@@ -108,6 +108,23 @@ namespace DigitalPlatform.CirculationClient
             return nodeDatabase;
         }
 
+        // 创建修改简单数据库的定义结点
+        static XmlNode ChangeSimpleDatabaseNode(XmlDocument dom,
+            string strOldDatabaseName,
+            string strType,
+            string strNewDatabaseName)
+        {
+            XmlNode nodeDatabase = dom.CreateElement("database");
+            dom.DocumentElement.AppendChild(nodeDatabase);
+
+            // type
+            DomUtil.SetAttr(nodeDatabase, "type", strType);
+
+            DomUtil.SetAttr(nodeDatabase, "name", strNewDatabaseName);
+
+            return nodeDatabase;
+        }
+
         // 出现提示
         // return:
         //      true    继续
@@ -128,6 +145,8 @@ namespace DigitalPlatform.CirculationClient
             out string strError)
         {
             strError = "";
+
+            string strStyle = "";
 
             // 创建书目库的定义
             XmlDocument database_dom = new XmlDocument();
@@ -261,6 +280,7 @@ namespace DigitalPlatform.CirculationClient
                     "create",
                     "",
                     database_dom.OuterXml,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -304,6 +324,7 @@ namespace DigitalPlatform.CirculationClient
             string strBiblioDbName,
             string strUsage,
             string strSyntax,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -358,6 +379,7 @@ namespace DigitalPlatform.CirculationClient
                     "create",
                     "",
                     database_dom.OuterXml,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -380,8 +402,9 @@ namespace DigitalPlatform.CirculationClient
         public static int CreateSimpleDatabase(
             LibraryChannel channel,
             Stop Stop,
-            string strBiblioDbName,
+            string strDbName,
             string strType,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -392,7 +415,7 @@ namespace DigitalPlatform.CirculationClient
 
             {
                 CreateSimpleDatabaseNode(database_dom,
-                    strBiblioDbName,
+                    strDbName,
                     strType);
             }
 
@@ -406,6 +429,7 @@ namespace DigitalPlatform.CirculationClient
                     "create",
                     "",
                     database_dom.OuterXml,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -661,5 +685,58 @@ namespace DigitalPlatform.CirculationClient
 
             return 0;
         }
+
+        // 修改一个简单库
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   没有找到源数据库定义
+        //      1   成功修改
+        public static int ChangeSimpleDatabase(
+            LibraryChannel channel,
+            Stop Stop,
+            string strDbName,
+            string strType,
+            string strNewDbName,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+
+            // 创建库的定义
+            XmlDocument database_dom = new XmlDocument();
+            database_dom.LoadXml("<root />");
+
+            {
+                ChangeSimpleDatabaseNode(database_dom,
+                    strDbName,
+                    strType,
+                    strNewDbName);
+            }
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 10, 0);
+            try
+            {
+                string strOutputInfo = "";
+                long lRet = channel.ManageDatabase(
+                    Stop,
+                    "change",
+                    strDbName,
+                    database_dom.OuterXml,
+                    strStyle,
+                    out strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+        }
+
     }
 }

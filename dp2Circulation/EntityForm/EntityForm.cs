@@ -3291,7 +3291,6 @@ true);
 
                 bSubrecordListCleared = true;
 
-                /// 
                 LoadSubRecordsInfo info = new LoadSubRecordsInfo();
 
                 if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
@@ -7016,7 +7015,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             this.m_webExternalHost_biblio.SetHtmlString("(空白)",
     "entityform_error");
 
-            ///
             InitialPages(strBiblioDbName);
 
             // 2007/11/5 
@@ -12625,7 +12623,6 @@ merge_dlg.UiState);
                 else if ((merge_style & MergeStyle.OverwriteSubrecord) != 0
                     || (merge_style & MergeStyle.CombineSubrecord) != 0)
                 {
-                    /// 
                     LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
 
                     if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)

@@ -834,6 +834,7 @@ out strError);
                     "getinfo",
                     "",
                     "",
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -949,6 +950,7 @@ out strError);
                     bRecreate == false ? "create" : "recreate",
                     "",
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -999,6 +1001,7 @@ out strError);
                     stop,
                     "delete",
                     strDatabaseNames,
+                    "",
                     "",
                     out strOutputInfo,
                     out strError);
@@ -1055,6 +1058,7 @@ out strError);
                     "refresh",
                     strDatabaseNames,
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -1105,6 +1109,7 @@ out strError);
                     stop,
                     "initialize",
                     strDatabaseNames,
+                    "",
                     "",
                     out strOutputInfo,
                     out strError);
@@ -1159,6 +1164,7 @@ out strError);
                     "change",
                     strDatabaseNames,
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)

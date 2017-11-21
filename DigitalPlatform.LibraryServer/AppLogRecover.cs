@@ -8183,6 +8183,19 @@ DO_SNAPSHOT:
             return -1;
         }
 
+        /*
+<root>
+  <operation>manageDatabase</operation>
+  <action>createDatabase</action> createDatabase/initializeDatabase/refreshDatabase/deleteDatabase
+  <databases>
+    <database type="biblio" syntax="unimarc" usage="book" role="" inCirculation="true" name="_测试用中文图书" entityDbName="_测试用中文图书实体" orderDbName="_测试用中文图书订购" commentDbName="_测试用中文图书评注" />
+  </databases>
+  <operator>supervisor</operator>
+  <operTime>Sat, 18 Nov 2017 20:00:05 +0800</operTime>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.06</version>
+</root>
+         * */
         // 2017/10/15
         //      attachment  附件流对象。注意文件指针在流的尾部
         public int RecoverManageDatabase(
@@ -8226,11 +8239,14 @@ DO_SNAPSHOT:
                     }
                 }
 
+
                 string strTempDir = Path.Combine(this.TempDir, "~rcvdb");
                 PathUtil.CreateDirIfNeed(strTempDir);
 
                 try
                 {
+                    bool bDbNameChanged = false;
+
                     string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                         "action");
                     if (strAction == "createDatabase")
@@ -8244,6 +8260,8 @@ DO_SNAPSHOT:
                         if (nRet == -1)
                             return -1;
 
+                        bDbNameChanged = true;
+
                         // 更新 library.xml 内容
                         XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
                         nRet = AppendDatabaseElement(this.LibraryCfgDom,
@@ -8252,6 +8270,10 @@ DO_SNAPSHOT:
                         if (nRet == -1)
                             return -1;
                         this.Changed = true;
+                    }
+                    else if (strAction == "changeDatabase")
+                    {
+
                     }
                     else if (strAction == "initializeDatabase")
                     {
@@ -8263,7 +8285,22 @@ DO_SNAPSHOT:
                     }
                     else if (strAction == "deleteDatabase")
                     {
+                        List<string> dbnames = new List<string>();
 
+                        XmlNodeList databases = domLog.DocumentElement.SelectNodes("databases/database");
+                        foreach (XmlElement database in databases)
+                        {
+                            dbnames.Add(database.GetAttribute("name"));
+                        }
+
+                        nRet = DeleteDatabases(
+                            null,
+                            channel,
+                            dbnames,
+                            ref bDbNameChanged,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
                     }
                     else
                     {
@@ -8273,6 +8310,21 @@ DO_SNAPSHOT:
 
                     if (this.Changed == true)
                         this.ActivateManagerThread();
+
+                    if (bDbNameChanged == true)
+                    {
+                        nRet = InitialKdbs(
+                            Channels,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        // 重新初始化虚拟库定义
+                        this.vdbs = null;
+                        nRet = this.InitialVdbs(Channels,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                     return 0;
                 }
                 finally
@@ -8303,6 +8355,119 @@ DO_SNAPSHOT:
                 goto DO_SNAPSHOT;
             }
             return -1;
+        }
+
+        int DeleteDatabases(
+            Stop stop,
+            RmsChannel channel,
+            List<string> dbnames,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            foreach (string dbname in dbnames)
+            {
+                string strDbType = GetDbTypeByDbName(dbname);
+                if (string.IsNullOrEmpty(dbname))
+                {
+                    // TODO: 遇到此种情况，写入错误日志
+                    strError = "数据库 '" + dbname + "' 没有找到类型";
+                    // return -1;
+                    continue;
+                }
+
+                if (strDbType == "biblio")
+                {
+                    // 删除一个书目库。
+                    // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = this.DeleteBiblioDatabase(
+                        channel,
+                        "",
+                        dbname,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    continue;
+                }
+
+                if (strDbType == "entity"
+                    || strDbType == "order"
+                    || strDbType == "issue"
+                    || strDbType == "comment")
+                {
+                    nRet = DeleteBiblioChildDatabase(channel,
+    "", // strLibraryCodeList,
+    dbname,
+    "", // strLogFileName,
+    ref bDbNameChanged,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    continue;
+                }
+
+                if (strDbType == "arrived"
+                    || strDbType == "amerce"
+                    || strDbType == "invoice"
+                    || strDbType == "pinyin"
+                    || strDbType == "gcat"
+                    || strDbType == "word"
+                    || strDbType == "message")
+                {
+                    // 删除一个单独类型的数据库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteSingleDatabase(channel,
+                        "", // strLibraryCodeList,
+                        dbname,
+                        "", // strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    continue;
+                }
+
+                if (IsUtilDbName(dbname) == true)
+                {
+                    // 删除一个实用库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteUtilDatabase(channel,
+                        "", // strLibraryCodeList,
+                        dbname,
+                        "", // strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    continue;
+                }
+
+                strError = "DeleteDatabases() 遭遇无法识别的数据库名 '" + dbname + "' (数据库类型 '" + strDbType + "')";
+                return -1;
+            }
+
+            return 0;
         }
     }
 

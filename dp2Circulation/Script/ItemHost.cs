@@ -13,10 +13,12 @@ namespace dp2Circulation
     /// </summary>
     public class ItemHost : StatisHostBase0
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 数据库类型。"item" 表示查询实体库；"order" 表示查询订购库；"issue" 表示查询期库；"comment" 表示查询评注库

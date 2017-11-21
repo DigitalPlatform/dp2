@@ -831,7 +831,7 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, dlg.Align);
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
-            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             store.UniversalStart = dlg.UniversalStart;
@@ -868,7 +868,7 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, dlg.Align);
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
-            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             LineStore store = new LineStore();

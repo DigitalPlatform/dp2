@@ -8914,6 +8914,7 @@ Stack:
         public LibraryServerResult ManageDatabase(string strAction,
             string strDatabaseName,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo)
         {
             string strError = "";
@@ -8968,6 +8969,7 @@ Stack:
                     strAction,
                     strDatabaseName,
                     strDatabaseInfo,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
                 if (nRet == -1)

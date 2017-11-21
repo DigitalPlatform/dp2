@@ -266,10 +266,6 @@
     <Compile Include="EntityForm\GetMergeStyleDialog.Designer.cs">
       <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityForm\MacroTableDialog.cs" />
-    <Compile Include="EntityForm\MacroTableDialog.Designer.cs">
-      <DependentUpon>MacroTableDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="EntityForm\MergePicture.cs" />
     <Compile Include="EntityForm\PartialDeniedDialog.cs">
       <SubType>Form</SubType>
@@ -1584,9 +1580,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EntityForm\GetMergeStyleDialog.resx">
       <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EntityForm\MacroTableDialog.resx">
-      <DependentUpon>MacroTableDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityForm\PartialDeniedDialog.resx">
       <DependentUpon>PartialDeniedDialog.cs</DependentUpon>

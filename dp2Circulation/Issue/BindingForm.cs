@@ -28,10 +28,12 @@ namespace dp2Circulation
 
         const int WM_ENSURE_VISIBLE = API.WM_USER + 200;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 期刊控件所关联的 ApplicationInfo 对象

@@ -39,10 +39,12 @@ namespace dp2Circulation
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
 
         // 

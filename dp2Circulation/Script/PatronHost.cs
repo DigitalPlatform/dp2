@@ -13,10 +13,12 @@ namespace dp2Circulation
     /// </summary>
     public class PatronHost : StatisHostBase0
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 当前读者记录路径

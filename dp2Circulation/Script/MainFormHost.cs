@@ -11,10 +11,12 @@ namespace dp2Circulation
     /// </summary>
     public class MainFormHost : StatisHostBase0
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
 #if NO
         public string ProjectDir = "";  // 方案源文件所在目录

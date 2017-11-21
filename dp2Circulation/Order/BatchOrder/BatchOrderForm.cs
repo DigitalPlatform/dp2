@@ -705,6 +705,7 @@ namespace dp2Circulation
         /// 向 IE 控件中追加一段 HTML 内容
         /// </summary>
         /// <param name="strText">HTML 内容</param>
+        /// <param name="scrollToEnd">是否要卷动到尾部</param>
         public void AppendHtml(string strText, bool scrollToEnd = true)
         {
             if (this.InvokeRequired)
@@ -1617,7 +1618,7 @@ int nCount)
                 this._listForm = new OrderListViewerForm();
                 this._listForm.BatchOrderForm = this;
                 this._listForm.FormClosed += _listForm_FormClosed;
-                this._listForm.DockChanged += _listForm_DockChanged;
+                this._listForm.MyDockChanged += _listForm_DockChanged;
                 // this._listForm.DoDockEvent += _listForm_DoDockEvent;
                 GuiUtil.AutoSetDefaultFont(this._listForm);
                 //this._keyboardForm.Text = "向导";

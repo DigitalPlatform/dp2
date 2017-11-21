@@ -28,7 +28,7 @@ namespace DigitalPlatform.LibraryServer.Common
             return result;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
         }

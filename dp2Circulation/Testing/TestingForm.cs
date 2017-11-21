@@ -101,6 +101,7 @@ namespace dp2Circulation
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
+    "",
     out strOutputInfo,
     out strError);
                 if (lRet == -1)
@@ -122,6 +123,7 @@ namespace dp2Circulation
                     strBiblioDbName,
                     "book",
                     "unimarc",
+                    "",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -136,6 +138,7 @@ namespace dp2Circulation
         stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
+        "",
         "",
         out strOutputInfo,
         out strError);
@@ -157,6 +160,7 @@ namespace dp2Circulation
                         this.Progress,
                         strSeedDbName,
                         "zhongcihao",
+                        "",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -227,6 +231,7 @@ UiTest3(strBiblioDbName)
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
+    "",
     out strOutputInfo,
     out strError);
                 if (lRet == -1)
@@ -239,6 +244,7 @@ UiTest3(strBiblioDbName)
         stop,
         "delete",
         strSeedDbName,    // strDatabaseNames,
+        "",
         "",
         out strOutputInfo,
         out strError);
@@ -679,6 +685,7 @@ UiTest3(strBiblioDbName)
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
+    "",
     out strOutputInfo,
     out strError);
                 if (lRet == -1)
@@ -700,6 +707,7 @@ UiTest3(strBiblioDbName)
                     strBiblioDbName,
                     "book",
                     "unimarc",
+                    "",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -811,6 +819,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
     stop,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
+    "",
     "",
     out strOutputInfo,
     out strError);
@@ -2001,6 +2010,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         "delete",
         strTestDbName,    // strDatabaseNames,
         "",
+        "",
         out strOutputInfo,
         out strError);
                     if (lRet == -1)
@@ -2021,6 +2031,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                         this.Progress,
                         strTestDbName,
                         "inventory",
+                        "",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2089,7 +2100,6 @@ strTestDbName,
                 }
 
 
-                ///
                 if (string.IsNullOrEmpty(strTestDbName) == false)
                 {
                     Progress.SetMessage("正在删除" + strTestDbName + " ...");
@@ -2097,6 +2107,7 @@ strTestDbName,
         stop,
         "delete",
         strTestDbName,    // strDatabaseNames,
+        "",
         "",
         out strOutputInfo,
         out strError);
@@ -2618,13 +2629,16 @@ strTestDbName,
         {
             Task.Factory.StartNew(() =>
             {
-                LogAndRecover("");
+                // LogAndRecover("createBiblioDatabase", "");
+                // LogAndRecover("deleteBiblioDatabase", "");
+                LogAndRecover("deleteSimpleDatabase", "");
             });
         }
 
         #region 日志和恢复
 
-        void LogAndRecover(string strStyle)
+        void LogAndRecover(string strAction,
+            string strStyle)
         {
             string strError = "";
             int nRet = 0;
@@ -2643,111 +2657,38 @@ strTestDbName,
                 ));
             try
             {
-                // 创建测试所需的书目库
-
-                string strBiblioDbName = "_测试用中文图书";
-
-                // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-                Progress.SetMessage("正在删除测试用书目库 ...");
-                string strOutputInfo = "";
-                long lRet = channel.ManageDatabase(
-    stop,
-    "delete",
-    strBiblioDbName,    // strDatabaseNames,
-    "",
-    out strOutputInfo,
-    out strError);
-                if (lRet == -1)
+                if (strAction == "createBiblioDatabase")
                 {
-                    if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
-                        goto ERROR1;
+                    nRet = TestRecoverCreatingDatabase(
+this.Progress,
+channel,
+strStyle,
+out strError);
                 }
-
-                // TODO: 记载当前操作日志偏移
-                DateTime now = DateTime.Now;
-                string strDate = DateTimeUtil.DateTimeToString8(now);
-
-                // return:
-                //      -2  此类型的日志在 dp2library 端尚未启用
-                //      -1  出错
-                //      0   日志文件不存在，或者记录数为 0
-                //      >0  记录数
-                lRet = OperLogLoader.GetOperLogCount(
-                    stop,
-                    channel,
-                    strDate,
-                    LogType.OperLog,
-                    out strError);
-                if (lRet <= -1)
+                else if (strAction == "deleteBiblioDatabase")
                 {
+                    nRet = TestRecoverDeletingBiblioDatabase(
+this.Progress,
+channel,
+strStyle,
+out strError);
+                }
+                else if (strAction == "deleteSimpleDatabase")
+                {
+                    nRet = TestRecoverDeletingSimpleDatabase(
+this.Progress,
+channel,
+strStyle,
+out strError);
+                }
+                else
+                {
+                    strError = "无法识别的 strAction '" + strAction + "'";
                     goto ERROR1;
                 }
 
-                long lStartOffs = lRet; // 日志起点偏移
-
-                Progress.SetMessage("正在创建测试用书目库 ...");
-                // 创建一个书目库
-                // parameters:
-                // return:
-                //      -1  出错
-                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
-                //      1   成功创建
-                nRet = ManageHelper.CreateBiblioDatabase(
-                    channel,
-                    this.Progress,
-                    strBiblioDbName,
-                    "book",
-                    "unimarc",
-                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
-                // 重新获得各种库名、列表
-                ReloadDatabaseCfg();
-
-                // *** 恢复测试
-                // 从指定偏移位置启动 dp2library 日志恢复后台任务
-                string strTaskName = "日志恢复";
-                nRet = StartBatchTask(
-                    stop,
-                    channel,
-                    strTaskName,
-                    strDate,
-                    lStartOffs,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 等待，直到 dp2library 后台任务结束
-                string strErrorInfo = "";
-                nRet = WaitBatchTaskFinish(
-            stop,
-            channel,
-            strTaskName,
-            out strErrorInfo,
-            out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (string.IsNullOrEmpty(strErrorInfo) == false)
-                {
-                    strError = "在等待后台任务 '" + strTaskName + "' 结束的过程中发生错误: " + strErrorInfo;
-                    goto ERROR1;
-                }
-
-                // 删除测试用的书目库、排架体系、馆藏地定义
-                Progress.SetMessage("正在删除测试用书目库 ...");
-                lRet = channel.ManageDatabase(
-    stop,
-    "delete",
-    strBiblioDbName,    // strDatabaseNames,
-    "",
-    out strOutputInfo,
-    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                // 重新获得各种库名、列表
-                ReloadDatabaseCfg();
                 return;
             }
             catch (Exception ex)
@@ -2773,6 +2714,517 @@ strTestDbName,
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
+
+        int TestRecoverCreatingDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 创建测试所需的书目库
+
+            string strBiblioDbName = "_测试用中文图书";
+
+            // *** 预先准备阶段
+            // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
+            Progress.SetMessage("正在删除以前残留的测试用书目库 ...");
+            string strOutputInfo = "";
+            long lRet = channel.ManageDatabase(
+                this.Progress,
+"delete",
+strBiblioDbName,    // strDatabaseNames,
+"",
+"skipOperLog",
+out strOutputInfo,
+out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                    goto ERROR1;
+            }
+
+            // 记载当前操作日志偏移
+            DateTime now = DateTime.Now;
+            string strDate = DateTimeUtil.DateTimeToString8(now);
+
+            // return:
+            //      -2  此类型的日志在 dp2library 端尚未启用
+            //      -1  出错
+            //      0   日志文件不存在，或者记录数为 0
+            //      >0  记录数
+            lRet = OperLogLoader.GetOperLogCount(
+                this.Progress,
+                channel,
+                strDate,
+                LogType.OperLog,
+                out strError);
+            if (lRet <= -1)
+            {
+                goto ERROR1;
+            }
+
+            long lStartOffs = lRet; // 日志起点偏移
+
+            {
+                Progress.SetMessage("正在创建测试用书目库 ...");
+                // 创建一个书目库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                //      1   成功创建
+                nRet = ManageHelper.CreateBiblioDatabase(
+                    channel,
+                    this.Progress,
+                    strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    "",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+            }
+
+            // *** 恢复测试
+            // 从指定偏移位置启动 dp2library 日志恢复后台任务
+            string strTaskName = "日志恢复";
+            nRet = StartBatchTask(
+                this.Progress,
+                channel,
+                strTaskName,
+                strDate,
+                lStartOffs,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 等待，直到 dp2library 后台任务结束
+            string strErrorInfo = "";
+            nRet = WaitBatchTaskFinish(
+                this.Progress,
+        channel,
+        strTaskName,
+        out strErrorInfo,
+        out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (string.IsNullOrEmpty(strErrorInfo) == false)
+            {
+                strError = "在等待后台任务 '" + strTaskName + "' 结束的过程中发生错误: " + strErrorInfo;
+                goto ERROR1;
+            }
+
+            // 验证恢复情况
+            {
+
+            }
+
+            // 清除残留信息
+            {
+                // 删除测试用的书目库
+                Progress.SetMessage("正在删除测试用书目库 ...");
+                lRet = channel.ManageDatabase(
+                    this.Progress,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    "skipOperLog",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // 测试恢复删除 书目数据库
+        // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
+        int TestRecoverDeletingBiblioDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strBiblioDbName = "_测试用中文图书";
+
+            // *** 预先准备阶段
+            // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
+            Progress.SetMessage("正在删除以前残留的测试用书目库 ...");
+            string strOutputInfo = "";
+            long lRet = channel.ManageDatabase(
+                this.Progress,
+"delete",
+strBiblioDbName,    // strDatabaseNames,
+"",
+"skipOperLog",
+out strOutputInfo,
+out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                    goto ERROR1;
+            }
+
+            // 创建一个书目库，以便后面进行删除操作
+            {
+                Progress.SetMessage("正在创建测试用书目库 ...");
+                // 创建一个书目库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                //      1   成功创建
+                nRet = ManageHelper.CreateBiblioDatabase(
+                    channel,
+                    this.Progress,
+                    strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    "skipOperLog",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+            }
+
+            // TODO: 记载当前操作日志偏移
+            DateTime now = DateTime.Now;
+            string strDate = DateTimeUtil.DateTimeToString8(now);
+
+            // return:
+            //      -2  此类型的日志在 dp2library 端尚未启用
+            //      -1  出错
+            //      0   日志文件不存在，或者记录数为 0
+            //      >0  记录数
+            lRet = OperLogLoader.GetOperLogCount(
+                this.Progress,
+                channel,
+                strDate,
+                LogType.OperLog,
+                out strError);
+            if (lRet <= -1)
+            {
+                goto ERROR1;
+            }
+
+            long lStartOffs = lRet; // 日志起点偏移
+
+            // 进行删除操作，并记入日志
+            {
+                lRet = channel.ManageDatabase(
+                    this.Progress,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    "",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+            }
+
+            if (StringUtil.IsInList("db_not_exist", strStyle))
+            {
+                // 在恢复操作前的环境中，不具有这个数据库
+            }
+            else
+            {
+                // 创建书目库，以便在恢复操作前的环境中，先具有这个数据库
+                // 创建一个书目库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                //      1   成功创建
+                nRet = ManageHelper.CreateBiblioDatabase(
+                    channel,
+                    this.Progress,
+                    strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    "skipOperLog",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // *** 恢复测试
+            // 从指定偏移位置启动 dp2library 日志恢复后台任务
+            string strTaskName = "日志恢复";
+            nRet = StartBatchTask(
+                this.Progress,
+                channel,
+                strTaskName,
+                strDate,
+                lStartOffs,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 等待，直到 dp2library 后台任务结束
+            string strErrorInfo = "";
+            nRet = WaitBatchTaskFinish(
+                this.Progress,
+        channel,
+        strTaskName,
+        out strErrorInfo,
+        out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (string.IsNullOrEmpty(strErrorInfo) == false)
+            {
+                strError = "在等待后台任务 '" + strTaskName + "' 结束的过程中发生错误: " + strErrorInfo;
+                goto ERROR1;
+            }
+
+            // 验证删除情况
+            {
+
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // 测试恢复删除 简单库
+        // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
+        // parameters:
+        //      strStyle    type:amerce 等等
+        int TestRecoverDeletingSimpleDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            long lRet = 0;
+
+            string strType = StringUtil.GetParameterByPrefix(strStyle, "type", ":");
+            if (string.IsNullOrEmpty(strType) == false)
+            {
+                strError = "strStyle 中没有包含任何 type:xxx 内容";
+                return -1;
+            }
+
+            string strSingleDbName = "test_" + strType;
+
+            // *** 预先准备阶段
+            // 如果测试用的书目库以前就存在，要先保护起来
+            Progress.SetMessage("正在保护测试前的单个库 ...");
+
+            // 得到当前此类型的简单库名
+            string strOldDbName = "";
+            string strDetachOldDbName = "";
+
+
+            if (string.IsNullOrEmpty(strOldDbName) == false)
+            {
+                // 修改一个简单库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有找到源数据库定义
+                //      1   成功修改
+                nRet = ManageHelper.ChangeSimpleDatabase(
+            channel,
+            stop,
+            strOldDbName,
+            strType,
+            strDetachOldDbName,
+            "detach",
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    strOldDbName = "";
+            }
+
+            try
+            {
+                string strOutputInfo = "";
+
+                // 创建一个简单库，以便后面进行删除操作
+                {
+                    Progress.SetMessage("正在创建测试用简单库 ...");
+                    // 创建一个书目库
+                    // parameters:
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                    //      1   成功创建
+                    nRet = ManageHelper.CreateSimpleDatabase(
+                        channel,
+                        this.Progress,
+                        strSingleDbName,
+                        strType,
+                        "skipOperLog",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 重新获得各种库名、列表
+                    ReloadDatabaseCfg();
+                }
+
+                // TODO: 记载当前操作日志偏移
+                DateTime now = DateTime.Now;
+                string strDate = DateTimeUtil.DateTimeToString8(now);
+
+                // return:
+                //      -2  此类型的日志在 dp2library 端尚未启用
+                //      -1  出错
+                //      0   日志文件不存在，或者记录数为 0
+                //      >0  记录数
+                lRet = OperLogLoader.GetOperLogCount(
+                    this.Progress,
+                    channel,
+                    strDate,
+                    LogType.OperLog,
+                    out strError);
+                if (lRet <= -1)
+                {
+                    goto ERROR1;
+                }
+
+                long lStartOffs = lRet; // 日志起点偏移
+
+                // 进行删除操作，并记入日志
+                {
+                    lRet = channel.ManageDatabase(
+                        this.Progress,
+        "delete",
+        strSingleDbName,    // strDatabaseNames,
+        "",
+        "",
+        out strOutputInfo,
+        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+                }
+
+                if (StringUtil.IsInList("db_not_exist", strStyle))
+                {
+                    // 在恢复操作前的环境中，不具有这个数据库
+                }
+                else
+                {
+                    // 创建简单库，以便在恢复操作前的环境中，先具有这个数据库
+                    // parameters:
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                    //      1   成功创建
+                    nRet = ManageHelper.CreateSimpleDatabase(
+                        channel,
+                        this.Progress,
+                        strSingleDbName,
+                        strType,
+                        "skipOperLog",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
+                // *** 恢复测试
+                // 从指定偏移位置启动 dp2library 日志恢复后台任务
+                string strTaskName = "日志恢复";
+                nRet = StartBatchTask(
+                    this.Progress,
+                    channel,
+                    strTaskName,
+                    strDate,
+                    lStartOffs,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 等待，直到 dp2library 后台任务结束
+                string strErrorInfo = "";
+                nRet = WaitBatchTaskFinish(
+                    this.Progress,
+            channel,
+            strTaskName,
+            out strErrorInfo,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (string.IsNullOrEmpty(strErrorInfo) == false)
+                {
+                    strError = "在等待后台任务 '" + strTaskName + "' 结束的过程中发生错误: " + strErrorInfo;
+                    goto ERROR1;
+                }
+
+                // 验证删除情况
+                {
+
+                }
+
+            }
+            finally
+            {
+                // 还原最初的数据库
+
+                if (string.IsNullOrEmpty(strOldDbName) == false)
+                {
+                    Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
+
+                    // 修改一个简单库
+                    // parameters:
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到源数据库定义
+                    //      1   成功修改
+                    nRet = ManageHelper.ChangeSimpleDatabase(
+                channel,
+                stop,
+                strDetachOldDbName,
+                strType,
+                strOldDbName,
+                "attach",
+                out strError);
+                    if (nRet == -1)
+                    {
+                        // 如何报错?
+                    }
+                }
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // 验证恢复“创建数据库”情况
+        /*
+         * 1) 验证每个 dp2kernel 数据库是否已经创建。方法是获取关键的几个配置文件看看
+         * 2) 往 dp2kernel 数据库中写入记录，然后尝试读回
+         * 3) 验证 library.xml 中 itemdbgroup 里面的 database 元素是否正确
+         * */
+
+        // 验证恢复“删除数据库”情况
+        /*
+         * 1) 验证每个 dp2kernel 数据库是否已经删除。方法是获取关键的几个配置文件看看
+         * 2) 验证 library.xml 中 itemdbgroup 里面的 database 元素是否正确删除或者修改了
+         * */
 
         static int StartBatchTask(
             Stop stop,

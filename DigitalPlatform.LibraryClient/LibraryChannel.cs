@@ -4488,6 +4488,26 @@ out strError);
             }
         }
 
+        // 兼容以前用法
+        public long ManageDatabase(
+    DigitalPlatform.Stop stop,
+    string strAction,
+    string strDatabaseName,
+    string strDatabaseInfo,
+    out string strOutputInfo,
+    out string strError)
+        {
+
+            return ManageDatabase(
+                stop,
+                strAction,
+                strDatabaseName,
+                strDatabaseInfo,
+                "",
+                out strOutputInfo,
+                out strError);
+        }
+
         // 管理数据库
         /// <summary>
         /// 管理数据库
@@ -4496,6 +4516,7 @@ out strError);
         /// <param name="strAction">动作参数</param>
         /// <param name="strDatabaseName">数据库名</param>
         /// <param name="strDatabaseInfo">数据库信息</param>
+        /// <param name="strStyle">风格</param>
         /// <param name="strOutputInfo">返回操作后的数据库信息</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -4507,6 +4528,7 @@ out strError);
             string strAction,
             string strDatabaseName,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -4520,6 +4542,7 @@ out strError);
                     strAction,
                     strDatabaseName,
                     strDatabaseInfo,
+                    strStyle,
                     null,
                     null);
 

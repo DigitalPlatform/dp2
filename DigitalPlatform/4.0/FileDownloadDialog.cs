@@ -30,7 +30,7 @@ namespace DigitalPlatform
             }));
         }
 
-        public Button CancelButton
+        public Button MyCancelButton
         {
             get
             {

@@ -21,10 +21,12 @@ namespace dp2Circulation
         /// </summary>
         public bool AutoFinish = false;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 是否为期刊模式? 

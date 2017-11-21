@@ -1654,7 +1654,6 @@ MessageBoxDefaultButton.Button2);
                             }
                         }
 
-                        /// 
                         {
                             string returningDate = borrow.GetAttribute("returningDate");
                             if (string.IsNullOrEmpty(returningDate))

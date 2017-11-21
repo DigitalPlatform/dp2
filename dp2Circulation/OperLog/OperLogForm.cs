@@ -2126,6 +2126,8 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             {
                 if (strAction == "createDatabase")
                     return "创建数据库";
+                if (strAction == "changeDatabase")
+                    return "修改数据库定义";
                 if (strAction == "deleteDatabase")
                     return "删除数据库";
                 if (strAction == "initializeDatabase")
@@ -7033,6 +7035,7 @@ Keys keyData)
         /// <param name="filenames">要参与处理的日志文件名集合</param>
         /// <param name="nLevel">从 dp2Library 服务器获取日志记录的详细级别</param>
         /// <param name="strStyle">处理风格。autocache</param>
+        /// <param name="strFilter">过滤参数</param>
         /// <param name="strCacheDir">日志本地缓存目录</param>
         /// <param name="param">回调对象</param>
         /// <param name="procDoRecord">回调函数</param>

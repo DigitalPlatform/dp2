@@ -466,9 +466,10 @@ namespace dp2Library
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult ManageDatabase(string strAction,
-                    string strDatabaseName,
-                    string strDatabaseInfo,
-                    out string strOutputInfo);
+            string strDatabaseName,
+            string strDatabaseInfo,
+            string strStyle,
+            out string strOutputInfo);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetUser(

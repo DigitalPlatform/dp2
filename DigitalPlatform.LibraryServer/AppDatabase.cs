@@ -48,6 +48,7 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             string strDatabaseNames,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -74,6 +75,7 @@ namespace DigitalPlatform.LibraryServer
                     // strDatabaseNames,
                     strDatabaseInfo,
                     false,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -88,6 +90,7 @@ namespace DigitalPlatform.LibraryServer
                     // strDatabaseNames,
                     strDatabaseInfo,
                     true,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -100,6 +103,7 @@ namespace DigitalPlatform.LibraryServer
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -111,6 +115,7 @@ namespace DigitalPlatform.LibraryServer
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -124,6 +129,7 @@ namespace DigitalPlatform.LibraryServer
                     strLibraryCodeList,
                     strDatabaseNames,
                     strDatabaseInfo,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -132,10 +138,12 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "change")
             {
                 return ChangeDatabase(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
                     strDatabaseInfo,
+                    strStyle,
                     out strOutputInfo,
                     out strError);
             }
@@ -373,16 +381,30 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        class ChangeInfo
+        {
+            public string OldDbName { get; set; }
+            public string NewDbName { get; set; }
+            public string DbType { get; set; }
+            public string ChangeStyle { get; set; }
+        }
+
         // 修改数据库
+        // parameters:
+        //      strStyle    changeOut/changeIn  改出/改入数据库名字
+        //                  改出的意思是，请求 dp2kernel 修改内核数据库名字，然后从 library.xml 清除这个数据库的痕迹。请求前，dp2kernel 中要检查源数据库名已经存在(并且 library.xml 中也有相应的配置元素内容)，若目标数据库名已经存在，要先删除这个数据库
+        //                  改入，则是请求 dp2kernel 修改内核数据库名字，然后在 library.xml 相关位置设置好这个新名字。请求前，dp2kernel 中的源数据库名应该存在；若目标数据库名已经存在，则要先删除这个数据库，确保改名可以成功
         // return:
         //      -1  出错
         //      0   没有找到
         //      1   成功
         int ChangeDatabase(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -414,6 +436,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            List<XmlElement> database_nodes = new List<XmlElement>(); // 已经创建的数据库的定义节点
+
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
             for (int i = 0; i < names.Length; i++)
@@ -426,8 +450,9 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 来自strDatabaseInfo
-                XmlElement nodeNewDatabase = nodes[i] as XmlElement;
+                XmlElement request_node = nodes[i] as XmlElement;   // nodeNewDatabase
 
+                #region biblio
                 // 修改书目库名、或者书目库从属的其他数据库名
                 if (this.IsBiblioDbName(strName) == true)
                 {
@@ -445,6 +470,8 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
+                    // TODO: 如何描述修改细节信息？是每个下级库一套？还是要集中描述?
+
                     /*
                      * <database>元素中的name/entityDbName/orderDbName/issueDbName
                      * 传递了改名请求。如果属性值为空，不表明要删除数据库，而是该属性无效。
@@ -456,7 +483,7 @@ namespace DigitalPlatform.LibraryServer
                         string strOldBiblioDbName = strName;
 
                         // 来自strDatabaseInfo
-                        string strNewBiblioDbName = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewBiblioDbName = DomUtil.GetAttr(request_node,
                             "name");
 
                         // 如果strNewBiblioDbName为空，表示不想改变名字
@@ -497,7 +524,7 @@ namespace DigitalPlatform.LibraryServer
                             "name");
 
                         // 来自strDatabaseInfo
-                        string strNewEntityDbName = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewEntityDbName = DomUtil.GetAttr(request_node,
                             "entityDbName");
 
                         if (String.IsNullOrEmpty(strNewEntityDbName) == false
@@ -540,7 +567,7 @@ namespace DigitalPlatform.LibraryServer
                             "orderDbName");
 
                         // 来自strDatabaseInfo
-                        string strNewOrderDbName = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewOrderDbName = DomUtil.GetAttr(request_node,
                             "orderDbName");
                         if (String.IsNullOrEmpty(strNewOrderDbName) == false
                             && strOldOrderDbName != strNewOrderDbName)
@@ -581,7 +608,7 @@ namespace DigitalPlatform.LibraryServer
                             "issueDbName");
 
                         // 来自strDatabaseInfo
-                        string strNewIssueDbName = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewIssueDbName = DomUtil.GetAttr(request_node,
                             "issueDbName");
                         if (String.IsNullOrEmpty(strNewIssueDbName) == false
                             && strOldIssueDbName != strNewIssueDbName)
@@ -623,7 +650,7 @@ namespace DigitalPlatform.LibraryServer
                             "commentDbName");
 
                         // 来自strDatabaseInfo
-                        string strNewCommentDbName = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewCommentDbName = DomUtil.GetAttr(request_node,
                             "commentDbName");
                         if (String.IsNullOrEmpty(strNewCommentDbName) == false
                             && strOldCommentDbName != strNewCommentDbName)
@@ -659,14 +686,14 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 是否参与流通
-                    if (DomUtil.HasAttr(nodeNewDatabase, "inCirculation") == true)
+                    if (DomUtil.HasAttr(request_node, "inCirculation") == true)
                     {
                         string strOldInCirculation = DomUtil.GetAttr(nodeDatabase,
                             "inCirculation");
                         if (String.IsNullOrEmpty(strOldInCirculation) == true)
                             strOldInCirculation = "true";
 
-                        string strNewInCirculation = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewInCirculation = DomUtil.GetAttr(request_node,
                             "inCirculation");
                         if (String.IsNullOrEmpty(strNewInCirculation) == true)
                             strNewInCirculation = "true";
@@ -681,12 +708,12 @@ namespace DigitalPlatform.LibraryServer
 
                     // 角色
                     // TODO: 是否要进行检查?
-                    if (DomUtil.HasAttr(nodeNewDatabase, "role") == true)
+                    if (DomUtil.HasAttr(request_node, "role") == true)
                     {
                         string strOldRole = DomUtil.GetAttr(nodeDatabase,
                             "role");
 
-                        string strNewRole = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewRole = DomUtil.GetAttr(request_node,
                             "role");
 
                         if (strOldRole != strNewRole)
@@ -699,12 +726,12 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2012/4/30
                     // 联合编目特性
-                    if (DomUtil.HasAttr(nodeNewDatabase, "unionCatalogStyle") == true)
+                    if (DomUtil.HasAttr(request_node, "unionCatalogStyle") == true)
                     {
                         string strOldUnionCatalogStyle = DomUtil.GetAttr(nodeDatabase,
                             "unionCatalogStyle");
 
-                        string strNewUnionCatalogStyle = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewUnionCatalogStyle = DomUtil.GetAttr(request_node,
                             "unionCatalogStyle");
 
                         if (strOldUnionCatalogStyle != strNewUnionCatalogStyle)
@@ -716,12 +743,12 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 复制
-                    if (DomUtil.HasAttr(nodeNewDatabase, "replication") == true)
+                    if (DomUtil.HasAttr(request_node, "replication") == true)
                     {
                         string strOldReplication = DomUtil.GetAttr(nodeDatabase,
                             "replication");
 
-                        string strNewReplication = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewReplication = DomUtil.GetAttr(request_node,
                             "replication");
 
                         if (strOldReplication != strNewReplication)
@@ -742,14 +769,39 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+                    database_nodes.Add(request_node);
                     continue;
                 } // end of if 书目库名
+                #endregion
 
-
+                #region entity/order/issue/comment 单独的数据库
                 // 单独修改实体库名
                 // 能修改是否参与流通
                 if (this.IsItemDbName(strName) == true)
                 {
+
+                    // 修改一个书目库下属数据库的名字
+                    // 也会自动修改 library.xml 中相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的(源)数据库不存在
+                    //      1   成功修改
+                    nRet = ChangeBiblioChildDbName(
+                        channel,
+                        strLibraryCodeList,
+                        strName,
+                        request_node,
+                        strStyle,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                        return 0;
+#if NO
                     // 获得相关配置小节
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -801,13 +853,6 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-
-#if NO
-                        bDbNameChanged = true;
-
-                        DomUtil.SetAttr(nodeDatabase, "name", strNewEntityDbName);
-                        this.Changed = true;
-#endif
                     }
 
                     // 是否参与流通
@@ -841,9 +886,14 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+#endif
+                    database_nodes.Add(request_node);
                     continue;
                 }
+                #endregion
 
+#if NO
+                #region order
                 // 单独修改订购库名
                 if (this.IsOrderDbName(strName) == true)
                 {
@@ -919,7 +969,9 @@ namespace DigitalPlatform.LibraryServer
                     this.Changed = true;
                     continue;
                 }
+                #endregion
 
+                #region issue
                 // 单独修改期库名
                 if (this.IsIssueDbName(strName) == true)
                 {
@@ -994,7 +1046,9 @@ namespace DigitalPlatform.LibraryServer
                     this.Changed = true;
                     continue;
                 }
+                #endregion
 
+                #region comment
                 // 单独修改评注库名
                 if (this.IsCommentDbName(strName) == true)
                 {
@@ -1069,7 +1123,10 @@ namespace DigitalPlatform.LibraryServer
                     this.Changed = true;
                     continue;
                 }
+                #endregion
+#endif
 
+                #region reader
                 // 修改读者库名
                 if (this.IsReaderDbName(strName) == true)
                 {
@@ -1099,7 +1156,7 @@ namespace DigitalPlatform.LibraryServer
                     string strOldReaderDbName = DomUtil.GetAttr(nodeDatabase,
                         "name");
                     // 来自strDatabaseInfo
-                    string strNewReaderDbName = DomUtil.GetAttr(nodeNewDatabase,
+                    string strNewReaderDbName = DomUtil.GetAttr(request_node,
                         "name");
 
                     if (strOldReaderDbName != strNewReaderDbName)
@@ -1142,7 +1199,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 是否参与流通
                     // 只有当提交的 XML 片断中具有 inCirculation 属性的时候，才会发生修改
-                    if (nodeNewDatabase.GetAttributeNode("inCirculation") != null)
+                    if (request_node.GetAttributeNode("inCirculation") != null)
                     {
                         // 来自LibraryCfgDom
                         string strOldInCirculation = DomUtil.GetAttr(nodeDatabase,
@@ -1151,7 +1208,7 @@ namespace DigitalPlatform.LibraryServer
                             strOldInCirculation = "true";
 
                         // 来自strDatabaseInfo
-                        string strNewInCirculation = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewInCirculation = DomUtil.GetAttr(request_node,
                             "inCirculation");
                         if (String.IsNullOrEmpty(strNewInCirculation) == true)
                             strNewInCirculation = "true";
@@ -1169,13 +1226,13 @@ namespace DigitalPlatform.LibraryServer
                     // 2012/9/7
                     // 图书馆代码
                     // 只有当提交的 XML 片断中具有 libraryCode 属性的时候，才会发生修改
-                    if (nodeNewDatabase.GetAttributeNode("libraryCode") != null)
+                    if (request_node.GetAttributeNode("libraryCode") != null)
                     {
                         // 来自LibraryCfgDom
                         string strOldLibraryCode = DomUtil.GetAttr(nodeDatabase,
                             "libraryCode");
                         // 来自strDatabaseInfo
-                        string strNewLibraryCode = DomUtil.GetAttr(nodeNewDatabase,
+                        string strNewLibraryCode = DomUtil.GetAttr(request_node,
                             "libraryCode");
 
                         if (strOldLibraryCode != strNewLibraryCode)
@@ -1215,12 +1272,39 @@ namespace DigitalPlatform.LibraryServer
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
 
                     this.Changed = true;
+                    database_nodes.Add(request_node);
                     continue;
                 }
+                #endregion
 
+                string strType = GetDbTypeByDbName(strName);
+
+                #region 单个数据库
                 // 修改预约到书库名
-                if (this.ArrivedDbName == strName)
+                if (// this.ArrivedDbName == strName
+                    strType == "arrived"
+                    || strType == "amerce"
+                    || strType == "message"
+                    || strType == "invoice"
+                    || strType == "pinyin"
+                    || strType == "gcat"
+                    || strType == "word")
                 {
+                    // 来自strDatabaseInfo
+                    string strNewDbName = DomUtil.GetAttr(request_node,
+                        "name");
+                    nRet = ChangeSingleDbName(
+    channel,
+    strLibraryCodeList,
+    strName,
+    strNewDbName,
+                            ref bDbNameChanged,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+#if NO
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许修改预约到书库定义";
@@ -1261,16 +1345,14 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-
-#if NO
-                        this.Changed = true;
-                        this.ArrivedDbName = strNewArrivedDbName;
-#endif
                     }
-
+#endif
+                    database_nodes.Add(request_node);
                     continue;
                 }
+                #endregion
 
+#if NO
                 // 修改违约金库名
                 if (this.AmerceDbName == strName)
                 {
@@ -1506,10 +1588,38 @@ namespace DigitalPlatform.LibraryServer
 
                     continue;
                 }
+#endif
 
+                #region 实用库
                 // 修改实用库名
                 if (IsUtilDbName(strName) == true)
                 {
+                    // 来自strDatabaseInfo
+                    string strNewUtilDbName = DomUtil.GetAttr(request_node,
+                        "name");
+                    string strNewType = DomUtil.GetAttr(request_node, "type");
+
+                    // 修改一个实用库的名字
+                    // 也会自动修改 library.xml 中相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的(源)数据库不存在
+                    //      1   成功修改
+                    nRet = ChangeUtilDbName(
+                        channel,
+                        strLibraryCodeList,
+                        strName,
+                        strNewUtilDbName,
+                        strNewType,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+#if NO
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
@@ -1573,12 +1683,56 @@ namespace DigitalPlatform.LibraryServer
                         this.Changed = true;
                         // TODO: 类型修改后，是否要应用新的模板来修改数据库定义？这是个大问题
                     }
+#endif
 
+                    database_nodes.Add(request_node);
                     continue;
                 }
+                #endregion
 
-                strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
+                strError = "数据库名 '" + strName + "' 不属于 dp2library (library.xml)目前管辖的范围...";
                 return 0;
+            }
+
+            // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "changeDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                StringBuilder text = new StringBuilder();
+                foreach (XmlElement node in database_nodes)
+                {
+                    text.Append(node.OuterXml);
+                }
+                new_node.InnerXml = text.ToString();
+
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                nRet = this.OperLog.WriteOperLog(domOperLog,
+sessioninfo.ClientAddress,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "ManageDatabase() API changeDatabase 写入日志时发生错误: " + strError;
+                    return -1;
+                }
             }
 
             if (this.Changed == true)
@@ -1628,6 +1782,360 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
             return -1;
+        }
+
+        // 修改一个实用库的名字
+        // 也会自动修改 library.xml 中相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的(源)数据库不存在
+        //      1   成功修改
+        int ChangeUtilDbName(
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strOldUtilDbName,
+            string strNewUtilDbName,
+            string strNewType,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strOldUtilDbName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "不存在 name 属性值为 '" + strOldUtilDbName + "' 的<utilDb/database>的元素";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许修改实用库 '" + strOldUtilDbName + "' 定义";
+                return -1;
+            }
+
+            if (strOldUtilDbName != strNewUtilDbName)
+            {
+                if (String.IsNullOrEmpty(strOldUtilDbName) == true
+                    && String.IsNullOrEmpty(strNewUtilDbName) == false)
+                {
+                    strError = "要创建实用库 '" + strNewUtilDbName + "'，请使用 create 功能，而不能使用change功能";
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strOldUtilDbName) == false
+                    && String.IsNullOrEmpty(strNewUtilDbName) == true)
+                {
+                    strError = "要删除实用库 '" + strNewUtilDbName + "'，请使用 delete 功能，而不能使用change功能";
+                    return -1;
+                }
+
+                nRet = ChangeDbName(
+                    channel,
+                    strOldUtilDbName,
+                    strNewUtilDbName,
+                        () =>
+                        {
+                            DomUtil.SetAttr(nodeDatabase, "name", strNewUtilDbName);
+                            this.Changed = true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            string strOldType = DomUtil.GetAttr(nodeDatabase, "type");
+            // string strNewType = DomUtil.GetAttr(nodeNewDatabase, "type");
+
+            if (strOldType != strNewType)
+            {
+                DomUtil.SetAttr(nodeDatabase, "type", strNewType);
+                this.Changed = true;
+                // TODO: 类型修改后，是否要应用新的模板来修改数据库定义？这是个大问题
+            }
+
+            return 1;
+        }
+
+        // 修改一个书目库下属数据库的名字
+        // 也会自动修改 library.xml 中相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      strChangeStyle  attach/detach/空。attach 表示将 dp2kernel 中数据库附加上来。detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的(源)数据库不存在
+        //      1   成功修改
+        int ChangeBiblioChildDbName(
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strOldDbName,
+            XmlElement nodeNewDatabase,
+            string strChangeStyle,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strDbType = GetDbTypeByDbName(strOldDbName);
+
+            // 类型。只有当 attach 和 detach 时候才有用到
+            string strNewType = DomUtil.GetAttr(nodeNewDatabase, "type");
+            if (StringUtil.IsInList("detach", strChangeStyle)
+                || StringUtil.IsInList("attach", strChangeStyle))
+            {
+                if (string.IsNullOrEmpty(strNewType))
+                {
+                    strError = "attach 或 detach 情况，请求的 database/@type 属性不应缺失";
+                    return -1;
+                }
+                if (string.IsNullOrEmpty(strDbType))
+                    strDbType = strNewType;
+            }
+
+            // TODO: 要注意数据库已经不存在的情况下是否会造成这里报错
+            if (string.IsNullOrEmpty(strDbType))
+            {
+                strError = "数据库 '" + strOldDbName + "' 的类型未知";
+                return -1;
+            }
+
+            // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
+            string strAttrName = GetBiblioChildDbAttributeName(strDbType);
+            if (string.IsNullOrEmpty(strAttrName))
+            {
+                strError = "数据库类型 '" + strOldDbName + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
+                return -1;
+            }
+
+            string strCaption = GetTypeCaption(strDbType);
+
+            // 获得相关配置小节
+            XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@" + strAttrName + "='" + strOldDbName + "']") as XmlElement;
+            if (nodeDatabase == null)
+            {
+                strError = "library.xml 中名字为 '" + strOldDbName + "' 的实体库(name属性)相关<database>元素没有找到";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许修改实体库定义";
+                return -1;
+            }
+
+            // 实体库名
+            string strOldEntityDbName = DomUtil.GetAttr(nodeDatabase,
+                strAttrName);
+
+            if (strOldEntityDbName != strOldDbName)
+            {
+                strError = "内部错误: strOldEntityDbName (" + strOldEntityDbName + ") != strOldDbName (" + strOldDbName + ")";
+                return -1;
+            }
+
+            // 来自strDatabaseInfo
+            string strNewEntityDbName = DomUtil.GetAttr(nodeNewDatabase,
+                "name");    // 注意这是请求参数 XML 中的 database/@name 属性
+
+            if (StringUtil.IsInList("detach", strChangeStyle)
+    || StringUtil.IsInList("attach", strChangeStyle))
+            {
+
+                // 源名字的数据库应当存在；目标名字的数据库应当不存在
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strOldEntityDbName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "源数据库 '" + strOldEntityDbName + "' 并不存在。attach 或 detach 失败";
+                    return -1;
+                }
+
+                nRet = DatabaseUtility.IsDatabaseExist(
+    channel,
+    strNewEntityDbName,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "目标数据库 '" + strNewEntityDbName + "' 已经存在。attach 或 detach 失败";
+                    return -1;
+                }
+            }
+
+            if (strOldEntityDbName != strNewEntityDbName)
+            {
+                if (String.IsNullOrEmpty(strOldEntityDbName) == true
+                    && String.IsNullOrEmpty(strNewEntityDbName) == false)
+                {
+                    strError = "要创建" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 create 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strOldEntityDbName) == false
+                    && String.IsNullOrEmpty(strNewEntityDbName) == true)
+                {
+                    strError = "要删除" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 delete 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                bool bTemp = false;
+                nRet = ChangeDbName(
+                    channel,
+                    strOldEntityDbName,
+                    strNewEntityDbName,
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                                nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                            else
+                                DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+                    out strError);
+                if (bTemp)
+                    bDbNameChanged = true;
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+            {
+                // 如果 strOldEntityDbName == strNewEntityDbName，依然要处理 detach 和 attach 情况
+                if (StringUtil.IsInList("detach", strChangeStyle))
+                {
+                    nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+                else if (StringUtil.IsInList("attach", strChangeStyle))
+                {
+                    DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+            }
+
+            // 是否参与流通
+            if (strDbType == "entity")
+            {
+                string strOldInCirculation = DomUtil.GetAttr(nodeDatabase,
+                    "inCirculation");
+                if (String.IsNullOrEmpty(strOldInCirculation) == true)
+                    strOldInCirculation = "true";
+
+                string strNewInCirculation = DomUtil.GetAttr(nodeNewDatabase,
+                    "inCirculation");
+                if (String.IsNullOrEmpty(strNewInCirculation) == true)
+                    strNewInCirculation = "true";
+
+                if (strOldInCirculation != strNewInCirculation)
+                {
+                    DomUtil.SetAttr(nodeDatabase, "inCirculation",
+                        strNewInCirculation);
+                    this.Changed = true;
+                }
+
+            }
+
+            // <itemdbgroup>内容更新，刷新配套的内存结构
+            nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                out strError);
+            if (nRet == -1)
+            {
+                this.WriteErrorLog(strError);
+                return -1;
+            }
+
+            this.Changed = true;
+            return 1;
+        }
+
+        // 修改一个单独数据库的名字
+        // 也会自动修改 library.xml 中相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的(源)数据库不存在
+        //      1   成功修改
+        int ChangeSingleDbName(
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strOldDbName,
+            string strNewDbName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strType = GetDbTypeByDbName(strOldDbName);
+            if (string.IsNullOrEmpty(strType))
+            {
+                strError = "数据库 '" + strOldDbName + "' 没有找到类型";
+                return 0;
+            }
+
+            string strTypeCaption = GetTypeCaption(strType);
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许修改" + strTypeCaption + "库定义";
+                return -1;
+            }
+
+            if (strOldDbName != strNewDbName)
+            {
+                if (String.IsNullOrEmpty(strOldDbName) == true
+                    && String.IsNullOrEmpty(strNewDbName) == false)
+                {
+                    strError = "要创建" + strTypeCaption + "库 '" + strNewDbName + "'，请使用create功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strOldDbName) == false
+                    && String.IsNullOrEmpty(strNewDbName) == true)
+                {
+                    strError = "要删除" + strTypeCaption + "库 '" + strNewDbName + "'，请使用 delete 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                bool bTemp = false;
+                nRet = ChangeDbName(
+                    channel,
+                    strOldDbName,
+                    strNewDbName,
+                        () =>
+                        {
+                            ChangeSingleDbName(strType, strNewDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+                    out strError);
+                if (bTemp)
+                    bDbNameChanged = true;
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 1;
         }
 
         // 检查一个单独的图书馆代码是否格式正确
@@ -1834,6 +2342,366 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 删除读者库。
+        // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
+        // parameters:
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteReaderDatabase(RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            string strLogFileName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 获得相关配置小节
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "配置 DOM 中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
+                return 0;
+            }
+
+            // 2012/9/9
+            // 分馆用户只允许删除属于管辖分馆的读者库
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                string strExistLibraryCode = DomUtil.GetAttr(nodeDatabase, "libraryCode");
+
+                if (string.IsNullOrEmpty(strExistLibraryCode) == true
+                    || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
+                {
+                    strError = "删除读者库 '" + strName + "' 被拒绝。当前用户只能删除图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                    return -1;
+                }
+            }
+
+            // 删除读者库
+            nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除读者库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            bDbNameChanged = true;
+
+            nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+
+            // <readerdbgroup>内容更新，刷新配套的内存结构
+            this.LoadReaderDbGroupParam(this.LibraryCfgDom);
+
+            this.Changed = true;
+            return 1;
+        }
+
+        // 删除一个实用库。
+        // 也会自动修改 library.xml 的相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteUtilDatabase(RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            string strLogFileName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // TODO: 关注一下数据库不存在的时候是不是会报这个错
+            if (IsUtilDbName(strName) == false)
+            {
+                strError = "数据库 '' 的类型不是实用库，无法用 DeleteUtilDatabase() 来加以删除";
+                return -1;
+            }
+
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "不存在 name 属性值为 '" + strName + "' 的<utilDb/database>的元素";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许删除实用库 '" + strName + "'";
+                return -1;
+            }
+
+            // 删除实用库
+            nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除实用库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            // bDbNameChanged = true;   // ?
+            nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+
+            this.Changed = true;
+            return 1;
+        }
+
+        // 删除一个单独类型的数据库。
+        // 也会自动修改 library.xml 的相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteSingleDatabase(RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            string strLogFileName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strDbType = GetDbTypeByDbName(strName);
+            if (string.IsNullOrEmpty(strDbType))
+            {
+                strError = "数据库 '" + strName + "' 没有找到类型";
+                return -1;
+            }
+
+            string strCaption = GetTypeCaption(strDbType);
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许删除" + strCaption + "库";
+                return -1;
+            }
+
+            // 删除预约到书库
+            nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除" + strCaption + "库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            // bDbNameChanged = true;   // ?
+
+            ChangeSingleDbName(strDbType, "");
+            // this.ArrivedDbName = "";
+
+            this.Changed = true;
+            return 1;
+        }
+
+        // 删除一个书目库的下级库。
+        // 也会自动修改 library.xml 的 itemdbgroup 中相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteBiblioChildDatabase(RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            string strLogFileName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+
+            string strDbType = GetDbTypeByDbName(strName);
+            // TODO: 要注意数据库已经不存在的情况下是否会造成这里报错
+            if (string.IsNullOrEmpty(strDbType))
+            {
+                strError = "数据库 '" + strName + "' 没有找到类型";
+                return -1;
+            }
+
+            // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
+            string strAttrName = GetBiblioChildDbAttributeName(strDbType);
+            if (string.IsNullOrEmpty(strAttrName))
+            {
+                strError = "数据库类型 '" + strName + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
+                return -1;
+            }
+
+            string strCaption = GetTypeCaption(strDbType);
+
+            // 获得相关配置小节
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strAttrName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "配置 DOM 中名字为 '" + strName + "' 的" + strCaption + "(" + strAttrName + "属性)相关<database>元素没有找到";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许删除" + strCaption + "库";
+                return -1;
+            }
+
+            // 删除实体库
+            int nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除" + strCaption + "库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            bDbNameChanged = true;
+
+            DomUtil.SetAttr(nodeDatabase, strAttrName, null);
+
+            // <itemdbgroup>内容更新，刷新配套的内存结构
+            nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                out strError);
+            if (nRet == -1)
+            {
+                this.WriteErrorLog(strError);
+                return -1;
+            }
+
+            this.Changed = true;
+            return 1;
+        }
+
+        // 删除一个书目库。
+        // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteBiblioDatabase(
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            // TODO: 数据库已经不存在的情况，是否会造成这样的报错？
+            if (this.IsBiblioDbName(strName) == false)
+            {
+                strError = "数据库 '" + strName + "' 不是书目库，无法进行删除";
+                return -1;
+            }
+
+            // 获得相关配置小节
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "配置 DOM 中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许删除书目库";
+                return -1;
+            }
+
+            string strLogFileName = "";
+
+            // 删除书目库
+            int nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            bDbNameChanged = true;
+
+            // 删除实体库
+            string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
+            if (String.IsNullOrEmpty(strEntityDbName) == false)
+            {
+                nRet = DeleteDatabase(channel,
+                    strEntityDbName,
+                    strLogFileName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            // 删除订购库
+            string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
+            if (String.IsNullOrEmpty(strOrderDbName) == false)
+            {
+                nRet = DeleteDatabase(channel, strOrderDbName, strLogFileName,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            // 删除期库
+            string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
+            if (String.IsNullOrEmpty(strIssueDbName) == false)
+            {
+                nRet = DeleteDatabase(channel, strIssueDbName, strLogFileName,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            // 删除评注库
+            string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
+            if (String.IsNullOrEmpty(strCommentDbName) == false)
+            {
+                nRet = DeleteDatabase(channel, strCommentDbName, strLogFileName,
+out strError);
+                if (nRet == -1)
+                {
+                    strError = "删除书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
+                    return -1;
+                }
+            }
+
+            nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+
+            // <itemdbgroup>内容更新，刷新配套的内存结构
+            nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                out strError);
+            if (nRet == -1)
+            {
+                this.WriteErrorLog(strError);
+                return -1;
+            }
+
+            this.Changed = true;
+            // this.ActivateManagerThread();
+            return 1;
+        }
+
         // 删除数据库
         // return:
         //      -1  出错
@@ -1844,6 +2712,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -1865,10 +2734,28 @@ namespace DigitalPlatform.LibraryServer
                 if (String.IsNullOrEmpty(strName) == true)
                     continue;
 
+                #region biblio
                 // 书目库整体删除，也是可以的
                 // TODO: 将来可以考虑单独删除书目库而不删除组内相关库
                 if (this.IsBiblioDbName(strName) == true)
                 {
+                    // 删除一个书目库。
+                    // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteBiblioDatabase(
+                        channel,
+                        strLibraryCodeList,
+                        strName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+#if NO
                     // 获得相关配置小节
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
                     if (nodeDatabase == null)
@@ -1961,12 +2848,33 @@ out strError);
 
                     this.Changed = true;
                     // this.ActivateManagerThread();
+#endif
+
                     continue;
                 }
 
+                #endregion
+
+                #region 单个书目下级数据库
+
                 // 单独删除实体库
-                if (this.IsItemDbName(strName) == true)
+                if (this.IsItemDbName(strName) == true
+                    || this.IsOrderDbName(strName) == true
+                    || this.IsIssueDbName(strName) == true
+                    || this.IsCommentDbName(strName) == true)
                 {
+                    nRet = DeleteBiblioChildDatabase(channel,
+                        strLibraryCodeList,
+                        strName,
+                        strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+
+#if NO
                     // 获得相关配置小节
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -2005,9 +2913,14 @@ out strError);
 
                     this.Changed = true;
                     // this.ActivateManagerThread();
+#endif
+
                     continue;
                 }
+                #endregion
 
+#if NO
+                #region order
                 // 单独删除订购库
                 if (this.IsOrderDbName(strName) == true)
                 {
@@ -2051,7 +2964,9 @@ out strError);
                     // this.ActivateManagerThread();
                     continue;
                 }
+                #endregion
 
+                #region issue
                 // 单独删除期库
                 if (this.IsIssueDbName(strName) == true)
                 {
@@ -2095,7 +3010,9 @@ out strError);
                     // this.ActivateManagerThread();
                     continue;
                 }
+                #endregion
 
+                #region comment
                 // 单独删除评注库
                 if (this.IsCommentDbName(strName) == true)
                 {
@@ -2138,10 +3055,34 @@ out strError);
                     // this.ActivateManagerThread();
                     continue;
                 }
+                #endregion
+#endif
 
+                #region reader
                 // 删除读者库
                 if (this.IsReaderDbName(strName) == true)
                 {
+
+                    // 删除读者库。
+                    // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
+                    // parameters:
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteReaderDatabase(channel,
+                        strLibraryCodeList,
+                        strName,
+                        strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+
+#if NO
                     // 获得相关配置小节
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -2182,12 +3123,47 @@ out strError);
 
                     this.Changed = true;
                     // this.ActivateManagerThread();
+#endif
                     continue;
                 }
+                #endregion
 
-                // 删除预约到书库
-                if (this.ArrivedDbName == strName)
+                string strDbType = GetDbTypeByDbName(strName);
+                if (string.IsNullOrEmpty(strDbType))
                 {
+                    strError = "数据库 '" + strName + "' 没有找到类型";
+                    return -1;
+                }
+
+                #region 各种单个数据库
+                // 删除预约到书库
+                // if (this.ArrivedDbName == strName)
+                if (strDbType == "arrived"
+                    || strDbType == "amerce"
+                    || strDbType == "invoice"
+                    || strDbType == "pinyin"
+                    || strDbType == "gcat"
+                    || strDbType == "word"
+                    || strDbType == "message")
+                {
+                    // 删除一个单独类型的数据库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteSingleDatabase(channel,
+                        strLibraryCodeList,
+                        strName,
+                        strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+#if NO
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许删除预约到书库";
@@ -2207,9 +3183,12 @@ out strError);
 
                     this.Changed = true;
                     // this.ActivateManagerThread();
+#endif
                     continue;
                 }
+                #endregion
 
+#if NO
                 // 删除违约金库
                 if (this.AmerceDbName == strName)
                 {
@@ -2358,10 +3337,32 @@ out strError);
                     // this.ActivateManagerThread();
                     continue;
                 }
+#endif
+
+                #region 实用库
 
                 // 单独删除实用库
                 if (IsUtilDbName(strName) == true)
                 {
+                    // 删除一个实用库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteUtilDatabase(channel,
+                        strLibraryCodeList,
+                        strName,
+                        strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+#if NO
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
@@ -2388,14 +3389,17 @@ out strError);
 
                     this.Changed = true;
                     // this.ActivateManagerThread();
+#endif
                     continue;
                 }
+                #endregion
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
             }
 
             // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -2522,6 +3526,7 @@ out strError);
             string strLibraryCodeList,
             string strDatabaseNames,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -3235,6 +4240,7 @@ out strError);
             }
 
             // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -3396,6 +4402,7 @@ out strError);
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -3974,6 +4981,7 @@ out strError);
 
 
             // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -4396,6 +5404,7 @@ out strError);
             string strLibraryCodeList,
             string strDatabaseInfo,
             bool bRecreate,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -4405,7 +5414,7 @@ out strError);
             int nRet = 0;
 
             string strLogFileName = this.GetTempFileName("zip");
-            List<XmlNode> database_nodes = new List<XmlNode>(); // 已经创建的数据库的定义节点
+            List<XmlElement> database_nodes = new List<XmlElement>(); // 已经创建的数据库的定义节点
 
             List<string> created_dbnames = new List<string>();  // 过程中，已经创建的数据库名
 
@@ -5706,6 +6715,7 @@ out strError);
             }
 
             // 写入操作日志
+            if (StringUtil.IsInList("skipOperLog", strStyle) == false)
             {
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -6013,6 +7023,59 @@ out strError);
             if (bChanged)
                 return 1;
             return 0;
+        }
+
+        // 根据数据库名字探测出数据库类型
+        string GetDbTypeByDbName(string strDbName)
+        {
+            if (this.IsBiblioDbName(strDbName) == true)
+                return "biblio";
+            if (this.IsItemDbName(strDbName) == true)
+                return "entity";
+            if (this.IsOrderDbName(strDbName) == true)
+                return "order";
+            if (this.IsIssueDbName(strDbName) == true)
+                return "issue";
+            if (this.IsCommentDbName(strDbName) == true)
+                return "comment";
+            if (this.IsReaderDbName(strDbName) == true)
+                return "reader";
+            if (this.ArrivedDbName == strDbName)
+                return "arrived";
+            if (this.AmerceDbName == strDbName)
+                return "amerce";
+            if (this.MessageDbName == strDbName)
+                return "message";
+            if (this.InvoiceDbName == strDbName)
+                return "invoice";
+            if (this.PinyinDbName == strDbName)
+                return "pinyin";
+            if (this.GcatDbName == strDbName)
+                return "gcat";
+            if (this.WordDbName == strDbName)
+                return "word";
+
+            return null;    // 表示没有找到
+        }
+
+        // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
+        static string GetBiblioChildDbAttributeName(string strDbType)
+        {
+            switch (strDbType)
+            {
+                case "entity":
+                    return "name";
+                case "order":
+                    return "orderDbName";
+                case "issue":
+                    return "issueDbName";
+                case "comment":
+                    return "commentDbName";
+                case "biblio":
+                    return "biblioDbName";
+                default:
+                    return null;
+            }
         }
 
         // 修改内存中那些单个数据库的名字。
