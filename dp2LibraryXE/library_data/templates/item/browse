@@ -12,6 +12,9 @@
   <col title="出版时间">
     <xpath>*/publishTime</xpath>
   </col>
+  <col title="卷期">
+    <xpath>*/volume</xpath>
+  </col>
   <col title="批次号">
     <xpath>*/batchNo</xpath>
   </col>

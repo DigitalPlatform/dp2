@@ -4132,3 +4132,336 @@
                     PathUtil.DeleteDirectory(strTempDir);
             }
         }
+
+
+		~~~~~~~~~~~~~~~~
+
+		        // 修改一个书目库下属数据库的名字
+        // 也会自动修改 library.xml 中相关元素
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      strChangeStyle  attach/detach/空。attach 表示将 dp2kernel 中数据库附加上来。detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的(源)数据库不存在
+        //      1   成功修改
+        int ChangeBiblioChildDbName(
+            RmsChannel channel,
+            string strLibraryCodeList,
+            string strOldDbName,
+            XmlElement nodeNewDatabase,
+            string strChangeStyle,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strDbType = GetDbTypeByDbName(strOldDbName);
+
+            // 类型。只有当 attach 和 detach 时候才有用到
+            string strNewType = DomUtil.GetAttr(nodeNewDatabase, "type");
+            if (StringUtil.IsInList("detach", strChangeStyle)
+                || StringUtil.IsInList("attach", strChangeStyle))
+            {
+                if (string.IsNullOrEmpty(strNewType))
+                {
+                    strError = "attach 或 detach 情况，请求的 database/@type 属性不应缺失";
+                    return -1;
+                }
+                if (string.IsNullOrEmpty(strDbType))
+                    strDbType = strNewType;
+            }
+
+            // TODO: 要注意数据库已经不存在的情况下是否会造成这里报错
+            if (string.IsNullOrEmpty(strDbType))
+            {
+                strError = "数据库 '" + strOldDbName + "' 的类型未知";
+                return -1;
+            }
+
+            // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
+            string strAttrName = GetBiblioChildDbAttributeName(strDbType);
+            if (string.IsNullOrEmpty(strAttrName))
+            {
+                strError = "数据库类型 '" + strOldDbName + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
+                return -1;
+            }
+
+            string strCaption = GetTypeCaption(strDbType);
+
+            // 获得相关配置小节
+            XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@" + strAttrName + "='" + strOldDbName + "']") as XmlElement;
+            if (nodeDatabase == null)
+            {
+                strError = "library.xml 中名字为 '" + strOldDbName + "' 的实体库(name属性)相关<database>元素没有找到";
+                return 0;
+            }
+
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "当前用户不是全局用户，不允许修改实体库定义";
+                return -1;
+            }
+
+            // 实体库名
+            string strOldEntityDbName = DomUtil.GetAttr(nodeDatabase,
+                strAttrName);
+
+            if (strOldEntityDbName != strOldDbName)
+            {
+                strError = "内部错误: strOldEntityDbName (" + strOldEntityDbName + ") != strOldDbName (" + strOldDbName + ")";
+                return -1;
+            }
+
+            // 来自strDatabaseInfo
+            string strNewEntityDbName = DomUtil.GetAttr(nodeNewDatabase,
+                "name");    // 注意这是请求参数 XML 中的 database/@name 属性
+
+            if (StringUtil.IsInList("detach", strChangeStyle)
+    || StringUtil.IsInList("attach", strChangeStyle))
+            {
+
+                // 源名字的数据库应当存在；目标名字的数据库应当不存在
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strOldEntityDbName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "源数据库 '" + strOldEntityDbName + "' 并不存在。attach 或 detach 失败";
+                    return -1;
+                }
+
+                nRet = DatabaseUtility.IsDatabaseExist(
+    channel,
+    strNewEntityDbName,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "目标数据库 '" + strNewEntityDbName + "' 已经存在。attach 或 detach 失败";
+                    return -1;
+                }
+            }
+
+            if (strOldEntityDbName != strNewEntityDbName)
+            {
+                if (String.IsNullOrEmpty(strOldEntityDbName) == true
+                    && String.IsNullOrEmpty(strNewEntityDbName) == false)
+                {
+                    strError = "要创建" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 create 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strOldEntityDbName) == false
+                    && String.IsNullOrEmpty(strNewEntityDbName) == true)
+                {
+                    strError = "要删除" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 delete 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                bool bTemp = false;
+                nRet = ChangeDbName(
+                    channel,
+                    strOldEntityDbName,
+                    strNewEntityDbName,
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                                nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                            else
+                                DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+                    out strError);
+                if (bTemp)
+                    bDbNameChanged = true;
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+            {
+                // 如果 strOldEntityDbName == strNewEntityDbName，依然要处理 detach 和 attach 情况
+                if (StringUtil.IsInList("detach", strChangeStyle))
+                {
+                    nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+                else if (StringUtil.IsInList("attach", strChangeStyle))
+                {
+                    DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+            }
+
+            // 是否参与流通
+            if (strDbType == "entity")
+            {
+                string strOldInCirculation = DomUtil.GetAttr(nodeDatabase,
+                    "inCirculation");
+                if (String.IsNullOrEmpty(strOldInCirculation) == true)
+                    strOldInCirculation = "true";
+
+                string strNewInCirculation = DomUtil.GetAttr(nodeNewDatabase,
+                    "inCirculation");
+                if (String.IsNullOrEmpty(strNewInCirculation) == true)
+                    strNewInCirculation = "true";
+
+                if (strOldInCirculation != strNewInCirculation)
+                {
+                    DomUtil.SetAttr(nodeDatabase, "inCirculation",
+                        strNewInCirculation);
+                    this.Changed = true;
+                }
+
+            }
+
+            // <itemdbgroup>内容更新，刷新配套的内存结构
+            nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                out strError);
+            if (nRet == -1)
+            {
+                this.WriteErrorLog(strError);
+                return -1;
+            }
+
+            this.Changed = true;
+            return 1;
+        }
+
+
+		~~~~~~~~~~~~~~~
+
+		                #region biblio
+                // 书目库整体删除，也是可以的
+                // TODO: 将来可以考虑单独删除书目库而不删除组内相关库
+                if (this.IsBiblioDbName(strName) == true)
+                {
+                    // 删除一个书目库。
+                    // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteBiblioDatabase(
+                        channel,
+                        strLibraryCodeList,
+                        strName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+#if NO
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                        return 0;
+                    }
+
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许删除书目库";
+                        return -1;
+                    }
+
+                    // 删除书目库
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    bDbNameChanged = true;
+
+                    // 删除实体库
+                    string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
+                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    {
+                        nRet = DeleteDatabase(channel,
+                            strEntityDbName,
+                            strLogFileName,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+
+                    // 删除订购库
+                    string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    {
+                        nRet = DeleteDatabase(channel, strOrderDbName, strLogFileName,
+out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+
+                    // 删除期库
+                    string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    {
+                        nRet = DeleteDatabase(channel, strIssueDbName, strLogFileName,
+out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+
+                    // 删除评注库
+                    string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    {
+                        nRet = DeleteDatabase(channel, strCommentDbName, strLogFileName,
+out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "删除书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+
+                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        return -1;
+                    }
+
+                    this.Changed = true;
+                    // this.ActivateManagerThread();
+#endif
+
+                    continue;
+                }
+
+                #endregion

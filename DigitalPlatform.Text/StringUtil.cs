@@ -225,6 +225,34 @@ namespace DigitalPlatform.Text
             return null;
         }
 
+        // 2017/11/22
+        public static string SetParameterByPrefix(string strList,
+            string strPrefix,
+            string strDelimiter = ":",
+            string strValue = null)
+        {
+            if (string.IsNullOrEmpty(strList) == true)
+                strList = "";
+
+            List<string> results = new List<string>();
+            string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in list)
+            {
+                if (s.StartsWith(strPrefix + strDelimiter) == true
+                    || s == strPrefix)
+                {
+                    // 注: strValue 为 ""，会产生 'prefix:'；strValue 为 null，则这个 prefix 在内容中会被完整删除
+                    if (strValue == null)
+                        continue;
+                    results.Add(strPrefix + strDelimiter + strValue);
+                }
+                else
+                    results.Add(s);
+            }
+
+            return StringUtil.MakePathList(results, ",");
+        }
+
         public static bool IsValidCMIS(string strText)
         {
             if (string.IsNullOrEmpty(strText))

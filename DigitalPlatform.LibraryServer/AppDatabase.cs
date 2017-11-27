@@ -24,6 +24,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
+using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
@@ -770,7 +771,7 @@ namespace DigitalPlatform.LibraryServer
 
                     this.Changed = true;
                     database_nodes.Add(request_node);
-                    continue;
+                    goto CONTINUE;
                 } // end of if 书目库名
                 #endregion
 
@@ -888,7 +889,7 @@ namespace DigitalPlatform.LibraryServer
                     this.Changed = true;
 #endif
                     database_nodes.Add(request_node);
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
@@ -1273,33 +1274,56 @@ namespace DigitalPlatform.LibraryServer
 
                     this.Changed = true;
                     database_nodes.Add(request_node);
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
                 string strType = GetDbTypeByDbName(strName);
+                // 注: attach 功能中的源数据库名，(执行操作前)在 library.xml 中并没有痕迹，需要从请求 database 元素的 type 属性获得
+                if (string.IsNullOrEmpty(strType) && StringUtil.IsInList("attach", strStyle))
+                {
+                    strType = request_node.GetAttribute("type");
+                    if (string.IsNullOrEmpty(strType))
+                    {
+                        strError = "attach 功能调用时请求的 database 元素中必须有 type 属性值";
+                        return -1;
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strType))
+                    {
+                        strError = "数据库名 '" + strType + "' 在 library.xml 中没有找到对应的类型信息";
+                        return -1;
+                    }
+                }
 
                 #region 单个数据库
                 // 修改预约到书库名
                 if (// this.ArrivedDbName == strName
+                    /*
                     strType == "arrived"
                     || strType == "amerce"
                     || strType == "message"
                     || strType == "invoice"
                     || strType == "pinyin"
                     || strType == "gcat"
-                    || strType == "word")
+                    || strType == "word"*/
+                    ServerDatabaseUtility.IsSingleDbType(strType))
                 {
                     // 来自strDatabaseInfo
                     string strNewDbName = DomUtil.GetAttr(request_node,
                         "name");
+                    // 注意要支持 attach/detach
                     nRet = ChangeSingleDbName(
-    channel,
-    strLibraryCodeList,
-    strName,
-    strNewDbName,
-                            ref bDbNameChanged,
-    out strError);
+                        channel,
+                        strLibraryCodeList,
+                        strName,
+                        strNewDbName,
+                        strType,
+                        strStyle,
+                        ref bDbNameChanged,
+                        out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
@@ -1348,7 +1372,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
                     database_nodes.Add(request_node);
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
@@ -1592,11 +1616,11 @@ namespace DigitalPlatform.LibraryServer
 
                 #region 实用库
                 // 修改实用库名
-                if (IsUtilDbName(strName) == true)
+                if (/*ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true*/
+                    ServerDatabaseUtility.IsUtilDbType(strType))
                 {
                     // 来自strDatabaseInfo
-                    string strNewUtilDbName = DomUtil.GetAttr(request_node,
-                        "name");
+                    string strNewUtilDbName = DomUtil.GetAttr(request_node, "name");
                     string strNewType = DomUtil.GetAttr(request_node, "type");
 
                     // 修改一个实用库的名字
@@ -1614,6 +1638,8 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strNewUtilDbName,
                         strNewType,
+                        strStyle,
+                        ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -1686,12 +1712,18 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
                     database_nodes.Add(request_node);
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library (library.xml)目前管辖的范围...";
                 return 0;
+
+            CONTINUE:
+                // 及时保存library.xml的变化
+                if (this.Changed == true)
+                    this.Flush();
+                // TODO: 验证数据库名的修改在 LibraryCfgDom 中兑现了
             }
 
             // 写入操作日志
@@ -1716,6 +1748,9 @@ namespace DigitalPlatform.LibraryServer
                 }
                 new_node.InnerXml = text.ToString();
 
+                // 记载 attach detach 风格
+                if (string.IsNullOrEmpty(strStyle) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                     sessioninfo.UserID);
@@ -1788,6 +1823,7 @@ out strError);
         // 也会自动修改 library.xml 中相关元素
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      strChangeStyle  attach/detach/空。attach 表示将 dp2kernel 中数据库附加上来。detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
         //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
         // return:
         //      -1  出错
@@ -1799,13 +1835,15 @@ out strError);
             string strOldUtilDbName,
             string strNewUtilDbName,
             string strNewType,
+            string strChangeStyle,
+            ref bool bDbNameChanged,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strOldUtilDbName + "']");
-            if (nodeDatabase == null)
+            XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strOldUtilDbName + "']") as XmlElement;
+            if (nodeDatabase == null && StringUtil.IsInList("attach", strChangeStyle) == false)
             {
                 strError = "不存在 name 属性值为 '" + strOldUtilDbName + "' 的<utilDb/database>的元素";
                 return 0;
@@ -1817,6 +1855,7 @@ out strError);
                 return -1;
             }
 
+#if NO
             if (strOldUtilDbName != strNewUtilDbName)
             {
                 if (String.IsNullOrEmpty(strOldUtilDbName) == true
@@ -1846,15 +1885,57 @@ out strError);
                 if (nRet == -1)
                     return -1;
             }
+#endif
+            bool bTemp = false;
+            nRet = ChangeDbName(
+    channel,
+    "util",
+    strOldUtilDbName,
+    strNewUtilDbName,
+    strChangeStyle,
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                            {
+                                // nodeDatabase.RemoveAttribute("name");  // library.xml 中去掉这个数据库的痕迹
+                                if (nodeDatabase != null)
+                                {
+                                    nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+                                    nodeDatabase = null;
+                                }
+                            }
+                            else
+                            {
+                                if (nodeDatabase == null)
+                                {
+                                    // 确保在 library.xml 中创建一个 utilDb/database 元素
+                                    nodeDatabase = ServerDatabaseUtility.EnsureUtilDatabaseElement(this.LibraryCfgDom,
+                                        strNewUtilDbName,
+                                        strNewType);
+                                }
+                                DomUtil.SetAttr(nodeDatabase, "name", strNewUtilDbName);
+                            }
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+                ref bDbNameChanged,
+                out strError);
+            if (bTemp)
+                bDbNameChanged = true;
+            if (nRet == -1)
+                return -1;
 
-            string strOldType = DomUtil.GetAttr(nodeDatabase, "type");
-            // string strNewType = DomUtil.GetAttr(nodeNewDatabase, "type");
-
-            if (strOldType != strNewType)
+            if (nodeDatabase != null)
             {
-                DomUtil.SetAttr(nodeDatabase, "type", strNewType);
-                this.Changed = true;
-                // TODO: 类型修改后，是否要应用新的模板来修改数据库定义？这是个大问题
+                string strOldType = DomUtil.GetAttr(nodeDatabase, "type");
+                // string strNewType = DomUtil.GetAttr(nodeNewDatabase, "type");
+
+                if (strOldType != strNewType)
+                {
+                    DomUtil.SetAttr(nodeDatabase, "type", strNewType);
+                    this.Changed = true;
+                    // TODO: 类型修改后，是否要应用新的模板来修改数据库定义？这是个大问题
+                }
             }
 
             return 1;
@@ -1906,14 +1987,14 @@ out strError);
             }
 
             // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
-            string strAttrName = GetBiblioChildDbAttributeName(strDbType);
+            string strAttrName = ServerDatabaseUtility.GetBiblioChildDbAttributeName(strDbType);
             if (string.IsNullOrEmpty(strAttrName))
             {
-                strError = "数据库类型 '" + strOldDbName + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
+                strError = "数据库类型 '" + strDbType + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
                 return -1;
             }
 
-            string strCaption = GetTypeCaption(strDbType);
+            string strCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
 
             // 获得相关配置小节
             XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@" + strAttrName + "='" + strOldDbName + "']") as XmlElement;
@@ -1943,6 +2024,7 @@ out strError);
             string strNewEntityDbName = DomUtil.GetAttr(nodeNewDatabase,
                 "name");    // 注意这是请求参数 XML 中的 database/@name 属性
 
+#if NO
             if (StringUtil.IsInList("detach", strChangeStyle)
     || StringUtil.IsInList("attach", strChangeStyle))
             {
@@ -2030,6 +2112,29 @@ out strError);
                     this.Changed = true;
                 }
             }
+#endif
+            bool bTemp = false;
+            nRet = ChangeDbName(
+                channel,
+                strDbType,
+                strOldEntityDbName,
+                strNewEntityDbName,
+                strChangeStyle,
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                                nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                            else
+                                DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+               ref bDbNameChanged,
+            out strError);
+            if (bTemp)
+                bDbNameChanged = true;
+            if (nRet == -1)
+                return -1;
 
             // 是否参与流通
             if (strDbType == "entity")
@@ -2066,10 +2171,127 @@ out strError);
             return 1;
         }
 
+        // 带有 attach/detach 功能的修改数据库名字的函数
+        // return:
+        //      -1  出错
+        //      0   成功
+        int ChangeDbName(
+            RmsChannel channel,
+            string strDbType,
+            string strOldEntityDbName,
+            string strNewEntityDbName,
+            string strChangeStyle,
+            Action change_complete,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
+
+            if (StringUtil.IsInList("detach", strChangeStyle)
+    || StringUtil.IsInList("attach", strChangeStyle))
+            {
+
+                // 源名字的数据库应当存在；目标名字的数据库应当不存在
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strOldEntityDbName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "源数据库 '" + strOldEntityDbName + "' 并不存在。attach 或 detach 失败";
+                    return -1;
+                }
+
+                nRet = DatabaseUtility.IsDatabaseExist(
+    channel,
+    strNewEntityDbName,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    strError = "目标数据库 '" + strNewEntityDbName + "' 已经存在。attach 或 detach 失败";
+                    return -1;
+                }
+            }
+
+            if (strOldEntityDbName != strNewEntityDbName)
+            {
+                if (String.IsNullOrEmpty(strOldEntityDbName) == true
+                    && String.IsNullOrEmpty(strNewEntityDbName) == false)
+                {
+                    strError = "要创建" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 create 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                if (String.IsNullOrEmpty(strOldEntityDbName) == false
+                    && String.IsNullOrEmpty(strNewEntityDbName) == true)
+                {
+                    strError = "要删除" + strCaption + "库 '" + strNewEntityDbName + "'，请使用 delete 功能，而不能使用 change 功能";
+                    return -1;
+                }
+
+                bool bTemp = false;
+                nRet = ChangeDbName(
+                    channel,
+                    strOldEntityDbName,
+                    strNewEntityDbName,
+                    change_complete,
+                    /*
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                                nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                            else
+                                DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        }, */
+                    out strError);
+                if (bTemp)
+                    bDbNameChanged = true;
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+            {
+                change_complete();
+                /*
+                // 如果 strOldEntityDbName == strNewEntityDbName，依然要处理 detach 和 attach 情况
+                if (StringUtil.IsInList("detach", strChangeStyle))
+                {
+                    nodeDatabase.RemoveAttribute(strAttrName);  // library.xml 中去掉这个数据库的痕迹
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+                else if (StringUtil.IsInList("attach", strChangeStyle))
+                {
+                    DomUtil.SetAttr(nodeDatabase, strAttrName, strNewEntityDbName);
+                    bDbNameChanged = true;
+                    this.Changed = true;
+                }
+                 * */
+            }
+
+            return 0;
+        }
+
         // 修改一个单独数据库的名字
         // 也会自动修改 library.xml 中相关元素
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+        //      strType 数据库类型。如果此参数为空，函数内会自动根据 strOldDbName 从 library.xml 中搜寻其类型。注意，attach 功能时(在函数调用前时刻) library.xml 中没有源数据库名信息
+        //      strChangeStyle  attach/detach/空。attach 表示将 dp2kernel 中数据库附加上来。detach 表示将 dp2library 用到的某个数据库从 library.xml 中摘除(但数据库已经在 dp2kernel 中存在)
         //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
         // return:
         //      -1  出错
@@ -2080,20 +2302,27 @@ out strError);
             string strLibraryCodeList,
             string strOldDbName,
             string strNewDbName,
+            string strType,
+            string strChangeStyle,
             ref bool bDbNameChanged,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            string strType = GetDbTypeByDbName(strOldDbName);
-            if (string.IsNullOrEmpty(strType))
+            string strDbType = strType;
+
+            if (string.IsNullOrEmpty(strDbType))
             {
-                strError = "数据库 '" + strOldDbName + "' 没有找到类型";
-                return 0;
+                strDbType = GetDbTypeByDbName(strOldDbName);
+                if (string.IsNullOrEmpty(strDbType))
+                {
+                    strError = "数据库 '" + strOldDbName + "' 没有找到类型";
+                    return 0;
+                }
             }
 
-            string strTypeCaption = GetTypeCaption(strType);
+            string strTypeCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
@@ -2101,6 +2330,30 @@ out strError);
                 return -1;
             }
 
+            bool bTemp = false;
+            nRet = ChangeDbName(
+    channel,
+    strDbType,
+    strOldDbName,
+    strNewDbName,
+    strChangeStyle,
+                        () =>
+                        {
+                            if (StringUtil.IsInList("detach", strChangeStyle))
+                                ChangeSingleDbName(strDbType, "");  // library.xml 中去掉这个数据库的痕迹
+                            else
+                                ChangeSingleDbName(strDbType, strNewDbName);
+                            bTemp = true;
+                            this.Changed = true;
+                        },
+                ref bDbNameChanged,
+                out strError);
+            if (bTemp)
+                bDbNameChanged = true;
+            if (nRet == -1)
+                return -1;
+
+#if NO
             if (strOldDbName != strNewDbName)
             {
                 if (String.IsNullOrEmpty(strOldDbName) == true
@@ -2134,6 +2387,7 @@ out strError);
                 if (nRet == -1)
                     return -1;
             }
+#endif
 
             return 1;
         }
@@ -2422,7 +2676,7 @@ out strError);
             int nRet = 0;
 
             // TODO: 关注一下数据库不存在的时候是不是会报这个错
-            if (IsUtilDbName(strName) == false)
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == false)
             {
                 strError = "数据库 '' 的类型不是实用库，无法用 DeleteUtilDatabase() 来加以删除";
                 return -1;
@@ -2483,7 +2737,7 @@ out strError);
                 return -1;
             }
 
-            string strCaption = GetTypeCaption(strDbType);
+            string strCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
 
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
             {
@@ -2500,7 +2754,7 @@ out strError);
                 return -1;
             }
 
-            // bDbNameChanged = true;   // ?
+            bDbNameChanged = true;
 
             ChangeSingleDbName(strDbType, "");
             // this.ArrivedDbName = "";
@@ -2536,14 +2790,14 @@ out strError);
             }
 
             // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
-            string strAttrName = GetBiblioChildDbAttributeName(strDbType);
+            string strAttrName = ServerDatabaseUtility.GetBiblioChildDbAttributeName(strDbType);
             if (string.IsNullOrEmpty(strAttrName))
             {
-                strError = "数据库类型 '" + strName + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
+                strError = "数据库类型 '" + strDbType + "' 无法找到对应的 itemdbgroup/database 元素内的对应属性名";
                 return -1;
             }
 
-            string strCaption = GetTypeCaption(strDbType);
+            string strCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
 
             // 获得相关配置小节
             XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strAttrName + "']");
@@ -2585,7 +2839,7 @@ out strError);
             return 1;
         }
 
-        // 删除一个书目库。
+        // 删除一个书目库，包括下属的数据库。
         // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
         // return:
         //      -1  出错
@@ -2734,10 +2988,18 @@ out strError);
                 if (String.IsNullOrEmpty(strName) == true)
                     continue;
 
+                string strDbType = GetDbTypeByDbName(strName);
+                if (string.IsNullOrEmpty(strDbType))
+                {
+                    strError = "数据库 '" + strName + "' 不存在";
+                    return 0;
+                }
+
                 #region biblio
                 // 书目库整体删除，也是可以的
                 // TODO: 将来可以考虑单独删除书目库而不删除组内相关库
-                if (this.IsBiblioDbName(strName) == true)
+                if (/*this.IsBiblioDbName(strName) == true*/
+                    strDbType == "biblio")
                 {
                     // 删除一个书目库。
                     // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
@@ -2850,7 +3112,7 @@ out strError);
                     // this.ActivateManagerThread();
 #endif
 
-                    continue;
+                    goto CONTINUE;
                 }
 
                 #endregion
@@ -2858,10 +3120,11 @@ out strError);
                 #region 单个书目下级数据库
 
                 // 单独删除实体库
-                if (this.IsItemDbName(strName) == true
+                if (/*this.IsItemDbName(strName) == true
                     || this.IsOrderDbName(strName) == true
                     || this.IsIssueDbName(strName) == true
-                    || this.IsCommentDbName(strName) == true)
+                    || this.IsCommentDbName(strName) == true*/
+                    ServerDatabaseUtility.IsBiblioSubType(strDbType))
                 {
                     nRet = DeleteBiblioChildDatabase(channel,
                         strLibraryCodeList,
@@ -2915,7 +3178,7 @@ out strError);
                     // this.ActivateManagerThread();
 #endif
 
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
@@ -3124,27 +3387,22 @@ out strError);
                     this.Changed = true;
                     // this.ActivateManagerThread();
 #endif
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
-
-                string strDbType = GetDbTypeByDbName(strName);
-                if (string.IsNullOrEmpty(strDbType))
-                {
-                    strError = "数据库 '" + strName + "' 没有找到类型";
-                    return -1;
-                }
 
                 #region 各种单个数据库
                 // 删除预约到书库
                 // if (this.ArrivedDbName == strName)
-                if (strDbType == "arrived"
+                if (
+                    /*strDbType == "arrived"
                     || strDbType == "amerce"
                     || strDbType == "invoice"
                     || strDbType == "pinyin"
                     || strDbType == "gcat"
                     || strDbType == "word"
-                    || strDbType == "message")
+                    || strDbType == "message"*/
+                    ServerDatabaseUtility.IsSingleDbType(strDbType))
                 {
                     // 删除一个单独类型的数据库。
                     // 也会自动修改 library.xml 的相关元素
@@ -3163,6 +3421,8 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    if (nRet == 0)
+                        return 0;
 #if NO
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
@@ -3184,7 +3444,8 @@ out strError);
                     this.Changed = true;
                     // this.ActivateManagerThread();
 #endif
-                    continue;
+                    // TODO: 要把 this.ArrivedDbName 的值兑现到 LibraryCfgDom，便于 Verify 模块正常运作
+                    goto CONTINUE;
                 }
                 #endregion
 
@@ -3342,7 +3603,7 @@ out strError);
                 #region 实用库
 
                 // 单独删除实用库
-                if (IsUtilDbName(strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
                 {
                     // 删除一个实用库。
                     // 也会自动修改 library.xml 的相关元素
@@ -3361,7 +3622,8 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         return -1;
-
+                    if (nRet == 0)
+                        return 0;
 #if NO
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -3390,12 +3652,36 @@ out strError);
                     this.Changed = true;
                     // this.ActivateManagerThread();
 #endif
-                    continue;
+                    goto CONTINUE;
                 }
                 #endregion
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
+
+            CONTINUE:
+                // 及时保存library.xml的变化
+                if (this.Changed == true)
+                    this.Flush();
+
+                if (StringUtil.IsInList("verify", strStyle))
+                {
+                    Debug.Assert(string.IsNullOrEmpty(strDbType) == false, "");
+                    Debug.Assert(string.IsNullOrEmpty(strName) == false, "");
+
+
+
+                    // return:
+                    //      -1  验证过程出现错误(也就是说验证过程没有来的及完成)
+                    //      0   验证发现不正确
+                    //      1   验证发现正确
+                    nRet = VerifyDatabaseDelete(//this.LibraryCfgDom,
+                strDbType,
+                strName,
+                out strError);
+                    if (nRet != 1)
+                        return -1;
+                }
             }
 
             // 写入操作日志
@@ -4113,7 +4399,7 @@ out strError);
                 }
 
                 // 刷新实用库
-                if (IsUtilDbName(strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
                 {
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -4843,7 +5129,7 @@ out strError);
                 }
 
                 // 初始化实用库
-                if (IsUtilDbName(strName) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strName) == true)
                 {
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
@@ -5762,7 +6048,7 @@ out strError);
                     || strType == "issue"
                     || strType == "comment")
                 {
-                    string strTypeCaption = GetTypeCaption(strType);
+                    string strTypeCaption = ServerDatabaseUtility.GetTypeCaption(strType);
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
@@ -6327,15 +6613,17 @@ out strError);
                     this.Changed = true;
                     database_nodes.Add(request_node);
                 }
-                else if (strType == "arrived"
+                else if (
+                    /*strType == "arrived"
                     || strType == "amerce"
                     || strType == "message"
                     || strType == "invoice"
                     || strType == "pinyin"
                     || strType == "gcat"
-                    || strType == "word")
+                    || strType == "word"*/
+                    ServerDatabaseUtility.IsSingleDbType(strType))
                 {
-                    string strTypeCaption = GetTypeCaption(strType);
+                    string strTypeCaption = ServerDatabaseUtility.GetTypeCaption(strType);
 
                     if (strType == "test")
                     {
@@ -7005,7 +7293,7 @@ out strError);
                     continue;
                 }
 
-                if (IsSingleDbType(strType))
+                if (ServerDatabaseUtility.IsSingleDbType(strType))
                 {
                     ChangeSingleDbName(strType, info.Name);
 
@@ -7054,37 +7342,18 @@ out strError);
                 return "gcat";
             if (this.WordDbName == strDbName)
                 return "word";
-
-            return null;    // 表示没有找到
-        }
-
-        // 根据数据库类型，获得在 itemdbgroup/database 元素中的相关属性名
-        static string GetBiblioChildDbAttributeName(string strDbType)
-        {
-            switch (strDbType)
-            {
-                case "entity":
-                    return "name";
-                case "order":
-                    return "orderDbName";
-                case "issue":
-                    return "issueDbName";
-                case "comment":
-                    return "commentDbName";
-                case "biblio":
-                    return "biblioDbName";
-                default:
-                    return null;
-            }
+            // 实用库的功能
+            // null 表示没有找到
+            return ServerDatabaseUtility.GetUtilDbType(this.LibraryCfgDom, strDbName);
         }
 
         // 修改内存中那些单个数据库的名字。
         // return:
         //      返回修改前的数据库名
-        string ChangeSingleDbName(string strType, string strDbName)
+        string ChangeSingleDbName(string strDbType, string strDbName)
         {
-            string strOldDbName = GetSingleDbName(strType);
-            switch (strType)
+            string strOldDbName = GetSingleDbName(strDbType);
+            switch (strDbType)
             {
                 case "arrived":
                     this.ArrivedDbName = strDbName;
@@ -7108,7 +7377,7 @@ out strError);
                     this.WordDbName = strDbName;
                     break;
                 default:
-                    throw new ArgumentException("未知的 strType 值 '" + strType + "'", "strType");
+                    throw new ArgumentException("未知的 strType 值 '" + strDbType + "'", "strType");
             }
             return strOldDbName;
         }
@@ -7131,59 +7400,6 @@ out strError);
                     return this.GcatDbName;
                 case "word":
                     return this.WordDbName;
-                default:
-                    throw new ArgumentException("未知的 strType 值 '" + strType + "'", "strType");
-            }
-        }
-
-        // 是否为单个数据库类型?
-        //  单个数据库是指那些 DbName 保存在内存变量中的数据库类型。(一般不要从 cfg_dom 中直接存取)
-        static bool IsSingleDbType(string strType)
-        {
-            switch (strType)
-            {
-                case "arrived":
-                case "amerce":
-                case "message":
-                case "invoice":
-                case "pinyin":
-                case "gcat":
-                case "word":
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-
-        static string GetTypeCaption(string strType)
-        {
-            switch (strType)
-            {
-                case "arrived":
-                    return "预约到书";
-                case "amerce":
-                    return "违约金";
-                case "message":
-                    return "消息";
-                case "invoice":
-                    return "发票";
-                case "pinyin":
-                    return "拼音";
-                case "gcat":
-                    return "著者号码";
-                case "word":
-                    return "词";
-                case "biblio":
-                    return "书目";
-                case "entity":
-                    return "实体";
-                case "order":
-                    return "订购";
-                case "issue":
-                    return "期";
-                case "comment":
-                    return "评注";
                 default:
                     throw new ArgumentException("未知的 strType 值 '" + strType + "'", "strType");
             }

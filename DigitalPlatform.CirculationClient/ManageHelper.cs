@@ -738,5 +738,75 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        public class DatabaseInfo
+        {
+            public string Type { get; set; }
+            public string Name { get; set; }
+            public string Syntax { get; set; }
+        }
+
+        public static int GetDatabaseInfo(
+            Stop stop,
+            LibraryChannel channel,
+            out List<DatabaseInfo> infos,
+            out string strError)
+        {
+            strError = "";
+            infos = new List<DatabaseInfo>();
+
+            string AllDatabaseInfoXml = "";
+            long lRet = channel.ManageDatabase(
+                stop,
+                "getinfo",
+                "",
+                "",
+                "",
+                out AllDatabaseInfoXml,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (String.IsNullOrEmpty(AllDatabaseInfoXml) == true)
+            {
+                return 0;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(AllDatabaseInfoXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML装入DOM时出错: " + ex.Message;
+                return -1;
+            }
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strName = DomUtil.GetAttr(node, "name");
+                string strType = DomUtil.GetAttr(node, "type");
+
+                DatabaseInfo info = new DatabaseInfo();
+                info.Type = strType;
+                info.Name = strName;
+                infos.Add(info);
+
+                if (strType == "biblio")
+                {
+                    string strSyntax = DomUtil.GetAttr(node, "syntax");
+                    if (String.IsNullOrEmpty(strSyntax) == true)
+                        strSyntax = "unimarc";
+
+                    info.Syntax = strSyntax;
+                }
+            }
+
+            return 1;
+        }
+
     }
 }

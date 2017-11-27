@@ -131,6 +131,7 @@
     <Compile Include="AppCenter.cs" />
     <Compile Include="AppChannel.cs" />
     <Compile Include="AppCirculation.cs" />
+    <Compile Include="AppDatabaseVerify.cs" />
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
     <Compile Include="AppRights.cs" />

@@ -72,7 +72,7 @@ namespace DigitalPlatform.Text
             if (dom == null || dom.DocumentElement == null)
                 return new List<IssueString>();
 
-            // 看看记录中是否有 banding/item 元素
+            // 看看记录中是否有 binding/item 元素
             /*
 - <binding>
   <item publishTime="20160101" volume="2016,no.1, 总.100, v.10" refID="1e651c7d-bcce-442a-b574-ceee7b4b81e0" price="CNY12" /> 

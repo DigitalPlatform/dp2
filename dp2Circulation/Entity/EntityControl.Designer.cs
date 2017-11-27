@@ -148,7 +148,7 @@ namespace dp2Circulation
             // 
             // columnHeader_volume
             // 
-            this.columnHeader_volume.Text = "¾íºÅ";
+            this.columnHeader_volume.Text = "¾íÆÚ";
             this.columnHeader_volume.Width = 150;
             // 
             // columnHeader_accessNo

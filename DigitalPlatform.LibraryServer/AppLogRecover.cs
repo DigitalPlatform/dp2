@@ -21,6 +21,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -8273,7 +8274,7 @@ DO_SNAPSHOT:
                     }
                     else if (strAction == "changeDatabase")
                     {
-
+                        // 注意处理 attach 和 detach 风格。或者明确报错不予处理
                     }
                     else if (strAction == "initializeDatabase")
                     {
@@ -8441,7 +8442,7 @@ DO_SNAPSHOT:
                     continue;
                 }
 
-                if (IsUtilDbName(dbname) == true)
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, dbname) == true)
                 {
                     // 删除一个实用库。
                     // 也会自动修改 library.xml 的相关元素

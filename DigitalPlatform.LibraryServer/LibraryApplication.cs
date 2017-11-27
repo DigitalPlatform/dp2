@@ -30,6 +30,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3186,7 +3187,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("Flush()中俘获异常 " + ex.Message);
+                this.WriteErrorLog("Flush()中俘获异常 " + ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -3201,7 +3202,6 @@ namespace DigitalPlatform.LibraryServer
             this.LockForWrite();    // 2016/10/16
             try
             {
-
                 if (this.m_bChanged == false)
                 {
                     /*
@@ -3220,7 +3220,6 @@ namespace DigitalPlatform.LibraryServer
                     bOldState = watcher.EnableRaisingEvents;
                     watcher.EnableRaisingEvents = false;
                 }
-
 
                 if (strFileName == null)
                     strFileName = m_strFileName;
@@ -3719,6 +3718,13 @@ namespace DigitalPlatform.LibraryServer
 
                 this.m_bChanged = false;
 
+                // 2017/11/25
+                {
+                    if (this.LibraryCfgDom == null)
+                        this.LibraryCfgDom = new XmlDocument();
+                    this.LibraryCfgDom.Load(strFileName);   
+                }
+
                 if (this.watcher != null)
                 {
                     watcher.EnableRaisingEvents = bOldState;
@@ -4208,26 +4214,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return false;
-        }
-
-        // 是否为实用库名
-        // 实用库包括 publisher / zhongcihao / dictionary 类型
-        public bool IsUtilDbName(string strUtilDbName)
-        {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "']");
-            if (node == null)
-                return false;
-
-            return true;
-        }
-
-        public bool IsUtilDbName(string strUtilDbName, string strType)
-        {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='" + strType + "']");
-            if (node == null)
-                return false;
-
-            return true;
         }
 
         // 是否在配置的书目库名之列?
@@ -14498,7 +14484,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             // 实用库 2013/10/30
-            if (this.IsUtilDbName(strDbName) == true)
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strDbName) == true)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 

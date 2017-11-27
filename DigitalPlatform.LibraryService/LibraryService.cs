@@ -24,6 +24,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.rms;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2Library
 {
@@ -8910,7 +8911,7 @@ Stack:
         // parameters:
         //      strAction   动作。create delete initialize backup getinfo
         // return:
-        //      result.Value    -1 错误
+        //      result.Value    -1 错误。如果数据库不存在，同时还要返回 ErrorCode 为 NotFound
         public LibraryServerResult ManageDatabase(string strAction,
             string strDatabaseName,
             string strDatabaseInfo,
@@ -12421,7 +12422,7 @@ Stack:
                     if (StringUtil.IsInList("delete", strStyle) == true)
                     {
                         string strDbName = ResPath.GetDbName(strResPath);
-                        if (app.IsUtilDbName(strDbName, "inventory") == true)
+                        if (ServerDatabaseUtility.IsUtilDbName(app.LibraryCfgDom, strDbName, "inventory") == true)
                         {
                             if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
                             {

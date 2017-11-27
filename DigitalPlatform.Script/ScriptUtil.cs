@@ -572,5 +572,33 @@ namespace DigitalPlatform.Script
             return 1;
         }
 
+        // 根据 query string，获得指定一期的期记录数量
+        // query string 是调用前从册记录中 volume 等字段综合取得的
+        // parameters:
+        //      strBiblioPath   书目记录路径
+        //      strQueryString  检索词。例如 “2005|1|1000|50”。格式为 年|期号|总期号|卷号。一般为 年|期号| 即可。
+        public static int GetIssueCount(this LibraryChannel channel,
+            DigitalPlatform.Stop stop,
+            string strBiblioRecPath,
+            string strQueryString,
+            out string strError)
+        {
+            strError = "";
+
+            string strBiblioRecordID = StringUtil.GetRecordId(strBiblioRecPath);
+            string strStyle = "query:父记录+期号|" + strBiblioRecordID + "|" + strQueryString;
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = null;
+            long lRet = channel.GetIssues(stop,
+                strBiblioRecPath,
+                0,
+                1,
+                strStyle,
+                channel.Lang,
+                out issueinfos,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            return (int)lRet;
+        }
     }
 }

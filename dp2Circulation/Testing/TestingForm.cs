@@ -22,6 +22,7 @@ using DigitalPlatform.Xml;
 using System.Collections;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -2631,7 +2632,7 @@ strTestDbName,
             {
                 // LogAndRecover("createBiblioDatabase", "");
                 // LogAndRecover("deleteBiblioDatabase", "");
-                LogAndRecover("deleteSimpleDatabase", "");
+                LogAndRecover("deleteSimpleDatabase", "type:*");   // type:* type:amerce
             });
         }
 
@@ -2642,6 +2643,9 @@ strTestDbName,
         {
             string strError = "";
             int nRet = 0;
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始进行日志和恢复的测试</div>");
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
@@ -2675,7 +2679,7 @@ out strError);
                 }
                 else if (strAction == "deleteSimpleDatabase")
                 {
-                    nRet = TestRecoverDeletingSimpleDatabase(
+                    nRet = TestRecoverDeletingSimpleDatabases(
 this.Progress,
 channel,
 strStyle,
@@ -2709,9 +2713,13 @@ out strError);
 
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束日志和恢复的测试</div>");
             }
         ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            this.DisplayError(strError);
             this.ShowMessage(strError, "red", true);
         }
 
@@ -3004,11 +3012,59 @@ out strError);
             return -1;
         }
 
-        // 测试恢复删除 简单库
+        // 测试恢复动作：删除各种类型的简单数据库
+        // 这里的简单数据库，是指书目库和下属库以外的所有类型的数据库。把这些类型集中在一起编写测试代码，是为了在测试外围 detach 和 attach
+        int TestRecoverDeletingSimpleDatabases(
+    Stop stop,
+    LibraryChannel channel,
+    string strStyle,
+    out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            long lRet = 0;
+
+            string strType = StringUtil.GetParameterByPrefix(strStyle, "type", ":");
+            if (string.IsNullOrEmpty(strType) == true)
+            {
+                strError = "strStyle 中没有包含任何 type:xxx 内容";
+                return -1;
+            }
+
+            if (strType == "*")
+            {
+                strType = "arrived|amerce|message|pinyin|gcat|word|publisher|inventory|dictionary|zhongcihao"; // invoice 暂时没有支持
+                // strType = "zhongcihao"; // invoice 暂时没有支持
+            }
+
+            List<string> types = StringUtil.SplitList(strType, "|");
+            foreach (string type in types)
+            {
+                string strCurrentStyle = StringUtil.SetParameterByPrefix(strStyle,
+                    "type",
+                    ":",
+                    type);
+                if (type == "zhongcihao")
+                    strCurrentStyle += ",dont_protect";
+                nRet = TestRecoverDeletingOneSimpleDatabase(
+            stop,
+            channel,
+            strCurrentStyle,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+        // TODO: 测试过程要显示在 OperHistory 中
+        // 测试恢复删除 一个特定类型的 简单库
         // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
         // parameters:
         //      strStyle    type:amerce 等等
-        int TestRecoverDeletingSimpleDatabase(
+        //                  dont_protect 表示不做 detach attach 保护。缺省为要保护
+        int TestRecoverDeletingOneSimpleDatabase(
             Stop stop,
             LibraryChannel channel,
             string strStyle,
@@ -3018,14 +3074,20 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
+            DisplayTitle("=== 删除一个简单库 ===");
+
+            bool bProtect = !StringUtil.IsInList("dont_protect", strStyle);
+
             string strType = StringUtil.GetParameterByPrefix(strStyle, "type", ":");
-            if (string.IsNullOrEmpty(strType) == false)
+            if (string.IsNullOrEmpty(strType) == true)
             {
                 strError = "strStyle 中没有包含任何 type:xxx 内容";
                 return -1;
             }
 
             string strSingleDbName = "test_" + strType;
+
+            DisplayTitle("数据库类型 '" + strType + "', 用于测试的数据库名为 '" + strSingleDbName + "'");
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先保护起来
@@ -3035,9 +3097,78 @@ out strError);
             string strOldDbName = "";
             string strDetachOldDbName = "";
 
+            if (bProtect)
+            {
+                List<DigitalPlatform.CirculationClient.ManageHelper.DatabaseInfo> infos = null;
+                nRet = ManageHelper.GetDatabaseInfo(
+            stop,
+            channel,
+            out infos,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                List<DigitalPlatform.CirculationClient.ManageHelper.DatabaseInfo> results =
+                    infos.FindAll((DigitalPlatform.CirculationClient.ManageHelper.DatabaseInfo info) =>
+                    {
+                        if (info.Type == strType) return true;
+                        return false;
+                    });
+                if (results.Count > 0)
+                {
+                    strOldDbName = results[0].Name;
+
+                    // TODO: 如果当前存在的此类型数据库正好和临时数据库重名，应认为是上次测试残留的结果，直接删除即可
+                    if (strSingleDbName == strOldDbName
+                        && String.IsNullOrEmpty(strSingleDbName) == false)
+                    {
+                        DisplayTitle("拟用于测试的数据库名已经存在，需要删除残留的数据库 '" + strSingleDbName + "'");
+
+                        string strOutputInfo = "";
+                        lRet = channel.ManageDatabase(
+                            this.Progress,
+            "delete",
+            strSingleDbName,    // strDatabaseNames,
+            "",
+            "skipOperLog",
+            out strOutputInfo,
+            out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+
+                    strDetachOldDbName = "_saved_" + strOldDbName;
+                }
+            }
+            else
+            {
+                DisplayTitle("不保护以前的同类数据库。因为此类数据库是可以重复创建的");
+                // 删除遗留的临时库
+                {
+                    DisplayTitle("尝试删除以前遗留的数据库 '" + strSingleDbName + "'");
+
+                    string strOutputInfo = "";
+                    lRet = channel.ManageDatabase(
+                        this.Progress,
+        "delete",
+        strSingleDbName,    // strDatabaseNames,
+        "",
+        "skipOperLog",
+        out strOutputInfo,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ErrorCode.NotFound)
+                            DisplayOK(strError);
+                        else
+                            goto ERROR1;
+                    }
+                }
+            }
 
             if (string.IsNullOrEmpty(strOldDbName) == false)
             {
+                DisplayTitle("保护当前的同类数据库 '" + strOldDbName + "' --> '" + strDetachOldDbName + "'");
+
                 // 修改一个简单库
                 // parameters:
                 // return:
@@ -3064,6 +3195,8 @@ out strError);
 
                 // 创建一个简单库，以便后面进行删除操作
                 {
+                    DisplayTitle("创建一个临时的简单库 '" + strSingleDbName + "'，以前后面能模拟出测试动作(删除)");
+
                     Progress.SetMessage("正在创建测试用简单库 ...");
                     // 创建一个书目库
                     // parameters:
@@ -3109,12 +3242,14 @@ out strError);
 
                 // 进行删除操作，并记入日志
                 {
+                    DisplayTitle("创建关键日志动作：删除数据库 '" + strSingleDbName + "'。创建动作带有校验功能");
+
                     lRet = channel.ManageDatabase(
                         this.Progress,
         "delete",
         strSingleDbName,    // strDatabaseNames,
         "",
-        "",
+        "verify",
         out strOutputInfo,
         out strError);
                     if (lRet == -1)
@@ -3127,6 +3262,7 @@ out strError);
                 }
                 else
                 {
+                    DisplayTitle("准备进行恢复模拟。先创建临时数据库 '" + strSingleDbName + "' 以作为恢复的准备条件");
                     // 创建简单库，以便在恢复操作前的环境中，先具有这个数据库
                     // parameters:
                     // return:
@@ -3138,12 +3274,13 @@ out strError);
                         this.Progress,
                         strSingleDbName,
                         strType,
-                        "skipOperLog",
+                        "skipOperLog,verify",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
                 }
 
+                DisplayTitle("启动 日志恢复 dp2library后台任务");
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
                 string strTaskName = "日志恢复";
@@ -3157,6 +3294,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+                DisplayTitle("等待后台任务结束 ...");
                 // 等待，直到 dp2library 后台任务结束
                 string strErrorInfo = "";
                 nRet = WaitBatchTaskFinish(
@@ -3187,6 +3325,8 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
+                    DisplayTitle("测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "'");
+                    string strError1 = "";
                     // 修改一个简单库
                     // parameters:
                     // return:
@@ -3200,10 +3340,11 @@ out strError);
                 strType,
                 strOldDbName,
                 "attach",
-                out strError);
+                out strError1);
                     if (nRet == -1)
                     {
                         // 如何报错?
+                        this.Invoke((Action)(() => MessageBox.Show(this, strError1)));
                     }
                 }
             }
@@ -3223,8 +3364,19 @@ out strError);
         // 验证恢复“删除数据库”情况
         /*
          * 1) 验证每个 dp2kernel 数据库是否已经删除。方法是获取关键的几个配置文件看看
-         * 2) 验证 library.xml 中 itemdbgroup 里面的 database 元素是否正确删除或者修改了
+         * 2) 如果是书目库，验证 library.xml 中 itemdbgroup 里面的 database 元素是否正确删除或者修改了
+         *      如果是其他单个数据库，验证 library.xml 中相应位置是否兑现了修改
          * */
+        int VerifyDeletingDatabase(Stop stop,
+            LibraryChannel channel,
+            string strDbType,
+            string strDbName,
+            out string strError)
+        {
+            strError = "";
+
+            return 0;
+        }
 
         static int StartBatchTask(
             Stop stop,
@@ -3303,6 +3455,18 @@ out strError);
 
         #endregion
 
+        void DisplayTitle(string strText)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+        void DisplayOK(string strText)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+        void DisplayError(string strText)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
     }
 
     // 验证异常
