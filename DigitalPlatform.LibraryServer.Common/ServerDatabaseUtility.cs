@@ -119,6 +119,14 @@ namespace DigitalPlatform.LibraryServer.Common
                     return "评注";
                 case "util":
                     return "实用";
+                case "publisher":
+                    return "出版者";
+                case "zhongcihao":
+                    return "种次号";
+                case "dictionary":
+                    return "字典";
+                case "inventory":
+                    return "盘点";
                 default:
                     throw new ArgumentException("未知的 strDbType 值 '" + strDbType + "'", "strDbType");
             }

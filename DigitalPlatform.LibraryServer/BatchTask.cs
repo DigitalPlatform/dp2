@@ -65,6 +65,19 @@ namespace DigitalPlatform.LibraryServer
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
 
+#if NO
+        internal List<string> _errors = new List<string>();
+        public void AddError(string strText)
+        {
+            _errors.Add(strText);
+        }
+
+        public void ClearErrors()
+        {
+            this._errors.Clear();
+        }
+#endif
+
         public virtual void Dispose()
         {
             this.Close();
@@ -388,6 +401,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             this.ErrorInfo = "";
+            // this.ClearErrors();
             this.m_bClosed = false;
 
             this.eventActive.Set();
@@ -521,6 +535,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lock.ReleaseWriterLock();
             }
+        }
+
+        // 2017/11/28
+        internal void AppendErrorText(string strText)
+        {
+            AppendResultText("{error}"+ strText);
         }
 
         // 追加结果文本
@@ -833,6 +853,7 @@ namespace DigitalPlatform.LibraryServer
             RecoverLevel level,
             string strXml,
             Stream attachment,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -1007,6 +1028,7 @@ namespace DigitalPlatform.LibraryServer
                     level,
                     dom,
                     attachment,
+                    strStyle,
                     out strError);
             }
             else

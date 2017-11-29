@@ -8204,6 +8204,7 @@ RmsChannelCollection Channels,
 RecoverLevel level,
 XmlDocument domLog,
 Stream attachmentLog,
+            string strStyle,
 out string strError)
         {
             strError = "";
@@ -8298,6 +8299,7 @@ DO_SNAPSHOT:
                             null,
                             channel,
                             dbnames,
+                            strStyle,
                             ref bDbNameChanged,
                             out strError);
                         if (nRet == -1)
@@ -8362,6 +8364,7 @@ DO_SNAPSHOT:
             Stop stop,
             RmsChannel channel,
             List<string> dbnames,
+            string strStyle,
             ref bool bDbNameChanged,
             out string strError)
         {
@@ -8395,13 +8398,23 @@ DO_SNAPSHOT:
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        if (this.VerifyDatabaseDelete(
+                            channel,
+                            strDbType, 
+                            dbname, 
+                            out strError) == -1)
+                            return -1;
+                    }
                     continue;
                 }
 
-                if (strDbType == "entity"
+                if (/*strDbType == "entity"
                     || strDbType == "order"
                     || strDbType == "issue"
-                    || strDbType == "comment")
+                    || strDbType == "comment"*/
+                    ServerDatabaseUtility.IsBiblioSubType(strDbType))
                 {
                     nRet = DeleteBiblioChildDatabase(channel,
     "", // strLibraryCodeList,
@@ -8411,16 +8424,26 @@ DO_SNAPSHOT:
     out strError);
                     if (nRet == -1)
                         return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        if (this.VerifyDatabaseDelete(
+                            channel,
+                            strDbType, 
+                            dbname, 
+                            out strError) == -1)
+                            return -1;
+                    } 
                     continue;
                 }
 
-                if (strDbType == "arrived"
+                if (/*strDbType == "arrived"
                     || strDbType == "amerce"
                     || strDbType == "invoice"
                     || strDbType == "pinyin"
                     || strDbType == "gcat"
                     || strDbType == "word"
-                    || strDbType == "message")
+                    || strDbType == "message"*/
+                    ServerDatabaseUtility.IsSingleDbType(strDbType))
                 {
                     // 删除一个单独类型的数据库。
                     // 也会自动修改 library.xml 的相关元素
@@ -8439,6 +8462,17 @@ DO_SNAPSHOT:
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        // test
+                        // strError = "test 验证发生错误";
+                        // return -1;
+                        if (this.VerifyDatabaseDelete(channel,
+                            strDbType,
+                            dbname,
+                            out strError) == -1)
+                            return -1;
+                    } 
                     continue;
                 }
 
@@ -8461,6 +8495,15 @@ DO_SNAPSHOT:
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(strDbType) == false, "");
+                        if (this.VerifyDatabaseDelete(channel,
+                            strDbType, 
+                            dbname,
+                            out strError) == -1)
+                            return -1;
+                    } 
                     continue;
                 }
 

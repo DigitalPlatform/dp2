@@ -2233,7 +2233,7 @@ strTestDbName,
                     {
                         errors.Add("上传对象 '" + strObjectPath + "' 时出错: " + strError);
                         return errors;
-                        continue;
+                        //continue;
                     }
 
                     // TODO: 要测试用多种不同尺寸的 chunksize 来下载
@@ -2253,7 +2253,7 @@ strTestDbName,
                     {
                         errors.Add("下载对象 '" + strObjectPath + "' 时出错:" + strError);
                         return errors;
-                        continue;
+                        //continue;
                     }
 
                     // 检查 metadata 中的 localfilepath 和 mime
@@ -2274,13 +2274,13 @@ strTestDbName,
                     {
                         errors.Add("比较针对 '" + strObjectPath + "' 上传和下载的两个文件时出错:" + strError);
                         return errors;
-                        continue;
+                        //continue;
                     }
                     if (nRet != 0)
                     {
                         errors.Add("比较针对 '" + strObjectPath + "' 上传和下载的两个文件时出错: 两个文件内容不一致: " + strError);
                         return errors;
-                        continue;
+                        //continue;
                     }
 
                     if (StringUtil.IsInList("delete", strStyle)
@@ -2643,6 +2643,8 @@ strTestDbName,
         {
             string strError = "";
             int nRet = 0;
+
+            // TODO: 对话框警告，测试过程可能会导致一些单个数据库无法改回原名，需要用 dp2manager 改名善后。不要在生产环境用这个测试功能。会创建一些测试用的操作日志并无法删除
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始进行日志和恢复的测试</div>");
@@ -3034,7 +3036,7 @@ out strError);
             if (strType == "*")
             {
                 strType = "arrived|amerce|message|pinyin|gcat|word|publisher|inventory|dictionary|zhongcihao"; // invoice 暂时没有支持
-                // strType = "zhongcihao"; // invoice 暂时没有支持
+                // strType = "publisher"; // invoice 暂时没有支持
             }
 
             List<string> types = StringUtil.SplitList(strType, "|");
@@ -3117,7 +3119,7 @@ out strError);
                 {
                     strOldDbName = results[0].Name;
 
-                    // TODO: 如果当前存在的此类型数据库正好和临时数据库重名，应认为是上次测试残留的结果，直接删除即可
+                    // 如果当前存在的此类型数据库正好和临时数据库重名，应认为是上次测试残留的结果，直接删除即可
                     if (strSingleDbName == strOldDbName
                         && String.IsNullOrEmpty(strSingleDbName) == false)
                     {
@@ -3134,9 +3136,10 @@ out strError);
             out strError);
                         if (lRet == -1)
                             goto ERROR1;
+                        strOldDbName = "";  // 旧数据库这时就不存在了
                     }
-
-                    strDetachOldDbName = "_saved_" + strOldDbName;
+                    else
+                        strDetachOldDbName = "_saved_" + strOldDbName;
                 }
             }
             else
@@ -3313,7 +3316,16 @@ out strError);
 
                 // 验证删除情况
                 {
+                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被删除");
 
+                    // 验证数据库操作的结果状态
+                    nRet = VerifyDatabaseState(this.Progress,
+                        channel,
+                        strSingleDbName + "#" + strType,
+                        "delete",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
                 }
 
             }
@@ -3325,7 +3337,7 @@ out strError);
                 {
                     Debug.Assert(string.IsNullOrEmpty(strDetachOldDbName) == false, "");
 
-                    DisplayTitle("测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "'");
+                    DisplayTitle("(测试结束。还原最初保存的数据库 '" + strDetachOldDbName + "' --> '" + strOldDbName + "')");
                     string strError1 = "";
                     // 修改一个简单库
                     // parameters:
@@ -3343,8 +3355,10 @@ out strError);
                 out strError1);
                     if (nRet == -1)
                     {
+                        string strText = "还原时出错: " + strError1;
+                        DisplayError(strText);
                         // 如何报错?
-                        this.Invoke((Action)(() => MessageBox.Show(this, strError1)));
+                        this.Invoke((Action)(() => MessageBox.Show(this, strText)));
                     }
                 }
             }
@@ -3392,6 +3406,7 @@ out strError);
             if (param.StartInfo == null)
                 param.StartInfo = new BatchTaskStartInfo();
             param.StartInfo.Start = lStartOffs.ToString() + "@" + strDate;
+            param.StartInfo.Param = "<root style='verify' />";  // 执行的时候自动进行校验
 
             BatchTaskInfo resultInfo = null;
 
@@ -3412,6 +3427,169 @@ out strError);
             return 0;
         }
 
+        static List<string> GetErrors(string strResult)
+        {
+            List<string> results = new List<string>();
+            List<string> lines = StringUtil.SplitList(strResult, "\r\n");
+            foreach (string line in lines)
+            {
+                if (line.IndexOf("{error}") != -1)
+                    results.Add(line);
+            }
+
+            return results;
+        }
+
+        // 获得后台任务执行过程中累积的出错信息
+        // return:
+        //      -1   出错
+        //      0   正常
+        static int GetBatchTaskErrorResult(Stop stop,
+            LibraryChannel channel,
+            string strTaskName,
+            out List<string> errors,
+            out string strError)
+        {
+            string strResult = "";
+            string strErrorInfo = "";
+            errors = new List<string>();
+
+            int nRet = GetBatchTaskResult(stop,
+            channel,
+            strTaskName,
+            out strResult,
+            out strErrorInfo,
+            out strError);
+            if (nRet == -1)
+                return -1;
+            errors = GetErrors(strResult);
+            if (string.IsNullOrEmpty(strErrorInfo) == false)
+                errors.Add(strErrorInfo);
+            return 0;
+        }
+
+        // 验证数据库操作的结果状态
+        // parameters:
+        //      strDatabaseNameList 数据库名列表。"预约到书#arrived,中文图书,#biblio"
+        int VerifyDatabaseState(Stop stop,
+            LibraryChannel channel,
+            string strDatabaseNameList,
+            string strFunction,
+            out string strError)
+        {
+            strError = "";
+
+            string strOutputInfo = "";
+            long lRet = channel.ManageDatabase(
+stop,
+"getinfo",
+strDatabaseNameList,    // strDatabaseNames,
+"",
+"verify:" + strFunction,
+out strOutputInfo,
+out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+        // 获得后台任务执行过程中累积的结果信息
+        // return:
+        //      -1   出错
+        //      0   批处理任务尚未完全结束
+        //      1   批处理任务已经结束
+        static int GetBatchTaskResult(Stop stop,
+            LibraryChannel channel,
+            string strTaskName,
+            out string strResult,
+            out string strErrorInfo,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+            strErrorInfo = "";
+
+            long currentResultOffs = 0;
+
+            Decoder resultTextDecoder = Encoding.UTF8.GetDecoder();
+
+            for (int i = 0; ; i++)
+            {
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
+                BatchTaskInfo param = new BatchTaskInfo();
+                BatchTaskInfo resultInfo = null;
+
+                // param.MaxResultBytes = 0;
+
+                param.MaxResultBytes = 4096;
+                if (i >= 5)  // 如果发现尚未来得及获取的内容太多，就及时扩大“窗口”尺寸
+                    param.MaxResultBytes = 100 * 1024;
+
+                param.ResultOffset = currentResultOffs;
+
+                stop.SetMessage("正在获取任务 '" + strTaskName + "' 的最新信息 (第 " + (i + 1).ToString() + " 批)...");
+
+                long lRet = channel.BatchTask(
+                    stop,
+                    strTaskName,
+                    "getinfo",
+                    param,
+                    out resultInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                strResult += GetResultText(resultTextDecoder, resultInfo.ResultText);
+
+                // 存储用于下次
+                currentResultOffs = resultInfo.ResultOffset;
+
+                // 如果本次并没有“触底”，需要立即循环获取新的信息。但是循环有一个最大次数，以应对服务器疯狂发生信息的情形。
+                if (resultInfo.ResultOffset >= resultInfo.ResultTotalLength)
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(resultInfo.ProgressText, ":");
+                    if (parts[0] == "批处理任务结束")
+                    {
+                        strErrorInfo = parts[1];
+                        return 1;
+                    }
+
+                    return 0;
+                }
+            }
+        }
+
+        static string GetResultText(Decoder decoder, byte[] baResult)
+        {
+            if (baResult == null)
+                return "";
+            if (baResult.Length == 0)
+                return "";
+
+            // Decoder ResultTextDecoder = Encoding.UTF8.GetDecoder;
+            char[] chars = new char[baResult.Length];
+
+            int nCharCount = decoder.GetChars(
+                baResult,
+                    0,
+                    baResult.Length,
+                    chars,
+                    0);
+            Debug.Assert(nCharCount <= baResult.Length, "");
+
+            return new string(chars, 0, nCharCount);
+        }
+
+        // 等待后台批处理任务结束
+        // parameters:
+        //      strErrorInfo    返回后台任务出错信息。后台任务启动阶段的报错会在这里出现，但执行阶段的报错不在这里
+        //      strError        返回本函数的出错信息
         static int WaitBatchTaskFinish(
             Stop stop,
             LibraryChannel channel,
@@ -3444,6 +3622,25 @@ out strError);
                 if (parts[0] == "批处理任务结束")
                 {
                     strErrorInfo = parts[1];
+                    {
+                        // 获得后台任务执行过程中累积的出错信息
+                        List<string> errors = null;
+                        // return:
+                        //      -1   出错
+                        //      0   正常
+                        int nRet = GetBatchTaskErrorResult(stop,
+                            channel,
+                            strTaskName,
+                            out errors,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (errors.Count > 0)
+                        {
+                            strError = StringUtil.MakePathList(errors, "\r\n");
+                            return -1;
+                        }
+                    }
                     return 1;
                 }
 

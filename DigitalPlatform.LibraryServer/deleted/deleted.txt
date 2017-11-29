@@ -4465,3 +4465,233 @@ out strError);
                 }
 
                 #endregion
+
+
+				~~~~~~~~~~~~~~
+
+				                #region 特殊名字
+
+
+                // 特殊名字
+                // TODO: 可以有个功能把特殊名字变换为普通名字，然后就可以执行后面的功能了
+                if (strName[0] == '#')
+                {
+                    if (strName == "#reader")
+                    {
+                        // 读者库
+                        for (int j = 0; j < this.ReaderDbs.Count; j++)
+                        {
+                            string strDbName = this.ReaderDbs[j].DbName;
+                            string strLibraryCode = this.ReaderDbs[j].LibraryCode;
+
+                            // 2012/9/9
+                            // 只允许当前用户看到自己管辖的读者库
+                            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                            {
+                                if (string.IsNullOrEmpty(strLibraryCode) == true
+                                    || StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                                    continue;
+                            }
+
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "reader");
+                            DomUtil.SetAttr(nodeDatabase, "name", strDbName);
+                            string strInCirculation = this.ReaderDbs[j].InCirculation == true ? "true" : "false";
+                            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
+
+                            DomUtil.SetAttr(nodeDatabase, "libraryCode", strLibraryCode);
+                        }
+                    }
+                    else if (strName == "#biblio")
+                    {
+                        // 实体库(书目库)
+                        for (int j = 0; j < this.ItemDbs.Count; j++)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            ItemDbCfg cfg = this.ItemDbs[j];
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "biblio");
+                            DomUtil.SetAttr(nodeDatabase, "name", cfg.BiblioDbName);
+                            DomUtil.SetAttr(nodeDatabase, "syntax", cfg.BiblioDbSyntax);
+                            DomUtil.SetAttr(nodeDatabase, "entityDbName", cfg.DbName);
+                            DomUtil.SetAttr(nodeDatabase, "orderDbName", cfg.OrderDbName);
+                            DomUtil.SetAttr(nodeDatabase, "issueDbName", cfg.IssueDbName);
+                            DomUtil.SetAttr(nodeDatabase, "commentDbName", cfg.CommentDbName);
+                            DomUtil.SetAttr(nodeDatabase, "unionCatalogStyle", cfg.UnionCatalogStyle);
+                            string strInCirculation = cfg.InCirculation == true ? "true" : "false";
+                            DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
+                            DomUtil.SetAttr(nodeDatabase, "role", cfg.Role);    // 2009/10/23
+                            DomUtil.SetAttr(nodeDatabase, "replication", cfg.Replication);    // 2009/10/23
+                            /*
+                            DomUtil.SetAttr(nodeDatabase, "biblioDbName", cfg.BiblioDbName);
+                            DomUtil.SetAttr(nodeDatabase, "itemDbName", cfg.DbName);
+                             * */
+                        }
+                    }
+                    else if (strName == "#arrived")
+                    {
+                        if (String.IsNullOrEmpty(this.ArrivedDbName) == true)
+                            continue;
+
+                        XmlNode nodeDatabase = dom.CreateElement("database");
+                        dom.DocumentElement.AppendChild(nodeDatabase);
+
+                        DomUtil.SetAttr(nodeDatabase, "type", "arrived");
+                        DomUtil.SetAttr(nodeDatabase, "name", this.ArrivedDbName);
+                    }
+                    else if (strName == "#amerce")
+                    {
+                        if (String.IsNullOrEmpty(this.AmerceDbName) == true)
+                            continue;
+
+                        XmlNode nodeDatabase = dom.CreateElement("database");
+                        dom.DocumentElement.AppendChild(nodeDatabase);
+
+                        DomUtil.SetAttr(nodeDatabase, "type", "amerce");
+                        DomUtil.SetAttr(nodeDatabase, "name", this.AmerceDbName);
+                    }
+                    else if (strName == "#invoice")
+                    {
+                        if (String.IsNullOrEmpty(this.InvoiceDbName) == true)
+                            continue;
+
+                        XmlNode nodeDatabase = dom.CreateElement("database");
+                        dom.DocumentElement.AppendChild(nodeDatabase);
+
+                        DomUtil.SetAttr(nodeDatabase, "type", "invoice");
+                        DomUtil.SetAttr(nodeDatabase, "name", this.InvoiceDbName);
+                    }
+                    else if (strName == "#message")
+                    {
+                        if (String.IsNullOrEmpty(this.MessageDbName) == true)
+                            continue;
+
+                        XmlNode nodeDatabase = dom.CreateElement("database");
+                        dom.DocumentElement.AppendChild(nodeDatabase);
+
+                        DomUtil.SetAttr(nodeDatabase, "type", "message");
+                        DomUtil.SetAttr(nodeDatabase, "name", this.MessageDbName);
+                    }
+                    else if (strName == "#pinyin"
+                        || strName == "#gcat"
+                        || strName == "#word")
+                    {
+                        string strDbName = "";
+                        if (strName == "#pinyin")
+                            strDbName = this.PinyinDbName;
+                        if (strName == "#gcat")
+                            strDbName = this.GcatDbName;
+                        if (strName == "#word")
+                            strDbName = this.WordDbName;
+
+                        if (String.IsNullOrEmpty(strDbName) == true)
+                            continue;
+
+                        XmlNode nodeDatabase = dom.CreateElement("database");
+                        dom.DocumentElement.AppendChild(nodeDatabase);
+
+                        DomUtil.SetAttr(nodeDatabase, "type", strName.Substring(1));
+                        DomUtil.SetAttr(nodeDatabase, "name", strDbName);
+                    }
+                    else if (strName == "#util"
+                        || strName == "#publisher"
+                        || strName == "#zhongcihao"
+                        || strName == "#dictionary"
+                        || strName == "#inventory")
+                    {
+                        string strType = "";
+                        if (strName != "#util")
+                            strType = strName.Substring(1);
+                        XmlNodeList nodes = null;
+                        if (string.IsNullOrEmpty(strType) == true)
+                            nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("utilDb/database");
+                        else
+                            nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("utilDb/database[@type='" + strType + "']");
+                        foreach (XmlNode node in nodes)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", DomUtil.GetAttr(node, "type"));
+                            DomUtil.SetAttr(nodeDatabase, "name", DomUtil.GetAttr(node, "name"));
+                        }
+                    }
+#if NO
+                    else if (strName == "#zhongcihao")
+                    {
+                        XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("utilDb/database[@type='zhongcihao']");
+                        for (int j = 0; j < nodes.Count; j++)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "zhongcihao");
+                            string strTemp = DomUtil.GetAttr(nodes[j], "name");
+                            DomUtil.SetAttr(nodeDatabase, "name", strTemp);
+                        }
+                    }
+#endif
+                    else if (strName == "#_accessLog")
+                    {
+                        // 2015/11/26
+                        if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
+                            && this.AccessLogDatabase != null)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "_accessLog");
+                            DomUtil.SetAttr(nodeDatabase, "name", AccessLogDbName);
+                        }
+                    }
+                    else if (strName == "#_hitcount")
+                    {
+                        // 2015/11/26
+                        if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
+                            && this.AccessLogDatabase != null)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "_hitcount");
+                            DomUtil.SetAttr(nodeDatabase, "name", HitCountDbName);
+                        }
+                    }
+                    else if (strName == "#_chargingOper")
+                    {
+                        // 2016/1/10
+                        if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
+                            && this.ChargingOperDatabase != null)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "_chargingOper");
+                            DomUtil.SetAttr(nodeDatabase, "name", ChargingHistoryDbName);
+                        }
+                    }
+                    else if (strName == "#_biblioSummary")
+                    {
+                        // 2016/8/30
+                        if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
+                            && this.SummaryCollection != null)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "_biblioSummary");
+                            DomUtil.SetAttr(nodeDatabase, "name", BiblioSummaryDbName);
+                        }
+                    }
+                    else
+                    {
+                        strError = "不可识别的数据库名 '" + strName + "'";
+                        return 0;
+                    }
+                    continue;
+                }
+                #endregion

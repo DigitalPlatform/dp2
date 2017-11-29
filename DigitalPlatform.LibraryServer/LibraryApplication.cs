@@ -549,11 +549,16 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // TODO: 是否需要锁定?
+        // TODO: 同时要在错误日志里面写入一笔，以便系统管理员了解情况
         public void AddHangup(string strText)
         {
             if (ContainsHangup(strText) == true)
                 return;
             this.HangupList.Add(strText);
+
+            // 2017/11/29
+            if (strText != "Exit")
+                this.WriteErrorLog("*** 当前系统已经被挂起 " + strText);
         }
 
         public bool ContainsHangup(string strText)
@@ -1404,8 +1409,8 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                        app.AddHangup("ERR002");
                         app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
+                        app.AddHangup("ERR002");
                     }
 
 #if LOG_INFO
@@ -1868,8 +1873,8 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 // 通知系统挂起
                                 // this.HangupReason = HangupReason.Expire;
-                                app.AddHangup("Expire");
                                 this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                                app.AddHangup("Expire");
                             }
                         }
                     }
@@ -1920,8 +1925,8 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                app.AddHangup("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
+                app.AddHangup("StartingError");
             }
             return -1;
         }
@@ -2410,9 +2415,9 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    this.AddHangup("MessageQueueCreateFail");
                     this.WriteErrorLog("*** 探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 时出现异常: " + ExceptionUtil.GetDebugText(ex)
                         + " 系统已被挂起。");
+                    this.AddHangup("MessageQueueCreateFail");
                 }
             }
         }
@@ -3835,9 +3840,9 @@ namespace DigitalPlatform.LibraryServer
             this.EndWather();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
-            this.AddHangup("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
+            this.AddHangup("Exit");
 
             DateTime start = DateTime.Now;
             try

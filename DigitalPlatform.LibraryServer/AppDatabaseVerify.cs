@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -17,6 +18,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   验证发现不正确
         //      1   验证发现正确
         public int VerifyDatabaseDelete(
+            RmsChannel channel,
     string strDbType,
     string strDbName,
     out string strError)
@@ -65,6 +67,31 @@ namespace DigitalPlatform.LibraryServer
             if (ServerDatabaseUtility.IsBiblioSubType(strDbType) == true)
             {
                 // TODO: 在内存结构里面验证
+            }
+
+            // 验证 dp2kernel 一端数据库是否被删除
+            if (channel != null)
+            {
+                // 数据库是否已经存在？
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strDbName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "验证物理数据库 '" + strDbName + "' 在 dp2kernel 一端是否成功删除时发生错误: " + strError;
+                    return -1;
+                }
+                if (nRet >= 1)
+                {
+                    strError = "物理数据库 '" + strDbName + "' 在 dp2kernel 一端未被删除: " + strError;
+                    return -1;
+                }
             }
 
             return 1;

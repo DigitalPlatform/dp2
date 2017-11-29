@@ -247,9 +247,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 通知系统挂起
                     //this.App.HangupReason = HangupReason.OperLogError;
-                    this.App.AddHangup("OperLogError");
 
                     this.App.WriteErrorLog("系统启动时，试图将备用日志文件中的信息写入当日日志文件，以使系统恢复正常，但是这一努力失败了。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
+                    this.App.AddHangup("OperLogError");
 
                     this.m_stream.SetLength(lSaveLength);
                 }
@@ -3802,9 +3802,9 @@ out strTargetLibraryCode);
 
                     // 通知系统挂起
                     //this.App.HangupReason = HangupReason.OperLogError;
-                    this.App.AddHangup("OperLogError");
 
                     this.App.WriteErrorLog("系统启动时，试图合并临时日志文件，但是这一努力失败了 [" + strError + "]。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
+                    this.App.AddHangup("OperLogError");
                     return -1;
                 }
             }
