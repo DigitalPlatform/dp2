@@ -62,7 +62,7 @@ namespace DigitalPlatform.LibraryServer.Common
                 string dbname = GetSingleDbName(cfg_dom, strDbType);
                 if (string.IsNullOrEmpty(dbname) == false)
                 {
-                    strError = "删除完成后，"+strDbTypeCaption+"库名 '" + strDbName + "' 在 library.xml 的 相应元素内没有清理干净";
+                    strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 相应元素内没有清理干净";
                     return 0;
                 }
             }
@@ -70,7 +70,7 @@ namespace DigitalPlatform.LibraryServer.Common
             // 书目库
             if (strDbType == "biblio")
             {
-                if (IsBiblioDbName(cfg_dom,  strDbName) == false)
+                if (IsBiblioDbName(cfg_dom, strDbName) == true)
                 {
                     strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 itemdbgroup/database 元素内没有清理干净";
                     return 0;
@@ -80,9 +80,103 @@ namespace DigitalPlatform.LibraryServer.Common
             // 单个书目库下属库
             if (IsBiblioSubType(strDbType) == true)
             {
-                if (IsBiblioSubDbName(cfg_dom, strDbType, strDbName) == false)
+                if (IsBiblioSubDbName(cfg_dom, strDbType, strDbName) == true)
                 {
                     strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 itemdbgroup/database 元素内没有清理干净";
+                    return 0;
+                }
+            }
+
+            if (strDbType == "reader")
+            {
+                if (IsReaderDbName(cfg_dom, strDbName) == true)
+                {
+                    strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 readerdbgroup/database 元素内没有清理干净";
+                    return 0;
+                }
+            }
+            return 1;
+        }
+
+        // 验证 library.xml 在数据库创建操作以后，相关元素信息是否正确
+        // parameters:
+        //      cfg_dom 装入了 library.xml 的 XmlDocument 对象
+        //      strDbName   被创建的数据库名
+        // return:
+        //      -1  验证过程出现错误(也就是说验证过程没有来的及完成)
+        //      0   验证发现不正确
+        //      1   验证发现正确
+        public static int VerifyDatabaseCreate(XmlDocument cfg_dom,
+            string strDbType,
+            string strDbName,
+            out string strError)
+        {
+            strError = "";
+
+            if (cfg_dom == null)
+            {
+                strError = "cfg_dom == null";
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strDbType) == true)
+            {
+                strError = "strDbType 参数值不应为空";
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName 参数值不应为空";
+                return -1;
+            }
+
+            // 实用库
+            if (IsUtilDbType(strDbType))
+            {
+                if (IsUtilDbName(cfg_dom, strDbName) == false)
+                {
+                    strError = "创建完成后，实用库名 '" + strDbName + "' 在 library.xml 的 utilDb 元素内没有设置";
+                    return 0;
+                }
+                // TODO: 检查 utilDb/database/@name 的重复情况
+                return 1;
+            }
+
+            string strDbTypeCaption = GetTypeCaption(strDbType);
+
+            // 单个数据库
+            if (IsSingleDbType(strDbType))
+            {
+                string dbname = GetSingleDbName(cfg_dom, strDbType);
+                if (string.IsNullOrEmpty(dbname) == true)
+                {
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 相应元素内没有设置";
+                    return 0;
+                }
+
+                if (dbname != strDbName)
+                {
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 相应元素内设置的值 '" + dbname + "' 和期望值 '" + strDbName + "' 不符合";
+                    return 0;
+                }
+            }
+
+            // 书目库
+            if (strDbType == "biblio")
+            {
+                if (IsBiblioDbName(cfg_dom, strDbName) == false)
+                {
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 itemdbgroup/database 元素内没有设置";
+                    return 0;
+                }
+            }
+
+            // 单个书目库下属库
+            if (IsBiblioSubType(strDbType) == true)
+            {
+                if (IsBiblioSubDbName(cfg_dom, strDbType, strDbName) == false)
+                {
+                    strError = "创建完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 itemdbgroup/database 元素内没有设置";
                     return 0;
                 }
             }
@@ -127,16 +221,35 @@ namespace DigitalPlatform.LibraryServer.Common
                     return "字典";
                 case "inventory":
                     return "盘点";
+                case "reader":
+                    return "读者";
                 default:
                     throw new ArgumentException("未知的 strDbType 值 '" + strDbType + "'", "strDbType");
             }
         }
 
+        #region 读者库
+        // 是否在配置的读者库名之列?
+        // 注：参与和不参与流通的读者库都算在列
+        // 注：未考虑读者库名字的其他语种情况
+        public static bool IsReaderDbName(XmlDocument LibraryCfgDom, 
+            string strReaderDbName)
+        {
+            if (string.IsNullOrEmpty(strReaderDbName) == true)
+                return false;
+            XmlNode node = LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strReaderDbName + "']");
+            if (node != null)
+                return true;
+            return false;
+        }
+
+        #endregion
+
         #region 书目库
 
         // 是否为书目库名?
         // 注： 未考虑书目库名字的其他语种情况
-        public static bool IsBiblioDbName(XmlDocument LibraryCfgDom, 
+        public static bool IsBiblioDbName(XmlDocument LibraryCfgDom,
             string strBiblioDbName)
         {
             XmlNode node = LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
@@ -224,7 +337,7 @@ namespace DigitalPlatform.LibraryServer.Common
 
         // 是否为特定类型的实用库名
         public static bool IsUtilDbName(XmlDocument LibraryCfgDom,
-            string strUtilDbName, 
+            string strUtilDbName,
             string strType)
         {
             XmlNode node = LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='" + strType + "']");

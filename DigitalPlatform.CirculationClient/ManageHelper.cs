@@ -21,11 +21,14 @@ namespace DigitalPlatform.CirculationClient
         //      strUsage    book/series
         //      strRole     orderWork/orderRecommendStore/biblioSource/catalogWork/catalogTarget
         //      strSyntax   unimarc/usmarc
+        //      strSubTypeList  要创建的下级数据库的类型列表。* 代表 entity,order,issue,comment
+        //                      注意当 strSyntax 为 "series" 时，issue 下级库是必须创建的。而当 strSyntax 为 "book" 时，虽然要求创建 issue 也会被忽略
         static XmlNode CreateBiblioDatabaseNode(XmlDocument dom,
             string strDatabaseName,
             string strUsage,
             string strRole,
             string strSyntax,
+            string strSubTypeList,
             bool bInCirculation)
         {
             XmlNode nodeDatabase = dom.CreateElement("database");
@@ -54,11 +57,19 @@ namespace DigitalPlatform.CirculationClient
 
             DomUtil.SetAttr(nodeDatabase, "name", strDatabaseName);
 
-            DomUtil.SetAttr(nodeDatabase, "entityDbName", strDatabaseName + "实体");
-            DomUtil.SetAttr(nodeDatabase, "orderDbName", strDatabaseName + "订购");
+            if (StringUtil.IsInList("entity", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "entityDbName", strDatabaseName + "实体");
+
+            if (StringUtil.IsInList("order", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "orderDbName", strDatabaseName + "订购");
+
             if (strUsage == "series")
+            {
                 DomUtil.SetAttr(nodeDatabase, "issueDbName", strDatabaseName + "期");
-            DomUtil.SetAttr(nodeDatabase, "commentDbName", strDatabaseName + "评注");
+            }
+
+            if (StringUtil.IsInList("comment", strSubTypeList))
+                DomUtil.SetAttr(nodeDatabase, "commentDbName", strDatabaseName + "评注");
 
             return nodeDatabase;
         }
@@ -165,6 +176,7 @@ namespace DigitalPlatform.CirculationClient
                     "book",
                     "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
                     "unimarc",
+                    "*",
                     true);
                 biblio_dbnames.Add("中文图书");
                 biblio_aliases.Add("cbook");
@@ -174,6 +186,7 @@ namespace DigitalPlatform.CirculationClient
     "series",
     "",
     "unimarc",
+    "*",
     true);
                 biblio_dbnames.Add("中文期刊");
                 biblio_aliases.Add("cseries");
@@ -183,6 +196,7 @@ namespace DigitalPlatform.CirculationClient
     "book",
     "",
     "usmarc",
+        "*",
     true);
                 biblio_dbnames.Add("西文图书");
                 biblio_aliases.Add("ebook");
@@ -192,6 +206,7 @@ namespace DigitalPlatform.CirculationClient
     "series",
     "",
     "usmarc",
+    "*",
     true);
                 biblio_dbnames.Add("西文期刊");
                 biblio_aliases.Add("eseries");
@@ -324,6 +339,7 @@ namespace DigitalPlatform.CirculationClient
             string strBiblioDbName,
             string strUsage,
             string strSyntax,
+                        string strSubTypeList,
             string strStyle,
             out string strError)
         {
@@ -346,6 +362,7 @@ namespace DigitalPlatform.CirculationClient
                     strUsage,   // "book",
                     "", // "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
                     strSyntax,  // "unimarc",
+                    strSubTypeList,
                     true);
                 biblio_dbnames.Add(strBiblioDbName);
                 // biblio_aliases.Add("cbook");
@@ -391,6 +408,59 @@ namespace DigitalPlatform.CirculationClient
             {
                 channel.Timeout = old_timeout;
             }
+        }
+
+        // 创建一个读者库
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+        //      1   成功创建
+        public static int CreateReaderDatabase(LibraryChannel channel,
+            Stop Stop,
+            string strDbName,
+            string strLibraryCode,
+            bool bInCirculation,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+
+            // 创建库的定义
+            XmlDocument database_dom = new XmlDocument();
+            database_dom.LoadXml("<root />");
+
+            {
+                // 创建读者库
+                CreateReaderDatabaseNode(database_dom,
+                    strDbName,
+                    strLibraryCode,
+                    bInCirculation);
+            }
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 10, 0);
+            try
+            {
+                string strOutputInfo = "";
+                long lRet = channel.ManageDatabase(
+                    Stop,
+                    "create",
+                    "",
+                    database_dom.OuterXml,
+                    strStyle,
+                    out strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+
         }
 
         // 创建一个简单库

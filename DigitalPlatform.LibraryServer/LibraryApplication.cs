@@ -576,6 +576,8 @@ namespace DigitalPlatform.LibraryServer
                     i--;
                 }
             }
+
+            this.WriteErrorLog("*** 系统已解除 " + strText + " 挂起状态");
         }
 
         public int LoadCfg(
@@ -1862,7 +1864,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 12, 1); // 上一个版本是 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2018, 1, 15); // 上一个版本是 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)
@@ -2336,7 +2338,7 @@ namespace DigitalPlatform.LibraryServer
                 if (this.ContainsHangup("MessageQueueCreateFail") == true)
                 {
                     this.ClearHangup("MessageQueueCreateFail");
-                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                    //this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
                 }
                 return;
             }
@@ -2403,7 +2405,7 @@ namespace DigitalPlatform.LibraryServer
                 if (this.ContainsHangup("MessageQueueCreateFail") == true)
                 {
                     this.ClearHangup("MessageQueueCreateFail");
-                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                    //this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
                 }
             }
             catch (Exception ex)
@@ -3727,7 +3729,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (this.LibraryCfgDom == null)
                         this.LibraryCfgDom = new XmlDocument();
-                    this.LibraryCfgDom.Load(strFileName);   
+                    this.LibraryCfgDom.Load(strFileName);
                 }
 
                 if (this.watcher != null)

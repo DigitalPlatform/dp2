@@ -273,7 +273,7 @@ namespace DigitalPlatform.LibraryServer
 
                     string strFileName = fis[i].Name;
 
-                    this.AppendResultText("检查文件 " + strFileName + "\r\n");
+                    // this.AppendResultText("检查文件 " + strFileName + "\r\n");
 
                     if (bStart == false)
                     {
@@ -313,6 +313,14 @@ namespace DigitalPlatform.LibraryServer
                 this.ErrorInfo = strError;
                 return;
             }
+            catch (Exception ex)
+            {
+                // 2017/11/30
+                string strError = "*** 日志恢复任务出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.AppendErrorText(strError);
+                this.App.WriteErrorLog(strError);
+                this.ErrorInfo = strError;
+            }
             finally
             {
                 // this.App.HangupReason = HangupReason.None;
@@ -321,7 +329,7 @@ namespace DigitalPlatform.LibraryServer
                 string strFinish = "批处理任务结束";
                 if (string.IsNullOrEmpty(this.ErrorInfo) == false)
                     strFinish += ":" + this.ErrorInfo;
-                SetProgressText(strFinish); 
+                SetProgressText(strFinish);
             }
         }
 

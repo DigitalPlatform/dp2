@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #if REPORT_SN    // 定义 REPORT_SN 会启用报表窗的序列号
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -58,7 +60,7 @@ namespace dp2Circulation
 
             this.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "ui_state", "");
 
-#if NO
+/*
             string strError = "";
             int nRet = Program.MainForm.VerifySerialCode("report", out strError);
             if (nRet == -1)
@@ -67,7 +69,7 @@ namespace dp2Circulation
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
                 return;
             }
-#endif
+*/
 
             DelayCheck();
         }
@@ -9822,12 +9824,14 @@ Stack:
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
                 return;
             }
+#endif
 #endif
 
             string strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
@@ -10254,12 +10258,14 @@ this.button_start_dailyReport.Enabled = true
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
                 return;
             }
+#endif
 #endif
 
             bool bFirst = false;    // 是否为第一次做
@@ -10619,12 +10625,14 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "创建报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             int nDoneCount = 0;
@@ -12957,12 +12965,14 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
@@ -13154,12 +13164,14 @@ MessageBoxDefaultButton.Button1);
 
             int nRet = 0;
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             FtpUploadDialog dlg = new FtpUploadDialog();
