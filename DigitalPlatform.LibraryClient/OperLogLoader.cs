@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
 
-using DigitalPlatform;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryClient
 {
+    /// <summary>
+    /// 根据日期列表获得日志记录的枚举器
+    /// </summary>
     public class OperLogLoader : IEnumerable
     {
         /// <summary>
@@ -1029,6 +1028,7 @@ namespace DigitalPlatform.LibraryClient
             return 0;
         }
 
+        // 根据 OperLogItem 对象获得相关的附件文件
         // return:
         //      -1  出错
         //      0   没有找到日志记录

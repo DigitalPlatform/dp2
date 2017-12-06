@@ -3564,7 +3564,7 @@ out strError);
                         strFileName,
                         lIndex,
                         lHint,
-                "", // strStyle,
+                "dont_return_xml", // strStyle,
                 "", // strFilter,
                 out strXml,
                 out lHintNext,

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,6 +7,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Xml;
+using System.Collections;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -17,12 +17,9 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-using System.Xml;
 using DigitalPlatform.Xml;
-using System.Collections;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Web;
 
 namespace dp2Circulation
 {
@@ -481,7 +478,7 @@ UiTest3(strBiblioDbName)
 
         // 多个窗口并发创建索取号，然后再统一保存
         void UiTest3(string strBiblioDbName//,
-            //string strStyle
+                                           //string strStyle
             )
         {
             string strError = "";
@@ -868,7 +865,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             this.ShowMessage(strError, "red", true);
         }
 
-        static string[] copy_faces = new string[] { 
+        static string[] copy_faces = new string[] {
             "reserve_source",
             "reserve_target",
             "create_objects",
@@ -934,7 +931,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             return styles1;
         }
 
-        static string[] move_faces = new string[] { 
+        static string[] move_faces = new string[] {
             "reserve_source",
             "reserve_target",
             "create_objects",
@@ -1722,7 +1719,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             string strTitle,
             string strStyle)
         {
-            string strError = "";
+            // string strError = "";
 
             EntityForm entity_form = new EntityForm();
             try
@@ -2795,7 +2792,7 @@ out strError);
             string[] subtypes = new string[] { "*", "",
                 "entity",
                 "entity|order",
-                "entity|order|issue", 
+                "entity|order|issue",
                 "entity|order|issue|comment",
                 "order",
                 "order|issue",
@@ -3044,7 +3041,7 @@ out strError);
                 }
 
                 long lStartOffs = lRet; // 日志起点偏移
-
+                string strRequestXml = "";
                 {
 
 
@@ -3066,6 +3063,7 @@ out strError);
                             strSyntax,  // "unimarc",
                                 strSubType.Replace("|", ","),
                             "verify",
+                            out strRequestXml,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3079,6 +3077,7 @@ out strError);
             "_测试分馆", // strLibraryCode,
             true, // bInCirculation,
             "verify",
+            out strRequestXml,
             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3092,6 +3091,7 @@ out strError);
         strSingleDbName,
         strType,
         "verify",
+        out strRequestXml,
         out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3099,6 +3099,38 @@ out strError);
 
                     // 重新获得各种库名、列表
                     ReloadDatabaseCfg();
+                }
+
+                // TODO: 此处即可进行一次验证
+                {
+                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
+
+                    // 验证数据库操作的结果状态
+                    nRet = VerifyDatabaseState(this.Progress,
+                        channel,
+                        strSingleDbName + "#" + strType,
+                        "create",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // TODO: 要验证数据库创建后在 library.xml 中的参数是否完全正确；验证数据库 dp2kernel 的全部配置文件内容和数量是否和操作日志中完全吻合
+
+                    // 比较创建数据库的操作日志，和当前 dp2library 一端的实际数据库和配置文件状态是否符合
+                    // return:
+                    //      -1  出错
+                    //      0   比较发现完全一致
+                    //      1   比较中发现(至少一处)不一致
+                    nRet = CompareLogOfCreatingDatabase(
+                        this.Progress,
+                        channel,
+                        strDate,
+                        lStartOffs,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        goto ERROR1;
                 }
 
                 // *** 恢复测试
@@ -3134,7 +3166,7 @@ out strError);
 
                 // 验证恢复情况
                 {
-                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被删除");
+                    DisplayTitle("验证数据库 '" + strSingleDbName + "' 是否确实被成功创建了");
 
                     // 验证数据库操作的结果状态
                     nRet = VerifyDatabaseState(this.Progress,
@@ -3146,6 +3178,22 @@ out strError);
                         goto ERROR1;
 
                     // TODO: 要验证数据库创建后在 library.xml 中的参数是否完全正确；验证数据库 dp2kernel 的全部配置文件内容和数量是否和操作日志中完全吻合
+
+                    // 比较创建数据库的操作日志，和当前 dp2library 一端的实际数据库和配置文件状态是否符合
+                    // return:
+                    //      -1  出错
+                    //      0   比较发现完全一致
+                    //      1   比较中发现(至少一处)不一致
+                    nRet = CompareLogOfCreatingDatabase(
+                        this.Progress,
+                        channel,
+                        strDate,
+                        lStartOffs,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        goto ERROR1;
                 }
 
                 // 清除残留信息
@@ -3206,6 +3254,159 @@ out strError);
             return -1;
         }
 
+        // 比较删除数据库的操作日志，和当前 dp2library 一端的实际数据库和配置文件状态是否符合
+        // return:
+        //      -1  出错
+        //      0   比较发现完全一致
+        //      1   比较中发现(至少一处)不一致
+        int CompareLogOfDeletingDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strDate,
+            long lOffset,
+            out string strError)
+        {
+            strError = "";
+
+            string strTempDir = Path.Combine(Program.MainForm.UserTempDir, "~comp_db");
+            PathUtil.CreateDirIfNeed(strTempDir);
+
+            string strAttachmentFileName = Program.MainForm.GetTempFileName("comp");
+
+            try
+            {
+
+                string strXml = "";
+                // 获得指定位置的一条操作日志
+
+                // return:
+                //      -2  日志记录不存在
+                //      -1  出错
+                //      >=0 附件文件的长度
+                long lRet = ManageHelper.GetOneOperLog(
+                    channel,
+                    stop,
+                    strDate,
+                    lOffset,
+                    strAttachmentFileName,
+                    out strXml,
+                    out strError);
+                if (lRet == -1 || lRet == -2)
+                    return -1;
+                if (lRet == 0)
+                {
+                    strError = "日志文件 '" + strDate + "' 偏移 '" + lOffset + "' 的日志记录中没有附件部分";
+                    return -1;
+                }
+
+                // 根据 .zip 定义文件，比较当前数据库状态
+                // return:
+                //      -1  出错
+                //      0   比较发现完全一致
+                //      1   比较中发现(至少一处)不一致
+                return ManageHelper.CompareDefinition(
+         stop,
+         channel,
+         strAttachmentFileName,
+         strTempDir,
+         "deleting",
+         out strError);
+            }
+            finally
+            {
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                {
+                    PathUtil.RemoveReadOnlyAttr(strTempDir);    // 避免 .zip 文件中有有只读文件妨碍删除
+                    PathUtil.DeleteDirectory(strTempDir);
+                }
+
+                File.Delete(strAttachmentFileName);
+            }
+        }
+
+        // 比较创建数据库的操作日志，和当前 dp2library 一端的实际数据库和配置文件状态是否符合
+        // return:
+        //      -1  出错
+        //      0   比较发现完全一致
+        //      1   比较中发现(至少一处)不一致
+        int CompareLogOfCreatingDatabase(
+            Stop stop,
+            LibraryChannel channel,
+            string strDate,
+            long lOffset,
+            out string strError)
+        {
+            strError = "";
+
+            string strTempDir = Path.Combine(Program.MainForm.UserTempDir, "~comp_db");
+            PathUtil.CreateDirIfNeed(strTempDir);
+
+            string strAttachmentFileName = Program.MainForm.GetTempFileName("comp");
+
+            try
+            {
+
+                string strXml = "";
+                // 获得指定位置的一条操作日志
+
+                // return:
+                //      -2  日志记录不存在
+                //      -1  出错
+                //      >=0 附件文件的长度
+                long lRet = ManageHelper.GetOneOperLog(
+                    channel,
+                    stop,
+                    strDate,
+                    lOffset,
+                    strAttachmentFileName,
+                    out strXml,
+                    out strError);
+                if (lRet == -1 || lRet == -2)
+                    return -1;
+
+                List<string> dbnames = null;
+                // 根据日志记录 XML，比较当前数据库状态
+                // parameters:
+                //      strFunction creating/deleting 之一
+                //      dbnames 顺便从日志 XML 中提取数据库名返回。注意，当函数返回值不是 0 时，列表中内容可能不全
+                // return:
+                //      -1  出错
+                //      0   比较发现完全一致
+                //      1   比较中发现(至少一处)不一致
+                int nRet = ManageHelper.CompareOperLog(stop,
+             channel,
+             strXml,
+             "creating",
+             out dbnames,
+             out strError);
+                if (nRet != 0)
+                    return -1;
+
+                // 根据 .zip 定义文件，比较当前数据库状态
+                // return:
+                //      -1  出错
+                //      0   比较发现完全一致
+                //      1   比较中发现(至少一处)不一致
+                return ManageHelper.CompareDefinition(
+         stop,
+         channel,
+         strAttachmentFileName,
+         strTempDir,
+         "creating",
+         out strError);
+            }
+            finally
+            {
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                {
+                    PathUtil.RemoveReadOnlyAttr(strTempDir);    // 避免 .zip 文件中有有只读文件妨碍删除
+                    PathUtil.DeleteDirectory(strTempDir);
+                }
+
+                File.Delete(strAttachmentFileName);
+            }
+        }
+
         // 测试恢复删除 书目数据库
         // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
         int TestRecoverDeletingBiblioDatabase(
@@ -3252,7 +3453,7 @@ out strError);
                     strBiblioDbName,
                     "book",
                     "unimarc",
-                        "*",
+                    "*",
                     "skipOperLog",
                     out strError);
                 if (nRet == -1)
@@ -3355,7 +3556,31 @@ out strError);
 
             // 验证删除情况
             {
+                DisplayTitle("验证数据库 '" + strBiblioDbName + "' 是否确实被删除");
 
+                // 验证数据库操作的结果状态
+                nRet = VerifyDatabaseState(this.Progress,
+                    channel,
+                    strBiblioDbName + "#" + "biblio",
+                    "delete",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // return:
+                //      -1  出错
+                //      0   比较发现完全一致
+                //      1   比较中发现(至少一处)不一致
+                nRet = CompareLogOfDeletingDatabase(
+                    this.Progress,
+                    channel,
+                    strDate,
+                    lStartOffs,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                    goto ERROR1;
             }
 
             return 0;
@@ -3373,7 +3598,7 @@ out strError);
         {
             strError = "";
             int nRet = 0;
-            long lRet = 0;
+            //long lRet = 0;
 
             string strType = StringUtil.GetParameterByPrefix(strStyle, "type", ":");
             if (string.IsNullOrEmpty(strType) == true)
@@ -3679,6 +3904,21 @@ out strError);
                         "delete",
                         out strError);
                     if (nRet == -1)
+                        goto ERROR1;
+
+                    // return:
+                    //      -1  出错
+                    //      0   比较发现完全一致
+                    //      1   比较中发现(至少一处)不一致
+                    nRet = CompareLogOfDeletingDatabase(
+                        this.Progress,
+                        channel,
+                        strDate,
+                        lStartOffs,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
                         goto ERROR1;
                 }
 
@@ -4000,8 +4240,6 @@ out strError);
 
                 Thread.Sleep(1000);
             }
-
-            return 0;
         }
 
         #endregion

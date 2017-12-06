@@ -2398,6 +2398,7 @@ out strTargetLibraryCode);
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
         //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
+        //                  如果包含 dont_return_xml 表示在 strXml 不返回内容
         // return:
         //      -1  error
         //      0   file not found
@@ -2629,6 +2630,10 @@ out strTargetLibraryCode);
 
                 // END1:
                 lHintNext = cache_item.Stream.Position;
+
+                // 2017/12/5
+                if (StringUtil.IsInList("dont_return_xml", strStyle) == true)
+                    strXml = "";
                 return 1;
             }
             finally

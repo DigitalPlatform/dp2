@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
@@ -12,7 +11,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Globalization;
 using System.ServiceModel.Channels;
-using System.Net;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
@@ -5928,9 +5926,9 @@ namespace dp2Library
                     //      1   命中1条
                     //      >1  命中多于1条
                     nRet = app.GetItemRecXml(
-                        // sessioninfo.Channels,
+                            // sessioninfo.Channels,
                             channel,
-                        // strDbType == "item" ? strRefID : "@refid:" + strRefID,
+                            // strDbType == "item" ? strRefID : "@refid:" + strRefID,
                             strRefID,
                             "withresmetadata",
                             out strXml,
@@ -5952,7 +5950,7 @@ namespace dp2Library
                         goto ERROR1;
 
                     nRet = itemDatabase.GetItemRecXml(
-                        // sessioninfo.Channels,
+                            // sessioninfo.Channels,
                             channel,
                             locateParam,
                             "withresmetadata",
@@ -8363,6 +8361,7 @@ namespace dp2Library
         //                  level-1   删除 读者记录和册记录
         //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
         //                  getcount    表示希望获得指定日志文件中的记录总数。返回在 lHintNext 参数中
+        //                  如果包含 dont_return_xml 表示在 strXml 不返回内容
         // 权限：需要getoperlog权限
         // return:
         // result.Value
@@ -8465,7 +8464,11 @@ namespace dp2Library
                     if (nRet == 1)
                     {
                         OperLogInfo info = records[0];
-                        strXml = info.Xml;
+                        // 2017/12/5
+                        if (StringUtil.IsInList("dont_return_xml", strStyle) == true)
+                            strXml = "";
+                        else
+                            strXml = info.Xml;
                         lAttachmentTotalLength = info.AttachmentLength;
                         lHintNext = info.HintNext;
                     }
@@ -11998,7 +12001,10 @@ Stack:
                 sessioninfo.LibraryCodeList) == false)
                         {
                             strError = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
-                            goto ERROR1;
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
                         }
                     }
                     else if (app.AmerceDbName == strDbName)
@@ -13324,7 +13330,7 @@ out strError);
                 try
                 {
                     return app.CommentItemDatabase.SearchItemDup(
-                        // sessioninfo.Channels,
+                    // sessioninfo.Channels,
                     channel,
                     locateParam,
                     nMax,

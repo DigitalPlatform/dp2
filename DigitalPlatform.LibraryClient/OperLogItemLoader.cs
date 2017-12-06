@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-// using System.Windows.Forms;
 using System.Collections;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
 
-using DigitalPlatform;
-using DigitalPlatform.Text;
-//using DigitalPlatform.Xml;
-//using DigitalPlatform.IO;
 using DigitalPlatform.Range;
-// using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryClient
@@ -849,15 +840,14 @@ FileShare.ReadWrite);
                         if (lHintNext >= 0)
                         {
                             // 校正
-                            if (lProgressValue + lHintNext > lSize)
+                            if (lProgressValue + lHintNext >= lSize)    // > 2017/12/4 修改为 >=
                             {
                                 lSize = lProgressValue + lHintNext;
 
-                                if (this.Stop != null && this.Estimate != null)
-                                {
+                                if (this.Stop != null)
                                     this.Stop.SetProgressRange(0, lSize);
+                                if (this.Estimate != null)
                                     Estimate.SetRange(0, lSize);
-                                }
                             }
 
                             this.Stop.SetProgressValue(lProgressValue + lHintNext);
@@ -874,11 +864,13 @@ FileShare.ReadWrite);
                         }
 
                         {
-                            OperLogItem item = new OperLogItem();
-                            item.Xml = strXml;
-                            item.Index = lIndex;
-                            item.Date = this.Date.Substring(0, 8);
-                            item.AttachmentLength = lAttachmentTotalLength;
+                            OperLogItem item = new OperLogItem
+                            {
+                                Xml = strXml,
+                                Index = lIndex,
+                                Date = this.Date.Substring(0, 8),
+                                AttachmentLength = lAttachmentTotalLength
+                            };
                             yield return item;
                         }
 

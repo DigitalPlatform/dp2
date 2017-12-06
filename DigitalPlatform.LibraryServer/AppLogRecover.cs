@@ -8394,6 +8394,7 @@ DO_SNAPSHOT:
                         channel,
                         "",
                         dbname,
+                        "",
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)

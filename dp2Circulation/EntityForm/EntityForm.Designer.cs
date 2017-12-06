@@ -113,6 +113,8 @@ namespace dp2Circulation
             this.ToolStripMenuItem_insertCoverImageFromClipboard = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_insertCoverImageFromCamera = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_itemAndIssue = new System.Windows.Forms.TabControl();
+            this.contextMenuStrip_itemArea = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem_itemArea_ensureDisplay = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage_item = new System.Windows.Forms.TabPage();
             this.entityControl1 = new dp2Circulation.EntityControl();
             this.tabPage_issue = new System.Windows.Forms.TabPage();
@@ -989,6 +991,23 @@ namespace dp2Circulation
             this.tabControl_itemAndIssue.SelectedIndex = 0;
             this.tabControl_itemAndIssue.Size = new System.Drawing.Size(732, 133);
             this.tabControl_itemAndIssue.TabIndex = 1;
+            this.tabControl_itemAndIssue.ContextMenuStrip = this.contextMenuStrip_itemArea;
+            // 
+            // contextMenuStrip_itemArea
+            // 
+            this.contextMenuStrip_itemArea.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.contextMenuStrip_itemArea.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_itemArea_ensureDisplay});
+            this.contextMenuStrip_itemArea.Name = "contextMenuStrip_itemArea";
+            this.contextMenuStrip_itemArea.Size = new System.Drawing.Size(101, 26);
+            this.contextMenuStrip_itemArea.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_itemArea_Opening);
+            // 
+            // toolStripMenuItem_itemArea_ensureDisplay
+            // 
+            this.toolStripMenuItem_itemArea_ensureDisplay.Name = "toolStripMenuItem_itemArea_ensureDisplay";
+            this.toolStripMenuItem_itemArea_ensureDisplay.Size = new System.Drawing.Size(100, 22);
+            this.toolStripMenuItem_itemArea_ensureDisplay.Text = "»∑±£œ‘ æ";
+            this.toolStripMenuItem_itemArea_ensureDisplay.Click += new System.EventHandler(this.toolStripMenuItem_itemArea_ensureDisplay_Click);
             // 
             // tabPage_item
             // 
@@ -1368,6 +1387,8 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_removeCoverImage;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_fixed;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_loadRecord;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_itemArea;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_itemArea_ensureDisplay;
 
     }
 }

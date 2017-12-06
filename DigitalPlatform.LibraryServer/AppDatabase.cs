@@ -4,26 +4,14 @@ using System.Text;
 
 using System.Xml;
 using System.IO;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
 using System.Diagnostics;
-using System.Net.Mail;
-using System.Web;
 
 using Ionic.Zip;
 
-using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
-
-using DigitalPlatform.Message;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
@@ -2859,6 +2847,7 @@ out strError);
             RmsChannel channel,
             string strLibraryCodeList,
             string strName,
+            string strLogFileName,
             ref bool bDbNameChanged,
             out string strError)
         {
@@ -2882,8 +2871,6 @@ out strError);
                 strError = "当前用户不是全局用户，不允许删除书目库";
                 return -1;
             }
-
-            string strLogFileName = "";
 
             // 删除书目库
             int nRet = DeleteDatabase(channel, strName, strLogFileName,
@@ -2915,7 +2902,9 @@ out strError);
             string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
             if (String.IsNullOrEmpty(strOrderDbName) == false)
             {
-                nRet = DeleteDatabase(channel, strOrderDbName, strLogFileName,
+                nRet = DeleteDatabase(channel,
+                    strOrderDbName,
+                    strLogFileName,
 out strError);
                 if (nRet == -1)
                 {
@@ -2928,7 +2917,9 @@ out strError);
             string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
             if (String.IsNullOrEmpty(strIssueDbName) == false)
             {
-                nRet = DeleteDatabase(channel, strIssueDbName, strLogFileName,
+                nRet = DeleteDatabase(channel, 
+                    strIssueDbName, 
+                    strLogFileName,
 out strError);
                 if (nRet == -1)
                 {
@@ -2941,7 +2932,9 @@ out strError);
             string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
             if (String.IsNullOrEmpty(strCommentDbName) == false)
             {
-                nRet = DeleteDatabase(channel, strCommentDbName, strLogFileName,
+                nRet = DeleteDatabase(channel, 
+                    strCommentDbName, 
+                    strLogFileName,
 out strError);
                 if (nRet == -1)
                 {
@@ -3021,6 +3014,7 @@ out strError);
                         channel,
                         strLibraryCodeList,
                         strName,
+                        strLogFileName,
                         ref bDbNameChanged,
                         out strError);
                     if (nRet == -1)
@@ -8179,7 +8173,7 @@ out strError);
                             strFullPath = strFullPathRecover;
                     }
 
-                    nRet = DatabaseUtility.ConvertGb2312TextfileToUtf8(strFullPath,
+                    nRet = FileUtil.ConvertGb2312TextfileToUtf8(strFullPath,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -8648,7 +8642,9 @@ out strError);
                     else
                     {
                         List<string> temp_names = null;
+                        // TODO: 注意读者库要筛选当前用户能管辖的部分名字
                         int nRet = GetDbNamesByType(strDbType,
+                            strLibraryCodeList,
             out temp_names,
             out strError);
                         if (nRet == -1)
@@ -8979,9 +8975,22 @@ out strError);
                 if (strDbType == "reader")
                 {
                     // 是否为读者库？
-                    for (int j = 0; j < this.ReaderDbs.Count; j++)
+                    foreach (ReaderDbCfg cfg in this.ReaderDbs)
                     {
-                        string strDbName = this.ReaderDbs[j].DbName;
+                        if (string.IsNullOrEmpty(strLibraryCodeList) == false)
+                        {
+                            // 匹配图书馆代码
+                            // parameters:
+                            //      strSingle   单个图书馆代码。空的总是不能匹配
+                            //      strList     图书馆代码列表，例如"第一个,第二个"，或者"*"。空表示都匹配
+                            // return:
+                            //      false   没有匹配上
+                            //      true    匹配上
+                            if (LibraryApplication.MatchLibraryCode(cfg.LibraryCode, strLibraryCodeList) == false)
+                                continue;
+                        }
+
+                        string strDbName = cfg.DbName;
                         if (strName == strDbName)
                         {
                             XmlElement nodeDatabase = dom.CreateElement("database");
@@ -8989,10 +8998,10 @@ out strError);
 
                             DomUtil.SetAttr(nodeDatabase, "type", "reader");
                             DomUtil.SetAttr(nodeDatabase, "name", strDbName);
-                            string strInCirculation = this.ReaderDbs[j].InCirculation == true ? "true" : "false";
+                            string strInCirculation = cfg.InCirculation == true ? "true" : "false";
                             DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
                             // 2017/12/1
-                            nodeDatabase.SetAttribute("libraryCode", this.ReaderDbs[j].LibraryCode);
+                            nodeDatabase.SetAttribute("libraryCode", cfg.LibraryCode);
                             goto CONTINUE;
                         }
                     }
@@ -9019,6 +9028,7 @@ out strError);
                             DomUtil.SetAttr(nodeDatabase, "issueDbName", cfg.IssueDbName);
                             DomUtil.SetAttr(nodeDatabase, "commentDbName", cfg.CommentDbName);
                             DomUtil.SetAttr(nodeDatabase, "unionCatalogStyle", cfg.UnionCatalogStyle);
+                            DomUtil.SetAttr(nodeDatabase, "role", cfg.Role);    // 2017/12/6
                             DomUtil.SetAttr(nodeDatabase, "replication", cfg.Replication);
 
                             string strInCirculation = cfg.InCirculation == true ? "true" : "false";
@@ -9173,7 +9183,10 @@ out strError);
             return 1;
         }
 
+        // parameters:
+        //      strLibraryCodeList  当前用户管辖的分馆列表
         int GetDbNamesByType(string strDbType,
+            string strLibraryCodeList,
             out List<string> dbnames,
             out string strError)
         {
@@ -9195,6 +9208,18 @@ out strError);
                 // 读者库
                 foreach (ReaderDbCfg cfg in this.ReaderDbs)
                 {
+                    if (string.IsNullOrEmpty(strLibraryCodeList) == false)
+                    {
+                        // 匹配图书馆代码
+                        // parameters:
+                        //      strSingle   单个图书馆代码。空的总是不能匹配
+                        //      strList     图书馆代码列表，例如"第一个,第二个"，或者"*"。空表示都匹配
+                        // return:
+                        //      false   没有匹配上
+                        //      true    匹配上
+                        if (LibraryApplication.MatchLibraryCode(cfg.LibraryCode, strLibraryCodeList) == false)
+                            continue;
+                    }
                     string strDbName = cfg.DbName;
                     dbnames.Add(strDbName);
                 }

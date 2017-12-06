@@ -13844,6 +13844,18 @@ Program.MainForm.DefaultFont);
                 true);
         }
 
+
+        private void contextMenuStrip_itemArea_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        // 确保册属性页区域处于可见状态。高度为父级窗口的一半
+        private void toolStripMenuItem_itemArea_ensureDisplay_Click(object sender, EventArgs e)
+        {
+            this.splitContainer_recordAndItems.SplitterDistance = this.splitContainer_recordAndItems.Height / 2;
+        }
+
 #if NO
         void TryStartDrag(Point start)
         {

@@ -1022,6 +1022,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strOperation == "manageDatabase")
             {
+#if NO
                 // 管理数据库 2017/5/23
                 // 2017/10/15
                 nRet = this.App.RecoverManageDatabase(this.RmsChannels,
@@ -1030,6 +1031,7 @@ namespace DigitalPlatform.LibraryServer
                     attachment,
                     strStyle,
                     out strError);
+#endif
             }
             else
             {
