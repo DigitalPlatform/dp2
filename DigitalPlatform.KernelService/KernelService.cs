@@ -248,9 +248,8 @@ namespace dp2Kernel
         // 准备this.user对象
         int PrepareUser(ref Result result)
         {
-            string strError = "";
 
-            this.user = this.GetUser(out strError);
+            this.user = this.GetUser(out string strError);
             if (user == null)
             {
                 result.Value = -1;
@@ -265,7 +264,6 @@ namespace dp2Kernel
         // 得到用户对象
         public User GetUser(out string strError)
         {
-            User user = null;
             // string strError = "";
             if (app == null)
             {
@@ -291,7 +289,7 @@ namespace dp2Kernel
             int nRet = app.Users.GetUserSafety(
                 false,
                 this.sessioninfo.UserName,
-                out user,
+                out User user,
                 out strError);
             if (nRet != 1)
             {

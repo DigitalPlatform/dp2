@@ -939,7 +939,7 @@ MessageBoxDefaultButton.Button1);
 
             _downloaders.Add(downloader);
 
-            downloader.Closed += new EventHandler(delegate(object o1, EventArgs e1)
+            downloader.Closed += new EventHandler(delegate (object o1, EventArgs e1)
             {
                 if (channel != null)
                 {
@@ -954,13 +954,13 @@ MessageBoxDefaultButton.Button1);
                     dlg.Close();
                 }));
             });
-            downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
+            downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
             {
                 if (dlg.IsDisposed == false)
                     dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
             });
             // 2017/10/7
-            downloader.Prompt += new MessagePromptEventHandler(delegate(object o1, MessagePromptEventArgs e1)
+            downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
             {
                 if (dlg.IsDisposed == true)
                 {
@@ -990,7 +990,7 @@ MessageBoxDefaultButton.Button1);
                     }
                 }));
             });
-            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
             {
                 downloader.Cancel();
 
@@ -1049,7 +1049,7 @@ MessageBoxDefaultButton.Button1);
             channel.Timeout = new TimeSpan(0, 5, 0);
 
             FileDownloadDialog dlg = new FileDownloadDialog();
-            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
             {
                 foreach (DynamicDownloader current in current_downloaders)
                 {
@@ -1160,18 +1160,18 @@ MessageBoxDefaultButton.Button1);
 
                     _downloaders.Add(downloader);
 
-                    downloader.Closed += new EventHandler(delegate(object o1, EventArgs e1)
+                    downloader.Closed += new EventHandler(delegate (object o1, EventArgs e1)
                     {
                         DisplayDownloaderErrorInfo(downloader);
                         RemoveDownloader(downloader);
                     });
-                    downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
+                    downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
                     {
                         if (dlg.IsDisposed == false)
                             dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
                     });
                     // 2017/10/7
-                    downloader.Prompt += new MessagePromptEventHandler(delegate(object o1, MessagePromptEventArgs e1)
+                    downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
                     {
                         if (dlg.IsDisposed == true)
                         {
@@ -1542,5 +1542,221 @@ MessageBoxDefaultButton.Button1);
             return results;
         }
 
+
+
+        #region 上传文件功能
+
+#if NO
+        // return:
+        //      -1  出错
+        //      0   放弃下载
+        //      1   成功启动了下载
+        public int BeginUploadFile(UploadFilesEventArgs e,
+            out string strError)
+        {
+            strError = "";
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.GetChannel();
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            FileDownloadDialog dlg = new FileDownloadDialog();
+            dlg.Font = this.Font;
+            dlg.Text = "正在上传 " + strPath;
+            dlg.SourceFilePath = strPath;
+            dlg.TargetFilePath = strTargetPath;
+            dlg.Show(this);
+
+            DynamicDownloader downloader = new DynamicDownloader(channel,
+                strPath,
+                strTargetPath);
+            downloader.Tag = dlg;
+
+            _downloaders.Add(downloader);
+
+            downloader.Closed += new EventHandler(delegate (object o1, EventArgs e1)
+            {
+                if (channel != null)
+                {
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
+                    channel = null;
+                }
+                DisplayDownloaderErrorInfo(downloader);
+                RemoveDownloader(downloader);
+                this.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                }));
+            });
+            downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate (object o1, DownloadProgressChangedEventArgs e1)
+            {
+                if (dlg.IsDisposed == false)
+                    dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
+            });
+            // 2017/10/7
+            downloader.Prompt += new MessagePromptEventHandler(delegate (object o1, MessagePromptEventArgs e1)
+            {
+                if (dlg.IsDisposed == true)
+                {
+                    e1.ResultAction = "cancel";
+                    return;
+                }
+
+                this.Invoke((Action)(() =>
+                {
+                    if (e1.Actions == "yes,no,cancel")
+                    {
+                        bool bHideMessageBox = true;
+                        DialogResult result = MessageDialog.Show(this,
+                            e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxDefaultButton.Button1,
+            null,
+            ref bHideMessageBox,
+            new string[] { "重试", "跳过", "放弃" },
+            20);
+                        if (result == DialogResult.Cancel)
+                            e1.ResultAction = "cancel";
+                        else if (result == System.Windows.Forms.DialogResult.No)
+                            e1.ResultAction = "no";
+                        else
+                            e1.ResultAction = "yes";
+                    }
+                }));
+            });
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+            {
+                downloader.Cancel();
+
+                if (channel != null)
+                {
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
+                    channel = null;
+                }
+                DisplayDownloaderErrorInfo(downloader);
+                RemoveDownloader(downloader);
+            });
+
+            downloader.StartDownload(bAppend);
+            return 1;
+        }
+#endif
+
+        public void BeginUploadFiles(UploadFilesEventArgs e)
+        {
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.GetChannel();
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            Stop stop = new Stop();
+
+            FileDownloadDialog dlg = new FileDownloadDialog();
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+            {
+                stop.DoStop();
+                if (channel != null)
+                {
+                    channel.TryAbortIt();
+                }
+            });
+            dlg.Font = this.Font;
+            dlg.Show(this);
+
+            stop.OnProgressChanged += new ProgressChangedEventHandler(delegate (object o1, ProgressChangedEventArgs e1)
+            {
+                dlg.SetProgress("", // StringUtil.GetPercentText(e1.Value - e1.Start, e1.End - e1.Start),
+                    e1.Value - e1.Start, e1.End - e1.Start);
+            });
+            stop.BeginLoop();
+
+            Task.Factory.StartNew(() =>
+            {
+                string strError = "";
+                foreach (string localfilename in e.SourceFileNames)
+                {
+                    if (stop.IsStopped)
+                    {
+                        strError = "用户中断";
+                        dlg.SetText(strError);
+                        goto ERROR1;
+                    }
+
+                    string strTargetPath = Path.Combine(e.TargetFolder, Path.GetFileName(localfilename)).Replace("\\", "/");
+                    // channel.UploadResChunkSize = nChunkSize;
+
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.Text = "正在上传 " + strTargetPath;
+                        dlg.SourceFilePath = localfilename;
+                        dlg.TargetFilePath = strTargetPath;
+                    }));
+
+                    int nRet = channel.UploadObject(
+                stop,
+                localfilename,
+                strTargetPath,
+                (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.120") >= 0) ? "gzip" : "",
+                null,   // timestamp,
+                true,
+                true,
+                out byte[] temp_timestamp,
+                out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "上传 '" + localfilename + "' --> '" + strTargetPath + "' 时出错: " + strError;
+                        dlg.SetText(strError);
+                        goto ERROR1;
+                    }
+                }
+
+                this.Invoke((Action)(() =>
+                {
+                    e.FuncEnd?.Invoke(false);
+                }));
+                if (channel != null)
+                {
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
+                    channel = null;
+                }
+                this.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                }));
+                return;
+            ERROR1:
+                this.Invoke((Action)(() =>
+                {
+                    e.FuncEnd?.Invoke(false);
+                }));
+                if (channel != null)
+                {
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
+                    channel = null;
+                }
+                this.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                    MessageBox.Show(this, strError);
+                }));
+            },
+CancellationToken.None,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+
+        }
+
+        #endregion
     }
 }

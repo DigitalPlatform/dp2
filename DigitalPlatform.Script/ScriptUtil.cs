@@ -21,8 +21,8 @@ namespace DigitalPlatform.Script
     /// </summary>
     public class ScriptUtil
     {
-        public static object InvokeMember(Type classType, 
-            string strFuncName, 
+        public static object InvokeMember(Type classType,
+            string strFuncName,
             object target,
             object[] param_list)
         {
@@ -234,6 +234,18 @@ namespace DigitalPlatform.Script
             None = 0,
             HttpUrlHitCount = 0x01,     // 是否对 http:// 地址进行访问计数
             FrontCover = 0x02,   // 是否包含封面图像事项
+            Template = 0x04,    // 是否利用模板机制对 $u 进行自动处理 2017/12/19
+        }
+
+        // 兼容以前的版本
+        public static string BuildObjectHtmlTable(string strMARC,
+    string strRecPath,
+    BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount)
+        {
+            return BuildObjectHtmlTable(strMARC,
+                strRecPath,
+                null,
+                style);
         }
 
         // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
@@ -246,7 +258,8 @@ namespace DigitalPlatform.Script
         // 公开注释 $z
         public static string BuildObjectHtmlTable(string strMARC,
             string strRecPath,
-            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount)
+            XmlElement maps_container,
+            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount | BuildObjectHtmlTableStyle.Template)
         {
             // Debug.Assert(false, "");
 
@@ -286,6 +299,21 @@ namespace DigitalPlatform.Script
 
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
+                if (maps_container != null
+                    && (style & BuildObjectHtmlTableStyle.Template) != 0)
+                {
+                    // return:
+                    //     -1  出错
+                    //     0   没有发生宏替换
+                    //     1   发生了宏替换
+                    int nRet = Map856u(u,
+                        strRecPath,
+                        maps_container,
+                        out strUri,
+                        out string strError);
+                    if (nRet == -1)
+                        strUri = "!error:" + strError;
+                }
 
                 string strSaveAs = "";
                 if (string.IsNullOrEmpty(s_q) == true
@@ -339,6 +367,8 @@ namespace DigitalPlatform.Script
                 if (string.IsNullOrEmpty(urlLabel) == true)
                     urlLabel = strObjectUrl;
 
+                if (strUri.StartsWith("!error:"))
+                    urlLabel += strUri;
                 string urlTemp = "";
                 if (String.IsNullOrEmpty(strObjectUrl) == false)
                 {
@@ -377,6 +407,87 @@ namespace DigitalPlatform.Script
 
             return text.ToString();
         }
+
+        #region 856 maps function
+
+        /*
+<856_maps>
+<item type="cxstar" template="http://www.cxstar.com:5000/Book/Detail?pinst=1ca53a3a0001390bce&ruid=%uri%" />
+<item type="default" template="http://localhost:8081/dp2OPAC/getobject.aspx?uri=%object_id%" />
+<item type="default" template="%getobject_module%?uri=%object_path%" />
+</856_maps>
+         * 
+         * */
+        // return:
+        //     -1  出错
+        //     0   没有发生宏替换
+        //     1   发生了宏替换
+        public static int Map856u(string u,
+            string strBiblioRecPath,
+            XmlElement container,
+            out string result,
+            out string strError)
+        {
+            strError = "";
+            result = u;
+            if (string.IsNullOrEmpty(u))
+                return 0;
+
+            if (StringUtil.HasHead(u, "uri:") == false)
+                return 0;
+
+            u = u.Substring(4).Trim();
+
+#if NO
+            XmlElement container = this.WebUiDom.DocumentElement.SelectSingleNode("856_maps") as XmlElement;
+            if (container == null)
+            {
+                strError = "webui.xml 中没有配置 856_maps 元素";
+                return -1;
+            }
+#endif
+
+            List<string> parts = StringUtil.ParseTwoPart(u, "@");
+            string uri = parts[0];
+            string type = parts[1];
+
+            XmlElement item = null;
+            if (string.IsNullOrEmpty(type))
+            {
+                item = container.SelectSingleNode("item[@type='default']") as XmlElement;
+                if (item == null)
+                {
+                    strError = "webui.xml 中没有配置 type='default' 的 856_maps/item 元素";
+                    return -1;
+                }
+            }
+            else
+            {
+                item = container.SelectSingleNode("item[@type='" + type + "']") as XmlElement;
+                if (item == null)
+                {
+                    strError = "webui.xml 中没有配置 type='" + type + "' 的 856_maps/item 元素";
+                    return -1;
+                }
+            }
+
+            string template = item.GetAttribute("template");
+            if (string.IsNullOrEmpty(template))
+            {
+                strError = "webui.xml 中元素 " + item.OuterXml + " 没有配置 template 属性";
+                return -1;
+            }
+
+            string object_path = MakeObjectUrl(strBiblioRecPath, uri);
+
+            result = template.Replace("{object_path}", HttpUtility.UrlEncode(object_path));
+            result = result.Replace("{uri}", HttpUtility.UrlEncode(uri));
+            result = result.Replace("{getobject_module}", "./getobject.aspx");
+            return 1;
+        }
+
+        #endregion
+
 
         // 创建 table 中的对象资源局部 XML。这是一个 <table> 片段
         // 前导语 $3
@@ -543,13 +654,13 @@ namespace DigitalPlatform.Script
             if (lRet == 0)
                 return 0;   // not found
 
-            EntityInfo info = issueinfos[0]; 
+            EntityInfo info = issueinfos[0];
             string strXml = info.OldRecord;
             string strIssueRecordPath = info.OldRecPath;
 
             if (string.IsNullOrEmpty(strXml))
             {
-                strError = "期记录 '"+strIssueRecordPath+"' 的 strXml 为空";
+                strError = "期记录 '" + strIssueRecordPath + "' 的 strXml 为空";
                 return -1;
             }
 
@@ -558,7 +669,7 @@ namespace DigitalPlatform.Script
             {
                 dom.LoadXml(strXml);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "期记录 '" + strIssueRecordPath + "' XML 装入 DOM 时出错: " + ex.Message;
                 return -1;

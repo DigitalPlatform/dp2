@@ -7616,7 +7616,6 @@ out strError);
                     return -1;
             }
 
-            string strOutputResPath = "";
 
             // string strMetadata = BuildMetadata(strMime, strLocalPath);
 
@@ -7630,7 +7629,7 @@ out strError);
                 strMetadata,
                 strStyle,
                 timestamp,
-                out strOutputResPath,
+                out string strOutputResPath,
                 out output_timestamp,
                 out strError);
             if (lRet == -1)

@@ -161,6 +161,38 @@ namespace dp2Circulation
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.InvalidOperationException
+Message: 集合已修改；可能无法执行枚举操作。
+Stack:
+在 System.Collections.ArrayList.ArrayListEnumeratorSimple.MoveNext()
+在 dp2Circulation.MainForm.ChangeDifferentFaceFont(ToolStrip tool, Font font)
+在 dp2Circulation.MainForm.ChangeDifferentFaceFont(Control parent, Font font)
+在 dp2Circulation.MainForm.SetControlFont(Control control, Font font, Boolean bForce)
+在 dp2Circulation.MainForm.MenuItem_configuration_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripMenuItem.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.ToolStripDropDown.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.ToolStripDropDown.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.30.6550.17227, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址:xxx 
+操作时间 2017/12/7 13:40:23 (Thu, 07 Dec 2017 13:40:23 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+* */
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
@@ -174,7 +206,15 @@ namespace dp2Circulation
             tool.ImageScalingSize = GetImageScalingSize();
 
             // 修改所有事项的字体，如果字体名不一样的话
+
+            // 2017/12/13 先把事项放入一个 List，避免枚举中途枚举器发生变化导致抛出异常
+            List<ToolStripItem> items = new List<ToolStripItem>();
             foreach (ToolStripItem item in tool.Items)
+            {
+                items.Add(item);
+            }
+
+            foreach(ToolStripItem item in items)
             {
                 item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
 

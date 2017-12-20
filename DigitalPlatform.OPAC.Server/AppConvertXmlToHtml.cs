@@ -13,7 +13,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
-
+using System.Xml;
+using System.Web;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -380,7 +381,7 @@ namespace DigitalPlatform.OPAC.Server
                                          this.BinDir + "\\digitalplatform.Xml.dll",
                                          this.BinDir + "\\digitalplatform.script.dll",
                                          this.BinDir + "\\digitalplatform.marcquery.dll",
-										 };
+                                         };
 
                         string strError1 = "";
                         string strWarning = "";
@@ -733,5 +734,6 @@ namespace DigitalPlatform.OPAC.Server
         ERROR1:
             return -1;
         }
+
     }
 }

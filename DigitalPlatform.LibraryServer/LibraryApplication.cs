@@ -161,7 +161,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.117 (2017/10/6) dp2kernel 的 GetRes() 和 WriteRes() API 的 strStyle 增加了 gzip 选项
         //      2.118 (2017/10/21) library.xml 中 channel 元素增加了 privilegedIpList 属性，可以定义特权前端 IP，这些前端可以创建 maxChannelsLocalhost 属性定义的那么多个并发通道
         //      2.119 (2017/11/13) library.xml 中 circulation 元素增加了 verifyRegisterNoDup 属性，用于定义是否校验册记录登录号的重复情况
-        public static string Version = "2.119";
+        //      2.120 (2017/12/16) WriteRes() API 针对上传文件也支持 gzip 风格了。此前只是对 dp2kernel 资源上传的时候支持 gzip
+        public static string Version = "2.120";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

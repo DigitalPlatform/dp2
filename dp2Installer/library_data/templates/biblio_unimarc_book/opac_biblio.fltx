@@ -13,12 +13,14 @@
 // 2015/12/10 修正一处缺少 <div class='coverimage'> 的 Bug
 // 2015/12/14 Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
 // 2016/12/27 StringUtil.IsHttpUrl()
+// 2017/12/20 改用带有模板功能的 ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container)
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Xml;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
@@ -31,6 +33,7 @@ using DigitalPlatform.Text;
     <ref>system.web.dll</ref>
     <ref>system.windows.forms.dll</ref>
     <ref>system.web.dll</ref>
+    <ref>system.xml.dll</ref>
     <def>
      <![CDATA[
 
@@ -1407,9 +1410,13 @@ using DigitalPlatform.Text;
         </field>
         <end>
           <![CDATA[
-                      Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
+		Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
                       
-                      Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath);
+		// Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath);
+
+		XmlElement container = Host.App.WebUiDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
+		Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container);
+
 		]]></end>
     </record>
     <end>

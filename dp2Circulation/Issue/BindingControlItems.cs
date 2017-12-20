@@ -5722,7 +5722,7 @@ rectFrame);
                             {
                                 brushText.Dispose();
                                 brushText = null;
-                            } 
+                            }
                             if (nState == -2)
                                 brushText = new SolidBrush(colorGray);
                             else if (nState == -1)
@@ -5979,12 +5979,18 @@ rectFrame);
                 return "";
                 // return m_strXml;
             }
-            /*
             set
             {
-                m_strXml = value;
+                // m_strXml = value;
+
+                // 2017/12/15
+                {
+                    if (dom == null)
+                        dom = new XmlDocument();
+
+                    dom.LoadXml(string.IsNullOrEmpty(value) ? "<root />" : value);
+                }
             }
-             * */
         }
 
         internal XmlDocument dom = null;
@@ -6525,6 +6531,17 @@ rectFrame);
                 return -1;
             }
 #endif
+            // 合并。strDefaultXml 合并到 this.Xml 中。不覆盖原有的非空内容
+            // 设置册记录默认值
+            string strDefaultXml = this.Xml;
+            nRet = this.Container.Container.SetItemDefaultValues("quickRegister_default",
+                true,
+                ref strDefaultXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            this.Xml = strDefaultXml;
 
             // 找到相关的OrderBindingItem对象，刷新<distribute>元素内容
             IssueBindingItem issue = this.Container;

@@ -720,7 +720,7 @@ namespace dp2Circulation
             if (scrollToEnd)
             {
                 // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
-                this.webBrowser1.Document.Window.ScrollTo(0,
+                this.webBrowser1.Document?.Window.ScrollTo(0,
                     this.webBrowser1.Document.Body.ScrollRectangle.Height);
             }
         }
@@ -1143,7 +1143,7 @@ namespace dp2Circulation
 
         private void toolStripButton_deleteOrder_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("deleteOrder");
+            webBrowser1.Document?.InvokeScript("deleteOrder");
         }
 
         private void toolStripButton_save_Click(object sender, EventArgs e)
@@ -1204,7 +1204,7 @@ namespace dp2Circulation
                 }
 
                 this.Changed = false;
-                webBrowser1.Document.InvokeScript("clearAllChanged");
+                webBrowser1.Document?.InvokeScript("clearAllChanged");
                 return;
             }
             finally
@@ -1492,7 +1492,7 @@ int nCount)
             bool bControl = Control.ModifierKeys == Keys.Control;
 
             if (bControl == false)
-                webBrowser1.Document.InvokeScript("newOrder");
+                webBrowser1.Document?.InvokeScript("newOrder");
             else
                 ToolStripMenuItem_newOrderTemplate_Click(sender, e);
         }
@@ -1559,20 +1559,20 @@ int nCount)
 
         private void ToolStripMenuItem_selectAllBiblio_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("selectAllBiblio",
+            webBrowser1.Document?.InvokeScript("selectAllBiblio",
                 new object[] { Control.ModifierKeys == Keys.Control ? false : true }
                 );
         }
 
         private void ToolStripMenuItem_selectAllOrder_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("selectAllOrder",
+            webBrowser1.Document ?.InvokeScript("selectAllOrder",
                 new object[] { Control.ModifierKeys == Keys.Control ? false : true });
         }
 
         private void toolStripButton_loadBiblio_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("loadBiblio");
+            webBrowser1.Document ?.InvokeScript("loadBiblio");
         }
 
         private void ToolStripMenuItem_quickChange_Click(object sender, EventArgs e)
@@ -1894,9 +1894,9 @@ int nCount)
 
         public void OnSheetSelectionChanged(dp2Circulation.OrderListViewerForm.Sheet sheet)
         {
-            string selection = (string)sheet.WebBrowser.Document.InvokeScript("getSelection");
+            string selection = (string)sheet.WebBrowser.Document?.InvokeScript("getSelection");
             // MessageBox.Show(this, selection);
-            this.webBrowser1.Document.InvokeScript("selectOrders", new object[] { selection, true });
+            this.webBrowser1.Document?.InvokeScript("selectOrders", new object[] { selection, true });
         }
 
         void RefreshOrderSheets()
@@ -1969,7 +1969,7 @@ int nCount)
         {
             if (Control.ModifierKeys == Keys.Control)
             {
-                webBrowser1.Document.InvokeScript("clearAllErrorInfo");
+                webBrowser1.Document ?.InvokeScript("clearAllErrorInfo");
                 return;
             }
 
@@ -1985,7 +1985,7 @@ int nCount)
         bool VerifyOrders()
         {
             // TODO: 首先清除以前残留的报错信息
-            webBrowser1.Document.InvokeScript("clearAllErrorInfo");
+            webBrowser1.Document ?.InvokeScript("clearAllErrorInfo");
 
             int nErrorCount = 0;
             foreach (BiblioStore biblio in this._lines)
@@ -1997,7 +1997,7 @@ int nCount)
                     {
                         // 将出错信息显示到 WebControl 页面
                         if (string.IsNullOrEmpty(order.ErrorInfo) == false)
-                            webBrowser1.Document.InvokeScript("setErrorInfo", new object[] { order.RefID, order.ErrorInfo });
+                            webBrowser1.Document ?.InvokeScript("setErrorInfo", new object[] { order.RefID, order.ErrorInfo });
                     }
                     nErrorCount++;
                 }
@@ -2011,7 +2011,7 @@ int nCount)
         // 选择所有包含订购的书目
         private void toolStripMenuItem_selectAllBiblio_hasOrders_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("selectAllBiblioHasOrder",
+            webBrowser1.Document?.InvokeScript("selectAllBiblioHasOrder",
     new object[] { Control.ModifierKeys == Keys.Control ? false : true }
     );
 
@@ -2020,7 +2020,7 @@ int nCount)
         // 选择所有不包含订购的书目
         private void toolStripMenuItem_selectAllBiblio_noOrder_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("selectAllBiblioNoOrder",
+            webBrowser1.Document?.InvokeScript("selectAllBiblioNoOrder",
     new object[] { Control.ModifierKeys == Keys.Control ? false : true }
     );
 
@@ -2028,7 +2028,7 @@ int nCount)
 
         private void toolStripMenuItem_removeSelectedBiblio_Click(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("removeSelectedBiblio");
+            webBrowser1.Document?.InvokeScript("removeSelectedBiblio");
             this.BeginRefreshOrderSheets();
         }
 

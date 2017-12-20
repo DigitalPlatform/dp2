@@ -765,8 +765,7 @@ Stack:
             // cfgcache
             if (cfgCache != null)
             {
-                string strError;
-                int nRet = cfgCache.Save(null, out strError);
+                int nRet = cfgCache.Save(null, out string strError);
                 if (nRet == -1)
                 {
                     if (string.IsNullOrEmpty(this.UserLogDir) == false)

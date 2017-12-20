@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
@@ -14,7 +11,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;    // LocationCollection
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -183,7 +179,7 @@ namespace dp2Circulation
             }
 
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -528,7 +524,7 @@ namespace dp2Circulation
             } // end of ' if (String.IsNullOrEmpty(strPublishTime) == false)
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -791,7 +787,7 @@ namespace dp2Circulation
             }
             edit.StartItem = null;  // 清除原始对象标记
 
-            REDO:
+        REDO:
             Program.MainForm.AppInfo.LinkFormState(edit, "IssueEditForm_state");
             edit.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(edit);
@@ -1836,7 +1832,6 @@ namespace dp2Circulation
             {
                 using (BindingForm dlg = new BindingForm())
                 {
-
                     dlg.Text = strTitle;
                     // dlg.MainForm = Program.MainForm;
                     dlg.AppInfo = Program.MainForm.AppInfo;
@@ -1876,6 +1871,9 @@ namespace dp2Circulation
 
                     dlg.GetBiblio -= dlg_GetBiblio;
                     dlg.GetBiblio += dlg_GetBiblio;
+
+                    dlg.GetMacroValue -= Dlg_GetMacroValue;
+                    dlg.GetMacroValue += Dlg_GetMacroValue;
                     // TODO: 如果册listview中有标记删除的对象？要求先提交，才能进行装订
 
                     // 汇集全部册信息
@@ -1951,7 +1949,6 @@ namespace dp2Circulation
 
                         Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
                         all_issue_refids.Add(issue_item.RefID);
-
                     }
 
 #if OLD_INITIAL
@@ -2072,9 +2069,8 @@ namespace dp2Circulation
                             // 删除实体数据
                             if (deleting_bind_refids.Count != 0)
                             {
-                                List<string> deleted_ids = null;
                                 nRet = DeleteItemRecords(deleting_bind_refids,
-                                    out deleted_ids,
+                                    out List<string> deleted_ids,
                                     out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
@@ -2126,9 +2122,8 @@ namespace dp2Circulation
                         // 删除期对象
                         if (deleting_issue_refids.Count != 0)
                         {
-                            List<string> deleted_ids = null;
                             nRet = DeleteIssueRecords(deleting_issue_refids,
-                                out deleted_ids,
+                                out List<string> deleted_ids,
                                 out strError);
                             if (nRet == -1)
                                 goto ERROR1;
@@ -2157,15 +2152,18 @@ namespace dp2Circulation
             }
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void Dlg_GetMacroValue(object sender, GetMacroValueEventArgs e)
+        {
+            TriggerGetMacroValue(sender, e);
         }
 
         void dlg_GetBiblio(object sender, GetBiblioEventArgs e)
         {
-            var func = this.GetBiblio;
-            if (func != null)
-                func(sender, e);
+            this.GetBiblio?.Invoke(sender, e);
         }
 
         // 给期记录 XML 中增加 recPath 元素
@@ -2856,7 +2854,7 @@ namespace dp2Circulation
             TriggerContentChanged(bOldChanged, true);
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 

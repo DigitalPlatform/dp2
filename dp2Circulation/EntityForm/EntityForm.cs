@@ -1433,6 +1433,7 @@ true);
                         data.Action,
                         data.RefID,
                         data.Xml,
+                        false,
                         out bookitem,
                         out strError);
                     if (nRet == -1)
@@ -1765,6 +1766,7 @@ true);
                         data.Action,
                         data.RefID,
                         data.Xml,
+                        true,
                         out bookitem,
                         out strError);
                     if (nRet == -1 || nRet == 1)

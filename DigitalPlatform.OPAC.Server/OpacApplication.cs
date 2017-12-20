@@ -26,7 +26,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Range;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -40,8 +39,16 @@ namespace DigitalPlatform.OPAC.Server
         /// </summary>
         public string SearchLogEnable
         {
-            get;
-            set;
+            get; set;
+        }
+
+        // 2017/12/12
+        /// <summary>
+        /// 要隐藏的数据库名列表。为逗号分隔的字符串。如果为 null，表示不隐藏任何数据库名
+        /// </summary>
+        public string HideDbNames
+        {
+            get; set;
         }
 
         /// <summary>
@@ -528,6 +535,15 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     app.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
                     app.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
+                }
+
+                // databaseFilter
+                {
+                    if (this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter") is XmlElement nodeDatabaseFilter)
+                        this.HideDbNames = nodeDatabaseFilter.GetAttribute("hide");
+                    else
+                        this.HideDbNames = null;
+
                 }
 
                 // //
@@ -1397,6 +1413,9 @@ namespace DigitalPlatform.OPAC.Server
                     node_virtual = DomUtil.SetElementOuterXml(node_virtual, strXml);
                     Debug.Assert(node_virtual != null, "");
 
+                    // 根据“禁用数据库名”列表，修改 virtualDatabases 元素内的细部
+                    ModifyVirtualDatabases(node_virtual, this.HideDbNames);
+
                     // 获取<arrived>定义
                     lRet = // session.Channel.
                         channel.GetSystemParameter(
@@ -2014,6 +2033,14 @@ System.Text.Encoding.UTF8))
                         {
                             node.WriteTo(writer);
                         }
+
+                        // 2017/12/12
+                        // <databaseFilter>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
                     }
 
                     writer.WriteEndElement();
@@ -2361,6 +2388,41 @@ System.Text.Encoding.UTF8))
             }
 
             return 0;
+        }
+
+        /*
+    <virtualDatabases searchMaxResultCount="5000">
+        <database name="中文图书" alias="cbook">
+            <caption lang="zh">中文图书</caption>
+            <from name="ISBN" style="isbn">
+                <caption lang="zh-CN">ISBN</caption>
+                <caption lang="en">ISBN</caption>
+            </from>
+         * */
+        // 根据“禁用数据库名”列表，修改 virtualDatabases 元素内的细部
+        void ModifyVirtualDatabases(XmlElement root,
+            string strHideDbNames)
+        {
+            // Debug.Assert(false, "");
+
+            List<string> hide_dbnames = StringUtil.SplitList(strHideDbNames);
+
+            XmlNodeList databases = root.SelectNodes("database | virtualDatabase");
+            foreach (XmlElement database in databases)
+            {
+                XmlNodeList captions = database.SelectNodes("caption");
+                bool bFound = false;
+                foreach(XmlNode caption in captions)
+                {
+                    if (hide_dbnames.IndexOf(caption.InnerText.Trim()) != -1)
+                        bFound = true;
+                }
+
+                if (bFound == false)
+                    database.RemoveAttribute("hide");
+                else
+                    database.SetAttribute("hide", "true");
+            }
         }
 
         // 初始化虚拟库集合定义对象
@@ -3067,7 +3129,7 @@ System.Text.Encoding.UTF8))
                     channel.GetCommentInfo(
     null,
     "@path:" + strCommentRecPath,
-                    // null,
+    // null,
     "xml", // strResultType
     out strItemXml,
     out strOutputItemPath,
@@ -3643,7 +3705,7 @@ System.Text.Encoding.UTF8))
 
                 string strLocalPath = postedFile.FileName;
 
-                // page.Response.Write("<br/>正在保存" + strLocalPath);
+            // page.Response.Write("<br/>正在保存" + strLocalPath);
 
             REDOWHOLESAVE:
                 string strWarning = "";

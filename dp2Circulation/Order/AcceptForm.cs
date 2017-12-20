@@ -1,25 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
-using System.IO;
-using System.Xml;
 using System.Diagnostics;
-using System.Reflection;
-using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-
-using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
-
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -97,6 +85,20 @@ namespace dp2Circulation
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
 
+            Program.MainForm.AppInfo.AppInfoChanged += AppInfo_AppInfoChanged;
+        }
+
+        private void AppInfo_AppInfoChanged(object sender, DigitalPlatform.Xml.AppInfoChangedEventArgs e)
+        {
+            if (e.Path == "entityform_optiondlg"
+                && e.Name == "quickRegister_default")
+            {
+                // 批次号可能被外部修改，需要刷新
+                string strNewValue = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+                    "batchNo");
+                if (this.tabComboBox_prepare_batchNo.Text != strNewValue)
+                    this.tabComboBox_prepare_batchNo.Text = strNewValue;
+            }
         }
 
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
@@ -226,6 +228,11 @@ namespace dp2Circulation
                 "accept_form",
                 "ui_state",
                 "");
+
+            // 批次号是例外，需要从默认值模板里面获得
+            this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+                "batchNo");
+
             if (string.IsNullOrEmpty(this.comboBox_accept_matchStyle.Text) == true)
                 this.comboBox_accept_matchStyle.Text = "精确一致";
 
@@ -385,6 +392,13 @@ this.checkBox_prepare_createCallNumber.Checked);
         "accept_form",
         "ui_state",
         this.UiState);
+
+                Program.MainForm.AppInfo.AppInfoChanged -= AppInfo_AppInfoChanged;
+
+                // 批次号是例外，需要保存到默认值模板
+                EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+    "batchNo",
+    this.tabComboBox_prepare_batchNo.Text);
             }
         }
 
@@ -5019,6 +5033,29 @@ Keys keyData)
                 button_accept_searchISBN_Click(this, new EventArgs());
             else if (this.listView_accept_records.Focused == true)
                 listView_accept_records_DoubleClick(this, new EventArgs());
+        }
+
+        private void button_defaultEntityFields_Click(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.DisplayStyle = "quick_entity";
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            // 批次号可能被对话框修改，需要刷新
+            //this.tabComboBox_prepare_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+            //    "batchNo");
+        }
+
+        private void tabComboBox_prepare_batchNo_Leave(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+                "batchNo",
+                this.tabComboBox_prepare_batchNo.Text);
         }
     }
 

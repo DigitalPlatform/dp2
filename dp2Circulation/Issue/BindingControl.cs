@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Diagnostics;
@@ -29,6 +26,12 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BindingControl : Control
     {
+        // 2017/12/15
+        /// <summary>
+        /// 获得宏的值
+        /// </summary>
+        public event GetMacroValueHandler GetMacroValue = null;
+
         // 2016/10/8
         public event GetBiblioEventHandler GetBiblio = null;
 
@@ -6793,7 +6796,7 @@ issue.Volume);
 
             if (ref_issue == null)
                 ref_issue = GetTailIssue();
-        REDO:
+            REDO:
             // 找到最后一期。如果找不到，则先出现对话框询问第一期
             if (ref_issue == null)
             {
@@ -13678,10 +13681,15 @@ MessageBoxDefaultButton.Button2);
             if (this.AppInfo == null)
                 return "";
 
+#if NO
             string strDefault = this.AppInfo.GetString(
                 "binding_form",
                 "binding_batchno",
                 "");
+#endif
+            // 2017/12/20 改为从默认值模板中获得
+            string strDefault = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+    "batchNo");
 
             if (this.m_bBindingBatchNoInputed == true)
                 return strDefault;
@@ -13695,16 +13703,22 @@ MessageBoxDefaultButton.Button2);
 
             if (strResult != strDefault)
             {
+#if NO
                 this.AppInfo.SetString(
                 "binding_form",
                 "binding_batchno",
                 strResult);
+#endif
+                EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+    "batchNo",
+    strResult);
             }
 
             this.m_bBindingBatchNoInputed = true;
             return strResult;
         }
 
+#if NO
         /// <summary>
         /// 验收批次号
         /// </summary>
@@ -13730,6 +13744,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
         }
+#endif
 
         /// <summary>
         /// 验收批次号是否已经在界面被输入了
@@ -13752,7 +13767,12 @@ MessageBoxDefaultButton.Button2);
             if (this.AppInfo == null)
                 return "";
 
+#if NO
             string strDefault = this.AcceptBatchNo;
+#endif
+            // 2017/12/20 改为从默认值模板中获得
+            string strDefault = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+    "batchNo");
 
             if (this.AcceptBatchNoInputed == true)
                 return strDefault;
@@ -13766,8 +13786,13 @@ MessageBoxDefaultButton.Button2);
 
             if (strResult != strDefault)
             {
+#if NO
                 // 记忆
                 this.AcceptBatchNo = strResult;
+#endif
+                EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+"batchNo",
+strResult);
             }
 
             this.AcceptBatchNoInputed = true;
@@ -14385,7 +14410,7 @@ Color.FromArgb(100, color)
                 return;
 
             // off先前的focus对象
-        OFF_OLD:
+            OFF_OLD:
             if (this.m_lastFocusObj != null
                 && this.m_lastFocusObj.m_bFocus == true)
             {
@@ -15394,7 +15419,7 @@ Color.FromArgb(100, color)
                             penBorder.Dispose();
                         if (brushInner != null)
                             brushInner.Dispose();
-                        if (brush == null)
+                        if (brush != null)  // 2017/12/7 修改
                             brush.Dispose();
                     }
                 }
@@ -15825,7 +15850,7 @@ Color.FromArgb(100, color)
             }
         }
 
-        #endregion
+#endregion
 
         protected override void OnPaint(PaintEventArgs pe)
         {
@@ -16022,6 +16047,135 @@ Color.FromArgb(100, color)
                 );
             // this.mouseMoveArgs
             this.OnMouseMove(e1);
+        }
+
+        internal string DoGetMacroValue(string strMacroName)
+        {
+            if (this.GetMacroValue != null)
+            {
+                GetMacroValueEventArgs e = new GetMacroValueEventArgs();
+                e.MacroName = strMacroName;
+                this.GetMacroValue(this, e);
+
+                return e.MacroValue;
+            }
+
+            return null;
+        }
+
+        public int SetItemDefaultValues(
+    string strCfgEntry,
+    bool bGetMacroValue,
+    ref string strXml,
+    // BookItem item,
+    out string strError)
+        {
+            strError = "";
+
+            XmlDocument old_dom = new XmlDocument();
+            try
+            {
+                old_dom.LoadXml(string.IsNullOrEmpty(strXml) ? "<root />" : strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "原有 XML 记录装入 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
+    "entityform_optiondlg",
+    strCfgEntry,
+    "<root />");
+
+            // 字符串strNewDefault包含了一个XML记录，里面相当于一个记录的原貌。
+            // 但是部分字段的值可能为"@"引导，表示这是一个宏命令。
+            // 需要把这些宏兑现后，再正式给控件
+            XmlDocument new_dom = new XmlDocument();
+            try
+            {
+                new_dom.LoadXml(strNewDefault);
+            }
+            catch (Exception ex)
+            {
+                strError = "默认值定义 XML 记录装入 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            // 合并新旧记录的第一级元素
+            // 合并新旧记录
+            // domExist 中的非空元素内容保留，添加 domNew 中的其余元素
+            int nRet = MergeTwoEntityXml(old_dom,
+                new_dom,
+                out string strMergedXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            new_dom.LoadXml(strMergedXml);
+
+            if (bGetMacroValue == true)
+            {
+                // 遍历所有一级元素的内容
+                XmlNodeList nodes = new_dom.DocumentElement.SelectNodes("*");
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    string strText = nodes[i].InnerText;
+                    if (strText.Length > 0
+                        && (strText[0] == '@' || strText.IndexOf("%") != -1))
+                    {
+                        // 兑现宏
+                        nodes[i].InnerText = DoGetMacroValue(strText);
+                    }
+                }
+            }
+
+            strXml = new_dom.OuterXml;
+#if NO
+            strNewDefault = dom.OuterXml;
+
+            int nRet = item.SetData("",
+                strNewDefault,
+                null,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            item.Parent = "";
+            item.RecPath = "";
+#endif
+            return 0;
+        }
+
+        // 合并新旧记录
+        // domExist 中的非空元素内容保留，添加 domNew 中的其余元素
+        static int MergeTwoEntityXml(XmlDocument domExist,
+            XmlDocument domNew,
+            out string strMergedXml,
+            out string strError)
+        {
+            strMergedXml = "";
+            strError = "";
+
+            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("*");
+
+            // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
+            foreach (XmlElement node in nodes)
+            {
+                string name = node.Name;
+
+                if (string.IsNullOrEmpty(node.InnerXml.Trim()) == true)
+                    continue;
+
+                string strTextNew = DomUtil.GetElementOuterXml(domExist.DocumentElement,
+                    name);
+                if (string.IsNullOrEmpty(strTextNew) == false)
+                    DomUtil.SetElementOuterXml(domNew.DocumentElement,
+                        name, strTextNew);
+            }
+
+            strMergedXml = domNew.OuterXml;
+            return 0;
         }
     }
 

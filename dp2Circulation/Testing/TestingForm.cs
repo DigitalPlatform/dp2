@@ -121,7 +121,7 @@ namespace dp2Circulation
                     strBiblioDbName,
                     "book",
                     "unimarc",
-                        "*",
+                    "*",
                     "",
                     out strError);
                 if (nRet == -1)
@@ -302,30 +302,34 @@ UiTest3(strBiblioDbName)
 
         void ReloadDatabaseCfg()
         {
-            int nRet = 0;
-            // 获得书目数据库From信息
-            nRet = Program.MainForm.GetDbFromInfos(false);
-            if (nRet == -1)
-                goto END1;
+            this.Invoke((Action)(() =>
+            {
+                int nRet = 0;
+                // 获得书目数据库From信息
+                nRet = Program.MainForm.GetDbFromInfos(false);
+                if (nRet == -1)
+                    goto END1;
 
-            // 获得全部数据库的定义
-            nRet = Program.MainForm.GetAllDatabaseInfo(false);
-            if (nRet == -1)
-                goto END1;
+                // 获得全部数据库的定义
+                nRet = Program.MainForm.GetAllDatabaseInfo(false);
+                if (nRet == -1)
+                    goto END1;
 
-            // 获得书目库属性列表
-            nRet = Program.MainForm.InitialBiblioDbProperties(false);
-            if (nRet == -1)
-                goto END1;
+                // 获得书目库属性列表
+                nRet = Program.MainForm.InitialBiblioDbProperties(false);
+                if (nRet == -1)
+                    goto END1;
 
-            // 获得索取号配置信息
-            // 2009/2/24 
-            nRet = Program.MainForm.GetCallNumberInfo(false);
-            if (nRet == -1)
-                goto END1;
-            return;
-        END1:
-            return;
+                // 获得索取号配置信息
+                // 2009/2/24 
+                nRet = Program.MainForm.GetCallNumberInfo(false);
+                if (nRet == -1)
+                    goto END1;
+                return;
+            END1:
+                return;
+            }
+            ));
         }
 
         // 新创建十个册记录在内存，然后发生索取号，然后统一保存。要求索取号完全相同
@@ -706,7 +710,7 @@ UiTest3(strBiblioDbName)
                     strBiblioDbName,
                     "book",
                     "unimarc",
-                        "*",
+                    "*",
                     "",
                     out strError);
                 if (nRet == -1)
@@ -2780,6 +2784,40 @@ out strError);
             return 0;
         }
 
+        static string[] _roles = new string[] { "catalogTarget",
+                "catalogWork",
+                "orderRecommendStore",
+                "biblioSource",
+                "orderWork" };
+
+        // 构造出用于测试 复制书目记录 功能的全部可用 style 字符串
+        static List<string> Build_roles_styleCombination()
+        {
+            List<string> styles = new List<string>();
+            int length = _roles.Length;
+
+            List<int> base_array = new List<int>();
+            for (int i = 0; i < length; i++)
+            {
+                base_array.Add(i);
+            }
+            List<List<int>> result = Permutation.GetPermuation(base_array);
+
+            foreach (IEnumerable<int> indices in result)
+            {
+                List<string> list = new List<string>();
+                foreach (int i in indices)
+                {
+                    list.Add(_roles[i]);
+                }
+
+                styles.Add(StringUtil.MakePathList(list));
+            }
+
+            return styles;
+        }
+
+
         int TestRecoverCreatingOneBiblioDatabase(
     Stop stop,
     LibraryChannel channel,
@@ -2801,6 +2839,21 @@ out strError);
                 "issue|comment",
                 "comment",
             };
+
+            // 单独测试一下 role 和 unioncatalogstyle 的组合情况
+            List<string> roles_list = Build_roles_styleCombination();
+            foreach (string roles in roles_list)
+            {
+                string strCurrentStyle = "type:biblio,usage:book,syntax:unimarc,role:" + roles.Replace(",", "|") + ",subtype:entity|order|issue|comment,dont_protect";
+
+                int nRet = TestRecoverCreatingOneDatabase(
+stop,
+channel,
+strCurrentStyle,
+out strError);
+                if (nRet == -1)
+                    return 1;
+            }
 
             foreach (string usage in usages)
             {
@@ -2826,7 +2879,7 @@ out strError);
         }
 
         // parameters:
-        //      strStyle    usage:xxx syntax:xxx dont_protect type:xxx
+        //      strStyle    usage:xxx syntax:xxx dont_protect type:xxx role:xxx
         int TestRecoverCreatingOneDatabase(
             Stop stop,
             LibraryChannel channel,
@@ -2856,6 +2909,8 @@ out strError);
             if (string.IsNullOrEmpty(strUsage) == true)
                 strUsage = "book";
 
+            string strRole = StringUtil.GetParameterByPrefix(strStyle, "role", ":");
+
             string strSyntax = StringUtil.GetParameterByPrefix(strStyle, "syntax", ":");
             if (string.IsNullOrEmpty(strSyntax) == true)
                 strSyntax = "unimarc";
@@ -2878,11 +2933,10 @@ out strError);
             string strOutputInfo = "";
             if (bProtect)
             {
-                List<DigitalPlatform.CirculationClient.ManageHelper.DatabaseInfo> infos = null;
                 nRet = ManageHelper.GetDatabaseInfo(
             stop,
             channel,
-            out infos,
+            out List<ManageHelper.DatabaseInfo> infos,
             out strError);
                 if (nRet == -1)
                     return -1;
@@ -3060,8 +3114,9 @@ out strError);
                             this.Progress,
                             strSingleDbName,
                             strUsage,    // "book",
+                            strRole?.Replace("|", ","),
                             strSyntax,  // "unimarc",
-                                strSubType.Replace("|", ","),
+                            strSubType?.Replace("|", ","),
                             "verify",
                             out strRequestXml,
                             out strError);
@@ -3518,7 +3573,7 @@ out strError);
                     strBiblioDbName,
                     "book",
                     "unimarc",
-                        "*",
+                    "*",
                     "skipOperLog",
                     out strError);
                 if (nRet == -1)

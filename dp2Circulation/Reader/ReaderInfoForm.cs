@@ -5735,9 +5735,12 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在装载借阅历史 ...");
-            stop.BeginLoop();
+            if (stop != null)
+            {
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在装载借阅历史 ...");
+                stop.BeginLoop();
+            }
 
             EnableControls(false);
             try
@@ -5786,9 +5789,12 @@ MessageBoxDefaultButton.Button1);
             {
                 EnableControls(true);
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                if (stop != null)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
             }
         }
 

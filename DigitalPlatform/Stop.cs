@@ -1,12 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
 
 using System.Windows.Forms;
-using System.Drawing;
 using System.IO;
 
 namespace DigitalPlatform
@@ -54,6 +50,17 @@ namespace DigitalPlatform
         public bool IsActive = false;
     }
 
+    // 进度条发生改变 事件
+    public delegate void ProgressChangedEventHandler(object sender,
+    ProgressChangedEventArgs e);
+
+    public class ProgressChangedEventArgs : EventArgs
+    {
+        public long Start { get; set; }
+        public long End { get; set; }
+        public long Value { get; set; }
+    }
+
     // 定义一个Delegate_doStop()
     // public delegate void Delegate_doStop();
 
@@ -72,6 +79,7 @@ namespace DigitalPlatform
 
         public event BeginLoopEventHandler OnBeginLoop = null;
         public event EndLoopEventHandler OnEndLoop = null;
+        public event ProgressChangedEventHandler OnProgressChanged = null;
 
         int nStop = -1;	// -1: 尚未使用 0:正在处理 1:希望停止 2:已经停止，EndLoop()已经调用
         StopManager m_manager = null;
@@ -275,6 +283,17 @@ namespace DigitalPlatform
             this.ProgressMax = lEnd;
             this.ProgressValue = lStart;
 
+            // 2017/12/16
+            this.OnProgressChanged?.Invoke(
+    this,
+    new ProgressChangedEventArgs
+    {
+        Start = lStart,
+        End = lEnd,
+        Value = lStart
+    }
+    );
+
             if (m_manager != null)
             {
                 m_manager.ChangeState(this,
@@ -286,6 +305,15 @@ namespace DigitalPlatform
         public void SetProgressValue(long lValue)
         {
             this.ProgressValue = lValue;
+
+            // 2017/12/16
+            this.OnProgressChanged?.Invoke(
+                this,
+                new ProgressChangedEventArgs {
+                    Start = this.ProgressMin,
+                    End = this.ProgressMax,
+                    Value = lValue}
+                );
 
             if (m_manager != null)
             {

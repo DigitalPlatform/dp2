@@ -2007,6 +2007,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         /// <param name="strAction">动作。为 new change delete neworchange 之一</param>
         /// <param name="strRefID">参考 ID</param>
         /// <param name="strXml">记录 XML</param>
+        /// <param name="bFillDefaultValue">是否填入字段默认值</param>
         /// <param name="bookitem">返回相关的 BookItem 对象</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 保存或者修改、删除成功，没有发现册条码重复; 1: 保存成功，但是发现了册条码重复</returns>
@@ -2016,6 +2017,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             string strAction,
             string strRefID,
             string strXml,
+            bool bFillDefaultValue,
             out BookItem bookitem,
             out string strError)
         {
@@ -2103,7 +2105,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 return 0;   // 1
             }
 
-
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -2186,15 +2187,18 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 bookitem = new BookItem();
 
                 // 设置缺省值
-                nRet = SetItemDefaultValues(
-                    "quickRegister_default",
-                    true,
-                    bookitem,
-                    out strError);
-                if (nRet == -1)
+                if (bFillDefaultValue)
                 {
-                    strError = "设置缺省值的时候发生错误: " + strError;
-                    return -1;
+                    nRet = SetItemDefaultValues(
+                        "quickRegister_default",
+                        true,
+                        bookitem,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "设置缺省值的时候发生错误: " + strError;
+                        return -1;
+                    }
                 }
             }
             else

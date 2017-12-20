@@ -16,8 +16,12 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
-        
-        
+
+        public static string GetPercentText(long uploaded, long length)
+        {
+            return String.Format("{0,3:N}", ((double)uploaded / (double)length) * (double)100) + "%";
+        }
+
         public static string[] units = new string[] { "K", "M", "G", "T" };
         public static string GetLengthText(long length)
         {
@@ -1677,19 +1681,19 @@ string strTimestamp)
                 return strText;
             return strText.Trim();
         }
-        static int[] iSign =   {65306, 
+        static int[] iSign =   {65306,
                             8220,
                             65307,
-                            8216, 
+                            8216,
                             65292,
                             65281,
-                            12289, 
-  
-65311,   
+                            12289,
+
+65311,
 8212,
 12290,
-12298,   
-12297,   
+12298,
+12297,
 8230,
 65509,
 65288,

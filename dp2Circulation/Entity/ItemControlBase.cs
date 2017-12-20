@@ -476,6 +476,11 @@ namespace dp2Circulation
             return null;
         }
 
+        public void TriggerGetMacroValue(object sender, GetMacroValueEventArgs e)
+        {
+            this.GetMacroValue?.Invoke(sender, e);
+        }
+
         // return:
         //      -1  出错。已经用MessageBox报错
         //      0   没有装载

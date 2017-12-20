@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -15,7 +14,6 @@ using System.Xml;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.OPAC.Server;
-using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.OPAC.Web
@@ -303,10 +301,12 @@ namespace DigitalPlatform.OPAC.Web
                 }
                 else
                 {
-                    list = new DropDownList();
-                    list.ID = "logic" + Convert.ToString(i);
-                    list.Width = new Unit("100%");
-                    list.CssClass = "logic";
+                    list = new DropDownList
+                    {
+                        ID = "logic" + Convert.ToString(i),
+                        Width = new Unit("100%"),
+                        CssClass = "logic"
+                    };
                     line.Controls.Add(list);
                     FillLogicOperList(list);
                 }

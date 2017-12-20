@@ -33,6 +33,9 @@ namespace DigitalPlatform.CirculationClient
             string strSubTypeList,
             bool bInCirculation)
         {
+            if (StringUtil.IsInList("*", strSubTypeList))
+                StringUtil.SetInList(ref strSubTypeList, "entity,order,issue,comment", true);
+
             XmlNode nodeDatabase = dom.CreateElement("database");
             dom.DocumentElement.AppendChild(nodeDatabase);
 
@@ -198,7 +201,7 @@ namespace DigitalPlatform.CirculationClient
     "book",
     "",
     "usmarc",
-        "*",
+    "*",
     true);
                 biblio_dbnames.Add("西文图书");
                 biblio_aliases.Add("ebook");
@@ -344,6 +347,7 @@ namespace DigitalPlatform.CirculationClient
     Stop,
     strBiblioDbName,
     strUsage,
+    "",
     strSyntax,
     strSubTypeList,
     strStyle,
@@ -363,6 +367,7 @@ namespace DigitalPlatform.CirculationClient
             Stop Stop,
             string strBiblioDbName,
             string strUsage,
+            string strRole,
             string strSyntax,
             string strSubTypeList,
             string strStyle,
@@ -387,7 +392,7 @@ namespace DigitalPlatform.CirculationClient
                 CreateBiblioDatabaseNode(database_dom,
                     strBiblioDbName,
                     strUsage,   // "book",
-                    "", // "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
+                    strRole, // "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
                     strSyntax,  // "unimarc",
                     strSubTypeList,
                     true);
