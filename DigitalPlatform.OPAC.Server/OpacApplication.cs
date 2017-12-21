@@ -2412,22 +2412,24 @@ System.Text.Encoding.UTF8))
             {
                 XmlNodeList captions = database.SelectNodes("caption");
                 bool bFound = false;
-                foreach(XmlNode caption in captions)
+                foreach (XmlNode caption in captions)
                 {
                     if (hide_dbnames.IndexOf(caption.InnerText.Trim()) != -1)
                         bFound = true;
                 }
 
+#if NO
                 if (bFound == false)
                     database.RemoveAttribute("hide");
                 else
                     database.SetAttribute("hide", "true");
+#endif
+                database.ParentNode.RemoveChild(database);
             }
         }
 
         // 初始化虚拟库集合定义对象
-        public int InitialVdbs(
-            out string strError)
+        public int InitialVdbs(out string strError)
         {
             strError = "";
 
@@ -2634,14 +2636,12 @@ System.Text.Encoding.UTF8))
             int nTotalUsed = 0;
 
             // *** 第一步 把虚拟库名和普通库名分离
-            List<VirtualDatabase> vdb_list = null;
-            string strNormalDbNameList = "";
 
-            int nRet = SeperateVirtuslDbs(
+            int nRet = SeperateVirtualDbs(
             app,
             strDbName,
-            out vdb_list,
-            out strNormalDbNameList,
+            out List<VirtualDatabase> vdb_list,
+            out string strNormalDbNameList,
             out strError);
             if (nRet == -1)
                 return -1;
@@ -2818,7 +2818,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 将数据库名列表分离为虚拟库数组和普通库名列表两部分
-        static int SeperateVirtuslDbs(
+        static int SeperateVirtualDbs(
             OpacApplication app,
             string strDbNameList,
             out List<VirtualDatabase> vdb_list,
@@ -2839,6 +2839,14 @@ System.Text.Encoding.UTF8))
                 //
                 // 数据库是不是虚拟库?
                 VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
+
+                // 2017/12/21
+                // 既不是虚拟库也不是普通库
+                if (vdb == null)
+                {
+                    strError = "数据库名 '" + strDbName + "' 不存在";
+                    return -1;
+                }
 
                 // 如果是虚拟库
                 if (vdb != null && vdb.IsVirtual == true)
