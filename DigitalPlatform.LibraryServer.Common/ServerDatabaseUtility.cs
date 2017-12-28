@@ -460,7 +460,15 @@ namespace DigitalPlatform.LibraryServer.Common
                     throw new ArgumentException("未知的 strType 值 '" + strType + "'", "strType");
             }
 
+            if (cfg_dom == null)
+                throw new ArgumentException("cfg_dom 参数不应为 null");
+            if (cfg_dom.DocumentElement == null)
+                throw new ArgumentException("cfg_dom.DocumentElement 不应为 null");
+
             XmlNode attr = cfg_dom.DocumentElement.SelectSingleNode(xpath);
+            // 2017/12/28
+            if (attr == null)
+                return "";
             return attr.Value;
         }
 

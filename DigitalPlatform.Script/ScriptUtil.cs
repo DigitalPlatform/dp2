@@ -299,6 +299,7 @@ namespace DigitalPlatform.Script
 
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
+                Hashtable parameters = new Hashtable();
                 if (maps_container != null
                     && (style & BuildObjectHtmlTableStyle.Template) != 0)
                 {
@@ -309,6 +310,7 @@ namespace DigitalPlatform.Script
                     int nRet = Map856u(u,
                         strRecPath,
                         maps_container,
+                        parameters,
                         out strUri,
                         out string strError);
                     if (nRet == -1)
@@ -372,7 +374,12 @@ namespace DigitalPlatform.Script
                 string urlTemp = "";
                 if (String.IsNullOrEmpty(strObjectUrl) == false)
                 {
-                    urlTemp += "<a href='" + strObjectUrl + "'>";
+                    string strParameters = "";
+                    foreach (string name in parameters.Keys)
+                    {
+                        strParameters += HttpUtility.HtmlAttributeEncode(name) + "='" + HttpUtility.HtmlAttributeEncode(parameters[name] as string) + "' "; // 注意，内容里面是否有单引号？
+                    }
+                    urlTemp += "<a href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
                     urlTemp += urlLabel;
                     urlTemp += "</a>";
                 }
@@ -425,10 +432,12 @@ namespace DigitalPlatform.Script
         public static int Map856u(string u,
             string strBiblioRecPath,
             XmlElement container,
+            Hashtable parameters,
             out string result,
             out string strError)
         {
             strError = "";
+
             result = u;
             if (string.IsNullOrEmpty(u))
                 return 0;
@@ -476,6 +485,16 @@ namespace DigitalPlatform.Script
             {
                 strError = "webui.xml 中元素 " + item.OuterXml + " 没有配置 template 属性";
                 return -1;
+            }
+
+            // 取得 _xxxx 属性值
+            if (parameters != null)
+            {
+                foreach (XmlAttribute attr in item.Attributes)
+                {
+                    if (attr.Name.StartsWith("_"))
+                        parameters[attr.Name.Substring(1)] = attr.Value;
+                }
             }
 
             string object_path = MakeObjectUrl(strBiblioRecPath, uri);

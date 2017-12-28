@@ -2633,8 +2633,8 @@ strTestDbName,
         {
             Task.Factory.StartNew(() =>
             {
-                LogAndRecover("createDatabase", "type:*");
-                //LogAndRecover("deleteBiblioDatabase", "");
+                //LogAndRecover("createDatabase", "type:*");
+                LogAndRecover("deleteBiblioDatabase", "");
                 //LogAndRecover("deleteSimpleDatabase", "type:*");   // type:* type:amerce
             });
         }
@@ -2676,7 +2676,7 @@ out strError);
                 }
                 else if (strAction == "deleteBiblioDatabase")
                 {
-                    nRet = TestRecoverDeletingBiblioDatabase(
+                    nRet = TestRecoverDeletingBiblioDatabases(
 this.Progress,
 channel,
 strStyle,
@@ -2852,7 +2852,7 @@ channel,
 strCurrentStyle,
 out strError);
                 if (nRet == -1)
-                    return 1;
+                    return -1;
             }
 
             foreach (string usage in usages)
@@ -2870,7 +2870,7 @@ out strError);
         strCurrentStyle,
         out strError);
                         if (nRet == -1)
-                            return 1;
+                            return -1;
                     }
                 }
             }
@@ -3462,9 +3462,106 @@ out strError);
             }
         }
 
+        int TestRecoverDeletingBiblioDatabases(
+Stop stop,
+LibraryChannel channel,
+string strStyle,
+out string strError)
+        {
+            strError = "";
+
+            string[] usages = new string[] { "book", "series" };
+            string[] syntaxs = new string[] { "unimarc", "usmarc" };
+            string[] subtypes = new string[] { "*", "",
+                "entity",
+                "entity|order",
+                "entity|order|issue",
+                "entity|order|issue|comment",
+                "order",
+                "order|issue",
+                "order|issue|comment",
+                "issue",
+                "issue|comment",
+                "comment",
+            };
+
+            // 单独测试一下 role 的不同
+            List<string> roles_list = Build_roles_styleCombination();
+            foreach (string roles in roles_list)
+            {
+                string strCurrentStyle = "type:biblio,usage:book,syntax:unimarc,role:" + roles.Replace(",", "|") + ",subtype:entity|order|issue|comment,dont_protect";
+
+                int nRet = TestRecoverDeletingOneBiblioDatabase(
+stop,
+channel,
+strCurrentStyle,
+out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // usage syntax subtype 的组合
+            foreach (string usage in usages)
+            {
+                foreach (string syntax in syntaxs)
+                {
+                    foreach (string subtype in subtypes)
+                    {
+                        string strCurrentStyle = "type:biblio,usage:" + usage + ",syntax:" + syntax + ",subtype:" + subtype
+                            + ",dont_protect";
+
+                        int nRet = TestRecoverDeletingOneBiblioDatabase(
+        stop,
+        channel,
+        strCurrentStyle,
+        out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                }
+            }
+
+#if NO
+
+            ////
+
+            string strType = StringUtil.GetParameterByPrefix(strStyle, "type", ":");
+            if (string.IsNullOrEmpty(strType) == true)
+            {
+                strError = "strStyle 中没有包含任何 type:xxx 内容";
+                return -1;
+            }
+
+            if (strType == "*")
+            {
+                strType = "arrived|amerce|message|pinyin|gcat|word|publisher|inventory|dictionary|zhongcihao"; // invoice 暂时没有支持
+                // strType = "publisher"; // invoice 暂时没有支持
+            }
+
+            List<string> types = StringUtil.SplitList(strType, "|");
+            foreach (string type in types)
+            {
+                string strCurrentStyle = StringUtil.SetParameterByPrefix(strStyle,
+                    "type",
+                    ":",
+                    type);
+                if (type == "zhongcihao")
+                    strCurrentStyle += ",dont_protect";
+                nRet = TestRecoverDeletingOneBiblioDatabase(
+            stop,
+            channel,
+            strCurrentStyle,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+#endif
+            return 0;
+        }
+
         // 测试恢复删除 书目数据库
         // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
-        int TestRecoverDeletingBiblioDatabase(
+        int TestRecoverDeletingOneBiblioDatabase(
             Stop stop,
             LibraryChannel channel,
             string strStyle,
@@ -3473,19 +3570,20 @@ out strError);
             strError = "";
             int nRet = 0;
 
+            DisplayTitle("=== 删除一个书目库 ===");
+
             string strBiblioDbName = "_测试用中文图书";
 
             // *** 预先准备阶段
             // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
-            Progress.SetMessage("正在删除以前残留的测试用书目库 ...");
-            string strOutputInfo = "";
+            DisplayTitle("正在尝试删除以前残留的测试用书目库 ...");
             long lRet = channel.ManageDatabase(
                 this.Progress,
 "delete",
 strBiblioDbName,    // strDatabaseNames,
 "",
 "skipOperLog",
-out strOutputInfo,
+out string strOutputInfo,
 out strError);
             if (lRet == -1)
             {
@@ -3493,9 +3591,26 @@ out strError);
                     goto ERROR1;
             }
 
+            string strUsage = StringUtil.GetParameterByPrefix(strStyle, "usage", ":");
+            if (string.IsNullOrEmpty(strUsage) == true)
+                strUsage = "book";
+
+            string strRole = StringUtil.GetParameterByPrefix(strStyle, "role", ":");
+
+            string strSyntax = StringUtil.GetParameterByPrefix(strStyle, "syntax", ":");
+            if (string.IsNullOrEmpty(strSyntax) == true)
+                strSyntax = "unimarc";
+
+            string strSubType = StringUtil.GetParameterByPrefix(strStyle, "subtype", ":");
+            if (string.IsNullOrEmpty(strSubType) == true)
+                strSubType = "*";    // 完全可能创建没有任何下级数据库的书目库
+
+            string strStyleCaption = "usage=" + strUsage + " syntax=" + strSyntax + " subtype=" + strSubType + " role=" + strRole;
+
             // 创建一个书目库，以便后面进行删除操作
             {
-                Progress.SetMessage("正在创建测试用书目库 ...");
+                DisplayTitle("创建一个书目库 '" + strBiblioDbName + "'，以前后面能模拟出测试动作(删除) " + strStyleCaption);
+
                 // 创建一个书目库
                 // parameters:
                 // return:
@@ -3506,10 +3621,12 @@ out strError);
                     channel,
                     this.Progress,
                     strBiblioDbName,
-                    "book",
-                    "unimarc",
-                    "*",
-                    "skipOperLog",
+                    strUsage,
+                    strRole?.Replace("|", ","),
+                    strSyntax,
+                    strSubType?.Replace("|", ","),
+                    "skipOperLog,verify",
+                    out string strRequestXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -3542,12 +3659,14 @@ out strError);
 
             // 进行删除操作，并记入日志
             {
+                DisplayTitle("创建关键日志动作：删除数据库 '" + strBiblioDbName + "'。创建动作带有校验功能");
+
                 lRet = channel.ManageDatabase(
                     this.Progress,
     "delete",
     strBiblioDbName,    // strDatabaseNames,
     "",
-    "",
+    "verify",
     out strOutputInfo,
     out strError);
                 if (lRet == -1)
@@ -3560,6 +3679,8 @@ out strError);
             }
             else
             {
+                DisplayTitle("准备进行恢复模拟。先创建临时书目库 '" + strBiblioDbName + "' 以作为恢复的准备条件 " + strStyleCaption);
+
                 // 创建书目库，以便在恢复操作前的环境中，先具有这个数据库
                 // 创建一个书目库
                 // parameters:
@@ -3571,10 +3692,12 @@ out strError);
                     channel,
                     this.Progress,
                     strBiblioDbName,
-                    "book",
-                    "unimarc",
-                    "*",
-                    "skipOperLog",
+                    strUsage,
+                    strRole?.Replace("|", ","),
+                    strSyntax,
+                    strSubType?.Replace("|", ","),
+                    "skipOperLog,verify",
+                    out string strRequestXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4128,14 +4251,13 @@ out strError);
         {
             strError = "";
 
-            string strOutputInfo = "";
             long lRet = channel.ManageDatabase(
 stop,
 "getinfo",
 strDatabaseNameList,    // strDatabaseNames,
 "",
 "verify:" + strFunction,
-out strOutputInfo,
+out string strOutputInfo,
 out strError);
             if (lRet == -1)
                 return -1;
@@ -4297,7 +4419,7 @@ out strError);
             }
         }
 
-        #endregion
+#endregion
 
         void DisplayTitle(string strText)
         {

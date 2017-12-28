@@ -979,9 +979,7 @@ namespace dp2Circulation
             StringBuilder text = new StringBuilder();
 
             XmlDocument item_dom = new XmlDocument();
-            if (string.IsNullOrEmpty(order.Xml))
-                order.Xml = "<root />";
-            item_dom.LoadXml(order.Xml);
+            DomUtil.SafeLoadXml(item_dom, order.Xml);
 
             // state
             string state = DomUtil.GetElementText(item_dom.DocumentElement,
@@ -1023,7 +1021,7 @@ namespace dp2Circulation
             {
                 refID = Guid.NewGuid().ToString();
                 order.SetFieldValue("refID", refID);
-                item_dom.LoadXml(order.Xml);
+                DomUtil.SafeLoadXml(item_dom, order.Xml);
             }
 
             // batchNo
@@ -1102,7 +1100,7 @@ namespace dp2Circulation
             string strXml)
         {
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(strXml);
+            DomUtil.SafeLoadXml(dom, strXml);
 
             StringBuilder text = new StringBuilder();
             text.Append("\r\n<table class='biblio'>");
@@ -1546,7 +1544,7 @@ int nCount)
                 && strPublicationType == "book")
             {
                 XmlDocument dom = new XmlDocument();
-                dom.LoadXml(strXml);
+                DomUtil.SafeLoadXml(dom, strXml);
                 DomUtil.DeleteElement(dom.DocumentElement, "range");
                 DomUtil.DeleteElement(dom.DocumentElement, "issueCount");
                 strXml = dom.DocumentElement.OuterXml;
@@ -2076,7 +2074,7 @@ int nCount)
             Hashtable results = new Hashtable();
 
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(this.Xml);
+            DomUtil.SafeLoadXml(dom, this.Xml);
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in nodes)
@@ -2363,10 +2361,12 @@ int nCount)
             }
         }
 
+
+
         public void SetFieldValue(string name, string value)
         {
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(this.Xml);
+            DomUtil.SafeLoadXml(dom, this.Xml);    // 2017/12/27 改进
 
             DomUtil.SetElementText(dom.DocumentElement, name, value);
             this.Xml = dom.DocumentElement.OuterXml;
@@ -2376,7 +2376,7 @@ int nCount)
         public string GetFieldValue(string name)
         {
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(this.Xml);
+            DomUtil.SafeLoadXml(dom, this.Xml);
 
             return DomUtil.GetElementText(dom.DocumentElement, name);
         }
@@ -2386,7 +2386,7 @@ int nCount)
         public void Modify(string template_xml)
         {
             XmlDocument temp_dom = new XmlDocument();
-            temp_dom.LoadXml(template_xml);
+            DomUtil.SafeLoadXml(temp_dom, template_xml);
 
             foreach (XmlNode node in temp_dom.DocumentElement.ChildNodes)
             {

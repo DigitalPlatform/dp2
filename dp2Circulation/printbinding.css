@@ -65,6 +65,12 @@ TABLE.binding TR.barcode TD.value
 }
 */
 
+    .barcode_label {
+        font-family: "C39HrP24DhTt", "Microsoft YaHei", Times, serif;
+        font-size: 3.0em;
+        padding-left: 50px;
+    }
+
 DIV.members_table_title
 {
 	text-align: center;

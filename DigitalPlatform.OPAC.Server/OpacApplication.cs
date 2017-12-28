@@ -2424,7 +2424,8 @@ System.Text.Encoding.UTF8))
                 else
                     database.SetAttribute("hide", "true");
 #endif
-                database.ParentNode.RemoveChild(database);
+                if (bFound == true)
+                    database.ParentNode.RemoveChild(database);
             }
         }
 
