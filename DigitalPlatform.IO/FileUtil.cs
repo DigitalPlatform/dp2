@@ -10,9 +10,9 @@ namespace DigitalPlatform.IO
     public static class StreamExtension
     {
         // 带有 Lock/Unlock 的写入操作
-        public static void LockingWrite(this Stream stream, 
-            byte[] buffer, 
-            int offset, 
+        public static void LockingWrite(this Stream stream,
+            byte[] buffer,
+            int offset,
             int length)
         {
             if (stream is FileStream)
@@ -43,7 +43,121 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class FileUtil
     {
-        public static byte [] GetFileMd5(string filename)
+        // 将一个文本文件的内容修改为 UTF-8 编码方式
+        public static int ConvertGb2312TextfileToUtf8(string strFilename,
+out string strError)
+        {
+            strError = "";
+
+            // 2013/10/31 如果无法通过文件头部探测出来，则不作转换
+            Encoding encoding = FileUtil.DetectTextFileEncoding(strFilename, null);
+
+            if (encoding == null || encoding.Equals(Encoding.UTF8) == true)
+                return 0;
+
+            string strContent = "";
+            try
+            {
+                using (StreamReader sr = new StreamReader(strFilename, encoding))
+                {
+                    strContent = sr.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "从文件 " + strFilename + " 读取失败: " + ex.Message;
+                return -1;
+            }
+
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(strFilename, false, Encoding.UTF8))
+                {
+                    sw.Write(strContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + strFilename + " 失败: " + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 比较两个文本文件的内容是否一致
+        // return:
+        //      -1  出错
+        //      0   两个文件内容一样
+        //      1   两个文件内容不一样
+        public static int CompareTwoTextFile(string filename1,
+            string filename2,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = ConvertGb2312TextfileToUtf8(filename1,
+        out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = ConvertGb2312TextfileToUtf8(filename2,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            try
+            {
+                using (StreamReader sr1 = new StreamReader(filename1, Encoding.UTF8))
+                using (StreamReader sr2 = new StreamReader(filename2, Encoding.UTF8))
+                {
+                    string s1 = sr1.ReadToEnd();
+                    string s2 = sr2.ReadToEnd();
+                    if (s1 == s2)
+                        return 0;
+                    return 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "从文件 " + filename1 + " 或 " + filename2 + " 读取失败: " + ex.Message;
+                return -1;
+            }
+        }
+
+        // return:
+        //      0   相同
+        //      其他  不同
+        public static int CompareTwoFile(string filename1, string filename2)
+        {
+
+
+            using (Stream s1 = File.OpenRead(filename1))
+            using (Stream s2 = File.OpenRead(filename2))
+            {
+                if (s1.Length != s2.Length)
+                    return -1;
+
+                int nChunkSize = 8192;
+                byte[] bytes1 = new byte[nChunkSize];
+                byte[] bytes2 = new byte[nChunkSize];
+
+                while (true)
+                {
+                    int n = s1.Read(bytes1, 0, nChunkSize);
+                    if (n <= 0)
+                        break;
+
+                    s2.Read(bytes2, 0, n);
+                    if (ByteArray.Compare(bytes1, bytes2, n) != 0)
+                        return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        public static byte[] GetFileMd5(string filename)
         {
             using (var md5 = MD5.Create())
             {

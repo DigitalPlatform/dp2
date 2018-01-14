@@ -3564,7 +3564,7 @@ out strError);
                         strFileName,
                         lIndex,
                         lHint,
-                "", // strStyle,
+                "dont_return_xml", // strStyle,
                 "", // strFilter,
                 out strXml,
                 out lHintNext,
@@ -4488,6 +4488,26 @@ out strError);
             }
         }
 
+        // 兼容以前用法
+        public long ManageDatabase(
+    DigitalPlatform.Stop stop,
+    string strAction,
+    string strDatabaseName,
+    string strDatabaseInfo,
+    out string strOutputInfo,
+    out string strError)
+        {
+
+            return ManageDatabase(
+                stop,
+                strAction,
+                strDatabaseName,
+                strDatabaseInfo,
+                "",
+                out strOutputInfo,
+                out strError);
+        }
+
         // 管理数据库
         /// <summary>
         /// 管理数据库
@@ -4496,6 +4516,7 @@ out strError);
         /// <param name="strAction">动作参数</param>
         /// <param name="strDatabaseName">数据库名</param>
         /// <param name="strDatabaseInfo">数据库信息</param>
+        /// <param name="strStyle">风格</param>
         /// <param name="strOutputInfo">返回操作后的数据库信息</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -4507,6 +4528,7 @@ out strError);
             string strAction,
             string strDatabaseName,
             string strDatabaseInfo,
+            string strStyle,
             out string strOutputInfo,
             out string strError)
         {
@@ -4520,6 +4542,7 @@ out strError);
                     strAction,
                     strDatabaseName,
                     strDatabaseInfo,
+                    strStyle,
                     null,
                     null);
 
@@ -7556,6 +7579,7 @@ out strError);
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
         //      file    文件 Stream。注意：本函数调用中，文件指针会被自然改变
+        //      length  要保存部分的长度。如果为 -1，在函数内会用 file.Length 代替
         public long SaveResObject(
             DigitalPlatform.Stop stop,
             string strPath,
@@ -7592,7 +7616,6 @@ out strError);
                     return -1;
             }
 
-            string strOutputResPath = "";
 
             // string strMetadata = BuildMetadata(strMime, strLocalPath);
 
@@ -7606,7 +7629,7 @@ out strError);
                 strMetadata,
                 strStyle,
                 timestamp,
-                out strOutputResPath,
+                out string strOutputResPath,
                 out output_timestamp,
                 out strError);
             if (lRet == -1)
@@ -7886,10 +7909,10 @@ out string strError)
         public long GetIssues(
             DigitalPlatform.Stop stop,
             string strBiblioRecPath,
-                   long lStart,
-                   long lCount,
-                   string strStyle,
-                   string strLang,
+            long lStart,
+            long lCount,
+            string strStyle,
+            string strLang,
             out EntityInfo[] issueinfos,
             out string strError)
         {

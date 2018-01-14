@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -31,17 +26,17 @@ namespace dp2Circulation
         {
             Debug.Assert(this.AppInfo != null, "");
 
-            // 装订批次号
-            this.textBox_general_bindingBatchNo.Text = this.AppInfo.GetString(
-                "binding_form",
-                "binding_batchno",
-                "");
-
+#if NO
             // 验收批次号
             this.textBox_general_acceptBatchNo.Text = this.AppInfo.GetString(
    "binding_form",
    "accept_batchno",
    "");
+#endif
+
+            // 批次号需要从默认值模板里面获得
+            this.textBox_general_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+                "batchNo");
 
             // 编辑区布局方式
             this.comboBox_ui_splitterDirection.Text = this.AppInfo.GetString(
@@ -96,15 +91,16 @@ namespace dp2Circulation
         {
             Debug.Assert(this.AppInfo != null, "");
 
-            this.AppInfo.SetString(
-                "binding_form",
-                "binding_batchno",
-                this.textBox_general_bindingBatchNo.Text);
-
+#if NO
             this.AppInfo.SetString(
                "binding_form",
                "accept_batchno",
                this.textBox_general_acceptBatchNo.Text);
+#endif
+            // 批次号需要保存到默认值模板
+            EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+"batchNo",
+this.textBox_general_batchNo.Text);
 
             this.AppInfo.SetString(
                 "binding_form",
@@ -262,8 +258,6 @@ namespace dp2Circulation
                 if (result == DialogResult.No)
                     return;
             }
-
-
 
             ListViewItem item = new ListViewItem();
             item.Text = dlg.FieldName;
@@ -590,6 +584,29 @@ namespace dp2Circulation
             listView_groupContents_lines_SelectedIndexChanged(sender, null);
 
             this.m_bGroupContentsChanged = true;
+        }
+
+        private void button_defaultEntityFields_Click(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.DisplayStyle = "quick_entity";
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            // 批次号可能被对话框修改，需要刷新
+            this.textBox_general_batchNo.Text = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+                "batchNo");
+        }
+
+        private void textBox_general_acceptBatchNo_Leave(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+                "batchNo",
+                this.textBox_general_batchNo.Text);
         }
     }
 }

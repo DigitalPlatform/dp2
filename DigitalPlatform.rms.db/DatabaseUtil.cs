@@ -499,7 +499,7 @@ namespace DigitalPlatform.rms
                     string strValue = strReadCount.Substring(1);
                     if (StringUtil.IsPureNumber(strValue) == false)
                     {
-                        strError = "strReadCount 参数值 '"+strReadCount+"' 应该为正负号引导的纯数字";
+                        strError = "strReadCount 参数值 '" + strReadCount + "' 应该为正负号引导的纯数字";
                         return -1;
                     }
                     long v = 0;
@@ -515,7 +515,7 @@ namespace DigitalPlatform.rms
 
                     oldRoot.SetAttribute("readCount", (old + v).ToString());
                 }
-                else 
+                else
                 {
                     long v = 0;
                     if (long.TryParse(strReadCount, out v) == false)
@@ -618,7 +618,7 @@ namespace DigitalPlatform.rms
             strError = "";
             if (String.IsNullOrEmpty(strXml) == true)
             {
-                using(Stream s = File.Create(strFileName))
+                using (Stream s = File.Create(strFileName))
                 {
 
                 }
@@ -636,12 +636,22 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            // 2017/12/5
+            // 以保持字符串原貌方式写入
+            using (StreamWriter w = new StreamWriter(strFileName, false, Encoding.UTF8))
+            {
+                w.Write(strXml);
+            }
+#if NO
+            // 这里的问题是要吞掉 tab 和回车
             using (XmlTextWriter w = new XmlTextWriter(strFileName,
                 System.Text.Encoding.UTF8))
             {
                 dom.Save(w);
                 // w.Close();
             }
+#endif
+
             return 0;
         }
 

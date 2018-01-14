@@ -130,6 +130,12 @@ namespace dp2Circulation
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
             this.kernelResTree1.DownloadFiles += kernelResTree1_DownloadFiles;
+            this.kernelResTree1.UploadFiles += KernelResTree1_UploadFiles;
+        }
+
+        private void KernelResTree1_UploadFiles(object sender, UploadFilesEventArgs e)
+        {
+            Program.MainForm.BeginUploadFiles(e);
         }
 
         void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
@@ -834,6 +840,7 @@ out strError);
                     "getinfo",
                     "",
                     "",
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -949,6 +956,7 @@ out strError);
                     bRecreate == false ? "create" : "recreate",
                     "",
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -999,6 +1007,7 @@ out strError);
                     stop,
                     "delete",
                     strDatabaseNames,
+                    "",
                     "",
                     out strOutputInfo,
                     out strError);
@@ -1055,6 +1064,7 @@ out strError);
                     "refresh",
                     strDatabaseNames,
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)
@@ -1105,6 +1115,7 @@ out strError);
                     stop,
                     "initialize",
                     strDatabaseNames,
+                    "",
                     "",
                     out strOutputInfo,
                     out strError);
@@ -1159,6 +1170,7 @@ out strError);
                     "change",
                     strDatabaseNames,
                     strDatabaseInfo,
+                    "",
                     out strOutputInfo,
                     out strError);
                 if (lRet == -1)

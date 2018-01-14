@@ -323,6 +323,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         SaveBreakPoint(s, param);
                     },
+                    param == null ? "" : param.Style,
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
@@ -518,6 +519,7 @@ namespace DigitalPlatform.LibraryServer
         int ProcessOperLogs(ServerReplicationStart breakpoint,
             bool bContinueWhenError,
             Delegate_saveBreakPoint func_saveBreakPoint,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -632,8 +634,9 @@ namespace DigitalPlatform.LibraryServer
                         nRet = this.DoOperLogRecord(
                             this.RecoverLevel,
                             item.Xml,
-        attachment,
-        out strError);
+                            attachment,
+                            strStyle,
+                            out strError);
                         if (nRet == -1)
                         {
                             strError = "做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时发生错误：" + strError;

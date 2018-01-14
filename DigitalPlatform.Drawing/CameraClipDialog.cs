@@ -129,6 +129,13 @@ namespace DigitalPlatform.Drawing
 
         private void toolStripButton_shoot_Click(object sender, EventArgs e)
         {
+            // 2017/12/26
+            if (this.qrRecognitionControl1.Image == null)
+            {
+                MessageBox.Show(this, "this.qrRecognitionControl1.Image == null");
+                return;
+            }
+
             this.qrRecognitionControl1.DisplayText("正在探测边沿 ...");
             Shoot();
             DetectEdge();
@@ -137,7 +144,7 @@ namespace DigitalPlatform.Drawing
 
         void Shoot()
         {
-            Image temp = this.qrRecognitionControl1.Image;
+            Image temp = this.qrRecognitionControl1.Image;  // 注意，此处 temp 可能为 null，会导致下一句抛出异常
 
             // this.pictureBox_clip.Image = new Bitmap(temp);
             ImageUtil.SetImage(this.pictureBox_clip, new Bitmap(temp)); // 2012/12/28

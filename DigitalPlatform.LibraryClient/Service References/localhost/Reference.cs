@@ -4113,10 +4113,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabaseResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabaseResponse")]
-        System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
         
@@ -12364,13 +12364,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginClearAllDbsDelegate, null, this.onEndClearAllDbsDelegate, this.onClearAllDbsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
-            return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle) {
+            return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, callback, asyncState);
+        public System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -12382,7 +12382,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strAction = ((string)(inValues[0]));
             string strDatabaseName = ((string)(inValues[1]));
             string strDatabaseInfo = ((string)(inValues[2]));
-            return this.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, callback, asyncState);
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, strStyle, callback, asyncState);
         }
         
         private object[] OnEndManageDatabase(System.IAsyncResult result) {
@@ -12400,11 +12401,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo) {
-            this.ManageDatabaseAsync(strAction, strDatabaseName, strDatabaseInfo, null);
+        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle) {
+            this.ManageDatabaseAsync(strAction, strDatabaseName, strDatabaseInfo, strStyle, null);
         }
         
-        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, object userState) {
+        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, object userState) {
             if ((this.onBeginManageDatabaseDelegate == null)) {
                 this.onBeginManageDatabaseDelegate = new BeginOperationDelegate(this.OnBeginManageDatabase);
             }
@@ -12417,7 +12418,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginManageDatabaseDelegate, new object[] {
                         strAction,
                         strDatabaseName,
-                        strDatabaseInfo}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
+                        strDatabaseInfo,
+                        strStyle}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {
@@ -14738,10 +14740,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndClearAllDbs(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageDatabaseResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ManageDatabase", ReplyAction="http://dp2003.com/dp2library/dp2library/ManageDatabaseResponse")]
-        System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndManageDatabase(out string strOutputInfo, System.IAsyncResult result);
         
@@ -22983,13 +22985,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginClearAllDbsDelegate, null, this.onEndClearAllDbsDelegate, this.onClearAllDbsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo) {
-            return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ManageDatabase(out string strOutputInfo, string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle) {
+            return base.Channel.ManageDatabase(out strOutputInfo, strAction, strDatabaseName, strDatabaseInfo, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, callback, asyncState);
+        public System.IAsyncResult BeginManageDatabase(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -23001,7 +23003,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strAction = ((string)(inValues[0]));
             string strDatabaseName = ((string)(inValues[1]));
             string strDatabaseInfo = ((string)(inValues[2]));
-            return this.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, callback, asyncState);
+            string strStyle = ((string)(inValues[3]));
+            return this.BeginManageDatabase(strAction, strDatabaseName, strDatabaseInfo, strStyle, callback, asyncState);
         }
         
         private object[] OnEndManageDatabase(System.IAsyncResult result) {
@@ -23019,11 +23022,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo) {
-            this.ManageDatabaseAsync(strAction, strDatabaseName, strDatabaseInfo, null);
+        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle) {
+            this.ManageDatabaseAsync(strAction, strDatabaseName, strDatabaseInfo, strStyle, null);
         }
         
-        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, object userState) {
+        public void ManageDatabaseAsync(string strAction, string strDatabaseName, string strDatabaseInfo, string strStyle, object userState) {
             if ((this.onBeginManageDatabaseDelegate == null)) {
                 this.onBeginManageDatabaseDelegate = new BeginOperationDelegate(this.OnBeginManageDatabase);
             }
@@ -23036,7 +23039,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginManageDatabaseDelegate, new object[] {
                         strAction,
                         strDatabaseName,
-                        strDatabaseInfo}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
+                        strDatabaseInfo,
+                        strStyle}, this.onEndManageDatabaseDelegate, this.onManageDatabaseCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetUser(out DigitalPlatform.LibraryClient.localhost.UserInfo[] contents, string strAction, string strName, int nStart, int nCount) {

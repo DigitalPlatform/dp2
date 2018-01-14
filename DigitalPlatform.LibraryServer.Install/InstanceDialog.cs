@@ -2129,7 +2129,7 @@ MessageBoxDefaultButton.Button2);
             }));
 
             StopManager stopManager = new StopManager();
-            stopManager.Initial(dlg.CancelButton, dlg.MessageLabel, dlg.ProgressBar);
+            stopManager.Initial(dlg.MyCancelButton, dlg.MessageLabel, dlg.ProgressBar);
 #if NO
             stopManager.OnDisplayMessage += new DisplayMessageEventHandler((sender, e) => {
                 dlg.SetMessage(e.Message);

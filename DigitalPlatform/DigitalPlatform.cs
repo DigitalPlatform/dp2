@@ -152,8 +152,8 @@ namespace DigitalPlatform
 
         // 比较两个byte[]数组是否相等。
         // parameter:
-        //		timestamp1: 第一个byte[]数组
-        //		timestamp2: 第二个byte[]数组
+        //		bytes1: 第一个byte[]数组
+        //		bytes2: 第二个byte[]数组
         // return:
         //		0   相等
         //		大于或者小于0   不等。先比较长度。长度相等，再逐个字符相减。
@@ -183,6 +183,9 @@ namespace DigitalPlatform
         }
 
         // 比较两个byte数组的局部
+        // return:
+        //		0   相等
+        //		大于或者小于0   不等。先比较长度。长度相等，再逐个字符相减。
         public static int Compare(
             byte[] bytes1,
             byte[] bytes2,

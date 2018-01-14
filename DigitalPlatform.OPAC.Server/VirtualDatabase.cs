@@ -6,6 +6,7 @@ using System.Xml;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace DigitalPlatform.OPAC.Server
 {
@@ -851,10 +852,10 @@ namespace DigitalPlatform.OPAC.Server
         {
             strError = "";
 
-            // this.ServerUrl = strServerUrl;
+            // Debug.Assert(false, "");
 
             // 列出所有虚拟库XML节点
-            XmlNodeList virtualnodes = root.SelectNodes("virtualDatabase");
+            // XmlNodeList virtualnodes = root.SelectNodes("virtualDatabase");
             for (int i = 0; i < root.ChildNodes.Count; i++)
             {
                 XmlNode node = root.ChildNodes[i];
@@ -862,9 +863,12 @@ namespace DigitalPlatform.OPAC.Server
                 if (node.NodeType != XmlNodeType.Element)
                     continue;
 
+                // 2017/12/12
+                if (DomUtil.GetBooleanParam(node, "hide", false) == true)
+                    continue;
+
                 if (node.Name == "virtualDatabase")
                 {
-
                     // 构造虚拟数据库对象
                     VirtualDatabase vdb = new VirtualDatabase();
                     vdb.nodeDatabase = node;
@@ -875,7 +879,6 @@ namespace DigitalPlatform.OPAC.Server
 
                 if (node.Name == "database")    // 普通库
                 {
-
                     // 构造普通数据库对象
                     VirtualDatabase vdb = new VirtualDatabase();
                     vdb.nodeDatabase = node;
@@ -927,7 +930,7 @@ namespace DigitalPlatform.OPAC.Server
                 all.Add(temp);
             }
 
-            infos = new DbFromInfo [all.Count];
+            infos = new DbFromInfo[all.Count];
             all.CopyTo(infos);
             return 0;
         }

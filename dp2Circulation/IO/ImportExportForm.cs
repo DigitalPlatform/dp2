@@ -964,7 +964,7 @@ new string[] { "重试", "跳过", "中断" });
             }
 
             // 上传书目记录的数字对象
-            if (info.IncludeSubObjects)
+            if (info.IncludeSubObjects && info.Collect == false)
                 UploadObjects(info, info.BiblioRecPath, info.BiblioXml);
 
             return true;

@@ -65,6 +65,19 @@ namespace DigitalPlatform.LibraryServer
 
         public int PerTime = 60 * 60 * 1000;	// 1小时
 
+#if NO
+        internal List<string> _errors = new List<string>();
+        public void AddError(string strText)
+        {
+            _errors.Add(strText);
+        }
+
+        public void ClearErrors()
+        {
+            this._errors.Clear();
+        }
+#endif
+
         public virtual void Dispose()
         {
             this.Close();
@@ -388,6 +401,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             this.ErrorInfo = "";
+            // this.ClearErrors();
             this.m_bClosed = false;
 
             this.eventActive.Set();
@@ -521,6 +535,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.m_lock.ReleaseWriterLock();
             }
+        }
+
+        // 2017/11/28
+        internal void AppendErrorText(string strText)
+        {
+            AppendResultText("{error}"+ strText);
         }
 
         // 追加结果文本
@@ -679,7 +699,6 @@ namespace DigitalPlatform.LibraryServer
 
             baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
 #endif
-
             // 2017/9/10 改造
             StreamItem s = this.App._physicalFileCache.GetStream(this.ProgressFileName,
                 FileMode.Open, FileAccess.Read);
@@ -689,7 +708,8 @@ namespace DigitalPlatform.LibraryServer
 
                 long lLength = lTotalLength - lStart;
 
-                if (lLength <= 0)
+                if (lLength <= 0 
+                    || lStart == -1)   //2017/11/14
                 {
                     lEndOffset = lTotalLength;
                     return;
@@ -827,10 +847,13 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 执行一个日志记录的恢复动作
+        // parameters:
+        //      attachment  附件流对象。注意文件指针在流的尾部
         public int DoOperLogRecord(
             RecoverLevel level,
             string strXml,
             Stream attachment,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -999,13 +1022,14 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strOperation == "manageDatabase")
             {
-                // 管理数据库 2017/5/23
 #if NO
+                // 管理数据库 2017/5/23
                 // 2017/10/15
                 nRet = this.App.RecoverManageDatabase(this.RmsChannels,
                     level,
                     dom,
                     attachment,
+                    strStyle,
                     out strError);
 #endif
             }

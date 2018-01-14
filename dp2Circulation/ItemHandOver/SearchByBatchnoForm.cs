@@ -16,10 +16,12 @@ namespace dp2Circulation
     /// </summary>
     internal partial class SearchByBatchnoForm : Form
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 获取批次号key+count值列表

@@ -107,6 +107,13 @@ namespace DigitalPlatform.LibraryServer
             if (strStyle == null)
                 strStyle = "";
 
+            // 2017/12/16
+            if (StringUtil.IsInList("gzip", strStyle)
+                && baSource != null && baSource.Length > 0)
+            {
+                baSource = ByteArray.DecompressGzip(baSource);
+            }
+
             bool bDelete = StringUtil.IsInList("delete", strStyle) == true;
 
             if (bDelete == true)

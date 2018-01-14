@@ -158,6 +158,7 @@ namespace ZkFingerprint
 #if HTTP_CHANNEL 
             m_serverChannel = new HttpChannel();
 #else
+            // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
             m_serverChannel = new IpcServerChannel(
                 "FingerprintChannel");
 #endif

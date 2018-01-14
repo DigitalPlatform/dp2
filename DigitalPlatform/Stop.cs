@@ -1,24 +1,20 @@
-using System;
-using System.Collections;
+ï»¿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
 
 using System.Windows.Forms;
-using System.Drawing;
 using System.IO;
 
 namespace DigitalPlatform
 {
     /*
      * 1) stop = new Stop() 
-     * 2) ´°¿Úload½×¶Î Register()
-     * 3) ´°¿Úclosed½×¶Î Unregister()
-     * 4) Ã¿´ÎÑ­»·¿ªÊ¼ Initial() ¹ØÁªdelegate
-     *    Ñ­»·¿ªÊ¼Ê±ºò£¬BeginLoop() Ñ­»·½áÊøºó£¬EndLoop() Initial()³·ÀëºÍdelegateµÄ¹ØÁª
-     * 5) ÔÚÑ­»·Ö´ĞĞÖĞ£¬Èç¹ûÓÃ»§´¥·¢stop button£¬delegate×ÔÈ»»á±»µ÷ÓÃ¡£»òÕß
-     *    ÔÚÑ­»·ÖĞÖ÷¶¯¹Û²ìstopµÄState×´Ì¬£¬Ò²¿ÉÒÔµÃÖª°´Å¥ÊÇ·ñÒÑ¾­±»´¥·¢ÁË
+     * 2) çª—å£loadé˜¶æ®µ Register()
+     * 3) çª—å£closedé˜¶æ®µ Unregister()
+     * 4) æ¯æ¬¡å¾ªç¯å¼€å§‹ Initial() å…³è”delegate
+     *    å¾ªç¯å¼€å§‹æ—¶å€™ï¼ŒBeginLoop() å¾ªç¯ç»“æŸåï¼ŒEndLoop() Initial()æ’¤ç¦»å’Œdelegateçš„å…³è”
+     * 5) åœ¨å¾ªç¯æ‰§è¡Œä¸­ï¼Œå¦‚æœç”¨æˆ·è§¦å‘stop buttonï¼Œdelegateè‡ªç„¶ä¼šè¢«è°ƒç”¨ã€‚æˆ–è€…
+     *    åœ¨å¾ªç¯ä¸­ä¸»åŠ¨è§‚å¯Ÿstopçš„StateçŠ¶æ€ï¼Œä¹Ÿå¯ä»¥å¾—çŸ¥æŒ‰é’®æ˜¯å¦å·²ç»è¢«è§¦å‘äº†
      * 
      * 
      * 
@@ -27,7 +23,7 @@ namespace DigitalPlatform
      * 
      */
 
-    // StopÊÂ¼ş
+    // Stopäº‹ä»¶
     public delegate void StopEventHandler(object sender,
         StopEventArgs e);
 
@@ -36,7 +32,7 @@ namespace DigitalPlatform
 
     }
 
-    // BeginLoopÊÂ¼ş
+    // BeginLoopäº‹ä»¶
     public delegate void BeginLoopEventHandler(object sender,
         BeginLoopEventArgs e);
 
@@ -45,7 +41,7 @@ namespace DigitalPlatform
         public bool IsActive = false;
     }
 
-    // EndLoopÊÂ¼ş
+    // EndLoopäº‹ä»¶
     public delegate void EndLoopEventHandler(object sender,
         EndLoopEventArgs e);
 
@@ -54,10 +50,21 @@ namespace DigitalPlatform
         public bool IsActive = false;
     }
 
-    // ¶¨ÒåÒ»¸öDelegate_doStop()
+    // è¿›åº¦æ¡å‘ç”Ÿæ”¹å˜ äº‹ä»¶
+    public delegate void ProgressChangedEventHandler(object sender,
+    ProgressChangedEventArgs e);
+
+    public class ProgressChangedEventArgs : EventArgs
+    {
+        public long Start { get; set; }
+        public long End { get; set; }
+        public long Value { get; set; }
+    }
+
+    // å®šä¹‰ä¸€ä¸ªDelegate_doStop()
     // public delegate void Delegate_doStop();
 
-    //ÔÚ×Ó´°¿ÚÖĞ¶¨Òå
+    //åœ¨å­çª—å£ä¸­å®šä¹‰
     public class Stop
     {
         public long ProgressMin = -1;
@@ -66,14 +73,15 @@ namespace DigitalPlatform
 
         public StopStyle Style = StopStyle.None;
         public ReaderWriterLock m_stoplock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         public event StopEventHandler OnStop = null;
 
         public event BeginLoopEventHandler OnBeginLoop = null;
         public event EndLoopEventHandler OnEndLoop = null;
+        public event ProgressChangedEventHandler OnProgressChanged = null;
 
-        int nStop = -1;	// -1: ÉĞÎ´Ê¹ÓÃ 0:ÕıÔÚ´¦Àí 1:Ï£ÍûÍ£Ö¹ 2:ÒÑ¾­Í£Ö¹£¬EndLoop()ÒÑ¾­µ÷ÓÃ
+        int nStop = -1;	// -1: å°šæœªä½¿ç”¨ 0:æ­£åœ¨å¤„ç† 1:å¸Œæœ›åœæ­¢ 2:å·²ç»åœæ­¢ï¼ŒEndLoop()å·²ç»è°ƒç”¨
         StopManager m_manager = null;
 
         string m_strMessage = "";
@@ -82,14 +90,14 @@ namespace DigitalPlatform
 
         public string Name = "";
 
-        public object Tag = null;   // ÓÃÀ´´æ·ÅÈÎÒâ¶ÔÏó
+        public object Tag = null;   // ç”¨æ¥å­˜æ”¾ä»»æ„å¯¹è±¡
 
         public Stop()
         {
         }
 
         // parameters:
-        //      strMessage  ÒªÏÔÊ¾µÄÏûÏ¢¡£Èç¹ûÎª null£¬±íÊ¾²»ÏÔÊ¾ÏûÏ¢
+        //      strMessage  è¦æ˜¾ç¤ºçš„æ¶ˆæ¯ã€‚å¦‚æœä¸º nullï¼Œè¡¨ç¤ºä¸æ˜¾ç¤ºæ¶ˆæ¯
         public string Initial(// Delegate_doStop doStopDelegate,
             string strMessage)
         {
@@ -100,7 +108,7 @@ namespace DigitalPlatform
                 m_strMessage = strMessage;
                 if (m_manager != null)
                 {
-                    // TODO: Ö´ĞĞ¶à´Î¸üĞÂ£¬¿ÉÄÜ»ÙµôÔ­À´´æ´¢µÄ×´Ì¬
+                    // TODO: æ‰§è¡Œå¤šæ¬¡æ›´æ–°ï¼Œå¯èƒ½æ¯æ‰åŸæ¥å­˜å‚¨çš„çŠ¶æ€
                     m_manager.ChangeState(this,
                         StateParts.All,
                         true);
@@ -110,9 +118,9 @@ namespace DigitalPlatform
             return strOldMessage;
         }
 
-        // ×¢²á£¬ºÍ¹ÜÀí¶ÔÏó½¨Á¢ÁªÏµ
+        // æ³¨å†Œï¼Œå’Œç®¡ç†å¯¹è±¡å»ºç«‹è”ç³»
         // parameters:
-        //      bActive ÊÇ·ñĞèÒªÁ¢¼´¼¤»î
+        //      bActive æ˜¯å¦éœ€è¦ç«‹å³æ¿€æ´»
         public void Register(StopManager manager,
             bool bActive)
         {
@@ -134,7 +142,7 @@ namespace DigitalPlatform
 
         int _inBeginLoop = 0;
 
-        // ¼ì²éµ±Ç°ÊÇ·ñÒÑ¾­´¦ÓÚ BeginLoop() Ö®ÖĞ
+        // æ£€æŸ¥å½“å‰æ˜¯å¦å·²ç»å¤„äº BeginLoop() ä¹‹ä¸­
         public bool IsInLoop
         {
             get
@@ -157,7 +165,7 @@ namespace DigitalPlatform
             }
         }
 
-        // ÔÊĞí»òÕß½ûÖ¹Ç¶Ì× BeginLoop()
+        // å…è®¸æˆ–è€…ç¦æ­¢åµŒå¥— BeginLoop()
         public bool SetAllowNest(bool bAllow)
         {
             bool bOldValue = this._allowNest;
@@ -165,23 +173,23 @@ namespace DigitalPlatform
             return bOldValue;
         }
 
-        //×¼±¸×öÊÂÇé,±»Ñ­»·µ÷£¬Ê±ÃæÁËµ÷ÁËStopmanagerµÄEnable()º¯Êı£¬ĞŞ¸Ä¸¸´°¿ÚµÄ°´Å¥×´Ì¬
+        //å‡†å¤‡åšäº‹æƒ…,è¢«å¾ªç¯è°ƒï¼Œæ—¶é¢äº†è°ƒäº†Stopmanagerçš„Enable()å‡½æ•°ï¼Œä¿®æ”¹çˆ¶çª—å£çš„æŒ‰é’®çŠ¶æ€
         // return:
-        //      true ³É¹¦
-        //      false   Ê§°Ü¡£BeginLoop() ·¢ÉúÁËÇ¶Ì×
+        //      true æˆåŠŸ
+        //      false   å¤±è´¥ã€‚BeginLoop() å‘ç”Ÿäº†åµŒå¥—
         public void BeginLoop()
         {
 #if NO
             if (_inBeginLoop > 0 
                 && _allowNest == false)
-                throw new Exception("Õë¶ÔÍ¬Ò» Stop ¶ÔÏó£¬BeginLoop ²»ÄÜÇ¶Ì×µ÷ÓÃ");
+                throw new Exception("é’ˆå¯¹åŒä¸€ Stop å¯¹è±¡ï¼ŒBeginLoop ä¸èƒ½åµŒå¥—è°ƒç”¨");
 #endif
 
             int nRet = Interlocked.Increment(ref _inBeginLoop);
             // _inBeginLoop++;
             if (nRet == 1)
             {
-                nStop = 0;	// ÕıÔÚ´¦Àí
+                nStop = 0;	// æ­£åœ¨å¤„ç†
 
                 if (m_manager != null)
                 {
@@ -202,7 +210,7 @@ namespace DigitalPlatform
                     }
                     else
                     {
-                        // ²»ÔÚ¼¤»îÎ»ÖÃµÄstop£¬²»Òª¼ÇÒäÔ­ÓĞµÄreversebutton×´Ì¬¡£ÒòÎªÕâÑù»á¼ÇÒäµ½±ğÈËµÄ×´Ì¬
+                        // ä¸åœ¨æ¿€æ´»ä½ç½®çš„stopï¼Œä¸è¦è®°å¿†åŸæœ‰çš„reversebuttonçŠ¶æ€ã€‚å› ä¸ºè¿™æ ·ä¼šè®°å¿†åˆ°åˆ«äººçš„çŠ¶æ€
                         m_manager.ChangeState(this,
                             StateParts.All,
                             true);
@@ -211,17 +219,17 @@ namespace DigitalPlatform
             }
         }
 
-        //ÊÂÇé×öÍêÁË£¬±»Ñ­»·µ÷£¬ÀïÃæµ÷ÁËStopManagerµÄEnable()º¯Êı£¬ĞŞ¸Ä°´Å¥Îª·¢»Ò×´Ì¬
+        //äº‹æƒ…åšå®Œäº†ï¼Œè¢«å¾ªç¯è°ƒï¼Œé‡Œé¢è°ƒäº†StopManagerçš„Enable()å‡½æ•°ï¼Œä¿®æ”¹æŒ‰é’®ä¸ºå‘ç°çŠ¶æ€
         public void EndLoop()
         {
             if (_inBeginLoop == 0)
-                throw new Exception("Õë¶ÔÍ¬Ò» Stop ¶ÔÏó£¬µ÷ÓÃ EndLoop() ²»Ó¦³¬¹ı BeginLoop() µ÷ÓÃ´ÎÊı");
+                throw new Exception("é’ˆå¯¹åŒä¸€ Stop å¯¹è±¡ï¼Œè°ƒç”¨ EndLoop() ä¸åº”è¶…è¿‡ BeginLoop() è°ƒç”¨æ¬¡æ•°");
 
             int nRet = Interlocked.Decrement(ref _inBeginLoop);
 
             if (nRet == 0)
             {
-                nStop = 2;	// ×ªÎª ÒÑ¾­Í£Ö¹ ×´Ì¬
+                nStop = 2;	// è½¬ä¸º å·²ç»åœæ­¢ çŠ¶æ€
 
                 if (m_manager != null)
                 {
@@ -244,7 +252,7 @@ namespace DigitalPlatform
                     }
                     else
                     {
-                        // ²»ÔÚ¼¤»îÎ»ÖÃ£¬²»Òª»Ö¸´ËùÎ½¾É×´Ì¬
+                        // ä¸åœ¨æ¿€æ´»ä½ç½®ï¼Œä¸è¦æ¢å¤æ‰€è°“æ—§çŠ¶æ€
                         m_manager.ChangeState(this,
                             StateParts.All,
                             true);
@@ -261,7 +269,7 @@ namespace DigitalPlatform
 
             if (m_manager != null)
             {
-                // TODO: Ö»Ó¦µ±¸Ä±äÎÄ±¾µÄ×´Ì¬£¬²»Ó¦µ±¶¯°´Å¥µÄ×´Ì¬
+                // TODO: åªåº”å½“æ”¹å˜æ–‡æœ¬çš„çŠ¶æ€ï¼Œä¸åº”å½“åŠ¨æŒ‰é’®çš„çŠ¶æ€
                 m_manager.ChangeState(this,
                     StateParts.Message,
                     true);
@@ -275,6 +283,17 @@ namespace DigitalPlatform
             this.ProgressMax = lEnd;
             this.ProgressValue = lStart;
 
+            // 2017/12/16
+            this.OnProgressChanged?.Invoke(
+    this,
+    new ProgressChangedEventArgs
+    {
+        Start = lStart,
+        End = lEnd,
+        Value = lStart
+    }
+    );
+
             if (m_manager != null)
             {
                 m_manager.ChangeState(this,
@@ -286,6 +305,15 @@ namespace DigitalPlatform
         public void SetProgressValue(long lValue)
         {
             this.ProgressValue = lValue;
+
+            // 2017/12/16
+            this.OnProgressChanged?.Invoke(
+                this,
+                new ProgressChangedEventArgs {
+                    Start = this.ProgressMin,
+                    End = this.ProgressMax,
+                    Value = lValue}
+                );
 
             if (m_manager != null)
             {
@@ -316,7 +344,7 @@ namespace DigitalPlatform
             }
         }
 
-        //²é¿´ÊÇ·ñ½áÊø,±»StopManagerµ÷
+        //æŸ¥çœ‹æ˜¯å¦ç»“æŸ,è¢«StopManagerè°ƒ
         public virtual int State
         {
             get
@@ -335,7 +363,7 @@ namespace DigitalPlatform
             }
         }
 
-        // TODO: ´¦ÀíÖĞÊÇ·ñÒª¼ÓËø?
+        // TODO: å¤„ç†ä¸­æ˜¯å¦è¦åŠ é”?
         public virtual void Continue()
         {
             nStop = 0;
@@ -346,10 +374,10 @@ namespace DigitalPlatform
             this.nStop = nState;
         }
 
-        // Í£Ö¹,±»StopManagerµ÷
-        // locks: Ğ´Ëø¶¨
+        // åœæ­¢,è¢«StopManagerè°ƒ
+        // locks: å†™é”å®š
         // parameters:
-        //      bHalfStop   ÊÇ·ñÎªÒ»°ëÖĞ¶Ï¡£ËùÎ½Ò»°ãÖĞ¶Ï£¬¾ÍÊÇ²»´¥·¢StopÊÂ¼ş£¬¶øÖ»ĞŞ¸ÄStop×´Ì¬¡£
+        //      bHalfStop   æ˜¯å¦ä¸ºä¸€åŠä¸­æ–­ã€‚æ‰€è°“ä¸€èˆ¬ä¸­æ–­ï¼Œå°±æ˜¯ä¸è§¦å‘Stopäº‹ä»¶ï¼Œè€Œåªä¿®æ”¹StopçŠ¶æ€ã€‚
         public void DoStop(object sender = null)
         {
             this.m_stoplock.AcquireWriterLock(Stop.m_nLockTimeout);
@@ -367,7 +395,7 @@ namespace DigitalPlatform
                 {
                     if (this.OnStop != null)
                     {
-                        // OnStop()ÊÇÔÚÒÑ¾­Ëø¶¨µÄÇé¿öÏÂµ÷ÓÃµÄ
+                        // OnStop()æ˜¯åœ¨å·²ç»é”å®šçš„æƒ…å†µä¸‹è°ƒç”¨çš„
                         StopEventArgs e = new StopEventArgs();
                         this.OnStop(sender == null ? this : sender, e);
                     }
@@ -392,7 +420,7 @@ namespace DigitalPlatform
 
     }
 
-    //ÔÚ¸¸´°¿ÚÖĞ¶¨Òå,³õÊ¼»¯°´Å¥
+    //åœ¨çˆ¶çª—å£ä¸­å®šä¹‰,åˆå§‹åŒ–æŒ‰é’®
     public class StopManager
     {
         public event DisplayMessageEventHandler OnDisplayMessage = null;
@@ -402,16 +430,16 @@ namespace DigitalPlatform
         public string DebugFileName = "";
 
         public ReaderWriterLock m_collectionlock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
-        // ToolBarButton m_stopToolButton = null;	// ÓÃÓÚÍ£Ö¹µÄ¹¤¾ßÌõ°´Å¥
-        // Button	m_stopButton = null;	// ÓÃÓÚÍ£Ö¹µÄ°´Å¥
-        object m_stopButton = null;	// ÓÃÓÚÍ£Ö¹µÄ¹¤¾ßÌõ°´Å¥ ¿ÉÒÔÊÇToolBarButton ToolStripButton Button
+        // ToolBarButton m_stopToolButton = null;	// ç”¨äºåœæ­¢çš„å·¥å…·æ¡æŒ‰é’®
+        // Button	m_stopButton = null;	// ç”¨äºåœæ­¢çš„æŒ‰é’®
+        object m_stopButton = null;	// ç”¨äºåœæ­¢çš„å·¥å…·æ¡æŒ‰é’® å¯ä»¥æ˜¯ToolBarButton ToolStripButton Button
 
 
         /*
-		StatusBar m_messageStatusBar = null;	// ×´Ì¬Ìõ
-		Label m_messageLabel = null;	// ÏÔÊ¾×´Ì¬µÄLabel
+		StatusBar m_messageStatusBar = null;	// çŠ¶æ€æ¡
+		Label m_messageLabel = null;	// æ˜¾ç¤ºçŠ¶æ€çš„Label
         */
         object m_messageBar = null;  // StatusBar StatusStrip Label TextBox
 
@@ -424,7 +452,7 @@ namespace DigitalPlatform
 
         // string m_strTipsSave = "";
 
-        List<object> m_reverseButtons = null;	// µ±Í£Ö¹°´Å¥Enabled×´Ì¬±ä»¯Ê±£¬ĞèÒªºÍËü×´Ì¬Ïà·´µÄ°´Å¥¶ÔÏóÊı×é
+        List<object> m_reverseButtons = null;	// å½“åœæ­¢æŒ‰é’®EnabledçŠ¶æ€å˜åŒ–æ—¶ï¼Œéœ€è¦å’Œå®ƒçŠ¶æ€ç›¸åçš„æŒ‰é’®å¯¹è±¡æ•°ç»„
         List<int> m_reverseButtonEnableStates = null;   // 0: diabled; 1: eanbled; -1: unknown
 
         void WriteDebugInfo(string strText)
@@ -435,9 +463,9 @@ namespace DigitalPlatform
             WriteText(this.DebugFileName, strText);
         }
 
-        // Ğ´ÈëÎÄ±¾ÎÄ¼ş¡£
-        // Èç¹ûÎÄ¼ş²»´æÔÚ, »á×Ô¶¯´´½¨ĞÂÎÄ¼ş
-        // Èç¹ûÎÄ¼şÒÑ¾­´æÔÚ£¬Ôò×·¼ÓÔÚÎ²²¿¡£
+        // å†™å…¥æ–‡æœ¬æ–‡ä»¶ã€‚
+        // å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨, ä¼šè‡ªåŠ¨åˆ›å»ºæ–°æ–‡ä»¶
+        // å¦‚æœæ–‡ä»¶å·²ç»å­˜åœ¨ï¼Œåˆ™è¿½åŠ åœ¨å°¾éƒ¨ã€‚
         public static void WriteText(string strFileName,
             string strText)
         {
@@ -451,7 +479,7 @@ namespace DigitalPlatform
         // 2007/8/2
         public void LinkReverseButtons(List<object> buttons)
         {
-            // ¼ì²é
+            // æ£€æŸ¥
             for (int i = 0; i < buttons.Count; i++)
             {
                 object button = buttons[i];
@@ -463,7 +491,7 @@ namespace DigitalPlatform
                 }
                 else
                 {
-                    throw new Exception("button²ÎÊıÖ»ÄÜÓÃToolBarButton ToolStripButton»òButtonÀàĞÍ");
+                    throw new Exception("buttonå‚æ•°åªèƒ½ç”¨ToolBarButton ToolStripButtonæˆ–Buttonç±»å‹");
                 }
             }
 
@@ -479,7 +507,7 @@ namespace DigitalPlatform
         // 2007/8/2
         public void UnlinkReverseButtons(List<object> buttons)
         {
-            // ¼ì²é
+            // æ£€æŸ¥
             for (int i = 0; i < buttons.Count; i++)
             {
                 object button = buttons[i];
@@ -491,7 +519,7 @@ namespace DigitalPlatform
                 }
                 else
                 {
-                    throw new Exception("button²ÎÊıÖ»ÄÜÓÃToolBarButton ToolStripButton»òButtonÀàĞÍ");
+                    throw new Exception("buttonå‚æ•°åªèƒ½ç”¨ToolBarButton ToolStripButtonæˆ–Buttonç±»å‹");
                 }
             }
 
@@ -517,7 +545,7 @@ namespace DigitalPlatform
             }
             else
             {
-                throw new Exception("button²ÎÊıÖ»ÄÜÓÃToolBarButton ToolStripButton»òButtonÀàĞÍ");
+                throw new Exception("buttonå‚æ•°åªèƒ½ç”¨ToolBarButton ToolStripButtonæˆ–Buttonç±»å‹");
             }
 
             if (m_reverseButtons == null)
@@ -535,7 +563,7 @@ namespace DigitalPlatform
             }
             else
             {
-                throw new Exception("button²ÎÊıÖ»ÄÜÓÃToolBarButton ToolStripButton»òButtonÀàĞÍ");
+                throw new Exception("buttonå‚æ•°åªèƒ½ç”¨ToolBarButton ToolStripButtonæˆ–Buttonç±»å‹");
             }
 
             if (m_reverseButtons == null)
@@ -554,7 +582,7 @@ namespace DigitalPlatform
 #if NO
             else if (m_messageBar is StatusBar)
             {
-                // StatusBar ÅÉÉú×Ô Control
+                // StatusBar æ´¾ç”Ÿè‡ª Control
                 StatusBar statusbar = ((StatusBar)m_messageBar);
 
                 Safe_SetStatusBarText(statusbar, strMessage);
@@ -572,7 +600,7 @@ namespace DigitalPlatform
             }
             else if (m_messageBar is ToolStripStatusLabel)
             {
-                // TODO: ToolStripStatusLabel Ò²ÊÇ¼Ì³Ğ×Ô ToolStripItem¡£´Ë´¦´úÂë¿ÉÒÔÉ¾³ıÁË
+                // TODO: ToolStripStatusLabel ä¹Ÿæ˜¯ç»§æ‰¿è‡ª ToolStripItemã€‚æ­¤å¤„ä»£ç å¯ä»¥åˆ é™¤äº†
 
                 // ((ToolStripStatusLabel)m_messageBar).Text = strMessage;
                 Safe_SetToolStripStatusLabelText((ToolStripStatusLabel)m_messageBar,
@@ -613,7 +641,7 @@ namespace DigitalPlatform
 
         #region StatusStrip
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         string Safe_SetStatusStripText(StatusStrip status_strip,
             string strText)
         {
@@ -675,7 +703,7 @@ string strText)
 
         #region ToolStripStatusLabel
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         string Safe_SetToolStripStatusLabelText(ToolStripStatusLabel label,
             string strText)
         {
@@ -691,9 +719,9 @@ string strText)
             {
                 string strOldText = label.Text;
 
-                label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // ÔÚÄ³Ğ©Çé¿öÏÂ£¬¿ÕÄÚÈİºÍ·Ç¿ÕÄÚÈİ»áµ¼ÖÂ label ¸ß¶È±ä»¯£¬½ø¶øÒıÆğÕû¸ö¿ò¼Ü´°¿ÚË¢ĞÂ¡£Îª±ÜÃâ´ËÇé¿ö£¬ÌØÒâÔÚ¿ÕµÄÊ±ºòÉèÖÃÒ»¸ö¿Õ¸ñ×Ö·û¡£2017/4/24
+                label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // åœ¨æŸäº›æƒ…å†µä¸‹ï¼Œç©ºå†…å®¹å’Œéç©ºå†…å®¹ä¼šå¯¼è‡´ label é«˜åº¦å˜åŒ–ï¼Œè¿›è€Œå¼•èµ·æ•´ä¸ªæ¡†æ¶çª—å£åˆ·æ–°ã€‚ä¸ºé¿å…æ­¤æƒ…å†µï¼Œç‰¹æ„åœ¨ç©ºçš„æ—¶å€™è®¾ç½®ä¸€ä¸ªç©ºæ ¼å­—ç¬¦ã€‚2017/4/24
 
-                // label.Owner.Update();    // ÓÅ»¯
+                // label.Owner.Update();    // ä¼˜åŒ–
 
                 return strOldText;
             }
@@ -718,7 +746,7 @@ string strText)
 
         #region TextBox
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         string Safe_SetTextBoxText(Control textbox,
             string strText)
         {
@@ -758,7 +786,7 @@ string strText)
 #if NO
         #region Label
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         string Safe_SetLabelText(Label label,
             string strText)
         {
@@ -797,7 +825,7 @@ string strText)
 
         #region ProgressBar
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         void Safe_SetProgressBar(ProgressBar progressbar,
             long lStart,
             long lEnd,
@@ -879,7 +907,7 @@ string strText)
 
         #region ToolStripProgressBar
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         void Safe_SetProgressBar(ToolStripProgressBar progressbar,
             long lStart,
             long lEnd,
@@ -959,7 +987,7 @@ string strText)
 #if NO
         #region StatusBar
 
-        // Ïß³Ì°²È«°æ±¾
+        // çº¿ç¨‹å®‰å…¨ç‰ˆæœ¬
         string Safe_SetStatusBarText(StatusBar statusbar,
             string strText)
         {
@@ -996,7 +1024,7 @@ string strText)
         #endregion
 #endif
 
-        // ¸Ä±ästop°´Å¥Enabled×´Ì¬¡£²»¼ÇÒäÒÔÇ°µÄ×´Ì¬
+        // æ”¹å˜stopæŒ‰é’®EnabledçŠ¶æ€ã€‚ä¸è®°å¿†ä»¥å‰çš„çŠ¶æ€
         void EnableStopButtons(bool bEnabled)
         {
             if (this.m_stopButton == null)
@@ -1056,7 +1084,7 @@ string strText)
 
         #region Button
 
-        // Ïß³Ì°²È«µ÷ÓÃ
+        // çº¿ç¨‹å®‰å…¨è°ƒç”¨
         static bool Safe_EnableButton(Button button,
             bool bEnabled)
         {
@@ -1094,7 +1122,7 @@ string strText)
 
         #region ToolBarButton
 
-        // Ïß³Ì°²È«µ÷ÓÃ
+        // çº¿ç¨‹å®‰å…¨è°ƒç”¨
         static bool Safe_EnableToolBarButton(ToolBarButton button,
             bool bEnabled)
         {
@@ -1132,7 +1160,7 @@ string strText)
 
         #region ToolStripButton
 
-        // Ïß³Ì°²È«µ÷ÓÃ
+        // çº¿ç¨‹å®‰å…¨è°ƒç”¨
         static bool Safe_EnableToolStripButton(ToolStripButton button,
             bool bEnabled)
         {
@@ -1170,11 +1198,11 @@ string strText)
 
         #endregion
 
-        // ÕûÌå¸Ä±äreverse_buttonsµÄEnabled×´Ì¬¡£
-        // ×¢Òâ£¬ÔÚfalseÊ±£¬ÊÇÒª¸Ä±äÎªdisabled×´Ì¬£»¶øtrueÊ±£¬ÔòÊÇÒª»Ö¸´Ô­À´¼ÇÒä(disableÇ°)µÄ×´Ì¬
+        // æ•´ä½“æ”¹å˜reverse_buttonsçš„EnabledçŠ¶æ€ã€‚
+        // æ³¨æ„ï¼Œåœ¨falseæ—¶ï¼Œæ˜¯è¦æ”¹å˜ä¸ºdisabledçŠ¶æ€ï¼›è€Œtrueæ—¶ï¼Œåˆ™æ˜¯è¦æ¢å¤åŸæ¥è®°å¿†(disableå‰)çš„çŠ¶æ€
         // parameters:
-        //      bEnabled    true±íÊ¾Ï£Íû»Ö¸´°´Å¥Ô­À´×´Ì¬£»falseÏ£Íûdisable°´Å¥
-        //      parts   SaveEnabledStateÏ£ÍûÏÈ±£´æ°´Å¥Ô­À´µÄÖµ£»RestoreEnabledState±íÊ¾Òª»Ö¸´°´Å¥Ô­À´µÄÖµ
+        //      bEnabled    trueè¡¨ç¤ºå¸Œæœ›æ¢å¤æŒ‰é’®åŸæ¥çŠ¶æ€ï¼›falseå¸Œæœ›disableæŒ‰é’®
+        //      parts   SaveEnabledStateå¸Œæœ›å…ˆä¿å­˜æŒ‰é’®åŸæ¥çš„å€¼ï¼›RestoreEnabledStateè¡¨ç¤ºè¦æ¢å¤æŒ‰é’®åŸæ¥çš„å€¼
         void EnableReverseButtons(bool bEnabled,
             StateParts parts)
         {
@@ -1186,7 +1214,7 @@ string strText)
 
             /*
             if ((parts & StateParts.All) != 0)
-                throw new Exception("StatePartsÃ¶¾ÙÖĞ³ıÁËSaveEnabledStateºÍRestoreEnabledStateÖµÍâ£¬ÆäËûÖµ¶ÔÓÚ±¾º¯ÊıÃ»ÓĞÒâÒå");
+                throw new Exception("StatePartsæšä¸¾ä¸­é™¤äº†SaveEnabledStateå’ŒRestoreEnabledStateå€¼å¤–ï¼Œå…¶ä»–å€¼å¯¹äºæœ¬å‡½æ•°æ²¡æœ‰æ„ä¹‰");
              * */
 
             bool bSave = false;
@@ -1198,7 +1226,7 @@ string strText)
                 bRestore = true;
 
 
-            // ±£Ö¤Á½¸öÊı×éµÄ´óĞ¡Ò»ÖÂ
+            // ä¿è¯ä¸¤ä¸ªæ•°ç»„çš„å¤§å°ä¸€è‡´
             while (m_reverseButtonEnableStates.Count < m_reverseButtons.Count)
             {
                 m_reverseButtonEnableStates.Add(-1);
@@ -1209,8 +1237,8 @@ string strText)
                 int nOldState = m_reverseButtonEnableStates[i];
 
                 bool bEnableResult = bEnabled;
-                // TODO: ×´Ì¬²»Ã÷µÄÊ±ºò£¬¿ÉÒÔÍ¨¹ıÊÂ¼ş´ÓÍâ²¿Ë÷È¡ĞÅÏ¢
-                // Èç¹ûbEnabledÒªÇótrue£¬¶ø¾É×´Ì¬²»Ã÷£¬ÄÇ¾ÍÑ¯ÎÊ
+                // TODO: çŠ¶æ€ä¸æ˜çš„æ—¶å€™ï¼Œå¯ä»¥é€šè¿‡äº‹ä»¶ä»å¤–éƒ¨ç´¢å–ä¿¡æ¯
+                // å¦‚æœbEnabledè¦æ±‚trueï¼Œè€Œæ—§çŠ¶æ€ä¸æ˜ï¼Œé‚£å°±è¯¢é—®
                 if (nOldState == -1 && bEnabled == true)
                 {
                     if (this.OnAskReverseButtonState != null)
@@ -1261,7 +1289,7 @@ string strText)
                         bRestore == true ? bOldState : bEnableResult);
                 }
 
-                // Ö÷¶¯disableÇ°£¬¼ÇÒäÒÔÇ°µÄ×´Ì¬
+                // ä¸»åŠ¨disableå‰ï¼Œè®°å¿†ä»¥å‰çš„çŠ¶æ€
                 if (bEnabled == false
                     && bSave == true)
                     m_reverseButtonEnableStates[i] = (bOldState == true ? 1 : 0);
@@ -1269,8 +1297,8 @@ string strText)
             }
         }
 
-        // ³õÊ¼»¯Ò»¸ö°´Å¥,ÔÚ¸¸´°¿ÚloadÊ±µ÷
-        // locks: ¼¯ºÏĞ´Ëø
+        // åˆå§‹åŒ–ä¸€ä¸ªæŒ‰é’®,åœ¨çˆ¶çª—å£loadæ—¶è°ƒ
+        // locks: é›†åˆå†™é”
         public void Initial(object button,
             object statusBar,
             object progressBar)
@@ -1302,8 +1330,8 @@ string strText)
         }
 
 
-        // ¼ÓÈëÒ»¸öStop¶ÔÏó¡£¼ÓÈëÔÚ·Ç»î¶¯Î»ÖÃ
-        // locks: ¼¯ºÏĞ´Ëø
+        // åŠ å…¥ä¸€ä¸ªStopå¯¹è±¡ã€‚åŠ å…¥åœ¨éæ´»åŠ¨ä½ç½®
+        // locks: é›†åˆå†™é”
         public void Add(Stop stop)
         {
             WriteDebugInfo("collection write lock 2\r\n");
@@ -1311,7 +1339,7 @@ string strText)
             try
             {
                 // stops.Add(stop);
-                stops.Insert(0, stop);  // ĞŞ¸ÄºóµÄĞ§¹û£¬¾Í²»»á¸Ä±ä¼¤»îµÄstop¶ÔÏóÁË
+                stops.Insert(0, stop);  // ä¿®æ”¹åçš„æ•ˆæœï¼Œå°±ä¸ä¼šæ”¹å˜æ¿€æ´»çš„stopå¯¹è±¡äº†
             }
             finally
             {
@@ -1364,8 +1392,8 @@ string strText)
             return Convert.ToString(stops.Count);
         }
 
-        // ÒÆ×ßÒ»¸öStop¶ÔÏó
-        // locks: ¼¯ºÏĞ´Ëø
+        // ç§»èµ°ä¸€ä¸ªStopå¯¹è±¡
+        // locks: é›†åˆå†™é”
         public void Remove(Stop stop, bool bChangeState = true)
         {
             WriteDebugInfo("collection write lock 3\r\n");
@@ -1377,7 +1405,7 @@ string strText)
                 if (bChangeState == true)
                     ChangeState(null,
                         StateParts.All,
-                        false); // false±íÊ¾²»¼Ó¼¯ºÏËø
+                        false); // falseè¡¨ç¤ºä¸åŠ é›†åˆé”
             }
             finally
             {
@@ -1390,13 +1418,13 @@ string strText)
 
         }
 
-        // ¼¤»î°´Å¥
-        // ÒòÎªStopManager¹ÜÏ½ºÜ¶àStop¶ÔÏó, µ±Ò»¸öStop¶ÔÏóĞèÒª´¦ÓÚ½¹µã×´Ì¬,
-        // ĞèÒªÔÚStopManagerÄÚ²¿Êı×éÖĞ°ÑÕâ¸öStop¶ÔÏóÅ²µ½¶ÓÁĞÎ²²¿, Ò²¾ÍÊÇÏàµ±ÓÚ¶ÑÕ»¶¥²¿
-        // µÄĞ§¹û¡£È»ºó, °ÑStopManagerËù¹ØÁªµÄbuttonÉèÖÃÎªºÍStop¶ÔÏóµ±Ç°×´Ì¬¶ÔÓ¦µÄ
-        // Enabled»òÕßDisabled×´Ì¬, ÒòÎªÖ»ÓĞÕâÑùÓÃ»§²ÅÄÜ´¥·¢°´Å¥¡£
-        // StopManager¹ÜÀíÁËºÜ¶àStop×´Ì¬£¬Active()º¯ÊıÏàµ±ÓÚ°ÑÄ³¸öStop×´Ì¬·­µ½¿É¼ûµÄ¶¥²¿¡£
-        // locks: ¼¯ºÏĞ´Ëø
+        // æ¿€æ´»æŒ‰é’®
+        // å› ä¸ºStopManagerç®¡è¾–å¾ˆå¤šStopå¯¹è±¡, å½“ä¸€ä¸ªStopå¯¹è±¡éœ€è¦å¤„äºç„¦ç‚¹çŠ¶æ€,
+        // éœ€è¦åœ¨StopManagerå†…éƒ¨æ•°ç»„ä¸­æŠŠè¿™ä¸ªStopå¯¹è±¡æŒªåˆ°é˜Ÿåˆ—å°¾éƒ¨, ä¹Ÿå°±æ˜¯ç›¸å½“äºå †æ ˆé¡¶éƒ¨
+        // çš„æ•ˆæœã€‚ç„¶å, æŠŠStopManageræ‰€å…³è”çš„buttonè®¾ç½®ä¸ºå’ŒStopå¯¹è±¡å½“å‰çŠ¶æ€å¯¹åº”çš„
+        // Enabledæˆ–è€…DisabledçŠ¶æ€, å› ä¸ºåªæœ‰è¿™æ ·ç”¨æˆ·æ‰èƒ½è§¦å‘æŒ‰é’®ã€‚
+        // StopManagerç®¡ç†äº†å¾ˆå¤šStopçŠ¶æ€ï¼ŒActive()å‡½æ•°ç›¸å½“äºæŠŠæŸä¸ªStopçŠ¶æ€ç¿»åˆ°å¯è§çš„é¡¶éƒ¨ã€‚
+        // locks: é›†åˆå†™é”
         public bool Active(Stop stop)
         {
             if (stop == null)
@@ -1467,7 +1495,7 @@ string strText)
             }
             //}
 
-            // ÎÄ×ÖÒ²Òª±ä»¯
+            // æ–‡å­—ä¹Ÿè¦å˜åŒ–
             //if (m_messageStatusBar != null) 
             //{
             InternalSetMessage(stop.Message);
@@ -1482,7 +1510,7 @@ string strText)
             return true;
         }
 
-        // ÊÇ·ñ´¦ÔÚµ±Ç°¼¤»îÎ»ÖÃ?
+        // æ˜¯å¦å¤„åœ¨å½“å‰æ¿€æ´»ä½ç½®?
         public bool IsActive(Stop stop)
         {
             int index = this.stops.IndexOf(stop);
@@ -1496,7 +1524,7 @@ string strText)
             return false;
         }
 
-        // µ±Ç°¼¤»îÁËµÄStop¶ÔÏó
+        // å½“å‰æ¿€æ´»äº†çš„Stopå¯¹è±¡
         public Stop ActiveStop
         {
             get
@@ -1510,7 +1538,7 @@ string strText)
             }
         }
 
-        // Í£Ö¹µ±Ç°¼¤»îµÄÒ»¸öStop¶ÔÏó¡£±¾º¯ÊıÍ¨³£±»µ¥»÷Í£Ö¹°´Å¥µ÷
+        // åœæ­¢å½“å‰æ¿€æ´»çš„ä¸€ä¸ªStopå¯¹è±¡ã€‚æœ¬å‡½æ•°é€šå¸¸è¢«å•å‡»åœæ­¢æŒ‰é’®è°ƒ
         public void DoStopActive()
         {
             if (stops.Count > 0)
@@ -1524,7 +1552,7 @@ string strText)
         }
 
 #if NOOOOOOOOOOO
-        // Ò»°ëÍ£Ö¹µ±Ç°¼¤»îµÄÒ»¸öStop¶ÔÏó¡£±¾º¯ÊıÍ¨³£±»µ¥»÷Í£Ö¹°´Å¥µ÷
+        // ä¸€åŠåœæ­¢å½“å‰æ¿€æ´»çš„ä¸€ä¸ªStopå¯¹è±¡ã€‚æœ¬å‡½æ•°é€šå¸¸è¢«å•å‡»åœæ­¢æŒ‰é’®è°ƒ
         public void DoHalfStopActive()
         {
             if (stops.Count > 0)
@@ -1535,8 +1563,8 @@ string strText)
         }
 #endif
 
-        // Í£Ö¹ËùÓĞStop¶ÔÏó£¬µ«ÊÇ²»Í£Ö¹µ±Ç°¼¤»îµÄÄÇ¸öStop°´Å¥¡£
-        // locks: ¼¯ºÏĞ´Ëø
+        // åœæ­¢æ‰€æœ‰Stopå¯¹è±¡ï¼Œä½†æ˜¯ä¸åœæ­¢å½“å‰æ¿€æ´»çš„é‚£ä¸ªStopæŒ‰é’®ã€‚
+        // locks: é›†åˆå†™é”
         public void DoStopAllButActive()
         {
             WriteDebugInfo("collection write lock 5\r\n");
@@ -1558,9 +1586,9 @@ string strText)
             //SetToolTipText();
         }
 
-        // Í£Ö¹ËùÓĞStop¶ÔÏó£¬°üÀ¨µ±Ç°¼¤»îµÄStop¶ÔÏó¡£ÕâÊÇÖ¸stopExclude²ÎÊı==null
-        // ÓÃstopExclude²ÎÊı¿ÉÒÔ¸Ä±äº¯ÊıĞĞÎª£¬²»Í£Ö¹Ä³¸öÖ¸¶¨µÄ¶ÔÏó¡£
-        // locks: ¼¯ºÏĞ´Ëø
+        // åœæ­¢æ‰€æœ‰Stopå¯¹è±¡ï¼ŒåŒ…æ‹¬å½“å‰æ¿€æ´»çš„Stopå¯¹è±¡ã€‚è¿™æ˜¯æŒ‡stopExcludeå‚æ•°==null
+        // ç”¨stopExcludeå‚æ•°å¯ä»¥æ”¹å˜å‡½æ•°è¡Œä¸ºï¼Œä¸åœæ­¢æŸä¸ªæŒ‡å®šçš„å¯¹è±¡ã€‚
+        // locks: é›†åˆå†™é”
         public void DoStopAll(Stop stopExclude)
         {
             WriteDebugInfo("collection write lock 6\r\n");
@@ -1584,8 +1612,8 @@ string strText)
             //SetToolTipText();
         }
 
-        // Éè×´Ì¬, ¹©Stopµ÷
-        // locks: ¼¯ºÏ¶ÁËø(Èç¹ûbLock == true)
+        // è®¾çŠ¶æ€, ä¾›Stopè°ƒ
+        // locks: é›†åˆè¯»é”(å¦‚æœbLock == true)
         public void ChangeState(Stop stop,
             StateParts parts,
             bool bLock)
@@ -1593,13 +1621,13 @@ string strText)
             if (stops.Count == 0)
                 return;
 
-            // TODO: ÕâÀïµÄÕû¸öÂß¼­ÓĞÎÊÌâ: ¼´±ãÊÓ¾õÉÏ²»±íÏÖ£¬ÄÚ´æÒ²Ó¦µ±¶ÒÏÖĞŞ¸Ä£¬ÒÔ±¸ºóÃæÇĞ»»Ê±ÏÔÊ¾³öÀ´¡£¶¯Ì¬²»ÄÇÃ´¼°Ê±¸üĞÂÊÇ¿ÉÒÔµÄ£¬µ«ÊÇ¹Ø¼ü×´Ì¬±ä»¯£¬ÀıÈçÏÔÊ¾¡¢Òş²ØµÈ¶¯×÷£¬Ò»¶¨Òª¶ÒÏÖµ½ÄÚ´æ
+            // TODO: è¿™é‡Œçš„æ•´ä¸ªé€»è¾‘æœ‰é—®é¢˜: å³ä¾¿è§†è§‰ä¸Šä¸è¡¨ç°ï¼Œå†…å­˜ä¹Ÿåº”å½“å…‘ç°ä¿®æ”¹ï¼Œä»¥å¤‡åé¢åˆ‡æ¢æ—¶æ˜¾ç¤ºå‡ºæ¥ã€‚åŠ¨æ€ä¸é‚£ä¹ˆåŠæ—¶æ›´æ–°æ˜¯å¯ä»¥çš„ï¼Œä½†æ˜¯å…³é”®çŠ¶æ€å˜åŒ–ï¼Œä¾‹å¦‚æ˜¾ç¤ºã€éšè—ç­‰åŠ¨ä½œï¼Œä¸€å®šè¦å…‘ç°åˆ°å†…å­˜
             if (stop != null && stop.ProgressValue == -1)
             {
                 if ((parts & StateParts.ProgressValue) != 0)
                 {
-                    // Èç¹ûÎªÒş²ØprogressµÄÒâÍ¼£¬
-                    // ½«maxºÍmin¶¼ÉèÖÃÎª-1£¬ÒÔ±ã½«À´Ë¢ĞÂµÄÊ±ºòÄÜÌåÏÖÒş²Ø
+                    // å¦‚æœä¸ºéšè—progressçš„æ„å›¾ï¼Œ
+                    // å°†maxå’Œminéƒ½è®¾ç½®ä¸º-1ï¼Œä»¥ä¾¿å°†æ¥åˆ·æ–°çš„æ—¶å€™èƒ½ä½“ç°éšè—
                     // 2011/10/12
                     stop.ProgressMax = -1;
                     stop.ProgressMin = -1;
@@ -1654,7 +1682,7 @@ string strText)
                         return;
 
                 }
-                // ÒÆ×ß
+                // ç§»èµ°
 
 
             }
@@ -1685,8 +1713,8 @@ string strText)
 
             if ((parts & StateParts.ProgressRange) != 0)
             {
-                // active.ProgressValue = 0;   // ³õÊ¼»¯
-                active.ProgressValue = active.ProgressMin;   // ³õÊ¼»¯ 2008/5/16 changed
+                // active.ProgressValue = 0;   // åˆå§‹åŒ–
+                active.ProgressValue = active.ProgressMin;   // åˆå§‹åŒ– 2008/5/16 changed
                 InternalSetProgressBar(active.ProgressMin, active.ProgressMax, -1);
             }
 
@@ -1695,8 +1723,8 @@ string strText)
                 /*
                 if (active.ProgressValue == -1)
                 {
-                    // Èç¹ûÎªÒş²ØprogressµÄÒâÍ¼£¬
-                    // ½«maxºÍmin¶¼ÉèÖÃÎª-1£¬ÒÔ±ã½«À´Ë¢ĞÂµÄÊ±ºòÄÜÌåÏÖÒş²Ø
+                    // å¦‚æœä¸ºéšè—progressçš„æ„å›¾ï¼Œ
+                    // å°†maxå’Œminéƒ½è®¾ç½®ä¸º-1ï¼Œä»¥ä¾¿å°†æ¥åˆ·æ–°çš„æ—¶å€™èƒ½ä½“ç°éšè—
                     // 2008/3/10
                     active.ProgressMax = -1;
                     active.ProgressMin = -1;
@@ -1710,38 +1738,38 @@ string strText)
 
     }
 
-    // ÄÄĞ©²¿¼ş
+    // å“ªäº›éƒ¨ä»¶
     [Flags]
     public enum StateParts
     {
         None = 0x00,
-        All = 0xff, // È«²¿ (³ıÁËStoreEnabledStateÒÔÍâ)
-        StopButton = 0x01,  // Stop°´Å¥
-        ReverseButtons = 0x02,  // StopÒÔÍâµÄÆäËû°´Å¥
-        Message = 0x10, // ÏûÏ¢ÎÄ±¾
-        ProgressRange = 0x20,   // ½ø¶ÈÌõ·¶Î§
-        ProgressValue = 0x40,   // ½ø¶ÈÌõÖµ
+        All = 0xff, // å…¨éƒ¨ (é™¤äº†StoreEnabledStateä»¥å¤–)
+        StopButton = 0x01,  // StopæŒ‰é’®
+        ReverseButtons = 0x02,  // Stopä»¥å¤–çš„å…¶ä»–æŒ‰é’®
+        Message = 0x10, // æ¶ˆæ¯æ–‡æœ¬
+        ProgressRange = 0x20,   // è¿›åº¦æ¡èŒƒå›´
+        ProgressValue = 0x40,   // è¿›åº¦æ¡å€¼
 
-        SaveEnabledState = 0x0100,   // ´æ´¢Enabled×´Ì¬
-        RestoreEnabledState = 0x0200,   // »Ö¸´ÒÔÇ°´æ´¢Enabled×´Ì¬
+        SaveEnabledState = 0x0100,   // å­˜å‚¨EnabledçŠ¶æ€
+        RestoreEnabledState = 0x0200,   // æ¢å¤ä»¥å‰å­˜å‚¨EnabledçŠ¶æ€
     }
 
-    // Ôö²¹²Ëµ¥
+    // å¢è¡¥èœå•
     public delegate void AskReverseButtonStateEventHandle(object sender,
     AskReverseButtonStateEventArgs e);
 
     public class AskReverseButtonStateEventArgs : EventArgs
     {
         public object Button = null;
-        public bool EnableQuestion = true; // ÎÊÌâ£ºÏ£ÍûEnabled? == trueÖ¸Ï£ÍûÊ¹ÄÜ¡£Ò»°ã²»»áÑ¯ÎÊÊ¹²»ÄÜ£¬ÒòÎªÕâ¸öÈí¼şµ×²ã¿ÉÒÔ×ÔĞĞ¾ö¶¨
-        public bool EnableResult = true;   // ´ğ°¸£ºÊÇ·ñÍ¬ÒâEnabled.
+        public bool EnableQuestion = true; // é—®é¢˜ï¼šå¸Œæœ›Enabled? == trueæŒ‡å¸Œæœ›ä½¿èƒ½ã€‚ä¸€èˆ¬ä¸ä¼šè¯¢é—®ä½¿ä¸èƒ½ï¼Œå› ä¸ºè¿™ä¸ªè½¯ä»¶åº•å±‚å¯ä»¥è‡ªè¡Œå†³å®š
+        public bool EnableResult = true;   // ç­”æ¡ˆï¼šæ˜¯å¦åŒæ„Enabled.
     }
 
     [Flags]
     public enum StopStyle
     {
         None = 0x00,
-        EnableHalfStop = 0x01,  // ÔÊĞíµÚÒ»´Î¡°°ëÖĞ¶Ï¡±
+        EnableHalfStop = 0x01,  // å…è®¸ç¬¬ä¸€æ¬¡â€œåŠä¸­æ–­â€
     }
 
     public delegate void DisplayMessageEventHandler(object sender,

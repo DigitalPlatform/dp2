@@ -30,6 +30,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -159,7 +160,9 @@ namespace DigitalPlatform.LibraryServer
         //      2.116 (2017/9/30) SetUser() API 增加了 closechannel 动作
         //      2.117 (2017/10/6) dp2kernel 的 GetRes() 和 WriteRes() API 的 strStyle 增加了 gzip 选项
         //      2.118 (2017/10/21) library.xml 中 channel 元素增加了 privilegedIpList 属性，可以定义特权前端 IP，这些前端可以创建 maxChannelsLocalhost 属性定义的那么多个并发通道
-        public static string Version = "2.118";
+        //      2.119 (2017/11/13) library.xml 中 circulation 元素增加了 verifyRegisterNoDup 属性，用于定义是否校验册记录登录号的重复情况
+        //      2.120 (2017/12/16) WriteRes() API 针对上传文件也支持 gzip 风格了。此前只是对 dp2kernel 资源上传的时候支持 gzip
+        public static string Version = "2.120";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -547,11 +550,16 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // TODO: 是否需要锁定?
+        // TODO: 同时要在错误日志里面写入一笔，以便系统管理员了解情况
         public void AddHangup(string strText)
         {
             if (ContainsHangup(strText) == true)
                 return;
             this.HangupList.Add(strText);
+
+            // 2017/11/29
+            if (strText != "Exit")
+                this.WriteErrorLog("*** 当前系统已经被挂起 " + strText);
         }
 
         public bool ContainsHangup(string strText)
@@ -569,6 +577,8 @@ namespace DigitalPlatform.LibraryServer
                     i--;
                 }
             }
+
+            this.WriteErrorLog("*** 系统已解除 " + strText + " 挂起状态");
         }
 
         public int LoadCfg(
@@ -745,7 +755,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "装载配置文件-- '" + strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
+                        strError = "装载配置文件-- '" + strFileName + "' 时发生异常：" + ExceptionUtil.GetDebugText(ex);
                         app.WriteErrorLog(strError);
                         // throw ex;
                         goto ERROR1;
@@ -987,6 +997,8 @@ namespace DigitalPlatform.LibraryServer
                         this.CirculationNotifyTypes = node.GetAttribute("notifyTypes");
 
                         this.AcceptBlankRoomName = DomUtil.GetBooleanParam(node, "acceptBlankRoomName", false);
+
+                        this.VerifyRegisterNoDup = DomUtil.GetBooleanParam(node, "verifyRegisterNoDup", true);
                     }
                     else
                     {
@@ -1007,6 +1019,8 @@ namespace DigitalPlatform.LibraryServer
                         this.BorrowCheckOverdue = true;
                         this.CirculationNotifyTypes = "";
                         this.AcceptBlankRoomName = false;
+
+                        this.VerifyRegisterNoDup = true;
                     }
 
                     // <channel>
@@ -1398,8 +1412,8 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                        app.AddHangup("ERR002");
                         app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
+                        app.AddHangup("ERR002");
                     }
 
 #if LOG_INFO
@@ -1851,7 +1865,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 12, 1); // 上一个版本是 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2018, 1, 15); // 上一个版本是 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)
@@ -1862,8 +1876,8 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 // 通知系统挂起
                                 // this.HangupReason = HangupReason.Expire;
-                                app.AddHangup("Expire");
                                 this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                                app.AddHangup("Expire");
                             }
                         }
                     }
@@ -1914,8 +1928,8 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                app.AddHangup("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
+                app.AddHangup("StartingError");
             }
             return -1;
         }
@@ -2325,7 +2339,7 @@ namespace DigitalPlatform.LibraryServer
                 if (this.ContainsHangup("MessageQueueCreateFail") == true)
                 {
                     this.ClearHangup("MessageQueueCreateFail");
-                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                    //this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
                 }
                 return;
             }
@@ -2392,7 +2406,7 @@ namespace DigitalPlatform.LibraryServer
                 if (this.ContainsHangup("MessageQueueCreateFail") == true)
                 {
                     this.ClearHangup("MessageQueueCreateFail");
-                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                    //this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
                 }
             }
             catch (Exception ex)
@@ -2404,9 +2418,9 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    this.AddHangup("MessageQueueCreateFail");
                     this.WriteErrorLog("*** 探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 时出现异常: " + ExceptionUtil.GetDebugText(ex)
                         + " 系统已被挂起。");
+                    this.AddHangup("MessageQueueCreateFail");
                 }
             }
         }
@@ -3181,7 +3195,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("Flush()中俘获异常 " + ex.Message);
+                this.WriteErrorLog("Flush()中俘获异常 " + ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -3196,7 +3210,6 @@ namespace DigitalPlatform.LibraryServer
             this.LockForWrite();    // 2016/10/16
             try
             {
-
                 if (this.m_bChanged == false)
                 {
                     /*
@@ -3215,7 +3228,6 @@ namespace DigitalPlatform.LibraryServer
                     bOldState = watcher.EnableRaisingEvents;
                     watcher.EnableRaisingEvents = false;
                 }
-
 
                 if (strFileName == null)
                     strFileName = m_strFileName;
@@ -3714,6 +3726,13 @@ namespace DigitalPlatform.LibraryServer
 
                 this.m_bChanged = false;
 
+                // 2017/11/25
+                {
+                    if (this.LibraryCfgDom == null)
+                        this.LibraryCfgDom = new XmlDocument();
+                    this.LibraryCfgDom.Load(strFileName);
+                }
+
                 if (this.watcher != null)
                 {
                     watcher.EnableRaisingEvents = bOldState;
@@ -3824,9 +3843,9 @@ namespace DigitalPlatform.LibraryServer
             this.EndWather();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
-            this.AddHangup("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
+            this.AddHangup("Exit");
 
             DateTime start = DateTime.Now;
             try
@@ -4203,26 +4222,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return false;
-        }
-
-        // 是否为实用库名
-        // 实用库包括 publisher / zhongcihao / dictionary 类型
-        public bool IsUtilDbName(string strUtilDbName)
-        {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "']");
-            if (node == null)
-                return false;
-
-            return true;
-        }
-
-        public bool IsUtilDbName(string strUtilDbName, string strType)
-        {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='" + strType + "']");
-            if (node == null)
-                return false;
-
-            return true;
         }
 
         // 是否在配置的书目库名之列?
@@ -9545,6 +9544,12 @@ out strError);
             return false;
         }
 
+        // 临时密码重发最短周期
+        static TimeSpan _tempPasswordRetryPeriod = new TimeSpan(0, 5, 0); // 五分钟
+
+        // 临时密码失效周期
+        static TimeSpan _tempPasswordExpirePeriod = new TimeSpan(1, 0, 0); // 一小时
+
         // 重设密码
         // parameters:
         //      strParameters   参数字符串。如果 queryword 使用 NB: 形态，注意要这样使用 NB:姓名|，因为这是采用前方一致检索的，如果没有竖线部分，可能会匹配上不该命中的较长的名字
@@ -9717,6 +9722,7 @@ out strError);
 
                     // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
                     DateTime end;
+#if NO
                     // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
                     // parameters:
                     //      now 当前时间。本地时间
@@ -9728,11 +9734,21 @@ out strError);
                         this.Clock.Now,
                         out end,
                         out strError);
+#endif
+
+                    // return:
+                    //      -1  出错
+                    //      0   已经过了禁止期，可以重试了
+                    //      1   还在重试禁止期以内
+                    nRet = CheckRetryStartTime(readerdom,
+    DateTime.Now,
+    out end,
+    out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == 1)
                     {
-                        strError = "本次重设密码的操作距离上次操作间隔不足一小时，操作被拒绝。请在 " + end.ToShortTimeString() + " 以后再进行操作";
+                        strError = "本次重设密码的操作距离上次操作间隔不足" + _tempPasswordRetryPeriod.TotalMinutes + "分钟，操作被拒绝。请在 " + end.ToShortTimeString() + " 以后再进行操作";
                         return 0;
                     }
 
@@ -9744,7 +9760,7 @@ out strError);
                     Random rnd = new Random();
                     string strReaderTempPassword = rnd.Next(1, 999999).ToString();
 
-                    DateTime expire = this.Clock.Now + new TimeSpan(1, 0, 0);   // 本地时间
+                    DateTime expire = DateTime.Now + _tempPasswordExpirePeriod;    // new TimeSpan(1, 0, 0);   // 本地时间
                     string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(expire);
 
                     if (bReturnMessage == true)
@@ -9759,7 +9775,10 @@ out strError);
                         DomUtil.SetElementText(node, "name", strName);
                         DomUtil.SetElementText(node, "tempPassword", strReaderTempPassword);
                         DomUtil.SetElementText(node, "expireTime", expire.ToLongTimeString());
-                        DomUtil.SetElementText(node, "period", "一小时");
+                        DomUtil.SetElementText(node, "period",
+                            _tempPasswordExpirePeriod.TotalMinutes.ToString() + "分钟"
+                            // "一小时"
+                            );
                         DomUtil.SetElementText(node, "refID", strRefID);    // 在所提供的姓名或者电话号码命中不止一条读者记录的情形，调用者后面使用读者记录的 refID 来绑定特别重要。
                     }
                     else
@@ -9771,7 +9790,9 @@ out strError);
                             .Replace("%name%", strName)
                             .Replace("%temppassword%", strReaderTempPassword)
                             .Replace("%expiretime%", expire.ToLongTimeString())
-                            .Replace("%period%", "一小时");
+                            .Replace("%period%", _tempPasswordExpirePeriod.TotalMinutes.ToString() + "分钟"
+                            //"一小时"
+                            );
                         // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
 
                         // 向手机号码发送短信
@@ -9836,7 +9857,7 @@ out strError);
             record.RecPath,
             readerdom,
             strReaderTempPassword,
-            strExpireTime,
+                        // strExpireTime,
             record.Timestamp,
             out output_timestamp,
             out strError);
@@ -9871,6 +9892,50 @@ out strError);
             }
 
             return dom.DocumentElement.OuterXml;
+        }
+
+        // 观察在 password 元素 tempPasswordCreateTime 属性中的时间加上重发周期长度，必须在这个时间以后才能进行本次操作
+        // parameters:
+        //      now 当前时间。本地时间
+        //      retry_start  可以重发的最早时间。本地时间
+        // return:
+        //      -1  出错
+        //      0   已经过了禁止期，可以重试了
+        //      1   还在重试禁止期以内
+        static int CheckRetryStartTime(XmlDocument readerdom,
+            DateTime now,
+            out DateTime retry_start,
+            out string strError)
+        {
+            strError = "";
+            retry_start = new DateTime(0);
+
+            XmlNode node = readerdom.DocumentElement.SelectSingleNode("password");
+            if (node == null)
+                return 0;
+
+            string strCreateTime = DomUtil.GetAttr(node,
+"tempPasswordCreateTime");
+            if (string.IsNullOrEmpty(strCreateTime) == true)
+                return 0;
+
+            try
+            {
+                retry_start = DateTimeUtil.FromRfc1123DateTimeString(strCreateTime).ToLocalTime();
+
+                if (now > retry_start + _tempPasswordRetryPeriod)
+                {
+                    // 禁止期已经过了
+                    return 0;
+                }
+            }
+            catch (Exception)
+            {
+                strError = "临时密码创建时间字符串 '" + strCreateTime + "' 格式不正确，应为 RFC1123 格式";
+                return -1;
+            }
+
+            return 1;   // 尚在禁止期以内
         }
 
         // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
@@ -11317,7 +11382,7 @@ out strError);
         public static int ChangeReaderTempPassword(
             XmlDocument readerdom,
             string strTempPassword,
-            string strExpireTime,
+            // string strExpireTime,
             ref XmlDocument domOperLog,
             out string strError)
         {
@@ -11333,15 +11398,19 @@ out strError);
                 return -1;
             }
 
-            XmlNode node = readerdom.DocumentElement.SelectSingleNode("password");
+            XmlElement node = readerdom.DocumentElement.SelectSingleNode("password") as XmlElement;
             if (node == null)
             {
                 node = readerdom.CreateElement("password");
                 readerdom.DocumentElement.AppendChild(node);
             }
 
+            string strCreateTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now);
+            string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(DateTime.Now + _tempPasswordExpirePeriod); // 本地时间
+
             DomUtil.SetAttr(node,
                 "tempPassword", strTempPassword);
+            node.SetAttribute("tempPasswordCreateTime", strCreateTime); // 2017/10/27
             DomUtil.SetAttr(node,
                 "tempPasswordExpire", strExpireTime);
 
@@ -12358,7 +12427,7 @@ strLibraryCode);    // 读者所在的馆代码
             string strReaderRecPath,
             XmlDocument readerdom,
             string strReaderTempPassword,
-            string strExpireTime,
+            // string strExpireTime,
             byte[] timestamp,
             out byte[] output_timestamp,
             out string strError)
@@ -12408,7 +12477,7 @@ strLibraryCode);    // 读者所在的馆代码
             nRet = LibraryApplication.ChangeReaderTempPassword(
                 readerdom,
                 strReaderTempPassword,
-                strExpireTime,
+                // strExpireTime,
                 ref domOperLog,
                 out strError);
             if (nRet == -1)
@@ -14186,7 +14255,8 @@ strLibraryCode);    // 读者所在的馆代码
 
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
 
-                if (string.Compare(strFirstLevel, "backup", true) == 0)
+                if (string.Compare(strFirstLevel, "backup", true) == 0
+                    || string.Compare(strFirstLevel, "cfgs", true) == 0)
                 {
                     if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
                     {
@@ -14422,7 +14492,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             // 实用库 2013/10/30
-            if (this.IsUtilDbName(strDbName) == true)
+            if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, strDbName) == true)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 

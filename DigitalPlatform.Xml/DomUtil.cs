@@ -12,6 +12,12 @@ namespace DigitalPlatform.Xml
     // DomUtil类包含XML DOM的一些扩展功能函数
     public class DomUtil
     {
+        // 2017/12/27
+        public static void SafeLoadXml(XmlDocument dom, string xml)
+        {
+            dom.LoadXml(string.IsNullOrEmpty(xml) ? "<root />" : xml);
+        }
+
         // 删除 start 元素下的所有空元素
         // parameters:
         //      bCheckStart 是否检查 start 节点的状况。如果本参数为 true, 当 start 为空元素时，要删除 start 元素

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
@@ -14,8 +11,8 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Range;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.Xml;
+using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -25,6 +22,8 @@ namespace DigitalPlatform.CirculationClient
     public partial class KernelResTree : System.Windows.Forms.TreeView
     {
         public ApplicationInfo AppInfo = null;
+
+        public event UploadFilesEventHandler UploadFiles = null;
 
         public event DownloadFilesEventHandler DownloadFiles = null;
 
@@ -166,7 +165,26 @@ namespace DigitalPlatform.CirculationClient
 
                     children.Clear();
 
+                    // 排序
+                    // 这样所有对象都要一次性进入内存了
+                    List<ResInfoItem> items = new List<ResInfoItem>();
                     foreach (ResInfoItem item in loader)
+                    {
+                        if (string.IsNullOrEmpty(item.Name))
+                            continue;
+                        items.Add(item);
+                    }
+
+                    items.Sort((a, b) =>
+                    {
+                        int nRet = a.Type - b.Type;
+                        if (nRet != 0)
+                            return nRet;
+                        return string.Compare(a.Name, b.Name);
+                    });
+
+                    // foreach (ResInfoItem item in loader)
+                    foreach (ResInfoItem item in items)
                     {
                         // 2017/9/23
                         if (string.IsNullOrEmpty(item.Name))
@@ -354,6 +372,15 @@ namespace DigitalPlatform.CirculationClient
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("上传文件 (&U)");
+            menuItem.Click += new System.EventHandler(this.menu_uploadFile);
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             List<TreeNode> selected_file_nodes = GetCheckedFileNodes();
 
             menuItem = new MenuItem("下载文件 [" + selected_file_nodes.Count + "] (&W)");
@@ -491,6 +518,118 @@ namespace DigitalPlatform.CirculationClient
 
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
+        }
+
+        bool _hideConfirmMessageBox = false;
+
+        private void menu_uploadFile(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.UploadFiles == null)
+            {
+                strError = "尚未绑定 UploadFiles 事件";
+                goto ERROR1;
+            }
+
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择代表上传目标位置的节点";
+                goto ERROR1;
+            }
+
+#if NO
+            List<TreeNode> nodes = this.GetCheckedFileNodes();
+
+            if (nodes.Count == 0)
+            {
+                strError = "尚未选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+#endif
+
+            if (this.SelectedNode.ImageIndex != RESTYPE_FOLDER
+                && this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是文件类型或目录类型。请选择上载操作的目标位置(前述两种类型的节点)";
+                goto ERROR1;
+            }
+
+            // TODO: checked 的状态是否可以
+            string strTagetFolder = GetNodePath(this.SelectedNode);
+            if (this.SelectedNode.ImageIndex == RESTYPE_FILE)
+                strTagetFolder = Path.GetDirectoryName(strTagetFolder);
+#if NO
+            List<string> paths = new List<string>();
+            foreach (TreeNode node in nodes)
+            {
+                string strPath = GetNodePath(node);
+
+                string strExt = Path.GetExtension(strPath);
+                if (strExt == ".~state")
+                {
+                    strError = "不允许下载扩展名为 .~state 的状态文件 (" + strPath + ")";
+                    goto ERROR1;
+                }
+                paths.Add(strPath);
+            }
+#endif
+
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Title = "请指定要上传的文件(可以多选)",
+                // dlg.FileName = this.RecPathFilePath;
+                // dlg.InitialDirectory = 
+                Multiselect = true,
+                Filter = "All files (*.*)|*.*",
+                RestoreDirectory = true
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            // 以出现一个确认源和目标的对话框
+            if (this._hideConfirmMessageBox == false)
+            {
+                DialogResult result = MessageDialog.Show(this,
+                    "确认将以下本地文件上传到位置 '" + strTagetFolder + "':\r\n---\r\n" + string.Join("\r\n", dlg.FileNames),
+    MessageBoxButtons.OKCancel,
+    MessageBoxDefaultButton.Button1,
+    "此后不再出现本对话框",
+    ref this._hideConfirmMessageBox,
+    new string[] { "确定", "取消" });
+                if (result == DialogResult.Cancel)
+                    return;
+            }
+
+            UploadFilesEventArgs e1 = new UploadFilesEventArgs
+            {
+                TargetFolder = strTagetFolder,
+                SourceFileNames = new List<string>(dlg.FileNames),
+                FuncEnd = (bError) => { Refresh(this.SelectedNode); }   // 完成后才刷新
+            };
+            this.UploadFiles(this, e1);
+            if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void Refresh(TreeNode node)
+        {
+            if (node == null)
+                return;
+
+            string strName = node.Text;
+            if (node.ImageIndex == RESTYPE_FILE)
+                node = node.Parent;
+
+            this.Fill(node);
+
+            // 复原选择
+            SelectNode(node, strName);
         }
 
         void menu_clearCheckBoxes(object sender, System.EventArgs e)
@@ -650,7 +789,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        string _usedDownloadFolder = "";
+        // string _usedDownloadFolder = "";
 
         // 下载动态文件
         // 动态文件就是一直在不断增长的文件。允许一边增长一边下载
@@ -802,6 +941,7 @@ namespace DigitalPlatform.CirculationClient
                 goto ERROR1;
             }
 
+#if NO
             TreeNode node = this.SelectedNode;
             string strName = node.Text;
             if (node.ImageIndex == RESTYPE_FILE)
@@ -811,6 +951,8 @@ namespace DigitalPlatform.CirculationClient
 
             // 复原选择
             SelectNode(node, strName);
+#endif
+            Refresh(this.SelectedNode);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -996,6 +1138,7 @@ MessageBoxDefaultButton.Button2);
 
                 // 编辑配置文件
                 KernelCfgFileDialog dlg = new KernelCfgFileDialog();
+                dlg.Text = "编辑 " + strPath;
                 dlg.Font = GuiUtil.GetDefaultFont();
                 dlg.ActivePage = "content";
                 dlg.Content = info.Content;
@@ -1354,4 +1497,26 @@ out strError);
         public List<string> FileNames { get; set; }  // [in]
         public string ErrorInfo { get; set; }  // [out]
     }
+
+    /// <summary>
+    /// 上传文件的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void UploadFilesEventHandler(object sender,
+    UploadFilesEventArgs e);
+
+    /// <summary>
+    /// 上传文件事件的参数
+    /// </summary>
+    public class UploadFilesEventArgs : EventArgs
+    {
+        public string TargetFolder { get; set; }    // [in] 目标位置，目录
+        public List<string> SourceFileNames { get; set; }  // [in] 源文件名列表
+        public Delegate_end FuncEnd { get; set; }   // [in]
+        public string ErrorInfo { get; set; }  // [out]
+    }
+
+    public delegate void Delegate_end(bool bError);
+
 }

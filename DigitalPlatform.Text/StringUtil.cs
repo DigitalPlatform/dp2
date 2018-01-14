@@ -16,8 +16,12 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
-        
-        
+
+        public static string GetPercentText(long uploaded, long length)
+        {
+            return String.Format("{0,3:N}", ((double)uploaded / (double)length) * (double)100) + "%";
+        }
+
         public static string[] units = new string[] { "K", "M", "G", "T" };
         public static string GetLengthText(long length)
         {
@@ -223,6 +227,34 @@ namespace DigitalPlatform.Text
             }
 
             return null;
+        }
+
+        // 2017/11/22
+        public static string SetParameterByPrefix(string strList,
+            string strPrefix,
+            string strDelimiter = ":",
+            string strValue = null)
+        {
+            if (string.IsNullOrEmpty(strList) == true)
+                strList = "";
+
+            List<string> results = new List<string>();
+            string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in list)
+            {
+                if (s.StartsWith(strPrefix + strDelimiter) == true
+                    || s == strPrefix)
+                {
+                    // 注: strValue 为 ""，会产生 'prefix:'；strValue 为 null，则这个 prefix 在内容中会被完整删除
+                    if (strValue == null)
+                        continue;
+                    results.Add(strPrefix + strDelimiter + strValue);
+                }
+                else
+                    results.Add(s);
+            }
+
+            return StringUtil.MakePathList(results, ",");
         }
 
         public static bool IsValidCMIS(string strText)
@@ -1649,19 +1681,19 @@ string strTimestamp)
                 return strText;
             return strText.Trim();
         }
-        static int[] iSign =   {65306, 
+        static int[] iSign =   {65306,
                             8220,
                             65307,
-                            8216, 
+                            8216,
                             65292,
                             65281,
-                            12289, 
-  
-65311,   
+                            12289,
+
+65311,
 8212,
 12290,
-12298,   
-12297,   
+12298,
+12297,
 8230,
 65509,
 65288,

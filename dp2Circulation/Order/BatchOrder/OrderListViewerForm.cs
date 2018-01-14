@@ -20,7 +20,7 @@ namespace dp2Circulation
     {
         public bool Docked = false;
 
-        public event EventHandler DockChanged = null;
+        public event EventHandler MyDockChanged = null;
 
         public BatchOrderForm BatchOrderForm = null;
 
@@ -53,9 +53,9 @@ namespace dp2Circulation
             this.Docked = true;
             this.Visible = false;
 
-            if (this.DockChanged != null)
+            if (this.MyDockChanged != null)
             {
-                this.DockChanged(this, new EventArgs());
+                this.MyDockChanged(this, new EventArgs());
             }
         }
 
@@ -67,9 +67,9 @@ namespace dp2Circulation
             if (Program.MainForm.CurrentPropertyControl == this.MainControl)
                 Program.MainForm.CurrentPropertyControl = null;
 
-            if (this.DockChanged != null)
+            if (this.MyDockChanged != null)
             {
-                this.DockChanged(this, new EventArgs());
+                this.MyDockChanged(this, new EventArgs());
             }
         }
 

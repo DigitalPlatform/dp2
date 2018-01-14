@@ -186,6 +186,12 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
+            if (string.IsNullOrEmpty(this.App.ArrivedDbName))
+            {
+                this.AppendResultText("启动失败: 当前 library.xml 中没有配置预约到书库参数\r\n");
+                return;
+            }
+
             bool bFirst = true;
             string strError = "";
             int nRet = 0;
@@ -427,8 +433,8 @@ namespace DigitalPlatform.LibraryServer
 
             return;
         ERROR1:
-            this.AppendResultText("arrivethread error : " + strError + "\r\n");
-            this.App.WriteErrorLog("arrivethread error : " + strError);
+            this.AppendResultText("预约到书管理 后台任务出错: " + strError + "\r\n");
+            this.App.WriteErrorLog("预约到书管理 后台任务出错: " + strError);
             return;
         }
 

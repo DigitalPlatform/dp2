@@ -65,10 +65,12 @@ namespace dp2Circulation
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
 #if USE_LOCAL_CHANNEL
         // 2011/12/5
@@ -174,7 +176,6 @@ namespace dp2Circulation
         /// 初始化 OperHistory 对象
         /// 初始化过程中，要编译出纳打印方案脚本代码，使它处于就绪状态
         /// </summary>
-        /// <param name="main_form">框架窗口</param>
         /// <param name="webbrowser">用于显示操作历史信息的 IE 浏览器控件</param>
         /// <param name="strError">出错信息</param>
         /// <returns>-1: 出错，错误信息在 strError中；0: 成功</returns>

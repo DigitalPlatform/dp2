@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackupTaskParam.cs" />
+    <Compile Include="ServerDatabaseUtility.cs" />
     <Compile Include="LibraryServerUtil.cs" />
     <Compile Include="LoanParam.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

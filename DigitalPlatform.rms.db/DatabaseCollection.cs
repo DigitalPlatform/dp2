@@ -3427,10 +3427,9 @@ namespace DigitalPlatform.rms
                  * */
                 if (lTotalLength != -1 && baSource == null)
                 {
-                    strError = "WriteRes()调用错误，baSource参数不能为null (当 lTotalLength 不为 -1 时)";
+                    strError = "WriteRes()调用错误，baSource 参数不能为 null (当 lTotalLength 不为 -1 时)";
                     return -1;
                 }
-
 
                 //------------------------------------------------
                 //分析出资源的类型
@@ -3526,7 +3525,6 @@ namespace DigitalPlatform.rms
                     string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
                     //***********吃掉第2层*************
                     // 到此为止，strPath不含记录号层了，下级分情况判断
-
 
                     strRecordID = strFirstPart;
                     // 只到记录号层的路径

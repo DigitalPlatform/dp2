@@ -202,29 +202,29 @@ namespace DigitalPlatform.CommonControl
 
         void OnTextBoxHeightChanged()
         {
-            if (this.m_nInHeightChanging > 0)
-                return;
+            try
+            {
+                if (this.m_nInHeightChanging > 0)
+                    return;
 
-            int nDelta = this.m_oldTextBoxLocation.Y;
+                int nDelta = this.m_oldTextBoxLocation.Y;
 
-            this.m_nInHeightChanging++;
-            this.Height = this.textBox_text.Height
-                + 2 * nDelta /*+ this.KernelMargin.Vertical*/ + this.Padding.Vertical
-                + BorderSize.Height * 2;
-            this.m_nInHeightChanging--;
+                this.m_nInHeightChanging++;
+                this.Height = this.textBox_text.Height
+                    + 2 * nDelta /*+ this.KernelMargin.Vertical*/ + this.Padding.Vertical
+                    + BorderSize.Height * 2;
+                this.m_nInHeightChanging--;
 
-            /*
-            nDelta = this.button_dropDownList.Location.Y;
-            int nCenterY = this.Height / 2;
-            this.button_dropDownList.Location = new Point(this.ClientRectangle.Width - this.button_dropDownList.Width - this.Margin.Right + this.Padding.Right,
-                nCenterY - this.button_dropDownList.Height / 2);
-             * */
+                this.textBox_text.Location = new Point(/*this.KernelMargin.Left + */this.Padding.Left + this.m_oldTextBoxLocation.X,
+                    /*this.KernelMargin.Top + */this.Padding.Top + this.m_oldTextBoxLocation.Y);
+                this.textBox_text.Width = this.Width /*- this.KernelMargin.Horizontal*/ - this.Padding.Horizontal - this.RectButton.Width - BorderSize.Width * 2 - 1;
 
-            this.textBox_text.Location = new Point(/*this.KernelMargin.Left + */this.Padding.Left + this.m_oldTextBoxLocation.X,
-                /*this.KernelMargin.Top + */this.Padding.Top + this.m_oldTextBoxLocation.Y);
-            this.textBox_text.Width = this.Width /*- this.KernelMargin.Horizontal*/ - this.Padding.Horizontal - this.RectButton.Width - BorderSize.Width * 2 - 1;
+                this.Invalidate();
+            }
+            catch
+            {
 
-            this.Invalidate();
+            }
         }
 
         Rectangle RectButton

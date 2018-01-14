@@ -12,6 +12,9 @@
   <col title="出版时间">
     <xpath>*/publishTime</xpath>
   </col>
+  <col title="卷期">
+    <xpath>*/volume</xpath>
+  </col>
   <col title="批次号">
     <xpath>*/batchNo</xpath>
   </col>
@@ -26,6 +29,9 @@
   </col>
   <col title="册类型">
     <xpath>*/bookType</xpath>
+  </col>
+  <col title="登录号" type="register_number">
+    <xpath>*/registerNo</xpath>
   </col>
   <col title="注释">
     <xpath>*/comment</xpath>

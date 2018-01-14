@@ -18,6 +18,8 @@ namespace dp2Circulation
                 components.Dispose();
             }
 
+            this.DisposeFonts();
+
             if (Program.MainForm != null && Program.MainForm._imageManager != null)
                 Program.MainForm._imageManager.GetObjectComplete -= _imageManager_GetObjectComplete;
 

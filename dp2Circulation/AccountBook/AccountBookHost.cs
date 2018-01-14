@@ -88,7 +88,7 @@ namespace dp2Circulation
         /// <summary>
         /// 当前窗口所从属的框架窗口
         /// </summary>
-        public virtual MainForm MainForm
+        public override MainForm MainForm
         {
             get
             {

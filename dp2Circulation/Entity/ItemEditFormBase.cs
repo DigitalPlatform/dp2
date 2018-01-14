@@ -35,10 +35,12 @@ namespace dp2Circulation
         /// </summary>
         public TC Items = null;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 当前窗口所从属的框架窗口

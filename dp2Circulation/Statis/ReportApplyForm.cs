@@ -21,10 +21,12 @@ namespace dp2Circulation
     /// </summary>
     public partial class ReportApplyForm : Form
     {
+        /*
         /// <summary>
         /// 框架窗口对象
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 用于存储报表配置文件的目录

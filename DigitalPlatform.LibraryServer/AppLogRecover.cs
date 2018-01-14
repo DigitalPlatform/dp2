@@ -21,6 +21,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -33,6 +34,7 @@ namespace DigitalPlatform.LibraryServer
         /* 日志记录格式如下
 <root>
   <operation>borrow</operation> 操作类型
+  <action>borrow</action>  动作 borrow/renew
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <itemBarcode>0000001</itemBarcode>  册条码号
   <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
@@ -331,7 +333,6 @@ out strError);
                 // 写回读者、册记录
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
-
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -638,7 +639,6 @@ out strError);
                 // 写回读者、册记录
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
-
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -1236,6 +1236,7 @@ strElementName);
         /* 日志记录格式
 <root>
   <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
   <itemBarcode>0000001</itemBarcode> 册条码号
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <operator>test</operator> 操作者
@@ -1281,6 +1282,15 @@ strElementName);
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
             {
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+    "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
+
                 XmlNode node = null;
                 string strReaderXml = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerRecord",
@@ -1345,10 +1355,8 @@ strElementName);
                     return -1;
                 }
 
-
                 return 0;
             }
-
 
             // 逻辑恢复或者混合恢复
             if (level == RecoverLevel.Logic
@@ -1358,6 +1366,12 @@ strElementName);
 
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                     "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
@@ -1652,6 +1666,12 @@ strElementName);
 
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                     "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
@@ -2181,6 +2201,13 @@ strElementName);
         {
             strError = "";
             int nRet = 0;
+
+            // 2017/10/24
+            if (strAction != "return" && strAction != "lost")
+            {
+                strError = "ReturnChangeReaderAndItemRecord() 只能处理 strAction 为 'return' 和 'lost' 的情况，不能处理 '" + strAction + "'";
+                return -1;
+            }
 
             string strReturnOperator = DomUtil.GetElementText(domLog.DocumentElement,
     "operator");
@@ -7661,7 +7688,7 @@ API: Settlement()
 <requestResPath>...</requestResPath> 资源路径参数。也就是请求API是的strResPath参数值。可能在路径中的记录ID部分包含问号，表示要追加创建新的记录
 <resPath>...</resPath> 资源路径。资源的确定路径。
 <ranges>...</ranges> 字节范围
-<totalLength>...</totalLength> 总长度
+<totalLength>...</totalLength> 总长度。如果为 -1，表示仅修改 metadata
 <metadata>...</metadata> 此元素的文本即是记录体，但注意为不透明的字符串（HtmlEncoding后的记录字符串）。
 <style>...</style> 当 style 中包含 delete 子串时表示要删除这个资源 
 <operator>test</operator> 
@@ -7709,14 +7736,6 @@ API: Settlement()
                     return -1;
                 }
 
-                string strRanges = DomUtil.GetElementText(
-    domLog.DocumentElement,
-    "ranges");
-                if (string.IsNullOrEmpty(strRanges) == true)
-                {
-                    strError = "日志记录中缺<ranges>元素";
-                    return -1;
-                }
 
                 string strTotalLength = DomUtil.GetElementText(
 domLog.DocumentElement,
@@ -7737,6 +7756,18 @@ domLog.DocumentElement,
                     strError = "lTotalLength值 '" + strTotalLength + "' 格式不正确";
                     return -1;
                 }
+
+                string strRanges = DomUtil.GetElementText(
+domLog.DocumentElement,
+"ranges");
+                if (lTotalLength != -1 && string.IsNullOrEmpty(strRanges) == true)
+                {
+                    // 2017/10/26 注: 当 totalLength 为 -1 时，表示仅修改 metadata。此时 ranges 为空
+                    // 而当 totalLength 为非 -1 值时，ranges 就不允许为空
+                    strError = "日志记录中缺 <ranges> 元素(当 <totalLength> 元素内容为非 -1 时)";
+                    return -1;
+                }
+
                 string strMetadata = DomUtil.GetElementText(
 domLog.DocumentElement,
 "metadata");
@@ -8153,12 +8184,27 @@ DO_SNAPSHOT:
             return -1;
         }
 
+        /*
+<root>
+  <operation>manageDatabase</operation>
+  <action>createDatabase</action> createDatabase/initializeDatabase/refreshDatabase/deleteDatabase
+  <databases>
+    <database type="biblio" syntax="unimarc" usage="book" role="" inCirculation="true" name="_测试用中文图书" entityDbName="_测试用中文图书实体" orderDbName="_测试用中文图书订购" commentDbName="_测试用中文图书评注" />
+  </databases>
+  <operator>supervisor</operator>
+  <operTime>Sat, 18 Nov 2017 20:00:05 +0800</operTime>
+  <clientAddress via="net.pipe://localhost/dp2library/xe">localhost</clientAddress>
+  <version>1.06</version>
+</root>
+         * */
         // 2017/10/15
+        //      attachment  附件流对象。注意文件指针在流的尾部
         public int RecoverManageDatabase(
 RmsChannelCollection Channels,
 RecoverLevel level,
 XmlDocument domLog,
 Stream attachmentLog,
+            string strStyle,
 out string strError)
         {
             strError = "";
@@ -8168,7 +8214,6 @@ out string strError)
             // 暂时把Robust当作Logic处理
             if (level == RecoverLevel.Robust)
                 level = RecoverLevel.Logic;
-
 
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -8191,15 +8236,19 @@ DO_SNAPSHOT:
                     strTempFileName = this.GetTempFileName("db");
                     using (Stream target = File.Create(strTempFileName))
                     {
+                        attachmentLog.Seek(0, SeekOrigin.Begin);
                         attachmentLog.CopyTo(target);
                     }
                 }
+
 
                 string strTempDir = Path.Combine(this.TempDir, "~rcvdb");
                 PathUtil.CreateDirIfNeed(strTempDir);
 
                 try
                 {
+                    bool bDbNameChanged = false;
+
                     string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                         "action");
                     if (strAction == "createDatabase")
@@ -8213,14 +8262,20 @@ DO_SNAPSHOT:
                         if (nRet == -1)
                             return -1;
 
+                        bDbNameChanged = true;
+
                         // 更新 library.xml 内容
                         XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
-                        nRet = LibraryApplication.AppendDatabaseElement(this.LibraryCfgDom,
+                        nRet = AppendDatabaseElement(this.LibraryCfgDom,
             nodes,
             out strError);
                         if (nRet == -1)
                             return -1;
                         this.Changed = true;
+                    }
+                    else if (strAction == "changeDatabase")
+                    {
+                        // 注意处理 attach 和 detach 风格。或者明确报错不予处理
                     }
                     else if (strAction == "initializeDatabase")
                     {
@@ -8232,7 +8287,23 @@ DO_SNAPSHOT:
                     }
                     else if (strAction == "deleteDatabase")
                     {
+                        List<string> dbnames = new List<string>();
 
+                        XmlNodeList databases = domLog.DocumentElement.SelectNodes("databases/database");
+                        foreach (XmlElement database in databases)
+                        {
+                            dbnames.Add(database.GetAttribute("name"));
+                        }
+
+                        nRet = DeleteDatabases(
+                            null,
+                            channel,
+                            dbnames,
+                            strStyle,
+                            ref bDbNameChanged,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
                     }
                     else
                     {
@@ -8242,6 +8313,21 @@ DO_SNAPSHOT:
 
                     if (this.Changed == true)
                         this.ActivateManagerThread();
+
+                    if (bDbNameChanged == true)
+                    {
+                        nRet = InitialKdbs(
+                            Channels,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        // 重新初始化虚拟库定义
+                        this.vdbs = null;
+                        nRet = this.InitialVdbs(Channels,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                     return 0;
                 }
                 finally
@@ -8272,6 +8358,161 @@ DO_SNAPSHOT:
                 goto DO_SNAPSHOT;
             }
             return -1;
+        }
+
+        int DeleteDatabases(
+            Stop stop,
+            RmsChannel channel,
+            List<string> dbnames,
+            string strStyle,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            foreach (string dbname in dbnames)
+            {
+                string strDbType = GetDbTypeByDbName(dbname);
+                if (string.IsNullOrEmpty(dbname))
+                {
+                    // TODO: 遇到此种情况，写入错误日志
+                    strError = "数据库 '" + dbname + "' 没有找到类型";
+                    // return -1;
+                    continue;
+                }
+
+                if (strDbType == "biblio")
+                {
+                    // 删除一个书目库。
+                    // 根据书目库的库名，在 library.xml 的 itemdbgroup 中找出所有下属库的库名，然后删除它们
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = this.DeleteBiblioDatabase(
+                        channel,
+                        "",
+                        dbname,
+                        "",
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        if (this.VerifyDatabaseDelete(
+                            channel,
+                            strDbType, 
+                            dbname, 
+                            out strError) == -1)
+                            return -1;
+                    }
+                    continue;
+                }
+
+                if (/*strDbType == "entity"
+                    || strDbType == "order"
+                    || strDbType == "issue"
+                    || strDbType == "comment"*/
+                    ServerDatabaseUtility.IsBiblioSubType(strDbType))
+                {
+                    nRet = DeleteBiblioChildDatabase(channel,
+    "", // strLibraryCodeList,
+    dbname,
+    "", // strLogFileName,
+    ref bDbNameChanged,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        if (this.VerifyDatabaseDelete(
+                            channel,
+                            strDbType, 
+                            dbname, 
+                            out strError) == -1)
+                            return -1;
+                    } 
+                    continue;
+                }
+
+                if (/*strDbType == "arrived"
+                    || strDbType == "amerce"
+                    || strDbType == "invoice"
+                    || strDbType == "pinyin"
+                    || strDbType == "gcat"
+                    || strDbType == "word"
+                    || strDbType == "message"*/
+                    ServerDatabaseUtility.IsSingleDbType(strDbType))
+                {
+                    // 删除一个单独类型的数据库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteSingleDatabase(channel,
+                        "", // strLibraryCodeList,
+                        dbname,
+                        "", // strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        // test
+                        // strError = "test 验证发生错误";
+                        // return -1;
+                        if (this.VerifyDatabaseDelete(channel,
+                            strDbType,
+                            dbname,
+                            out strError) == -1)
+                            return -1;
+                    } 
+                    continue;
+                }
+
+                if (ServerDatabaseUtility.IsUtilDbName(this.LibraryCfgDom, dbname) == true)
+                {
+                    // 删除一个实用库。
+                    // 也会自动修改 library.xml 的相关元素
+                    // parameters:
+                    //      strLibraryCodeList  当前用户所管辖的分馆代码列表
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteUtilDatabase(channel,
+                        "", // strLibraryCodeList,
+                        dbname,
+                        "", // strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (StringUtil.IsInList("verify", strStyle))
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(strDbType) == false, "");
+                        if (this.VerifyDatabaseDelete(channel,
+                            strDbType, 
+                            dbname,
+                            out strError) == -1)
+                            return -1;
+                    } 
+                    continue;
+                }
+
+                strError = "DeleteDatabases() 遭遇无法识别的数据库名 '" + dbname + "' (数据库类型 '" + strDbType + "')";
+                return -1;
+            }
+
+            return 0;
         }
     }
 

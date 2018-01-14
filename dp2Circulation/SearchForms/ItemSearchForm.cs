@@ -2775,6 +2775,7 @@ out strError);
             }
 
             _verifyBarcodeFuncTable.Clear();
+            _issueQueryCacheTable.Clear();
 
             VerifyEntityDialog dlg = new VerifyEntityDialog();
             if (bControl == true)
@@ -3395,6 +3396,15 @@ out strError);
                     errors.Add("^" + strError); // ^ 开头表示修改提示，而不是错误信息
             }
 
+            // 检查期刊册记录的 volume 字段
+            VerifySerialsVolume(
+    channel,
+    itemdom,
+    strItemRecPath,
+    bAutoModify,
+    errors,
+    ref bChanged);
+
             // 检查馆藏地字段
 
             // 检查图书类型字段
@@ -3403,6 +3413,105 @@ out strError);
             if (bChanged)
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
+            }
+        }
+
+        // 检查册记录中的期号是否正确连接了期记录，存储检索结果所用的 Hashtable
+        Hashtable _issueQueryCacheTable = new Hashtable();   // string --> int
+        const int MAX_ISSUE_QUERY_CACHE_COUNT = 1000;
+
+        // 带有缓冲的检索功能
+        int SearchIssueCount(LibraryChannel channel,
+            string strBiblioRecPath,
+            string strQueryString,
+            out string strError)
+        {
+            strError = "";
+            string strKey = strBiblioRecPath + "|" + strQueryString;
+            if (_issueQueryCacheTable.ContainsKey(strKey) == true)
+            {
+                return (int)_issueQueryCacheTable[strKey];
+            }
+
+            // parameters:
+            //      strBiblioPath   书目记录路径
+            //      strQueryString  检索词。例如 “2005|1|1000|50”。格式为 年|期号|总期号|卷号。一般为 年|期号| 即可。
+            int nRet = channel.GetIssueCount(null,
+                strBiblioRecPath,
+                strQueryString,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (_issueQueryCacheTable.Count > MAX_ISSUE_QUERY_CACHE_COUNT)
+                _issueQueryCacheTable.Clear();
+
+            _issueQueryCacheTable[strKey] = nRet;
+            return nRet;
+        }
+
+        void VerifySerialsVolume(
+            LibraryChannel channel,
+            XmlDocument itemdom,
+            string strItemRecPath,
+            bool bModify,
+            List<string> errors,
+            ref bool bChanged)
+        {
+            // -1: 不是实体库; 0: 图书类型; 1: 期刊类型
+            if (Program.MainForm.IsSeriesTypeFromItemDbName(Global.GetDbName(strItemRecPath)) != 1)
+                return;
+
+            if (itemdom.DocumentElement == null)
+            {
+                errors.Add("XML 记录为空");
+                return;
+            }
+
+            string strVolume = DomUtil.GetElementText(itemdom.DocumentElement, "volume");
+
+            // 累积期定位字符串
+            if (string.IsNullOrEmpty(strVolume) == true)
+            {
+                errors.Add("卷期字段为空");
+                return;
+            }
+
+            string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+            if (string.IsNullOrEmpty(strParentID))
+            {
+                errors.Add("缺乏 parent 元素");
+                return;
+            }
+            string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
+    this.DbType,
+    strItemRecPath,
+    strParentID);
+            if (string.IsNullOrEmpty(strBiblioRecPath))
+            {
+                errors.Add("利用册记录路径 '" + strItemRecPath + "' 获取对应的书目记录路径时出错");
+                return;
+            }
+
+#if NO
+            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
+            string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
+            if (string.IsNullOrEmpty(strIssueDbName) == true)
+                return; // 不是期刊相关库
+#endif
+
+            List<IssueString> query_strings = dp2StringUtil.GetIssueQueryStringFromItemXml(itemdom);
+
+            foreach (IssueString issue_string in query_strings)
+            {
+                string strError = "";
+                int nRet = SearchIssueCount(channel,
+        strBiblioRecPath,
+        issue_string.Query,
+        out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+                if (nRet == 0)
+                    errors.Add("卷期 '" + issue_string.Volume + "' 没有找到对应的期记录");
             }
         }
 
@@ -6054,6 +6163,7 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
             }
 
+#if NO
             string strIssueDbName = "";
             if (this.listView_records.SelectedItems.Count > 0)
             {
@@ -6065,6 +6175,14 @@ Program.MainForm.DefaultFont);
                     string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strOrderDbName);
                     strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
                 }
+            }
+#endif
+            bool IsSeriesType = false;
+            {
+                string strFirstRecPath = "";
+                strFirstRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+
+                IsSeriesType = Program.MainForm.IsSeriesTypeFromOrderDbName(Global.GetDbName(strFirstRecPath)) == 1;
             }
 
             List<string> recpaths = new List<string>();
@@ -6079,7 +6197,8 @@ Program.MainForm.DefaultFont);
             form.MdiParent = Program.MainForm;
             form.Show();
 
-            if (string.IsNullOrEmpty(strIssueDbName) == false)
+            if (/*string.IsNullOrEmpty(strIssueDbName) == false*/
+                IsSeriesType)
                 form.PublicationType = PublicationType.Series;
             else
                 form.PublicationType = PublicationType.Book;
