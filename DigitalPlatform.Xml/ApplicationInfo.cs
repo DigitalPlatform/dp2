@@ -4,9 +4,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Xml;
-using System.Text.RegularExpressions;
 using System.Deployment.Application;
 
 namespace DigitalPlatform.Xml
@@ -27,6 +25,9 @@ namespace DigitalPlatform.Xml
 
         public event EventHandler LoadMdiLayout = null;
         public event EventHandler SaveMdiLayout = null;
+
+        // 2017/12/20
+        public event AppInfoChangedEventHandler AppInfoChanged = null;
 
         public ApplicationInfo()
         {
@@ -344,11 +345,11 @@ Convert.ToString(nValue));
         //		strPath	参数路径
         //		strName	参数名
         //		strValue	要设置的字符串，如果为null，表示删除这个事项
-        public void SetString(string strPath,
+        public void SetString(string strPathParam,
             string strName,
             string strValue)
         {
-            strPath = GetSectionPath(strPath);
+            string strPath = GetSectionPath(strPathParam);
 
             string[] aPath = strPath.Split(new char[] { '/' });
             XmlNode node = DomUtil.CreateNode(dom, aPath);
@@ -361,6 +362,18 @@ Convert.ToString(nValue));
             DomUtil.SetAttr(node,
                 strName,
                 strValue);
+
+            var handler = this.AppInfoChanged;
+            if (handler != null)
+            {
+                AppInfoChangedEventArgs e = new AppInfoChangedEventArgs
+                {
+                    Path = strPathParam,
+                    Name = strName,
+                    Value = strValue
+                };
+                handler(this, e);
+            }
         }
 
         ////
@@ -770,5 +783,16 @@ null);
         Size = 0x01,
         Layout = 0x02,
         All = Size | Layout,
+    }
+
+    // AppInfo 值发生改变的事件
+    public delegate void AppInfoChangedEventHandler(object sender,
+AppInfoChangedEventArgs e);
+
+    public class AppInfoChangedEventArgs : EventArgs
+    {
+        public string Path { get; set; }
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 }

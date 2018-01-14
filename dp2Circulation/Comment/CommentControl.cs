@@ -10,14 +10,10 @@ using System.Xml;
 using System.Web;
 
 using DigitalPlatform;
-using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -2179,7 +2175,7 @@ namespace dp2Circulation
         int SearchCommentRefIdDup(
             LibraryChannel channel,
             string strRefID,
-            // string strBiblioRecPath,
+    // string strBiblioRecPath,
     string strOriginRecPath,
     out string[] paths,
     out string strError)
@@ -2908,7 +2904,6 @@ namespace dp2Circulation
                 }
             }
         }
-
     }
 
     /// <summary>

@@ -1640,7 +1640,7 @@ namespace dp2Circulation
             this.tabControl_panelFixed.SelectedIndexChanged += new System.EventHandler(this.tabControl_panelFixed_SelectedIndexChanged);
             this.tabControl_panelFixed.SizeChanged += new System.EventHandler(this.tabControl_panelFixed_SizeChanged);
             // 
-            // contextMenuStrip_fixedPanel
+            // contextMenuStrip_itemArea
             // 
             this.contextMenuStrip_fixedPanel.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.contextMenuStrip_fixedPanel.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {

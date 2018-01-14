@@ -23,10 +23,12 @@ namespace dp2Circulation
     /// </summary>
     public partial class SelectDictionaryItemDialog : Form
     {
+        /*
         /// <summary>
         /// MainForm 对象
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 词典数据库名

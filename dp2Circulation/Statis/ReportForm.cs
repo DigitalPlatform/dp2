@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #if REPORT_SN    // 定义 REPORT_SN 会启用报表窗的序列号
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -58,7 +60,7 @@ namespace dp2Circulation
 
             this.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "ui_state", "");
 
-#if NO
+/*
             string strError = "";
             int nRet = Program.MainForm.VerifySerialCode("report", out strError);
             if (nRet == -1)
@@ -67,7 +69,7 @@ namespace dp2Circulation
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
                 return;
             }
-#endif
+*/
 
             DelayCheck();
         }
@@ -6236,7 +6238,10 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
-                    long lCount = GetOperLogCount(strEndDate,
+                    long lCount = OperLogLoader.GetOperLogCount(
+                        stop,
+                        this.Channel,
+                        strEndDate,
                         LogType.OperLog,
                         out strError);
                     if (lCount < 0)
@@ -6291,7 +6296,10 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
-                    long lCount = GetOperLogCount(strEndDate,
+                    long lCount = OperLogLoader.GetOperLogCount(
+                        stop,
+                        this.Channel,
+                        strEndDate,
                         LogType.AccessLog,
                         out strError);
                     if (lCount == -1)
@@ -8231,6 +8239,7 @@ out strError);
         /*
 <root>
   <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
   <itemBarcode>0000001</itemBarcode> 册条码号
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <operator>test</operator> 操作者
@@ -8254,8 +8263,8 @@ out string strError)
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
     "action");
-            if (strAction == "read")
-                return 0;   // read 动作并不会改变任何册记录，所以这里返回了
+            if (strAction != "return" && strAction != "lost")
+                return 0;   // 其余 inventory/read/boxing 动作并不会改变任何册记录，所以这里返回了
 
             //long lRet = 0;
             int nRet = 0;
@@ -9246,6 +9255,7 @@ out strError);
 
         #endregion
 
+#if NO
         // 获得日志文件中记录的总数
         // parameters:
         //      strDate 日志文件的日期，8 字符
@@ -9305,6 +9315,7 @@ out strError);
             Debug.Assert(lRecCount >= 0, "");
             return lRecCount;
         }
+#endif
 
         // 执行每日同步任务
         // 从上次记忆的断点位置，开始同步
@@ -9813,12 +9824,14 @@ Stack:
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
                 return;
             }
+#endif
 #endif
 
             string strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
@@ -10245,12 +10258,14 @@ this.button_start_dailyReport.Enabled = true
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
                 return;
             }
+#endif
 #endif
 
             bool bFirst = false;    // 是否为第一次做
@@ -10610,12 +10625,14 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "创建报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             int nDoneCount = 0;
@@ -12948,12 +12965,14 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
@@ -13145,12 +13164,14 @@ MessageBoxDefaultButton.Button1);
 
             int nRet = 0;
 #if SN
+#if REPORT_SN
             nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
                 goto ERROR1;
             }
+#endif
 #endif
 
             FtpUploadDialog dlg = new FtpUploadDialog();

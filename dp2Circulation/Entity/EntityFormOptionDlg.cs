@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
+using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CommonControl;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -360,7 +357,7 @@ this.checkBox_normalRegister_simple.Checked);
             if (StringUtil.IsInList("all", this.DisplayStyle) == true)
                 return;
 
-            for(int i=0;i<this.tabControl_main.TabPages.Count; i++)
+            for (int i = 0; i < this.tabControl_main.TabPages.Count; i++)
             {
                 TabPage page = this.tabControl_main.TabPages[i];
                 string strPageName = page.Tag as string;
@@ -373,5 +370,40 @@ this.checkBox_normalRegister_simple.Checked);
             }
         }
 
+        // 设置默认值模板的字段值
+        // parameters:
+        //      strFieldName    quickRegister_default/normalRegister_default/issue_quickRegister_default/issue_normalRegister_default 等
+        public static void SetFieldValue(string strEntry, 
+            string strFieldName,
+            string strValue)
+        {
+            string strNormalDefault = Program.MainForm.AppInfo.GetString(
+    "entityform_optiondlg",
+    strEntry,
+    "<root />");
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strNormalDefault);
+
+            DomUtil.SetElementText(dom.DocumentElement, strFieldName, strValue);
+
+            Program.MainForm.AppInfo.SetString(
+    "entityform_optiondlg",
+    strEntry,
+    dom.DocumentElement.OuterXml);
+        }
+
+        // 获得默认值模板的字段值
+        public static string GetFieldValue(string strEntry,
+            string strFieldName)
+        {
+            string strNormalDefault = Program.MainForm.AppInfo.GetString(
+    "entityform_optiondlg",
+    strEntry,
+    "<root />");
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strNormalDefault);
+
+            return DomUtil.GetElementText(dom.DocumentElement, strFieldName);
+        }
     }
 }

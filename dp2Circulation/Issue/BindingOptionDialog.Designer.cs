@@ -33,10 +33,9 @@ namespace dp2Circulation
             this.button_OK = new System.Windows.Forms.Button();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_general = new System.Windows.Forms.TabPage();
-            this.textBox_general_acceptBatchNo = new System.Windows.Forms.TextBox();
+            this.button_defaultEntityFields = new System.Windows.Forms.Button();
+            this.textBox_general_batchNo = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.textBox_general_bindingBatchNo = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.tabPage_ui = new System.Windows.Forms.TabPage();
             this.checkBox_ui_displayLockedOrderGroup = new System.Windows.Forms.CheckBox();
             this.checkBox_ui_displayOrderInfoXY = new System.Windows.Forms.CheckBox();
@@ -73,10 +72,9 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(257, 223);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(386, 334);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
             this.button_Cancel.TabIndex = 6;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -85,10 +83,9 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(196, 223);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(294, 334);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(84, 33);
             this.button_OK.TabIndex = 5;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -103,63 +100,52 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_ui);
             this.tabControl_main.Controls.Add(this.tabPage_cellContents);
             this.tabControl_main.Controls.Add(this.tabPage_groupContents);
-            this.tabControl_main.Location = new System.Drawing.Point(10, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Location = new System.Drawing.Point(15, 15);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(304, 208);
+            this.tabControl_main.Size = new System.Drawing.Size(456, 312);
             this.tabControl_main.TabIndex = 7;
             // 
             // tabPage_general
             // 
-            this.tabPage_general.Controls.Add(this.textBox_general_acceptBatchNo);
+            this.tabPage_general.Controls.Add(this.button_defaultEntityFields);
+            this.tabPage_general.Controls.Add(this.textBox_general_batchNo);
             this.tabPage_general.Controls.Add(this.label3);
-            this.tabPage_general.Controls.Add(this.textBox_general_bindingBatchNo);
-            this.tabPage_general.Controls.Add(this.label1);
-            this.tabPage_general.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_general.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_general.Location = new System.Drawing.Point(4, 28);
             this.tabPage_general.Name = "tabPage_general";
-            this.tabPage_general.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_general.Size = new System.Drawing.Size(296, 182);
+            this.tabPage_general.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_general.Size = new System.Drawing.Size(448, 280);
             this.tabPage_general.TabIndex = 0;
             this.tabPage_general.Text = "一般事项";
             this.tabPage_general.UseVisualStyleBackColor = true;
             // 
+            // button_defaultEntityFields
+            // 
+            this.button_defaultEntityFields.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button_defaultEntityFields.Location = new System.Drawing.Point(11, 119);
+            this.button_defaultEntityFields.Name = "button_defaultEntityFields";
+            this.button_defaultEntityFields.Size = new System.Drawing.Size(258, 45);
+            this.button_defaultEntityFields.TabIndex = 14;
+            this.button_defaultEntityFields.Text = "册记录默认值...";
+            this.button_defaultEntityFields.UseVisualStyleBackColor = true;
+            this.button_defaultEntityFields.Click += new System.EventHandler(this.button_defaultEntityFields_Click);
+            // 
             // textBox_general_acceptBatchNo
             // 
-            this.textBox_general_acceptBatchNo.Location = new System.Drawing.Point(95, 39);
-            this.textBox_general_acceptBatchNo.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_general_acceptBatchNo.Name = "textBox_general_acceptBatchNo";
-            this.textBox_general_acceptBatchNo.Size = new System.Drawing.Size(96, 21);
-            this.textBox_general_acceptBatchNo.TabIndex = 3;
+            this.textBox_general_batchNo.Location = new System.Drawing.Point(206, 60);
+            this.textBox_general_batchNo.Name = "textBox_general_acceptBatchNo";
+            this.textBox_general_batchNo.Size = new System.Drawing.Size(176, 28);
+            this.textBox_general_batchNo.TabIndex = 3;
+            this.textBox_general_batchNo.Leave += new System.EventHandler(this.textBox_general_acceptBatchNo_Leave);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(5, 42);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(8, 63);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 12);
+            this.label3.Size = new System.Drawing.Size(179, 18);
             this.label3.TabIndex = 2;
-            this.label3.Text = "验收批次号(&A):";
-            // 
-            // textBox_general_bindingBatchNo
-            // 
-            this.textBox_general_bindingBatchNo.Location = new System.Drawing.Point(95, 14);
-            this.textBox_general_bindingBatchNo.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_general_bindingBatchNo.Name = "textBox_general_bindingBatchNo";
-            this.textBox_general_bindingBatchNo.Size = new System.Drawing.Size(96, 21);
-            this.textBox_general_bindingBatchNo.TabIndex = 1;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(5, 17);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(89, 12);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "装订批次号(&B):";
+            this.label3.Text = "记到/装订批次号(&A):";
             // 
             // tabPage_ui
             // 
@@ -167,10 +153,9 @@ namespace dp2Circulation
             this.tabPage_ui.Controls.Add(this.checkBox_ui_displayOrderInfoXY);
             this.tabPage_ui.Controls.Add(this.comboBox_ui_splitterDirection);
             this.tabPage_ui.Controls.Add(this.label2);
-            this.tabPage_ui.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_ui.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_ui.Location = new System.Drawing.Point(4, 28);
             this.tabPage_ui.Name = "tabPage_ui";
-            this.tabPage_ui.Size = new System.Drawing.Size(296, 182);
+            this.tabPage_ui.Size = new System.Drawing.Size(448, 280);
             this.tabPage_ui.TabIndex = 1;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
@@ -178,10 +163,9 @@ namespace dp2Circulation
             // checkBox_ui_displayLockedOrderGroup
             // 
             this.checkBox_ui_displayLockedOrderGroup.AutoSize = true;
-            this.checkBox_ui_displayLockedOrderGroup.Location = new System.Drawing.Point(5, 79);
-            this.checkBox_ui_displayLockedOrderGroup.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_ui_displayLockedOrderGroup.Location = new System.Drawing.Point(8, 118);
             this.checkBox_ui_displayLockedOrderGroup.Name = "checkBox_ui_displayLockedOrderGroup";
-            this.checkBox_ui_displayLockedOrderGroup.Size = new System.Drawing.Size(270, 16);
+            this.checkBox_ui_displayLockedOrderGroup.Size = new System.Drawing.Size(403, 22);
             this.checkBox_ui_displayLockedOrderGroup.TabIndex = 3;
             this.checkBox_ui_displayLockedOrderGroup.Text = "显示当前用户管辖分馆范围之外的订购信息(&L)";
             this.checkBox_ui_displayLockedOrderGroup.UseVisualStyleBackColor = true;
@@ -189,10 +173,9 @@ namespace dp2Circulation
             // checkBox_ui_displayOrderInfoXY
             // 
             this.checkBox_ui_displayOrderInfoXY.AutoSize = true;
-            this.checkBox_ui_displayOrderInfoXY.Location = new System.Drawing.Point(5, 47);
-            this.checkBox_ui_displayOrderInfoXY.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_ui_displayOrderInfoXY.Location = new System.Drawing.Point(8, 70);
             this.checkBox_ui_displayOrderInfoXY.Name = "checkBox_ui_displayOrderInfoXY";
-            this.checkBox_ui_displayOrderInfoXY.Size = new System.Drawing.Size(150, 16);
+            this.checkBox_ui_displayOrderInfoXY.Size = new System.Drawing.Size(223, 22);
             this.checkBox_ui_displayOrderInfoXY.TabIndex = 2;
             this.checkBox_ui_displayOrderInfoXY.Text = "显示订购信息坐标值(&O)";
             this.checkBox_ui_displayOrderInfoXY.UseVisualStyleBackColor = true;
@@ -203,19 +186,17 @@ namespace dp2Circulation
             this.comboBox_ui_splitterDirection.Items.AddRange(new object[] {
             "垂直",
             "水平"});
-            this.comboBox_ui_splitterDirection.Location = new System.Drawing.Point(91, 16);
-            this.comboBox_ui_splitterDirection.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_ui_splitterDirection.Location = new System.Drawing.Point(136, 24);
             this.comboBox_ui_splitterDirection.Name = "comboBox_ui_splitterDirection";
-            this.comboBox_ui_splitterDirection.Size = new System.Drawing.Size(92, 20);
+            this.comboBox_ui_splitterDirection.Size = new System.Drawing.Size(136, 26);
             this.comboBox_ui_splitterDirection.TabIndex = 1;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 18);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(4, 27);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(116, 18);
             this.label2.TabIndex = 0;
             this.label2.Text = "布局方式(&L):";
             // 
@@ -228,10 +209,9 @@ namespace dp2Circulation
             this.tabPage_cellContents.Controls.Add(this.button_cellContents_moveUp);
             this.tabPage_cellContents.Controls.Add(this.listView_cellContents_lines);
             this.tabPage_cellContents.Controls.Add(this.label4);
-            this.tabPage_cellContents.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_cellContents.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_cellContents.Location = new System.Drawing.Point(4, 28);
             this.tabPage_cellContents.Name = "tabPage_cellContents";
-            this.tabPage_cellContents.Size = new System.Drawing.Size(296, 182);
+            this.tabPage_cellContents.Size = new System.Drawing.Size(448, 280);
             this.tabPage_cellContents.TabIndex = 2;
             this.tabPage_cellContents.Text = "册格子内容";
             this.tabPage_cellContents.UseVisualStyleBackColor = true;
@@ -241,10 +221,9 @@ namespace dp2Circulation
             this.button_cellContents_modify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cellContents_modify.Enabled = false;
             this.button_cellContents_modify.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cellContents_modify.Location = new System.Drawing.Point(239, 126);
-            this.button_cellContents_modify.Margin = new System.Windows.Forms.Padding(2);
+            this.button_cellContents_modify.Location = new System.Drawing.Point(358, 189);
             this.button_cellContents_modify.Name = "button_cellContents_modify";
-            this.button_cellContents_modify.Size = new System.Drawing.Size(56, 22);
+            this.button_cellContents_modify.Size = new System.Drawing.Size(84, 33);
             this.button_cellContents_modify.TabIndex = 9;
             this.button_cellContents_modify.Text = "修改(&M)";
             this.button_cellContents_modify.UseVisualStyleBackColor = true;
@@ -255,10 +234,9 @@ namespace dp2Circulation
             this.button_cellContents_delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cellContents_delete.Enabled = false;
             this.button_cellContents_delete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cellContents_delete.Location = new System.Drawing.Point(239, 153);
-            this.button_cellContents_delete.Margin = new System.Windows.Forms.Padding(2);
+            this.button_cellContents_delete.Location = new System.Drawing.Point(358, 230);
             this.button_cellContents_delete.Name = "button_cellContents_delete";
-            this.button_cellContents_delete.Size = new System.Drawing.Size(56, 22);
+            this.button_cellContents_delete.Size = new System.Drawing.Size(84, 33);
             this.button_cellContents_delete.TabIndex = 10;
             this.button_cellContents_delete.Text = "删除(&R)";
             this.button_cellContents_delete.UseVisualStyleBackColor = true;
@@ -268,10 +246,9 @@ namespace dp2Circulation
             // 
             this.button_cellContents_new.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cellContents_new.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cellContents_new.Location = new System.Drawing.Point(239, 98);
-            this.button_cellContents_new.Margin = new System.Windows.Forms.Padding(2);
+            this.button_cellContents_new.Location = new System.Drawing.Point(358, 147);
             this.button_cellContents_new.Name = "button_cellContents_new";
-            this.button_cellContents_new.Size = new System.Drawing.Size(56, 22);
+            this.button_cellContents_new.Size = new System.Drawing.Size(84, 33);
             this.button_cellContents_new.TabIndex = 8;
             this.button_cellContents_new.Text = "新增(&N)";
             this.button_cellContents_new.UseVisualStyleBackColor = true;
@@ -282,10 +259,9 @@ namespace dp2Circulation
             this.button_cellContents_moveDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cellContents_moveDown.Enabled = false;
             this.button_cellContents_moveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cellContents_moveDown.Location = new System.Drawing.Point(239, 54);
-            this.button_cellContents_moveDown.Margin = new System.Windows.Forms.Padding(2);
+            this.button_cellContents_moveDown.Location = new System.Drawing.Point(358, 81);
             this.button_cellContents_moveDown.Name = "button_cellContents_moveDown";
-            this.button_cellContents_moveDown.Size = new System.Drawing.Size(56, 22);
+            this.button_cellContents_moveDown.Size = new System.Drawing.Size(84, 33);
             this.button_cellContents_moveDown.TabIndex = 7;
             this.button_cellContents_moveDown.Text = "下移(&D)";
             this.button_cellContents_moveDown.UseVisualStyleBackColor = true;
@@ -296,10 +272,9 @@ namespace dp2Circulation
             this.button_cellContents_moveUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cellContents_moveUp.Enabled = false;
             this.button_cellContents_moveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cellContents_moveUp.Location = new System.Drawing.Point(239, 26);
-            this.button_cellContents_moveUp.Margin = new System.Windows.Forms.Padding(2);
+            this.button_cellContents_moveUp.Location = new System.Drawing.Point(358, 39);
             this.button_cellContents_moveUp.Name = "button_cellContents_moveUp";
-            this.button_cellContents_moveUp.Size = new System.Drawing.Size(56, 22);
+            this.button_cellContents_moveUp.Size = new System.Drawing.Size(84, 33);
             this.button_cellContents_moveUp.TabIndex = 6;
             this.button_cellContents_moveUp.Text = "上移(&U)";
             this.button_cellContents_moveUp.UseVisualStyleBackColor = true;
@@ -315,10 +290,9 @@ namespace dp2Circulation
             this.columnHeader_caption});
             this.listView_cellContents_lines.FullRowSelect = true;
             this.listView_cellContents_lines.HideSelection = false;
-            this.listView_cellContents_lines.Location = new System.Drawing.Point(3, 26);
-            this.listView_cellContents_lines.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_cellContents_lines.Location = new System.Drawing.Point(4, 39);
             this.listView_cellContents_lines.Name = "listView_cellContents_lines";
-            this.listView_cellContents_lines.Size = new System.Drawing.Size(233, 158);
+            this.listView_cellContents_lines.Size = new System.Drawing.Size(348, 235);
             this.listView_cellContents_lines.TabIndex = 1;
             this.listView_cellContents_lines.UseCompatibleStateImageBehavior = false;
             this.listView_cellContents_lines.View = System.Windows.Forms.View.Details;
@@ -337,10 +311,9 @@ namespace dp2Circulation
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(0, 11);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Location = new System.Drawing.Point(0, 16);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(113, 12);
+            this.label4.Size = new System.Drawing.Size(170, 18);
             this.label4.TabIndex = 0;
             this.label4.Text = "所显示的内容行(&L):";
             // 
@@ -353,10 +326,9 @@ namespace dp2Circulation
             this.tabPage_groupContents.Controls.Add(this.button_groupContents_moveUp);
             this.tabPage_groupContents.Controls.Add(this.listView_groupContents_lines);
             this.tabPage_groupContents.Controls.Add(this.label5);
-            this.tabPage_groupContents.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_groupContents.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_groupContents.Location = new System.Drawing.Point(4, 28);
             this.tabPage_groupContents.Name = "tabPage_groupContents";
-            this.tabPage_groupContents.Size = new System.Drawing.Size(296, 182);
+            this.tabPage_groupContents.Size = new System.Drawing.Size(448, 280);
             this.tabPage_groupContents.TabIndex = 3;
             this.tabPage_groupContents.Text = "组格子内容";
             this.tabPage_groupContents.UseVisualStyleBackColor = true;
@@ -366,10 +338,9 @@ namespace dp2Circulation
             this.button_groupContents_modify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_groupContents_modify.Enabled = false;
             this.button_groupContents_modify.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_groupContents_modify.Location = new System.Drawing.Point(239, 126);
-            this.button_groupContents_modify.Margin = new System.Windows.Forms.Padding(2);
+            this.button_groupContents_modify.Location = new System.Drawing.Point(358, 189);
             this.button_groupContents_modify.Name = "button_groupContents_modify";
-            this.button_groupContents_modify.Size = new System.Drawing.Size(56, 22);
+            this.button_groupContents_modify.Size = new System.Drawing.Size(84, 33);
             this.button_groupContents_modify.TabIndex = 16;
             this.button_groupContents_modify.Text = "修改(&M)";
             this.button_groupContents_modify.UseVisualStyleBackColor = true;
@@ -380,10 +351,9 @@ namespace dp2Circulation
             this.button_groupContents_delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_groupContents_delete.Enabled = false;
             this.button_groupContents_delete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_groupContents_delete.Location = new System.Drawing.Point(239, 153);
-            this.button_groupContents_delete.Margin = new System.Windows.Forms.Padding(2);
+            this.button_groupContents_delete.Location = new System.Drawing.Point(358, 230);
             this.button_groupContents_delete.Name = "button_groupContents_delete";
-            this.button_groupContents_delete.Size = new System.Drawing.Size(56, 22);
+            this.button_groupContents_delete.Size = new System.Drawing.Size(84, 33);
             this.button_groupContents_delete.TabIndex = 17;
             this.button_groupContents_delete.Text = "删除(&R)";
             this.button_groupContents_delete.UseVisualStyleBackColor = true;
@@ -393,10 +363,9 @@ namespace dp2Circulation
             // 
             this.button_groupContents_new.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_groupContents_new.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_groupContents_new.Location = new System.Drawing.Point(239, 98);
-            this.button_groupContents_new.Margin = new System.Windows.Forms.Padding(2);
+            this.button_groupContents_new.Location = new System.Drawing.Point(358, 147);
             this.button_groupContents_new.Name = "button_groupContents_new";
-            this.button_groupContents_new.Size = new System.Drawing.Size(56, 22);
+            this.button_groupContents_new.Size = new System.Drawing.Size(84, 33);
             this.button_groupContents_new.TabIndex = 15;
             this.button_groupContents_new.Text = "新增(&N)";
             this.button_groupContents_new.UseVisualStyleBackColor = true;
@@ -407,10 +376,9 @@ namespace dp2Circulation
             this.button_groupContents_moveDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_groupContents_moveDown.Enabled = false;
             this.button_groupContents_moveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_groupContents_moveDown.Location = new System.Drawing.Point(239, 54);
-            this.button_groupContents_moveDown.Margin = new System.Windows.Forms.Padding(2);
+            this.button_groupContents_moveDown.Location = new System.Drawing.Point(358, 81);
             this.button_groupContents_moveDown.Name = "button_groupContents_moveDown";
-            this.button_groupContents_moveDown.Size = new System.Drawing.Size(56, 22);
+            this.button_groupContents_moveDown.Size = new System.Drawing.Size(84, 33);
             this.button_groupContents_moveDown.TabIndex = 14;
             this.button_groupContents_moveDown.Text = "下移(&D)";
             this.button_groupContents_moveDown.UseVisualStyleBackColor = true;
@@ -421,10 +389,9 @@ namespace dp2Circulation
             this.button_groupContents_moveUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_groupContents_moveUp.Enabled = false;
             this.button_groupContents_moveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_groupContents_moveUp.Location = new System.Drawing.Point(239, 26);
-            this.button_groupContents_moveUp.Margin = new System.Windows.Forms.Padding(2);
+            this.button_groupContents_moveUp.Location = new System.Drawing.Point(358, 39);
             this.button_groupContents_moveUp.Name = "button_groupContents_moveUp";
-            this.button_groupContents_moveUp.Size = new System.Drawing.Size(56, 22);
+            this.button_groupContents_moveUp.Size = new System.Drawing.Size(84, 33);
             this.button_groupContents_moveUp.TabIndex = 13;
             this.button_groupContents_moveUp.Text = "上移(&U)";
             this.button_groupContents_moveUp.UseVisualStyleBackColor = true;
@@ -440,10 +407,9 @@ namespace dp2Circulation
             this.columnHeader2});
             this.listView_groupContents_lines.FullRowSelect = true;
             this.listView_groupContents_lines.HideSelection = false;
-            this.listView_groupContents_lines.Location = new System.Drawing.Point(3, 26);
-            this.listView_groupContents_lines.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_groupContents_lines.Location = new System.Drawing.Point(4, 39);
             this.listView_groupContents_lines.Name = "listView_groupContents_lines";
-            this.listView_groupContents_lines.Size = new System.Drawing.Size(233, 158);
+            this.listView_groupContents_lines.Size = new System.Drawing.Size(348, 235);
             this.listView_groupContents_lines.TabIndex = 12;
             this.listView_groupContents_lines.UseCompatibleStateImageBehavior = false;
             this.listView_groupContents_lines.View = System.Windows.Forms.View.Details;
@@ -462,28 +428,26 @@ namespace dp2Circulation
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(0, 11);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(0, 16);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(113, 12);
+            this.label5.Size = new System.Drawing.Size(170, 18);
             this.label5.TabIndex = 11;
             this.label5.Text = "所显示的内容行(&L):";
             // 
             // BindingOptionDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(322, 255);
+            this.ClientSize = new System.Drawing.Size(483, 382);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "BindingOptionDialog";
             this.ShowInTaskbar = false;
-            this.Text = "装订选项";
+            this.Text = "记到/装订选项";
             this.Load += new System.EventHandler(this.BindingOptionDialog_Load);
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_general.ResumeLayout(false);
@@ -504,12 +468,10 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.TabControl tabControl_main;
         private System.Windows.Forms.TabPage tabPage_general;
-        private System.Windows.Forms.TextBox textBox_general_bindingBatchNo;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TabPage tabPage_ui;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox_ui_splitterDirection;
-        private System.Windows.Forms.TextBox textBox_general_acceptBatchNo;
+        private System.Windows.Forms.TextBox textBox_general_batchNo;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkBox_ui_displayOrderInfoXY;
         private System.Windows.Forms.TabPage tabPage_cellContents;
@@ -533,5 +495,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox checkBox_ui_displayLockedOrderGroup;
+        private System.Windows.Forms.Button button_defaultEntityFields;
     }
 }

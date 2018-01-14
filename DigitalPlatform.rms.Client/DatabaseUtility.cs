@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 using Ionic.Zip;
@@ -18,46 +17,6 @@ namespace DigitalPlatform.rms.Client
     /// </summary>
     public class DatabaseUtility
     {
-        public static int ConvertGb2312TextfileToUtf8(string strFilename,
-    out string strError)
-        {
-            strError = "";
-
-            // 2013/10/31 如果无法通过文件头部探测出来，则不作转换
-            Encoding encoding = FileUtil.DetectTextFileEncoding(strFilename, null);
-
-            if (encoding == null || encoding.Equals(Encoding.UTF8) == true)
-                return 0;
-
-            string strContent = "";
-            try
-            {
-                using (StreamReader sr = new StreamReader(strFilename, encoding))
-                {
-                    strContent = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "从文件 " + strFilename + " 读取失败: " + ex.Message;
-                return -1;
-            }
-
-            try
-            {
-                using (StreamWriter sw = new StreamWriter(strFilename, false, Encoding.UTF8))
-                {
-                    sw.Write(strContent);
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "写入文件 " + strFilename + " 失败: " + ex.Message;
-                return -1;
-            }
-
-            return 0;
-        }
 
         static void CopyTempFile(string strSourcePath,
     string strTempDir,
@@ -186,14 +145,14 @@ namespace DigitalPlatform.rms.Client
             string strKeysDefFileName = PathUtil.MergePath(strTemplateDir, "keys");
             string strBrowseDefFileName = PathUtil.MergePath(strTemplateDir, "browse");
 
-            nRet = ConvertGb2312TextfileToUtf8(strKeysDefFileName,
+            nRet = FileUtil.ConvertGb2312TextfileToUtf8(strKeysDefFileName,
                 out strError);
             if (nRet == -1)
                 return -1;
 
             CopyTempFile(strKeysDefFileName, strTempDir, strDatabaseName);
 
-            nRet = ConvertGb2312TextfileToUtf8(strBrowseDefFileName,
+            nRet = FileUtil.ConvertGb2312TextfileToUtf8(strBrowseDefFileName,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -300,7 +259,7 @@ namespace DigitalPlatform.rms.Client
 
                 string strFullPath = fis[i].FullName;
 
-                nRet = ConvertGb2312TextfileToUtf8(strFullPath,
+                nRet = FileUtil.ConvertGb2312TextfileToUtf8(strFullPath,
                     out strError);
                 if (nRet == -1)
                     return -1;

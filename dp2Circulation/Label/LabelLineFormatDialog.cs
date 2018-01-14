@@ -166,7 +166,7 @@ namespace dp2Circulation
         }
 
         // Size 字符串，当前度量单位
-        public string Size
+        public string SizeString
         {
             get
             {

@@ -237,8 +237,7 @@ namespace DigitalPlatform.LibraryServer
                     if (String.Compare(format, "summary", true) == 0)
                     {
                         // 权限字符串
-                        if (StringUtil.IsInList("getbibliosummary", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
                             result.ErrorInfo = "获取种摘要信息被拒绝。不具备order、getbibliosummary权限。";
@@ -398,8 +397,7 @@ namespace DigitalPlatform.LibraryServer
                 if (bRightVerified == false)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getbiblioinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "获取书目信息被拒绝。不具备order或getbiblioinfo权限。";
@@ -978,9 +976,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false   // 2009/10/18 
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1045,8 +1041,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getorderinfo", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1095,8 +1090,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1145,8 +1139,7 @@ namespace DigitalPlatform.LibraryServer
                         long lTemp = 0;
 
                         // 权限字符串
-                        if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                        if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                         {
                             lTemp = -1;
                         }
@@ -1730,8 +1723,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 权限判断
                 // 权限字符串
-                if (StringUtil.IsInList("getbibliosummary", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getbibliosummary,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获取种摘要信息被拒绝。不具备 order 或 getbibliosummary 权限。";
@@ -4667,8 +4659,7 @@ nsmgr);
             if (bRightVerified == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "设置书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
@@ -5626,8 +5617,8 @@ out strError);
                 if (entityinfos != null && entityinfos.Count > 0)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备setiteminfo或setentities权限，不能删除它们。";
@@ -5677,9 +5668,7 @@ out strError);
                 if (orderinfos != null && orderinfos.Count > 0)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备order、setorderinfo或setorders权限，不能删除它们。";
@@ -5729,8 +5718,7 @@ out strError);
                 if (issueinfos != null && issueinfos.Count > 0)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备setissueinfo或setissues权限，不能删除它们。";
@@ -6268,8 +6256,7 @@ out strError);
             if (bRightVerified == false)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "设置书目信息被拒绝。不具备order或setbiblioinfo权限。";
@@ -6755,8 +6742,7 @@ out strError);
             if (entityinfos != null && entityinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false)
                 {
                     strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo 或 setentities 权限，不能复制或者移动它们。";
                     return -2;
@@ -6816,9 +6802,7 @@ out strError);
             if (orderinfos != null && orderinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备 order、setorderinfo 或 setorders 权限，不能复制或移动它们。";
                     return -2;
@@ -6870,8 +6854,7 @@ out strError);
             if (issueinfos != null && issueinfos.Count > 0)
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
                 {
                     strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 setissues 权限，不能复制或移动它们。";
                     return -2;
@@ -7657,8 +7640,7 @@ out strError);
                 if (entityinfos != null && entityinfos.Count > 0)
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setentities,setiteminfo", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "为册记录设置书目信息的操作被拒绝。前用户不具备 setiteminfo 或 setentities 权限，不能修改它们。";

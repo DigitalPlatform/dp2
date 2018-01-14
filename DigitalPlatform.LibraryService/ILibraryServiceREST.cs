@@ -485,9 +485,10 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult ManageDatabase(string strAction,
-                    string strDatabaseName,
-                    string strDatabaseInfo,
-                    out string strOutputInfo);
+            string strDatabaseName,
+            string strDatabaseInfo,
+            string strStyle,
+            out string strOutputInfo);
 
         [OperationContract]
         LibraryServerResult GetUser(

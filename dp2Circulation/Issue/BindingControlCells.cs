@@ -384,7 +384,7 @@ namespace dp2Circulation
             // 普通单册
             Color colorText = this.Container.Container.SingleForeColor;
             Color colorGray = this.Container.Container.SingleGrayColor;
-            Brush brushBack = null;
+            Brush brushBack = null; // 2017/11/10 加固 Dispose()
             float fBorderWidth = 2;
             Color colorBorder = Color.FromArgb(255, Color.Gray);
 
@@ -404,6 +404,11 @@ namespace dp2Circulation
                     fBorderWidth = 1;
                     Color colorBack = this.Container.Container.MemberBackColor;
                     {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
+                        }
                         brushBack = new SolidBrush(colorBack);
                     }
 
@@ -417,6 +422,11 @@ namespace dp2Circulation
                     fBorderWidth = (float)1;    //  0.2;
                     Color colorBack = this.Container.Container.CalculatedBackColor;
                     {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
+                        }
                         brushBack = new SolidBrush(colorBack);
                     }
                     colorText = this.Container.Container.CalculatedForeColor;
@@ -430,6 +440,11 @@ namespace dp2Circulation
                     fBorderWidth = 3;
                     Color colorBack = this.Container.Container.ParentBackColor;
                     {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
+                        }
                         brushBack = new SolidBrush(colorBack);
                     }
 
@@ -442,6 +457,11 @@ namespace dp2Circulation
                     brushBack = null;
                     Color colorBack = this.Container.Container.SingleBackColor;
                     {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
+                        }
                         brushBack = new SolidBrush(colorBack);
                     }
                 }
@@ -525,7 +545,10 @@ namespace dp2Circulation
             finally
             {
                 if (brushBack != null)
+                {
                     brushBack.Dispose();
+                    brushBack = null;
+                }
             }
 
         }
@@ -562,450 +585,491 @@ namespace dp2Circulation
 
             GraphicsState gstate = null;
 
-            // 是否进行了整体旋转
-            bool bRotate = this.OutofIssue == true
-                | (this.m_bFocus == true && this.m_bHover == false);
+            Region region = null;
+            Matrix x = null;
 
-            if (bRotate == true)
+            try
             {
-                rect = new RectangleF(start_x,
-                    start_y,
-                    this.Width,
-                    this.Height);
 
-                gstate = e.Graphics.Save();
-                e.Graphics.Clip = new Region(rect); // TODO: Region 需要明显 Dispose() 么?
-                // Setup the transformation matrix
-                Matrix x = new Matrix();
-                if (this.OutofIssue == true
-                    && (this.m_bFocus == true && this.m_bHover == false))
-                    x.RotateAt(-35, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                else if (this.OutofIssue == true)
-                    x.RotateAt(-45, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                else
-                    x.RotateAt(10, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                e.Graphics.Transform = x;
-            }
+                // 是否进行了整体旋转
+                bool bRotate = this.OutofIssue == true
+                    | (this.m_bFocus == true && this.m_bHover == false);
 
-            // 普通单册
-            Color colorText = this.Container.Container.SingleForeColor;
-            Color colorGray = this.Container.Container.SingleGrayColor;
-            float fBorderWidth = 1; // 2
-            Color colorBorder = Color.FromArgb(255, Color.Gray);
-
-            {
-                Brush brushBack = null;
-                try
+                if (bRotate == true)
                 {
-                    // 背景
-                    if (bSelected == true)
-                    {
-                        // 选定了的格子
-                        Color colorBack = this.Container.Container.SelectedBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(120, colorBack),
-                Color.FromArgb(255, ControlPaint.Dark(colorBack))   // 0-150
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-                        colorText = this.Container.Container.SelectedForeColor;
-                        colorGray = this.Container.Container.SelectedGrayColor;
-                    }
-                    else if (this.IsMember == true)
-                    {
-                        // 成员册
-#if DEBUG
-                        if (this.item != null)
-                        {
-                            Debug.Assert(this.item.IsMember == true, "");
-                        }
-#endif
-                        fBorderWidth = 1;
-                        Color colorBack = this.Container.Container.MemberBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),
-                Color.FromArgb(150, ControlPaint.Dark(colorBack))
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-
-                        colorText = this.Container.Container.MemberForeColor;
-                        colorGray = this.Container.Container.MemberGrayColor;
-                    }
-                    else if (this.item != null
-                        && this.item.Calculated == true)
-                    {
-                        // 预测的单册
-                        fBorderWidth = (float)1;
-                        Color colorBack = this.Container.Container.CalculatedBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),
-                Color.FromArgb(150, ControlPaint.Dark(colorBack))
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-                        colorText = this.Container.Container.CalculatedForeColor;
-                        colorGray = this.Container.Container.CalculatedGrayColor;
-                        colorBorder = Color.FromArgb(255, Color.White);
-                    }
-                    else if (this.item != null
-                   && this.item.IsParent == true)
-                    {
-                        // 合订本
-                        fBorderWidth = 1;   // 3
-                        Color colorBack = this.Container.Container.ParentBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),
-                Color.FromArgb(150, ControlPaint.Dark(colorBack))
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-
-                        colorText = this.Container.Container.ParentForeColor;
-                        colorGray = this.Container.Container.ParentGrayColor;
-                    }
-                    else
-                    {
-                        brushBack = null;
-                        Color colorBack = this.Container.Container.SingleBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),   // 0
-                Color.FromArgb(100, ControlPaint.Dark(colorBack))   // 255
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-                    }
-
-                    Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
-
-                    // 新建的和发生过修改的，侧边条颜色需要设定
-                    if (this.item != null
-                        && this.item.NewCreated == true)
-                    {
-                        // 新创建的单册
-                        colorSideBar = this.Container.Container.NewBarColor;
-                    }
-                    else if (this.item != null
-                   && this.item.Changed == true)
-                    {
-                        // 修改过的的单册
-                        colorSideBar = this.Container.Container.ChangedBarColor;
-                    }
-
-                    // 边框和边条
-                    {
-
-                        rect = new RectangleF(start_x,
-                            start_y,
-                            this.Container.Container.m_nCellWidth,
-                            this.Container.Container.m_nCellHeight);
-
-                        {
-                            // 没有焦点时要小一些
-                            rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
-                                rect);
-                        }
-                        // rect = RectangleF.Inflate(rect, -4, -4);
-
-                        RectangleF rectTest = rect;
-                        rectTest.Inflate(1, 1);
-                        rectTest.Width += 2;
-                        rectTest.Height += 2;
-
-                        // 优化
-                        if (rectTest.IntersectsWith(e.ClipRectangle) == true
-                            || bRotate == true)
-                        {
-                            float round_radius = 10;
-
-                            // 阴影
-                            RectangleF rectShadow = rect;
-                            rectShadow.Offset((float)1.5, (float)1.5);  // 0.5
-                            // rectShadow.Inflate((float)-0.9, (float)-0.9);
-                            // Pen penShadow = new Pen(Color.FromArgb(160, 190,190,180),5);
-                            Brush brushShadow = new SolidBrush(Color.FromArgb(160, 190, 190, 180));
-                            BindingControl.RoundRectangle(e.Graphics,
-                                null,
-                                brushShadow,
-                                rectShadow,
-                                round_radius);
-
-                            float que_radius = 0;
-                            if (this.item != null)
-                            {
-                                string strIntact = this.item.GetText("intact");
-                                float r = GetIntactRatio(strIntact);
-                                if (r < (float)1.0)
-                                {
-                                    float h = Math.Min(rect.Width, rect.Height) - (round_radius + fBorderWidth);
-                                    que_radius = h - (h * r);
-                                    if (que_radius < round_radius)
-                                        que_radius = round_radius;
-                                }
-                            }
-
-                            rect.Inflate(-(fBorderWidth / 2), -(fBorderWidth / 2));
-                            using (Pen penBorder = new Pen(colorBorder, fBorderWidth))
-                            {
-                                penBorder.LineJoin = LineJoin.Bevel;
-                                if (que_radius == 0)
-                                    BindingControl.RoundRectangle(e.Graphics,
-                                        penBorder,
-                                        brushBack,
-                                        rect,
-                                        round_radius);
-                                else
-                                    BindingControl.QueRoundRectangle(e.Graphics,
-                                        penBorder,
-                                        brushBack,
-                                        rect,
-                                        round_radius,
-                                        que_radius);
-                            }
-
-                            // 边条。左侧
-                            Brush brushSideBar = new SolidBrush(colorSideBar);
-                            RectangleF rectSideBar = new RectangleF(
-                                rect.X + fBorderWidth,  // + penBorder.Width,
-                                rect.Y + 10,
-                                10 / 2,
-                                rect.Height - 2 * 10);
-                            e.Graphics.FillRectangle(brushSideBar, rectSideBar);
-                        }
-                    }
-                }
-                finally
-                {
-                    if (brushBack != null)
-                    {
-                        brushBack.Dispose();
-                        brushBack = null;
-                    }
-                }
-            }
-
-            // 绘制文字
-            if (this.item != null)
-            {
-                Debug.Assert(this.item.Missing == false, "Missing为true的Item对象应该在初始化刚结束时就丢弃");
-
-                // 锁定状态的单元
-                if (this.item.Locked == true && this.IsMember == false)
-                {
-                    Padding margin = this.Container.Container.CellMargin;
-                    Padding padding = this.Container.Container.CellPadding;
-
-                    float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
-                        this.Height - margin.Vertical - padding.Vertical);
-
-                    RectangleF rectMask = new RectangleF(
-                        //start_x + this.Width / 2 - nLittleWidth / 2,
-                        //start_y + this.Height / 2 - nLittleWidth / 2,
-                        start_x + this.Width / 2 - nLittleWidth / 2,
-                        start_y + this.Height- nLittleWidth,
-                        nLittleWidth,
-                        nLittleWidth);
-                    PaintLockedMask(rectMask,
-                        this.item.Calculated == true ? ControlPaint.Dark(colorGray) : colorGray,
-                        e,
-                        bRotate);
-                }
-
-                if (this.item.Calculated == true)
-                {
-                    // 绘制淡色的“?”字样
-                    this.PaintQue(start_x,
-                        start_y,
-                        "?",
-                        colorGray,
-                        e,
-                        bRotate);
-                }
-                // “数据库记录”已经删除的单元
-                if (this.item.Deleted == true)
-                {
-                    /*
-                    float nCenterX = start_x + (this.Container.Container.m_nCellWidth / 2);
-                    float nCenterY = start_y + (this.Container.Container.m_nCellHeight / 2);
-                    float nWidth = Math.Min(this.Container.Container.m_nCellWidth,
-                        this.Container.Container.m_nCellHeight);
-                    nWidth = nWidth * (float)0.6;
-                    rect = new RectangleF(nCenterX - nWidth/2,
-    nCenterY - nWidth/2,
-    nWidth,
-    nWidth);
-                    rect = PaddingRect(this.Container.Container.CellMargin,
-                        rect);
-                    rect = RectangleF.Inflate(rect, -4, -4);
-
-                    Pen pen = new Pen(Color.LightGray,
-                        nWidth/10);
-                    e.Graphics.DrawArc(pen, rect, 0, 360);
-                    e.Graphics.DrawLine(pen, new PointF(rect.X, rect.Y + rect.Height / 2),
-                    new PointF(rect.X + rect.Width, rect.Y + rect.Height / 2));
-                     * */
-                    Padding margin = this.Container.Container.CellMargin;
-                    Padding padding = this.Container.Container.CellPadding;
-
-                    float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
-                        this.Height - margin.Vertical - padding.Vertical);
-
-                    RectangleF rectMask = new RectangleF(
-                        start_x + this.Width/2 - nLittleWidth/2,
-                        start_y + this.Height/2 - nLittleWidth/2,
-                        nLittleWidth,
-                        nLittleWidth);
-                    PaintDeletedMask(rectMask,
-                        colorGray,
-                        e,
-                        bRotate);
-                }
-
-                // 被人借阅的格子
-                if (String.IsNullOrEmpty(this.item.Borrower) == false)
-                {
-                    Padding margin = this.Container.Container.CellMargin;
-                    Padding padding = this.Container.Container.CellPadding;
-
-                    float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
-                        this.Height - margin.Vertical - padding.Vertical);
-
-                    RectangleF rectMask = new RectangleF(
-                        start_x + this.Width / 2 - nLittleWidth / 2,
-                        start_y + this.Height / 2 - nLittleWidth / 2,
-                        nLittleWidth,
-                        nLittleWidth);
-                    PaintBorrowedMask(rectMask,
-                        colorGray,
-                        e,
-                        bRotate);
-                }
-
-                if (StringUtil.IsInList("注销", this.item.State) == true)
-                {
-                    this.PaintTextLines(start_x, start_y, true,
-                        colorText,
-                        e, bRotate);
-                }
-                else
-                {
-                    this.PaintTextLines(start_x, start_y, false,
-                        colorText,
-                        e, bRotate);
-                }
-
-                if (this.m_bHover == true
-                    && this.m_bDisplayCheckBox == false)    // 要显示checkbox，就不要显示行标题
-                    this.PaintLineLabels(start_x, start_y, e, bRotate);
-
-                // 绑定了采购信息的格子，显示xy值
-                if (this.Container.Container.DisplayOrderInfoXY == true
-                    && this.item != null && this.item.OrderInfoPosition.X != -1)
-                {
-                    string strText = this.item.OrderInfoPosition.X.ToString() + "," + this.item.OrderInfoPosition.Y.ToString();
-
-                    Font font = this.Container.Container.m_fontLine;
-                    SizeF size = e.Graphics.MeasureString(strText, font);
-
                     rect = new RectangleF(start_x,
                         start_y,
                         this.Width,
                         this.Height);
-                    rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
-                        rect);
-                    rect = GuiUtil.PaddingRect(this.Container.Container.CellPadding,
-                        rect);
 
-                    // 右上角
-                    RectangleF rectText = new RectangleF(
-                        rect.X + rect.Width - size.Width,
-                        rect.Y,
-                        size.Width,
-                        size.Height);
+                    gstate = e.Graphics.Save();
+                    region = new Region(rect); // TODO: Region 需要明显 Dispose() 么?
+                    e.Graphics.Clip = region;
+                    // Setup the transformation matrix
+                    x = new Matrix();
+                    if (this.OutofIssue == true
+                        && (this.m_bFocus == true && this.m_bHover == false))
+                        x.RotateAt(-35, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
+                    else if (this.OutofIssue == true)
+                        x.RotateAt(-45, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
+                    else
+                        x.RotateAt(10, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
+                    e.Graphics.Transform = x;
+                }
 
-                    StringFormat stringFormat = new StringFormat();
-                    stringFormat.Alignment = StringAlignment.Near;
-                    stringFormat.LineAlignment = StringAlignment.Near;
-                    stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+                // 普通单册
+                Color colorText = this.Container.Container.SingleForeColor;
+                Color colorGray = this.Container.Container.SingleGrayColor;
+                float fBorderWidth = 1; // 2
+                Color colorBorder = Color.FromArgb(255, Color.Gray);
 
-                    using (Brush brushText = new SolidBrush(this.Container.Container.ForeColor))
+                {
+                    Brush brushBack = null; // 2017/11/10 对 Dispose 进行了巩固
+                    try
                     {
-                        e.Graphics.DrawString(strText,
-                            font,
-                            brushText,
-                            rectText,
-                            stringFormat);
+                        // 背景
+                        if (bSelected == true)
+                        {
+                            // 选定了的格子
+                            Color colorBack = this.Container.Container.SelectedBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(120, colorBack),
+                    Color.FromArgb(255, ControlPaint.Dark(colorBack))   // 0-150
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+                            colorText = this.Container.Container.SelectedForeColor;
+                            colorGray = this.Container.Container.SelectedGrayColor;
+                        }
+                        else if (this.IsMember == true)
+                        {
+                            // 成员册
+#if DEBUG
+                            if (this.item != null)
+                            {
+                                Debug.Assert(this.item.IsMember == true, "");
+                            }
+#endif
+                            fBorderWidth = 1;
+                            Color colorBack = this.Container.Container.MemberBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),
+                    Color.FromArgb(150, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+
+                            colorText = this.Container.Container.MemberForeColor;
+                            colorGray = this.Container.Container.MemberGrayColor;
+                        }
+                        else if (this.item != null
+                            && this.item.Calculated == true)
+                        {
+                            // 预测的单册
+                            fBorderWidth = (float)1;
+                            Color colorBack = this.Container.Container.CalculatedBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),
+                    Color.FromArgb(150, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+                            colorText = this.Container.Container.CalculatedForeColor;
+                            colorGray = this.Container.Container.CalculatedGrayColor;
+                            colorBorder = Color.FromArgb(255, Color.White);
+                        }
+                        else if (this.item != null
+                       && this.item.IsParent == true)
+                        {
+                            // 合订本
+                            fBorderWidth = 1;   // 3
+                            Color colorBack = this.Container.Container.ParentBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),
+                    Color.FromArgb(150, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+
+                            colorText = this.Container.Container.ParentForeColor;
+                            colorGray = this.Container.Container.ParentGrayColor;
+                        }
+                        else
+                        {
+                            brushBack = null;
+                            Color colorBack = this.Container.Container.SingleBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),   // 0
+                    Color.FromArgb(100, ControlPaint.Dark(colorBack))   // 255
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+                        }
+
+                        Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
+
+                        // 新建的和发生过修改的，侧边条颜色需要设定
+                        if (this.item != null
+                            && this.item.NewCreated == true)
+                        {
+                            // 新创建的单册
+                            colorSideBar = this.Container.Container.NewBarColor;
+                        }
+                        else if (this.item != null
+                       && this.item.Changed == true)
+                        {
+                            // 修改过的的单册
+                            colorSideBar = this.Container.Container.ChangedBarColor;
+                        }
+
+                        // 边框和边条
+                        {
+
+                            rect = new RectangleF(start_x,
+                                start_y,
+                                this.Container.Container.m_nCellWidth,
+                                this.Container.Container.m_nCellHeight);
+
+                            {
+                                // 没有焦点时要小一些
+                                rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
+                                    rect);
+                            }
+                            // rect = RectangleF.Inflate(rect, -4, -4);
+
+                            RectangleF rectTest = rect;
+                            rectTest.Inflate(1, 1);
+                            rectTest.Width += 2;
+                            rectTest.Height += 2;
+
+                            // 优化
+                            if (rectTest.IntersectsWith(e.ClipRectangle) == true
+                                || bRotate == true)
+                            {
+                                float round_radius = 10;
+
+                                // 阴影
+                                RectangleF rectShadow = rect;
+                                rectShadow.Offset((float)1.5, (float)1.5);  // 0.5
+                                                                            // rectShadow.Inflate((float)-0.9, (float)-0.9);
+                                                                            // Pen penShadow = new Pen(Color.FromArgb(160, 190,190,180),5);
+                                using (Brush brushShadow = new SolidBrush(Color.FromArgb(160, 190, 190, 180)))
+                                {
+                                    BindingControl.RoundRectangle(e.Graphics,
+                                        null,
+                                        brushShadow,
+                                        rectShadow,
+                                        round_radius);
+                                }
+
+                                float que_radius = 0;
+                                if (this.item != null)
+                                {
+                                    string strIntact = this.item.GetText("intact");
+                                    float r = GetIntactRatio(strIntact);
+                                    if (r < (float)1.0)
+                                    {
+                                        float h = Math.Min(rect.Width, rect.Height) - (round_radius + fBorderWidth);
+                                        que_radius = h - (h * r);
+                                        if (que_radius < round_radius)
+                                            que_radius = round_radius;
+                                    }
+                                }
+
+                                rect.Inflate(-(fBorderWidth / 2), -(fBorderWidth / 2));
+                                using (Pen penBorder = new Pen(colorBorder, fBorderWidth))
+                                {
+                                    penBorder.LineJoin = LineJoin.Bevel;
+                                    if (que_radius == 0)
+                                        BindingControl.RoundRectangle(e.Graphics,
+                                            penBorder,
+                                            brushBack,
+                                            rect,
+                                            round_radius);
+                                    else
+                                        BindingControl.QueRoundRectangle(e.Graphics,
+                                            penBorder,
+                                            brushBack,
+                                            rect,
+                                            round_radius,
+                                            que_radius);
+                                }
+
+                                // 边条。左侧
+                                RectangleF rectSideBar = new RectangleF(
+                                    rect.X + fBorderWidth,  // + penBorder.Width,
+                                    rect.Y + 10,
+                                    10 / 2,
+                                    rect.Height - 2 * 10);
+                                using (Brush brushSideBar = new SolidBrush(colorSideBar))
+                                {
+                                    e.Graphics.FillRectangle(brushSideBar, rectSideBar);
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
+                        }
+                        if (x != null)
+                        {
+                            x.Dispose();
+                            x = null;
+                        }
                     }
                 }
-            }
-            else
-            {
-                /*
-                // 空白格子。绘制淡色的“缺”字样
-                this.PaintQue(start_x,
-                    start_y,
-                    "缺",
-                    colorGray,
-                    e,
-                    bRotate);
-                 * */
+
+                // 绘制文字
+                if (this.item != null)
                 {
-                    Padding margin = this.Container.Container.CellMargin;
-                    Padding padding = this.Container.Container.CellPadding;
+                    Debug.Assert(this.item.Missing == false, "Missing为true的Item对象应该在初始化刚结束时就丢弃");
 
-                    float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
-                        this.Height - margin.Vertical - padding.Vertical);
+                    // 锁定状态的单元
+                    if (this.item.Locked == true && this.IsMember == false)
+                    {
+                        Padding margin = this.Container.Container.CellMargin;
+                        Padding padding = this.Container.Container.CellPadding;
 
-                    RectangleF rectMask = new RectangleF(
-                        start_x + this.Width / 2 - nLittleWidth / 2,
-                        start_y + this.Height / 2 - nLittleWidth / 2,
-                        nLittleWidth,
-                        nLittleWidth);
-                    PaintMissingMask(rectMask,
+                        float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
+                            this.Height - margin.Vertical - padding.Vertical);
+
+                        RectangleF rectMask = new RectangleF(
+                            //start_x + this.Width / 2 - nLittleWidth / 2,
+                            //start_y + this.Height / 2 - nLittleWidth / 2,
+                            start_x + this.Width / 2 - nLittleWidth / 2,
+                            start_y + this.Height - nLittleWidth,
+                            nLittleWidth,
+                            nLittleWidth);
+                        PaintLockedMask(rectMask,
+                            this.item.Calculated == true ? ControlPaint.Dark(colorGray) : colorGray,
+                            e,
+                            bRotate);
+                    }
+
+                    if (this.item.Calculated == true)
+                    {
+                        // 绘制淡色的“?”字样
+                        this.PaintQue(start_x,
+                            start_y,
+                            "?",
+                            colorGray,
+                            e,
+                            bRotate);
+                    }
+                    // “数据库记录”已经删除的单元
+                    if (this.item.Deleted == true)
+                    {
+                        /*
+                        float nCenterX = start_x + (this.Container.Container.m_nCellWidth / 2);
+                        float nCenterY = start_y + (this.Container.Container.m_nCellHeight / 2);
+                        float nWidth = Math.Min(this.Container.Container.m_nCellWidth,
+                            this.Container.Container.m_nCellHeight);
+                        nWidth = nWidth * (float)0.6;
+                        rect = new RectangleF(nCenterX - nWidth/2,
+        nCenterY - nWidth/2,
+        nWidth,
+        nWidth);
+                        rect = PaddingRect(this.Container.Container.CellMargin,
+                            rect);
+                        rect = RectangleF.Inflate(rect, -4, -4);
+
+                        Pen pen = new Pen(Color.LightGray,
+                            nWidth/10);
+                        e.Graphics.DrawArc(pen, rect, 0, 360);
+                        e.Graphics.DrawLine(pen, new PointF(rect.X, rect.Y + rect.Height / 2),
+                        new PointF(rect.X + rect.Width, rect.Y + rect.Height / 2));
+                         * */
+                        Padding margin = this.Container.Container.CellMargin;
+                        Padding padding = this.Container.Container.CellPadding;
+
+                        float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
+                            this.Height - margin.Vertical - padding.Vertical);
+
+                        RectangleF rectMask = new RectangleF(
+                            start_x + this.Width / 2 - nLittleWidth / 2,
+                            start_y + this.Height / 2 - nLittleWidth / 2,
+                            nLittleWidth,
+                            nLittleWidth);
+                        PaintDeletedMask(rectMask,
+                            colorGray,
+                            e,
+                            bRotate);
+                    }
+
+                    // 被人借阅的格子
+                    if (String.IsNullOrEmpty(this.item.Borrower) == false)
+                    {
+                        Padding margin = this.Container.Container.CellMargin;
+                        Padding padding = this.Container.Container.CellPadding;
+
+                        float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
+                            this.Height - margin.Vertical - padding.Vertical);
+
+                        RectangleF rectMask = new RectangleF(
+                            start_x + this.Width / 2 - nLittleWidth / 2,
+                            start_y + this.Height / 2 - nLittleWidth / 2,
+                            nLittleWidth,
+                            nLittleWidth);
+                        PaintBorrowedMask(rectMask,
+                            colorGray,
+                            e,
+                            bRotate);
+                    }
+
+                    if (StringUtil.IsInList("注销", this.item.State) == true)
+                    {
+                        this.PaintTextLines(start_x, start_y, true,
+                            colorText,
+                            e, bRotate);
+                    }
+                    else
+                    {
+                        this.PaintTextLines(start_x, start_y, false,
+                            colorText,
+                            e, bRotate);
+                    }
+
+                    if (this.m_bHover == true
+                        && this.m_bDisplayCheckBox == false)    // 要显示checkbox，就不要显示行标题
+                        this.PaintLineLabels(start_x, start_y, e, bRotate);
+
+                    // 绑定了采购信息的格子，显示xy值
+                    if (this.Container.Container.DisplayOrderInfoXY == true
+                        && this.item != null && this.item.OrderInfoPosition.X != -1)
+                    {
+                        string strText = this.item.OrderInfoPosition.X.ToString() + "," + this.item.OrderInfoPosition.Y.ToString();
+
+                        Font font = this.Container.Container.m_fontLine;
+                        SizeF size = e.Graphics.MeasureString(strText, font);
+
+                        rect = new RectangleF(start_x,
+                            start_y,
+                            this.Width,
+                            this.Height);
+                        rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
+                            rect);
+                        rect = GuiUtil.PaddingRect(this.Container.Container.CellPadding,
+                            rect);
+
+                        // 右上角
+                        RectangleF rectText = new RectangleF(
+                            rect.X + rect.Width - size.Width,
+                            rect.Y,
+                            size.Width,
+                            size.Height);
+
+                        StringFormat stringFormat = new StringFormat();
+                        stringFormat.Alignment = StringAlignment.Near;
+                        stringFormat.LineAlignment = StringAlignment.Near;
+                        stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                        using (Brush brushText = new SolidBrush(this.Container.Container.ForeColor))
+                        {
+                            e.Graphics.DrawString(strText,
+                                font,
+                                brushText,
+                                rectText,
+                                stringFormat);
+                        }
+                    }
+                }
+                else
+                {
+                    /*
+                    // 空白格子。绘制淡色的“缺”字样
+                    this.PaintQue(start_x,
+                        start_y,
+                        "缺",
                         colorGray,
                         e,
                         bRotate);
-                }
+                     * */
+                    {
+                        Padding margin = this.Container.Container.CellMargin;
+                        Padding padding = this.Container.Container.CellPadding;
+
+                        float nLittleWidth = Math.Min(this.Width - margin.Horizontal - padding.Horizontal,
+                            this.Height - margin.Vertical - padding.Vertical);
+
+                        RectangleF rectMask = new RectangleF(
+                            start_x + this.Width / 2 - nLittleWidth / 2,
+                            start_y + this.Height / 2 - nLittleWidth / 2,
+                            nLittleWidth,
+                            nLittleWidth);
+                        PaintMissingMask(rectMask,
+                            colorGray,
+                            e,
+                            bRotate);
+                    }
 
 #if NOOOOOOOOOOOOOOO
                 rect = new RectangleF(start_x,
@@ -1070,84 +1134,90 @@ namespace dp2Circulation
 
                 }
 #endif
-            }
+                }
 
 
-            // 焦点虚线
-            if (this.m_bFocus == true)
-            {
-                rect = new RectangleF(
-    start_x,
-    start_y,
-    this.Width,
-    this.Height);
-                rect.Inflate(-1, -1);
-                /*
-                 rect = PaddingRect(this.Container.Container.CellMargin,
-     rect);
-
-                 rect.Inflate(-4, -4);
-                  * */
-                ControlPaint.DrawFocusRectangle(e.Graphics,
-                    Rectangle.Round(rect));
-            }
-
-            if (gstate != null)
-            {
-                Debug.Assert(bRotate == true);
-                e.Graphics.Restore(gstate);
-            }
-
-            // 移动把手，不要旋转。因为旋转会带来点击的不一致
-            if (this.m_bHover == true)
-            {
-                // 把手
-                Rectangle rect1 = this.Container.Container.RectGrab;
-                rect1.Offset((int)start_x, (int)start_y);
-                ControlPaint.DrawContainerGrabHandle(
-        e.Graphics,
-        rect1);
-
-                // checkbox
-                if (this.item != null
-                    && this.m_bDisplayCheckBox == true)
+                // 焦点虚线
+                if (this.m_bFocus == true)
                 {
-                    long nCenterX = start_x + this.Width / 2;
-                    long nCenterY = start_y + this.Height / 2;
-                    int nWidth = this.Container.Container.RectGrab.Width;
-                    Rectangle rectCheckBox = new Rectangle(
-                        (int)nCenterX - nWidth/2,
-                        (int)nCenterY - nWidth/2,
-                        nWidth,
-                        nWidth);
+                    rect = new RectangleF(
+        start_x,
+        start_y,
+        this.Width,
+        this.Height);
+                    rect.Inflate(-1, -1);
+                    /*
+                     rect = PaddingRect(this.Container.Container.CellMargin,
+         rect);
 
-                    // 显示半透明的遮罩
-                    RectangleF rectShadow = rectCheckBox;
-                    int nDelta = this.Width / 8;
-                    rectShadow.Inflate(nDelta, nDelta);
-                    using (Pen pen = new Pen(Color.FromArgb(100, 200, 200, 200), 2))
-                    using(Brush brush = new SolidBrush(Color.FromArgb(150, 200, 200, 200)))
-                    {
-                        BindingControl.Circle(e.Graphics,
-                            pen,
-                            brush,
-                            rectShadow);
-                    }
+                     rect.Inflate(-4, -4);
+                      * */
+                    ControlPaint.DrawFocusRectangle(e.Graphics,
+                        Rectangle.Round(rect));
+                }
 
-                    if (this.item.Calculated == true)
+                if (gstate != null)
+                {
+                    Debug.Assert(bRotate == true);
+                    e.Graphics.Restore(gstate);
+                }
+
+                // 移动把手，不要旋转。因为旋转会带来点击的不一致
+                if (this.m_bHover == true)
+                {
+                    // 把手
+                    Rectangle rect1 = this.Container.Container.RectGrab;
+                    rect1.Offset((int)start_x, (int)start_y);
+                    ControlPaint.DrawContainerGrabHandle(
+            e.Graphics,
+            rect1);
+
+                    // checkbox
+                    if (this.item != null
+                        && this.m_bDisplayCheckBox == true)
                     {
-                        ControlPaint.DrawCheckBox(e.Graphics,
-                            rectCheckBox,
-                            ButtonState.Normal);
-                    }
-                    else if (this.item.OrderInfoPosition.X != -1
-                        && this.item.NewCreated == true)
-                    {
-                        ControlPaint.DrawCheckBox(e.Graphics,
-                            rectCheckBox,
-                            ButtonState.Checked);
+                        long nCenterX = start_x + this.Width / 2;
+                        long nCenterY = start_y + this.Height / 2;
+                        int nWidth = this.Container.Container.RectGrab.Width;
+                        Rectangle rectCheckBox = new Rectangle(
+                            (int)nCenterX - nWidth / 2,
+                            (int)nCenterY - nWidth / 2,
+                            nWidth,
+                            nWidth);
+
+                        // 显示半透明的遮罩
+                        RectangleF rectShadow = rectCheckBox;
+                        int nDelta = this.Width / 8;
+                        rectShadow.Inflate(nDelta, nDelta);
+                        using (Pen pen = new Pen(Color.FromArgb(100, 200, 200, 200), 2))
+                        using (Brush brush = new SolidBrush(Color.FromArgb(150, 200, 200, 200)))
+                        {
+                            BindingControl.Circle(e.Graphics,
+                                pen,
+                                brush,
+                                rectShadow);
+                        }
+
+                        if (this.item.Calculated == true)
+                        {
+                            ControlPaint.DrawCheckBox(e.Graphics,
+                                rectCheckBox,
+                                ButtonState.Normal);
+                        }
+                        else if (this.item.OrderInfoPosition.X != -1
+                            && this.item.NewCreated == true)
+                        {
+                            ControlPaint.DrawCheckBox(e.Graphics,
+                                rectCheckBox,
+                                ButtonState.Checked);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                if (region != null)
+                    region.Dispose();   // 2017/11/10
             }
         }
 
@@ -1326,7 +1396,7 @@ namespace dp2Circulation
                 stringFormat.LineAlignment = StringAlignment.Center;
                 stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
-                using(Font font = new Font("微软雅黑",    // "Arial",
+                using (Font font = new Font("微软雅黑",    // "Arial",
     rect.Height,
     FontStyle.Regular,
     GraphicsUnit.Pixel))
@@ -1527,16 +1597,19 @@ Color.FromArgb(0, Color.Gray)
             }
 
             // 白色，粗体
-            PaintText(
-x0,
-y0,
-nWidth,
-nHeight,
-strIntact,
-Color.White,
-           new Font(this.Container.Container.m_fontLine, FontStyle.Bold),
+            using (Font temp_font = new Font(this.Container.Container.m_fontLine, FontStyle.Bold))
+            {
+                PaintText(
+    x0,
+    y0,
+    nWidth,
+    nHeight,
+    strIntact,
+    Color.White,
+               temp_font,   // 2017/11/10 改到 using
 
-e);
+    e);
+            }
             /*
             PaintText(
     x0,
@@ -1796,7 +1869,7 @@ e);
                 Debug.Assert(issue != null, "");
                 int index = issue.IndexOfCell(this);
                 Debug.Assert(index != -1, "");
-                for (int i = index-1; i >= 0; i--)
+                for (int i = index - 1; i >= 0; i--)
                 {
                     Cell cell = issue.Cells[i];
                     if (cell == null)
@@ -1945,7 +2018,7 @@ e);
                 issue.AfterMembersChanged();
         }
 
-                // 在组内插入新的格子(预测格子)
+        // 在组内插入新的格子(预测格子)
         // parameters:
         //      nInsertPos  插入位置。如果为-1，表示插入在尾部
         // return:
@@ -2053,7 +2126,7 @@ e);
                     out strNewValue);
                 int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
                 int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
-                nOldCopy ++;
+                nOldCopy++;
                 this.order.Copy = OrderDesignControl.LinkOldNewValue(nOldCopy.ToString(),
                      nNewCopy.ToString());
             }
@@ -2210,289 +2283,318 @@ e);
 
             GraphicsState gstate = null;
 
-            // 是否进行了整体旋转
-            bool bRotate = this.OutofIssue == true
-                | (this.m_bFocus == true && this.m_bHover == false);
+            Region region = null;
+            Matrix x = null;
 
-            if (bRotate == true)
+            try
             {
-                rect = new RectangleF(start_x,
-                    start_y,
-                    this.Width,
-                    this.Height);
+                // 是否进行了整体旋转
+                bool bRotate = this.OutofIssue == true
+                    | (this.m_bFocus == true && this.m_bHover == false);
 
-                gstate = e.Graphics.Save();
-                e.Graphics.Clip = new Region(rect);
-                // Setup the transformation matrix
-                Matrix x = new Matrix();
-                if (this.OutofIssue == true
-                    && (this.m_bFocus == true && this.m_bHover == false))
-                    x.RotateAt(-35, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                else if (this.OutofIssue == true)
-                    x.RotateAt(-45, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                else
-                    x.RotateAt(10, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
-                e.Graphics.Transform = x;
-            }
-
-            // 普通单册
-            Color colorText = this.Container.Container.ForeColor;
-            Color colorGray = this.Container.Container.GrayColor;
-
-            {
-                Brush brushBack = null;
-
-                try
+                if (bRotate == true)
                 {
-                    // 背景
-                    if (bSelected == true)
-                    {
-                        // 选定了的格子
-                        Color colorBack = this.Container.Container.SelectedBackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),
-                Color.FromArgb(255, ControlPaint.Dark(colorBack))
-                );
-                        }
-                        else
-                        {
-                            brushBack = new SolidBrush(colorBack);
-                        }
-                        colorText = this.Container.Container.SelectedForeColor;
-                        colorGray = this.Container.Container.SelectedGrayColor;
-                    }
-                    else if (this.EndBracket == false)
-                    {
-                        // 左花括号
+                    rect = new RectangleF(start_x,
+                        start_y,
+                        this.Width,
+                        this.Height);
 
-                        // brushBack = null;
-                        Color colorBack = this.Container.Container.BackColor;
-                        if (this.m_bFocus == true)
-                        {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(0, colorBack),
-                Color.FromArgb(255, ControlPaint.Dark(colorBack))
-                );
-                        }
-                        else
-                        {
-                            // brushBack = new SolidBrush(colorBack);
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(50, colorBack),
-                Color.FromArgb(255, colorBack)
-                );
-                        }
-                    }
+                    gstate = e.Graphics.Save();
+                    region = new Region(rect);
+                    e.Graphics.Clip = region;
+                    // Setup the transformation matrix
+                    x = new Matrix();
+                    if (this.OutofIssue == true
+                        && (this.m_bFocus == true && this.m_bHover == false))
+                        x.RotateAt(-35, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
+                    else if (this.OutofIssue == true)
+                        x.RotateAt(-45, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
                     else
-                    {
-                        // 右花括号
+                        x.RotateAt(10, new PointF(start_x + (this.Width / 2), start_y + (this.Height / 2)));
+                    e.Graphics.Transform = x;
+                }
 
-                        // brushBack = null;
-                        Color colorBack = this.Container.Container.BackColor;
-                        if (this.m_bFocus == true)
+                // 普通单册
+                Color colorText = this.Container.Container.ForeColor;
+                Color colorGray = this.Container.Container.GrayColor;
+
+                {
+                    Brush brushBack = null; // 2017/11/10 对 Dispose() 进行了巩固
+
+                    try
+                    {
+                        // 背景
+                        if (bSelected == true)
                         {
-                            // 左 -- 右
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y + this.Height),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(255, colorBack),
-                Color.FromArgb(0, ControlPaint.Dark(colorBack))
-                );
+                            // 选定了的格子
+                            Color colorBack = this.Container.Container.SelectedBackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),
+                    Color.FromArgb(255, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                brushBack = new SolidBrush(colorBack);
+                            }
+                            colorText = this.Container.Container.SelectedForeColor;
+                            colorGray = this.Container.Container.SelectedGrayColor;
+                        }
+                        else if (this.EndBracket == false)
+                        {
+                            // 左花括号
+
+                            // brushBack = null;
+                            Color colorBack = this.Container.Container.BackColor;
+                            if (brushBack != null)
+                            {
+                                brushBack.Dispose();
+                                brushBack = null;
+                            }
+                            if (this.m_bFocus == true)
+                            {
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(0, colorBack),
+                    Color.FromArgb(255, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                // brushBack = new SolidBrush(colorBack);
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(50, colorBack),
+                    Color.FromArgb(255, colorBack)
+                    );
+                            }
                         }
                         else
                         {
-                            // brushBack = new SolidBrush(colorBack);
-                            brushBack = new LinearGradientBrush(
-                new PointF(start_x, start_y),
-                new PointF(start_x + this.Width, start_y),
-                Color.FromArgb(255, colorBack),
-                Color.FromArgb(50, colorBack)
-                );
-                        }
-                    }
+                            // 右花括号
 
-                    Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
-
-                    // 新建的和发生过修改的，侧边条颜色需要设定
-                    if (this.item != null
-                        && this.item.NewCreated == true)
-                    {
-                        // 新创建的单册
-                        colorSideBar = this.Container.Container.NewBarColor;
-                    }
-                    else if (this.item != null
-                   && this.item.Changed == true)
-                    {
-                        // 修改过的的单册
-                        colorSideBar = this.Container.Container.ChangedBarColor;
-                    }
-
-                    // 边框和边条
-                    {
-
-                        rect = new RectangleF(start_x,
-                            start_y,
-                            this.Container.Container.m_nCellWidth,
-                            this.Container.Container.m_nCellHeight);
-
-                        {
-                            // 没有焦点时要小一些
-                            rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
-                                rect);
-                        }
-                        // rect = RectangleF.Inflate(rect, -4, -4);
-
-                        // 优化
-                        if (rect.IntersectsWith(e.ClipRectangle) == true
-                            || bRotate == true)
-                        {
-                            float fPenWidth = 6;
-
-                            e.Graphics.FillRectangle(brushBack, rect);
-
-                            // rect.Inflate(-(fPenWidth / 2), -(fPenWidth / 2));
-                            using (Pen penBorder = new Pen(Color.FromArgb(100, Color.Gray), fPenWidth))
+                            // brushBack = null;
+                            Color colorBack = this.Container.Container.BackColor;
+                            if (brushBack != null)
                             {
-                                penBorder.LineJoin = LineJoin.Bevel;
-                                BindingControl.Bracket(e.Graphics,
-                                    penBorder,
-                                    this.EndBracket == false ? true : false,   //left
-                                    rect,
-                                    10);
+                                brushBack.Dispose();
+                                brushBack = null;
                             }
-
-                            // brushBack?
-                            if (this.EndBracket == false)
+                            if (this.m_bFocus == true)
                             {
-                                int height = 20;
-                                int width = 20;
-                                // 右上角
-                                RectangleF rectCircle = new RectangleF(
-                                    rect.X + rect.Width - 20 - 20,  // radius * 2
-                                    rect.Y, // +rect.Height/2-height/2,
-                                    width,
-                                    height);
-                                Color colorDark = this.Container.Container.ForeColor;
-                                using (Brush brush = new SolidBrush(colorDark))
+                                // 左 -- 右
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y + this.Height),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(255, colorBack),
+                    Color.FromArgb(0, ControlPaint.Dark(colorBack))
+                    );
+                            }
+                            else
+                            {
+                                // brushBack = new SolidBrush(colorBack);
+                                brushBack = new LinearGradientBrush(
+                    new PointF(start_x, start_y),
+                    new PointF(start_x + this.Width, start_y),
+                    Color.FromArgb(255, colorBack),
+                    Color.FromArgb(50, colorBack)
+                    );
+                            }
+                        }
+
+                        Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
+
+                        // 新建的和发生过修改的，侧边条颜色需要设定
+                        if (this.item != null
+                            && this.item.NewCreated == true)
+                        {
+                            // 新创建的单册
+                            colorSideBar = this.Container.Container.NewBarColor;
+                        }
+                        else if (this.item != null
+                       && this.item.Changed == true)
+                        {
+                            // 修改过的的单册
+                            colorSideBar = this.Container.Container.ChangedBarColor;
+                        }
+
+                        // 边框和边条
+                        {
+
+                            rect = new RectangleF(start_x,
+                                start_y,
+                                this.Container.Container.m_nCellWidth,
+                                this.Container.Container.m_nCellHeight);
+
+                            {
+                                // 没有焦点时要小一些
+                                rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
+                                    rect);
+                            }
+                            // rect = RectangleF.Inflate(rect, -4, -4);
+
+                            // 优化
+                            if (rect.IntersectsWith(e.ClipRectangle) == true
+                                || bRotate == true)
+                            {
+                                float fPenWidth = 6;
+
+                                e.Graphics.FillRectangle(brushBack, rect);
+
+                                // rect.Inflate(-(fPenWidth / 2), -(fPenWidth / 2));
+                                using (Pen penBorder = new Pen(Color.FromArgb(100, Color.Gray), fPenWidth))
                                 {
-                                    BindingControl.Circle(e.Graphics,
-                                        null,
-                                        brush,
-                                        rectCircle);
+                                    penBorder.LineJoin = LineJoin.Bevel;
+                                    BindingControl.Bracket(e.Graphics,
+                                        penBorder,
+                                        this.EndBracket == false ? true : false,   //left
+                                        rect,
+                                        10);
                                 }
 
-                                IssueBindingItem issue = this.Container;
-                                Debug.Assert(issue != null, "");
-                                int nOrderIndex = issue.OrderItems.IndexOf(this.order);
-                                Debug.Assert(nOrderIndex != -1, "");
-                                string strText = new String((char)((int)'a' + nOrderIndex), 1);
-
-                                StringFormat stringFormat = new StringFormat();
-                                stringFormat.Alignment = StringAlignment.Center;
-                                stringFormat.LineAlignment = StringAlignment.Center;
-                                stringFormat.FormatFlags = StringFormatFlags.NoWrap;
-
-                                using (Brush brushText = new SolidBrush(this.Container.Container.BackColor))
-                                using (Font font = new Font("微软雅黑",
-                                    rectCircle.Height,
-                                    FontStyle.Bold,
-                                    GraphicsUnit.Pixel))
+                                // brushBack?
+                                if (this.EndBracket == false)
                                 {
-                                    e.Graphics.DrawString(strText,
-                                        font,
-                                        brushText,
-                                        rectCircle,
-                                        stringFormat);
+                                    int height = 20;
+                                    int width = 20;
+                                    // 右上角
+                                    RectangleF rectCircle = new RectangleF(
+                                        rect.X + rect.Width - 20 - 20,  // radius * 2
+                                        rect.Y, // +rect.Height/2-height/2,
+                                        width,
+                                        height);
+                                    Color colorDark = this.Container.Container.ForeColor;
+                                    using (Brush brush = new SolidBrush(colorDark))
+                                    {
+                                        BindingControl.Circle(e.Graphics,
+                                            null,
+                                            brush,
+                                            rectCircle);
+                                    }
+
+                                    IssueBindingItem issue = this.Container;
+                                    Debug.Assert(issue != null, "");
+                                    int nOrderIndex = issue.OrderItems.IndexOf(this.order);
+                                    Debug.Assert(nOrderIndex != -1, "");
+                                    string strText = new String((char)((int)'a' + nOrderIndex), 1);
+
+                                    StringFormat stringFormat = new StringFormat();
+                                    stringFormat.Alignment = StringAlignment.Center;
+                                    stringFormat.LineAlignment = StringAlignment.Center;
+                                    stringFormat.FormatFlags = StringFormatFlags.NoWrap;
+
+                                    using (Brush brushText = new SolidBrush(this.Container.Container.BackColor))
+                                    using (Font font = new Font("微软雅黑",
+                                        rectCircle.Height,
+                                        FontStyle.Bold,
+                                        GraphicsUnit.Pixel))
+                                    {
+                                        e.Graphics.DrawString(strText,
+                                            font,
+                                            brushText,
+                                            rectCircle,
+                                            stringFormat);
+                                    }
+
+                                }
+
+                                // 边条。左侧
+                                using (Brush brushSideBar = new SolidBrush(colorSideBar))
+                                {
+                                    RectangleF rectSideBar = new RectangleF(
+                                        rect.X + fPenWidth, // + penBorder.Width,
+                                        rect.Y + 10,
+                                        10 / 2,
+                                        rect.Height - 2 * 10);
+                                    e.Graphics.FillRectangle(brushSideBar, rectSideBar);
                                 }
 
                             }
-
-                            // 边条。左侧
-                            using (Brush brushSideBar = new SolidBrush(colorSideBar))
-                            {
-                                RectangleF rectSideBar = new RectangleF(
-                                    rect.X + fPenWidth, // + penBorder.Width,
-                                    rect.Y + 10,
-                                    10 / 2,
-                                    rect.Height - 2 * 10);
-                                e.Graphics.FillRectangle(brushSideBar, rectSideBar);
-                            }
-
+                        }
+                    }
+                    finally
+                    {
+                        if (brushBack != null)
+                        {
+                            brushBack.Dispose();
+                            brushBack = null;
                         }
                     }
                 }
-                finally
+
+                // 绘制文字
+                if (this.order != null)
                 {
-                    if (brushBack != null)
-                    {
-                        brushBack.Dispose();
-                        brushBack = null;
-                    }
-                }
-            }
-
-            // 绘制文字
-            if (this.order != null)
-            {
                     this.PaintTextLines(start_x, start_y, false,
                         colorText,
                         e, bRotate);
 
+                    if (this.m_bHover == true)
+                        this.PaintLineLabels(start_x, start_y, e, bRotate);
+                }
+                else
+                {
+                    /*
+                    // 空白格子。绘制淡色的“缺”字样
+                    this.PaintQue(start_x,
+                        start_y,
+                        "缺",
+                        colorGray,
+                        e,
+                        bRotate);
+                    */
+                }
+
+
+                // 焦点虚线
+                if (this.m_bFocus == true)
+                {
+                    rect = new RectangleF(
+        start_x,
+        start_y,
+        this.Width,
+        this.Height);
+                    rect.Inflate(-1, -1);
+                    ControlPaint.DrawFocusRectangle(e.Graphics,
+                        Rectangle.Round(rect));
+                }
+
+                if (gstate != null)
+                {
+                    Debug.Assert(bRotate == true);
+                    e.Graphics.Restore(gstate);
+                }
+
+                // 移动把手，不要旋转。因为旋转会带来点击的不一致
+                Rectangle rect1 = this.Container.Container.RectGrab;
+                rect1.Offset((int)start_x, (int)start_y);
                 if (this.m_bHover == true)
-                    this.PaintLineLabels(start_x, start_y, e, bRotate);
+                {
+                    ControlPaint.DrawContainerGrabHandle(
+            e.Graphics,
+            rect1);
+                }
             }
-            else
+            finally
             {
-                /*
-                // 空白格子。绘制淡色的“缺”字样
-                this.PaintQue(start_x,
-                    start_y,
-                    "缺",
-                    colorGray,
-                    e,
-                    bRotate);
-                */
-            }
-
-
-            // 焦点虚线
-            if (this.m_bFocus == true)
-            {
-                rect = new RectangleF(
-    start_x,
-    start_y,
-    this.Width,
-    this.Height);
-                rect.Inflate(-1, -1);
-                ControlPaint.DrawFocusRectangle(e.Graphics,
-                    Rectangle.Round(rect));
-            }
-
-            if (gstate != null)
-            {
-                Debug.Assert(bRotate == true);
-                e.Graphics.Restore(gstate);
-            }
-
-            // 移动把手，不要旋转。因为旋转会带来点击的不一致
-            Rectangle rect1 = this.Container.Container.RectGrab;
-            rect1.Offset((int)start_x, (int)start_y);
-            if (this.m_bHover == true)
-            {
-                ControlPaint.DrawContainerGrabHandle(
-        e.Graphics,
-        rect1);
+                if (region != null)
+                    region.Dispose();
+                if (x != null)
+                    x.Dispose();
             }
         }
 

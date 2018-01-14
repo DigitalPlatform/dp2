@@ -418,7 +418,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// 卷号 (2007/10/19 增加)
+        /// 卷期 (2007/10/19 增加)
         /// </summary>
         public string Volume
         {

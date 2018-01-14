@@ -30,7 +30,7 @@ namespace DigitalPlatform
             }));
         }
 
-        public Button CancelButton
+        public Button MyCancelButton
         {
             get
             {
@@ -64,6 +64,11 @@ namespace DigitalPlatform
         }
 #endif
 
+        // 设置进度条信息
+        // parameters:
+        //      strText 文字。当 strText 为空的时候，函数用 bytesReceived 和 totalBytesToReceive 刷新设置进度条比例显示。否则只刷新显示 strText 文字
+        //      bytesReceived   接收到多少 bytes
+        //      totalBytesToReceive 总共计划接收多少 bytes
         public void SetProgress(
             string strText,
             long bytesReceived, 
@@ -72,26 +77,37 @@ namespace DigitalPlatform
             if (this.IsDisposed)
                 return;
 
-            this.Invoke((Action)(() =>
+            try
             {
-                if (string.IsNullOrEmpty(strText))
+                this.Invoke((Action)(() =>
                 {
-                    double ratio = (double)bytesReceived / (double)totalBytesToReceive;
+                    if (string.IsNullOrEmpty(strText))
+                    {
+                        double ratio = (double)bytesReceived / (double)totalBytesToReceive;
                     //this.progressBar1.Minimum = 0;
                     //this.progressBar1.Maximum = 100;
                     this.progressBar1.Value = Convert.ToInt32((double)100 * ratio);
 
-                    if (ratio == 100)
-                        this.progressBar1.Style = ProgressBarStyle.Marquee;
-                    else
-                        this.progressBar1.Style = ProgressBarStyle.Continuous;
+                        if (ratio == 100)
+                            this.progressBar1.Style = ProgressBarStyle.Marquee;
+                        else
+                            this.progressBar1.Style = ProgressBarStyle.Continuous;
 
                     // this.label_message.Text = bytesReceived.ToString() + " / " + totalBytesToReceive.ToString() + " " + this.SourceFilePath;
                     this.label_message.Text = GetLengthText(bytesReceived) + " / " + GetLengthText(totalBytesToReceive) + " " + this.SourceFilePath;
-                }
-                else
-                    this.label_message.Text = strText;
-            }));
+                    }
+                    else
+                        this.label_message.Text = strText;
+                }));
+            }
+            catch(ObjectDisposedException)
+            {
+
+            }
+            catch(Exception)
+            {
+                throw;
+            }
         }
 
         public static string[] units = new string[] { "K", "M", "G", "T" };

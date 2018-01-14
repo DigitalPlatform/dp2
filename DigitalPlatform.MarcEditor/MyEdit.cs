@@ -972,6 +972,31 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
              */
         }
 
+        /*
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentOutOfRangeException
+Message: 索引和计数必须引用该字符串内的位置。
+参数名: count
+Stack:
+在 System.String.RemoveInternal(Int32 startIndex, Int32 count)
+在 System.String.Remove(Int32 startIndex, Int32 count)
+在 DigitalPlatform.Marc.MyEdit.OnKeyPress(KeyPressEventArgs e)
+在 System.Windows.Forms.Control.ProcessKeyEventArgs(Message& m)
+在 System.Windows.Forms.Control.ProcessKeyMessage(Message& m)
+在 System.Windows.Forms.Control.WmKeyChar(Message& m)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.TextBoxBase.WndProc(Message& m)
+在 System.Windows.Forms.TextBox.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: xxx 
+操作时间 2017/10/26 9:28:53 (Thu, 26 Oct 2017 09:28:53 +0800) 
+         * * */
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
             _k = false;
@@ -1067,24 +1092,35 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         if (this.SelectionLength == 0
                             && nStart > 0)
                         {
-                            // 如果删除的正好是方向字符
-                            if (this.Text[nStart] == 0x200e
-                                && this.Text.Length >= nStart + 1 + 1)
+                            // 为调试准备的信息
+                            string strDebugInfo = "删除前的 text [" + this.Text + "] hex[" + GetTextHex(this.Text) + "], nStart=" + nStart + ", this.Text.Length=" + this.Text.Length;
+
+                            try
                             {
-                                // 一同删除
-                                this.Text = this.Text.Remove(nStart - 1, 2);
-                                this.SelectionStart = nStart - 1;
-                                // 2011/12/5 上面两行曾经有BUG
-                                e.Handled = true;
+                                // 如果删除的正好是方向字符，那么也要追加删除其左方一个普通字符
+                                if (this.Text[nStart] == 0x200e)    // && this.Text.Length >= nStart + 1 + 1
+                                {
+                                    // 一同删除
+                                    this.Text = this.Text.Remove(
+                                        nStart - 1,
+                                        2);
+                                    this.SelectionStart = nStart - 1;
+                                    // 2011/12/5 上面两行曾经有BUG
+                                    e.Handled = true;
+                                }
+                                // 如果删除位置的左方正好是方向字符，也要一并删除
+                                else if (nStart > 0
+                                    && this.Text[nStart - 1] == 0x200e)
+                                {
+                                    // 一同删除
+                                    this.Text = this.Text.Remove(nStart - 1, 2);
+                                    this.SelectionStart = nStart - 1;
+                                    e.Handled = true;
+                                }
                             }
-                            // 如果删除位置的左方正好是方向字符
-                            else if (nStart > 0
-                                && this.Text[nStart - 1] == 0x200e)
+                            catch (ArgumentOutOfRangeException ex)
                             {
-                                // 一同删除
-                                this.Text = this.Text.Remove(nStart - 1, 2);
-                                this.SelectionStart = nStart - 1;
-                                e.Handled = true;
+                                throw new Exception("Backspace 发生异常:" + strDebugInfo, ex);
                             }
                         }
 #endif
@@ -1106,8 +1142,18 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                             {
                                 if (this.Text.Length >= this.MaxLength) // 2009/3/6 changed
                                 {
-                                    this.Text = this.Text.Remove(this.SelectionStart, 1 + (this.Text.Length - this.MaxLength));
-                                    this.SelectionStart = nOldSelectionStart;
+                                    // 为调试准备的信息
+                                    string strDebugInfo = "删除前的 text [" + this.Text + "] hex[" + GetTextHex(this.Text) + "], this.MaxLength=" + this.MaxLength + ", this.Text.Length=" + this.Text.Length;
+
+                                    try
+                                    {
+                                        this.Text = this.Text.Remove(this.SelectionStart, 1 + (this.Text.Length - this.MaxLength));
+                                        this.SelectionStart = nOldSelectionStart;
+                                    }
+                                    catch (ArgumentOutOfRangeException ex)
+                                    {
+                                        throw new Exception("default overwrite 发生异常:" + strDebugInfo, ex);
+                                    }
                                 }
                                 this.ContentIsNull = false; // 2017/1/15 防止首次在 MyEdit 中输入无法兑现到内存
                             }
@@ -1121,6 +1167,21 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
             }
 
             base.OnKeyPress(e);
+        }
+
+        static string GetTextHex(string strText)
+        {
+            StringBuilder result = new StringBuilder();
+            int i = 0;
+            foreach (char ch in strText)
+            {
+                string strHex = Convert.ToString(ch, 16).PadLeft(2, '0');
+
+                result.Append(i.ToString() + ":" + strHex + ",");
+                i++;
+            }
+
+            return result.ToString();
         }
 
 #if BIDI_SUPPORT

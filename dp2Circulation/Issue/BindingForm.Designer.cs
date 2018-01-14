@@ -185,7 +185,6 @@ namespace dp2Circulation
             // 
             // bindingControl1
             // 
-            this.bindingControl1.AcceptBatchNo = "";
             this.bindingControl1.AcceptBatchNoInputed = false;
             this.bindingControl1.BackColor = System.Drawing.Color.DeepSkyBlue;
             this.bindingControl1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;

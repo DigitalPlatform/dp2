@@ -1,22 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+ï»¿using System;
 using System.Windows.Forms;
-
-// ¹«¹²ÊÂ¼ş¶¨Òå
 
 namespace DigitalPlatform
 {
     /// <summary>
-    /// ¿ÕÏĞÊÂ¼ş
+    /// ç©ºé—²äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void IdleEventHandler(object sender,
     IdleEventArgs e);
 
     /// <summary>
-    /// ¿ÕÏĞÊÂ¼şµÄ²ÎÊı
+    /// ç©ºé—²äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class IdleEventArgs : EventArgs
     {
@@ -24,15 +20,15 @@ namespace DigitalPlatform
     }
 
     /// <summary>
-    /// ÄÚÈİ·¢Éú¸Ä±ä
+    /// å†…å®¹å‘ç”Ÿæ”¹å˜
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void ContentChangedEventHandler(object sender,
     ContentChangedEventArgs e);
 
     /// <summary>
-    /// »ñµÃÖµÁĞ±íµÄ²ÎÊı
+    /// è·å¾—å€¼åˆ—è¡¨çš„å‚æ•°
     /// </summary>
     public class ContentChangedEventArgs : EventArgs
     {
@@ -41,15 +37,15 @@ namespace DigitalPlatform
     }
 
     /// <summary>
-    /// »ñµÃÖµÁĞ±í
+    /// è·å¾—å€¼åˆ—è¡¨
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetValueTableEventHandler(object sender,
     GetValueTableEventArgs e);
 
     /// <summary>
-    /// »ñµÃÖµÁĞ±íµÄ²ÎÊı
+    /// è·å¾—å€¼åˆ—è¡¨çš„å‚æ•°
     /// </summary>
     public class GetValueTableEventArgs : EventArgs
     {
@@ -59,7 +55,7 @@ namespace DigitalPlatform
 
 
         /// <summary>
-        /// ÖµÁĞ±í
+        /// å€¼åˆ—è¡¨
         /// </summary>
         public string[] values = null;
 
@@ -67,10 +63,10 @@ namespace DigitalPlatform
 
     ///
     /// <summary>
-    /// °´¼ü
+    /// æŒ‰é”®
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void ControlKeyPressEventHandler(object sender,
         ControlKeyPressEventArgs e);
 
@@ -81,7 +77,7 @@ namespace DigitalPlatform
     {
         public KeyPressEventArgs e = null;
 
-        // ½¹µãËùÔÚÊÂÏîÃû
+        // ç„¦ç‚¹æ‰€åœ¨äº‹é¡¹å
         public string Name = "";
     }
 
@@ -89,10 +85,10 @@ namespace DigitalPlatform
 
     ///
     /// <summary>
-    /// °´¼ü
+    /// æŒ‰é”®
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void ControlKeyEventHandler(object sender,
         ControlKeyEventArgs e);
 
@@ -103,11 +99,11 @@ namespace DigitalPlatform
     {
         public KeyEventArgs e = null;
 
-        // ½¹µãËùÔÚÊÂÏîÃû
+        // ç„¦ç‚¹æ‰€åœ¨äº‹é¡¹å
         public string Name = "";
 
         /*
-        // ´¥·¢ËùÔÚµÄ×Ó¿Ø¼ş
+        // è§¦å‘æ‰€åœ¨çš„å­æ§ä»¶
         // 2009/2/24
         public object SenderControl = null;
          * */
@@ -124,7 +120,7 @@ namespace DigitalPlatform
     public class LockException : Exception
     {
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         /// <param name="error"></param>
         /// <param name="strText"></param>

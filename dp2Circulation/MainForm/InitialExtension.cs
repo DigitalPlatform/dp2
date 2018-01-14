@@ -3841,7 +3841,11 @@ Culture=neutral, PublicKeyToken=null
                                 out baCfgOutputTimestamp,
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                                    continue;
                                 goto ERROR1;
+                            }
 
                             try
                             {
@@ -4024,6 +4028,7 @@ Culture=neutral, PublicKeyToken=null
                 lRet = channel.ManageDatabase(
     Stop,
     "getinfo",
+    "",
     "",
     "",
     out strValue,

@@ -81,6 +81,10 @@
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
+      <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
+      <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer\DigitalPlatform.LibraryServer.csproj">
       <Project>{E153CC55-DA01-4403-A53F-AF801BDDF4BA}</Project>
       <Name>DigitalPlatform.LibraryServer</Name>

@@ -1525,9 +1525,7 @@ namespace DigitalPlatform.LibraryServer
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("getentities,getiteminfo,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = "获得册信息 操作被拒绝。不具备 order、getiteminfo 或 getentities 权限。";
@@ -2318,15 +2316,18 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = SearchDup(channel,
-domExist,
-strRecPath,
-"registerNo",
-"登录号",
-ref errors,
-out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            if (this.VerifyRegisterNoDup)
+            {
+                nRet = SearchDup(channel,
+    domExist,
+    strRecPath,
+    "registerNo",
+    "登录号",
+    ref errors,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
             if (errors.Count > 0)
             {
@@ -2417,9 +2418,7 @@ out strError);
             LibraryServerResult result = new LibraryServerResult();
 
             // 权限字符串
-            if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+            if (StringUtil.IsInList("setentities,setiteminfo,order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
                 result.ErrorInfo = "保存册信息 操作被拒绝。不具备 order、setiteminfo 或 setentities 权限。";
@@ -3047,21 +3046,24 @@ out strError);
                                     continue;
                             }
 
-                            // 2017/9/29
-                            string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
-                            if (string.IsNullOrEmpty(strRegisterNo) == false)
+                            if (this.VerifyRegisterNoDup)
                             {
-                                nRet = SearchDup(
-    channel,
-    info,
-    strRegisterNo,
-    "登录号",
-    ref ErrorInfos,
-    out strError);
-                                if (nRet == -1)
-                                    goto ERROR1;
-                                if (nRet == 1)
-                                    continue;
+                                // 2017/9/29
+                                string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
+                                if (string.IsNullOrEmpty(strRegisterNo) == false)
+                                {
+                                    nRet = SearchDup(
+        channel,
+        info,
+        strRegisterNo,
+        "登录号",
+        ref ErrorInfos,
+        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                    if (nRet == 1)
+                                        continue;
+                                }
                             }
                         }
                     }

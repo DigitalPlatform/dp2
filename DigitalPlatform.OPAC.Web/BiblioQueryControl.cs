@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Diagnostics;
 
 using System.Threading;
 using System.Resources;
 using System.Globalization;
 
-using DigitalPlatform.Text;
 using DigitalPlatform.OPAC.Server;
 
 namespace DigitalPlatform.OPAC.Web
@@ -166,7 +161,7 @@ string strWrapperClass)
             get
             {
                 String s = (String)ViewState[this.ID + "Title"];
-                return ((s == null) ? String.Empty : s);
+                return (s ?? string.Empty);
             }
             set
             {

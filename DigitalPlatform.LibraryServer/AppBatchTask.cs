@@ -271,6 +271,7 @@ namespace DigitalPlatform.LibraryServer
                 StopAllBatchTasks();
             }
 
+            task.SetProgressText("");
             task.ManualStart = true;    // 表示为命令启动
             task.StartInfo = param.StartInfo;
             task.ClearProgressFile();   // 清除进度文件内容

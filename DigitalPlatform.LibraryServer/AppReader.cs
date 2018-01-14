@@ -472,6 +472,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (string.IsNullOrEmpty(strBirthDate) == false)
                     strNewPassword = DateTimeUtil.DateTimeToString8(DateTimeUtil.FromRfc1123DateTimeString(strBirthDate).ToLocalTime());    // 2015/10/27 修改 bug。原来缺 ToLocalTime()，造成产生的字符串是前一天的日期
+                else
+                    strNewPassword = Guid.NewGuid().ToString(); // 2017/10/29 如果前端发来的读者记录中没有 dateOfBirth 元素内容，则自动发生一个随机的字符串作为密码，这样读者就无法登录成功，只能去图书馆柜台重设密码，或者用微信公众号的找回密码功能来得到密码(假如创建读者记录时候提供了手机号码)
             }
             catch (Exception ex)
             {

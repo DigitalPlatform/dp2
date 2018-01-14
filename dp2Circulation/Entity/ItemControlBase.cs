@@ -72,10 +72,12 @@ namespace dp2Circulation
         /// </summary>
         public DigitalPlatform.Stop Stop = null;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 获得宏的值
@@ -472,6 +474,11 @@ namespace dp2Circulation
             }
 
             return null;
+        }
+
+        public void TriggerGetMacroValue(object sender, GetMacroValueEventArgs e)
+        {
+            this.GetMacroValue?.Invoke(sender, e);
         }
 
         // return:

@@ -207,6 +207,7 @@ namespace dp2Circulation
             return 0;
         }
 
+        // TODO: 增加 style 参数
         /// <summary>
         /// 解析日志恢复参数
         /// </summary>

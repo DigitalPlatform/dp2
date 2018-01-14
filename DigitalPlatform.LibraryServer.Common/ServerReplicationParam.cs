@@ -16,6 +16,9 @@ namespace DigitalPlatform.LibraryServer.Common
         public bool ClearFirst { get; set; }
         public bool ContinueWhenError { get; set; }
 
+        // 2017/11/28
+        public string Style { get; set; }
+
         public static ServerReplicationParam FromString(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -28,7 +31,7 @@ namespace DigitalPlatform.LibraryServer.Common
             return result;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
         }

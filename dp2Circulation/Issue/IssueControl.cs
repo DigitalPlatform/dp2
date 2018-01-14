@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
@@ -14,7 +11,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;    // LocationCollection
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -1834,124 +1830,126 @@ namespace dp2Circulation
 
             try
             {
-                BindingForm dlg = new BindingForm();
-
-                dlg.Text = strTitle;
-                // dlg.MainForm = Program.MainForm;
-                dlg.AppInfo = Program.MainForm.AppInfo;
-                dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);
-                if (this.PrepareAccept != null)
+                using (BindingForm dlg = new BindingForm())
                 {
-                    dlg.AcceptBatchNoInputed = true;
-                    // dlg.AcceptBatchNo = this.AcceptBatchNo;
-                    Program.MainForm.AppInfo.SetString(
-                        "binding_form",
-                        "accept_batchno",
-                        this.AcceptBatchNo);
-                }
+                    dlg.Text = strTitle;
+                    // dlg.MainForm = Program.MainForm;
+                    dlg.AppInfo = Program.MainForm.AppInfo;
+                    dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);
+                    if (this.PrepareAccept != null)
+                    {
+                        dlg.AcceptBatchNoInputed = true;
+                        // dlg.AcceptBatchNo = this.AcceptBatchNo;
+                        Program.MainForm.AppInfo.SetString(
+                            "binding_form",
+                            "accept_batchno",
+                            this.AcceptBatchNo);
+                    }
 
-                dlg.Operator = Program.MainForm.DefaultUserName;
+                    dlg.Operator = Program.MainForm.DefaultUserName;
 #if NO
                 if (this.Channel != null)
                     dlg.LibraryCodeList = this.Channel.LibraryCodeList;
 #endif
-                if (Program.MainForm != null)
-                    dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList;
+                    if (Program.MainForm != null)
+                        dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList;
 
-                dlg.SetProcessingState = this.SetProcessingState;
-                /*
-                dlg.GetItemInfo -= new GetItemInfoEventHandler(dlg_GetItemInfo);
-                dlg.GetItemInfo += new GetItemInfoEventHandler(dlg_GetItemInfo);
-                 * */
+                    dlg.SetProcessingState = this.SetProcessingState;
+                    /*
+                    dlg.GetItemInfo -= new GetItemInfoEventHandler(dlg_GetItemInfo);
+                    dlg.GetItemInfo += new GetItemInfoEventHandler(dlg_GetItemInfo);
+                     * */
 
-                dlg.GetOrderInfo -= new GetOrderInfoEventHandler(dlg_GetOrderInfo);
-                dlg.GetOrderInfo += new GetOrderInfoEventHandler(dlg_GetOrderInfo);
+                    dlg.GetOrderInfo -= new GetOrderInfoEventHandler(dlg_GetOrderInfo);
+                    dlg.GetOrderInfo += new GetOrderInfoEventHandler(dlg_GetOrderInfo);
 
-                dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
-                dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
+                    dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
+                    dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
 
-                dlg.GenerateData -= new GenerateDataEventHandler(dlg_GenerateData);
-                dlg.GenerateData += new GenerateDataEventHandler(dlg_GenerateData);
+                    dlg.GenerateData -= new GenerateDataEventHandler(dlg_GenerateData);
+                    dlg.GenerateData += new GenerateDataEventHandler(dlg_GenerateData);
 
-                dlg.GetBiblio -= dlg_GetBiblio;
-                dlg.GetBiblio += dlg_GetBiblio;
-                // TODO: 如果册listview中有标记删除的对象？要求先提交，才能进行装订
+                    dlg.GetBiblio -= dlg_GetBiblio;
+                    dlg.GetBiblio += dlg_GetBiblio;
 
-                // 汇集全部册信息
-                List<String> ItemXmls = new List<string>();
-                List<string> all_item_refids = new List<string>();  // 调用对话框以前，全部册的refif数组
-                {
-                    GetItemInfoEventArgs e = new GetItemInfoEventArgs();
-                    e.BiblioRecPath = this.BiblioRecPath;
-                    e.PublishTime = "*";
-                    dlg_GetItemInfo(this, e);
-                    for (int i = 0; i < e.ItemXmls.Count; i++)
+                    dlg.GetMacroValue -= Dlg_GetMacroValue;
+                    dlg.GetMacroValue += Dlg_GetMacroValue;
+                    // TODO: 如果册listview中有标记删除的对象？要求先提交，才能进行装订
+
+                    // 汇集全部册信息
+                    List<String> ItemXmls = new List<string>();
+                    List<string> all_item_refids = new List<string>();  // 调用对话框以前，全部册的refif数组
                     {
-                        XmlDocument dom = new XmlDocument();
-                        try
+                        GetItemInfoEventArgs e = new GetItemInfoEventArgs();
+                        e.BiblioRecPath = this.BiblioRecPath;
+                        e.PublishTime = "*";
+                        dlg_GetItemInfo(this, e);
+                        for (int i = 0; i < e.ItemXmls.Count; i++)
                         {
-                            dom.LoadXml(e.ItemXmls[i]);
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(e.ItemXmls[i]);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "XML装入DOM时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
+                            string strRefID = DomUtil.GetElementText(dom.DocumentElement,
+                                "refID");
+                            if (String.IsNullOrEmpty(strRefID) == false)
+                            {
+                                all_item_refids.Add(strRefID);
+                                ItemXmls.Add(e.ItemXmls[i]);
+                            }
+                            else
+                            {
+                                Debug.Assert(false, "");
+                            }
                         }
-                        catch (Exception ex)
+                        ItemXmls = e.ItemXmls;  // 直接用
+                    }
+
+                    // 汇集期信息
+                    List<String> IssueXmls = new List<string>();
+                    List<string> all_issue_refids = new List<string>();  // 调用对话框以前，全部期的refif数组
+                    List<string> IssueObjectXmls = new List<string>();
+                    foreach (IssueItem issue_item in this.Items)
+                    {
+                        // IssueItem issue_item = this.IssueItems[i];
+
+                        if (issue_item.ItemDisplayState == ItemDisplayState.Deleted)
                         {
-                            strError = "XML装入DOM时出错: " + ex.Message;
+                            strError = "当前存在标记删除的期事项，必须先提交保存后，才能使用期管理功能";
                             goto ERROR1;
                         }
-                        string strRefID = DomUtil.GetElementText(dom.DocumentElement,
-                            "refID");
-                        if (String.IsNullOrEmpty(strRefID) == false)
+
+                        if (String.IsNullOrEmpty(issue_item.RefID) == true)
                         {
-                            all_item_refids.Add(strRefID);
-                            ItemXmls.Add(e.ItemXmls[i]);
+                            issue_item.RefID = Guid.NewGuid().ToString();
+                            issue_item.Changed = true;
+                            issue_item.RefreshListView();
+                            Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
                         }
-                        else
-                        {
-                            Debug.Assert(false, "");
-                        }
-                    }
-                    ItemXmls = e.ItemXmls;  // 直接用
-                }
 
-                // 汇集期信息
-                List<String> IssueXmls = new List<string>();
-                List<string> all_issue_refids = new List<string>();  // 调用对话框以前，全部期的refif数组
-                List<string> IssueObjectXmls = new List<string>();
-                foreach (IssueItem issue_item in this.Items)
-                {
-                    // IssueItem issue_item = this.IssueItems[i];
+                        string strIssueXml = "";
+                        nRet = issue_item.BuildRecord(
+                            true,   // 要检查 Parent 成员
+                            out strIssueXml,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-                    if (issue_item.ItemDisplayState == ItemDisplayState.Deleted)
-                    {
-                        strError = "当前存在标记删除的期事项，必须先提交保存后，才能使用期管理功能";
-                        goto ERROR1;
-                    }
+                        // 给期记录 XML 中增加 recPath 元素
+                        AddRecPath(ref strIssueXml, issue_item.RecPath);
 
-                    if (String.IsNullOrEmpty(issue_item.RefID) == true)
-                    {
-                        issue_item.RefID = Guid.NewGuid().ToString();
-                        issue_item.Changed = true;
-                        issue_item.RefreshListView();
+                        IssueXmls.Add(strIssueXml);
+                        IssueObjectXmls.Add(issue_item.ObjectXml);
+
                         Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
+                        all_issue_refids.Add(issue_item.RefID);
                     }
-
-                    string strIssueXml = "";
-                    nRet = issue_item.BuildRecord(
-                        true,   // 要检查 Parent 成员
-                        out strIssueXml,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    // 给期记录 XML 中增加 recPath 元素
-                    AddRecPath(ref strIssueXml, issue_item.RecPath);
-
-                    IssueXmls.Add(strIssueXml);
-                    IssueObjectXmls.Add(issue_item.ObjectXml);
-
-                    Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
-                    all_issue_refids.Add(issue_item.RefID);
-
-                }
 
 #if OLD_INITIAL
 
@@ -2003,136 +2001,135 @@ namespace dp2Circulation
             if (nRet == 1)  // 警告
                 MessageBox.Show(this, strError);
 #endif
-                dlg.LoadState();
+                    dlg.LoadState();
 
-                nRet = dlg.NewInitial(
-                    strLayoutMode,
-                    ItemXmls,
-                    IssueXmls,
-                    IssueObjectXmls,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 1)  // 警告
-                    MessageBox.Show(this, strError);
+                    nRet = dlg.NewInitial(
+                        strLayoutMode,
+                        ItemXmls,
+                        IssueXmls,
+                        IssueObjectXmls,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)  // 警告
+                        MessageBox.Show(this, strError);
 
-                dlg.Changed = false;
+                    dlg.Changed = false;
 
-                Program.MainForm.AppInfo.LinkFormState(dlg,
-                    "binding_form_state");
-                dlg.ShowDialog(this);
-                Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.LinkFormState(dlg,
+                        "binding_form_state");
+                    dlg.ShowDialog(this);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                if (dlg.DialogResult != DialogResult.OK)
-                    return;
+                    if (dlg.DialogResult != DialogResult.OK)
+                        return;
 
-                // *** 兑现对册的修改
-                {
-                    // 先用全部refid装满，然后去掉那些还存在的，剩下的就是该删除的了
-                    List<string> deleting_bind_refids = new List<string>();
-                    deleting_bind_refids.AddRange(all_item_refids);
-
-                    List<string> Xmls = new List<string>();
-                    List<ItemBindingItem> allitems = dlg.AllItems;  // 加速
-                    // 遍历对象数组，兑现 修改/创建/删除 动作
-                    for (int i = 0; i < allitems.Count; i++)
+                    // *** 兑现对册的修改
                     {
-                        ItemBindingItem bind_item = allitems[i];
+                        // 先用全部refid装满，然后去掉那些还存在的，剩下的就是该删除的了
+                        List<string> deleting_bind_refids = new List<string>();
+                        deleting_bind_refids.AddRange(all_item_refids);
 
-                        deleting_bind_refids.Remove(bind_item.RefID);
-
-                        if (bind_item.Changed == true)
+                        List<string> Xmls = new List<string>();
+                        List<ItemBindingItem> allitems = dlg.AllItems;  // 加速
+                                                                        // 遍历对象数组，兑现 修改/创建/删除 动作
+                        for (int i = 0; i < allitems.Count; i++)
                         {
-                            // 根据refid找到这个册对象，并兑现修改
-                            // 如果没有找到，则创建之
-                            Xmls.Add(bind_item.Xml);
+                            ItemBindingItem bind_item = allitems[i];
+
+                            deleting_bind_refids.Remove(bind_item.RefID);
+
+                            if (bind_item.Changed == true)
+                            {
+                                // 根据refid找到这个册对象，并兑现修改
+                                // 如果没有找到，则创建之
+                                Xmls.Add(bind_item.Xml);
+                            }
+                        }
+
+                        if (this.ChangeItem != null)
+                        {
+                            string strWarning = "";
+                            // 根据册XML数据，自动创建或者修改册对象
+                            // return:
+                            //      -1  error
+                            //      0   没有修改
+                            //      1   修改了
+                            nRet = ChangeItems(Xmls,
+                                out strWarning,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            //if (nRet == 1)
+                            //    bChanged = true;
+
+                            if (String.IsNullOrEmpty(strWarning) == false)
+                                MessageBox.Show(this, strWarning);
+
+                            // 删除实体数据
+                            if (deleting_bind_refids.Count != 0)
+                            {
+                                nRet = DeleteItemRecords(deleting_bind_refids,
+                                    out List<string> deleted_ids,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                //if (deleted_ids.Count > 0)
+                                //    bChanged = true;
+
+                            }
                         }
                     }
 
-                    if (this.ChangeItem != null)
+                    // *** 兑现对期的修改
                     {
-                        string strWarning = "";
-                        // 根据册XML数据，自动创建或者修改册对象
+                        // 先用全部refid装满，然后去掉那些还存在的，剩下的就是该删除的了
+                        List<string> deleting_issue_refids = new List<string>();
+                        deleting_issue_refids.AddRange(all_issue_refids);
+
+                        List<string> Xmls = new List<string>(); // 要创建或者修改的期记录
+                        List<string> ObjectXmls = new List<string>();
+                        // 遍历对象数组，创建deleting_issue_refids和Xmls
+                        foreach (IssueBindingItem issue_item in dlg.Issues)
+                        {
+                            // IssueBindingItem issue_item = dlg.Issues[i];
+
+                            if (issue_item.Virtual == true)
+                                continue;
+
+                            deleting_issue_refids.Remove(issue_item.RefID);
+
+                            if (issue_item.Changed == true
+                                || issue_item.ObjectChanged == true)
+                            {
+                                // 根据refid找到这个期对象，并兑现修改
+                                // 如果没有找到，则创建之
+                                Xmls.Add(issue_item.Xml);
+                                ObjectXmls.Add(issue_item.ObjectXml);
+                            }
+                        }
+
+                        // 根据册XML数据，自动创建或者修改期对象
                         // return:
                         //      -1  error
-                        //      0   没有修改
-                        //      1   修改了
-                        nRet = ChangeItems(Xmls,
-                            out strWarning,
+                        //      0   succeed
+                        nRet = ChangeIssues(Xmls,
+                            ObjectXmls,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        //if (nRet == 1)
-                        //    bChanged = true;
 
-                        if (String.IsNullOrEmpty(strWarning) == false)
-                            MessageBox.Show(this, strWarning);
-
-                        // 删除实体数据
-                        if (deleting_bind_refids.Count != 0)
+                        // 删除期对象
+                        if (deleting_issue_refids.Count != 0)
                         {
-                            List<string> deleted_ids = null;
-                            nRet = DeleteItemRecords(deleting_bind_refids,
-                                out deleted_ids,
+                            nRet = DeleteIssueRecords(deleting_issue_refids,
+                                out List<string> deleted_ids,
                                 out strError);
                             if (nRet == -1)
                                 goto ERROR1;
                             //if (deleted_ids.Count > 0)
                             //    bChanged = true;
-
                         }
-                    }
-                }
-
-                // *** 兑现对期的修改
-                {
-                    // 先用全部refid装满，然后去掉那些还存在的，剩下的就是该删除的了
-                    List<string> deleting_issue_refids = new List<string>();
-                    deleting_issue_refids.AddRange(all_issue_refids);
-
-                    List<string> Xmls = new List<string>(); // 要创建或者修改的期记录
-                    List<string> ObjectXmls = new List<string>();
-                    // 遍历对象数组，创建deleting_issue_refids和Xmls
-                    foreach (IssueBindingItem issue_item in dlg.Issues)
-                    {
-                        // IssueBindingItem issue_item = dlg.Issues[i];
-
-                        if (issue_item.Virtual == true)
-                            continue;
-
-                        deleting_issue_refids.Remove(issue_item.RefID);
-
-                        if (issue_item.Changed == true
-                            || issue_item.ObjectChanged == true)
-                        {
-                            // 根据refid找到这个期对象，并兑现修改
-                            // 如果没有找到，则创建之
-                            Xmls.Add(issue_item.Xml);
-                            ObjectXmls.Add(issue_item.ObjectXml);
-                        }
-                    }
-
-                    // 根据册XML数据，自动创建或者修改期对象
-                    // return:
-                    //      -1  error
-                    //      0   succeed
-                    nRet = ChangeIssues(Xmls,
-                        ObjectXmls,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    // 删除期对象
-                    if (deleting_issue_refids.Count != 0)
-                    {
-                        List<string> deleted_ids = null;
-                        nRet = DeleteIssueRecords(deleting_issue_refids,
-                            out deleted_ids,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        //if (deleted_ids.Count > 0)
-                        //    bChanged = true;
                     }
                 }
             }
@@ -2159,11 +2156,14 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        private void Dlg_GetMacroValue(object sender, GetMacroValueEventArgs e)
+        {
+            TriggerGetMacroValue(sender, e);
+        }
+
         void dlg_GetBiblio(object sender, GetBiblioEventArgs e)
         {
-            var func = this.GetBiblio;
-            if (func != null)
-                func(sender, e);
+            this.GetBiblio?.Invoke(sender, e);
         }
 
         // 给期记录 XML 中增加 recPath 元素
@@ -2387,7 +2387,7 @@ namespace dp2Circulation
             {
                 string strXml = Xmls[i];
                 string strObjectXml = "";
-                
+
                 if (ObjectXmls != null && i < ObjectXmls.Count)
                     strObjectXml = ObjectXmls[i];
 

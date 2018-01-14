@@ -19,16 +19,20 @@ library_data.zip
 opac_app.zip
 opac_data.zip
 opac_style.zip
+zserver_app.zip
 
 _[Dd]ocs/
 kernel_app/
 library_app/
+opac_app/
+zserver_app/
+.vs/
 
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
-x64/
+[Dd]ebug/x64/
 build/
 bld/
 [Bb]in/

@@ -1954,7 +1954,7 @@ this.OperTime);
     class PassGateOperLogLine : OperLogLineBase
     {
         // 馆代码
-        public string LibraryCode = "";
+        // public string LibraryCode = "";
 
         // 读者证条码号
         public string ReaderBarcode = "";

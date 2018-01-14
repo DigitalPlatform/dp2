@@ -597,7 +597,6 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strIssueDbName) == true)
                 return null;
 
-
             if (this.BiblioDbProperties != null)
             {
                 for (int i = 0; i < this.BiblioDbProperties.Count; i++)

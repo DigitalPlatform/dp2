@@ -41,7 +41,7 @@ namespace DigitalPlatform.LibraryServer.Common
             return param;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             string strDbNameList = this.DbNameList;
 

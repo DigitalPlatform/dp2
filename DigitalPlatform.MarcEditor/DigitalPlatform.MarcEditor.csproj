@@ -166,9 +166,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FieldCollection.cs" />
-    <Compile Include="FieldNameDlg.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="IndicatorNameDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -255,10 +252,6 @@
     <EmbeddedResource Include="DeleteFieldDlg.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DeleteFieldDlg.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FieldNameDlg.resx">
-      <DependentUpon>FieldNameDlg.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="IndicatorNameDlg.resx">
       <DependentUpon>IndicatorNameDlg.cs</DependentUpon>

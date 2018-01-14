@@ -26,7 +26,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Range;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -40,8 +39,16 @@ namespace DigitalPlatform.OPAC.Server
         /// </summary>
         public string SearchLogEnable
         {
-            get;
-            set;
+            get; set;
+        }
+
+        // 2017/12/12
+        /// <summary>
+        /// 要隐藏的数据库名列表。为逗号分隔的字符串。如果为 null，表示不隐藏任何数据库名
+        /// </summary>
+        public string HideDbNames
+        {
+            get; set;
         }
 
         /// <summary>
@@ -530,6 +537,15 @@ namespace DigitalPlatform.OPAC.Server
                     app.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
                 }
 
+                // databaseFilter
+                {
+                    if (this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter") is XmlElement nodeDatabaseFilter)
+                        this.HideDbNames = nodeDatabaseFilter.GetAttribute("hide");
+                    else
+                        this.HideDbNames = null;
+
+                }
+
                 // //
                 string strDebugInfo = "";
                 // return:
@@ -906,7 +922,10 @@ namespace DigitalPlatform.OPAC.Server
 
             XmlElement root = this.WebUiDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
             if (root == null)
+            {
+                strFilePath = Path.Combine(this.DataDir, "style/" + strStyle + "/" + strFileName);  // 2017/11/13
                 return 0;
+            }
 
             XmlElement library = root.SelectSingleNode("library[@code='" + strLibraryCode + "']") as XmlElement;
             if (library == null)
@@ -1329,7 +1348,7 @@ namespace DigitalPlatform.OPAC.Server
                             return -2;
                         }
 #endif
-                        
+
                         string base_version = "2.86";
                         if (StringUtil.CompareVersion(strVersion, base_version) < 0)
                         {
@@ -1393,6 +1412,9 @@ namespace DigitalPlatform.OPAC.Server
 
                     node_virtual = DomUtil.SetElementOuterXml(node_virtual, strXml);
                     Debug.Assert(node_virtual != null, "");
+
+                    // 根据“禁用数据库名”列表，修改 virtualDatabases 元素内的细部
+                    ModifyVirtualDatabases(node_virtual, this.HideDbNames);
 
                     // 获取<arrived>定义
                     lRet = // session.Channel.
@@ -2011,6 +2033,14 @@ System.Text.Encoding.UTF8))
                         {
                             node.WriteTo(writer);
                         }
+
+                        // 2017/12/12
+                        // <databaseFilter>
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
                     }
 
                     writer.WriteEndElement();
@@ -2056,34 +2086,59 @@ System.Text.Encoding.UTF8))
                 this.defaultManagerThread.Activate();
         }
 
+        // 当遇到 System.IO.IOException 的时候会自动重试几次
         int LoadWebuiCfgDom(out string strError)
         {
             strError = "";
 
-            if (String.IsNullOrEmpty(this.m_strWebuiFileName) == true)
-            {
-                strError = "m_strWebuiFileName尚未初始化，因此无法装载webui.xml配置文件到DOM";
-                return -1;
-            }
-
-            XmlDocument webuidom = new XmlDocument();
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-                webuidom.Load(this.m_strWebuiFileName);
-            }
-            catch (FileNotFoundException)
-            {
-                webuidom.LoadXml("<root/>");
-            }
-            catch (Exception ex)
-            {
-                strError = "装载配置文件-- '" + this.m_strWebuiFileName + "'时发生错误，原因：" + ex.Message;
-                // app.WriteErrorLog(strError);
-                return -1;
-            }
+                if (String.IsNullOrEmpty(this.m_strWebuiFileName) == true)
+                {
+                    strError = "m_strWebuiFileName尚未初始化，因此无法装载webui.xml配置文件到DOM";
+                    return -1;
+                }
 
-            this.WebUiDom = webuidom;
-            return 0;
+                int nRedoCount = 0;
+            REDO:
+                XmlDocument webuidom = new XmlDocument();
+                try
+                {
+                    webuidom.Load(this.m_strWebuiFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    webuidom.LoadXml("<root/>");
+                }
+                catch (System.IO.IOException ex)
+                {
+                    if (nRedoCount < 5)
+                    {
+                        Thread.Sleep(500);
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    else
+                    {
+                        strError = "装载配置文件-- '" + this.m_strWebuiFileName + "' 时出现异常(重试 5 次以后依然遇到异常)：" + ExceptionUtil.GetDebugText(ex);
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载配置文件-- '" + this.m_strWebuiFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                    // this.WriteErrorLog(strError);
+                    return -1;
+                }
+
+                this.WebUiDom = webuidom;
+                return 0;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
         }
 
 #if NO
@@ -2186,7 +2241,7 @@ System.Text.Encoding.UTF8))
             {
                 string strError = "";
 
-                // 稍微延时一下，避免很快地重装、正好和尚在改写opac.xml文件的的进程发生冲突
+                // 稍微延时一下，避免很快地重装、正好和尚在改写 opac.xml 文件的的进程发生冲突
                 Thread.Sleep(500);
 
                 nRet = this.Load(
@@ -2210,6 +2265,10 @@ System.Text.Encoding.UTF8))
             if (PathUtil.IsEqual(this.m_strWebuiFileName, e.FullPath) == true)
             {
                 string strError = "";
+
+                // 稍微延时一下，避免很快地重装、正好和尚在改写 webui.xml 文件的的进程发生冲突
+                Thread.Sleep(500);
+
                 nRet = this.LoadWebuiCfgDom(out strError);
                 if (nRet == -1)
                 {
@@ -2331,9 +2390,47 @@ System.Text.Encoding.UTF8))
             return 0;
         }
 
+        /*
+    <virtualDatabases searchMaxResultCount="5000">
+        <database name="中文图书" alias="cbook">
+            <caption lang="zh">中文图书</caption>
+            <from name="ISBN" style="isbn">
+                <caption lang="zh-CN">ISBN</caption>
+                <caption lang="en">ISBN</caption>
+            </from>
+         * */
+        // 根据“禁用数据库名”列表，修改 virtualDatabases 元素内的细部
+        void ModifyVirtualDatabases(XmlElement root,
+            string strHideDbNames)
+        {
+            // Debug.Assert(false, "");
+
+            List<string> hide_dbnames = StringUtil.SplitList(strHideDbNames);
+
+            XmlNodeList databases = root.SelectNodes("database | virtualDatabase");
+            foreach (XmlElement database in databases)
+            {
+                XmlNodeList captions = database.SelectNodes("caption");
+                bool bFound = false;
+                foreach (XmlNode caption in captions)
+                {
+                    if (hide_dbnames.IndexOf(caption.InnerText.Trim()) != -1)
+                        bFound = true;
+                }
+
+#if NO
+                if (bFound == false)
+                    database.RemoveAttribute("hide");
+                else
+                    database.SetAttribute("hide", "true");
+#endif
+                if (bFound == true)
+                    database.ParentNode.RemoveChild(database);
+            }
+        }
+
         // 初始化虚拟库集合定义对象
-        public int InitialVdbs(
-            out string strError)
+        public int InitialVdbs(out string strError)
         {
             strError = "";
 
@@ -2540,14 +2637,12 @@ System.Text.Encoding.UTF8))
             int nTotalUsed = 0;
 
             // *** 第一步 把虚拟库名和普通库名分离
-            List<VirtualDatabase> vdb_list = null;
-            string strNormalDbNameList = "";
 
-            int nRet = SeperateVirtuslDbs(
+            int nRet = SeperateVirtualDbs(
             app,
             strDbName,
-            out vdb_list,
-            out strNormalDbNameList,
+            out List<VirtualDatabase> vdb_list,
+            out string strNormalDbNameList,
             out strError);
             if (nRet == -1)
                 return -1;
@@ -2724,7 +2819,7 @@ System.Text.Encoding.UTF8))
         }
 
         // 将数据库名列表分离为虚拟库数组和普通库名列表两部分
-        static int SeperateVirtuslDbs(
+        static int SeperateVirtualDbs(
             OpacApplication app,
             string strDbNameList,
             out List<VirtualDatabase> vdb_list,
@@ -2745,6 +2840,14 @@ System.Text.Encoding.UTF8))
                 //
                 // 数据库是不是虚拟库?
                 VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
+
+                // 2017/12/21
+                // 既不是虚拟库也不是普通库
+                if (vdb == null)
+                {
+                    strError = "数据库名 '" + strDbName + "' 不存在";
+                    return -1;
+                }
 
                 // 如果是虚拟库
                 if (vdb != null && vdb.IsVirtual == true)
@@ -3035,7 +3138,7 @@ System.Text.Encoding.UTF8))
                     channel.GetCommentInfo(
     null,
     "@path:" + strCommentRecPath,
-                    // null,
+    // null,
     "xml", // strResultType
     out strItemXml,
     out strOutputItemPath,
@@ -3611,7 +3714,7 @@ System.Text.Encoding.UTF8))
 
                 string strLocalPath = postedFile.FileName;
 
-                // page.Response.Write("<br/>正在保存" + strLocalPath);
+            // page.Response.Write("<br/>正在保存" + strLocalPath);
 
             REDOWHOLESAVE:
                 string strWarning = "";
@@ -4240,7 +4343,7 @@ Value data: HEX 0x1
                 Page.Response.AddHeader("Expires", "0");
 
                 // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
-                
+
                 Page.Response.BufferOutput = false; // 2016/8/31
 
                 image.Seek(0, SeekOrigin.Begin);

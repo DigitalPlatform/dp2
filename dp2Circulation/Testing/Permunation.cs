@@ -15,8 +15,8 @@ namespace dp2Circulation
         /// <summary>
         /// 交换两个变量
         /// </summary>
-        /// <param name="a">变量1</param>
-        /// <param name="b">变量2</param>
+        /// <param name="a">变量1</param>
+        /// <param name="b">变量2</param>
         public static void Swap(ref T a, ref T b)
         {
             T temp = a;
@@ -27,12 +27,12 @@ namespace dp2Circulation
         /// <summary>
         /// 递归算法求数组的组合(私有成员)
         /// </summary>
-        /// <param name="list">返回的范型</param>
-        /// <param name="t">所求数组</param>
-        /// <param name="n">辅助变量</param>
-        /// <param name="m">辅助变量</param>
-        /// <param name="b">辅助数组</param>
-        /// <param name="M">辅助变量M</param>
+        /// <param name="list">返回的范型</param>
+        /// <param name="t">所求数组</param>
+        /// <param name="n">辅助变量</param>
+        /// <param name="m">辅助变量</param>
+        /// <param name="b">辅助数组</param>
+        /// <param name="M">辅助变量M</param>
         private static void GetCombination(ref List<T[]> list, T[] t, int n, int m, int[] b, int M)
         {
             for (int i = n; i >= m; i--)
@@ -61,10 +61,10 @@ namespace dp2Circulation
         /// <summary>
         /// 递归算法求排列(私有成员)
         /// </summary>
-        /// <param name="list">返回的列表</param>
-        /// <param name="t">所求数组</param>
-        /// <param name="startIndex">起始标号</param>
-        /// <param name="endIndex">结束标号</param>
+        /// <param name="list">返回的列表</param>
+        /// <param name="t">所求数组</param>
+        /// <param name="startIndex">起始标号</param>
+        /// <param name="endIndex">结束标号</param>
         private static void GetPermutation(ref List<T[]> list, T[] t, int startIndex, int endIndex)
         {
             if (startIndex == endIndex)
@@ -91,9 +91,9 @@ namespace dp2Circulation
         /// <summary>
         /// 求从起始标号到结束标号的排列，其余元素不变
         /// </summary>
-        /// <param name="t">所求数组</param>
-        /// <param name="startIndex">起始标号</param>
-        /// <param name="endIndex">结束标号</param>
+        /// <param name="t">所求数组</param>
+        /// <param name="startIndex">起始标号</param>
+        /// <param name="endIndex">结束标号</param>
         /// <returns>从起始标号到结束标号排列的范型</returns>
         public static List<T[]> GetPermutation(T[] t, int startIndex, int endIndex)
         {
@@ -109,7 +109,7 @@ namespace dp2Circulation
         /// <summary>
         /// 返回数组所有元素的全排列
         /// </summary>
-        /// <param name="t">所求数组</param>
+        /// <param name="t">所求数组</param>
         /// <returns>全排列的范型</returns>
         public static List<T[]> GetPermutation(T[] t)
         {
@@ -119,8 +119,8 @@ namespace dp2Circulation
         /// <summary>
         /// 求数组中n个元素的排列
         /// </summary>
-        /// <param name="t">所求数组</param>
-        /// <param name="n">元素个数</param>
+        /// <param name="t">所求数组</param>
+        /// <param name="n">元素个数</param>
         /// <returns>数组中n个元素的排列</returns>
         public static List<T[]> GetPermutation(T[] t, int n)
         {
@@ -143,8 +143,8 @@ namespace dp2Circulation
         /// <summary>
         /// 求数组中n个元素的组合
         /// </summary>
-        /// <param name="t">所求数组</param>
-        /// <param name="n">元素个数</param>
+        /// <param name="t">所求数组</param>
+        /// <param name="n">元素个数</param>
         /// <returns>数组中n个元素的组合的范型</returns>
         public static List<T[]> GetCombination(T[] t, int n)
         {

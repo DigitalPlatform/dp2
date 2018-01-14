@@ -465,6 +465,9 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      host    如果为空，则函数内部会 new 一个此类型的对象；如果不为空，则直接使用
         //      strLibraryCodeList  当前操作者管辖的馆代码列表 2014/9/27
+        //      nResultValue    [out]返回脚本函数执行的结果
+        //                      脚本函数返回值含义: -1: 脚本函数执行出错; 0 不合法的条码号; 1: 合法的读者证条码号; 2: 合法的册条码号
+        //      strError        [out]返回本函数的出错信息或脚本函数执行的出错信息
         // return:
         //      -2  not found script
         //      -1  出错
@@ -549,6 +552,7 @@ namespace DigitalPlatform.LibraryServer
             // 执行函数
             try
             {
+                // 旧版本脚本函数
                 if (parameters.Length == 2)
                 {
                     object[] args = new object[2];
@@ -565,7 +569,7 @@ namespace DigitalPlatform.LibraryServer
                     // 取出out参数值
                     strError = (string)args[1];
                 }
-                else if (parameters.Length == 3)
+                else if (parameters.Length == 3)    // 新版本脚本函数
                 {
                     object[] args = new object[3];
                     args[0] = strLibraryCodeList;

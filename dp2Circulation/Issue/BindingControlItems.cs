@@ -12,7 +12,6 @@ using System.Xml;
 using System.Drawing.Imaging;
 using System.IO;
 
-using System.Runtime.InteropServices;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -23,7 +22,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonDialog;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
@@ -5412,7 +5410,7 @@ rectFrame);
             bool bFree = false; // 是否为自由期
 
             {
-                Brush brushText = null;
+                Brush brushText = null; // 2017/11/10 巩固了 Dispose()
 
                 try
                 {
@@ -5522,6 +5520,11 @@ rectFrame);
                     // 如果不是某年的第一期，则年份显示为淡色
                     {
                         // 1) 期号
+                        if (brushText != null)
+                        {
+                            brushText.Dispose();
+                            brushText = null;
+                        }
                         brushText = new SolidBrush(colorDark);
                         // size里面已经有strNo的尺寸
                         RectangleF rect = new RectangleF(
@@ -5550,6 +5553,12 @@ rectFrame);
                         // 2) 年份
                         if (String.IsNullOrEmpty(strYear) == false)
                         {
+                            if (brushText != null)
+                            {
+                                brushText.Dispose();
+                                brushText = null;
+                            }
+
                             if (bFirstIssue == true)
                                 brushText = new SolidBrush(colorDark);
                             else
@@ -5592,6 +5601,11 @@ rectFrame);
                         y0 += (int)size.Height;
                         string strText = BindingControl.GetDisplayPublishTime(this.PublishTime);
 
+                        if (brushText != null)
+                        {
+                            brushText.Dispose();
+                            brushText = null;
+                        }
                         brushText = new SolidBrush(colorGray);
                         size = e.Graphics.MeasureString(strText,
                             this.Container.m_fontTitleSmall);
@@ -5648,6 +5662,11 @@ rectFrame);
                         if (String.IsNullOrEmpty(strText) == false)
                         {
                             y0 += (int)size.Height;
+                            if (brushText != null)
+                            {
+                                brushText.Dispose();
+                                brushText = null;
+                            }
                             brushText = new SolidBrush(colorGray);
                             size = e.Graphics.MeasureString(strText,
                                 this.Container.m_fontTitleSmall);
@@ -5698,7 +5717,12 @@ rectFrame);
                         if (String.IsNullOrEmpty(strText) == false)
                         {
                             y0 += (int)size.Height;
-                            // brushText = new SolidBrush(colorGray);
+
+                            if (brushText != null)
+                            {
+                                brushText.Dispose();
+                                brushText = null;
+                            }
                             if (nState == -2)
                                 brushText = new SolidBrush(colorGray);
                             else if (nState == -1)
@@ -5766,7 +5790,10 @@ rectFrame);
                 finally
                 {
                     if (brushText != null)
+                    {
                         brushText.Dispose();
+                        brushText = null;
+                    }
                 }
             }
 
@@ -5952,12 +5979,18 @@ rectFrame);
                 return "";
                 // return m_strXml;
             }
-            /*
             set
             {
-                m_strXml = value;
+                // m_strXml = value;
+
+                // 2017/12/15
+                {
+                    if (dom == null)
+                        dom = new XmlDocument();
+
+                    dom.LoadXml(string.IsNullOrEmpty(value) ? "<root />" : value);
+                }
             }
-             * */
         }
 
         internal XmlDocument dom = null;
@@ -6498,6 +6531,17 @@ rectFrame);
                 return -1;
             }
 #endif
+            // 合并。strDefaultXml 合并到 this.Xml 中。不覆盖原有的非空内容
+            // 设置册记录默认值
+            string strDefaultXml = this.Xml;
+            nRet = this.Container.Container.SetItemDefaultValues("quickRegister_default",
+                true,
+                ref strDefaultXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            this.Xml = strDefaultXml;
 
             // 找到相关的OrderBindingItem对象，刷新<distribute>元素内容
             IssueBindingItem issue = this.Container;

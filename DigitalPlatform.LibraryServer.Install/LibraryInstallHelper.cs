@@ -3,20 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
-//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
-
-using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {

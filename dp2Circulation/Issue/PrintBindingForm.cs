@@ -177,29 +177,29 @@ namespace dp2Circulation
         /// 列号: 完好率
         /// </summary>
         public static int COLUMN_INTACT = 19;        // 完好率
-        /*
-        public static int COLUMN_BARCODE = 0;    // 册条码号
-        public static int COLUMN_SUMMARY = 1;    // 摘要
-        public static int COLUMN_ERRORINFO = 1;  // 错误信息
-        public static int COLUMN_ISBNISSN = 2;           // ISBN/ISSN
+                                                     /*
+                                                     public static int COLUMN_BARCODE = 0;    // 册条码号
+                                                     public static int COLUMN_SUMMARY = 1;    // 摘要
+                                                     public static int COLUMN_ERRORINFO = 1;  // 错误信息
+                                                     public static int COLUMN_ISBNISSN = 2;           // ISBN/ISSN
 
-        public static int COLUMN_STATE = 3;      // 状态
-        public static int COLUMN_LOCATION = 4;   // 馆藏地点
-        public static int COLUMN_PRICE = 5;      // 价格
-        public static int COLUMN_BOOKTYPE = 6;   // 册类型
-        public static int COLUMN_REGISTERNO = 7; // 登录号
-        public static int COLUMN_COMMENT = 8;    // 注释
-        public static int COLUMN_MERGECOMMENT = 9;   // 合并注释
-        public static int COLUMN_BATCHNO = 10;    // 批次号
-        public static int COLUMN_BORROWER = 11;  // 借阅者
-        public static int COLUMN_BORROWDATE = 12;    // 借阅日期
-        public static int COLUMN_BORROWPERIOD = 13;  // 借阅期限
-        public static int COLUMN_RECPATH = 14;   // 册记录路径
-        public static int COLUMN_BIBLIORECPATH = 15; // 种记录路径
-        public static int COLUMN_ACCESSNO = 16; // 索取号
-        public static int COLUMN_TARGETRECPATH = 17; // 目标记录路径
-         * */
-#endregion
+                                                     public static int COLUMN_STATE = 3;      // 状态
+                                                     public static int COLUMN_LOCATION = 4;   // 馆藏地点
+                                                     public static int COLUMN_PRICE = 5;      // 价格
+                                                     public static int COLUMN_BOOKTYPE = 6;   // 册类型
+                                                     public static int COLUMN_REGISTERNO = 7; // 登录号
+                                                     public static int COLUMN_COMMENT = 8;    // 注释
+                                                     public static int COLUMN_MERGECOMMENT = 9;   // 合并注释
+                                                     public static int COLUMN_BATCHNO = 10;    // 批次号
+                                                     public static int COLUMN_BORROWER = 11;  // 借阅者
+                                                     public static int COLUMN_BORROWDATE = 12;    // 借阅日期
+                                                     public static int COLUMN_BORROWPERIOD = 13;  // 借阅期限
+                                                     public static int COLUMN_RECPATH = 14;   // 册记录路径
+                                                     public static int COLUMN_BIBLIORECPATH = 15; // 种记录路径
+                                                     public static int COLUMN_ACCESSNO = 16; // 索取号
+                                                     public static int COLUMN_TARGETRECPATH = 17; // 目标记录路径
+                                                      * */
+        #endregion
 
         const int WM_LOADSIZE = API.WM_USER + 201;
 
@@ -343,7 +343,8 @@ namespace dp2Circulation
              * */
         }
 
-        /*public*/ void LoadSize()
+        /*public*/
+        void LoadSize()
         {
 #if NO
             // 设置窗口尺寸状态
@@ -374,7 +375,8 @@ namespace dp2Circulation
             }
         }
 
-        /*public*/ void SaveSize()
+        /*public*/
+        void SaveSize()
         {
 #if NO
             MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -599,7 +601,7 @@ namespace dp2Circulation
                     // 2013/3/25
                     lRet = Channel.SearchItem(
                     stop,
-                        // 2010/2/25 changed
+                     // 2010/2/25 changed
                      "<all series>",
                     "", //
                     -1,
@@ -620,7 +622,7 @@ namespace dp2Circulation
                 else
                     lRet = Channel.SearchItem(
                         stop,
-                        // 2010/2/25 changed
+                         // 2010/2/25 changed
                          "<all series>",
                         dlg.BatchNo,
                         -1,
@@ -1312,12 +1314,13 @@ namespace dp2Circulation
         //      -1  出错(注意表示出错的行已经加入listview中了)
         //      0   因为馆藏地点不匹配，没有加入list中
         //      1   成功
-        /*public*/ int LoadOneItem(
-            string strBarcodeOrRecPath,
-            ListView list,
-            string strMatchLocation,
-            out string strOutputItemRecPath,
-            out string strError)
+        /*public*/
+        int LoadOneItem(
+ string strBarcodeOrRecPath,
+ ListView list,
+ string strMatchLocation,
+ out string strOutputItemRecPath,
+ out string strError)
         {
             strError = "";
             strOutputItemRecPath = "";
@@ -1536,7 +1539,7 @@ namespace dp2Circulation
             string strPublishTime = ListViewUtil.GetItemText(item, COLUMN_PUBLISHTIME);
             if (strPublishTime.IndexOf("-") == -1)
             {
-                strError = "不是合订册。出版日期 '"+strPublishTime+"' 不是范围形式";
+                strError = "不是合订册。出版日期 '" + strPublishTime + "' 不是范围形式";
                 goto ERROR1;
             }
 
@@ -1618,12 +1621,13 @@ namespace dp2Circulation
 
         }
 
-        /*public*/ static ListViewItem AddToListView(ListView list,
-    XmlDocument dom,
-    string strRecPath,
-    string strBiblioSummary,
-    string strISBnISSN,
-    string strBiblioRecPath)
+        /*public*/
+        static ListViewItem AddToListView(ListView list,
+XmlDocument dom,
+string strRecPath,
+string strBiblioSummary,
+string strISBnISSN,
+string strBiblioRecPath)
         {
             string strBarcode = DomUtil.GetElementText(dom.DocumentElement,
     "barcode");
@@ -1646,13 +1650,14 @@ namespace dp2Circulation
         // 本函数会自动把事项的data.Changed设置为false
         // parameters:
         //      bSetBarcodeColumn   是否要设置条码列内容(第一列)
-        /*public*/ static void SetListViewItemText(XmlDocument dom,
-            bool bSetBarcodeColumn,
-            string strRecPath,
-            string strBiblioSummary,
-            string strISBnISSN,
-            string strBiblioRecPath,
-            ListViewItem item)
+        /*public*/
+        static void SetListViewItemText(XmlDocument dom,
+ bool bSetBarcodeColumn,
+ string strRecPath,
+ string strBiblioSummary,
+ string strISBnISSN,
+ string strBiblioRecPath,
+ ListViewItem item)
         {
             OriginItemData data = null;
             data = (OriginItemData)item.Tag;
@@ -1813,15 +1818,15 @@ namespace dp2Circulation
 
             // 一些必要的链接库
             string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2circulation.exe"
                 };
@@ -2038,7 +2043,7 @@ namespace dp2Circulation
                 {
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += "\r\n";
-                    strWarning += "打印过程中，有 "+nSkipCount.ToString()+" 个错误状态的事项被跳过";
+                    strWarning += "打印过程中，有 " + nSkipCount.ToString() + " 个错误状态的事项被跳过";
                 }
 
                 if (String.IsNullOrEmpty(strWarning) == false)
@@ -2159,7 +2164,7 @@ namespace dp2Circulation
                     return -1;
 
                 // 追加到macro_table中
-                foreach(string key in this.ColumnTable.Keys)
+                foreach (string key in this.ColumnTable.Keys)
                 {
                     macro_table.Remove("%" + key + "%");
 
@@ -2190,8 +2195,8 @@ namespace dp2Circulation
 
             if (nRet == 0)
             {
-                strWarning = "合订册 (记录路径="+strRecPath+"; 参考ID="
-                    +ListViewUtil.GetItemText(item, COLUMN_REFID)+") 中没有包含任何(实到的)成员册";
+                strWarning = "合订册 (记录路径=" + strRecPath + "; 参考ID="
+                    + ListViewUtil.GetItemText(item, COLUMN_REFID) + ") 中没有包含任何(实到的)成员册";
             }
 
             BuildPageTop(option,
@@ -2320,7 +2325,7 @@ namespace dp2Circulation
                     StreamUtil.WriteText(strFilename,
                        "<td class='name'>期刊</td>");
                     StreamUtil.WriteText(strFilename,
-                      "<td class='value'>"+HttpUtility.HtmlEncode(
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
                       (string)macro_table["%bindingsummary%"]) + "</td>");
                     StreamUtil.WriteText(strFilename,
                         "</tr>");
@@ -2535,18 +2540,19 @@ namespace dp2Circulation
 
         // 解析当年期号、总期号、卷号的字符串
         // 注意这是一个特殊版本，能够识别里面的"y."
-        /*public*/ static void ParseItemVolumeString(string strVolumeString,
-            out string strYear,
-            out string strIssue,
-            out string strZong,
-            out string strVolume)
+        /*public*/
+        static void ParseItemVolumeString(string strVolumeString,
+ out string strYear,
+ out string strIssue,
+ out string strZong,
+ out string strVolume)
         {
             strYear = "";
             strIssue = "";
             strZong = "";
             strVolume = "";
 
-            string[] segments = strVolumeString.Split(new char[] { ';',',','=' });
+            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=' });
             for (int i = 0; i < segments.Length; i++)
             {
                 string strSegment = segments[i].Trim();
@@ -2564,13 +2570,14 @@ namespace dp2Circulation
 
         // 创建表示范围的 期号，卷号，总期号字符串
         // 各个序列间用等号连接
-        /*public*/ static string BuildVolumeRangeString(List<string> volumes)
+        /*public*/
+        static string BuildVolumeRangeString(List<string> volumes)
         {
             Hashtable no_list_table = new Hashtable();
             List<string> volume_list = new List<string>();
             List<string> zong_list = new List<string>();
 
-            for(int i=0;i<volumes.Count;i++)
+            for (int i = 0; i < volumes.Count; i++)
             {
                 // 解析单册的volumestring
                 string strYear = "";
@@ -2709,8 +2716,8 @@ namespace dp2Circulation
 
                 string strClass = StringUtil.GetLeft(column.Name);
 
-            strResult +=
-                    "<td class='" + strClass + "'>" + strCaption + "</td>";
+                strResult +=
+                        "<td class='" + strClass + "'>" + strCaption + "</td>";
             }
 
             strResult += "</tr>";
@@ -2784,8 +2791,8 @@ namespace dp2Circulation
                         StringUtil.GetLeft(column.Name));
 
                     string strClass = StringUtil.GetLeft(column.Name);
-            strResult +=
-                        "<td class='" + strClass + "'>" + strContent + "</td>";
+                    strResult +=
+                                "<td class='" + strClass + "'>" + strContent + "</td>";
 
                 }
 
@@ -2805,10 +2812,11 @@ namespace dp2Circulation
             return nArriveCount;
         }
 
-        /*public*/ int GetItemXmlByRefID(
-            string strRefID,
-            out string strItemXml,
-            out string strError)
+        /*public*/
+        int GetItemXmlByRefID(
+ string strRefID,
+ out string strItemXml,
+ out string strError)
         {
             strError = "";
             strItemXml = "";
@@ -2820,7 +2828,7 @@ namespace dp2Circulation
             string strBarcode = "@refID:" + strRefID;
 
             if (this.stop != null)
-                this.stop.SetMessage("正在获取参考ID为 '"+strRefID+"' 的实体记录... ");
+                this.stop.SetMessage("正在获取参考ID为 '" + strRefID + "' 的实体记录... ");
 
             long lRet = Channel.GetItemInfo(
                 stop,
@@ -3635,7 +3643,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this.listView_parent, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView_parent, new Point(e.X, e.Y));
 
         }
 

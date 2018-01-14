@@ -247,9 +247,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 通知系统挂起
                     //this.App.HangupReason = HangupReason.OperLogError;
-                    this.App.AddHangup("OperLogError");
 
                     this.App.WriteErrorLog("系统启动时，试图将备用日志文件中的信息写入当日日志文件，以使系统恢复正常，但是这一努力失败了。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
+                    this.App.AddHangup("OperLogError");
 
                     this.m_stream.SetLength(lSaveLength);
                 }
@@ -1207,6 +1207,7 @@ namespace DigitalPlatform.LibraryServer
         //              目前的含义是记录起始位置。
         //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
         //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
+        //                  本函数返回后，attachment 的文件指针在文件末尾。调用时需引起注意
         // return:
         //      -1  error
         //      0   file not found
@@ -2397,6 +2398,7 @@ out strTargetLibraryCode);
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
         //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
+        //                  如果包含 dont_return_xml 表示在 strXml 不返回内容
         // return:
         //      -1  error
         //      0   file not found
@@ -2628,6 +2630,10 @@ out strTargetLibraryCode);
 
                 // END1:
                 lHintNext = cache_item.Stream.Position;
+
+                // 2017/12/5
+                if (StringUtil.IsInList("dont_return_xml", strStyle) == true)
+                    strXml = "";
                 return 1;
             }
             finally
@@ -2750,6 +2756,7 @@ out strTargetLibraryCode);
         // 要读出附件
         // parameters:
         //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
+        //                  本函数返回后，attachment 的文件指针在文件末尾。调用时需引起注意
         // return:
         //      1   出错
         //      0   成功
@@ -3112,6 +3119,7 @@ out strTargetLibraryCode);
         // 读出一个事项(Stream类型)
         // parameters:
         //      streamBody  承载输出的 body 部分的 Stream 对象。如果为 null，表示不输出这部分
+        //                  本函数返回后，streamBody 的文件指针在文件末尾。调用时需引起注意
         public static int ReadEntry(
             Stream stream,
             out string strMetaData,
@@ -3799,9 +3807,9 @@ out strTargetLibraryCode);
 
                     // 通知系统挂起
                     //this.App.HangupReason = HangupReason.OperLogError;
-                    this.App.AddHangup("OperLogError");
 
                     this.App.WriteErrorLog("系统启动时，试图合并临时日志文件，但是这一努力失败了 [" + strError + "]。请试着为数据目录腾出更多富余磁盘空间，然后重新启动系统。");
+                    this.App.AddHangup("OperLogError");
                     return -1;
                 }
             }

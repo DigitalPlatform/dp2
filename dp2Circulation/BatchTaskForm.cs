@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Threading;
 using System.Diagnostics;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -15,7 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
-using System.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 

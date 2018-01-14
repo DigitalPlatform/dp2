@@ -37,9 +37,65 @@ namespace DigitalPlatform.CirculationClient
             strStyle,
             timestamp,
             bRetryOverwiteExisting,
+            false,
             out output_timestamp,
             out strError);
         }
+
+        public static int UploadObject(
+    this LibraryChannel channel,
+    Stop stop,
+    string strClientFilePath,
+    string strServerFilePath,
+    string strStyle,
+    byte[] timestamp,
+    bool bRetryOverwiteExisting,
+    bool bProgressChange,
+    out byte[] output_timestamp,
+    out string strError)
+        {
+            string strMime = PathUtil.MimeTypeFrom(strClientFilePath);
+            string strMetadata = LibraryChannel.BuildMetadata(strMime, Path.GetFileName(strClientFilePath));
+            return UploadFile(
+            channel,
+            stop,
+            strClientFilePath,
+            strServerFilePath,
+            strMetadata,
+            strStyle,
+            timestamp,
+            bRetryOverwiteExisting,
+            bProgressChange,
+            out output_timestamp,
+            out strError);
+        }
+
+        public static int UploadFile(
+    this LibraryChannel channel,
+    Stop stop,
+    string strClientFilePath,
+    string strServerFilePath,
+    string strMetadata,
+    string strStyle,
+    byte[] timestamp,
+    bool bRetryOverwiteExisting,
+    out byte[] output_timestamp,
+    out string strError)
+        {
+            return UploadFile(
+            channel,
+            stop,
+            strClientFilePath,
+            strServerFilePath,
+            strMetadata,
+            strStyle,
+            timestamp,
+            bRetryOverwiteExisting,
+            false,
+            out output_timestamp,
+            out strError);
+        }
+
 
         // 上传文件到到 dp2lbrary 服务器
         // parameters:
@@ -57,6 +113,7 @@ namespace DigitalPlatform.CirculationClient
             string strStyle,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
+            bool bProgressChange,
             out byte[] output_timestamp,
             out string strError)
         {
@@ -90,7 +147,6 @@ out strError);
                 return 0;
             }
 
-
             // 检测文件尺寸
             FileInfo fi = new FileInfo(strClientFilePath);
             if (fi.Exists == false)
@@ -117,6 +173,8 @@ out strError);
                 ranges = RangeList.ChunkRange(strRange,
                     channel.UploadResChunkSize // 500 * 1024
                     );
+                if (bProgressChange && stop != null)
+                    stop.SetProgressRange(0, fi.Length);
             }
 
             if (timestamp == null)
@@ -158,10 +216,15 @@ out strError);
                         }
 
                         if (stop != null)
+                        {
                             stop.SetMessage( // strMessagePrefix + 
                                 "正在上载 " + ranges[j] + "/"
                                 + StringUtil.GetLengthText(fi.Length)
                                 + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
+                            if (bProgressChange && rl.Count > 0)
+                                stop.SetProgressValue(rl[0].lStart);
+                        }
+
                         int nRedoCount = 0;
                     REDO:
                         long lRet = channel.SaveResObject(
@@ -171,7 +234,7 @@ out strError);
         -1,
         j == ranges.Length - 1 ? strMetadata : null,	// 最尾一次操作才写入 metadata
         ranges[j],
-                            // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+        // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
         timestamp,
         strStyle,
         out output_timestamp,
@@ -193,13 +256,12 @@ out strError);
                             }
                             return -1;
                         }
-
                     }
                 }
             }
             catch (Exception ex)
             {
-                strError = "UploadFile() 出现异常: " + ex.Message;
+                strError = "UploadFile() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally

@@ -1559,6 +1559,7 @@
         <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strDatabaseName" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strDatabaseInfo" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

@@ -1411,6 +1411,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <param name="func">出纳功能</param>
         /// <param name="strText">字符串。可能是证条码号，也可能是册条码号</param>
         /// <param name="strTaskID">任务 ID，用于管理和查询任务状态</param>
+        /// <param name="strParameters"></param>
         public void AsyncDoAction(FuncState func,
             string strText,
             string strTaskID = "",

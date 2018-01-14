@@ -22,10 +22,12 @@ namespace dp2Circulation
 
         const int WM_SETCARETPOS = API.WM_USER + 201;
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 获得值列表
