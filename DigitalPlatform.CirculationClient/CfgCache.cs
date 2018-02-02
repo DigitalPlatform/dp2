@@ -32,6 +32,8 @@ namespace DigitalPlatform.CirculationClient
 
         // 获得或设置临时文件目录
         // 如果不设置临时文件目录, 则在需要创建临时文件的时候, 自动创建在系统临时文件目录中
+        // exception:
+        //      可能会抛出异常
         public string TempDir
         {
             get
@@ -43,7 +45,15 @@ namespace DigitalPlatform.CirculationClient
                 m_strTempDir = value;
                 // 创建目录
                 if (m_strTempDir != "")
+                {
+                    // 如果目录不存在则创建之
+                    // return:
+                    //      false   已经存在
+                    //      true    刚刚新创建
+                    // exception:
+                    //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
                     PathUtil.TryCreateDir(m_strTempDir);
+                }
             }
         }
 
@@ -352,7 +362,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.5.5759.36671, Culture=neutral, 
             if (string.IsNullOrEmpty(this.m_strTempDir) == false)
             {
                 PathUtil.DeleteDirectory(this.m_strTempDir);
-                PathUtil.TryCreateDir(this.m_strTempDir);
+                try
+                {
+                    // 如果目录不存在则创建之
+                    // return:
+                    //      false   已经存在
+                    //      true    刚刚新创建
+                    // exception:
+                    //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
+                    PathUtil.TryCreateDir(this.m_strTempDir);
+                }
+                catch
+                {
+
+                }
             }
         }
 

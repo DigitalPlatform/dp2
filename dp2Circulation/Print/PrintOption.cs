@@ -107,7 +107,6 @@ namespace dp2Circulation
     "ColumnEvalue_" + i.ToString(),
     "");
 
-
                     Column column = new Column();
                     column.Name = strColumnName;
                     column.Caption = strColumnCaption;
@@ -265,6 +264,26 @@ namespace dp2Circulation
             }
 
             return false;
+        }
+
+        // 2018/1/9
+        public virtual string [] GetAllColumnItems()
+        {
+            List<Column> columns = GetAllColumns(false);
+            List<string> results = new List<string>();
+            foreach(Column column in columns)
+            {
+                results.Add(column.Name);
+            }
+
+            return results.ToArray();
+        }
+
+        // parameters:
+        //      bDefault    是否只取得默认栏目？否则就是取得所有栏目
+        public virtual List<Column> GetAllColumns(bool bDefault)
+        {
+            return new List<Column>();
         }
     }
 }

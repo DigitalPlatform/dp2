@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -14,6 +12,8 @@ using System.Web;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ClosedXML.Excel;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -24,11 +24,9 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
-using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -81,7 +79,44 @@ namespace dp2Circulation
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
+
+            prop.CompareColumn -= new CompareEventHandler(SearchFormBase.prop_CompareColumn);
+            prop.CompareColumn += new CompareEventHandler(SearchFormBase.prop_CompareColumn);
         }
+
+#if NO
+        void prop_CompareColumn(object sender, CompareEventArgs e)
+        {
+            // TODO: 实现 ISBN 排序。把 10 位和 13 位的归一化以后排序
+
+            if (e.Column.SortStyle.Name == "call_number")
+            {
+                // 比较两个索取号的大小
+                // return:
+                //      <0  s1 < s2
+                //      ==0 s1 == s2
+                //      >0  s1 > s2
+                e.Result = StringUtil.CompareAccessNo(e.String1, e.String2, true);
+            }
+            else if (e.Column.SortStyle.Name == "parent_id")
+            {
+                // 右对齐比较字符串
+                // parameters:
+                //      chFill  填充用的字符
+                e.Result = StringUtil.CompareRecPath(e.String1, e.String2);
+            }
+            else if (e.Column.SortStyle.Name == "order_price")
+            {
+                e.Result = ItemSearchForm.CompareOrderPrice(e.String1, e.String2);
+            }
+            else if (e.Column.SortStyle.Name == "price")
+            {
+                e.Result = StringUtil.ComparePrice(e.String1, e.String2);
+            }
+            else
+                e.Result = string.Compare(e.String1, e.String2);
+        }
+#endif
 
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
         {
@@ -122,7 +157,6 @@ namespace dp2Circulation
 
             if (this.m_bFirstColumnIsKey == true)
                 e.ColumnTitles.Insert(0, "命中的检索点");
-
         }
 
         void ClearListViewPropertyCache()

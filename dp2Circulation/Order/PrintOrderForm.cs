@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -19,7 +17,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;

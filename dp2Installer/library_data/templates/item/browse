@@ -24,7 +24,7 @@
   <col title="架号" type="shelf_number">
     <xpath>*/shelfNo</xpath>
   </col>
-  <col title="价格">
+  <col title="价格" type="price">
     <xpath>*/price</xpath>
   </col>
   <col title="册类型">

@@ -244,7 +244,7 @@ namespace DigitalPlatform.OPAC.Server
             this.SetProgressText("休眠");
 
             return;
-        ERROR1:
+            ERROR1:
             AppendResultText("CacheBuilder thread error : " + strError + "\r\n");
             this.SetProgressText("CacheBuilder thread error : " + strError);
             this.App.WriteErrorLog("CacheBuilder thread error : " + strError + "\r\n");
@@ -783,7 +783,7 @@ namespace DigitalPlatform.OPAC.Server
                     long lRet = 0;
                     int nRedoCount = 0;
 
-                REDO_SEARCH:
+                    REDO_SEARCH:
 
                     this.SetProgressText("检索" + " " + strPureCaption);
                     this.AppendResultText("检索" + " " + strPureCaption + "\r\n");
@@ -1096,7 +1096,7 @@ namespace DigitalPlatform.OPAC.Server
                     continue;
                 }
 
-            DO_ADD:
+                DO_ADD:
                 {
                     string strLine = strDataFile + ":" + strPrefix;
                     lines.Add(strLine.ToLower());
@@ -1154,9 +1154,12 @@ namespace DigitalPlatform.OPAC.Server
             return 0;
         }
 
-        public static XmlNode GetDataNode(XmlNode root,
-    string strNodePath)
+        public static XmlNode GetDataNode(XmlNode root, string strNodePath)
         {
+            // 2018/1/27
+            if (strNodePath == null)
+                throw new ArgumentException("strNodePath 参数值不应为 null", "strNodePath");
+
             string[] path = strNodePath.Split(new char[] { '_' });
             XmlNode current_node = root;
             for (int i = 1; i < path.Length; i++)

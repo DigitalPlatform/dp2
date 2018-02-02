@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
-using System.Windows.Forms;
 using System.IO;
-using System.Diagnostics;
 using System.Xml;
-using System.Reflection;
 using System.Web;
+using System.Windows.Forms;
+using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 
 using DigitalPlatform;
@@ -24,7 +24,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
-using DigitalPlatform.rms.Client;
 
 using ClosedXML.Excel;
 
@@ -102,28 +101,6 @@ namespace dp2Circulation
 
             prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn);
             prop.CompareColumn += new CompareEventHandler(prop_CompareColumn);
-        }
-
-        void prop_CompareColumn(object sender, CompareEventArgs e)
-        {
-            if (e.Column.SortStyle.Name == "call_number")
-            {
-                // 比较两个索取号的大小
-                // return:
-                //      <0  s1 < s2
-                //      ==0 s1 == s2
-                //      >0  s1 > s2
-                e.Result = StringUtil.CompareAccessNo(e.String1, e.String2, true);
-            }
-            else if (e.Column.SortStyle.Name == "parent_id")
-            {
-                // 右对齐比较字符串
-                // parameters:
-                //      chFill  填充用的字符
-                e.Result = StringUtil.CompareRecPath(e.String1, e.String2);
-            }
-            else
-                e.Result = string.Compare(e.String1, e.String2);
         }
 
         void ClearListViewPropertyCache()
@@ -1039,7 +1016,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1217,7 +1194,7 @@ namespace dp2Circulation
                         strTempBrowseStyle += ",format:@coldef:*/parent";
                     }
 
-                REDO_GETRECORDS:
+                    REDO_GETRECORDS:
                     long lRet = channel.GetSearchResult(
                         stop,
                         strResultSetName,
@@ -1484,7 +1461,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, "当前用户不具备获取书目摘要的权限");
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2696,7 +2673,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个" + this.DbType + "记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2710,7 +2687,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2725,7 +2702,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2739,7 +2716,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3268,7 +3245,7 @@ out strError);
                 out strLibraryCode,
                 out strRoom);
 
-                REDO_VERIFYBARCODE:
+                    REDO_VERIFYBARCODE:
                     // <para>-2  服务器没有配置校验方法，无法校验</para>
                     // <para>-1  出错</para>
                     // <para>0   不是合法的条码号</para>
@@ -3313,7 +3290,7 @@ out strError);
             // 服务器端校验
             if (dlg.ServerVerify == true)
             {
-            REDO_SERVERVERIFY:
+                REDO_SERVERVERIFY:
                 // 调用服务器端校验册记录功能
                 // return:
                 //      -1  校验过程出错
@@ -3652,7 +3629,7 @@ out strError);
                     return -1;
                 }
 
-            REDO_GETBIBLIOINFO:
+                REDO_GETBIBLIOINFO:
                 string[] results = null;
                 byte[] baTimestamp = null;
 
@@ -5223,7 +5200,7 @@ Program.MainForm.DefaultFont);
                 MessageBox.Show(this, strText);
 
             return;
-        ERROR1:
+            ERROR1:
             if (string.IsNullOrEmpty(strText) == false)
                 MessageBox.Show(this, strText);
 
@@ -5306,7 +5283,7 @@ Program.MainForm.DefaultFont);
                 MessageBox.Show(this, strText);
 
             return;
-        ERROR1:
+            ERROR1:
             if (string.IsNullOrEmpty(strText) == false)
                 MessageBox.Show(this, strText);
 
@@ -5438,7 +5415,7 @@ Program.MainForm.DefaultFont);
                 MessageBox.Show(this, strText);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5457,7 +5434,8 @@ Program.MainForm.DefaultFont);
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
-                items.Add(item);
+                if (string.IsNullOrEmpty(item.Text) == false)
+                    items.Add(item);
             }
 
             string strError = "";
@@ -5608,7 +5586,7 @@ Program.MainForm.DefaultFont);
 
             MessageBox.Show(this, "成功删除" + this.DbTypeCaption + "记录 " + items.Count + " 条");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5625,7 +5603,7 @@ Program.MainForm.DefaultFont);
             if (nRet != 0)
                 MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6099,7 +6077,7 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6148,7 +6126,7 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6208,7 +6186,7 @@ Program.MainForm.DefaultFont);
             form.EnableControls(true);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6255,7 +6233,7 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6301,7 +6279,7 @@ Program.MainForm.DefaultFont);
 
             Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportItemRecPathFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6553,7 +6531,7 @@ Program.MainForm.DefaultFont);
                         lRet = channel.GetIssueInfo(
     stop,
     "@path:" + strIssueRecPath,
-                            // "",
+    // "",
     "xml",
     out strIssueXml,
     out strOutputIssueRecPath,
@@ -6792,7 +6770,7 @@ Program.MainForm.DefaultFont);
                         }
                     }
 
-                ERROR:
+                    ERROR:
                     if (nRet == -1)
                     {
                         if (itemsearchform == null)
@@ -6851,7 +6829,7 @@ Program.MainForm.DefaultFont);
 
             MessageBox.Show(this, "共处理 " + nCount.ToString() + " 个册记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7141,7 +7119,7 @@ MessageBoxDefaultButton.Button1);
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7374,7 +7352,7 @@ MessageBoxDefaultButton.Button1);
                 this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
                 listView_records_SelectedIndexChanged(null, null);
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7443,7 +7421,7 @@ MessageBoxDefaultButton.Button1);
 
                         item.Selected = true;
 
-                    CONTINUE:
+                        CONTINUE:
                         if (stop != null)
                         {
                             stop.SetMessage(strLine);
@@ -7759,7 +7737,7 @@ MessageBoxDefaultButton.Button1);
                     sr.Close();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7774,7 +7752,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7959,7 +7937,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(strError);
         }
 
@@ -8373,7 +8351,7 @@ dlg.UiState);
                             if (string.IsNullOrEmpty(entity.Path))
                                 goto CONTINUE;
                             item_recpath_table[entity.Path] = strPrice;
-                        CONTINUE:
+                            CONTINUE:
                             i++;
                             stop.SetProgressValue(i);
                         }
@@ -8665,7 +8643,7 @@ dlg.UiState);
 
             Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8910,7 +8888,7 @@ dlg.UiState);
 
             Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9309,7 +9287,7 @@ dlg.UiState);
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10078,7 +10056,7 @@ out strError);
 
             Program.MainForm.StatusBarMessage = "书目记录路径 " + biblio_recpaths.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBiblioRecPathFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10209,7 +10187,7 @@ out strError);
 
             Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10361,7 +10339,7 @@ out strError);
                 stop.Style = StopStyle.None;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10456,7 +10434,7 @@ out strError);
             }
 
             return true;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return false;
         }
@@ -11371,7 +11349,7 @@ out strError);
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11413,15 +11391,15 @@ out strError);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
@@ -11465,7 +11443,7 @@ out strError);
                 null);
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -11650,7 +11628,7 @@ Keys keyData)
 
             return;
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11732,7 +11710,7 @@ out strError);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -11957,7 +11935,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
             return -1;
         }

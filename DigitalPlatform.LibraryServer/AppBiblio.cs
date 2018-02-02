@@ -393,7 +393,7 @@ namespace DigitalPlatform.LibraryServer
                     bRightVerified = true;
                 }
 
-            VERIFY_NORMAL_RIGHTS:
+                VERIFY_NORMAL_RIGHTS:
                 if (bRightVerified == false)
                 {
                     // 权限字符串
@@ -602,7 +602,7 @@ namespace DigitalPlatform.LibraryServer
 
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -1335,7 +1335,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
-            CONTINUE:
+                CONTINUE:
                 result_strings.Add(strBiblio);
             } // end of for
 
@@ -1940,7 +1940,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioXml = "";
             strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
 
-        LOADBIBLIO:
+            LOADBIBLIO:
 
             // 看看是否在排除列表中
             if (String.IsNullOrEmpty(strBiblioRecPathExclude) == false
@@ -2152,7 +2152,7 @@ return result;
 
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2645,7 +2645,7 @@ out strError);
                         goto FOUND;
                 }
                 return false;
-            FOUND:
+                FOUND:
                 continue;
             }
 
@@ -3957,7 +3957,7 @@ nsmgr);
 
             result.Value = 0;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -4655,7 +4655,7 @@ nsmgr);
                 }
             }
 
-        CHECK_RIGHTS_2:
+            CHECK_RIGHTS_2:
             if (bRightVerified == false)
             {
                 // 权限字符串
@@ -4867,7 +4867,7 @@ nsmgr);
                 // 防止贸然覆盖了文档根下的有用信息。
             }
 
-        SKIP_MEMO_OLDRECORD:
+            SKIP_MEMO_OLDRECORD:
 
             bool bBiblioNotFound = false;
 
@@ -4954,7 +4954,7 @@ nsmgr);
                 {
                     strOutputBiblioRecPath = strError;
                     result.Value = -1;
-                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。";
                     result.ErrorCode = ErrorCode.BiblioDup;
                     return result;
                 }
@@ -5036,7 +5036,7 @@ nsmgr);
                     {
                         strOutputBiblioRecPath = strError;
                         result.Value = -1;
-                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。";
                         if (strAction != "checkunique")
                             result.ErrorInfo += "本次保存操作被拒绝";
                         result.ErrorCode = ErrorCode.BiblioDup;
@@ -5183,7 +5183,7 @@ out strError);
                     {
                         strOutputBiblioRecPath = strError;
                         result.Value = -1;
-                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。本次保存操作被拒绝";
                         result.ErrorCode = ErrorCode.BiblioDup;
                         return result;
                     }
@@ -5506,7 +5506,7 @@ out strError);
                 goto ERROR1;
             }
 
-        END1:
+            END1:
             if (bSimulate == false && bNoEventLog == false)
             {
                 if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
@@ -5547,7 +5547,7 @@ out strError);
                 }
             }
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -5980,7 +5980,7 @@ out strError);
                 this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
             }
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6252,7 +6252,7 @@ out strError);
                 }
             }
 
-        CHECK_RIGHTS_2:
+            CHECK_RIGHTS_2:
             if (bRightVerified == false)
             {
                 // 权限字符串
@@ -6342,7 +6342,7 @@ out strError);
                 // 防止贸然覆盖了文档根下的有用信息。
             }
 
-        SKIP_MEMO_OLDRECORD:
+            SKIP_MEMO_OLDRECORD:
 
             // bool bBiblioNotFound = false;
 
@@ -6435,7 +6435,7 @@ out strError);
                             // move 操作，要排除 source 记录路径，因为它即将被删除
                             strOutputBiblioRecPath = strError;
                             result.Value = -1;
-                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。本次保存操作(" + strAction + ")被拒绝";
                             result.ErrorCode = ErrorCode.BiblioDup;
                             return result;
                         }
@@ -6468,7 +6468,7 @@ out strError);
                         {
                             strOutputBiblioRecPath = strError;
                             result.Value = -1;
-                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录(" + strOutputBiblioRecPath + ")。本次保存操作(" + strAction + ")被拒绝";
                             result.ErrorCode = ErrorCode.BiblioDup;
                             return result;
                         }
@@ -6564,7 +6564,7 @@ out strError);
                                     // 删除刚刚复制的目标记录
                                     string strError_1 = "";
                                     int nRedoCount = 0;
-                                REDO_DELETE:
+                                    REDO_DELETE:
                                     lRet = channel.DoDeleteRes(strOutputBiblioRecPath,
                                         baTimestamp,
                                         out baOutputTimestamp,
@@ -6662,7 +6662,7 @@ out strError);
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -7120,7 +7120,7 @@ out strError);
             }
 
             return nCopyCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -7364,7 +7364,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 

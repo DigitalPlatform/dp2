@@ -57,15 +57,15 @@ TABLE.binding TD.name
 }
 
 /*
-TABLE.binding TR.barcode TD.value
+TABLE.binding TR.barcode_label TD.value
 {
     font-family: "C39HrP24DhTt", "Microsoft YaHei", Times, serif;
     font-size: 3.0em;
     padding-left: 50px;
 }
-*/
+    */
 
-    .barcode_label {
+    tr.content td.barcode_label, .barcode_label.value {
         font-family: "C39HrP24DhTt", "Microsoft YaHei", Times, serif;
         font-size: 3.0em;
         padding-left: 50px;
@@ -135,7 +135,6 @@ TABLE.members TR.content TD.missing
 	text-decoration:none;
 	font-weight: bold;
 }
-
 
 TABLE.members TR.content TD.volume
 {

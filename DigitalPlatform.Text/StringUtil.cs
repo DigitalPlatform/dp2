@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +15,87 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
+
+        // 比较两个一般价格字符串。形态为 "CNY12.00+USD20.00"
+        public static int ComparePrice(string s1, string s2)
+        {
+            string strError = "";
+            // 将形如"-123.4+10.55-20.3"的价格字符串切割为单个的价格字符串，并各自带上正负号
+            // return:
+            //      -1  error
+            //      0   succeed
+            int nRet = PriceUtil.SplitPrices(s1,
+                out List<string> prices1,
+                out strError);
+            if (nRet == -1)
+                goto NORMAL_STRING;
+            nRet = PriceUtil.SplitPrices(s2,
+    out List<string> prices2,
+    out strError);
+            if (nRet == -1)
+                goto NORMAL_STRING;
+
+            int nMinCount = Math.Min(prices1.Count, prices2.Count);
+            for (int i = 0; i < nMinCount; i++)
+            {
+                nRet = StringUtil.CompareSinglePrice(prices1[i], prices2[i]);
+                if (nRet != 0)
+                    return nRet;
+            }
+
+            if (prices1.Count > nMinCount)
+                return 1;
+            if (prices2.Count > nMinCount)
+                return -1;
+
+            return 0;
+            NORMAL_STRING:
+            return string.Compare(s1, s2);
+        }
+
+        // 比较两个单独的价格字符串。形态为 "CNY12.00"
+        public static int CompareSinglePrice(string s1, string s2)
+        {
+#if NO
+            CurrencyItem item1 = null;
+            CurrencyItem item2 = null;
+
+            // TODO: 需要改进为可以处理 CNY12.00 * 5 这样的形态
+            try
+            {
+                item1 = CurrencyItem.Parse(s1);
+                item2 = CurrencyItem.Parse(s2);
+            }
+            catch
+            {
+                return string.Compare(s1, s2);
+            }
+
+            int nRet = string.Compare(item1.Prefix + "|" + item1.Postfix, item2.Prefix + "|" + item2.Postfix);
+            if (nRet != 0)
+                return nRet;
+
+            return decimal.Compare(item1.Value, item2.Value);
+#endif
+            int nRet = PriceUtil.ParseSinglePrice(s1,
+     out CurrencyItem item1,
+     out string strError);
+            if (nRet == -1)
+                goto NORMAL_STRING;
+            nRet = PriceUtil.ParseSinglePrice(s2,
+out CurrencyItem item2,
+out strError);
+            if (nRet == -1)
+                goto NORMAL_STRING;
+
+            nRet = string.Compare(item1.Prefix + "|" + item1.Postfix, item2.Prefix + "|" + item2.Postfix);
+            if (nRet != 0)
+                return nRet;
+
+            return decimal.Compare(item1.Value, item2.Value);
+            NORMAL_STRING:
+            return string.Compare(s1, s2);
+        }
 
         public static string GetPercentText(long uploaded, long length)
         {
@@ -841,12 +921,12 @@ string strTimestamp)
             strLeft = strText;
             goto END1;
 
-        FOUND:
+            FOUND:
             Debug.Assert(nRet != -1, "");
             strLeft = strText.Substring(0, nRet).Trim();
             strRight = strText.Substring(nRet + strSep.Length).Trim();
 
-        END1:
+            END1:
             List<string> results = new List<string>();
             results.Add(strLeft);
             results.Add(strRight);
@@ -958,6 +1038,7 @@ string strTimestamp)
             sb.Append(")");
             return sb.ToString();
         }
+
         // 对短路径进行比较
         // 数据库名/id
         public static int CompareRecPath(string s1, string s2)
@@ -2837,7 +2918,7 @@ string strTimestamp)
                     strResult += ",";
                 strResult += items1[i];
                 continue;
-            FOUND:
+                FOUND:
                 continue;
             }
 

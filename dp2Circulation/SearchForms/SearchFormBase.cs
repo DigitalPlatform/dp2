@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Web;
@@ -15,9 +14,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -576,7 +573,7 @@ namespace dp2Circulation
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -632,7 +629,7 @@ namespace dp2Circulation
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -996,7 +993,7 @@ namespace dp2Circulation
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1038,7 +1035,7 @@ namespace dp2Circulation
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1113,7 +1110,7 @@ namespace dp2Circulation
 
                         byte[] baNewTimestamp = null;
 
-                    REDO_SAVE:
+                        REDO_SAVE:
                         // return:
                         //      -2  时间戳不匹配
                         //      -1  出错
@@ -1244,7 +1241,7 @@ namespace dp2Circulation
                         this.m_nChangedCount--;
                         Debug.Assert(this.m_nChangedCount >= 0, "");
 
-                    CONTINUE:
+                        CONTINUE:
                         stop.SetProgressValue(i);
                     }
                 }
@@ -1882,5 +1879,58 @@ ref bChanged);
             this._listviewRecords.Items.Add(item);
             return item;
         }
+
+
+        internal static void prop_CompareColumn(object sender, CompareEventArgs e)
+        {
+            if (e.Column.SortStyle.Name == "call_number")
+            {
+                // 比较两个索取号的大小
+                // return:
+                //      <0  s1 < s2
+                //      ==0 s1 == s2
+                //      >0  s1 > s2
+                e.Result = StringUtil.CompareAccessNo(e.String1, e.String2, true);
+            }
+            else if (e.Column.SortStyle.Name == "parent_id")
+            {
+                // 右对齐比较字符串
+                // parameters:
+                //      chFill  填充用的字符
+                e.Result = StringUtil.CompareRecPath(e.String1, e.String2);
+            }
+            else if (e.Column.SortStyle.Name == "order_price")
+            {
+                e.Result = CompareOrderPrice(e.String1, e.String2);
+            }
+            else if (e.Column.SortStyle.Name == "price")
+            {
+                e.Result = StringUtil.ComparePrice(e.String1, e.String2);
+            }
+            else
+                e.Result = string.Compare(e.String1, e.String2);
+        }
+
+        // 比较订购价格大小。订购价格是指订购记录里面的特殊价格字符串，例如 "CNY12.00[CNY24.00]"
+        public static int CompareOrderPrice(string s1, string s2)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(s1,
+                out string strOldPrice1,
+                out string strNewPrice1);
+
+            OrderDesignControl.ParseOldNewValue(s2,
+    out string strOldPrice2,
+    out string strNewPrice2);
+
+            int nRet = StringUtil.CompareSinglePrice(strOldPrice1, strOldPrice2);
+            if (nRet != 0)
+                return nRet;
+
+            return StringUtil.CompareSinglePrice(strNewPrice1, strNewPrice2);
+        }
+
+
+
     }
 }

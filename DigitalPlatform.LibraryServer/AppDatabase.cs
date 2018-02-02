@@ -156,6 +156,11 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strLogFileName) == false)
             {
                 strTempDir = Path.Combine(this.TempDir, "~" + Guid.NewGuid().ToString());
+                // return:
+                //      false   已经存在
+                //      true    刚刚新创建
+                // exception:
+                //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
                 PathUtil.TryCreateDir(strTempDir);
             }
 

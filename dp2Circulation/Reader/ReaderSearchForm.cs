@@ -8182,6 +8182,11 @@ out strError);
                 foreach (ListViewItem item in this.Items)
                 {
                     string strRecPath = item.Text;
+                    if (string.IsNullOrEmpty(strRecPath))
+                    {
+                        throw new Exception("Items 中包含了 路径为空的事项");
+                    }
+
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
                     BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];

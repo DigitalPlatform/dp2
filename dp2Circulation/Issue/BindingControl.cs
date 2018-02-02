@@ -2989,7 +2989,7 @@ namespace dp2Circulation
                     // 使用后自然会被丢弃
                 }
 
-            PLACEMEMT:
+                PLACEMEMT:
                 memberitems_table[parent_item] = member_items;
             }
 
@@ -3963,7 +3963,7 @@ namespace dp2Circulation
                 goto END1;
             }
 
-        END1:
+            END1:
             result.X = x;
             result.Y = y;
             result.Object = null;
@@ -4153,7 +4153,7 @@ namespace dp2Circulation
                 // this.Update();
             }
 
-        END1:
+            END1:
             base.OnMouseDown(e);
         }
 
@@ -4215,7 +4215,7 @@ namespace dp2Circulation
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4321,7 +4321,7 @@ namespace dp2Circulation
                 return;
 
             this.HoverObject = (Cell)result.Object;
-        END1:
+            END1:
             base.OnMouseHover(e);
         }
 
@@ -4792,7 +4792,7 @@ namespace dp2Circulation
                 }
             }
 
-        END1:
+            END1:
             // Call MyBase.OnMouseHover to activate the delegate.
             base.OnMouseMove(e);
         }
@@ -4880,7 +4880,7 @@ namespace dp2Circulation
                 goto END1;
             }
 
-        END1:
+            END1:
             base.OnMouseUp(e);
         }
 
@@ -4928,7 +4928,7 @@ namespace dp2Circulation
                 }
             }
 
-        END1:
+            END1:
             base.OnMouseDoubleClick(e);
         }
 
@@ -5753,7 +5753,7 @@ namespace dp2Circulation
 
             this.AfterWidthChanged(true);   // content宽度可能改变
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5838,7 +5838,7 @@ namespace dp2Circulation
 
             this.UpdateObjects(changed_cells);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5922,7 +5922,7 @@ namespace dp2Circulation
 
             this.UpdateObjects(changed_cells);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6141,7 +6141,7 @@ namespace dp2Circulation
 
             this.Invalidate();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -6181,7 +6181,7 @@ namespace dp2Circulation
             e1.Action = "focus";
             this.EditArea(this, e1);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6347,7 +6347,7 @@ issue.Volume);
 
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6520,7 +6520,7 @@ issue.Volume);
 
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6556,7 +6556,7 @@ issue.Volume);
             // UpdateIssues(changed_issues);
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6754,7 +6754,7 @@ issue.Volume);
             // UpdateIssues(changed_issues);
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6833,7 +6833,7 @@ issue.Volume);
                 dlg.EditComment = "当前订购时间范围为 " + strStartDate + "-" + strEndDate;   // 显示可用的订购时间范围
                 dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            REDO_INPUT:
+                REDO_INPUT:
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -7175,7 +7175,7 @@ issue.Volume);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7373,7 +7373,7 @@ issue.Volume);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9086,7 +9086,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9214,7 +9214,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9330,7 +9330,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9404,7 +9404,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9525,7 +9525,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9644,7 +9644,7 @@ MessageBoxDefaultButton.Button2);
             // this.m_lContentHeight = this.m_nCellHeight * this.Issues.Count;
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9777,7 +9777,7 @@ MessageBoxDefaultButton.Button2);
             // this.m_lContentHeight = this.m_nCellHeight * this.Issues.Count;
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9860,7 +9860,7 @@ MessageBoxDefaultButton.Button2);
             VerifyAll();
 #endif
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9889,7 +9889,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9918,7 +9918,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9972,7 +9972,7 @@ MessageBoxDefaultButton.Button2);
             this.EnsureVisible(cell);  // 确保滚入视野
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10449,10 +10449,10 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-            DODELETE:
+                DODELETE:
                 // 其他单册(订购信息管辖外的单册)，删除
                 issue.RemoveSingleIndex(nCol);
-            CONTINUE:
+                CONTINUE:
                 this.m_bChanged = true;
             }
 
@@ -10531,7 +10531,7 @@ MessageBoxDefaultButton.Button2);
 
             this.AfterWidthChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10806,7 +10806,7 @@ MessageBoxDefaultButton.Button2);
 
             this.Invalidate();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11003,6 +11003,9 @@ MessageBoxDefaultButton.Button2);
                 if (source_parent == null && target_parent != null)
                 {
                     // 将若干单册加入一个合订册
+                    // return:
+                    //      -1  出错。注意函数返回后，parent 格子需要及时清除
+                    //      0   成功
                     nRet = AddToBinding(source_cells,
                         target_parent,
                         out strError);
@@ -11155,6 +11158,9 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                     // 将若干单册加入一个合订册
+                    // return:
+                    //      -1  出错。注意函数返回后，parent 格子需要及时清除
+                    //      0   成功
                     nRet = AddToBinding(source_cells,
                         target_parent,
                         out strError);
@@ -11385,7 +11391,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11641,7 +11647,11 @@ MessageBoxDefaultButton.Button2);
             return cell.Container.Cells.IndexOf(cell);
         }
 
+
         // 将若干单册加入一个合订册
+        // return:
+        //      -1  出错。注意函数返回后，parent 格子需要及时清除
+        //      0   成功
         int AddToBinding(List<Cell> singles,
             Cell parent,
             out string strError)
@@ -11691,6 +11701,10 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+#if NO
+            // 不允许进行合订的册状态
+            string[] states = new string[] { "注销", "丢失" };
+
             // 检查单册，“注销”状态的不能加入合订范围
             // 预测状态的不能加入合订范围
             for (int i = 0; i < singles.Count; i++)
@@ -11713,10 +11727,13 @@ MessageBoxDefaultButton.Button2);
                 if (single.item == null)
                     continue;
 
-                if (StringUtil.IsInList("注销", single.item.State) == true)
+                foreach (string state in states)
                 {
-                    strError = "出版日期为 '" + single.item.PublishTime + "' 的单册记录状态为“注销”，不能加入合订范围";
-                    return -1;
+                    if (StringUtil.IsInList(state, single.item.State) == true)   // "注销"
+                    {
+                        strError = "出版日期为 '" + single.item.PublishTime + "' 的单册记录状态为“" + state + "”，不能加入合订范围";
+                        return -1;
+                    }
                 }
 
                 if (String.IsNullOrEmpty(single.item.Borrower) == false)
@@ -11731,6 +11748,8 @@ MessageBoxDefaultButton.Button2);
                     return -1;
                 }
             }
+
+#endif
 
             int nCol = -1;
 
@@ -12157,7 +12176,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-            END1:
+                END1:
                 if (bBackSetParent == true)
                     parent_cell.item.AfterMembersChanged();
                 return;
@@ -12528,6 +12547,7 @@ MessageBoxDefaultButton.Button2);
         }
          * */
 
+        // 检查参与装订的册。检查应该尽量在这里进行，以避免创建合订册格子以后，再检查成员格子发现不合格去删除合订册格子
         // 检查是否一期只有一个册。期可以不连续
         // 检查：一期只能有一个册参与。也就是说，每个册的Container不能相同
         // return:
@@ -12551,14 +12571,14 @@ MessageBoxDefaultButton.Button2);
                 if (cell.item != null
                     && StringUtil.IsInList("注销", cell.item.State) == true)
                 {
-                    strError = "出版日期为 '" + cell.item.PublishTime + "' 的单册记录状态为“注销”，不能加入合订范围";
+                    strError = "出版日期为 '" + cell.item.PublishTime + "' 的单册记录状态为“注销”，不允许加入合订范围";
                     return 1;
                 }
 
                 if (cell.item != null
     && String.IsNullOrEmpty(cell.item.Borrower) == false)
                 {
-                    strError = "出版日期为 '" + cell.item.PublishTime + "' 的单册记录目前处于被借阅状态，不能加入合订范围";
+                    strError = "出版日期为 '" + cell.item.PublishTime + "' 的单册记录目前处于被借阅状态，不允许加入合订范围";
                     return 1;
                 }
 
@@ -12580,6 +12600,78 @@ MessageBoxDefaultButton.Button2);
                         strError = "有同属于一期 (" + cell.Container.PublishTime + ") 的多册";
                         return 1;
                     }
+                }
+            }
+
+            // 检查参与合订的册的状态
+            // return:
+            //      -1  出错
+            //      0   检查没有发现问题
+            //      1   检查发现有问题
+            int nRet = CheckBindingMemberStates(cells,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 1)
+                return 1;
+            return 0;
+        }
+
+
+        // 检查参与合订的册的状态
+        // return:
+        //      -1  出错
+        //      0   检查没有发现问题
+        //      1   检查发现有问题
+        static int CheckBindingMemberStates(List<Cell> singles,
+            out string strError)
+        {
+            strError = "";
+
+            // 不允许进行合订的册状态
+            string[] states = new string[] { "注销", "丢失" };
+
+            // 检查单册，“注销”状态的不允许加入合订范围
+            // 预测状态的不能加入合订范围
+            for (int i = 0; i < singles.Count; i++)
+            {
+                Cell single = singles[i];
+                Debug.Assert(single != null, "");
+
+                if (single is GroupCell)
+                {
+                    strError = "订购组首尾格子不能参与合订";
+                    return 1;
+                }
+
+                if (String.IsNullOrEmpty(single.Container.PublishTime) == true)
+                {
+                    strError = "来自于自由期的格子不允许加入合订范围";
+                    return 1;
+                }
+
+                if (single.item == null)
+                    continue;
+
+                foreach (string state in states)
+                {
+                    if (StringUtil.IsInList(state, single.item.State) == true)   // "注销"
+                    {
+                        strError = "出版日期为 '" + single.item.PublishTime + "' 的单册记录状态为“" + state + "”，不允许加入合订范围";
+                        return 1;
+                    }
+                }
+
+                if (String.IsNullOrEmpty(single.item.Borrower) == false)
+                {
+                    strError = "出版日期为 '" + single.item.PublishTime + "' 的单册记录目前处于被借阅状态，不允许加入合订范围";
+                    return 1;
+                }
+
+                if (single.item.Calculated == true)
+                {
+                    strError = "出版日期为 '" + single.item.PublishTime + "' 的格子为预测状态，不允许加入合订范围";
+                    return 1;
                 }
             }
 
@@ -13620,7 +13712,7 @@ MessageBoxDefaultButton.Button2);
             VerifyAll();
 #endif
             return;
-        ERROR1:
+            ERROR1:
             // 复原
             if (bAddToParentItems == true)
             {
@@ -15263,7 +15355,7 @@ Color.FromArgb(100, color)
                     goto CONTINUE;
 
                 issue.Paint(i, (int)x, (int)y, e);
-            CONTINUE:
+                CONTINUE:
                 y += lIssueHeight;
                 //  lHeight += lIssueHeight;
             }

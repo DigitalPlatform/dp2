@@ -9,7 +9,7 @@
     <col title="复本">
         <xpath>*/copy</xpath>
     </col>
-    <col title="价格">
+    <col title="价格" type="order_price">
         <xpath>*/price</xpath>
     </col>
     <col title="状态">

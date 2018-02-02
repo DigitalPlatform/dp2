@@ -1,17 +1,11 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
@@ -626,7 +620,7 @@ MessageBoxDefaultButton.Button1);
 
             _base.ServersDom = dom;
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 
@@ -730,8 +724,7 @@ MessageBoxDefaultButton.Button1);
         // 检索
         private void button_search_Click(object sender, EventArgs e)
         {
-            DoSearch(this.textBox_queryWord.Text,
-                this.comboBox_from.Text);
+            DoSearch(this.textBox_queryWord.Text, this.comboBox_from.Text);
         }
 
         public string QueryWord
@@ -884,7 +877,7 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
             MessageBox.Show(this, strError);
         }
@@ -940,7 +933,7 @@ MessageBoxDefaultButton.Button1);
 
                 // 多行检索中的一行检索
                 int nRedoCount = 0;
-            REDO:
+                REDO:
                 int nRet = search.Search(
                     account.ServerUrl,
                     strQueryWord.Replace("-", ""),
@@ -1000,7 +993,7 @@ MessageBoxDefaultButton.Button1);
                 this.ClearMessage();
             }
 
-        ERROR1:
+            ERROR1:
             strError = "针对服务器 '" + account.ServerName + "' 检索出错: " + strError;
             AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
             return -1;
@@ -1220,7 +1213,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-        ERROR1:
+            ERROR1:
             strError = "针对 共享网络 检索出错: " + strError;
             AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
             return -1;
@@ -1321,7 +1314,7 @@ out strError);
             }
 #endif
             return;
-        ERROR1:
+            ERROR1:
             // 加入一个文本行
             AddBiblioBrowseLine(
                 TYPE_ERROR,
@@ -1380,7 +1373,7 @@ out strError);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             this.Invoke((Action)(() =>
             {
                 AddBiblioBrowseLine(
@@ -1710,7 +1703,7 @@ false);
                 this.ClearMessage();
             }
 
-        ERROR1:
+            ERROR1:
             AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
             return -1;
         }
@@ -2166,7 +2159,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             this.AsyncGetImageComplete(e.Row,
                 "",
                 null,
@@ -2396,7 +2389,7 @@ out strError);
 #endif
             }
             return;
-        ERROR1:
+            ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
             {
                 // MessageBox.Show(this, strError);
@@ -2623,7 +2616,7 @@ MessageBoxDefaultButton.Button1);
                 Program.MainForm.DomCache.SetObject(strFileName, dom);  // 保存到缓存
             }
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(e.ErrorInfo, "red", true);
         }
 
@@ -2701,7 +2694,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2840,7 +2833,7 @@ MessageBoxDefaultButton.Button1);
                         lCount = lResultCount - lStart;
                 }
 
-            END1:
+                END1:
                 this._biblio.AddPlus();
                 return nCount;
             }
@@ -2912,7 +2905,7 @@ MessageBoxDefaultButton.Button1);
                 this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
             }
-        ERROR1:
+            ERROR1:
             SetEditErrorInfo(edit, strError);
             //line._biblioRegister.BarColor = "R";   // 红色
             //this.SetColorList();
@@ -3375,7 +3368,7 @@ int nCount)
                 this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
             }
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
             return -1;
         }
@@ -3449,7 +3442,7 @@ int nCount)
                 }
 
                 return 1;
-            ERROR1:
+                ERROR1:
                 return -1;
             }
             finally
@@ -3706,7 +3699,7 @@ int nCount)
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
             // MessageBox.Show(this, strError);
             return -1;
@@ -3715,7 +3708,7 @@ int nCount)
         int DeleteBiblioRecordFromDatabase(
     string strServerName,
     string strPath,
-            // string strXml,
+    // string strXml,
     byte[] baTimestamp,
     out byte[] baNewTimestamp,
     out string strError)
@@ -3770,7 +3763,7 @@ int nCount)
                 }
 
                 return 1;
-            ERROR1:
+                ERROR1:
                 return -1;
             }
             finally
@@ -4040,7 +4033,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (bAutoSetFocus)
             {
                 if (string.IsNullOrEmpty(strError) == false)
