@@ -1880,7 +1880,7 @@ ref bChanged);
             return item;
         }
 
-
+        // BiblioSearchForm 和 ItemSearchForm 共用同一种排序解释函数
         internal static void prop_CompareColumn(object sender, CompareEventArgs e)
         {
             if (e.Column.SortStyle.Name == "call_number")

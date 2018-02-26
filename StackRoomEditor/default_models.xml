@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <shelf 
+    no="书架1" 
+    width="0.95" 
+    height="2.10" 
+    depth="0.24" 
+    thick="0.02"
+    color="#E0E0FF"
+    level="6" />
+</root>

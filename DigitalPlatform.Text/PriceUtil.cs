@@ -1,13 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Xml;
-using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
 using System.Diagnostics;
 
 namespace DigitalPlatform.Text
@@ -840,8 +832,10 @@ namespace DigitalPlatform.Text
             strError = "";
             prices = new List<string>();
 
-            strPrices = strPrices.Replace("+", ",+").Replace("-", ",-");
-            string[] parts = strPrices.Split(new char[] { ',' });
+            // 2018/2/6
+            // 这里假定字符 ` 在数据中不常见。或者可以考虑使用一个更不常见的字符
+            strPrices = strPrices.Replace("+", "`+").Replace("-", "`-");
+            string[] parts = strPrices.Split(new char[] { '`' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strPart = parts[i].Trim();

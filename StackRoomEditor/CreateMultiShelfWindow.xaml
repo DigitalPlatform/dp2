@@ -1,0 +1,11 @@
+﻿<Window x:Class="StackRoomEditor.CreateMultiShelfWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="请指定创建书架的数量" Height="132" Width="300" Loaded="Window_Loaded">
+    <Grid>
+        <Label Content="数量" Height="28" HorizontalAlignment="Left" Margin="10,10,0,0" Name="label1" VerticalAlignment="Top" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="111,12,0,0" Name="textBox_count" VerticalAlignment="Top" Width="120" TextChanged="textBox_count_TextChanged" />
+        <Button Content="确定" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="111,0,0,12" Name="button_OK" VerticalAlignment="Bottom" Width="75" Click="button_OK_Click" />
+        <Button Content="取消" Height="23" HorizontalAlignment="Right" Margin="0,0,12,12" Name="button_Cancel" VerticalAlignment="Bottom" Width="75" Click="button_Cancel_Click" />
+    </Grid>
+</Window>

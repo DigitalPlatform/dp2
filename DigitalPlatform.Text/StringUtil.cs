@@ -1681,8 +1681,6 @@ string strTimestamp)
             return 0;
         }
 
-
-
         #endregion
 
         // 获得有限的行数
