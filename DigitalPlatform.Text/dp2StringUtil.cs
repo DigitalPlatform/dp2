@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace DigitalPlatform.Text
@@ -11,6 +9,46 @@ namespace DigitalPlatform.Text
     /// </summary>
     public static class dp2StringUtil
     {
+        /// <summary>
+        /// 从一个馆藏地点字符串中解析出馆代码部分。例如 "海淀分馆/阅览室" 解析出 "海淀分馆"
+        /// </summary>
+        /// <param name="strLocationString">馆藏地点字符串</param>
+        /// <returns>返回馆代码</returns>
+        public static string GetLibraryCode(string strLocationString)
+        {
+            string strLibraryCode = "";
+            string strPureName = "";
+
+            // 解析
+            ParseCalendarName(strLocationString,
+        out strLibraryCode,
+        out strPureName);
+
+            return strLibraryCode;
+        }
+
+        /// <summary>
+        /// 解析日历名。例如 "海淀分馆/基本日历"
+        /// </summary>
+        /// <param name="strName">完整的日历名</param>
+        /// <param name="strLibraryCode">返回馆代码部分</param>
+        /// <param name="strPureName">返回纯粹日历名部分</param>
+        public static void ParseCalendarName(string strName,
+            out string strLibraryCode,
+            out string strPureName)
+        {
+            strLibraryCode = "";
+            strPureName = "";
+            int nRet = strName.IndexOf("/");
+            if (nRet == -1)
+            {
+                strPureName = strName;
+                return;
+            }
+            strLibraryCode = strName.Substring(0, nRet).Trim();
+            strPureName = strName.Substring(nRet + 1).Trim();
+        }
+
         // 从 volumeInfo.cs 中移动过来
         // 获得出版日期的年份部分
         public static string GetYearPart(string strPublishTime)

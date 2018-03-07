@@ -159,6 +159,25 @@ public class MyKeysHost : KeysHost
             return result.ToString();
         }
 
+	public void getLocationBarcode()
+	{
+		XmlNode node = this.DataDom.SelectSingleNode("//location");
+
+		string strLocation = "";
+		if (node != null)
+			strLocation = node.InnerText;
+
+		strLocation = dp2StringUtil.GetLibraryCode( GetPureLocation(strLocation) );
+
+		node = this.DataDom.SelectSingleNode("//barcode");
+		if (node == null)
+		{
+			this.ResultString = strLocation + "|";
+			return;
+		}
+
+		this.ResultString = strLocation + "|" + node.InnerText;
+	}
 }
 
 
@@ -322,6 +341,16 @@ public class MyKeysHost : KeysHost
   <table name="shelfno" id="12">
     <caption lang="zh-CN">架号</caption>
     <caption lang="en">Shelf No</caption>
+  </table>
+
+  <key>
+    <xpath scripting="on">getLocationBarcode</xpath>
+    <from>locbcd</from>
+    <table ref="locationbarcode" />
+  </key>
+  <table name="locationbarcode" id="13">
+    <caption lang="zh-CN">馆代码+册条码号</caption>
+    <caption lang="en">Library Barcode</caption>
   </table>
 
   <!-- ******************配置非用字**************************************** -->

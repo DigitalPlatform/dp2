@@ -8557,6 +8557,8 @@ out strError);
         // TODO: 判断strBarcode是否为空
         // 根据册条码号对实体库进行查重
         // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strFrom 检索途径
         // return:
         //      -1  error
         //      其他    命中记录条数(不超过nMax规定的极限)
@@ -8581,8 +8583,8 @@ out strError);
 	<operator value='OR'/>
 	<target list='图书编目实体:册条码'>
 		<item><word>0000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>
-<lang>zh</lang>
-</target>
+        <lang>zh</lang>
+    </target>
 </group>             * */
 
             // 构造检索式

@@ -10916,7 +10916,7 @@ Stack:
                 if (StringUtil.IsInList("passgate", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "入馆登记的操作被拒绝。不具备passgate权限。";
+                    result.ErrorInfo = "入馆登记的操作被拒绝。不具备 passgate 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

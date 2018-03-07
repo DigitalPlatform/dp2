@@ -10711,11 +10711,11 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-#if DEBUG
                 Cell parent_cell = parent_item.ContainerCell;
                 if (parent_cell != null)
+                {
                     Debug.Assert(parent_cell.IsMember == false, "");
-#endif
+                }
 
                 parent_item.MemberCells.Clear();
 
