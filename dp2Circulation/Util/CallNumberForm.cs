@@ -263,7 +263,7 @@ namespace dp2Circulation
                         return;
                          * */
                     }
-                //                    return;
+                    //                    return;
             }
             base.DefWndProc(ref m);
         }
@@ -376,7 +376,7 @@ namespace dp2Circulation
                         goto ERROR1;
 
                     return m_strMaxNumber;
-                ERROR1:
+                    ERROR1:
                     throw (new Exception(strError));
                 }
                 return m_strMaxNumber;
@@ -407,7 +407,7 @@ namespace dp2Circulation
 
                     m_strTailNumber = strTailNumber;
                     return m_strTailNumber;
-                ERROR1:
+                    ERROR1:
                     throw (new Exception(strError));
 
                 }
@@ -449,7 +449,7 @@ namespace dp2Circulation
                 EventFinish.Set();
             }
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -685,7 +685,7 @@ namespace dp2Circulation
                 EnableControls(true);
             }
 
-        END1:
+            END1:
             // 用内存中最新的索取号来刷新
             RefreshByNewlyCallNumberItems();
 
@@ -697,6 +697,10 @@ namespace dp2Circulation
 
                 SetGroupBackcolor(this.listView_number,
                     COLUMN_BIBLIORECPATH);
+
+                SetNumberBackcolor(
+this.listView_number,
+COLUMN_CALLNUMBER);
 
                 this.MaxNumber = GetZhongcihaoPart(GetTopNumber(this.listView_number));
 
@@ -719,7 +723,7 @@ namespace dp2Circulation
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1121,6 +1125,57 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 判断两个号码是否为连续的？1 和 1，1 和 2 都算是连续的；1 和 3 算是不连续的
+        static bool IsContinueNumber(string strNumber1, string strNumber2)
+        {
+            Int64.TryParse(strNumber1, out long number1);
+            Int64.TryParse(strNumber2, out long number2);
+
+            if (number1 == number2)
+                return true;
+            if (number1 == number2 + 1 || number2 == number1 + 1)
+                return true;
+            return false;
+        }
+
+        static void SetNumberBackcolor(
+    ListView list,
+    int nNumberColumn)
+        {
+            string strPrevText = "";
+            for (int i = 0; i < list.Items.Count; i++)
+            {
+                ListViewItem item = list.Items[i];
+
+                if (item.ImageIndex == TYPE_ERROR)
+                    continue;
+
+                string strThisText = "";
+                try
+                {
+                    strThisText = item.SubItems[nNumberColumn].Text;
+                }
+                catch
+                {
+                }
+
+                strThisText = GetZhongcihaoPart(strThisText);
+
+                if (string.IsNullOrEmpty(strPrevText) == false
+                    && IsContinueNumber(strPrevText, strThisText) == false)
+                {
+                    // 突变处是特殊颜色
+                    item.BackColor = Color.Yellow;
+                }
+                else
+                {
+                }
+
+                strPrevText = strThisText;
+            }
+        }
+
+
         // 根据排序键值的变化分组设置颜色
         // 算法是将原本的背景颜色变深或者浅一点
         static void SetGroupBackcolor(
@@ -1211,7 +1266,7 @@ namespace dp2Circulation
                 EventFinish.Set();
             }
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1492,7 +1547,7 @@ namespace dp2Circulation
             }
 
             // return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1523,7 +1578,7 @@ namespace dp2Circulation
                 EventFinish.Set();
             }
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1557,7 +1612,7 @@ namespace dp2Circulation
                 EventFinish.Set();
             }
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1614,7 +1669,7 @@ namespace dp2Circulation
             }
 
             // return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1633,7 +1688,7 @@ namespace dp2Circulation
             this.textBox_tailNumber.Text = strOutputNumber;
             // MessageBox.Show(this, "推动尾号成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1749,7 +1804,7 @@ namespace dp2Circulation
             }
 
             // return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1807,7 +1862,7 @@ namespace dp2Circulation
             }
 
             // return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1833,7 +1888,7 @@ namespace dp2Circulation
 
             Clipboard.SetDataObject(strResult);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1883,7 +1938,7 @@ namespace dp2Circulation
 
             }
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2092,7 +2147,7 @@ namespace dp2Circulation
 
                 {
 
-                REDO_INPUT:
+                    REDO_INPUT:
                     // 此类从来没有过记录，当前是第一条
                     strNumber = InputDlg.GetInput(
                         this,
@@ -2177,7 +2232,7 @@ namespace dp2Circulation
                     if (nRet == 0)
                         strTestNumber = ""; // "1"
 
-                REDO_INPUT:
+                    REDO_INPUT:
                     // 此类从来没有过记录，当前是第一条
                     strNumber = InputDlg.GetInput(
                         this,
@@ -2297,7 +2352,7 @@ namespace dp2Circulation
                     if (nRet == 0)
                         strTestNumber = ""; // "1"
 
-                REDO_INPUT:
+                    REDO_INPUT:
                     // 此类从来没有过记录，当前是第一条
                     strNumber = InputDlg.GetInput(
                         this,
@@ -2332,7 +2387,7 @@ namespace dp2Circulation
                 return 1;
             }
             return 1;
-        PROTECT_END:
+            PROTECT_END:
             {
                 // 旧版本没有防范重号功能
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
@@ -2348,7 +2403,7 @@ namespace dp2Circulation
                     goto ERROR1;
             }
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2403,7 +2458,7 @@ namespace dp2Circulation
                         strSummary = strError;
                     }
 
-                SETTEXT:
+                    SETTEXT:
                     ListViewUtil.ChangeItemText(item, COLUMN_SUMMARY, strSummary);
 
                     strPrevBiblioRecPath = strBiblioRecPath;

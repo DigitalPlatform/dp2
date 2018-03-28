@@ -1001,6 +1001,9 @@ namespace DigitalPlatform.Marc
                 nMaxBytes = 2 * nMaxBytes;
             }
 
+            // TODO: 如果是文件开头，要检查头三个 bytes 是不是 UTF-8 的 BOM
+            bool bIsFirstRecord = s.Position == 0;
+
             for (i = 0; i < nMaxBytes; i++)
             {
                 nRet = s.ReadByte();
@@ -1049,6 +1052,16 @@ namespace DigitalPlatform.Marc
                 strError = "ISO2709记录尺寸(根据记录结束符测得)超过 " + nMaxBytes.ToString() + ", 被认为是不合法的记录";
                 nRet = -1;	// 记录太大，或者文件不是ISO2709格式
             }
+
+            // 2018/3/8
+            // 检查 UTF-8 文件头部的 BOM
+            if (bIsFirstRecord == true && baTemp.Count >= 3)
+            {
+                // ef bb bf
+                if (baTemp[0] == 0xef && baTemp[1] == 0xbb && baTemp[2] == 0xbf)
+                    baTemp.RemoveRange(0, 3); // 删除开头的 BOM
+            }
+
 
             //       int i = 0;
 
@@ -4432,6 +4445,13 @@ out strError);
                 return -1;
             if (baMARC.Length < 24)
                 return -1;
+
+            // 2018/3/8
+            if (baMARC[0] == 0
+    || baMARC[1] == 0)
+            {
+                throw new Exception("ISO2709 格式无法使用编码方式 UCS-2 (UTF-16)");
+            }
 
             MarcHeaderStruct header = new MarcHeaderStruct(baMARC);
 

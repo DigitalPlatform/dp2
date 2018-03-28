@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
@@ -546,7 +543,7 @@ MessageBoxDefaultButton.Button2);
                     string strOutputRecPath = "";
                     int nRedoCount = 0;
 
-                REDO:
+                    REDO:
                     stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                     string[] results = null;
@@ -726,7 +723,7 @@ MessageBoxDefaultButton.Button2);
 
             tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -952,7 +949,7 @@ MessageBoxDefaultButton.Button2);
 
             tabControl_readerInfo_SelectedIndexChanged(this, new EventArgs());
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1196,7 +1193,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1401,7 +1398,7 @@ MessageBoxDefaultButton.Button2);
             {
                 this.EnableControls(true);
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1627,7 +1624,7 @@ select_temp_dlg.SelectedRecordXml);
 
                 this.readerEditControl1.Changed = false;
                 return 1;
-            ERROR1:
+                ERROR1:
                 MessageBox.Show(this, strError);
                 return -1;
             }
@@ -2062,7 +2059,7 @@ strSavedXml);
                         stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
                         int nRedoCount = 0;
-                    REDO_LOAD_HTML:
+                        REDO_LOAD_HTML:
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(
                             stop,
@@ -2150,7 +2147,7 @@ strSavedXml);
                 Program.MainForm.StatusBarMessage = "读者记录保存成功";
             // MessageBox.Show(this, "保存成功");
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2259,7 +2256,7 @@ strSavedXml);
             DomUtil.DeleteElement(dom.DocumentElement, "fingerprint");
             DomUtil.DeleteElement(dom.DocumentElement, "hire");
             DomUtil.DeleteElement(dom.DocumentElement, "foregift");
-            DomUtil.DeleteElement(dom.DocumentElement, "personalLibrary");
+            // DomUtil.DeleteElement(dom.DocumentElement, "personalLibrary");
             DomUtil.DeleteElement(dom.DocumentElement, "friends");
 
 #if NO
@@ -2608,7 +2605,7 @@ strSavedXml);
             else
                 MessageBox.Show(this, "另存成功。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -2777,7 +2774,7 @@ strSavedXml);
 
             MessageBox.Show(this, "删除成功。\r\n\r\n您会发现编辑窗口中还留着读者记录内容，但请不要担心，数据库里的读者记录已经被删除了。\r\n\r\n如果您这时后悔了，还可以按“保存按钮”把读者记录原样保存回去。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3371,7 +3368,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "创建租金交费请求 成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3711,7 +3708,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "创建" + strActionName + "记录成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
 
@@ -3817,7 +3814,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3894,7 +3891,7 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3963,7 +3960,7 @@ MessageBoxDefaultButton.Button2);
                 + strShrinkComment
                 + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4305,7 +4302,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4473,7 +4470,7 @@ MessageBoxDefaultButton.Button2);
                     m_strIdcardXml = "";
                     m_baPhoto = null;
 
-                REDO:
+                    REDO:
                     try
                     {
                         // prameters:
@@ -4864,7 +4861,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "移动成功。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -5016,7 +5013,7 @@ MessageBoxDefaultButton.Button2);
                 _inFingerprintCall--;
                 EndFingerprintChannel(channel);
             }
-        ERROR1:
+            ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -5072,7 +5069,7 @@ MessageBoxDefaultButton.Button2);
                 _inFingerprintCall--;
                 EndFingerprintChannel(channel);
             }
-        ERROR1:
+            ERROR1:
             result.ErrorInfo = strError;
             result.Value = -1;
             return result;
@@ -5145,7 +5142,7 @@ MessageBoxDefaultButton.Button2);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
-            REDO:
+                REDO:
 #if NO
                 // return:
                 //      -1  error
@@ -5215,7 +5212,7 @@ MessageBoxDefaultButton.Button1);
             // MessageBox.Show(this, strFingerprint);
             Program.MainForm.StatusBarMessage = "指纹信息获取成功";
             return;
-        ERROR1:
+            ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             ShowMessageBox(strError);
         }
@@ -5302,7 +5299,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "导出成功。";
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5376,7 +5373,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5532,7 +5529,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "导出成功。";
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5640,7 +5637,7 @@ MessageBoxDefaultButton.Button1);
             }
             Program.MainForm.StatusBarMessage = strError;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5672,7 +5669,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5720,7 +5717,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 
@@ -6167,7 +6164,7 @@ MessageBoxDefaultButton.Button1);
 #endif
             ImageUtil.SetImage(this.pictureBox_qrCode, writer.Write(strCode));  // 2016/12/28
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "red", true);
         }
 

@@ -2196,33 +2196,6 @@ out strError);
 
             // // //
 
-#if NOOOOOOOOOOO
-            menuItem = new MenuItem("根据册条码号 '" + strBarcode + "' 装入到"+strOpenStyle+"种册窗(&E)");
-            menuItem.Click += new System.EventHandler(this.menu_loadToEntityFormByBarcode_Click);
-            if (String.IsNullOrEmpty(strBarcode) == true)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
-
-
-            // ---
-            menuItem = new MenuItem("-");
-            contextMenu.MenuItems.Add(menuItem);
-
-
-            menuItem = new MenuItem("根据册记录路径 '" + strRecPath + "' 装入到"+strOpenStyle+"实体窗(&P)");
-            menuItem.Click += new System.EventHandler(this.menu_loadToItemInfoFormByRecPath_Click);
-            if (String.IsNullOrEmpty(strRecPath) == true)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
-
-            menuItem = new MenuItem("根据册条码号 '" + strBarcode + "' 装入到"+strOpenStyle+"实体窗(&B)");
-            menuItem.Click += new System.EventHandler(this.menu_loadToItemInfoFormByBarcode_Click);
-            if (String.IsNullOrEmpty(strBarcode) == true)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
-
-#endif
-
             /*
             int nPathItemCount = 0;
             int nKeyItemCount = 0;
@@ -2317,14 +2290,6 @@ out strError);
 
                 if (this.DbType == "item")
                 {
-#if NO
-                    subMenuItem = new MenuItem("快速修改册记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
-                    subMenuItem.Click += new System.EventHandler(this.menu_quickChangeRecords_Click);
-                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
-                        subMenuItem.Enabled = false;
-                    menuItem.MenuItems.Add(subMenuItem);
-#endif
-
                     subMenuItem = new MenuItem("创建索取号 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
                     subMenuItem.Click += new System.EventHandler(this.menu_createCallNumber_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
@@ -2407,6 +2372,14 @@ out strError);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
+
+#if NO
+                    subMenuItem = new MenuItem("统计馆藏分配去向 (&D)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_distributeStatis_Click);
+                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
+#endif
 
                     subMenuItem = new MenuItem("校验订购记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
                     subMenuItem.Click += new System.EventHandler(this.menu_verifyRecord_Click);
@@ -6124,6 +6097,123 @@ Program.MainForm.DefaultFont);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 统计馆藏分配去向
+        void menu_distributeStatis_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                if (string.IsNullOrEmpty(item.Text) == false)
+                    items.Add(item);
+            }
+
+            if (stop.IsInLoop == true)
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在统计" + this.DbTypeCaption + "记录 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+
+            this.EnableControls(false);
+            this.listView_records.Enabled = false;
+            try
+            {
+                stop.SetProgressRange(0, items.Count);
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    Debug.Assert(item.ListViewItem == items[i], "");
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(info.OldXml);
+                    }
+                    catch(Exception ex)
+                    {
+                        strError = "XML 装入 DOM 失败: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    string strLocationString = DomUtil.GetElementText(dom.DocumentElement, "distribute");
+
+                    LocationCollection locations = new LocationCollection();
+                    int nRet = locations.Build(strLocationString, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "订购记录 " + info.RecPath + " 中，馆藏分配去向字符串 '" + strLocationString + "' 格式错误: " + strError;
+                        goto ERROR1;
+                    }
+
+
+                    EntityInfo entity = new EntityInfo();
+
+                    EntityInfo[] entities = new EntityInfo[1];
+                    entities[0] = entity;
+                    entity.Action = "delete";
+                    entity.OldRecPath = info.RecPath;
+                    entity.NewRecord = "";
+                    entity.NewTimestamp = null;
+                    entity.OldRecord = info.OldXml;
+                    entity.OldTimestamp = info.Timestamp;
+
+
+
+                    stop.SetProgressValue(i);
+
+                    this.listView_records.Items.Remove(item.ListViewItem);
+                    i++;
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.listView_records.Enabled = true;
+
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+            }
 
             return;
             ERROR1:

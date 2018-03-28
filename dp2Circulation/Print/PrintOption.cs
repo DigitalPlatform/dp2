@@ -134,6 +134,7 @@ namespace dp2Circulation
 
                     Debug.Assert(String.IsNullOrEmpty(this.DataDir) == false, "");
 
+                    // 把带有宏的路径兑现为实际路径。这里要用到 this.DataDir
                     param.FilePath = UnMacroPath(param.FilePath);
 
                     Debug.Assert(param.FilePath.IndexOf("%") == -1, "去除宏以后的路径字符串里面不能有%符号");

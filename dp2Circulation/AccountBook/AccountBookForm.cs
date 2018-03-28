@@ -3388,7 +3388,7 @@ null,
             string strNamePath = "accountbook_printoption_wordxml";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -3996,7 +3996,7 @@ null,
             string strNamePath = "accountbook_printoption_text";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -4635,7 +4635,7 @@ strTotalPrice);
             string strNamePath = "accountbook_printoption_html";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7120,7 +7120,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_wordxml";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7130,7 +7130,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " WordML 打印配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7187,7 +7187,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_html";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7197,7 +7197,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " HTML 打印配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7255,7 +7255,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_text";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7265,7 +7265,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 纯文本 输出配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",

@@ -253,11 +253,11 @@ namespace DigitalPlatform.dp2.Statis
             WriteExcelCell(
                 nLineIndex,
                 0,
-                strName);
+                strName.Trim());    // 2018/3/23
             WriteExcelCell(
                 nLineIndex,
                 1,
-                strValue);
+                strValue.Trim());
         }
 
         // 2014/1/12
@@ -304,6 +304,8 @@ true);
             string strTitle,
             int nStyleIndex = 0)
         {
+            // strTitle = strTitle.Replace(" ", "_");  // 2018/3/23
+
             string strStartCellName = "A" + (nLineIndex + 1).ToString();
             string strEndCellName = GetColumnName(nCols - 1) + (nLineIndex + 1).ToString();
 

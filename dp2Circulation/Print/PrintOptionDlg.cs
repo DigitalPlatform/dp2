@@ -37,6 +37,7 @@ namespace dp2Circulation
 
         /// <summary>
         /// 数据目录。用于存储配置的模板文件等
+        /// 用法方面，2018/3/26 从 MainForm.DataDir 改为用 MainForm.UserDir
         /// </summary>
         public string DataDir = ""; // 如果此项为空，则无法创建新的模板文件
 
@@ -558,7 +559,6 @@ namespace dp2Circulation
                 RemoveNewCreatedTemplateFiles();
             }
 
-
             this.listView_templates.Items.Clear();
             this.textBox_templates_content.Text = "";
             this.textBox_templates_content.Enabled = false;
@@ -751,7 +751,8 @@ namespace dp2Circulation
 
             string strFilePath = "";
             int nRedoCount = 0;
-            string strDir = PathUtil.MergePath(this.DataDir, "print_templates");
+            string strDir = PathUtil.MergePath(this.DataDir,    // 老用法
+                "print_templates");
             PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {

@@ -2136,7 +2136,9 @@ namespace dp2Circulation
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOption option = new SettlementPrintOption(Program.MainForm.DataDir);
+            PrintOption option = new SettlementPrintOption(Program.MainForm.UserDir
+                // Program.MainForm.DataDir
+                );
             option.LoadData(Program.MainForm.AppInfo,
                 "settlement_printoption");
 
@@ -2634,7 +2636,8 @@ namespace dp2Circulation
         private void button_print_option_Click(object sender, EventArgs e)
         {
             // 配置标题和风格
-            PrintOption option = new SettlementPrintOption(Program.MainForm.DataDir);
+            PrintOption option = new SettlementPrintOption(Program.MainForm.UserDir // Program.MainForm.DataDir
+                );
             option.LoadData(Program.MainForm.AppInfo,
                 "settlement_printoption");
 
@@ -2643,7 +2646,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",

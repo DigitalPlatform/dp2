@@ -18,6 +18,9 @@
     <col title="批次号">
         <xpath>*/batchNo</xpath>
     </col>
+    <col title="去向">
+        <xpath>*/distribute</xpath>
+    </col>
   <col title="书目记录" type="parent_id">
     <xpath>*/parent</xpath>
   </col>

@@ -2269,7 +2269,7 @@ MessageBoxDefaultButton.Button2);
             string strNamePath = "handover_printoption";
 
             // 配置标题和风格
-            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -2280,7 +2280,7 @@ MessageBoxDefaultButton.Button2);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 打印配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -2331,7 +2331,7 @@ MessageBoxDefaultButton.Button2);
             string strNamePath = "handover_printoption";
 
             // 获得打印参数
-            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);

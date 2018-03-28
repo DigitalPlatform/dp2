@@ -28,6 +28,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
+using ClosedXML.Excel;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -898,7 +899,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -930,7 +931,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             this.Text = "打印订单";
             MessageBox.Show(this, strError);
         }
@@ -1216,7 +1217,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2052,15 +2053,17 @@ namespace dp2Circulation
         // 打印订单
         private void button_print_printOrderList_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = PrintOrder("html", out strError);
+            int nRet = PrintOrder("html",
+                true,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
+#if NO
         private static Stylesheet GenerateStyleSheet()
         {
             return new Stylesheet(
@@ -2092,7 +2095,8 @@ namespace dp2Circulation
                     new Fill(                                                           // Index 2 - The yellow fill.
                         new PatternFill(
                             new ForegroundColor() { Rgb = new HexBinaryValue() { Value = "FFFFFF00" } }
-                        ) { PatternType = PatternValues.Solid })
+                        )
+                        { PatternType = PatternValues.Solid })
                 ),
                 new Borders(
                     new Border(                                                         // Index 0 - The default border.
@@ -2104,16 +2108,20 @@ namespace dp2Circulation
                     new Border(                                                         // Index 1 - Applies a Left, Right, Top, Bottom border to a cell
                         new LeftBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new RightBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new TopBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new BottomBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new DiagonalBorder())
                 ),
                 new CellFormats(
@@ -2124,12 +2132,13 @@ namespace dp2Circulation
                     new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true },       // Index 4 - Yellow Fill
                     new CellFormat(                                                                   // Index 5 - Alignment
                         new Alignment() { Horizontal = HorizontalAlignmentValues.Center, Vertical = VerticalAlignmentValues.Center }
-                    ) { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
+                    )
+                    { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
                     new CellFormat() { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }      // Index 6 - Border
                 )
             ); // return
         }
-
+#endif
         string ExportExcelFilename = "";
 
         // 打印订单
@@ -2137,13 +2146,15 @@ namespace dp2Circulation
         //      strStyle    excel / html 之一或者逗号联接组合。 excel: 输出 Excel 文件
         int PrintOrder(
             string strStyle,
+            bool bLaunchExcel,
             out string strError)
         {
             strError = "";
 
             int nErrorCount = 0;
 
-            ExcelDocument doc = null;
+            /*ExcelDocument*/
+            XLWorkbook doc = null;
 
             if (StringUtil.IsInList("excel", strStyle) == true)
             {
@@ -2173,7 +2184,11 @@ namespace dp2Circulation
 #endif
                 try
                 {
-                    doc = ExcelDocument.Create(this.ExportExcelFilename);
+                    // doc = ExcelDocument.Create(this.ExportExcelFilename);
+
+                    doc = new XLWorkbook(XLEventTracking.Disabled);
+                    File.Delete(this.ExportExcelFilename);
+
                 }
                 catch (Exception ex)
                 {
@@ -2181,8 +2196,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                doc.Stylesheet = GenerateStyleSheet();
-                // doc.Initial();
+                // doc.Stylesheet = GenerateStyleSheet();
             }
 
             this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
@@ -2240,7 +2254,9 @@ namespace dp2Circulation
                         }
 
                         List<string> temp_filenames = null;
-                        int nRet = PrintMergedList(lists[i],
+                        int nRet = PrintMergedList(
+                            i,
+                            lists[i],
                             ref doc,
                             out temp_filenames,
                             out strError);
@@ -2260,12 +2276,12 @@ namespace dp2Circulation
                         }
 
                         // 按渠道打印分类统计页
-                        List<string> temp_filenames = null;
                         int nRet = PrintClassStatisList(
+                            i,
                             "class",
                             lists[i],
                             ref doc,
-                            out temp_filenames,
+                            out List<string> temp_filenames,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -2278,6 +2294,7 @@ namespace dp2Circulation
                         // 按渠道打印出版社统计页
                         temp_filenames = null;
                         nRet = PrintClassStatisList(
+                            i,
                             "publisher",
                             lists[i],
                             ref doc,
@@ -2328,19 +2345,36 @@ namespace dp2Circulation
             if (doc != null)
             {
                 // Close the document.
-                doc.Close();
+                // doc.Close();
+
+                // TODO: 当没有装载任何数据时候输出 Excel，这里会抛出异常
+                doc.SaveAs(this.ExportExcelFilename);
+                doc.Dispose();
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(this.ExportExcelFilename);
+                    }
+                    catch
+                    {
+
+                    }
+                }
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
         // 打印一个渠道的分类统计表
         int PrintClassStatisList(
+            int nSheetIndex,
             string strStatisType,
             NamedListViewItems items,
-            ref ExcelDocument doc,
+            ref /*ExcelDocument*/ XLWorkbook doc,
             out List<string> filenames,
             out string strError)
         {
@@ -2357,6 +2391,7 @@ namespace dp2Circulation
 
                 // 构造html页面
                 int nRet = BuildStatisHtml(
+                    nSheetIndex,
                     strStatisType,
                     items,
                     ref doc,
@@ -2380,8 +2415,10 @@ namespace dp2Circulation
         }
 
         // 打印一个渠道的订单
-        int PrintMergedList(NamedListViewItems items,
-            ref ExcelDocument doc,
+        int PrintMergedList(
+            int nSheetIndex,
+            NamedListViewItems items,
+            ref /*ExcelDocument*/ XLWorkbook doc,
             out List<string> html_filenames,
             out string strError)
         {
@@ -2397,6 +2434,7 @@ namespace dp2Circulation
 
                 // 构造html页面
                 int nRet = BuildMergedHtml(
+                    nSheetIndex,
                     items,
                     ref doc,
                     out html_filenames,
@@ -2423,11 +2461,10 @@ namespace dp2Circulation
             // 配置标题和风格
             string strNamePath = "printorder_printoption";
 
-            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.DataDir,
+            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
-
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -2435,7 +2472,7 @@ namespace dp2Circulation
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 订单 打印参数";
             dlg.PrintOption = option;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
                 "seller -- 渠道",
@@ -2651,13 +2688,14 @@ namespace dp2Circulation
             return results.Count;
         }
 
-        // 构造分类统计html页面
+        // 构造分类统计 html 或 Excel 页面
         // parameters:
         //      strStatisType   统计表类型 "class" "publisher"
         int BuildStatisHtml(
+            int nSheetIndex,
             string strStatisType,
             NamedListViewItems items,
-            ref ExcelDocument doc,
+            ref /*ExcelDocument*/ XLWorkbook doc,
             out List<string> filenames,
             out string strError)
         {
@@ -2667,7 +2705,7 @@ namespace dp2Circulation
             int nRet = 0;
 
             // 获得打印参数
-            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.DataDir,
+            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "printorder_printoption");
@@ -2800,12 +2838,12 @@ namespace dp2Circulation
                 strTableTitle = "%date% %seller% 分类统计表";
                 if (this.checkBox_print_accepted.Checked == false)
                 {
-                    strSheetName = "分类统计页";
+                    strSheetName = "分类统计";
                     strStatisTemplateFilePath = option.GetTemplatePageFilePath("分类统计页");
                 }
                 else
                 {
-                    strSheetName = "分类统计页(含验收)";    // 不允许使用方括号
+                    strSheetName = "分类统计(含验收)";    // 不允许使用方括号
                     strStatisTemplateFilePath = option.GetTemplatePageFilePath("分类统计页[含验收]");
                 }
 
@@ -2823,12 +2861,12 @@ namespace dp2Circulation
                 strTableTitle = "%date% %seller% 出版社统计表";
                 if (this.checkBox_print_accepted.Checked == false)
                 {
-                    strSheetName = "出版社统计页";
+                    strSheetName = "出版社统计";
                     strStatisTemplateFilePath = option.GetTemplatePageFilePath("出版社统计页");
                 }
                 else
                 {
-                    strSheetName = "出版社统计页(含验收)"; // 不能使用方括号
+                    strSheetName = "出版社统计(含验收)"; // 不能使用方括号
                     strStatisTemplateFilePath = option.GetTemplatePageFilePath("出版社统计页[含验收]");
                 }
 
@@ -2853,14 +2891,13 @@ namespace dp2Circulation
             }
             {
                 // 根据模板打印
-                string strContent = "";
                 // 能自动识别文件内容的编码方式的读入文本文件内容模块
                 // return:
                 //      -1  出错
                 //      0   文件不存在
                 //      1   文件存在
                 nRet = Global.ReadTextFileContent(strStatisTemplateFilePath,
-                    out strContent,
+                    out string strContent,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2876,9 +2913,14 @@ namespace dp2Circulation
 
             filenames.Add(strFileName);
 
-            Sheet sheet = null;
+            /*
+                        Sheet sheet = null;
+                        if (doc != null)
+                            sheet = doc.NewSheet(strSheetName);
+                            */
+            IXLWorksheet sheet = null;
             if (doc != null)
-                sheet = doc.NewSheet(strSheetName);
+                sheet = doc.Worksheets.Add(strSheetName + (nSheetIndex + 1).ToString());
 
             bool bWiledMatched = false; // 是否遇到过通配符
 
@@ -2951,7 +2993,6 @@ namespace dp2Circulation
                 }
 
                 // 匹配行
-                List<StatisLine> results = null;
                 // 用分类号匹配统计结果行。
                 // return:
                 //      -1  出错
@@ -2960,7 +3001,7 @@ namespace dp2Circulation
                     main_lines,
                     strStatisType == "class" ? false : true,
                     strStatisType == "class" ? false : true,
-                    out results,
+                    out List<StatisLine> results,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -3016,7 +3057,6 @@ namespace dp2Circulation
                             }
                         }
 
-                        List<StatisLine> temp_results = null;
                         // 匹配行
                         // 用分类号匹配统计结果行。
                         // return:
@@ -3026,7 +3066,7 @@ namespace dp2Circulation
                             line.InnerLines,
                             false,
                             false,
-                            out temp_results,
+                            out List<StatisLine> temp_results,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -3065,8 +3105,6 @@ namespace dp2Circulation
 
                         new_results.AddRange(temp_results);
                     }
-
-
                 }
 
                 string strTotalPrice = ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTALPRICE);
@@ -3079,14 +3117,10 @@ namespace dp2Circulation
                 // string strAcceptPrice = ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPTPRICE);
 
                 // 套数
-                int nSeries = 0;
-                Int32.TryParse(strCopy, out nSeries);
-                int nAcceptSeries = 0;
-                Int32.TryParse(strAcceptCopy, out nAcceptSeries);
-                int nSubCopy = 1;
-                Int32.TryParse(strSubCopy, out nSubCopy);
-                int nAcceptSubCopy = 1;
-                Int32.TryParse(strAcceptSubCopy, out nAcceptSubCopy);
+                Int32.TryParse(strCopy, out int nSeries);
+                Int32.TryParse(strAcceptCopy, out int nAcceptSeries);
+                Int32.TryParse(strSubCopy, out int nSubCopy);
+                Int32.TryParse(strAcceptSubCopy, out int nAcceptSubCopy);
 
                 ////
                 nRet = AddValue(
@@ -3161,19 +3195,34 @@ namespace dp2Circulation
                     }
 
                     // 输出标题
-                    doc.WriteExcelTitle(0,
+                    WriteExcelTitle(
+                        sheet,
+                        TABLE_TOP_BLANK_LINES,
+                        TABLE_LEFT_BLANK_COLUMS,
     cols.Count,
     strTableTitle,
-    5);
+    XLColor.DarkRed);   // 订单统计页
 
+                    IXLCell title_first = null;
+                    IXLCell title_last = null;
                     foreach (string s in cols)
                     {
-                        doc.WriteExcelCell(
-            2,
-            nColIndex++,
-            s,
-            true);
+                        IXLCell cell = WriteExcelCell(
+                            sheet,
+            TABLE_TOP_BLANK_LINES + 2,
+            TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+            s/*,
+            true*/);
+                        if (title_first == null)
+                            title_first = cell;
+                        title_last = cell;
                     }
+
+                    SetColumnLineStyle(sheet,
+title_first,
+title_last,
+"",
+XLColor.LightGray);
                 }
 
                 #endregion
@@ -3194,6 +3243,10 @@ namespace dp2Circulation
                 main_lines.Sort(new CellStatisLineComparer());
             }
 
+            IXLCell sum_first = null;
+            IXLCell sum_last = null;
+            List<int> column_max_chars = new List<int>();
+
             // 嵌套的子表
             List<InnerTableLine> inner_tables = new List<InnerTableLine>();
 
@@ -3204,11 +3257,10 @@ namespace dp2Circulation
                 if (line.Class == "*")
                     continue;
 
-                string strCurrentPrices = "";
                 // 2012/3/7
                 // 将形如"-123.4+10.55-20.3"的价格字符串归并汇总
                 nRet = PriceUtil.SumPrices(line.Price,
-        out strCurrentPrices,
+        out string strCurrentPrices,
         out strError);
                 if (nRet == -1)
                     strCurrentPrices = strError;
@@ -3254,46 +3306,87 @@ namespace dp2Circulation
                 if (doc != null)
                 {
                     int nColIndex = 0;
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.Class,
-true);
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.BiblioCount.ToString());
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.SeriesCount.ToString());
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.ItemCount.ToString());
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
+
+                    // 记载第一列最大字符数
+                    SetMaxChars(ref column_max_chars,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex,
+    line.Class.Length);
+
+                    IXLCell left = WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.Class/*,
+true*/);
+
+
+
+                    /*
+                    if (line.AllowSum == false)
+                        left.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                    */
+
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.BiblioCount/*.ToString()*/);
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.SeriesCount/*.ToString()*/);
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.ItemCount/*.ToString()*/);
+
+                    // 记载最后一列最大字符数
+                    SetMaxChars(ref column_max_chars,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex,
+    strCurrentPrices.Length);
+
+                    IXLCell right = WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strCurrentPrices);
 
                     if (this.checkBox_print_accepted.Checked == true)
                     {
-                        doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.AcceptBiblioCount.ToString());
-                        doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.AcceptSeriesCount.ToString());
-                        doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-line.AcceptItemCount.ToString());
-                        doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
+                        WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.AcceptBiblioCount/*.ToString()*/);
+                        WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.AcceptSeriesCount/*.ToString()*/);
+                        WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+line.AcceptItemCount/*.ToString()*/);
+
+                        // 记载最后一列最大字符数
+                        SetMaxChars(ref column_max_chars,
+        TABLE_LEFT_BLANK_COLUMS + nColIndex,
+        strAcceptCurrentPrices.Length);
+
+                        right = WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strAcceptCurrentPrices);
+                    }
+
+                    if (line.AllowSum == false)
+                    {
+                        IXLRange range = sheet.Range(left, right);
+                        range.Style.Font.Italic = true;
                     }
 
                     nExcelLineIndex++;
@@ -3336,9 +3429,8 @@ strAcceptCurrentPrices);
             // 汇总行
             #region 输出 HTML
             {
-                string strOutputPrice = "";
                 nRet = PriceUtil.SumPrices(strSumPrice,
-        out strOutputPrice,
+        out string strOutputPrice,
         out strError);
                 if (nRet == -1)
                     strOutputPrice = strError;
@@ -3352,9 +3444,8 @@ strAcceptCurrentPrices);
 
                 if (this.checkBox_print_accepted.Checked == true)
                 {
-                    string strAcceptOutputPrice = "";
                     nRet = PriceUtil.SumPrices(strAcceptSumPrice,
-            out strAcceptOutputPrice,
+            out string strAcceptOutputPrice,
             out strError);
                     if (nRet == -1)
                         strAcceptOutputPrice = strError;
@@ -3378,59 +3469,78 @@ strAcceptCurrentPrices);
                     strOutputPrice = strError;
 
                 int nColIndex = 0;
-                doc.WriteExcelCell(
-    nExcelLineIndex,
-    nColIndex++,
-    "合计",
-    true);
-                doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lBiblioCount.ToString());
+                sum_first = WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    "合计"/*,
+    true*/);
+                WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lBiblioCount/*.ToString()*/);
 
-                doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lSeriesCount.ToString());
+                WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lSeriesCount/*.ToString()*/);
 
-                doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lItemCount.ToString());
+                WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lItemCount/*.ToString()*/);
 
-                doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
+                sum_last = WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strOutputPrice);
 
                 if (this.checkBox_print_accepted.Checked == true)
                 {
-                    string strAcceptOutputPrice = "";
                     nRet = PriceUtil.SumPrices(strAcceptSumPrice,
-            out strAcceptOutputPrice,
+            out string strAcceptOutputPrice,
             out strError);
                     if (nRet == -1)
                         strAcceptOutputPrice = strError;
 
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lAcceptBiblioCount.ToString());
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lAcceptBiblioCount/*.ToString()*/);
 
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lAcceptSeriesCount.ToString());
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-lAcceptItemCount.ToString());
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lAcceptSeriesCount/*.ToString()*/);
+                    WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+lAcceptItemCount/*.ToString()*/);
+                    sum_last = WriteExcelCell(
+                            sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
 strAcceptOutputPrice);
                 }
+
+                AdjectColumnWidth(sheet, column_max_chars);
+                // 设置合计行样式
+                // parameters:
+                //      strSepStyle every 每个格子左边都有竖线(除了第一个格子)
+                //                  two 除了第一个格子，每两个格子，左边一个的左侧有竖线
+                SetSumLineStyle(sheet,
+                    sum_first,
+                    sum_last,
+                    "");    // 没有竖线
             }
+
             #endregion
 
             strTableContent += "</tr>";
@@ -3452,12 +3562,12 @@ strAcceptOutputPrice);
                 {
                     if (this.checkBox_print_accepted.Checked == false)
                     {
-                        strSheetName = "出版社分类统计页";
+                        strSheetName = "出版社分类统计";
                         strStatisTemplateFilePath = option.GetTemplatePageFilePath("出版社分类统计页");
                     }
                     else
                     {
-                        strSheetName = "出版社分类统计页(含验收)"; // 不能使用方括号
+                        strSheetName = "出版社分类统计(含验收)"; // 不能使用方括号
                         strStatisTemplateFilePath = option.GetTemplatePageFilePath("出版社分类统计页[含验收]");
                     }
 
@@ -3480,14 +3590,13 @@ strAcceptOutputPrice);
                 }
                 {
                     // 根据模板打印
-                    string strContent = "";
                     // 能自动识别文件内容的编码方式的读入文本文件内容模块
                     // return:
                     //      -1  出错
                     //      0   文件不存在
                     //      1   文件存在
                     nRet = Global.ReadTextFileContent(strStatisTemplateFilePath,
-                        out strContent,
+                        out string strContent,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -3496,8 +3605,14 @@ strAcceptOutputPrice);
                         strContent);
                 }
 
+                /*
                 if (doc != null)
                     sheet = doc.NewSheet(strSheetName);
+                    */
+                if (doc != null)
+                    sheet = doc.Worksheets.Add(
+                        // "表格" + strStatisType + (nSheetIndex + 1).ToString()
+                        "出版社分类统计" + (nSheetIndex + 1).ToString());
 
                 strTableTitle = "%date% %seller% 出版社分类号统计表";
                 strTableTitle = StringUtil.MacroString(macro_table,
@@ -3510,7 +3625,8 @@ strAcceptOutputPrice);
                     strStatisTypeName,
                     inner_tables,
                     strTableTitle,
-                    ref doc,
+                    // ref doc,
+                    ref sheet,
                     out strTableContent,
                     out strError);
                 if (nRet == -1)
@@ -3536,7 +3652,8 @@ strAcceptOutputPrice);
             string strStatisTypeName,
             List<InnerTableLine> table,
             string strTableTitle,
-            ref ExcelDocument doc,
+            // ref /*ExcelDocument*/ XLWorkbook doc,
+            ref IXLWorksheet sheet,
             out string strResult,
             out string strError)
         {
@@ -3558,6 +3675,8 @@ strAcceptOutputPrice);
             if (first_lines == null)
                 return 0;   // 没有任何内容
 
+            List<int> column_max_chars = new List<int>();
+
             StringBuilder strTableContent = new StringBuilder(4096);
             strTableContent.Append("<table class='" + strStatisType + "extendstatis'>");
 
@@ -3576,45 +3695,79 @@ strAcceptOutputPrice);
 
             #region 输出 Excel
 
-            if (doc != null)
+            if (sheet != null)
             {
                 int nColIndex = 0;
+                IXLCell title_first = null;
+                IXLCell title_last = null;
+
 
                 // 表格标题
-                doc.WriteExcelTitle(0,
+                WriteExcelTitle(
+                    sheet,
+                    TABLE_TOP_BLANK_LINES,
+                    TABLE_LEFT_BLANK_COLUMS,
 first_lines.Count * 2 + 1,
 strTableTitle,
-5);
+XLColor.DarkBlue); // 出版社分类
 
-                doc.WriteExcelCell(
-    2,
-    nColIndex++,
-    strStatisTypeName,
-    true);
+                {
+                    title_first = WriteExcelCell(
+                            sheet,
+        TABLE_TOP_BLANK_LINES + 2,
+        TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+        strStatisTypeName/*,
+    true*/);
+                    //cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                    //cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                }
                 // 类号标题列
+                int i = 0;
                 foreach (StatisLine line in first_lines)
                 {
                     int nFirstCol = nColIndex;
-                    doc.WriteExcelCell(
-    2,
-    nColIndex++,
-    line.Class,
-    true,
-    5); // 居中
+                    IXLCell first = WriteExcelCell(
+                        sheet,
+    TABLE_TOP_BLANK_LINES + 2,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    line.Class + (i == 0 ? " (种,册)" : ""),
+    // true,
+    XLAlignmentHorizontalValues.Center); // 居中
+
+                    first.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+
                     // 空白单元
-                    doc.WriteExcelCell(
-    2,
-    nColIndex++,
-    "",
-    true);
+                    IXLCell second = WriteExcelCell(
+                        sheet,
+    TABLE_TOP_BLANK_LINES + 2,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    ""/*,
+    true*/);
+
+                    IXLRange range = sheet.Range(first, second).Merge();
+                    //range.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                    //range.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                    title_last = second;
+                    /*
                     // 把两个单元连接起来
-                    doc.InsertMergeCell(
+                    InsertMergeCell(
+                        sheet,
              2,
              nFirstCol,
              2);
+             */
+                    i++;
                 }
 
-                // nTitleColCount = nColIndex;
+                //sheet.Row(TABLE_TOP_BLANK_LINES + 2 + 1).Height = XLWorkbook.DefaultRowHeight * 1.5;
+                //sheet.Row(TABLE_TOP_BLANK_LINES + 2 + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                SetColumnLineStyle(sheet,
+title_first,
+title_last,
+"",
+XLColor.LightGray);
             }
             #endregion
 
@@ -3638,13 +3791,19 @@ strTableTitle,
                 #region 输出 Excel
 
                 int nColIndex = 0;
-                if (doc != null)
+                if (sheet != null)
                 {
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-inner_line.Key,
-true);
+                    // 记载第一列最大字符数
+                    SetMaxChars(ref column_max_chars,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex,
+    inner_line.Key.Length);
+
+                    WriteExcelCell(
+                        sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+inner_line.Key/*,
+true*/);
                 }
 
                 #endregion
@@ -3657,16 +3816,22 @@ true);
 
                     #region 输出 Excel
 
-                    if (doc != null)
+                    if (sheet != null)
                     {
-                        doc.WriteExcelCell(
-    nExcelLineIndex,
-    nColIndex++,
-    line.BiblioCount.ToString());
-                        doc.WriteExcelCell(
-    nExcelLineIndex,
-    nColIndex++,
-    line.ItemCount.ToString());
+                        IXLCell cell = WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    line.BiblioCount/*.ToString()*/,
+    XLAlignmentHorizontalValues.Right);
+                        cell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+
+                        WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    line.ItemCount/*.ToString()*/,
+    XLAlignmentHorizontalValues.Right);
                     }
 
                     #endregion
@@ -3688,9 +3853,12 @@ true);
 
                 strTableContent.Append("</tr>");
 
-                if (doc != null)
+                if (sheet != null)
                     nExcelLineIndex++;
             }
+
+            IXLCell sum_first = null;
+            IXLCell sum_last = null;
 
             // 汇总行
             {
@@ -3700,31 +3868,45 @@ true);
                 #region 输出 Excel
 
                 int nColIndex = 0;
-                if (doc != null)
+                if (sheet != null)
                 {
-                    doc.WriteExcelCell(
-nExcelLineIndex,
-nColIndex++,
-"合计",
-true);
+                    sum_first = WriteExcelCell(
+                        sheet,
+TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+"合计"/*,
+true*/);
+                    // cell.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+
                 }
 
                 #endregion
+
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
                     #region 输出 Excel
-                    if (doc != null)
+                    if (sheet != null)
                     {
-                        doc.WriteExcelCell(
-    nExcelLineIndex,
-    nColIndex++,
-    line.BiblioCount.ToString());
-                        doc.WriteExcelCell(
-    nExcelLineIndex,
-    nColIndex++,
-    line.ItemCount.ToString());
+                        IXLCell first = WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    line.BiblioCount/*.ToString()*/,
+    XLAlignmentHorizontalValues.Right);
+                        //first.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+                        //first.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+
+
+                        sum_last = WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nExcelLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + nColIndex++,
+    line.ItemCount/*.ToString()*/,
+    XLAlignmentHorizontalValues.Right);
+                        // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
+
                     }
                     #endregion
                 }
@@ -3733,6 +3915,20 @@ true);
 
             strTableContent.Append("</tr>");
             strTableContent.Append("</table>");
+
+            if (sheet != null)
+            {
+                AdjectColumnWidth(sheet, column_max_chars);
+
+                // 设置合计行样式
+                // parameters:
+                //      strSepStyle every 每个格子左边都有竖线(除了第一个格子)
+                //                  two 除了第一个格子，每两个格子，左边一个的左侧有竖线
+                SetSumLineStyle(sheet,
+                    sum_first,
+                    sum_last,
+                    "two");
+            }
 
             strResult = strTableContent.ToString();
             return 0;   //  nTitleColCount;
@@ -3928,8 +4124,9 @@ true);
 
         // 构造html页面
         int BuildMergedHtml(
+            int nSheetIndex,
             NamedListViewItems items,
-            ref ExcelDocument doc,
+            ref /*ExcelDocument*/ XLWorkbook doc,
             out List<string> filenames,
             out string strError)
         {
@@ -3942,7 +4139,7 @@ true);
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.DataDir,
+            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "printorder_printoption");
@@ -3958,22 +4155,6 @@ true);
                         return -1;
                 }
             }
-
-            /*
-            // 检查当前排序状态和包含种价格列之间是否存在矛盾
-            if (bHasBiblioPriceColumn(option) == true)
-            {
-
-                if (this.SortColumns_in.Count != 0
-                    && this.SortColumns_in[0].No == COLUMN_BIBLIORECPATH)
-                {
-                }
-                else
-                {
-                    MessageBox.Show(this, "警告：打印列中要求了‘种价格’列，但打印前集合内事项并未按‘种记录路径’排序，这样打印出的‘种价格’栏内容将会不准确。\r\n\r\n要避免这种情况，可在打印前用鼠标左键点‘种记录路径’栏标题，确保按其排序。");
-                }
-            }*/
-
 
             // 计算出页总数
             int nTablePageCount = items.Count / option.LinesPerPage;
@@ -4003,35 +4184,12 @@ true);
 
             string strFileName = "";
 
-            // 初始化 Excel 文件
-#if NO
-            Sheets sheets = null;
-            WorksheetPart worksheetPart = null;
+            IXLWorksheet sheet = null;
+            if (doc != null)
             {
-                // Add a WorkbookPart to the document.
-                WorkbookPart workbookpart = spreadsheetDocument.AddWorkbookPart();
-                workbookpart.Workbook = new Workbook();
-
-                // Add a WorksheetPart to the WorkbookPart.
-                worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
-                worksheetPart.Worksheet = new Worksheet(new SheetData());
-
-                // Add Sheets to the Workbook.
-                sheets = spreadsheetDocument.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+                sheet = doc.Worksheets.Add("统计页" + (nSheetIndex + 1).ToString());
             }
 
-            // Append a new worksheet and associate it with the workbook.
-            Sheet sheet = new Sheet() { 
-                Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart),
-                SheetId = (UInt32)filenames.Count + 1,
-                Name = "统计页" };
-            sheets.Append(sheet);
-#endif
-
-            Sheet sheet = null;
-
-            if (doc != null)
-                sheet = doc.NewSheet("统计页");
 
             // 输出信息页
             // TODO: 要增加“统计页”模板功能
@@ -4098,31 +4256,42 @@ true);
                 {
                     BuildMergedExcelPageTop(option,
                         macro_table,
-                        ref doc,
-                        4,
+                        // ref doc,
+                        ref sheet,
+                        SUM_TOP_BLANK_LINES,
+                        SUM_LEFT_BLANK_COLUMS,
+                        6,  // 4,
                         false);
 
-                    doc.WriteExcelLine(
+                    sheet.Column(SUM_LEFT_BLANK_COLUMS + 1 + 1).Width = 0.5;
+                    sheet.Column(SUM_LEFT_BLANK_COLUMS + 1 + 2).Width = 0.5;
+
+                    WriteExcelLine(
+                        sheet,
                     nLineIndex++,
                     "渠道",
                     items.Seller);
 
-                    doc.WriteExcelLine(
+                    WriteExcelLine(
+                        sheet,
     nLineIndex++,
         "种数",
-        nBiblioCount.ToString());
+        nBiblioCount/*.ToString()*/);
 
-                    doc.WriteExcelLine(
+                    WriteExcelLine(
+                        sheet,
     nLineIndex++,
     "套数",
-    nTotalSeries.ToString());
+    nTotalSeries/*.ToString()*/);
 
-                    doc.WriteExcelLine(
+                    WriteExcelLine(
+                        sheet,
     nLineIndex++,
     "册数",
-    nTotalCopies.ToString());
+    nTotalCopies/*.ToString()*/);
 
-                    doc.WriteExcelLine(
+                    WriteExcelLine(
+                        sheet,
     nLineIndex++,
     "总价",
     strTotalPrice);
@@ -4151,38 +4320,46 @@ true);
 
                     if (doc != null)
                     {
-                        doc.WriteExcelLine(
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "已验收种数",
-nAcceptBiblioCount.ToString());
-                        doc.WriteExcelLine(
+nAcceptBiblioCount/*.ToString()*/);
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "已验收套数",
-nAcceptTotalSeries.ToString());
-                        doc.WriteExcelLine(
+nAcceptTotalSeries/*.ToString()*/);
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "已验收册数",
-nAcceptTotalCopies.ToString());
-                        doc.WriteExcelLine(
+nAcceptTotalCopies/*.ToString()*/);
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "已验收总价",
 strAcceptTotalPrice);
 
-                        doc.WriteExcelLine(
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "种数到货率",
 (string)macro_table["%ratio_bibliocount%"]);
 
-                        doc.WriteExcelLine(
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "套数到货率",
 (string)macro_table["%ratio_totalseries%"]);
 
-                        doc.WriteExcelLine(
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "册数到货率",
 (string)macro_table["%ratio_totalcopies%"]);
-                        doc.WriteExcelLine(
+                        WriteExcelLine(
+                        sheet,
 nLineIndex++,
 "总价到货率",
 (string)macro_table["%ratio_totalprice%"]);
@@ -4195,12 +4372,21 @@ nLineIndex++,
                     false);
             }
 
+            List<int> column_max_chars = new List<int>();
+
             if (doc != null)
             {
-                sheet = doc.NewSheet("订单"); // "表1"
+                // sheet = doc.NewSheet("订单"); // "表1"
+                sheet = null;
+                sheet = doc.Worksheets.Add("订单" + (nSheetIndex + 1).ToString());
+                column_max_chars.Clear();
+
                 BuildMergedExcelPageTop(option,
     macro_table,
-    ref doc,
+    // ref doc,
+    ref sheet,
+    TABLE_TOP_BLANK_LINES,
+    TABLE_LEFT_BLANK_COLUMS,
     option.Columns.Count,
     true);
             }
@@ -4215,24 +4401,6 @@ nLineIndex++,
                     strError = "用户中断";
                     return -1;
                 }
-
-#if NO
-                // Append a new worksheet and associate it with the workbook.
-                sheet = new Sheet()
-                {
-                    Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart),
-                    SheetId = (UInt32)filenames.Count + 1,
-                    Name = "表" + (i+1).ToString()
-                };
-                sheets.Append(sheet);
-#endif
-
-
-#if NO
-                SheetInfo sheetinfo = new SheetInfo();
-                sheetinfo.wp = spreadsheetDocument.WorkbookPart;
-                sheetinfo.ws = worksheetPart.Worksheet;
-#endif
 
                 macro_table["%pageno%"] = (i + 1 + 1).ToString();
 
@@ -4259,8 +4427,10 @@ nLineIndex++,
                     BuildMergedTableLine(option,
                         items,
                         strFileName,
-                        doc,    // sheetinfo,
-                        i, j, 3);
+                        // doc,    // sheetinfo,
+                        sheet,
+                        i, j, 3,
+                        ref column_max_chars);
                 }
 
                 BuildMergedPageBottom(option,
@@ -4269,7 +4439,165 @@ nLineIndex++,
                     true);
             }
 
+            if (sheet != null && column_max_chars.Count > 0)
+            {
+                if (stop != null)
+                    stop.SetMessage("正在调整列宽度 ...");
+                Application.DoEvents();
+
+                AdjectColumnWidth(sheet, column_max_chars);
+#if NO
+                List<int> wrap_columns = new List<int>();
+                // 字符数太多的列不要做 width auto adjust
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    int MAX_CHARS = 50;   // 60
+
+                    int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                    if (nIndex >= column_max_chars.Count)
+                        break;
+                    int nChars = column_max_chars[nIndex];
+
+                    if (nIndex == 1)
+                    {
+                        column.Width = 10;
+                        continue;
+                    }
+
+#if NO
+                    if (nIndex == 3)
+                        MAX_CHARS = 50;
+                    else
+                        MAX_CHARS = 24;
+#endif
+
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                    {
+                        column.Width = Math.Min(MAX_CHARS, nChars);
+                        if (wrap_columns.IndexOf(nIndex) == -1)
+                            wrap_columns.Add(nIndex);
+                    }
+                }
+
+                foreach (int index in wrap_columns)
+                {
+                    sheet.Column(index + 1).Style.Alignment.WrapText = true;
+                }
+#endif
+            }
+
             return 0;
+        }
+
+        // 设置合计行样式
+        // parameters:
+        //      strSepStyle every 每个格子左边都有竖线(除了第一个格子)
+        //                  two 除了第一个格子，每两个格子，左边一个的左侧有竖线
+        static void SetSumLineStyle(IXLWorksheet sheet,
+            IXLCell first,
+            IXLCell last,
+            string strSepStyle)
+        {
+            if (first == null || last == null)
+                return;
+
+            if (last == null)
+                last = first;
+
+            IXLRange range = sheet.Range(first, last);
+            range.Style.Border.TopBorder = XLBorderStyleValues.Medium;
+
+            int i = 0;
+            foreach (IXLCell cell in range.Cells())
+            {
+                if (strSepStyle == "every" && i > 0)
+                    cell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+                if (strSepStyle == "two" && i > 0 && (i % 2) == 1)
+                    cell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+
+                i++;
+            }
+        }
+
+        static void SetColumnLineStyle(IXLWorksheet sheet,
+    IXLCell first,
+    IXLCell last,
+    string strSepStyle,
+    XLColor backColor)
+        {
+            if (first == null || last == null)
+                return;
+
+            if (last == null)
+                last = first;
+
+            IXLRow row = sheet.Row(first.Address.RowNumber);
+            row.Height = XLWorkbook.DefaultRowHeight * 1.5;
+            row.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+            // first.WorksheetRow().Height = XLWorkbook.DefaultRowHeight * 1.5;
+
+            IXLRange range = sheet.Range(first, last);
+            range.Style.Border.BottomBorder = XLBorderStyleValues.Medium;
+            range.Style.Fill.BackgroundColor = backColor;
+            range.Style.Font.Bold = true;
+
+            int i = 0;
+            foreach (IXLCell cell in range.Cells())
+            {
+                if (strSepStyle == "every" && i > 0)
+                    cell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+                if (strSepStyle == "two" && i > 0 && (i % 2) == 1)
+                    cell.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+
+                i++;
+            }
+        }
+
+
+        static void AdjectColumnWidth(IXLWorksheet sheet,
+            List<int> column_max_chars)
+        {
+            List<int> wrap_columns = new List<int>();
+            // 字符数太多的列不要做 width auto adjust
+            foreach (IXLColumn column in sheet.Columns())
+            {
+                int MAX_CHARS = 50;   // 60
+
+                int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                if (nIndex >= column_max_chars.Count)
+                    break;
+                int nChars = column_max_chars[nIndex];
+
+#if NO
+                if (nIndex == 1)
+                {
+                    column.Width = 10;
+                    continue;
+                }
+
+                    if (nIndex == 3)
+                        MAX_CHARS = 50;
+                    else
+                        MAX_CHARS = 24;
+#endif
+
+                if (nChars < MAX_CHARS)
+                    column.AdjustToContents();
+                else
+                {
+                    column.Width = Math.Min(MAX_CHARS, nChars);
+                    if (wrap_columns.IndexOf(nIndex) == -1)
+                        wrap_columns.Add(nIndex);
+                }
+            }
+
+            foreach (int index in wrap_columns)
+            {
+                sheet.Column(index + 1).Style.Alignment.WrapText = true;
+            }
         }
 
         // 2009/10/10
@@ -4343,11 +4671,13 @@ nLineIndex++,
         // 输出 Excel 页面头部信息
         int BuildMergedExcelPageTop(PrintOption option,
             Hashtable macro_table,
-            ref ExcelDocument doc,
+            // ref /*ExcelDocument*/ XLWorkbook doc,
+            ref IXLWorksheet sheet,
+            int nLineIndex,
+            int nColIndex,
             int nTitleCols,
             bool bOutputTable)
         {
-
             // 页眉
             string strPageHeaderText = option.PageHeader;
 
@@ -4363,22 +4693,9 @@ nLineIndex++,
             }
 
             // 表格标题
-            string strTableTitleText = option.TableTitle;
 
-            // 第一行，表格标题
-            if (String.IsNullOrEmpty(strTableTitleText) == false)
-            {
 
-                strTableTitleText = StringUtil.MacroString(macro_table,
-                    strTableTitleText);
-
-                doc.WriteExcelTitle(0,
-                    nTitleCols,
-                    strTableTitleText,
-                    5);
-
-            }
-
+            // 输出栏目标题
             if (bOutputTable == true)
             {
                 for (int i = 0; i < option.Columns.Count; i++)
@@ -4397,19 +4714,229 @@ nLineIndex++,
                     {
                         // 不输出 已到套数 列
                         if (strClass == "acceptCopy")
+                        {
+                            nTitleCols--;
                             continue;
+                        }
                     }
 
+                    /*
                     doc.WriteExcelCell(
             2,
             i,
             strCaption,
             true);
+            */
+                    IXLCell cell = WriteExcelCell(sheet,
+TABLE_TOP_BLANK_LINES + 2,
+TABLE_LEFT_BLANK_COLUMS + i,
+strCaption//,
+          //true
+);
+                    if (i == 0)
+                    {
+                        sheet.Row(TABLE_TOP_BLANK_LINES + 2 + 1).Height = XLWorkbook.DefaultRowHeight * 1.5;
+                        sheet.Row(TABLE_TOP_BLANK_LINES + 2 + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    }
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    cell.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
                 }
+            }
+
+            string strTableTitleText = option.TableTitle;
+
+            // 第一行，表格标题
+            if (String.IsNullOrEmpty(strTableTitleText) == false)
+            {
+                strTableTitleText = StringUtil.MacroString(macro_table,
+                    strTableTitleText);
+
+                /*
+                doc.WriteExcelTitle(0,
+                    nTitleCols,
+                    strTableTitleText,
+                    5);
+                    */
+                WriteExcelTitle(
+                    sheet,
+                    nLineIndex + 0,
+                    nColIndex,
+nTitleCols,
+strTableTitleText,
+XLColor.DarkGreen); // 订单
+                sheet.Row(nLineIndex + 1).Height = XLWorkbook.DefaultRowHeight * 1.5;
+                sheet.Row(nLineIndex + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
             }
 
             return 0;
         }
+
+        #region Excel 实用函数
+
+        // 合计页的边沿
+        static int SUM_TOP_BLANK_LINES = 2;
+        static int SUM_LEFT_BLANK_COLUMS = 1;
+
+        // 表格页的边沿
+        static int TABLE_TOP_BLANK_LINES = 2;
+        static int TABLE_LEFT_BLANK_COLUMS = 1;
+
+        // 一次写左右两个单元，构成统计行
+        static void WriteExcelLine(
+                        IXLWorksheet sheet,
+    int nLineIndex,
+    string strName,
+    string strValue)
+        {
+            WriteExcelLineName(
+            sheet,
+    nLineIndex,
+    strName);
+            WriteExcelCell(
+                sheet,
+                SUM_TOP_BLANK_LINES + nLineIndex,
+                SUM_LEFT_BLANK_COLUMS + 3,
+                strValue.Trim());
+        }
+
+        static void WriteExcelLine(
+                IXLWorksheet sheet,
+int nLineIndex,
+string strName,
+long value)
+        {
+            WriteExcelLineName(
+            sheet,
+    nLineIndex,
+    strName);
+            WriteExcelCell(
+                sheet,
+                SUM_TOP_BLANK_LINES + nLineIndex,
+                SUM_LEFT_BLANK_COLUMS + 3,
+                value);
+        }
+
+        static void WriteExcelLineName(
+        IXLWorksheet sheet,
+int nLineIndex,
+string strName)
+        {
+            {
+                IXLCell cell = WriteExcelCell(
+            sheet,
+            SUM_TOP_BLANK_LINES + nLineIndex,
+            SUM_LEFT_BLANK_COLUMS,
+            strName.Trim());
+                // cell.Style.Font.FontColor = XLColor.DarkGray;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+            }
+
+            {
+                IXLCell cell = WriteExcelCell(
+            sheet,
+            SUM_TOP_BLANK_LINES + nLineIndex,
+            SUM_LEFT_BLANK_COLUMS + 1,
+            "");
+                cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                // 左右单元之间加一道竖线
+                cell.Style.Border.RightBorder = XLBorderStyleValues.Thin;
+
+            }
+        }
+
+        static IXLCell WriteExcelCell(
+    IXLWorksheet sheet,
+int nLineIndex,
+int nColIndex,
+long value,
+    // bool bString,
+    // int nStyleIndex = 0
+    XLAlignmentHorizontalValues align = XLAlignmentHorizontalValues.Left
+    )
+        {
+            IXLCell cell = sheet.Cell(nLineIndex + 1, nColIndex + 1).SetValue(value);
+            cell.Style.Alignment.Horizontal = align; // XLAlignmentHorizontalValues.Center;
+            return cell;
+        }
+
+        static IXLCell WriteExcelCell(
+            IXLWorksheet sheet,
+    int nLineIndex,
+    int nColIndex,
+    string strValue,
+            // bool bString,
+            // int nStyleIndex = 0
+            XLAlignmentHorizontalValues align = XLAlignmentHorizontalValues.Left
+            )
+        {
+            Debug.Assert(strValue != "0", "");
+
+            IXLCell cell = sheet.Cell(nLineIndex + 1, nColIndex + 1).SetValue(DomUtil.ReplaceControlCharsButCrLf(strValue, '*'));
+            cell.Style.Alignment.Horizontal = align; // XLAlignmentHorizontalValues.Center;
+            return cell;
+        }
+
+#if NO
+        static IXLCell WriteExcelTitle(
+            IXLWorksheet sheet,
+            int nLineIndex,
+    int nCols,
+    string strTitle,
+    int nStyleIndex = 0)
+        {
+            IXLCell cell = sheet.Cell(nLineIndex + 1, nCols + 1).SetValue(DomUtil.ReplaceControlCharsButCrLf(strTitle, '*'));
+
+            cell.Style.Font.Bold = true;
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            return cell;
+        }
+#endif
+
+        static IXLRange WriteExcelTitle(
+            IXLWorksheet sheet,
+            int nLineIndex,
+    int nStartCol,
+    int nCols,
+    string strTitle,
+    XLColor titleColor)
+        {
+            IXLRange range = sheet.Range(nLineIndex + 1, nStartCol + 1, nLineIndex + 1, nStartCol + 1 + nCols - 1);
+            range.Merge();
+            range.SetValue(DomUtil.ReplaceControlCharsButCrLf(strTitle, '*'));
+            //IXLCell cell = sheet.Cell(nLineIndex, nStartCol).SetValue(DomUtil.ReplaceControlCharsButCrLf(strTitle, '*'));
+
+            //cell.Style.Alignment.WrapText = true;
+            //cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            range.Style.Font.Bold = true;
+            //    cell.Style.Font.FontName = config.FontName;
+            range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            range.Style.Border.LeftBorder = XLBorderStyleValues.Thick;
+            range.Style.Border.LeftBorderColor = titleColor;
+            return range;
+        }
+
+#if NO
+        public IXLRange InsertMergeCell(
+            IXLWorksheet sheet,
+    int nLineIndex,
+    int nColIndex,
+    int nColspan)
+        {
+            Debug.Assert(nColspan >= 2, "");
+
+            IXLRange range = sheet.Range(nLineIndex + 1, nColIndex + 1, nLineIndex + 1, nColIndex + 1 + nColspan);
+            range.Merge();
+            // range.SetValue(DomUtil.ReplaceControlCharsButCrLf(strTitle, '*'));
+            // range.Style.Font.Bold = true;
+            // range.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            return range;
+        }
+#endif
+
+        #endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -4532,10 +5059,12 @@ nLineIndex++,
             List<ListViewItem> items,
             string strFileName,
             // SheetInfo sheetinfo,
-            ExcelDocument doc,
+            // /*ExcelDocument*/ XLWorkbook doc,
+            IXLWorksheet sheet,
             int nPage,
             int nLine,
-            int nTopBlankLines)
+            int nTopBlankLines,
+            ref List<int> column_max_chars)
         {
             string strHtmlLineContent = "";
             int nRet = 0;
@@ -4655,9 +5184,10 @@ nLineIndex++,
                         continue;
                 }
 
-                if (doc != null)
+                if (sheet != null)
                 {
                     int nLineIndex = (nPage * option.LinesPerPage) + nLine;
+                    /*
                     ExcelUtil.UpdateValue(
                         doc.workbookpart,
                         doc.worksheetPart.Worksheet,
@@ -4665,6 +5195,37 @@ nLineIndex++,
                         strContent,
                         0,
                         StringUtil.IsNumber(strContent) ? false : true);
+                        */
+
+
+                    if (column.Name.StartsWith("no ") == true
+                        || column.Name.StartsWith("acceptCopy ") == true)
+                    {
+                        if (Int64.TryParse(strContent, out long no))
+                            WriteExcelCell(sheet,
+        TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines,
+        TABLE_LEFT_BLANK_COLUMS + i,
+        no).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        else
+                            WriteExcelCell(sheet,
+TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines,
+TABLE_LEFT_BLANK_COLUMS + i,
+strContent);
+                    }
+                    else
+                    {
+
+                        WriteExcelCell(sheet,
+TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines,
+TABLE_LEFT_BLANK_COLUMS + i,
+strContent);
+                    }
+
+                    // 最大字符数
+                    SetMaxChars(ref column_max_chars,
+                        TABLE_LEFT_BLANK_COLUMS + i,
+                        strContent.Length);
+                    sheet.Row(TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines + 1).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 }
 
                 if (String.IsNullOrEmpty(strContent) == true)
@@ -4676,7 +5237,7 @@ nLineIndex++,
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-        END1:
+            END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -4694,6 +5255,22 @@ nLineIndex++,
                 "</tr>");
 
             return 0;
+        }
+
+        public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
+        {
+            // 确保空间足够
+            while (column_max_chars.Count < index + 1)
+            {
+                column_max_chars.Add(0);
+            }
+
+            // 统计最大字符数
+            int nOldChars = column_max_chars[index];
+            if (chars > nOldChars)
+            {
+                column_max_chars[index] = chars;
+            }
         }
 
         // 获得栏目内容(合并后)
@@ -5671,7 +6248,7 @@ nLineIndex++,
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6192,7 +6769,7 @@ MessageBoxDefaultButton.Button2);
                 EnableControls(true);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6300,7 +6877,7 @@ MessageBoxDefaultButton.Button2);
             // item.ImageIndex = TYPE_NORMAL;
             SetItemColor(item, TYPE_NORMAL);
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -7124,7 +7701,7 @@ MessageBoxDefaultButton.Button2);
             // 配置标题和风格
             string strNamePath = "orderorigin_printoption";
 
-            OrderOriginPrintOption option = new OrderOriginPrintOption(Program.MainForm.DataDir,
+            OrderOriginPrintOption option = new OrderOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7135,7 +7712,7 @@ MessageBoxDefaultButton.Button2);
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 原始数据 打印参数";
             dlg.PrintOption = option;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
                 "recpath -- 记录路径",
@@ -7221,7 +7798,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7238,7 +7815,7 @@ MessageBoxDefaultButton.Button2);
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            OrderOriginPrintOption option = new OrderOriginPrintOption(Program.MainForm.DataDir,
+            OrderOriginPrintOption option = new OrderOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "orderorigin_printoption");
@@ -7595,7 +8172,7 @@ MessageBoxDefaultButton.Button2);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-        END1:
+            END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -8456,7 +9033,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9139,11 +9716,11 @@ MessageBoxDefaultButton.Button2);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\dp2circulation.exe",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 
@@ -9197,7 +9774,7 @@ MessageBoxDefaultButton.Button2);
             objOutputOrder.ProjectDir = strProjectLocate;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -9246,12 +9823,13 @@ MessageBoxDefaultButton.Button2);
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = PrintArriveRatio("html", out strError);
+            int nRet = PrintArriveRatio("html",
+                true,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9261,12 +9839,14 @@ MessageBoxDefaultButton.Button2);
         //      strStyle    excel / html 之一或者逗号联接组合。 excel: 输出 Excel 文件
         int PrintArriveRatio(
             string strStyle,
+            bool bLaunchExcel,
             out string strError)
         {
             strError = "";
             int nErrorCount = 0;
 
-            ExcelDocument doc = null;
+            /*ExcelDocument*/
+            XLWorkbook doc = null;
 
             if (StringUtil.IsInList("excel", strStyle) == true)
             {
@@ -9295,7 +9875,11 @@ MessageBoxDefaultButton.Button2);
 #endif
                 try
                 {
-                    doc = ExcelDocument.Create(this.ExportExcelFilename);
+                    // doc = ExcelDocument.Create(this.ExportExcelFilename);
+
+                    doc = new XLWorkbook(XLEventTracking.Disabled);
+                    File.Delete(this.ExportExcelFilename);
+
                 }
                 catch (Exception ex)
                 {
@@ -9303,7 +9887,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
-                doc.Stylesheet = GenerateStyleSheet();
+                // doc.Stylesheet = GenerateStyleSheet();
             }
 
             this.tabControl_items.SelectedTab = this.tabPage_mergedItems;
@@ -9407,13 +9991,13 @@ MessageBoxDefaultButton.Button2);
                             goto ERROR1;
                         }
 
-                        List<string> temp_filenames = null;
                         int nRet = BuildArriveHtml(
+                            i,
                             channel,
                             lists[i],
                             ref doc,
                             time_ranges,
-                            out temp_filenames,
+                            out List<string> temp_filenames,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -9456,11 +10040,25 @@ MessageBoxDefaultButton.Button2);
             if (doc != null)
             {
                 // Close the document.
-                doc.Close();
+                // doc.Close();
+                doc.SaveAs(this.ExportExcelFilename);
+                doc.Dispose();
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(this.ExportExcelFilename);
+                    }
+                    catch
+                    {
+
+                    }
+                }
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             // MessageBox.Show(this, strError);
             return -1;
         }
@@ -9664,7 +10262,7 @@ MessageBoxDefaultButton.Button2);
             if (table == null)
                 table = new Hashtable();
 
-        REDO_GETITEMINFO:
+            REDO_GETITEMINFO:
             string strBiblio = "";
             string strResult = "";
             long lRet = channel.GetItemInfo(stop,
@@ -9760,7 +10358,7 @@ MessageBoxDefaultButton.Button1);
 
                     string[] paths = new string[item_recpaths.Count];
                     item_recpaths.CopyTo(paths);
-                REDO_GETRECORDS:
+                    REDO_GETRECORDS:
                     lRet = channel.GetBrowseRecords(
                         this.stop,
                         paths,
@@ -9854,9 +10452,10 @@ MessageBoxDefaultButton.Button1);
 
         // 到货率统计
         int BuildArriveHtml(
+            int nSheetIndex,
             LibraryChannel channel,
             NamedListViewItems items,
-            ref ExcelDocument doc,
+            ref /*ExcelDocument*/ XLWorkbook doc,
             List<TimeSlice> time_ranges,
             out List<string> filenames,
             out string strError)
@@ -9868,11 +10467,10 @@ MessageBoxDefaultButton.Button1);
             stop.SetMessage("正在进行到货率统计 ...");
 
             // 准备册记录
-            List<OneLine> infos = null;
             nRet = GetArriveTimes(
                 channel,
                 items,
-                out infos,
+                out List<OneLine> infos,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -9880,7 +10478,7 @@ MessageBoxDefaultButton.Button1);
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.DataDir,
+            PrintOrderPrintOption option = new PrintOrderPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "printorder_printoption");
@@ -9901,9 +10499,14 @@ MessageBoxDefaultButton.Button1);
 
             string strFileName = "";
 
+            /*
             Sheet sheet = null;
             if (doc != null)
                 sheet = doc.NewSheet("到货率统计表");
+                */
+            IXLWorksheet sheet = null;
+            if (doc != null)
+                sheet = doc.Worksheets.Add("到货率统计" + (nSheetIndex + 1).ToString());
 
 
             // 输出信息页
@@ -9953,7 +10556,8 @@ MessageBoxDefaultButton.Button1);
                 {
                     BuildSliceExcelPageTop(option,
         macro_table,
-        ref doc,
+        // ref doc,
+        sheet,
         5);
 
                     {
@@ -9966,12 +10570,16 @@ MessageBoxDefaultButton.Button1);
                         int i = 0;
                         foreach (string strCaption in captions)
                         {
-                            doc.WriteExcelCell(
-                    nLineIndex,
-                    i++,
-                    strCaption,
-                    true);
+                            IXLCell cell = WriteExcelCell(
+                                sheet,
+                    TABLE_TOP_BLANK_LINES + nLineIndex,
+                    TABLE_LEFT_BLANK_COLUMS + (i++),
+                    strCaption/*,
+                    true*/);
+                            cell.Style.Fill.BackgroundColor = XLColor.LightGray;
                         }
+
+                        sheet.Row(TABLE_TOP_BLANK_LINES + nLineIndex + 1).Height = XLWorkbook.DefaultRowHeight * 1.5;
                     }
                 }
 
@@ -10006,26 +10614,35 @@ MessageBoxDefaultButton.Button1);
                 {
                     nLineIndex++;
                     int i = 0;
-                    doc.WriteExcelCell(
-            nLineIndex,
-            i++,
-            "订购数",
-            true);
-                    doc.WriteExcelCell(
-nLineIndex,
-i++,
-nBiblioCount.ToString(),
-false);
-                    doc.WriteExcelCell(
-nLineIndex,
-i++,
-"",
-true);
-                    doc.WriteExcelCell(
-nLineIndex,
-i++,
-nTotalCopies.ToString(),
-false);
+                    WriteExcelCell(
+                        sheet,
+                        TABLE_TOP_BLANK_LINES + nLineIndex,
+                        TABLE_LEFT_BLANK_COLUMS + (i++),
+            "订购数"/*,
+            true*/);
+
+                    WriteExcelCell(
+                        sheet,
+TABLE_TOP_BLANK_LINES + nLineIndex,
+TABLE_LEFT_BLANK_COLUMS + (i++),
+nBiblioCount/*.ToString(),
+false*/);
+
+                    WriteExcelCell(
+                        sheet,
+TABLE_TOP_BLANK_LINES + nLineIndex,
+TABLE_LEFT_BLANK_COLUMS + (i++),
+""/*,
+true*/);
+
+                    WriteExcelCell(
+                        sheet,
+TABLE_TOP_BLANK_LINES + nLineIndex,
+TABLE_LEFT_BLANK_COLUMS + (i++),
+nTotalCopies/*.ToString(),
+false*/);
+
+                    sheet.Row(TABLE_TOP_BLANK_LINES + nLineIndex + 1).Style.Font.Bold = true;
                 }
 
                 Debug.Assert(time_ranges.Count > 0, "");
@@ -10034,14 +10651,12 @@ false);
                 {
                     DateTime end = slice.Start + slice.Length;
 
-                    long lBiblioCount = 0;
-                    long lItemCount = 0;
                     // 计算特定时间范围内到达的种册数
                     nRet = GetValues(start,
                         end,
                         infos,
-            out lBiblioCount,
-            out lItemCount,
+            out long lBiblioCount,
+            out long lItemCount,
             out strError);
                     if (nRet == -1)
                         return -1;
@@ -10068,31 +10683,36 @@ false);
                     {
                         nLineIndex++;
                         int i = 0;
-                        doc.WriteExcelCell(
-                nLineIndex,
-                i++,
-                slice.Caption,
-                true);
-                        doc.WriteExcelCell(
-    nLineIndex,
-    i++,
-    lBiblioCount.ToString(),
-    false);
-                        doc.WriteExcelCell(
-    nLineIndex,
-    i++,
-    strRatioBiblio,
-    true);
-                        doc.WriteExcelCell(
-    nLineIndex,
-    i++,
-    lItemCount.ToString(),
-    false);
-                        doc.WriteExcelCell(
-    nLineIndex,
-    i++,
-    strRatioItem,
-    true);
+                        WriteExcelCell(
+                            sheet,
+                TABLE_TOP_BLANK_LINES + nLineIndex,
+                TABLE_LEFT_BLANK_COLUMS + i++,
+                slice.Caption/*,
+                true*/);
+                        WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + i++,
+    lBiblioCount/*.ToString(),
+    false*/);
+                        WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + i++,
+    strRatioBiblio/*,
+    true*/);
+                        WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + i++,
+    lItemCount/*.ToString(),
+    false*/);
+                        WriteExcelCell(
+                            sheet,
+    TABLE_TOP_BLANK_LINES + nLineIndex,
+    TABLE_LEFT_BLANK_COLUMS + i++,
+    strRatioItem/*,
+    true*/);
 
                     }
                 }
@@ -10113,8 +10733,9 @@ false);
         // 输出 Excel 页面头部信息
         int BuildSliceExcelPageTop(PrintOption option,
             Hashtable macro_table,
-            ref ExcelDocument doc,
-            int nTitleCols)
+                // ref /*ExcelDocument*/ XLWorkbook doc,
+                IXLWorksheet sheet,
+                int nTitleCols)
         {
 
             // 页眉
@@ -10136,10 +10757,13 @@ false);
                 strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
-                doc.WriteExcelTitle(0,
+                WriteExcelTitle(
+                    sheet,
+                    TABLE_TOP_BLANK_LINES,
+                    TABLE_LEFT_BLANK_COLUMS,
                     nTitleCols,
                     strTableTitleText,
-                    5);
+                    XLColor.Yellow);    // 到货率
 
             }
 
@@ -10215,24 +10839,26 @@ string strFileName)
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = PrintOrder("excel", out strError);
+            int nRet = PrintOrder("excel",
+                true,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
         // 到货率统计 -- 输出 Excel 文件
         private void toolStripMenuItem_arriveRatio_outputExcel_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = PrintArriveRatio("excel", out strError);
+            int nRet = PrintArriveRatio("excel",
+                true,
+                out string strError);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
     }

@@ -3882,7 +3882,7 @@ strPubType);
             BindPrintOptionDlg dlg = new BindPrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.Text = strPubType + " 装订单 打印参数";
             dlg.PrintOption = main_option;
             dlg.BindColumns = secondary_option.Columns;
