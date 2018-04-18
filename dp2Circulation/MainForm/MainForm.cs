@@ -2424,7 +2424,7 @@ Stack:
                 }
 
                 goto CONTINUE;
-            FOUND:
+                FOUND:
 
                 if (child.GetType().Equals(type) == true)
                 {
@@ -2436,7 +2436,7 @@ Stack:
                     return child;
                 }
 
-            CONTINUE:
+                CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -2810,18 +2810,29 @@ Stack:
             }
         }
 
+        public LibraryChannel GetChannel(string strServerUrl = ".",
+    string strUserName = ".",
+    GetChannelStyle style = GetChannelStyle.GUI)
+        {
+            return GetChannel(strServerUrl,
+                strUserName,
+                style,
+                null);
+        }
+
         // parameters:
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
-        public LibraryChannel GetChannel(string strServerUrl = ".",
-            string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI)
+        public LibraryChannel GetChannel(string strServerUrl,   // = ".",
+            string strUserName, // = ".",
+            GetChannelStyle style,  // = GetChannelStyle.GUI,
+            string strClientIP/* = null*/)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.DefaultUserName;
 
-            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName, null, strClientIP);
             if ((style & GetChannelStyle.GUI) != 0)
                 channel.Idle += channel_Idle;
             _channelList.Add(channel);
@@ -2942,7 +2953,7 @@ Stack:
                 // EndSearch();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3033,7 +3044,7 @@ Stack:
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3827,7 +3838,7 @@ Stack:
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4457,7 +4468,7 @@ Stack:
             if (nRet == 2)
                 LoadItemBarcode();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4612,7 +4623,7 @@ Stack:
                 this.ReturnChannel(channel);
                 // EndSearch();
             }
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4721,7 +4732,7 @@ Stack:
                 // this.ReturnChannel(channel);
                 // EndSearch();
             }
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5738,7 +5749,7 @@ out strError);
             if (this.QuickPinyin != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5789,7 +5800,7 @@ out strError);
             if (this.QuickCutter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5840,7 +5851,7 @@ out strError);
             if (this.QuickSjhm != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5891,7 +5902,7 @@ out strError);
             if (this.IsbnSplitter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -6396,7 +6407,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7351,7 +7362,7 @@ out strError);
                 goto ERROR1;
             form.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
         }
@@ -7385,7 +7396,7 @@ out strError);
             }
             form.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
         }
@@ -7569,7 +7580,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
                 this.m_speech.SpeakAsyncCancelAll();
                 this.m_speech.SpeakAsync(strText);
             }
-            catch(InvalidCastException ex)
+            catch (InvalidCastException ex)
             {
                 // 如何显示出错信息?
             }
@@ -7816,7 +7827,7 @@ Keys keyData)
             {
             }
 
-        REDO_VERIFY:
+            REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -7852,7 +7863,7 @@ Keys keyData)
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
             if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
-                // strSha1 != GetCheckCode(strSerialCode)
+                    // strSha1 != GetCheckCode(strSerialCode)
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -7997,7 +8008,7 @@ Keys keyData)
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -8050,7 +8061,7 @@ Keys keyData)
             string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
-        REDO_VERIFY:
+            REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -8080,7 +8091,7 @@ Keys keyData)
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
             if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
-                // strSha1 != GetCheckCode(strSerialCode) 
+                    // strSha1 != GetCheckCode(strSerialCode) 
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -8112,7 +8123,7 @@ Keys keyData)
                 goto REDO_VERIFY;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }
@@ -8619,7 +8630,7 @@ Keys keyData)
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

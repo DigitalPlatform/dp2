@@ -2740,6 +2740,50 @@ out strError);
             return 0;
         }
 
+        // 删除记录里面的 997 字段
+        public static int RemoveUniformKey(
+ref string strBiblioXml,
+out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                true,
+                "", // this.CurMarcSyntax,
+                out strMarcSyntax,
+                out strMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            MarcRecord record = new MarcRecord(strMarc);
+            record.select("field[@name='997']").detach();
+            strMarc = record.Text;
+
+            nRet = MarcUtil.Marc2XmlEx(strMarc,
+                strMarcSyntax,
+                ref strBiblioXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 1;
+        }
 
         public static int CreateUniformKey(
     ref string strBiblioXml,
@@ -6451,6 +6495,23 @@ out strError);
                             goto ERROR1;
                         }
 
+                        // TODO: 确保 strExistingSourceXml 中有 997
+                        {
+                            /* // 测试代码
+                            nRet = RemoveUniformKey(
+ref strExistingSourceXml,
+out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            */
+
+                            nRet = CreateUniformKey(
+        ref strExistingSourceXml,
+        out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+
                         // return:
                         //      -1  出错
                         //      0   没有命中
@@ -7459,10 +7520,10 @@ out strError);
                 return 0;
 
             string strKey = Get997a(strBiblioXml, out strError);
-            //if (strKey == null)
-            //    return -1;
             if (strKey == null)
-                return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
+               return -1;
+            //if (strKey == null)
+            //    return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
 
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
 

@@ -806,7 +806,7 @@ Keys keyData)
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1022,7 +1022,10 @@ Keys keyData)
 
             this.label_message.Text = "";
 
-            LibraryChannel channel = this.GetChannel();
+            LibraryChannel channel = this.GetChannel(".",
+                ",",
+                GetChannelStyle.GUI,
+                "test:127.0.0.1");
 
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1130,6 +1133,7 @@ Keys keyData)
 
                 string strQueryXml = "";
                 channel.Timeout = new TimeSpan(0, 5, 0);
+
                 long lRet = channel.SearchBiblio(stop,
                     this.checkedComboBox_biblioDbNames.Text,
                     this.textBox_queryWord.Text,
@@ -1311,7 +1315,7 @@ Keys keyData)
                                                 cols);
                                     }
 
-                                CONTINUE:
+                                    CONTINUE:
                                     query.Items.Add(item);
                                 }
                             }
@@ -1395,7 +1399,7 @@ Keys keyData)
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1601,7 +1605,7 @@ out strError);
             // 单独给一个线程来执行
             Task.Factory.StartNew(() => FillList(e.Start, strLibraryName, e.Records));
             return;
-        ERROR1:
+            ERROR1:
             AddErrorLine(strError);
         }
 
@@ -1877,7 +1881,7 @@ out strError);
                 DoSearch(false, false, null);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2403,6 +2407,13 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("订购分配表到 Excel 文件 [" + nSelectedItemCount.ToString() + "] (&E)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportDistributeExcelFile_Click);
+                if (nSelectedItemCount == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+
                 // ---
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
@@ -2540,7 +2551,7 @@ out strError);
                 goto ERROR1;
             MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2794,6 +2805,142 @@ out strError);
             }
         }
 
+        // 导出订购去向分配表 Excel 文件
+        void menu_exportDistributeExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的去向分配表 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            bool bLaunchExcel = true;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "BiblioSearchForm new XLWorkbook() {94E68114-353E-49E5-987E-7E8545A6D4E3} exception: " + ExceptionUtil.GetAutoText(ex);
+                return;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+            int nBiblioIndex = 0;
+            int nRowIndex = 2;
+            try
+            {
+
+                int nRet = ProcessBiblio(
+                        (strRecPath, dom, timestamp) =>
+                        {
+                            this.ShowMessage("正在处理书目记录 " + strRecPath);
+
+                            OutputBiblioInfo(sheet,
+                                dom,
+                                strRecPath,
+                                nBiblioIndex++,
+                                "",
+                                ref nRowIndex);
+                            nRowIndex++;    // 空行
+                            return true;
+                        },
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            catch (Exception ex)
+            {
+                strError = "导出去向分配表 Excel 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+
+                this.ClearMessage();
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void OutputDistributeInfo(IXLWorksheet sheet,
+    XmlDocument dom,
+    string strRecPath,
+    int nBiblioIndex,
+    string strStyle,
+    ref int nRowIndex
+    )
+        {
+            string strError = "";
+
+            string strTableXml = "";
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetTable(
+                strRecPath,
+                out strTableXml,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            /*
+            ExcelUtility.OutputBiblioTable(
+            strRecPath,
+            strTableXml,
+            nBiblioIndex,
+            sheet,
+            2,  // nColIndex,
+            ref nRowIndex);
+            */
+        }
+
+
         // 2017/3/17
         // 导出详情到 Excel 文件
         void menu_exportDetailExcelFile_Click(object sender, EventArgs e)
@@ -2829,7 +2976,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "ReaderSearchForm new XLWorkbook() {4A02147F-FA0C-4C9F-995E-5103B7E46669} exception: " + ExceptionUtil.GetAutoText(ex);
+                strError = "BiblioSearchForm new XLWorkbook() {D8E22F4C-9810-4799-A243-3D8148047646} exception: " + ExceptionUtil.GetAutoText(ex);
                 return;
             }
 
@@ -2893,7 +3040,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3017,7 +3164,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3063,7 +3210,7 @@ out strError);
             form.EnableControls(true);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3186,7 +3333,7 @@ out strError);
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3217,7 +3364,7 @@ out strError);
             strError = "处理完成。\r\n\r\n" + strError;
             MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3387,7 +3534,7 @@ MessageBoxDefaultButton.Button1);
                     this.m_nChangedCount--;
                     Debug.Assert(this.m_nChangedCount >= 0, "");
 
-                CONTINUE:
+                    CONTINUE:
                     stop.SetProgressValue(i);
                 }
             }
@@ -3609,7 +3756,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3657,7 +3804,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4148,7 +4295,7 @@ MessageBoxDefaultButton.Button1);
 
             RefreshPropertyView(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4498,15 +4645,15 @@ MessageBoxDefaultButton.Button1);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.CommonControl.dll",  // 2015/11/20 新增
@@ -4551,7 +4698,7 @@ MessageBoxDefaultButton.Button1);
                 null);
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4749,7 +4896,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4802,15 +4949,15 @@ MessageBoxDefaultButton.Button1);
 
             // 一些必要的链接库
             string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2circulation.exe"
                 };
@@ -4848,7 +4995,7 @@ MessageBoxDefaultButton.Button1);
 
             filter.Assembly = assemblyFilter;
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4981,7 +5128,7 @@ MessageBoxDefaultButton.Button1);
             // 如果正好修改了处于选择状态的一行
             RefreshPropertyView(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5106,7 +5253,7 @@ MessageBoxDefaultButton.Button1);
                     // 2016/3/23
                     channel.Timeout = new TimeSpan(0, 40, 0);   // 复制的时候可能需要复制对象，所需时间一般很长
 
-                REDO:
+                    REDO:
                     // result.Value:
                     //      -1  出错
                     //      0   成功，没有警告信息。
@@ -5143,7 +5290,7 @@ MessageBoxDefaultButton.Button1);
                     if (bCopy == false)
                         moved_items.Add(item);
 
-                CONTINUE:
+                    CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -5167,7 +5314,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             // MessageBox.Show(this, strError);
             return -1;
         }
@@ -5192,7 +5339,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5216,7 +5363,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5238,7 +5385,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5260,7 +5407,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5282,7 +5429,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5304,7 +5451,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5345,7 +5492,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5372,7 +5519,7 @@ MessageBoxDefaultButton.Button1);
             form.EnableControls(true);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5386,7 +5533,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5402,7 +5549,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5416,7 +5563,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5430,7 +5577,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5443,7 +5590,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5459,7 +5606,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5474,7 +5621,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5489,7 +5636,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5504,7 +5651,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5636,7 +5783,7 @@ MessageBoxDefaultButton.Button1);
                         index++;
                     }
 
-                CONTINUE:
+                    CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -5871,7 +6018,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = strDbTypeName + "记录记录路径 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportEntityRecPathFilename;
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6018,7 +6165,7 @@ MessageBoxDefaultButton.Button1);
 
             Program.MainForm.StatusBarMessage = "统计出下级" + strDbTypeName + "记录为空的书目记录 " + nCount.ToString() + "个";
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6198,7 +6345,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6698,7 +6845,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "成功删除书目记录 " + nDeleteCount + " 条");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7023,7 +7170,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (dlg.IncludeObjectFile && bRemote == false)
                     {
-                    REDO_WRITEOBJECTS:
+                        REDO_WRITEOBJECTS:
                         // 将书目记录中的对象资源写入外部文件
                         nRet = WriteObjectFiles(stop,
                 channel,
@@ -7148,7 +7295,7 @@ MessageBoxDefaultButton.Button1);
 
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
-                CONTINUE:
+                    CONTINUE:
                     stop.SetProgressValue(++i);
                 }
 
@@ -7178,7 +7325,7 @@ MessageBoxDefaultButton.Button1);
             MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
                 + "条记录成功保存到文件 " + dlg.FileName;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7320,7 +7467,7 @@ MessageBoxDefaultButton.Button1);
                     ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
 #endif
 
-                CONTINUE:
+                    CONTINUE:
                     i++;
                 }
 
@@ -7426,7 +7573,7 @@ out string strError)
 
                 if (dlg.IncludeObjectFile)
                 {
-                REDO_WRITEOBJECTS:
+                    REDO_WRITEOBJECTS:
                     // 将记录中的对象资源写入外部文件
                     int nRet = WriteObjectFiles(stop,
             channel,
@@ -7821,7 +7968,7 @@ MessageBoxDefaultButton.Button1);
                 + "条记录成功保存到文件 " + dlg.FileName;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8465,7 +8612,7 @@ MessageBoxDefaultButton.Button1);
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9249,7 +9396,7 @@ MessageBoxDefaultButton.Button1);
 
             return;
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9318,7 +9465,7 @@ out strError);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

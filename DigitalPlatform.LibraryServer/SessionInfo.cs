@@ -262,6 +262,8 @@ namespace DigitalPlatform.LibraryServer
             }
             else
                 this.RouterClientIP = null;
+
+            // TODO: 这里要改造，允许显示多个 client ip 在通道管理窗
         }
 
         public string GetTempDir()
