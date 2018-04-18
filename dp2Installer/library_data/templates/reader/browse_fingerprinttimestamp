@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <col title="指纹时间戳">
-    <xpath>*/fingerprint/@timestamp</xpath>
-  </col>
-  <col title="证条码号">
-    <xpath>*/barcode</xpath>
-  </col>
-</root>
