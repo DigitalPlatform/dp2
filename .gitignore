@@ -21,6 +21,10 @@ opac_data.zip
 opac_style.zip
 zserver_app.zip
 
+*.dll
+*.exe
+dp2Installer/library_data/
+
 _[Dd]ocs/
 kernel_app/
 library_app/
@@ -211,3 +215,5 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /dp2Installer/library_data_save
+
+

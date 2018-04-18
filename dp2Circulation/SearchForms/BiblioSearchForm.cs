@@ -5210,6 +5210,8 @@ MessageBoxDefaultButton.Button1);
                     strAction = "move";
             }
 
+            bool bHideMessageBox = false;
+
             LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.EnableHalfStop;
@@ -5274,12 +5276,30 @@ MessageBoxDefaultButton.Button1);
                         out strError);
                     if (lRet == -1)
                     {
+                        /*
                         DialogResult result = MessageBox.Show(this,
 "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + strError + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
 "BiblioSearchForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
+*/
+                        DialogResult result = DialogResult.Cancel;
+
+                        if (bHideMessageBox == false)
+                        {
+                            // TODO: 提示中出现书目记录的摘要信息？
+                            result = MessageDialog.Show(this,
+            "复制或移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "' 时出现错误: " + strError + "。\r\n\r\n是否重试? (Yes 重试；No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxDefaultButton.Button1,
+            "不再出现此对话框",
+            ref bHideMessageBox,
+            new string[] { "重试", "跳过此条继续", "放弃" });
+                        }
+                        else
+                            result = DialogResult.No;
+
                         if (result == System.Windows.Forms.DialogResult.Yes)
                             goto REDO;
                         if (result == System.Windows.Forms.DialogResult.No)

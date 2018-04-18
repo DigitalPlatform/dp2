@@ -2785,6 +2785,10 @@ out string strError)
             return 1;
         }
 
+        // return:
+        //      -1  出错
+        //      0   strBiblioXml 没有发生修改
+        //      1   strBiblioXml 发生了修改
         public static int CreateUniformKey(
     ref string strBiblioXml,
     out string strError)
@@ -2838,6 +2842,10 @@ out string strError)
         // TODO: 根据多个 ISBN 创建多个 997 字段。查重算法也要改造，变成根据多个 key 分别检索
         // 创建查重键字段
         // 要创建的字段名和 MARC 格式无关，都是 997 字段。但要提取的书名等信息在什么字段，和具体的 MARC 格式有关
+        // return:
+        //      -1  出错
+        //      0   strMARC 没有发生修改
+        //      1   strMARC 发生了修改
         public static int CreateUniformKey(ref string strMARC,
             string strMarcSyntax,
             out string strKey,
@@ -3038,7 +3046,7 @@ out string strError)
                 strMARC = record.Text;
             }
 
-            return 0;
+            return 1;
         }
 
         public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
@@ -6505,11 +6513,19 @@ out strError);
                                 goto ERROR1;
                             */
 
+                            // return:
+                            //      -1  出错
+                            //      0   strBiblioXml 没有发生修改
+                            //      1   strBiblioXml 发生了修改
                             nRet = CreateUniformKey(
         ref strExistingSourceXml,
         out strError);
                             if (nRet == -1)
                                 goto ERROR1;
+
+                            // 拟复制的记录内容被添加了 997 字段
+                            if (nRet == 1 && string.IsNullOrEmpty(strNewBiblio))
+                                strNewBiblio = strExistingSourceXml;
                         }
 
                         // return:
