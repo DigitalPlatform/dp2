@@ -1714,7 +1714,7 @@ namespace DigitalPlatform.LibraryServer
                 strError = "数据库名 '" + strName + "' 不属于 dp2library (library.xml)目前管辖的范围...";
                 return 0;
 
-            CONTINUE:
+                CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();
@@ -1784,7 +1784,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             // 2015/1/29
             if (this.Changed == true)
                 this.ActivateManagerThread();
@@ -2803,7 +2803,7 @@ out strError);
             string strCaption = ServerDatabaseUtility.GetTypeCaption(strDbType);
 
             // 获得相关配置小节
-            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strAttrName + "']");
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@" + strAttrName + "='" + strName + "']");
             if (nodeDatabase == null)
             {
                 strError = "配置 DOM 中名字为 '" + strName + "' 的" + strCaption + "(" + strAttrName + "属性)相关<database>元素没有找到";
@@ -2922,8 +2922,8 @@ out strError);
             string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
             if (String.IsNullOrEmpty(strIssueDbName) == false)
             {
-                nRet = DeleteDatabase(channel, 
-                    strIssueDbName, 
+                nRet = DeleteDatabase(channel,
+                    strIssueDbName,
                     strLogFileName,
 out strError);
                 if (nRet == -1)
@@ -2937,8 +2937,8 @@ out strError);
             string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
             if (String.IsNullOrEmpty(strCommentDbName) == false)
             {
-                nRet = DeleteDatabase(channel, 
-                    strCommentDbName, 
+                nRet = DeleteDatabase(channel,
+                    strCommentDbName,
                     strLogFileName,
 out strError);
                 if (nRet == -1)
@@ -3668,7 +3668,7 @@ out strError);
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
 
-            CONTINUE:
+                CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();
@@ -4641,7 +4641,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             if (keyschanged_dbnames.Count > 0)
             {
                 // 增加WebServiceUrl部分
@@ -5742,7 +5742,7 @@ out strError);
                 bool verify_blank = true)
             {
                 List<string> results = new List<string>();
-                XmlNodeList nodes = container.SelectNodes("database/@"+attr_name+"");
+                XmlNodeList nodes = container.SelectNodes("database/@" + attr_name + "");
                 foreach (XmlNode node in nodes)
                 {
                     if (verify_blank == false && string.IsNullOrEmpty(node.Value))
@@ -7567,7 +7567,7 @@ out strError);
 
                 created_dbnames.Clear();
 
-            CONTINUE:
+                CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();
@@ -7665,7 +7665,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             List<string> error_deleting_dbnames = new List<string>();
             // 将本次已经创建的数据库在返回前删除掉
             for (int i = 0; i < created_dbnames.Count; i++)
@@ -8095,7 +8095,7 @@ out strError);
             strDbName = strName;
             this.Changed = true;
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8265,7 +8265,7 @@ out strError);
                         continue;
 #endif
 
-                DO_CREATE:
+                    DO_CREATE:
                     using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                     {
                         new_stream.Seek(0, SeekOrigin.Begin);
@@ -9179,7 +9179,7 @@ out strError);
 
                 strError = "不存在数据库名 '" + strName + "'";
                 return 0;
-            CONTINUE:
+                CONTINUE:
                 int kkk = 0;
                 kkk++;
             }
