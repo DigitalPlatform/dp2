@@ -59,6 +59,7 @@
             this.tabPage_originItems = new System.Windows.Forms.TabPage();
             this.tabPage_mergedItems = new System.Windows.Forms.TabPage();
             this.listView_merged = new DigitalPlatform.GUI.ListViewNF();
+            this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_saveChange.SuspendLayout();
@@ -68,13 +69,14 @@
             this.tabControl_items.SuspendLayout();
             this.tabPage_originItems.SuspendLayout();
             this.tabPage_mergedItems.SuspendLayout();
+            this.tableLayoutPanel_main.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_next
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_next.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_next.Location = new System.Drawing.Point(572, 256);
+            this.button_next.Location = new System.Drawing.Point(569, 245);
             this.button_next.Name = "button_next";
             this.button_next.Size = new System.Drawing.Size(124, 33);
             this.button_next.TabIndex = 3;
@@ -84,15 +86,14 @@
             // 
             // tabControl_main
             // 
-            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_main.Controls.Add(this.tabPage_load);
             this.tabControl_main.Controls.Add(this.tabPage_saveChange);
             this.tabControl_main.Controls.Add(this.tabPage_print);
-            this.tabControl_main.Location = new System.Drawing.Point(0, 15);
+            this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl_main.Location = new System.Drawing.Point(3, 3);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(696, 236);
+            this.tabControl_main.Size = new System.Drawing.Size(690, 236);
             this.tabControl_main.TabIndex = 2;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -105,8 +106,8 @@
             this.tabPage_load.Controls.Add(this.button_load_loadFromFile);
             this.tabPage_load.Location = new System.Drawing.Point(4, 28);
             this.tabPage_load.Name = "tabPage_load";
-            this.tabPage_load.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_load.Size = new System.Drawing.Size(688, 204);
+            this.tabPage_load.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_load.Size = new System.Drawing.Size(682, 204);
             this.tabPage_load.TabIndex = 0;
             this.tabPage_load.Text = "装载";
             this.tabPage_load.UseVisualStyleBackColor = true;
@@ -115,7 +116,7 @@
             // 
             this.checkBox_print_accepted.AutoSize = true;
             this.checkBox_print_accepted.Location = new System.Drawing.Point(180, 45);
-            this.checkBox_print_accepted.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_print_accepted.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_print_accepted.Name = "checkBox_print_accepted";
             this.checkBox_print_accepted.Size = new System.Drawing.Size(133, 22);
             this.checkBox_print_accepted.TabIndex = 2;
@@ -315,12 +316,12 @@
             this.contextMenuStrip_printOrder.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_printOrder_outputExcel});
             this.contextMenuStrip_printOrder.Name = "contextMenuStrip_printOrder";
-            this.contextMenuStrip_printOrder.Size = new System.Drawing.Size(241, 65);
+            this.contextMenuStrip_printOrder.Size = new System.Drawing.Size(206, 32);
             // 
             // toolStripMenuItem_printOrder_outputExcel
             // 
             this.toolStripMenuItem_printOrder_outputExcel.Name = "toolStripMenuItem_printOrder_outputExcel";
-            this.toolStripMenuItem_printOrder_outputExcel.Size = new System.Drawing.Size(240, 28);
+            this.toolStripMenuItem_printOrder_outputExcel.Size = new System.Drawing.Size(205, 28);
             this.toolStripMenuItem_printOrder_outputExcel.Text = "输出 Excel 文件";
             this.toolStripMenuItem_printOrder_outputExcel.Click += new System.EventHandler(this.toolStripMenuItem_outputExcel_Click);
             // 
@@ -332,7 +333,7 @@
             this.listView_origin.LargeImageList = this.imageList_lineType;
             this.listView_origin.Location = new System.Drawing.Point(3, 3);
             this.listView_origin.Name = "listView_origin";
-            this.listView_origin.Size = new System.Drawing.Size(682, 115);
+            this.listView_origin.Size = new System.Drawing.Size(676, 140);
             this.listView_origin.SmallImageList = this.imageList_lineType;
             this.listView_origin.TabIndex = 4;
             this.listView_origin.UseCompatibleStateImageBehavior = false;
@@ -351,15 +352,13 @@
             // 
             // tabControl_items
             // 
-            this.tabControl_items.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_items.Controls.Add(this.tabPage_originItems);
             this.tabControl_items.Controls.Add(this.tabPage_mergedItems);
-            this.tabControl_items.Location = new System.Drawing.Point(0, 297);
+            this.tabControl_items.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl_items.Location = new System.Drawing.Point(3, 284);
             this.tabControl_items.Name = "tabControl_items";
             this.tabControl_items.SelectedIndex = 0;
-            this.tabControl_items.Size = new System.Drawing.Size(696, 153);
+            this.tabControl_items.Size = new System.Drawing.Size(690, 178);
             this.tabControl_items.TabIndex = 5;
             // 
             // tabPage_originItems
@@ -367,8 +366,8 @@
             this.tabPage_originItems.Controls.Add(this.listView_origin);
             this.tabPage_originItems.Location = new System.Drawing.Point(4, 28);
             this.tabPage_originItems.Name = "tabPage_originItems";
-            this.tabPage_originItems.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_originItems.Size = new System.Drawing.Size(688, 121);
+            this.tabPage_originItems.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_originItems.Size = new System.Drawing.Size(682, 146);
             this.tabPage_originItems.TabIndex = 0;
             this.tabPage_originItems.Text = "原始数据";
             this.tabPage_originItems.UseVisualStyleBackColor = true;
@@ -378,7 +377,7 @@
             this.tabPage_mergedItems.Controls.Add(this.listView_merged);
             this.tabPage_mergedItems.Location = new System.Drawing.Point(4, 28);
             this.tabPage_mergedItems.Name = "tabPage_mergedItems";
-            this.tabPage_mergedItems.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_mergedItems.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_mergedItems.Size = new System.Drawing.Size(688, 121);
             this.tabPage_mergedItems.TabIndex = 1;
             this.tabPage_mergedItems.Text = "合并后";
@@ -400,14 +399,29 @@
             this.listView_merged.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_merged_ColumnClick);
             this.listView_merged.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_merged_MouseUp);
             // 
+            // tableLayoutPanel_main
+            // 
+            this.tableLayoutPanel_main.ColumnCount = 1;
+            this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_main.Controls.Add(this.tabControl_main, 0, 0);
+            this.tableLayoutPanel_main.Controls.Add(this.tabControl_items, 0, 2);
+            this.tableLayoutPanel_main.Controls.Add(this.button_next, 0, 1);
+            this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
+            this.tableLayoutPanel_main.RowCount = 3;
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(696, 465);
+            this.tableLayoutPanel_main.TabIndex = 6;
+            // 
             // PrintOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(696, 465);
-            this.Controls.Add(this.tabControl_items);
-            this.Controls.Add(this.button_next);
-            this.Controls.Add(this.tabControl_main);
+            this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "PrintOrderForm";
             this.Text = "打印订单";
@@ -426,6 +440,7 @@
             this.tabControl_items.ResumeLayout(false);
             this.tabPage_originItems.ResumeLayout(false);
             this.tabPage_mergedItems.ResumeLayout(false);
+            this.tableLayoutPanel_main.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -461,5 +476,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_printOrder_outputExcel;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_arriveRatio;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_arriveRatio_outputExcel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
     }
 }
