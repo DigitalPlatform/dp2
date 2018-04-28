@@ -4557,20 +4557,22 @@ nLineIndex++,
         }
 
 
-        static void AdjectColumnWidth(IXLWorksheet sheet,
-            List<int> column_max_chars)
+        public static void AdjectColumnWidth(IXLWorksheet sheet,
+            List<int> column_max_chars,
+            int MAX_CHARS = 50)
         {
             List<int> wrap_columns = new List<int>();
             // 字符数太多的列不要做 width auto adjust
             foreach (IXLColumn column in sheet.Columns())
             {
-                int MAX_CHARS = 50;   // 60
+                // int MAX_CHARS = 50;   // 60
 
                 int nIndex = column.FirstCell().Address.ColumnNumber - 1;
                 if (nIndex >= column_max_chars.Count)
                     break;
                 int nChars = column_max_chars[nIndex];
-
+                if (nChars == 0)
+                    continue;
 #if NO
                 if (nIndex == 1)
                 {

@@ -218,6 +218,32 @@ namespace DigitalPlatform.Text
 
         #endregion
 
+        // 判断两个价格字符串是否相等
+        public static bool IsEqual(string strPrice1, string strPrice2, string strDefaultPrefix = "CNY")
+        {
+            if (strPrice1 == strPrice2)
+                return true;
+
+            try
+            {
+                CurrencyItem item1 = CurrencyItem.Parse(strPrice1);
+                CurrencyItem item2 = CurrencyItem.Parse(strPrice2);
+                if (string.IsNullOrEmpty(item1.Prefix))
+                    item1.Prefix = strDefaultPrefix;
+                if (string.IsNullOrEmpty(item2.Prefix))
+                    item2.Prefix = strDefaultPrefix;
+                if (item1.Prefix == item2.Prefix
+                    && item1.Value == item2.Value
+                    && item1.Postfix == item2.Postfix)
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // 计算价格乘积
         // 从PrintOrderForm中转移过来
         public static int MultiPrice(string strPrice,

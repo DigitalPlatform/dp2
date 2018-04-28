@@ -866,6 +866,81 @@ namespace TestMarcKernel
             "856!");
         }
 
+        // 常规测试
+        // 测试 MarcDiff.MergeOldNew() 方法
+        // 模拟前端用户增加一个 205 字段，但权限被限制的情况
+        [TestMethod]
+        public void MarcDiff_MergeOldNew_6_1()
+        {
+            string strUserRights = ""; // "level-1";
+            string strFieldNameList = "200"; // 所有字段都允许操作
+
+            MarcRecord old_record = new MarcRecord();
+            // 旧记录没有 205 字段
+            old_record.add(new MarcField("001A1234567"));
+            old_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            old_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcRecord new_record = new MarcRecord();
+            // 新记录增加一个 205 字段
+            new_record.add(new MarcField("001A1234567"));
+            new_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            new_record.add(new MarcField('$', "205  $a第一版"));
+            new_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcRecord target_record = new MarcRecord();
+            // 结果记录没有 205 字段。打算增加 205 字段被拒绝了
+            target_record.add(new MarcField("001A1234567"));
+            target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            target_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcDiff_MergeOldNew(
+            strUserRights,
+            strFieldNameList,
+            old_record,
+            new_record,
+            target_record,
+            "");
+        }
+
+        // 常规测试
+        // 测试 MarcDiff.MergeOldNew() 方法
+        // 模拟前端用户修改一个 205 字段，但权限被限制的情况
+        [TestMethod]
+        public void MarcDiff_MergeOldNew_6_2()
+        {
+            string strUserRights = ""; // "level-1";
+            string strFieldNameList = "200"; // 所有字段都允许操作
+
+            MarcRecord old_record = new MarcRecord();
+            // 旧记录有 205 字段
+            old_record.add(new MarcField("001A1234567"));
+            old_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            old_record.add(new MarcField('$', "205  $a第一版"));
+            old_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcRecord new_record = new MarcRecord();
+            // 新记录修改 205 字段
+            new_record.add(new MarcField("001A1234567"));
+            new_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            new_record.add(new MarcField('$', "205  $a第二版"));
+            new_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcRecord target_record = new MarcRecord();
+            // 结果记录 205 字段的修改被拒绝了
+            target_record.add(new MarcField("001A1234567"));
+            target_record.add(new MarcField('$', "2001 $atitle$fauthor"));
+            target_record.add(new MarcField('$', "205  $a第一版"));
+            target_record.add(new MarcField('$', "701  $aauthor"));
+
+            MarcDiff_MergeOldNew(
+            strUserRights,
+            strFieldNameList,
+            old_record,
+            new_record,
+            target_record,
+            "");
+        }
 
         // 测试 MarcDiff.MergeOldNew() 方法
         // parameters:

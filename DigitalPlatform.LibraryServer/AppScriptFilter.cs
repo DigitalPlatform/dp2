@@ -638,6 +638,34 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
+        /*
+         * https://en.wikipedia.org/wiki/International_Standard_Bibliographic_Description#Structure_of_an_ISBD_record
+ISBD Structure
+0: Content form and media type area
+1: Title and statement of responsibility area, consisting of 
+1.1 Title proper
+1.2 Parallel title
+1.3 Other title information
+1.4 Statement of responsibility
+2: Edition area
+3: Material or type of resource specific area (e.g., the scale of a map or the numbering of a periodical)
+4: Publication, production, distribution, etc., area
+5: Material description area (e.g., number of pages in a book or number of CDs issued as a unit)
+6: Series area
+7: Notes area
+8: Resource identifier and terms of availability area (e.g., ISBN, ISSN)
+         * 
+         * 按照上述结构名称，大项的 type 命名为：
+         * content_form_area
+         * title_area
+         * edition_area
+         * material_specific_area
+         * publication_area
+         * material_description_area
+         * series_area
+         * notes_area
+         * resource_identifier_area
+         * */
         // 将书目 XML 转换为 table 格式
         // parameters:
         //      strBiblioXml    XML记录，或者 MARC 记录

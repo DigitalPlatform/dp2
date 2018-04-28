@@ -19,8 +19,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>5F800D2A6707CBDB7D373647FD2D3365F9DF96C4</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Circulation_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
     <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>279</ApplicationRevision>
+    <ApplicationRevision>280</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -85,6 +85,12 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ClosedXML, Version=0.80.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b, processorArchitecture=MSIL">
@@ -584,6 +590,13 @@
       <DependentUpon>DistributeDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Order\BatchOrder\OrderList.cs" />
+    <Compile Include="Order\DistributeExcelFile.cs" />
+    <Compile Include="Order\SaveDistributeExcelFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\SaveDistributeExcelFileDialog.Designer.cs">
+      <DependentUpon>SaveDistributeExcelFileDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Print\BindPrintOptionDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1719,6 +1732,9 @@
     <EmbeddedResource Include="Order\DistributeDialog.resx">
       <DependentUpon>DistributeDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Order\SaveDistributeExcelFileDialog.resx">
+      <DependentUpon>SaveDistributeExcelFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reader\AddFriendsDialog.resx">
       <DependentUpon>AddFriendsDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -2374,10 +2390,7 @@
     <Content Include="default_printorder_publisherstatis_accept.template">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="dp2Circulation_1_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_2_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_9_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_TemporaryKey.pfx" />
+    <None Include="dp2003.pfx" />
     <Content Include="jquery.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

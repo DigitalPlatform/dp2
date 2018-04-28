@@ -460,17 +460,13 @@ namespace DigitalPlatform.LibraryServer
 
             // 比较两个复本字符串
             {
-                string strExistOldValue = "";
-                string strExistNewValue = "";
                 ParseOldNewValue(strExistCopy,
-            out strExistOldValue,
-            out strExistNewValue);
+            out string strExistOldValue,
+            out string strExistNewValue);
 
-                string strChangedOldValue = "";
-                string strChangedNewValue = "";
                 ParseOldNewValue(strChangedCopy,
-            out strChangedOldValue,
-            out strChangedNewValue);
+            out string strChangedOldValue,
+            out string strChangedNewValue);
 
                 if (strExistOldValue != strChangedOldValue)
                 {
@@ -483,26 +479,23 @@ namespace DigitalPlatform.LibraryServer
 
             // 比较两个价格字符串
             {
-                string strExistOldValue = "";
-                string strExistNewValue = "";
                 ParseOldNewValue(strExistPrice,
-            out strExistOldValue,
-            out strExistNewValue);
+            out string strExistOldValue,
+            out string strExistNewValue);
 
-                string strChangedOldValue = "";
-                string strChangedNewValue = "";
                 ParseOldNewValue(strChangedPrice,
-            out strChangedOldValue,
-            out strChangedNewValue);
+            out string strChangedOldValue,
+            out string strChangedNewValue);
 
-                if (strExistOldValue != strChangedOldValue)
+                // 避免用 == 判断。用 IsEqual 判断，可以把 CNY10.00 和 10.00 视作等同
+                if (PriceUtil.IsEqual(strExistOldValue, strChangedOldValue) == false)
                 {
                     strError = "订购价(方括号左边的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
                     return 1;
                 }
-                if (strExistNewValue != strChangedNewValue)
+                if (PriceUtil.IsEqual(strExistNewValue, strChangedNewValue) == false)
                 {
-                    strError = "验收价(方括中的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
+                    strError = "验收价(方括号中的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
                     return 1;
                 }
             }
@@ -537,16 +530,13 @@ namespace DigitalPlatform.LibraryServer
                 if (exist_location.Name != new_location.Name)
                 {
                     // 进一步检查是否馆代码部分改变了
-                    string strCode1 = "";
-                    string strPureName = "";
-                    string strCode2 = "";
 
                     // 解析
                     LibraryApplication.ParseCalendarName(exist_location.Name,
-                        out strCode1,
-                        out strPureName);
+                        out string strCode1,
+                        out string strPureName);
                     LibraryApplication.ParseCalendarName(new_location.Name,
-                        out strCode2,
+                        out string strCode2,
                         out strPureName);
                     // 只要馆代码部分不改变即可
                     if (strCode1 != strCode2)
@@ -558,13 +548,11 @@ namespace DigitalPlatform.LibraryServer
 
                 if (exist_location.RefID != new_location.RefID)
                 {
-                    string strLibraryCode = "";
-                    string strPureName = "";
 
                     // 解析
                     LibraryApplication.ParseCalendarName(exist_location.Name,
-                out strLibraryCode,
-                out strPureName);
+                out string strLibraryCode,
+                out string strPureName);
                     if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                     {
                         strError = "馆代码 '" + strLibraryCode + "' 不在范围 '" + strLibraryCodeList + "' 内，不允许进行收登操作。";

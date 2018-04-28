@@ -1810,7 +1810,7 @@ MessageBoxDefaultButton.Button2);
                         // “无在借册和违约金的”
                         if (dlg.NoBorrowAndOverdueItem == true)
                         {
-                            if (borrows.Count == 0 || overdues.Count == 0)
+                            if (borrows.Count == 0 && overdues.Count == 0)  // 2018/4/26 从 || 修改为 &&
                                 bOn = true;
                         }
 

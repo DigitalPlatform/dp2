@@ -8854,6 +8854,228 @@ Keys keyData)
             OpenWindow<BatchOrderForm>();
         }
 
+        public delegate void ProcessOrderRecord(
+    string strBiblioRecPath,
+    string strOrderRecPath,
+    string strDistributeString,
+    Dictionary<string, string> content_table
+    );
+
+        // 从订购去向 Excel 文件导入
+        private void MenuItem_importFromOrderDistributeExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            LibraryChannel channel = this.GetChannel();
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在导入 Excel 文件 ...");
+            Stop.BeginLoop();
+            try
+            {
+                Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
+                    (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell) =>
+                    {
+                        string strOldXml = "";
+                        byte[] timestamp = null;
+                        if (string.IsNullOrEmpty(strOrderRecPath) == false)
+                        {
+                            long lRet = channel.GetRecord(Stop,
+                                strOrderRecPath,
+                                out timestamp,
+                                out strOldXml,
+                                out strError);
+                            if (lRet == -1)
+                                throw new Exception(strError);
+                        }
+                        else
+                            strOldXml = "<root />";
+
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(strOldXml);
+
+                        foreach (string key in order_content_table.Keys)
+                        {
+                            if (key == "recpath")
+                                continue;
+                            // TODO: 是否要检查元素名的合法性?
+                            DomUtil.SetElementText(dom.DocumentElement, key, order_content_table[key]);
+                        }
+
+
+                        LocationCollection locations = new LocationCollection();
+                        int nRet = locations.Build(strDistributeString, out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
+
+                        // TODO: 注意复本数是否有纯数字以外的其他形态?
+                        DomUtil.SetElementText(dom.DocumentElement, "copy", locations.Count.ToString());
+
+                        if (string.IsNullOrEmpty(strOrderRecPath))
+                        {
+                            strOrderRecPath = this.GetOrderDbName(Global.GetDbName(strBiblioRecPath)) + "/?";
+                            strOldXml = "";
+                        }
+
+                        nRet = SaveItemRecord(channel,
+                            strBiblioRecPath,
+"order",
+strOrderRecPath,
+strOldXml,
+dom.DocumentElement.OuterXml,
+"",
+timestamp,
+out string strOutputOrderRecPath,
+out byte[] baNewTimestamp,
+out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        if (strOrderRecPath.IndexOf("?") != -1)
+                            orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
+                    });
+            }
+            finally
+            {
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // TODO: 移入通道函数库
+        public int SaveItemRecord(
+    LibraryChannel channel,
+    string strBiblioRecPath,
+    string strDbType,
+    string strRecPath,
+    string strOldXml,
+    string strNewXml,
+    string strStyle,
+    byte[] baTimestamp,
+    out string strOutputRecPath,
+    out byte[] baNewTimestamp,
+    out string strError)
+        {
+            strError = "";
+            baNewTimestamp = null;
+            strOutputRecPath = "";
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo item_info = new EntityInfo();
+
+                item_info.OldRecPath = strRecPath;
+
+                if (strRecPath.IndexOf("?") == -1)
+                {
+                    if (StringUtil.IsInList("force", strStyle))
+                        item_info.Action = "forcechange";
+                    else
+                        item_info.Action = "change";
+
+                    strOutputRecPath = strRecPath;
+                }
+                else
+                    item_info.Action = "new";
+
+                item_info.NewRecPath = strRecPath;
+
+                item_info.NewRecord = strNewXml;
+                item_info.NewTimestamp = null;
+
+                item_info.OldRecord = strOldXml;
+                item_info.OldTimestamp = baTimestamp;
+
+                entityArray.Add(item_info);
+            }
+
+            // 复制到目标
+            EntityInfo[] entities = null;
+            entities = new EntityInfo[entityArray.Count];
+            for (int i = 0; i < entityArray.Count; i++)
+            {
+                entities[i] = entityArray[i];
+            }
+
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+            if (strDbType == "item")
+                lRet = channel.SetEntities(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "order")
+                lRet = channel.SetOrders(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "issue")
+                lRet = channel.SetIssues(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "comment")
+                lRet = channel.SetComments(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else
+            {
+                strError = "未知的数据库类型 '" + strDbType + "'";
+                return -1;
+            }
+            if (lRet == -1)
+                return -1;
+
+            // string strWarning = ""; // 警告信息
+
+            if (errorinfos == null)
+                return 0;
+
+            strError = "";
+            {
+                int i = 0;
+                foreach (EntityInfo errorinfo in errorinfos)
+                {
+                    if (i == 0)
+                    {
+                        baNewTimestamp = errorinfo.NewTimestamp;
+                        strOutputRecPath = errorinfo.NewRecPath;
+                    }
+
+                    // 正常信息处理
+                    if (errorinfo.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    strError += errorinfo.RefID + "在提交保存过程中发生错误 -- " + errorinfo.ErrorInfo + "\r\n";
+
+                    i++;
+                }
+            }
+
+            //if (baNewTimestamp != null) // 2016/9/3
+            //    info.Timestamp = baNewTimestamp;    // 2013/10/17
+
+            if (String.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            return 0;
+        }
     }
 
     /// <summary>

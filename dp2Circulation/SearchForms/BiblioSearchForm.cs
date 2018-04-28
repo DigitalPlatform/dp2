@@ -2816,6 +2816,33 @@ out strError);
                 goto ERROR1;
             }
 
+            int nRet = GetLocationList(
+    out List<string> location_list,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = "获得馆藏地配置参数时出错: " + strError;
+                goto ERROR1;
+            }
+
+            Order.SaveDistributeExcelFileDialog dlg = new Order.SaveDistributeExcelFileDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+"ItemSearchForm",
+"SaveDistributeExcelFileDialog_uiState",
+"");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_SaveDistributeExcelFileDialog");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(
+"ItemSearchForm",
+"SaveDistributeExcelFileDialog_uiState",
+dlg.UiState);
+            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
+                return;
+
+#if NO
             // 询问文件名
             SaveFileDialog dlg = new SaveFileDialog();
 
@@ -2828,6 +2855,7 @@ out strError);
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
+#endif
 
             bool bLaunchExcel = true;
 
@@ -2835,7 +2863,7 @@ out strError);
             try
             {
                 doc = new XLWorkbook(XLEventTracking.Disabled);
-                File.Delete(dlg.FileName);
+                File.Delete(dlg.OutputFileName);
             }
             catch (Exception ex)
             {
@@ -2848,28 +2876,115 @@ out strError);
 
             // 每个列的最大字符数
             List<int> column_max_chars = new List<int>();
-            int nBiblioIndex = 0;
+            int nLineNumber = 0;
             int nRowIndex = 2;
             try
             {
 
-                int nRet = ProcessBiblio(
+                List<Order.ColumnProperty> biblio_title_list = new List<Order.ColumnProperty> {
+                    new Order.ColumnProperty("书目记录路径", "biblio_recpath"),
+                    new Order.ColumnProperty("题名", "biblio_title" ),
+                    new Order.ColumnProperty("责任者", "biblio_author" ),
+                    new Order.ColumnProperty("出版者", "biblio_publication_area" ),
+                };
+                List<Order.ColumnProperty> order_title_list = new List<Order.ColumnProperty> {
+                    new Order.ColumnProperty("订购记录路径", "order_recpath"),
+                    new Order.ColumnProperty("书商", "order_seller" ),
+                    new Order.ColumnProperty("订购价", "order_price" ),
+                };
+
+                // 输出标题行
+                Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
+location_list,
+sheet,
+"",
+biblio_title_list,
+order_title_list,
+ref nRowIndex,
+ref column_max_chars);
+
+                /*
+* content_form_area
+* title_area
+* edition_area
+* material_specific_area
+* publication_area
+* material_description_area
+* series_area
+* notes_area
+* resource_identifier_area
+* * */
+#if NO
+                List<string> col_list = new List<string> {
+                "recpath",
+                "title",
+                "author",
+                "publication_area" };
+
+                List<string> order_col_list = new List<string> {
+                "recpath",
+                "seller",
+                "price" };
+#endif
+                string strSellerFilter = dlg.Seller;  // "*";
+                string strDefaultOrderXml = "";
+
+                nRet = ProcessBiblio(
                         (strRecPath, dom, timestamp) =>
                         {
                             this.ShowMessage("正在处理书目记录 " + strRecPath);
 
-                            OutputBiblioInfo(sheet,
-                                dom,
+                            Order.DistributeExcelFile.OutputDistributeInfos(
+                                this,
+                                location_list,
+                                strSellerFilter,
+                                sheet,
+                                // dom,
                                 strRecPath,
-                                nBiblioIndex++,
+                                ref nLineNumber,
                                 "",
-                                ref nRowIndex);
-                            nRowIndex++;    // 空行
+                                biblio_title_list,
+                                ref nRowIndex,
+                                order_title_list,
+                                (biblio_recpath, order_recpath) => {
+                                    if (string.IsNullOrEmpty(strDefaultOrderXml))
+                                    {
+                                        // 看看即将插入的位置是图书还是期刊?
+                                        string strPubType = OrderEditForm.GetPublicationType(biblio_recpath);
+
+                                        OrderEditForm edit = new OrderEditForm();
+
+                                        OrderEditForm.SetXml(edit.OrderEditControl,
+                                            Program.MainForm.AppInfo.GetString("BiblioSearchForm", "orderRecord", "<root />"),
+                                            strPubType);
+                                        edit.Text = "新增订购事项";
+                                        edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
+
+                                        Program.MainForm.AppInfo.LinkFormState(edit, "BiblioSearchForm_OrderEditForm_state");
+                                        edit.ShowDialog(this);
+
+                                        strDefaultOrderXml = OrderEditForm.GetXml(edit.OrderEditControl);
+                                        Program.MainForm.AppInfo.SetString("BiblioSearchForm", "orderRecord", strDefaultOrderXml);
+
+                                        if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                                            strDefaultOrderXml = "<root />";
+                                    }
+                                    EntityInfo order = new EntityInfo
+                                    {
+                                        OldRecord = strDefaultOrderXml
+                                    };
+                                    return order;
+                                },
+                                ref column_max_chars);
+
+                            // nRowIndex++;
                             return true;
                         },
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
             }
             catch (Exception ex)
             {
@@ -2885,7 +3000,7 @@ out strError);
 
                 if (doc != null)
                 {
-                    doc.SaveAs(dlg.FileName);
+                    doc.SaveAs(dlg.OutputFileName);
                     doc.Dispose();
                 }
 
@@ -2893,7 +3008,7 @@ out strError);
                 {
                     try
                     {
-                        System.Diagnostics.Process.Start(dlg.FileName);
+                        System.Diagnostics.Process.Start(dlg.OutputFileName);
                     }
                     catch
                     {
@@ -2906,40 +3021,6 @@ out strError);
             ERROR1:
             MessageBox.Show(this, strError);
         }
-
-        void OutputDistributeInfo(IXLWorksheet sheet,
-    XmlDocument dom,
-    string strRecPath,
-    int nBiblioIndex,
-    string strStyle,
-    ref int nRowIndex
-    )
-        {
-            string strError = "";
-
-            string strTableXml = "";
-            // return:
-            //      -1  出错
-            //      0   没有找到
-            //      1   找到
-            int nRet = GetTable(
-                strRecPath,
-                out strTableXml,
-                out strError);
-            if (nRet == -1)
-                throw new Exception(strError);
-
-            /*
-            ExcelUtility.OutputBiblioTable(
-            strRecPath,
-            strTableXml,
-            nBiblioIndex,
-            sheet,
-            2,  // nColIndex,
-            ref nRowIndex);
-            */
-        }
-
 
         // 2017/3/17
         // 导出详情到 Excel 文件
@@ -3042,49 +3123,6 @@ out strError);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
-        }
-
-        // return:
-        //      -1  出错
-        //      0   没有找到
-        //      1   找到
-        int GetTable(
-            string strRecPath,
-            out string strXml,
-            out string strError)
-        {
-            strError = "";
-            strXml = "";
-
-            LibraryChannel channel = this.GetChannel();
-            try
-            {
-                string[] results = null;
-                byte[] baNewTimestamp = null;
-                long lRet = channel.GetBiblioInfos(
-                    stop,
-                    strRecPath,
-                    "",
-                    new string[] { "table" },   // formats
-                    out results,
-                    out baNewTimestamp,
-                    out strError);
-                if (lRet == 0)
-                    return 0;
-                if (lRet == -1)
-                    return -1;
-                if (results == null || results.Length == 0)
-                {
-                    strError = "results error";
-                    return -1;
-                }
-                strXml = results[0];
-                return 1;
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
-            }
         }
 
         void OutputBiblioInfo(IXLWorksheet sheet,
@@ -10277,7 +10315,7 @@ MessageBoxDefaultButton.Button1);
             return this.listView_records.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -10346,7 +10384,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

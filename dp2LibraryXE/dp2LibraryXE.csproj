@@ -36,7 +36,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>240</ApplicationRevision>
+    <ApplicationRevision>241</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -65,10 +65,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>1E594CA1E9FC340410BA4ECF6899DD0D4CCC9F7D</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_5_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -81,6 +81,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>dbs.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -216,12 +219,7 @@
     </Content>
     <None Include="copydata.bat" />
     <None Include="copyopac.bat" />
-    <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
-    <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
-    <None Include="dp2LibraryXE_3_TemporaryKey.pfx" />
-    <None Include="dp2LibraryXE_4_TemporaryKey.pfx" />
-    <None Include="dp2LibraryXE_5_TemporaryKey.pfx" />
-    <None Include="dp2LibraryXE_TemporaryKey.pfx" />
+    <None Include="dp2003.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

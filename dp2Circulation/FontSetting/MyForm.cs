@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Web;
 using System.Reflection;
+using System.Xml;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
 
 using DigitalPlatform;
-using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
@@ -21,8 +20,6 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Remoting.Channels;
 using DigitalPlatform.Interfaces;
 
 // 2013/3/16 添加 XML 注释
@@ -1796,6 +1793,143 @@ out string strError)
             }
 
             return 0;
+        }
+
+        #endregion
+
+        #region 其他 API
+
+        // 获得馆藏地列表
+        public int GetLocationList(
+            out List<string> list,
+            out string strError)
+        {
+            strError = "";
+            list = new List<string>();
+            string strOutputInfo = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                long lRet = channel.GetSystemParameter(
+stop,
+"circulation",
+"locationTypes",
+out strOutputInfo,
+out strError);
+                if (lRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+
+            // 
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            XmlDocumentFragment fragment = dom.CreateDocumentFragment();
+            try
+            {
+                fragment.InnerXml = strOutputInfo;
+            }
+            catch (Exception ex)
+            {
+                strError = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message;
+                return -1;
+            }
+
+            dom.DocumentElement.AppendChild(fragment);
+
+            /*
+<locationTypes>
+    <item canborrow="yes" itembarcodeNullable="yes">流通库</item>
+    <item>阅览室</item>
+    <library code="分馆1">
+        <item canborrow="yes">流通库</item>
+        <item>阅览室</item>
+    </library>
+</locationTypes>
+*/
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
+            foreach (XmlElement node in nodes)
+            {
+                string strText = node.InnerText;
+
+                // 
+                string strLibraryCode = "";
+                XmlNode parent = node.ParentNode;
+                if (parent.Name == "library")
+                {
+                    strLibraryCode = DomUtil.GetAttr(parent, "code");
+                }
+
+                list.Add(string.IsNullOrEmpty(strLibraryCode) ? strText : strLibraryCode + "/" + strText);
+            }
+
+            return 1;
+        }
+
+
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetTable(
+            string strRecPath,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                string[] results = null;
+                byte[] baNewTimestamp = null;
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    strRecPath,
+                    "",
+                    new string[] { "table" },   // formats
+                    out results,
+                    out baNewTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;
+                if (lRet == -1)
+                    return -1;
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+                strXml = results[0];
+                return 1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        public void OnLoaderPrompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "MyForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
         }
 
         #endregion

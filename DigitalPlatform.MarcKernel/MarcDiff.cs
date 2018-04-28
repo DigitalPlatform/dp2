@@ -288,6 +288,8 @@ namespace DigitalPlatform.Marc
                             bReserveOld = true;
                         }
                     }
+                    else
+                        bReserveOld = true; // 2018/4/28
                     
                     if (bReserveOld)
                     {
