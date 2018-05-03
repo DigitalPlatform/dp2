@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-using System.Text.RegularExpressions;
 using System.Diagnostics;
 
 namespace DigitalPlatform.Xml
@@ -12,6 +11,73 @@ namespace DigitalPlatform.Xml
     // DomUtil类包含XML DOM的一些扩展功能函数
     public class DomUtil
     {
+        // parameters:
+        //      condition   如果为 "element_not_exists"，表示元素一开始不存在
+        //      action      希望进行的动作。传入值为 "change" 或者 "remove"。传出值表示希望进行的修改动作
+        public delegate void FuncChange(string condition,
+            ref string action,
+            ref string attr_value);
+
+        // 有条件地修改一个元素的属性值。
+        // 所谓条件就是根据 func 的返回值判断
+        // parameters:
+        //      element_name    内容为 "element1/element2" 形态
+        public static bool ChangeAttribute(XmlDocument dom,
+            string element_name,
+            string attr_name,
+            FuncChange func)
+        {
+            bool bChanged = false;
+            string attr_value = null;
+            string action = "change";
+            string strOldValue = null;
+
+            XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+            if (element == null)
+            {
+                func("element_not_exists", ref action, ref attr_value);
+                if (attr_value == null || action == "remove")
+                    return false;
+                element = DomUtil.CreateNode(dom.DocumentElement, element_name.Split(new char[] { '/' })) as XmlElement;
+                bChanged = true;
+            }
+            else
+            {
+                attr_value = element.GetAttribute(attr_name);
+                strOldValue = attr_value;
+                func("element_exists", ref action, ref attr_value);
+            }
+
+            if (attr_value == null && strOldValue == null)
+                return bChanged;
+            if (attr_value == null || action == "remove")
+                element.RemoveAttribute(attr_name);
+            else
+            {
+                if (attr_value == strOldValue)
+                    return bChanged;
+                element.SetAttribute(attr_name, attr_value);
+            }
+
+            bChanged = true;
+            return bChanged;
+        }
+
+
+        // 确保在根元素之下创建一个容器元素
+        public static XmlElement EnsureContainerElement(XmlDocument cfg_dom,
+            string strElementName)
+        {
+            XmlElement container = cfg_dom.DocumentElement.SelectSingleNode(strElementName) as XmlElement;
+            if (container == null)
+            {
+                container = cfg_dom.CreateElement(strElementName);
+                cfg_dom.DocumentElement.AppendChild(container);
+            }
+
+            return container;
+        }
+
         // 2017/12/27
         public static void SafeLoadXml(XmlDocument dom, string xml)
         {
@@ -1044,12 +1110,12 @@ namespace DigitalPlatform.Xml
             if (node == null)
                 return strDefault;
             /*
-			XmlNode nodeAttr = node.SelectSingleNode("@" + attrName);
+            XmlNode nodeAttr = node.SelectSingleNode("@" + attrName);
 
-			if (nodeAttr == null)
-				return strDefault;
-			else
-				return nodeAttr.Value;
+            if (nodeAttr == null)
+                return strDefault;
+            else
+                return nodeAttr.Value;
              * */
 
             Debug.Assert(node.Attributes != null, "");
@@ -1090,7 +1156,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null)
             {
                 if (strAttrValue == null)
-                    return;	// 本来就不存在
+                    return; // 本来就不存在
 
                 XmlElement element = (XmlElement)node;
                 element.SetAttribute(strAttrName, strAttrValue);
@@ -1128,7 +1194,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null)
             {
                 if (strAttrValue == null)
-                    return;	// 本来就不存在
+                    return; // 本来就不存在
 
                 XmlElement element = (XmlElement)node;
                 element.SetAttribute(strAttrName, strAttrNameSpaceURI, strAttrValue);
@@ -1168,7 +1234,7 @@ namespace DigitalPlatform.Xml
             if (attrFound == null)
             {
                 if (strValue == null)
-                    return;	// 本来就不存在
+                    return; // 本来就不存在
 
                 XmlElement element = (XmlElement)node;
                 XmlAttribute attr = node.OwnerDocument.CreateAttribute(strPrefix, strName, strNamespaceURI);

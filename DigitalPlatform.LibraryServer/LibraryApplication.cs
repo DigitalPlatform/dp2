@@ -1406,6 +1406,12 @@ namespace DigitalPlatform.LibraryServer
 
                     ///
                     app.InitialMsmq();
+                    if (string.IsNullOrEmpty(this.OutgoingQueue))
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Message Queue 未被启用");
+#endif
+                    }
 
                     // 初始化 mongodb 相关对象
                     nRet = InitialMongoDatabases(out strError);
@@ -14948,6 +14954,12 @@ strLibraryCode);    // 读者所在的馆代码
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(this.OutgoingQueue))
+            {
+                strError = "消息队列尚未被 dp2library 启用";
+                return -1;
+            }
 
             try
             {

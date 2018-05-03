@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using DigitalPlatform.Xml;
+using System;
 using System.Xml;
 
 namespace DigitalPlatform.LibraryServer.Common
@@ -370,7 +368,7 @@ namespace DigitalPlatform.LibraryServer.Common
                 return nodeDatabase;
             }
 
-            XmlElement container = EnsureContainerElement(cfg_dom, "utilDb");
+            XmlElement container = DomUtil.EnsureContainerElement(cfg_dom, "utilDb");
 
             nodeDatabase = cfg_dom.CreateElement("database");
             container.AppendChild(nodeDatabase);
@@ -378,21 +376,7 @@ namespace DigitalPlatform.LibraryServer.Common
             nodeDatabase.SetAttribute("type", strType);
             return nodeDatabase;
         }
-
-        // 确保在根元素创建一个容器元素
-        public static XmlElement EnsureContainerElement(XmlDocument cfg_dom,
-            string strElementName)
-        {
-            XmlElement container = cfg_dom.DocumentElement.SelectSingleNode(strElementName) as XmlElement;
-            if (container == null)
-            {
-                container = cfg_dom.CreateElement(strElementName);
-                cfg_dom.DocumentElement.AppendChild(container);
-            }
-
-            return container;
-        }
-
+    
         #endregion
 
         #region 单个数据库

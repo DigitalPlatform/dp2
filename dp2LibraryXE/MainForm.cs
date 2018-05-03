@@ -751,7 +751,7 @@ http://github.com/digitalplatform/dp2"
             // 修改前的模式
             string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
-        REDO_VERIFY:
+            REDO_VERIFY:
             strSerialCode = this.AppInfo.GetString("sn", "sn", "");
             if (strSerialCode == "test")
             {
@@ -889,7 +889,7 @@ http://github.com/digitalplatform/dp2"
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -1113,7 +1113,7 @@ http://github.com/digitalplatform/dp2"
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2765,7 +2765,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2788,7 +2788,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2806,7 +2806,7 @@ TaskScheduler.Default);
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2977,7 +2977,7 @@ miniServer	-- enterprise mini
             string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
             string strSerialCode = "";
-        REDO_VERIFY:
+            REDO_VERIFY:
 
             //string strLocalString = GetEnvironmentString(this.IsServer);
 
@@ -3093,7 +3093,7 @@ miniServer	-- enterprise mini
             }
 
 
-        RESTART:
+            RESTART:
             // 修改后的模式
             //string strNewMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
             //if (strOldMode != strNewMode)
@@ -3106,7 +3106,7 @@ miniServer	-- enterprise mini
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }
@@ -3306,7 +3306,7 @@ this.Font);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3332,7 +3332,7 @@ this.Font);
                 _versionManager.AutoSave();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3485,7 +3485,7 @@ this.Font);
             if (time1 > time2)
                 return 1;
             return -1;
-        BAD_TIMESTRING:
+            BAD_TIMESTRING:
             return string.Compare(strTimestamp1, strTimestamp2);
         }
 
@@ -3945,7 +3945,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "dp2OPAC 数据目录和应用程序目录安装成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4078,7 +4078,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
             MessageBox.Show(this, "注册成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4222,7 +4222,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 goto ERROR1;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4405,7 +4405,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
             AppendSectionTitle("结束安装 dp2OPAC");
             return;
-        ERROR1:
+            ERROR1:
             AppendString(strError + "\r\n");
 
             this.AppInfo.SetBoolean("OPAC", "installed", false);
@@ -4435,7 +4435,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             }
 
             string strHead = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
-                // + "<link rel='stylesheet' href='"+strCssFileName+"' type='text/css'>"
+    // + "<link rel='stylesheet' href='"+strCssFileName+"' type='text/css'>"
     + "<style media='screen' type='text/css'>"
     + "body { font-family:Microsoft YaHei; background-color:#555555; color:#eeeeee; } "
     + "</style>"
@@ -4555,7 +4555,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 try
                 {
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // return:
                     //      -1  error
                     //      0   登录未成功
@@ -4762,7 +4762,7 @@ Stack:
 
             AppendSectionTitle("结束升级 dp2OPAC");
             return;
-        ERROR1:
+            ERROR1:
             AppendString(strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4814,13 +4814,13 @@ Stack:
             string strError = "";
             int nRet = 0;
 
-            var featureNames = new[] 
+            var featureNames = new[]
     {
         "MSMQ-Container",
         "MSMQ-Server",
     };
             // Windows Server 2008, Windows Server 2012 的用法
-            var server_featureNames = new[] 
+            var server_featureNames = new[]
     {
         "MSMQ-Services",
         "MSMQ-Server",
@@ -4851,7 +4851,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
              * */
 
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4942,6 +4942,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 strError = "单机版 dp2Library 模块 尚未安装。请先安装 dp2Library 模块";
                 goto ERROR1;
             }
+
+            bool bAdd = Control.ModifierKeys == Keys.Control ? false : true;
             // 为 dp2library 的 library.xml 文件增配 MSMQ 相关参数。这之前要确保在 Windows 上启用了 Message Queue Service。
             // return:
             //      -1  出错
@@ -4950,16 +4952,16 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             int nRet = InstallHelper.SetupMessageQueue(
                 strLibraryXmlFileName,
                 "xe",
-                Control.ModifierKeys == Keys.Control ? false : true,
+                bAdd,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
             if (nRet == 1)
-                MessageBox.Show(this, "添加参数成功");
+                MessageBox.Show(this, (bAdd ? "添加" : "清除") + "参数成功");
             else
-                MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经配置过 MQ 参数了)");
+                MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经" + (bAdd ? "配置" : "清除") + "过 MQ 参数了)");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4990,7 +4992,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             else
                 MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经配置过 MongoDB 参数了)");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5052,7 +5054,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
             AppendString("MongoDB 移走成功\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5162,7 +5164,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

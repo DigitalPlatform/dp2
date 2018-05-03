@@ -268,6 +268,36 @@ out string strError)
             bool bChanged = false;
 
             // message 元素 defaultQueue 属性
+            if (DomUtil.ChangeAttribute(dom,
+                "message",
+                "defaultQueue",
+                (string condition, ref string action, ref string attr_value) =>
+                {
+                    if (bAdd == true)
+                    {
+                        // 添加
+                        if (string.IsNullOrEmpty(attr_value) == true)
+                        {
+                            attr_value = ".\\private$\\dp2library";
+                            if (string.IsNullOrEmpty(strInstanceName) == false)
+                                attr_value += "_" + strInstanceName;
+                        }
+                    }
+                    else
+                    {
+                        // 移除
+                        if (string.IsNullOrEmpty(attr_value) == false)
+                        {
+                            // TODO: 从 strOldValue 中移除 strNewValue 部分
+                            // 现在先简单实现为直接清除整个值
+                            // message.SetAttribute("defaultQueue", strNewValue);
+                            attr_value = null;
+                        }
+                    }
+                }) == true)
+                bChanged = true;
+#if NO
+            // message 元素 defaultQueue 属性
             {
                 XmlElement message = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
                 if (message == null)
@@ -307,7 +337,101 @@ out string strError)
                     }
                 }
             }
+#endif
 
+            // arrived 元素的 notifyTypes 属性
+            if (DomUtil.ChangeAttribute(dom,
+    "arrived",
+    "notifyTypes",
+    (string condition, ref string action, ref string attr_value) =>
+    {
+        if (bAdd == true)
+        {
+            // 添加
+            if (string.IsNullOrEmpty(attr_value) == true)
+            {
+                // 默认值
+                attr_value = "dpmail,mail,mq";
+            }
+            else
+            {
+                // 增加 mq
+                StringUtil.SetInList(ref attr_value, "mq", true);
+            }
+
+        }
+        else
+        {
+            // 删除 mq
+            if (string.IsNullOrEmpty(attr_value) != true)
+                StringUtil.SetInList(ref attr_value, "mq", false);
+        }
+    }) == true)
+                bChanged = true;
+
+            // monitors/readersMonitor 元素的 types 元素
+            if (DomUtil.ChangeAttribute(dom,
+"monitors/readersMonitor",
+"types",
+(string condition, ref string action, ref string attr_value) =>
+{
+    if (bAdd == true)
+    {
+        if (condition == "element_not_exists")
+            return; // 如果原来就不存在这个 readersMonitor 元素，则不添加 mq 了
+
+        // 添加
+        if (string.IsNullOrEmpty(attr_value) == true)
+        {
+            // 默认值
+            attr_value = "dpmail,email,mq"; // 注：因缺省值为 "dpmail,email"，所以添加 mq 以后应该是 "dpmail,email,mq"
+        }
+        else
+        {
+            // 增加 mq
+            StringUtil.SetInList(ref attr_value, "mq", true);
+        }
+
+    }
+    else
+    {
+        // 删除 mq
+        if (string.IsNullOrEmpty(attr_value) != true)
+            StringUtil.SetInList(ref attr_value, "mq", false);
+    }
+}) == true)
+                bChanged = true;
+
+            // circulation 元素的 notifyTypes 属性
+            if (DomUtil.ChangeAttribute(dom,
+"circulation",
+"notifyTypes",
+(string condition, ref string action, ref string attr_value) =>
+{
+    if (bAdd == true)
+    {
+        // 添加
+        if (string.IsNullOrEmpty(attr_value) == true)
+        {
+            // 默认值
+            attr_value = "mq";
+        }
+        else
+        {
+            // 增加 mq
+            StringUtil.SetInList(ref attr_value, "mq", true);
+        }
+
+    }
+    else
+    {
+        // 删除 mq
+        if (string.IsNullOrEmpty(attr_value) != true)
+            StringUtil.SetInList(ref attr_value, "mq", false);
+    }
+}) == true)
+                bChanged = true;
+#if NO
             if (bAdd == true)
             {
                 // arrived 元素的 notifyTypes 属性
@@ -396,6 +520,7 @@ out string strError)
                     }
                 }
             }
+#endif
 
             if (bChanged == true)
             {
@@ -521,7 +646,7 @@ out string strError)
             out string strError)
         {
             strError = "";
-        REDO_DELETE_DATADIR:
+            REDO_DELETE_DATADIR:
             try
             {
                 Directory.Delete(strDataDir, true);
