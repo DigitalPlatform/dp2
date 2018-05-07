@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Configuration.Install;
-using System.Security.Cryptography.X509Certificates;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 
@@ -20,7 +15,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.rms.Client;
 using DigitalPlatform.Interfaces;
 
 namespace DigitalPlatform.LibraryServer

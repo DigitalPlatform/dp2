@@ -573,7 +573,7 @@ namespace UpgradeUtil
                         LocationCollection locations = new LocationCollection();
                         for (int k = 0; k < nMax; k++)
                         {
-                            DigitalPlatform.Location location = new DigitalPlatform.Location();
+                            DigitalPlatform.Text.Location location = new DigitalPlatform.Text.Location();
                             location.Name = "未知";
                             if (nCount < cell.ArrivedCopy)
                             {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 
 using ClosedXML.Excel;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -164,6 +165,9 @@ namespace dp2Circulation
         }
 
         // 输出一行实体/订购/期刊/评注信息
+        // parameters:
+        //      dropdown_list   下拉列表内容数组。每个元素为这样的格式：value1,value2,value3
+        //                      也可以选择在此函数以外设置 cell range 的 valuelist。
         public static void OutputItemLine(
     string strRecPath,
     string strXml,
@@ -171,7 +175,9 @@ namespace dp2Circulation
     IXLWorksheet sheet,
     int nStartColIndex,     // 从 0 开始计数
     List<string> col_list,
-    int nRowIndex)  // 从 0 开始计数。
+    List<string> dropdown_list,
+    int nRowIndex,  // 从 0 开始计数。
+    XLColor backColor)
         {
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strXml);
@@ -179,6 +185,10 @@ namespace dp2Circulation
             int i = 0;
             foreach (string col in col_list)
             {
+                List<string> value_list = null;
+                if (dropdown_list != null)
+                    value_list = StringUtil.SplitList(dropdown_list[i]);
+
                 string strValue = "";
                 if (col == "recpath" || col.EndsWith("_recpath"))
                     strValue = strRecPath;
@@ -186,10 +196,31 @@ namespace dp2Circulation
                     strValue = FindItemContent(dom, col);
 
                 {
-                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
+                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue(strValue);
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    if (backColor != XLColor.NoColor)
+                        cell.Style.Fill.BackgroundColor = backColor;
+                    if (i == 0)
+                    {
+                        cell.Style.Border.SetLeftBorderColor(XLColor.Black);
+                        cell.Style.Border.SetLeftBorder(XLBorderStyleValues.Medium);
+                    }
+                    if (i == col_list.Count - 1)
+                    {
+                        cell.Style.Border.SetRightBorderColor(XLColor.Black);
+                        cell.Style.Border.SetRightBorder(XLBorderStyleValues.Medium);
+                    }
+
+                    if (value_list != null && value_list.Count > 0)
+                    {
+                        //Pass a string in this format: "Option1,Option2,Option3"
+                        // var options = new List<string> { "Option1", "Option2", "Option3" };
+                        var validOptions = $"\"{String.Join(",", value_list)}\"";
+                        cell.DataValidation.List(validOptions, true);
+                    }
                 }
 
+                i++;
             }
         }
 

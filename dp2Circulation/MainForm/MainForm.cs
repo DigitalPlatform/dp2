@@ -8873,7 +8873,7 @@ Keys keyData)
             try
             {
                 Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
-                    (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell) =>
+                    (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell, copyCell) =>
                     {
                         string strOldXml = "";
                         byte[] timestamp = null;
@@ -8897,6 +8897,7 @@ Keys keyData)
                         {
                             if (key == "recpath")
                                 continue;
+                            // copy 字段内容在此先兑现修改了
                             // TODO: 是否要检查元素名的合法性?
                             DomUtil.SetElementText(dom.DocumentElement, key, order_content_table[key]);
                         }
@@ -8909,12 +8910,15 @@ Keys keyData)
 
                         DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
 
-                        // TODO: 注意复本数是否有纯数字以外的其他形态?
-                        DomUtil.SetElementText(dom.DocumentElement, "copy", locations.Count.ToString());
+                        // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
+                        string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                        string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
+                        if (strOldCopyString != strNewCopyString)
+                            DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
 
                         if (string.IsNullOrEmpty(strOrderRecPath))
                         {
-                            strOrderRecPath = this.GetOrderDbName(Global.GetDbName(strBiblioRecPath)) + "/?";
+                            // strOrderRecPath = this.GetOrderDbName(Global.GetDbName(strBiblioRecPath)) + "/?";    // 拟新创建的订购记录路径为空，API 也能从书目记录路径中自动推导出来
                             strOldXml = "";
                         }
 
@@ -8934,6 +8938,8 @@ out strError);
 
                         if (strOrderRecPath.IndexOf("?") != -1)
                             orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
+                        if (strOldCopyString != strNewCopyString)
+                            copyCell.SetValue<string>(strNewCopyString);
                     });
             }
             finally
@@ -8944,6 +8950,26 @@ out strError);
 
                 this.ReturnChannel(channel);
             }
+        }
+
+        // 修改复本字符串中，订购复本数部分的套数数字
+        // 12[13] 的 12; 或者 3*5[4*5] 的 3
+        static string ChangeCopyStringCopyPart(string strText, string strCopy)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strText,
+                out string strOldCopy,
+                out string strNewCopy);
+
+#if NO
+            // 对 strOldCopy 进一步分解
+            // string strLeft = OrderDesignControl.GetCopyFromCopyString(strOldCopy);
+            // string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+#endif
+
+            strOldCopy = OrderDesignControl.ModifyCopy(strOldCopy, strCopy);
+
+            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
         }
 
         // TODO: 移入通道函数库
@@ -8971,7 +8997,8 @@ out strError);
 
                 item_info.OldRecPath = strRecPath;
 
-                if (strRecPath.IndexOf("?") == -1)
+                if (string.IsNullOrEmpty(strRecPath) == false
+                    && strRecPath.IndexOf("?") == -1)
                 {
                     if (StringUtil.IsInList("force", strStyle))
                         item_info.Action = "forcechange";

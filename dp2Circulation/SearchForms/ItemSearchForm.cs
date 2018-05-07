@@ -6134,6 +6134,8 @@ Program.MainForm.DefaultFont);
 
             Order.SaveDistributeExcelFileDialog dlg = new Order.SaveDistributeExcelFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
+            dlg.CreateNewOrderRecordVisible = false;
+            dlg.LibraryCode = Program.MainForm.FocusLibraryCode;
 
             dlg.UiState = Program.MainForm.AppInfo.GetString(
 "ItemSearchForm",
@@ -6172,7 +6174,7 @@ dlg.UiState);
             int nRowIndex = 2;
             try
             {
-
+#if NO
                 List<Order.ColumnProperty> biblio_title_list = new List<Order.ColumnProperty> {
                     new Order.ColumnProperty("书目记录路径", "biblio_recpath"),
                     new Order.ColumnProperty("题名", "biblio_title" ),
@@ -6184,6 +6186,38 @@ dlg.UiState);
                     new Order.ColumnProperty("书商", "order_seller" ),
                     new Order.ColumnProperty("订购价", "order_price" ),
                 };
+#endif
+                //
+                Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
+    "");
+                biblio_column_option.LoadData(Program.MainForm.AppInfo,
+                typeof(Order.BiblioColumnOption).ToString());
+
+                List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
+
+                //
+                Order.OrderColumnOption order_column_option = new Order.OrderColumnOption(Program.MainForm.UserDir,
+    "");
+                order_column_option.LoadData(Program.MainForm.AppInfo,
+                typeof(Order.OrderColumnOption).ToString());
+
+                List<Order.ColumnProperty> order_title_list = Order.DistributeExcelFile.BuildList(order_column_option);
+                // 附加某些列的值列表
+                {
+                    LibraryChannel channel = this.GetChannel();
+                    try
+                    {
+                        if (Order.ColumnProperty.FillValueList(channel,
+                            dlg.LibraryCode,
+                            order_title_list,
+                            out strError) == -1)
+                            goto ERROR1;
+                    }
+                    finally
+                    {
+                        this.ReturnChannel(channel);
+                    }
+                }
 
                 // 输出标题行
                 Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
@@ -6218,7 +6252,7 @@ ref column_max_chars);
                 "seller",
                 "price" };
 #endif
-                string strSellerFilter = dlg.Seller;  // "*";
+                string strSellerFilter = dlg.SellerFilter;  // "*";
 
                 nRet = VerifyItems(
                     (

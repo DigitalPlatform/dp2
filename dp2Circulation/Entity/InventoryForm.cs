@@ -61,7 +61,6 @@ namespace dp2Circulation
                 prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn2);
                 prop.CompareColumn += new CompareEventHandler(prop_CompareColumn2);
             }
-
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)

@@ -156,14 +156,17 @@ namespace DigitalPlatform.LibraryServer
 
             List<string> bodytypes = new List<string>();
 
-            string strBodyTypesDef = GetBodyTypesDef();
+            string strBodyTypesDef = GetBodyTypesDef(); // 已经处理了默认值情况
 
+#if NO
             if (string.IsNullOrEmpty(strBodyTypesDef) == true)
             {
                 strBodyTypesDef = "dpmail,email";   // 空表示只使用两种保守的类型
                 bodytypes = StringUtil.SplitList(strBodyTypesDef);
             }
-            else if (strBodyTypesDef == "[all]")
+            else 
+#endif
+            if (strBodyTypesDef == "[all]")
             {
                 // 全部类型。包括 mq 和外部接口
                 bodytypes.Add("dpmail");
@@ -317,7 +320,7 @@ namespace DigitalPlatform.LibraryServer
                         // 循环并不停止
                     }
 
-                CONTINUE:
+                    CONTINUE:
                     continue;
                 } // end of for
 
@@ -346,21 +349,21 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-        ERROR1:
+            ERROR1:
             AppendResultText("ReadersMonitor thread error : " + strError + "\r\n");
             this.App.WriteErrorLog("ReadersMonitor thread error : " + strError + "\r\n");
             return;
         }
 
         // 获得通知类型的定义
-        // monitors/readersMonitor 元素的 types 属性。缺省为空
+        // monitors/readersMonitor 元素的 types 属性值。缺省为"dpmail,email"
         string GetBodyTypesDef()
         {
             if (this.App.LibraryCfgDom == null || this.App.LibraryCfgDom.DocumentElement == null)
-                return "";
+                return "";  // DOM 对象，或者根元素不存在
             XmlElement def_node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
             if (def_node == null)
-                return "";
+                return "dpmail,email";  // 属性缺省后，缺省值是 "dpmail,mail"
             return def_node.GetAttribute("types");
         }
 
@@ -380,7 +383,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
             int nRedoCount = 0;
 
-        REDO:
+            REDO:
             byte[] output_timestamp = null;
 
             XmlDocument readerdom = new XmlDocument();
@@ -502,12 +505,12 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.DoNotifyReaderScriptFunction(
                         readerdom,
                         calendar,
-                    // notifiedBarcodes,
+                        // notifiedBarcodes,
                         strBodyType,
                         out nResultValue,
                         out strBody,
                         out strMime,
-                    // out wantNotifyBarcodes,
+                        // out wantNotifyBarcodes,
                         out strError);
                 if (nRet == -1)
                 {

@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-using DigitalPlatform;
+using DigitalPlatform.Text;
 
 /*
  * TODO:
@@ -1332,7 +1330,7 @@ namespace DigitalPlatform.CommonControl
         public static int Merge(ref List<LocationItem> items)
         {
             bool bChanged = false;
-            for (int i = 0; i < items.Count; )
+            for (int i = 0; i < items.Count;)
             {
                 LocationItem item = items[i];
 
@@ -1778,7 +1776,7 @@ namespace DigitalPlatform.CommonControl
             comboBox_location.FlatStyle = FlatStyle.Flat;
             comboBox_location.DropDownHeight = DpiUtil.GetScalingY(this.Container.DpiXY, 300);   //  300;
             comboBox_location.DropDownWidth = DpiUtil.GetScalingX(this.Container.DpiXY, 300);    //  300;
-            comboBox_location.Size = new Size(this.Container.m_nLocationWidth, 
+            comboBox_location.Size = new Size(this.Container.m_nLocationWidth,
                 DpiUtil.GetScalingY(this.Container.DpiXY, 28)); // 28
             comboBox_location.ForeColor = this.Container.panel_main.ForeColor;
 
@@ -1786,7 +1784,7 @@ namespace DigitalPlatform.CommonControl
 
             // 已验收标志
             this.checkBox_arrived = new CheckBox();
-            this.checkBox_arrived.Size = new Size(this.Container.m_nArrivedWidth, 
+            this.checkBox_arrived.Size = new Size(this.Container.m_nArrivedWidth,
                 DpiUtil.GetScalingY(this.Container.DpiXY, 28));  // 28
             this.checkBox_arrived.ForeColor = this.Container.panel_main.ForeColor;
             container.panel_main.Controls.Add(checkBox_arrived);

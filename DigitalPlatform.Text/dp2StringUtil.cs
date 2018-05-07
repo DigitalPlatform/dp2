@@ -9,6 +9,67 @@ namespace DigitalPlatform.Text
     /// </summary>
     public static class dp2StringUtil
     {
+
+        public static bool IsGlobalUser(string strLibraryCodeList)
+        {
+            if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
+                return true;
+
+            return false;
+        }
+
+        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+        // parameters:
+        //      bNarrow 如果为 true，表示 馆代码 "" 只匹配总馆，不包括各个分馆；如果为 false，表示 馆代码 "" 匹配总馆和所有分馆
+        // return:
+        //      -1  出错
+        //      0   超过管辖范围。strError中有解释
+        //      1   在管辖范围内
+        public static int DistributeInControlled(string strDistribute,
+            string strLibraryCodeList,
+            bool bNarrow,
+            out string strError)
+        {
+            strError = "";
+
+            if (bNarrow == false && IsGlobalUser(strLibraryCodeList) == true)
+                return 1;
+
+            LocationCollection locations = new LocationCollection();
+            int nRet = locations.Build(strDistribute, out strError);
+            if (nRet == -1)
+            {
+                strError = "馆藏分配字符串 '" + strDistribute + "' 格式不正确";
+                return -1;
+            }
+
+            foreach (Location location in locations)
+            {
+                // 空的馆藏地点被视为不在分馆用户管辖范围内
+                if (bNarrow == false && string.IsNullOrEmpty(location.Name) == true)
+                {
+                    strError = "馆代码 '' 不在范围 '" + strLibraryCodeList + "' 内";
+                    return 0;
+                }
+
+                // 解析
+                ParseCalendarName(location.Name,
+            out string strLibraryCode,
+            out string strPureName);
+
+                if (string.IsNullOrEmpty(strLibraryCode) && string.IsNullOrEmpty(strLibraryCodeList))
+                    continue;
+
+                if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                {
+                    strError = "馆代码 '" + strLibraryCode + "' 不在范围 '" + strLibraryCodeList + "' 内";
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
         /// <summary>
         /// 从一个馆藏地点字符串中解析出馆代码部分。例如 "海淀分馆/阅览室" 解析出 "海淀分馆"
         /// </summary>

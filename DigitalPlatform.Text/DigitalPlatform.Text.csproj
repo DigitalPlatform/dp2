@@ -151,6 +151,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\DigitalPlatform\LocationCollection.cs">
+      <Link>LocationCollection.cs</Link>
+    </Compile>
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

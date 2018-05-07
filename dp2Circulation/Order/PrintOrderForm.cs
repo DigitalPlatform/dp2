@@ -11,8 +11,8 @@ using System.Reflection;
 using System.Web;   // HttpUtility
 
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
+//using DocumentFormat.OpenXml.Packaging;
+//using DocumentFormat.OpenXml.Spreadsheet;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -4099,6 +4099,7 @@ true*/);
             return String.Format("{0,3:N}", ((double)value1 / (double)value2) * (double)100) + "%";
         }
 
+#if NO
         static void WriteExcelLine(WorkbookPart wp,
             Worksheet ws,
             int nLineIndex,
@@ -4121,7 +4122,7 @@ true*/);
                 0,
                 bString);
         }
-
+#endif
         // 构造html页面
         int BuildMergedHtml(
             int nSheetIndex,

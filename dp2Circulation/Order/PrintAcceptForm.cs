@@ -1342,7 +1342,7 @@ namespace dp2Circulation
 
                 for (int j = 0; j < locations.Count; j++)
                 {
-                    DigitalPlatform.Location location = locations[j];
+                    DigitalPlatform.Text.Location location = locations[j];
 
                     if (string.IsNullOrEmpty(location.RefID) == true)
                         continue;
@@ -4451,7 +4451,7 @@ out strError);
 
                 for (int i = 0; i < locations.Count; i++)
                 {
-                    DigitalPlatform.Location location = locations[i];
+                    DigitalPlatform.Text.Location location = locations[i];
 
                     if (string.IsNullOrEmpty(location.RefID) == true)
                         continue;

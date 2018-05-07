@@ -1,26 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
-using System.IO;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
 using System.Diagnostics;
 
-using DigitalPlatform;	// Stop类
-using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
-
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-
 
 namespace DigitalPlatform.LibraryServer
 {

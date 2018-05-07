@@ -1117,7 +1117,8 @@ out strError);
 
             REDO:
             TimeSpan old_timeout = this.Timeout;
-            this.Timeout = new TimeSpan(0, 0, 10);
+            if (this.Timeout < TimeSpan.FromSeconds(10))
+                this.Timeout = TimeSpan.FromSeconds(10);
             try
             {
                 LibraryServerResult result = ws.Login(out strOutputUserName,
@@ -1147,7 +1148,8 @@ out strError);
             }
             finally
             {
-                this.Timeout = old_timeout;
+                if (this.Timeout != old_timeout)
+                    this.Timeout = old_timeout;
             }
         }
 

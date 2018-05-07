@@ -8,6 +8,7 @@ using System.IO;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
+using DigitalPlatform.CommonControl;
 
 // 2013/3/16 添加 XML 注释
 
@@ -61,6 +62,11 @@ namespace dp2Circulation
         public PrintOptionDlg()
         {
             InitializeComponent();
+        }
+
+        public void HidePage(string key)
+        {
+            this.TabControl.TabPages.RemoveByKey(key);  // tabPage_normal tabPage_templates
         }
 
         private void PrintOptionDlg_Load(object sender, EventArgs e)
@@ -915,6 +921,22 @@ namespace dp2Circulation
             get
             {
                 return this.listView_columns;
+            }
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_columns);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_columns);
+                GuiState.SetUiState(controls, value);
             }
         }
     }

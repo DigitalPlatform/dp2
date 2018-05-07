@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Xml;
+
 using ClosedXML.Excel;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -106,6 +108,7 @@ ref List<int> column_max_chars)
             MyForm form,
             List<string> location_list,
             string strSellerFilter,
+            string strLibraryCode,
             IXLWorksheet sheet,
     // XmlDocument dom,
     string strRecPath,
@@ -171,6 +174,25 @@ ref List<int> column_max_chars)
                         if (StringUtil.IsInList(strSeller, strSellerFilter) == false)
                             continue;
                     }
+
+                    {
+                        string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
+
+                        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+                        // return:
+                        //      -1  出错
+                        //      0   超过管辖范围。strError中有解释
+                        //      1   在管辖范围内
+                        int nRet = dp2StringUtil.DistributeInControlled(strDistribute,
+                            strLibraryCode,
+                            true,
+                            out string strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                        if (nRet == 0)
+                            continue;
+                    }
+
                     orders.Add(info);
                 }
 
@@ -198,6 +220,7 @@ order_col_list,
 "", // 表示希望获得订购记录模板
 procGetOrderRecord,
 ref column_max_chars);
+                nRowIndex++;
             }
             else
             {
@@ -215,7 +238,8 @@ ref column_max_chars);
     nRowIndex,
     order_col_list,
     order.OldRecPath,
-    (biblio_recpath, order_recpath) => {
+    (biblio_recpath, order_recpath) =>
+    {
         Debug.Assert(strRecPath == biblio_recpath, "");
         Debug.Assert(order_recpath == order.OldRecPath, "");
         return order;
@@ -305,7 +329,9 @@ order.OldRecord,
 sheet,
 nStartColIndex,  // nColIndex,
 ColumnProperty.GetTypeList(order_col_list),
-nRowIndex);
+ColumnProperty.GetDropDownList(order_col_list),
+nRowIndex,
+XLColor.NoColor);
             }
 
             nStartColIndex += order_col_list.Count;
@@ -336,6 +362,7 @@ nRowIndex);
                 if (nRet == -1)
                     throw new Exception("订购记录 '" + order.OldRecPath + "' 的去向字段格式错误:" + strError);
 
+                List<IXLCell> cells = new List<IXLCell>();
                 int i = 0;
                 foreach (string location in location_list)
                 {
@@ -353,8 +380,19 @@ nRowIndex);
                     cell.Style.Font.Bold = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cells.Add(cell);
 
                     i++;
+                }
+
+                if (cells.Count > 0)
+                {
+                    var dv1 = sheet.Range(cells[0], cells[cells.Count - 1]).SetDataValidation();
+                    dv1.WholeNumber.Between(0, 1000);
+
+                    dv1.ErrorStyle = XLErrorStyle.Warning;
+                    dv1.ErrorTitle = "数字超出范围";
+                    dv1.ErrorMessage = "本单元只允许输入 0 到 1000 之间的数字";
                 }
             }
 
@@ -411,7 +449,8 @@ int MAX_CHARS = 50)
             string strOrderRecPath,
             string strDistributeString,
             Dictionary<string, string> order_content_table,
-            IXLCell orderRecPathCell
+            IXLCell orderRecPathCell,
+            IXLCell copyCell
             );
 
         public static void ImportFromOrderDistributeExcelFile(ProcessOrderRecord proc)
@@ -446,7 +485,8 @@ int MAX_CHARS = 50)
                             info._content_name_value_table["order_recpath"],
                             info.DistributeString,
                             info.GetOrderTable(),
-                            info.OrderRecPathCell
+                            info.OrderRecPathCell,
+                            info.CopyCell
                             );
                     }
 
@@ -477,7 +517,11 @@ int MAX_CHARS = 50)
 
             public IXLRow CurrentDataRow { get; set; }
 
+            // 当前行内订购记录路径格子。用于修改这个格子的值
             public IXLCell OrderRecPathCell { get; set; }
+
+            // 当前行内复本格子。用于修改这个格子的值
+            public IXLCell CopyCell { get; set; }
 
             // 内容 type name --> data value
             internal Dictionary<string, string> _content_name_value_table { get; set; }
@@ -541,6 +585,7 @@ int MAX_CHARS = 50)
             {
                 this.CurrentDataRow = null;
                 this.OrderRecPathCell = null;
+                this.CopyCell = null;
             }
 
             // 获得下一个数据行的信息
@@ -593,6 +638,8 @@ int MAX_CHARS = 50)
 
                         if (type == "order_recpath")
                             this.OrderRecPathCell = cell;
+                        else if (type == "order_copy")
+                            this.CopyCell = cell;
 
                         if (type.StartsWith("location:"))
                             location_list.Add(type.Substring("location:".Length) + ":" + cell.GetValue<string>());
@@ -627,7 +674,27 @@ int MAX_CHARS = 50)
             }
         }
 
+        internal static List<ColumnProperty> BuildList(PrintOption option)
+        {
+            List<ColumnProperty> results = new List<ColumnProperty>();
+            for (int i = 0; i < option.Columns.Count; i++)
+            {
+                Column column = option.Columns[i];
 
+                string strCaption = column.Caption;
+
+                // 如果没有caption定义，就挪用name定义
+                if (String.IsNullOrEmpty(strCaption) == true)
+                    strCaption = column.Name;
+
+                string strClass = StringUtil.GetLeft(column.Name);
+
+                ColumnProperty prop = new ColumnProperty(strCaption, strClass);
+                results.Add(prop);
+            }
+
+            return results;
+        }
     }
 
     // 列属性
@@ -635,14 +702,30 @@ int MAX_CHARS = 50)
     {
         // 用于阅读的标题
         public string Caption { get; set; }
+
         // 用于程序识别的类型
         public string Type { get; set; }
+
+        // 可用值列表
+        public List<string> ValueList { get; set; }
 
         public ColumnProperty(string caption, string type)
         {
             this.Caption = caption;
             this.Type = type;
         }
+
+        public static List<string> GetDropDownList(List<ColumnProperty> property_list)
+        {
+            List<string> results = new List<string>();
+            property_list.ForEach((o) =>
+            {
+                results.Add(StringUtil.MakePathList(o.ValueList));
+            });
+
+            return results;
+        }
+
 
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
             bool bRemovePrefix = true)
@@ -663,5 +746,183 @@ int MAX_CHARS = 50)
 
             return results;
         }
+
+        public static int FillValueList(LibraryChannel channel,
+            string strLibraryCode,
+            List<ColumnProperty> order_title_list,
+            out string strError)
+        {
+            strError = "";
+
+            string[] names = new string[] { "orderSeller",
+                "orderSource",
+                "orderClass",
+            };
+
+            foreach (string name in names)
+            {
+                ColumnProperty seller_prop = order_title_list.Find((o) =>
+                { if (o.Type == name.Replace("order", "order_").ToLower()) return true; return false; });
+
+                if (seller_prop == null)
+                    continue;
+
+                // order_seller 列表
+                int nRet = Program.MainForm.GetValueTable(name,
+                "",
+                out string[] values,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+
+                var list = Global.FilterValuesWithLibraryCode(strLibraryCode, new List<string>(values));
+
+                // 去掉每个元素内的 {} 部分
+                list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
+
+                if (seller_prop != null)
+                    seller_prop.ValueList = new List<string>(list);
+            }
+
+            return 0;
+        }
     }
+
+    internal class BiblioColumnOption : PrintOption
+    {
+        string PublicationType = "图书"; // 图书 连续出版物
+
+        public BiblioColumnOption(string strDataDir,
+            string strPublicationType)
+        {
+            this.DataDir = strDataDir;
+            this.PublicationType = strPublicationType;
+
+#if NO
+            this.PageHeaderDefault = "%date% 原始订购数据 - %recpathfilename% - (共 %pagecount% 页)";
+            this.PageFooterDefault = "%pageno%/%pagecount%";
+
+            this.TableTitleDefault = "%date% 原始订购数据";
+
+            this.LinesPerPageDefault = 20;
+#endif
+
+            // Columns缺省值
+            Columns.Clear();
+
+            Column column = new Column();
+            column.Name = "biblio_recpath -- 书目记录路径";
+            column.Caption = "书目记录路径";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "biblio_title -- 题名";
+            column.Caption = "题名";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "biblio_author -- 责任者";
+            column.Caption = "责任者";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+
+            column = new Column();
+            column.Name = "biblio_publication_area -- 出版者";
+            column.Caption = "出版者";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+        }
+    }
+
+    internal class OrderColumnOption : PrintOption
+    {
+        string PublicationType = "图书"; // 图书 连续出版物
+
+        public OrderColumnOption(string strDataDir,
+            string strPublicationType)
+        {
+            this.DataDir = strDataDir;
+            this.PublicationType = strPublicationType;
+
+            // Columns缺省值
+            Columns.Clear();
+
+            Column column = new Column();
+            column.Name = "order_recpath -- 订购记录路径";
+            column.Caption = "订购记录路径";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_seller -- 渠道(书商)";
+            column.Caption = "渠道(书商)";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_price -- 订购价";
+            column.Caption = "订购价";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_source -- 经费来源";
+            column.Caption = "经费来源";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+#if NO
+            column = new Column();
+            column.Name = "range -- 时间范围";
+            column.Caption = "时间范围";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "issueCount -- 包含期数";
+            column.Caption = "包含期数";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+#endif
+            column = new Column();
+            column.Name = "order_copy -- 复本数";
+            column.Caption = "复本数";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_orderID -- 订单号";
+            column.Caption = "订单号";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_class -- 类别";
+            column.Caption = "类别";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_batchNo -- 批次号";
+            column.Caption = "批次号";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_catalogNo -- 书目号";
+            column.Caption = "书目号";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+
+            column = new Column();
+            column.Name = "order_comment -- 附注";
+            column.Caption = "附注";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
+        }
+    }
+
 }
