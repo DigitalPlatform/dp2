@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.label1 = new System.Windows.Forms.Label();
-            this.comboBox_seller = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_getOutputFileName = new System.Windows.Forms.Button();
@@ -40,9 +39,10 @@
             this.button_orderColumns = new System.Windows.Forms.Button();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_output = new System.Windows.Forms.TabPage();
-            this.tabPage_cfg = new System.Windows.Forms.TabPage();
-            this.label3 = new System.Windows.Forms.Label();
             this.comboBox_libraryCode = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.comboBox_seller = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_output.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
@@ -56,17 +56,6 @@
             this.label1.Size = new System.Drawing.Size(170, 18);
             this.label1.TabIndex = 2;
             this.label1.Text = "渠道(书商)筛选(&S):";
-            // 
-            // comboBox_seller
-            // 
-            this.comboBox_seller.BackColor = System.Drawing.SystemColors.Window;
-            this.comboBox_seller.Location = new System.Drawing.Point(204, 65);
-            this.comboBox_seller.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox_seller.Name = "comboBox_seller";
-            this.comboBox_seller.Padding = new System.Windows.Forms.Padding(6);
-            this.comboBox_seller.Size = new System.Drawing.Size(263, 33);
-            this.comboBox_seller.TabIndex = 3;
-            this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
             // 
             // button_Cancel
             // 
@@ -186,6 +175,24 @@
             this.tabPage_output.Text = "如何输出";
             this.tabPage_output.UseVisualStyleBackColor = true;
             // 
+            // comboBox_libraryCode
+            // 
+            this.comboBox_libraryCode.FormattingEnabled = true;
+            this.comboBox_libraryCode.Location = new System.Drawing.Point(204, 14);
+            this.comboBox_libraryCode.Name = "comboBox_libraryCode";
+            this.comboBox_libraryCode.Size = new System.Drawing.Size(263, 26);
+            this.comboBox_libraryCode.TabIndex = 1;
+            this.comboBox_libraryCode.TextChanged += new System.EventHandler(this.comboBox_libraryCode_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(18, 17);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(98, 18);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "馆代码(&C):";
+            // 
             // tabPage_cfg
             // 
             this.tabPage_cfg.Controls.Add(this.button_biblioColumns);
@@ -198,23 +205,17 @@
             this.tabPage_cfg.Text = "配置";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
-            // label3
+            // comboBox_seller
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(18, 17);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(98, 18);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "馆代码(&C):";
-            // 
-            // comboBox_libraryCode
-            // 
-            this.comboBox_libraryCode.Enabled = false;
-            this.comboBox_libraryCode.FormattingEnabled = true;
-            this.comboBox_libraryCode.Location = new System.Drawing.Point(204, 14);
-            this.comboBox_libraryCode.Name = "comboBox_libraryCode";
-            this.comboBox_libraryCode.Size = new System.Drawing.Size(263, 26);
-            this.comboBox_libraryCode.TabIndex = 1;
+            this.comboBox_seller.BackColor = System.Drawing.SystemColors.Window;
+            this.comboBox_seller.Location = new System.Drawing.Point(204, 65);
+            this.comboBox_seller.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_seller.Name = "comboBox_seller";
+            this.comboBox_seller.Padding = new System.Windows.Forms.Padding(6);
+            this.comboBox_seller.Size = new System.Drawing.Size(263, 33);
+            this.comboBox_seller.TabIndex = 3;
+            this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
+            this.comboBox_seller.TextChanged += new System.EventHandler(this.comboBox_seller_TextChanged);
             // 
             // SaveDistributeExcelFileDialog
             // 
@@ -230,6 +231,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "保存到订购去向 Excel 文件";
+            this.Load += new System.EventHandler(this.SaveDistributeExcelFileDialog_Load);
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_output.ResumeLayout(false);
             this.tabPage_output.PerformLayout();

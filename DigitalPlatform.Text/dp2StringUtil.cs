@@ -9,6 +9,26 @@ namespace DigitalPlatform.Text
     /// </summary>
     public static class dp2StringUtil
     {
+        public static List<string> FilterLocationList(List<string> location_list,
+    string strLibraryCodeList)
+        {
+            if (string.IsNullOrEmpty(strLibraryCodeList))
+                return location_list;
+            if (strLibraryCodeList == "[仅总馆]")
+                strLibraryCodeList = "";
+            List<string> results = new List<string>();
+            location_list.ForEach((o) =>
+            {
+                dp2StringUtil.ParseCalendarName(o,
+out string strLibraryCode,
+out string strPureName);
+
+                if (string.IsNullOrEmpty(strLibraryCode) && string.IsNullOrEmpty(strLibraryCodeList)
+                    || StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == true)
+                    results.Add(o);
+            });
+            return results;
+        }
 
         public static bool IsGlobalUser(string strLibraryCodeList)
         {
@@ -20,17 +40,20 @@ namespace DigitalPlatform.Text
 
         // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
         // parameters:
-        //      bNarrow 如果为 true，表示 馆代码 "" 只匹配总馆，不包括各个分馆；如果为 false，表示 馆代码 "" 匹配总馆和所有分馆
         // return:
         //      -1  出错
         //      0   超过管辖范围。strError中有解释
         //      1   在管辖范围内
         public static int DistributeInControlled(string strDistribute,
             string strLibraryCodeList,
-            bool bNarrow,
             out string strError)
         {
             strError = "";
+
+            //      bNarrow 如果为 true，表示 馆代码 "" 只匹配总馆，不包括各个分馆；如果为 false，表示 馆代码 "" 匹配总馆和所有分馆
+            bool bNarrow = strLibraryCodeList == "[仅总馆]";
+            if (strLibraryCodeList == "[仅总馆]")
+                strLibraryCodeList = "";
 
             if (bNarrow == false && IsGlobalUser(strLibraryCodeList) == true)
                 return 1;

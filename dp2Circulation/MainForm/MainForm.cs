@@ -8936,7 +8936,7 @@ out strError);
                         if (nRet == -1)
                             throw new Exception(strError);
 
-                        if (strOrderRecPath.IndexOf("?") != -1)
+                        if (string.IsNullOrEmpty(strOrderRecPath) == true || strOrderRecPath.IndexOf("?") != -1)
                             orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
                         if (strOldCopyString != strNewCopyString)
                             copyCell.SetValue<string>(strNewCopyString);

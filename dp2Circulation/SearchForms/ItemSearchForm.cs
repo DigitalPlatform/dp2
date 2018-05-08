@@ -6123,18 +6123,10 @@ Program.MainForm.DefaultFont);
                 goto ERROR1;
             }
 
-            int nRet = GetLocationList(
-    out List<string> location_list,
-    out strError);
-            if (nRet == -1)
-            {
-                strError = "获得馆藏地配置参数时出错: " + strError;
-                goto ERROR1;
-            }
-
             Order.SaveDistributeExcelFileDialog dlg = new Order.SaveDistributeExcelFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
             dlg.CreateNewOrderRecordVisible = false;
+            dlg.LibraryCodeList = Program.MainForm.GetAllLibraryCode();
             dlg.LibraryCode = Program.MainForm.FocusLibraryCode;
 
             dlg.UiState = Program.MainForm.AppInfo.GetString(
@@ -6150,6 +6142,17 @@ Program.MainForm.DefaultFont);
 dlg.UiState);
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            int nRet = GetLocationList(
+out List<string> location_list,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "获得馆藏地配置参数时出错: " + strError;
+                goto ERROR1;
+            }
+            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
+
 
             bool bLaunchExcel = true;
 

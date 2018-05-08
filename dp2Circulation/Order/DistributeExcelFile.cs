@@ -185,7 +185,6 @@ ref List<int> column_max_chars)
                         //      1   在管辖范围内
                         int nRet = dp2StringUtil.DistributeInControlled(strDistribute,
                             strLibraryCode,
-                            true,
                             out string strError);
                         if (nRet == -1)
                             throw new Exception(strError);
@@ -642,7 +641,15 @@ int MAX_CHARS = 50)
                             this.CopyCell = cell;
 
                         if (type.StartsWith("location:"))
-                            location_list.Add(type.Substring("location:".Length) + ":" + cell.GetValue<string>());
+                        {
+                            string strNumber = cell.GetValue<string>();
+                            if (string.IsNullOrEmpty(strNumber) || strNumber == "0")
+                            {
+                                // 空或者 "0" 表示这个馆藏地没有册。跳过，不处理
+                            }
+                            else
+                                location_list.Add(type.Substring("location:".Length) + ":" + strNumber);
+                        }
 
                         if (cell == this.CurrentDataRow.LastCellUsed())
                             break;
@@ -775,10 +782,16 @@ int MAX_CHARS = 50)
                 if (nRet == -1)
                     return -1;
 
-                var list = Global.FilterValuesWithLibraryCode(strLibraryCode, new List<string>(values));
+                var list = new List<string>(values);
+                if (strLibraryCode == "[仅总馆]")
+                {
+                    list = Global.FilterValuesWithLibraryCode("", list);
 
-                // 去掉每个元素内的 {} 部分
-                list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
+                    // 去掉每个元素内的 {} 部分
+                    list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
+
+                    StringUtil.RemoveDupNoSort(ref list);
+                }
 
                 if (seller_prop != null)
                     seller_prop.ValueList = new List<string>(list);

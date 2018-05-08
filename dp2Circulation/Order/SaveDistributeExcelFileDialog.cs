@@ -9,6 +9,21 @@ namespace dp2Circulation.Order
 {
     public partial class SaveDistributeExcelFileDialog : Form
     {
+        private List<string> _libraryCodeList;
+
+        public List<string> LibraryCodeList
+        {
+            get
+            {
+                return _libraryCodeList;
+            }
+            set
+            {
+                _libraryCodeList = value;
+                this.FillLibraryCodeList();
+            }
+        }
+
         public SaveDistributeExcelFileDialog()
         {
             InitializeComponent();
@@ -103,15 +118,24 @@ namespace dp2Circulation.Order
             }
         }
 
+        // 注：[总馆] 相当于 [总馆和全部分馆]。到外部会被替换为空。
+        // [仅总馆] 是新增加的值。到外部也是这个值
         public string LibraryCode
         {
             get
             {
-                return this.comboBox_libraryCode.Text;
+                string strValue = this.comboBox_libraryCode.Text;
+                if (strValue == "[总馆]" || strValue == "[总馆和全部分馆]")
+                    strValue = "";
+                return strValue;
             }
             set
             {
-                this.comboBox_libraryCode.Text = value;
+                string strValue = value;
+                if (string.IsNullOrEmpty(strValue))
+                    strValue = "[总馆和全部分馆]";
+
+                this.comboBox_libraryCode.Text = strValue;
             }
         }
 
@@ -132,6 +156,13 @@ namespace dp2Circulation.Order
             if (this.comboBox_seller.Items.Count > 0)
                 return;
 
+            this.FillSellerList();
+        }
+
+        void FillSellerList()
+        {
+            this.comboBox_seller.Items.Clear();
+
             this.comboBox_seller.Items.Add("<全部>");
 
             {
@@ -142,16 +173,20 @@ namespace dp2Circulation.Order
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
 
-                var list = Global.FilterValuesWithLibraryCode(this.LibraryCode, new List<string>(values));
+                var list = new List<string>(values);
+
+                if (this.LibraryCode == "[仅总馆]")
+                    list = Global.FilterValuesWithLibraryCode("", new List<string>(values));
 
                 // 去掉每个元素内的 {} 部分
-                list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
+                // list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
 
                 this.comboBox_seller.Items.AddRange(list);
             }
 
             this.comboBox_seller.Items.Add("<空>");
         }
+
 
         public string UiState
         {
@@ -263,6 +298,38 @@ dlg.UiState);
             option.SaveData(Program.MainForm.AppInfo,
                 typeof(OrderColumnOption).ToString());
 
+        }
+
+        private void SaveDistributeExcelFileDialog_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        void FillLibraryCodeList()
+        {
+            this.comboBox_libraryCode.Items.Clear();
+
+            this.comboBox_libraryCode.Items.Add("[仅总馆]");
+            if (this.LibraryCodeList != null)
+                _libraryCodeList.ForEach((o) =>
+                {
+                    if (o == "")
+                        o = "[总馆和全部分馆]";
+                    this.comboBox_libraryCode.Items.Add(o);
+                });
+
+        }
+
+        private void comboBox_libraryCode_TextChanged(object sender, EventArgs e)
+        {
+            this.comboBox_seller.Text = "<全部>";
+
+            FillSellerList();
+        }
+
+        private void comboBox_seller_TextChanged(object sender, EventArgs e)
+        {
+            Global.FilterValue(this, (Control)sender);
         }
     }
 }

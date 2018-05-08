@@ -2845,17 +2845,9 @@ out strError);
                 goto ERROR1;
             }
 
-            int nRet = GetLocationList(
-    out List<string> location_list,
-    out strError);
-            if (nRet == -1)
-            {
-                strError = "获得馆藏地配置参数时出错: " + strError;
-                goto ERROR1;
-            }
-
             Order.SaveDistributeExcelFileDialog dlg = new Order.SaveDistributeExcelFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
+            dlg.LibraryCodeList = Program.MainForm.GetAllLibraryCode();
             dlg.LibraryCode = Program.MainForm.FocusLibraryCode;
             dlg.UiState = Program.MainForm.AppInfo.GetString(
 "ItemSearchForm",
@@ -2870,6 +2862,16 @@ out strError);
 dlg.UiState);
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            int nRet = GetLocationList(
+out List<string> location_list,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "获得馆藏地配置参数时出错: " + strError;
+                goto ERROR1;
+            }
+            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
 
 #if NO
             // 询问文件名
@@ -3049,13 +3051,12 @@ ref column_max_chars);
                                         //      1   在管辖范围内
                                         nRet = dp2StringUtil.DistributeInControlled(strDistribute,
                                             dlg.LibraryCode,
-                                            true,
                                             out strError);
                                         if (nRet == -1)
                                             throw new Exception(strError);
                                         if (nRet == 0)
                                         {
-                                            strError = "馆藏去向 '" + strDistribute + "' 越过当前用户的关注范围 '" + dlg.LibraryCode + "'。请重新指定馆藏去向";
+                                            strError = "馆藏去向 '" + strDistribute + "' 越过当前用户的关注范围(馆代码) '" + dlg.LibraryCode + "'。请重新指定馆藏去向";
                                             MessageBox.Show(this, strError);
                                             goto REDO;
                                         }

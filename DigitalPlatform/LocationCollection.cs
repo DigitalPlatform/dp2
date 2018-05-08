@@ -269,7 +269,7 @@ namespace DigitalPlatform.Text
                     }
                     catch
                     {
-                        strError = "'" + strCount + "' 应为纯数字";
+                        strError = "馆藏分配片段 '" + strLocationString + "' 中 '" + strCount + "' 部分应为纯数字";
                         return -1;
                     }
 
@@ -360,7 +360,7 @@ namespace DigitalPlatform.Text
         public int Merge()
         {
             bool bChanged = false;
-            for (int i = 0; i < this.Count; )
+            for (int i = 0; i < this.Count;)
             {
                 Location item = this[i];
 
