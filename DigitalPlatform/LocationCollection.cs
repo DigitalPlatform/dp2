@@ -230,6 +230,9 @@ namespace DigitalPlatform.Text
             strError = "";
             this.Clear();
 
+            if (string.IsNullOrEmpty(value))    // 2018/5/9
+                return 0;
+
             string[] sections = value.Split(new char[] { ';' });
             for (int i = 0; i < sections.Length; i++)
             {

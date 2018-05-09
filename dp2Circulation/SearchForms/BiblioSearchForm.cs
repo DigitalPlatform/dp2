@@ -2873,21 +2873,6 @@ out strError);
             }
             location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
 
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要输出的去向分配表 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-#endif
-
             bool bLaunchExcel = true;
 
             XLWorkbook doc = null;
@@ -2902,25 +2887,21 @@ out strError);
                 return;
             }
 
-            IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("表格");
+            IXLWorksheet sheet = doc.Worksheets.Add("表格");
 
-            // 每个列的最大字符数
-            List<int> column_max_chars = new List<int>();
-            int nLineNumber = 0;
-            int nRowIndex = 2;
-            bool bDone = false;
+            List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
+            int nLineNumber = 0;    // 序号            
+            int nRowIndex = 2;  // 跟踪行号            
+            bool bDone = false; // 是否成功走完全部流程
+
+            int nBiblioCount = 0;   // 导出书目计数
+            int nOrderCount = 0;    // 导出订购记录计数
+            int nNewOrderCount = 0; // 导出新订购记录计数(已包含在 nOrderCount 数值内)
+            int nWriteNewOrderCount = 0;    // 导出前立即写入订购库的新订购记录数
+
             try
             {
-#if NO
-                List<Order.ColumnProperty> biblio_title_list = new List<Order.ColumnProperty> {
-                    new Order.ColumnProperty("书目记录路径", "biblio_recpath"),
-                    new Order.ColumnProperty("题名", "biblio_title" ),
-                    new Order.ColumnProperty("责任者", "biblio_author" ),
-                    new Order.ColumnProperty("出版者", "biblio_publication_area" ),
-                };
-#endif
-
+                // 准备书目列标题
                 Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
                     "");
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
@@ -2928,13 +2909,7 @@ out strError);
 
                 List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
 
-#if NO
-                List<Order.ColumnProperty> order_title_list = new List<Order.ColumnProperty> {
-                    new Order.ColumnProperty("订购记录路径", "order_recpath"),
-                    new Order.ColumnProperty("书商", "order_seller" ),
-                    new Order.ColumnProperty("订购价", "order_price" ),
-                };
-#endif
+                // 准备订购列标题
                 Order.OrderColumnOption order_column_option = new Order.OrderColumnOption(Program.MainForm.UserDir,
     "");
                 order_column_option.LoadData(Program.MainForm.AppInfo,
@@ -2979,18 +2954,7 @@ ref column_max_chars);
 * notes_area
 * resource_identifier_area
 * * */
-#if NO
-                List<string> col_list = new List<string> {
-                "recpath",
-                "title",
-                "author",
-                "publication_area" };
 
-                List<string> order_col_list = new List<string> {
-                "recpath",
-                "seller",
-                "price" };
-#endif
                 string strSellerFilter = dlg.SellerFilter;  // "*";
                 string strDefaultOrderXml = "";
 
@@ -2999,7 +2963,7 @@ ref column_max_chars);
                         {
                             this.ShowMessage("正在处理书目记录 " + strRecPath);
 
-                            Order.DistributeExcelFile.OutputDistributeInfos(
+                            nOrderCount += Order.DistributeExcelFile.OutputDistributeInfos(
                                 this,
                                 location_list,
                                 strSellerFilter,
@@ -3094,13 +3058,15 @@ ref column_max_chars);
                                         {
                                             this.ReturnChannel(channel);
                                         }
+                                        nWriteNewOrderCount++;
                                     }
 
+                                    nNewOrderCount++;
                                     return order;
                                 },
                                 ref column_max_chars);
 
-                            // nRowIndex++;
+                            nBiblioCount++;
                             return true;
                         },
                 out strError);
@@ -3149,7 +3115,10 @@ ref column_max_chars);
                 }
             }
 
-            // TODO: 提示共创建订购记录多少条
+            // 提示完成和统计信息
+            MessageDialog.Show(this,
+                string.Format("导出完成。\r\n\r\n共处理书目记录 {0} 条, 导出订购记录 {1} 条。\r\n所导出的订购记录中，{2} 条是新订购记录， 其中 {3} 条已经写入订购库",
+                nBiblioCount, nOrderCount, nNewOrderCount, nWriteNewOrderCount));
             return;
             ERROR1:
             MessageBox.Show(this, strError);

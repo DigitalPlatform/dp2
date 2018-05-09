@@ -8866,6 +8866,9 @@ Keys keyData)
         {
             string strError = "";
 
+            int nOrderCount = 0;    // 修改过的订购记录数
+            int nNewOrderCount = 0; // 新创建的订购记录数。包含在 nOrderCount 中
+
             LibraryChannel channel = this.GetChannel();
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在导入 Excel 文件 ...");
@@ -8937,9 +8940,16 @@ out strError);
                             throw new Exception(strError);
 
                         if (string.IsNullOrEmpty(strOrderRecPath) == true || strOrderRecPath.IndexOf("?") != -1)
+                        {
                             orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
+                            nNewOrderCount++;
+                        }
                         if (strOldCopyString != strNewCopyString)
                             copyCell.SetValue<string>(strNewCopyString);
+
+                        nOrderCount++;
+
+                        // TODO: 显示进度，或可以用 旋转木马进度条，或者只用文字提示进度
                     });
             }
             finally
@@ -8950,6 +8960,10 @@ out strError);
 
                 this.ReturnChannel(channel);
             }
+
+            // 提示完成和统计信息
+            MessageDialog.Show(this,
+                string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条。其中新创建订购记录 {1} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录", nOrderCount, nNewOrderCount));
         }
 
         // 修改复本字符串中，订购复本数部分的套数数字

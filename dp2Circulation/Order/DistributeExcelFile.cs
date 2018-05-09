@@ -104,7 +104,9 @@ ref List<int> column_max_chars)
         // 输出和一个书目记录有关的去向信息行
         // parameters:
         //      strSourceFilter   书商名列表。列出的书商有关的订购记录才参与输出。如果为 "*"，表示全部输出
-        public static void OutputDistributeInfos(
+        // return:
+        //      共输出了多少条订购记录
+        public static int OutputDistributeInfos(
             MyForm form,
             List<string> location_list,
             string strSellerFilter,
@@ -202,6 +204,7 @@ ref List<int> column_max_chars)
                 form.ReturnChannel(channel);
             }
 
+            int nOrderCount = 0;
             // 如果书目记录下属没有任何订购记录，则也输出一个订购信息为空的行
             if (orders.Count == 0)
             {
@@ -220,6 +223,7 @@ order_col_list,
 procGetOrderRecord,
 ref column_max_chars);
                 nRowIndex++;
+                nOrderCount++;
             }
             else
             {
@@ -245,8 +249,11 @@ ref column_max_chars);
     },
     ref column_max_chars);
                     nRowIndex++;
+                    nOrderCount++;
                 }
             }
+
+            return nOrderCount;
         }
 
         // “获得一个订购记录”的回调函数原型

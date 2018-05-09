@@ -2905,7 +2905,7 @@ out strError);
                     }
                     catch (Exception ex)
                     {
-                        strError = ex.Message;
+                        strError = ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
 
@@ -6171,26 +6171,16 @@ out strError);
             IXLWorksheet sheet = null;
             sheet = doc.Worksheets.Add("表格");
 
-            // 每个列的最大字符数
-            List<int> column_max_chars = new List<int>();
-            int nLineNumber = 0;
-            int nRowIndex = 2;
+            List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
+            int nLineNumber = 0;    // 序号            
+            int nRowIndex = 2;  // 跟踪行号            
+            bool bDone = false; // 是否成功走完全部流程
+
+            int nOrderCount = 0;    // 导出订购记录计数
+
             try
             {
-#if NO
-                List<Order.ColumnProperty> biblio_title_list = new List<Order.ColumnProperty> {
-                    new Order.ColumnProperty("书目记录路径", "biblio_recpath"),
-                    new Order.ColumnProperty("题名", "biblio_title" ),
-                    new Order.ColumnProperty("责任者", "biblio_author" ),
-                    new Order.ColumnProperty("出版者", "biblio_publication_area" ),
-                };
-                List<Order.ColumnProperty> order_title_list = new List<Order.ColumnProperty> {
-                    new Order.ColumnProperty("订购记录路径", "order_recpath"),
-                    new Order.ColumnProperty("书商", "order_seller" ),
-                    new Order.ColumnProperty("订购价", "order_price" ),
-                };
-#endif
-                //
+                // 准备书目列标题
                 Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
     "");
                 biblio_column_option.LoadData(Program.MainForm.AppInfo,
@@ -6198,7 +6188,7 @@ out strError);
 
                 List<Order.ColumnProperty> biblio_title_list = Order.DistributeExcelFile.BuildList(biblio_column_option);
 
-                //
+                // 准备订购列标题
                 Order.OrderColumnOption order_column_option = new Order.OrderColumnOption(Program.MainForm.UserDir,
     "");
                 order_column_option.LoadData(Program.MainForm.AppInfo,
@@ -6243,18 +6233,6 @@ ref column_max_chars);
 * notes_area
 * resource_identifier_area
 * * */
-#if NO
-                List<string> col_list = new List<string> {
-                "recpath",
-                "title",
-                "author",
-                "publication_area" };
-
-                List<string> order_col_list = new List<string> {
-                "recpath",
-                "seller",
-                "price" };
-#endif
                 string strSellerFilter = dlg.SellerFilter;  // "*";
 
                 nRet = VerifyItems(
@@ -6289,6 +6267,25 @@ ref column_max_chars);
                         }
                     }
 
+                    {
+                        string strDistribute = DomUtil.GetElementInnerText(itemdom.DocumentElement, "distribute");
+
+                        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+                        // return:
+                        //      -1  出错
+                        //      0   超过管辖范围。strError中有解释
+                        //      1   在管辖范围内
+                        nRet = dp2StringUtil.DistributeInControlled(strDistribute,
+                            dlg.LibraryCode,
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                        if (nRet == 0)
+                        {
+                            errors.Add("馆藏去向 '" + strDistribute + "' 越过馆代码 '" + dlg.LibraryCode + "' 的管辖范围，此条订购记录没有被输出");
+                            return;
+                        }
+                    }
 
                     // 处理一条订购记录(输出到订购去向 Excel 文件)
                     string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
@@ -6340,7 +6337,8 @@ ref column_max_chars);
         nRowIndex,
         order_title_list,
         strItemRecPath,
-                                        (biblio_recpath, order_recpath) => {
+                                        (biblio_recpath, order_recpath) =>
+                                        {
                                             if (string.IsNullOrEmpty(order_recpath))
                                             {
                                                 throw new Exception("尚未处理订购记录模板");
@@ -6351,40 +6349,16 @@ ref column_max_chars);
         ref column_max_chars);
                         nRowIndex++;
                     }
+
+                    nOrderCount++;
                 },
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-#if NO
-                nRet = ProcessBiblio(
-                        (strRecPath, dom, timestamp) =>
-                        {
-                            this.ShowMessage("正在处理书目记录 " + strRecPath);
-
-                            Order.DistributeExcelFile.OutputDistributeInfos(
-                                this,
-                                location_list,
-                                strSellerList,
-                                sheet,
-                                // dom,
-                                strRecPath,
-                                ref nLineNumber,
-                                "",
-                                biblio_title_list,
-                                ref nRowIndex,
-                                order_title_list,
-                                ref column_max_chars);
-
-                            // nRowIndex++;
-                            return true;
-                        },
-                out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-#endif
-
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
+
+                bDone = true;
             }
             catch (Exception ex)
             {
@@ -6398,25 +6372,31 @@ ref column_max_chars);
 
                 this.ClearMessage();
 
-                if (doc != null)
+                if (bDone)
                 {
-                    doc.SaveAs(dlg.OutputFileName);
-                    doc.Dispose();
-                }
-
-                if (bLaunchExcel)
-                {
-                    try
+                    if (doc != null)
                     {
-                        System.Diagnostics.Process.Start(dlg.OutputFileName);
+                        doc.SaveAs(dlg.OutputFileName);
+                        doc.Dispose();
                     }
-                    catch
-                    {
 
+                    if (bLaunchExcel)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(dlg.OutputFileName);
+                        }
+                        catch
+                        {
+
+                        }
                     }
                 }
             }
 
+            // 提示完成和统计信息
+            MessageDialog.Show(this,
+                string.Format("导出完成。\r\n\r\n共导出订购记录 {0} 条。", nOrderCount));
             return;
             ERROR1:
             MessageBox.Show(this, strError);

@@ -218,6 +218,9 @@ namespace dp2Circulation
                         var validOptions = $"\"{String.Join(",", value_list)}\"";
                         cell.DataValidation.List(validOptions, true);
                     }
+
+                    if (col == "copy")
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
                 }
 
                 i++;

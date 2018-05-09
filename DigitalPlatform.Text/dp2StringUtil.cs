@@ -58,6 +58,14 @@ out string strPureName);
             if (bNarrow == false && IsGlobalUser(strLibraryCodeList) == true)
                 return 1;
 
+            // 2018/5/9
+            if (string.IsNullOrEmpty(strDistribute))
+            {
+                // 去向分配字符串为空，表示谁都可以控制它。这样便于分馆用户修改。
+                // 若这种情况返回 0，则分馆用户修改不了，只能等总馆用户才有权限修改
+                return 1;
+            }
+
             LocationCollection locations = new LocationCollection();
             int nRet = locations.Build(strDistribute, out strError);
             if (nRet == -1)
