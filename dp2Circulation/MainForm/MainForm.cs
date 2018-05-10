@@ -8875,7 +8875,11 @@ Keys keyData)
             Stop.BeginLoop();
             try
             {
-                Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
+                // return:
+                //      -1  导入过程出错，并且本函数已经 MessageBox 报错了
+                //      0   放弃导入
+                //      1   导入完成
+                int nImportResult = Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
                     (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell, copyCell) =>
                     {
                         string strOldXml = "";
@@ -8951,6 +8955,11 @@ out strError);
 
                         // TODO: 显示进度，或可以用 旋转木马进度条，或者只用文字提示进度
                     });
+
+                // 提示完成和统计信息
+                if (nImportResult == 1)
+                    MessageDialog.Show(this,
+                        string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条。其中新创建订购记录 {1} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录", nOrderCount, nNewOrderCount));
             }
             finally
             {
@@ -8961,9 +8970,6 @@ out strError);
                 this.ReturnChannel(channel);
             }
 
-            // 提示完成和统计信息
-            MessageDialog.Show(this,
-                string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条。其中新创建订购记录 {1} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录", nOrderCount, nNewOrderCount));
         }
 
         // 修改复本字符串中，订购复本数部分的套数数字

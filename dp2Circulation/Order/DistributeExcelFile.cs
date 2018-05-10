@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Web;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -100,6 +101,77 @@ ref List<int> column_max_chars)
             nRowIndex += 2;
         }
 
+        public static void Warning(string strText)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug warning'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+
+        public static void WarningRecPath(string strRecPath, string strXml)
+        {
+            if (string.IsNullOrEmpty(strXml) == false)
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strRecPath) + "<br/>" + HttpUtility.HtmlEncode(strXml).Replace("\r", "<br/>").Replace(" ", "&nbsp;") + "</div>");
+            else
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strRecPath) + "</div>");
+        }
+
+        public static void WarningGreen(string strText)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(strText) + "</div>");
+        }
+
+        // 过滤订购记录
+        // return:
+        //      true    保留
+        //      false   被过滤掉
+        public static bool FilterOrderRecord(XmlDocument order_dom,
+            string strSellerFilter,
+            string strLibraryCode,
+            string strOrderRecPath)
+        {
+            string strState = DomUtil.GetElementText(order_dom.DocumentElement, "state");
+            if (string.IsNullOrEmpty(strState) == false)
+            {
+                Warning(string.Format("订购记录 {0} 因状态为 '{1}'，被忽略导出", strOrderRecPath, strState));
+                return false;   // 只处理状态为空的订购记录。也就是说 “已订购” 和 “已验收” 的都不会被处理
+            }
+
+            string strSeller = DomUtil.GetElementText(order_dom.DocumentElement, "seller");
+            if (String.IsNullOrEmpty(strSellerFilter) == true && string.IsNullOrEmpty(strSeller) == true)
+            {
+
+            }
+            else if (strSellerFilter != "*")
+            {
+                if (StringUtil.IsInList(strSeller, strSellerFilter) == false)
+                {
+                    Warning(string.Format("订购记录 {0}因书商字段 '{1}' 不包含在过滤字符串 '{2}' 中，被忽略导出", strOrderRecPath, strSeller, strSellerFilter));
+                    return false;
+                }
+            }
+
+            {
+                string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
+
+                // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+                // return:
+                //      -1  出错
+                //      0   超过管辖范围。strError中有解释
+                //      1   在管辖范围内
+                int nRet = dp2StringUtil.DistributeInControlled(strDistribute,
+                    strLibraryCode,
+                    out string strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+                if (nRet == 0)
+                {
+                    Warning(string.Format("订购记录 {0} 因去向字段 '{1}' 越过馆代码 '{2}' 控制，被忽略导出", strOrderRecPath, strDistribute, strLibraryCode));
+                    return false;
+                }
+            }
+
+            WarningGreen("订购记录 '" + strOrderRecPath + "' 导出");
+            return true;
+        }
 
         // 输出和一个书目记录有关的去向信息行
         // parameters:
@@ -113,7 +185,7 @@ ref List<int> column_max_chars)
             string strLibraryCode,
             IXLWorksheet sheet,
     // XmlDocument dom,
-    string strRecPath,
+    string strBiblioRecPath,
     ref int nLineIndex,
     string strStyle,
     List<Order.ColumnProperty> biblio_col_list,
@@ -130,7 +202,7 @@ ref List<int> column_max_chars)
                 //      0   没有找到
                 //      1   找到
                 int nRet = form.GetTable(
-                    strRecPath,
+                    strBiblioRecPath,
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -144,13 +216,14 @@ ref List<int> column_max_chars)
             try
             {
                 SubItemLoader sub_loader = new SubItemLoader();
-                sub_loader.BiblioRecPath = strRecPath;
+                sub_loader.BiblioRecPath = strBiblioRecPath;
                 sub_loader.Channel = channel;
                 sub_loader.Stop = form.stop;
                 sub_loader.DbType = "order";
 
                 sub_loader.Prompt += new MessagePromptEventHandler(form.OnLoaderPrompt);
 
+                int i = 0;
                 foreach (EntityInfo info in sub_loader)
                 {
                     if (info.ErrorCode != ErrorCodeValue.NoError)
@@ -159,42 +232,27 @@ ref List<int> column_max_chars)
                         throw new Exception(strError);
                     }
 
+                    WarningRecPath(info.OldRecPath + " -- " + (i + 1) + "/" + sub_loader.TotalCount + ")", DomUtil.GetIndentXml(DomUtil.RemoveEmptyElements(info.OldRecord)));
+
                     XmlDocument order_dom = new XmlDocument();
                     order_dom.LoadXml(info.OldRecord);
 
-                    string strState = DomUtil.GetElementText(order_dom.DocumentElement, "state");
-                    if (string.IsNullOrEmpty(strState) == false)
-                        continue;   // 只处理状态为空的订购记录。也就是说 “已订购” 和 “已验收” 的都不会被处理
-
-                    string strSeller = DomUtil.GetElementText(order_dom.DocumentElement, "seller");
-                    if (String.IsNullOrEmpty(strSellerFilter) == true && string.IsNullOrEmpty(strSeller) == true)
+                    ////
+                    // 过滤订购记录
+                    // return:
+                    //      true    保留
+                    //      false   被过滤掉
+                    if (FilterOrderRecord(order_dom,
+                        strSellerFilter,
+                        strLibraryCode,
+                        info.OldRecPath) == false)
                     {
-
-                    }
-                    else if (strSellerFilter != "*")
-                    {
-                        if (StringUtil.IsInList(strSeller, strSellerFilter) == false)
-                            continue;
-                    }
-
-                    {
-                        string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
-
-                        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
-                        // return:
-                        //      -1  出错
-                        //      0   超过管辖范围。strError中有解释
-                        //      1   在管辖范围内
-                        int nRet = dp2StringUtil.DistributeInControlled(strDistribute,
-                            strLibraryCode,
-                            out string strError);
-                        if (nRet == -1)
-                            throw new Exception(strError);
-                        if (nRet == 0)
-                            continue;
+                        i++;
+                        continue;
                     }
 
                     orders.Add(info);
+                    i++;
                 }
 
                 sub_loader.Prompt -= new MessagePromptEventHandler(form.OnLoaderPrompt);
@@ -212,7 +270,7 @@ ref List<int> column_max_chars)
                     form,
 location_list,
 sheet,
-strRecPath,
+strBiblioRecPath,
 ref nLineIndex,
 strTableXml,
 strStyle,
@@ -233,7 +291,7 @@ ref column_max_chars);
                         form,
     location_list,
     sheet,
-    strRecPath,
+    strBiblioRecPath,
     ref nLineIndex,
     strTableXml,
     strStyle,
@@ -243,7 +301,7 @@ ref column_max_chars);
     order.OldRecPath,
     (biblio_recpath, order_recpath) =>
     {
-        Debug.Assert(strRecPath == biblio_recpath, "");
+        Debug.Assert(strBiblioRecPath == biblio_recpath, "");
         Debug.Assert(order_recpath == order.OldRecPath, "");
         return order;
     },
@@ -459,7 +517,11 @@ int MAX_CHARS = 50)
             IXLCell copyCell
             );
 
-        public static void ImportFromOrderDistributeExcelFile(ProcessOrderRecord proc)
+        // return:
+        //      -1  导入过程出错，并且本函数已经 MessageBox 报错了
+        //      0   放弃导入
+        //      1   导入完成
+        public static int ImportFromOrderDistributeExcelFile(ProcessOrderRecord proc)
         {
             OpenFileDialog dlg = new OpenFileDialog
             {
@@ -471,7 +533,7 @@ int MAX_CHARS = 50)
             };
 
             if (dlg.ShowDialog() != DialogResult.OK)
-                return;
+                return 0;
 
             string strError = "";
             try
@@ -501,13 +563,14 @@ int MAX_CHARS = 50)
             }
             catch (Exception ex)
             {
-                strError = "ImportFromOrderDistributeExcelFile new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                strError = "导入过程出现异常: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
 
-            return;
+            return 1;
             ERROR1:
             MessageBox.Show(Program.MainForm, strError);
+            return -1;
         }
 
         public class CommandRowInfo

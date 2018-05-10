@@ -331,5 +331,13 @@ dlg.UiState);
         {
             Global.FilterValue(this, (Control)sender);
         }
+
+        private void comboBox_seller_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+            CheckedComboBox.ProcessItemChecked(e, "<空>");
+        }
+
+
     }
 }

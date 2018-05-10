@@ -1425,20 +1425,6 @@ namespace UpgradeDt1000ToDp2
                 }
             }
 
-
-            /*
-            if (e.Item.Checked == true)
-            {
-                e.Item.Font = new Font(e.Item.Font, FontStyle.Bold);
-                e.Item.BackColor = Color.LightYellow;
-            }
-            else
-            {
-                e.Item.Font = new Font(e.Item.Font, FontStyle.Regular);
-                e.Item.BackColor = SystemColors.Window;
-            }
-             * */
-
             SetDtlpDatabaseItemColor(e.Item);
 
             if (this.listView_dtlpDatabases.CheckedItems.Count == 0)

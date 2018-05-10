@@ -41,8 +41,8 @@
             this.tabPage_output = new System.Windows.Forms.TabPage();
             this.comboBox_libraryCode = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.tabPage_cfg = new System.Windows.Forms.TabPage();
             this.comboBox_seller = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.tabPage_cfg = new System.Windows.Forms.TabPage();
             this.tabControl_main.SuspendLayout();
             this.tabPage_output.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
@@ -193,18 +193,6 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "馆代码(&C):";
             // 
-            // tabPage_cfg
-            // 
-            this.tabPage_cfg.Controls.Add(this.button_biblioColumns);
-            this.tabPage_cfg.Controls.Add(this.button_orderColumns);
-            this.tabPage_cfg.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_cfg.Name = "tabPage_cfg";
-            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_cfg.Size = new System.Drawing.Size(600, 340);
-            this.tabPage_cfg.TabIndex = 1;
-            this.tabPage_cfg.Text = "配置";
-            this.tabPage_cfg.UseVisualStyleBackColor = true;
-            // 
             // comboBox_seller
             // 
             this.comboBox_seller.BackColor = System.Drawing.SystemColors.Window;
@@ -216,6 +204,19 @@
             this.comboBox_seller.TabIndex = 3;
             this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
             this.comboBox_seller.TextChanged += new System.EventHandler(this.comboBox_seller_TextChanged);
+            this.comboBox_seller.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_seller_ItemChecked);
+            // 
+            // tabPage_cfg
+            // 
+            this.tabPage_cfg.Controls.Add(this.button_biblioColumns);
+            this.tabPage_cfg.Controls.Add(this.button_orderColumns);
+            this.tabPage_cfg.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_cfg.Name = "tabPage_cfg";
+            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_cfg.Size = new System.Drawing.Size(600, 340);
+            this.tabPage_cfg.TabIndex = 1;
+            this.tabPage_cfg.Text = "配置";
+            this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
             // SaveDistributeExcelFileDialog
             // 

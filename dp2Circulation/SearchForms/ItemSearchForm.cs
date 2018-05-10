@@ -6164,8 +6164,8 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "BiblioSearchForm new XLWorkbook() {94E68114-353E-49E5-987E-7E8545A6D4E3} exception: " + ExceptionUtil.GetAutoText(ex);
-                return;
+                strError = "ItemSearchForm new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
             }
 
             IXLWorksheet sheet = null;
@@ -6239,12 +6239,13 @@ ref column_max_chars);
                     (
             object param,
             LibraryChannel channel,
-            string strItemRecPath,
-            XmlDocument itemdom,
+            string strOrderRecPath,
+            XmlDocument order_dom,
             List<string> errors,
             bool bAutoModify,
             ref bool bChanged) =>
                 {
+#if NO
                     string strState = DomUtil.GetElementText(itemdom.DocumentElement, "state");
                     if (string.IsNullOrEmpty(strState) == false)
                     {
@@ -6286,9 +6287,19 @@ ref column_max_chars);
                             return;
                         }
                     }
+#endif
+                    // 过滤订购记录
+                    // return:
+                    //      true    保留
+                    //      false   被过滤掉
+                    if (Order.DistributeExcelFile.FilterOrderRecord(order_dom,
+                        strSellerFilter,
+                        dlg.LibraryCode,
+                        strOrderRecPath) == false)
+                        return;
 
                     // 处理一条订购记录(输出到订购去向 Excel 文件)
-                    string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+                    string strParentID = DomUtil.GetElementText(order_dom.DocumentElement, "parent");
                     if (string.IsNullOrEmpty(strParentID))
                     {
                         errors.Add("缺乏 parent 元素");
@@ -6297,7 +6308,7 @@ ref column_max_chars);
 
                     string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
                         this.DbType,
-                        strItemRecPath,
+                        strOrderRecPath,
                         strParentID);
                     if (string.IsNullOrEmpty(strBiblioRecPath))
                     {
@@ -6322,8 +6333,8 @@ ref column_max_chars);
 
                     {
                         EntityInfo order = new EntityInfo();
-                        order.OldRecPath = strItemRecPath;
-                        order.OldRecord = itemdom.DocumentElement.OuterXml;
+                        order.OldRecPath = strOrderRecPath;
+                        order.OldRecord = order_dom.DocumentElement.OuterXml;
 
                         Order.DistributeExcelFile.OutputDistributeInfo(
                             this,
@@ -6336,7 +6347,7 @@ ref column_max_chars);
         biblio_title_list,
         nRowIndex,
         order_title_list,
-        strItemRecPath,
+        strOrderRecPath,
                                         (biblio_recpath, order_recpath) =>
                                         {
                                             if (string.IsNullOrEmpty(order_recpath))
@@ -12420,6 +12431,9 @@ out strError);
 
         private void comboBox_entityDbName_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+
+#if NO
             ListView list = e.Item.ListView;
 
             if (e.Item.Text.StartsWith("<全部") || e.Item.Text.ToLower().StartsWith("<all"))
@@ -12453,6 +12467,7 @@ out strError);
                     }
                 }
             }
+#endif
 
         }
     }

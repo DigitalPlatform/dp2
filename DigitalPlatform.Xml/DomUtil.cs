@@ -84,6 +84,29 @@ namespace DigitalPlatform.Xml
             dom.LoadXml(string.IsNullOrEmpty(xml) ? "<root />" : xml);
         }
 
+        public static string RemoveEmptyElements(string strXml)
+        {
+            if (String.IsNullOrEmpty(strXml) == true)
+                return strXml;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch
+            {
+                return strXml;
+            }
+
+            if (dom.DocumentElement == null)
+                return strXml;
+
+            RemoveEmptyElements(dom.DocumentElement);
+
+            return dom.DocumentElement.OuterXml;
+        }
+
         // 删除 start 元素下的所有空元素
         // parameters:
         //      bCheckStart 是否检查 start 节点的状况。如果本参数为 true, 当 start 为空元素时，要删除 start 元素

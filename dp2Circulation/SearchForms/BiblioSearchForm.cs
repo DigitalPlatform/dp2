@@ -2883,8 +2883,8 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "BiblioSearchForm new XLWorkbook() {94E68114-353E-49E5-987E-7E8545A6D4E3} exception: " + ExceptionUtil.GetAutoText(ex);
-                return;
+                strError = "BiblioSearchForm new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
             }
 
             IXLWorksheet sheet = doc.Worksheets.Add("表格");
@@ -2899,6 +2899,8 @@ out strError);
             int nNewOrderCount = 0; // 导出新订购记录计数(已包含在 nOrderCount 数值内)
             int nWriteNewOrderCount = 0;    // 导出前立即写入订购库的新订购记录数
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始导出订购去向 Excel 文件</div>");
             try
             {
                 // 准备书目列标题
@@ -2959,9 +2961,12 @@ ref column_max_chars);
                 string strDefaultOrderXml = "";
 
                 nRet = ProcessBiblio(
-                        (strRecPath, dom, timestamp) =>
+                        (strBiblioRecPath, dom, timestamp) =>
                         {
-                            this.ShowMessage("正在处理书目记录 " + strRecPath);
+                            this.ShowMessage("正在处理书目记录 " + strBiblioRecPath);
+
+                            Order.DistributeExcelFile.WarningRecPath("===", null);
+                            Order.DistributeExcelFile.WarningRecPath("书目记录 " + strBiblioRecPath, null);
 
                             nOrderCount += Order.DistributeExcelFile.OutputDistributeInfos(
                                 this,
@@ -2970,7 +2975,7 @@ ref column_max_chars);
                                 dlg.LibraryCode,
                                 sheet,
                                 // dom,
-                                strRecPath,
+                                strBiblioRecPath,
                                 ref nLineNumber,
                                 "",
                                 biblio_title_list,
@@ -3061,6 +3066,9 @@ ref column_max_chars);
                                         nWriteNewOrderCount++;
                                     }
 
+                                    Order.DistributeExcelFile.WarningGreen("因书目记录 '" + strBiblioRecPath + "' 没有符合条件的订购记录，所以导出一条新的订购记录，如下：");
+                                    Order.DistributeExcelFile.WarningRecPath(order.OldRecPath, DomUtil.GetIndentXml(DomUtil.RemoveEmptyElements(order.OldRecord)));
+
                                     nNewOrderCount++;
                                     return order;
                                 },
@@ -3113,6 +3121,9 @@ ref column_max_chars);
                         }
                     }
                 }
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束导出订购去向 Excel 文件</div>");
             }
 
             // 提示完成和统计信息
@@ -9305,6 +9316,8 @@ MessageBoxDefaultButton.Button1);
         // 调节各个事项之间的并存冲突
         private void checkedComboBox_biblioDbNames_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+#if NO
             ListView list = e.Item.ListView;
 
             if (e.Item.Text == "<全部>" || e.Item.Text.ToLower() == "<all>")
@@ -9338,6 +9351,7 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
+#endif
         }
 
         // 清除残余图像
@@ -10417,7 +10431,7 @@ MessageBoxDefaultButton.Button1);
             return this.listView_records.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -10486,7 +10500,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
