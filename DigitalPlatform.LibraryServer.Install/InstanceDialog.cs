@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Configuration.Install;
-using System.Security.Cryptography.X509Certificates;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 
@@ -20,7 +15,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.rms.Client;
 using DigitalPlatform.Interfaces;
 
 namespace DigitalPlatform.LibraryServer
@@ -212,7 +206,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -241,7 +235,7 @@ namespace DigitalPlatform.LibraryServer
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-        REDO:
+            REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -313,7 +307,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.Enabled = true;
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -474,7 +468,7 @@ namespace DigitalPlatform.LibraryServer
     "start");
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -800,7 +794,7 @@ namespace DigitalPlatform.LibraryServer
                 this.Enabled = true;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1194,7 +1188,7 @@ namespace DigitalPlatform.LibraryServer
 
                             strSourceDir = PathUtil.MergePath(strTempDataDir, "cfgs");
                             strTargetDir = PathUtil.MergePath(strDataDir, "cfgs");
-                        REDO:
+                            REDO:
                             try
                             {
                                 nRet = PathUtil.CopyDirectory(strSourceDir,
@@ -1272,7 +1266,7 @@ namespace DigitalPlatform.LibraryServer
 
                         string strSourceDir = PathUtil.MergePath(strTempDataDir, "cfgs");
                         string strTargetDir = PathUtil.MergePath(strDataDir, "cfgs");
-                    REDO:
+                        REDO:
                         try
                         {
                             nRet = PathUtil.CopyDirectory(strSourceDir,
@@ -1318,7 +1312,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-            CONTINUE:
+                CONTINUE:
                 // 在注册表中写入instance信息
                 // 因为可能插入或者删除任意实例，那么注册表事项需要全部重写
                 InstallHelper.SetInstanceInfo(
@@ -1407,7 +1401,16 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            PathUtil.TryCreateDir(strDataDir);
+            try
+            {
+                PathUtil.TryCreateDir(strDataDir);
+            }
+            catch (Exception ex)
+            {
+                // 2018/1/27
+                strError = ex.Message;
+                return -1;
+            }
 
             if (string.IsNullOrEmpty(this.SourceDir) == false)
             {
@@ -1794,7 +1797,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(strDataDir) == false)
                 {
-                REDO_DELETE_DATADIR:
+                    REDO_DELETE_DATADIR:
                     // 删除数据目录
                     try
                     {
@@ -2092,7 +2095,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 });
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2114,7 +2117,7 @@ MessageBoxDefaultButton.Button2);
 
             FileDownloadDialog dlg = null;
             dlg = new FileDownloadDialog();
-            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
             {
                 stop.DoStop();
             });
@@ -2170,7 +2173,7 @@ MessageBoxDefaultButton.Button2);
                 }));
             }
 
-        ERROR1:
+            ERROR1:
             owner.Invoke((Action)(() =>
             {
                 MessageBox.Show(owner, strError);

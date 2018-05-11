@@ -35,7 +35,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>323</ApplicationRevision>
+    <ApplicationRevision>331</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -61,10 +61,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>0E0782C3A1A21892146F9E2267901A7142578C02</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2Installer_3_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -74,6 +74,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>setup-v.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
@@ -165,6 +168,7 @@
     <None Include="copylibrary.bat" />
     <None Include="copyopac.bat" />
     <None Include="copyzserver.bat" />
+    <None Include="dp2003.pfx" />
     <None Include="dp2Installer_1_TemporaryKey.pfx" />
     <None Include="dp2Installer_2_TemporaryKey.pfx" />
     <None Include="dp2Installer_3_TemporaryKey.pfx" />

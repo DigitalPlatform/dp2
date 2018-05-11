@@ -1,19 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-using System.Xml;
-
 using DigitalPlatform;
-using DigitalPlatform.Xml;
-using DigitalPlatform.LibraryServer;
-using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -378,6 +370,53 @@ namespace dp2Circulation
                     Debug.Assert(false, "未知的栏目名称 '" + e.Name + "'");
                     return;
             }
+        }
+
+        public static string GetXml(ItemEditControlBase control)
+        {
+            string strError = "";
+            string strXml = "";
+            int nRet = control.GetData(false, out strXml, out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+            return strXml;
+        }
+
+        public static void SetXml(ItemEditControlBase control,
+            string strXml,
+            string strPublicationType)
+        {
+            string strError = "";
+
+            // 去掉记录里面的 issueCount 和 range 元素
+            if (string.IsNullOrEmpty(strXml) == false
+                && strPublicationType == "book")
+            {
+                XmlDocument dom = new XmlDocument();
+                DomUtil.SafeLoadXml(dom, strXml);
+                DomUtil.DeleteElement(dom.DocumentElement, "range");
+                DomUtil.DeleteElement(dom.DocumentElement, "issueCount");
+                strXml = dom.DocumentElement.OuterXml;
+            }
+
+            int nRet = control.SetData(strXml, "", null, out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+        }
+
+        // return:
+        //      null    strBiblioRecPath 不是书目库名
+        public static string GetPublicationType(string strBiblioRecPath)
+        {
+            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
+            BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strBiblioDbName);
+            if (prop == null)
+                return null;
+
+            if (string.IsNullOrEmpty(prop.IssueDbName) == true)
+                return "book";
+
+            return "series";
         }
 
     }

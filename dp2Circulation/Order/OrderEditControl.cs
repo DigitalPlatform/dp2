@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using System.Xml;
 using System.Diagnostics;
-using System.Reflection;
 using System.Globalization;
 
 using DigitalPlatform;
@@ -15,6 +10,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -229,7 +225,7 @@ namespace dp2Circulation
             if (DateTime.TryParse(strText, out time) == true)
                 return time;
 
-            string[] formats = new string[] {"yyyy","yyyyMM", "yyyyMMdd" };
+            string[] formats = new string[] { "yyyy", "yyyyMM", "yyyyMMdd" };
 
             foreach (string format in formats)
             {
@@ -600,12 +596,12 @@ namespace dp2Circulation
 
         internal override void RefreshDom()
         {
-            DomUtil.SetElementText(this._dataDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "parent", this.ParentId);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "refID", this.RefID);
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "index", this.Index);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "state", this.State);
@@ -615,7 +611,7 @@ namespace dp2Circulation
                 "seller", this.Seller);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "source", this.Source);
-            DomUtil.SetElementText(this._dataDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "range", this.Range);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "issueCount", this.IssueCount);
@@ -658,7 +654,7 @@ namespace dp2Circulation
                 throw new Exception(strError);
             }
 
-            DomUtil.SetElementText(this._dataDom.DocumentElement, 
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "comment", this.Comment);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "batchNo", this.BatchNo);

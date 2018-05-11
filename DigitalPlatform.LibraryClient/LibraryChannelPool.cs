@@ -40,7 +40,8 @@ namespace DigitalPlatform.LibraryClient
         /// <returns>返回通道对象</returns>
         public LibraryChannel GetChannel(string strUrl,
             string strUserName,
-            string strLang = "")
+            string strLang = null,
+            string strClientIP = null)
         {
             LibraryChannelWrapper wrapper = null;
 
@@ -68,7 +69,15 @@ namespace DigitalPlatform.LibraryClient
                 LibraryChannel inner_channel = new LibraryChannel();
                 inner_channel.Url = strUrl;
                 inner_channel.UserName = strUserName;
-                inner_channel.Lang = strLang;
+                if (strLang != null)
+                    inner_channel.Lang = strLang;
+                if (strClientIP != null)
+                    inner_channel.ClientIP = strClientIP;
+
+                // test
+                // inner_channel.ClientIP = "test:127.0.0.1";
+
+
                 inner_channel.BeforeLogin -= new BeforeLoginEventHandle(channel_BeforeLogin);
                 inner_channel.BeforeLogin += new BeforeLoginEventHandle(channel_BeforeLogin);
 

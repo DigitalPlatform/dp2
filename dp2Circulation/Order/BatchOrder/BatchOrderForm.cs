@@ -166,7 +166,7 @@ namespace dp2Circulation
                     {
                         if (info.ErrorCode != ErrorCodeValue.NoError)
                         {
-                            strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                            strError = "路径为 '" + info.OldRecPath + "' 的订购记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
                             return -1;
                         }
 
@@ -867,26 +867,11 @@ namespace dp2Circulation
             text.Clear();
         }
 
-        // return:
-        //      null    strBiblioRecPath 不是书目库名
-        public static string GetPublicationType(string strBiblioRecPath)
-        {
-            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
-            BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strBiblioDbName);
-            if (prop == null)
-                return null;
-
-            if (string.IsNullOrEmpty(prop.IssueDbName) == true)
-                return "book";
-
-            return "series";
-        }
-
         int _tableCount = 0;
 
         void OutputBiblio(BiblioStore item, ref int nStart)
         {
-            string strPubType = GetPublicationType(item.RecPath);
+            string strPubType = OrderEditForm.GetPublicationType(item.RecPath);
 
             StringBuilder text = new StringBuilder();
 
@@ -974,7 +959,7 @@ namespace dp2Circulation
             int i,
             string strClass)
         {
-            string strPubType = GetPublicationType(strBiblioRecPath);
+            string strPubType = OrderEditForm.GetPublicationType(strBiblioRecPath);
 
             StringBuilder text = new StringBuilder();
 
@@ -1499,12 +1484,12 @@ int nCount)
         {
             // 看看即将插入的位置是图书还是期刊?
             string strFirstBiblioRecPath = (string)webBrowser1.Document.InvokeScript("getFirstSelectedBiblioRecPath");
-            string strPubType = GetPublicationType(strFirstBiblioRecPath);
+            string strPubType = OrderEditForm.GetPublicationType(strFirstBiblioRecPath);
 
             OrderEditForm edit = new OrderEditForm();
 
             // edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            SetXml(edit.OrderEditControl,
+            OrderEditForm.SetXml(edit.OrderEditControl,
                 Program.MainForm.AppInfo.GetString("batchOrderForm", "orderRecord", "<root />"),
                 strPubType);
             edit.Text = "新增订购事项";
@@ -1514,7 +1499,7 @@ int nCount)
             Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
             edit.ShowDialog(this);
 
-            string strXml = GetXml(edit.OrderEditControl);
+            string strXml = OrderEditForm.GetXml(edit.OrderEditControl);
             Program.MainForm.AppInfo.SetString("batchOrderForm", "orderRecord", strXml);
 
             if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -1523,37 +1508,7 @@ int nCount)
             webBrowser1.Document.InvokeScript("newOrder", new object[] { strXml });
         }
 
-        static string GetXml(ItemEditControlBase control)
-        {
-            string strError = "";
-            string strXml = "";
-            int nRet = control.GetData(false, out strXml, out strError);
-            if (nRet == -1)
-                throw new Exception(strError);
-            return strXml;
-        }
 
-        static void SetXml(ItemEditControlBase control,
-            string strXml,
-            string strPublicationType)
-        {
-            string strError = "";
-
-            // 去掉记录里面的 issueCount 和 range 元素
-            if (string.IsNullOrEmpty(strXml) == false
-                && strPublicationType == "book")
-            {
-                XmlDocument dom = new XmlDocument();
-                DomUtil.SafeLoadXml(dom, strXml);
-                DomUtil.DeleteElement(dom.DocumentElement, "range");
-                DomUtil.DeleteElement(dom.DocumentElement, "issueCount");
-                strXml = dom.DocumentElement.OuterXml;
-            }
-
-            int nRet = control.SetData(strXml, "", null, out strError);
-            if (nRet == -1)
-                throw new Exception(strError);
-        }
 
         private void ToolStripMenuItem_selectAllBiblio_Click(object sender, EventArgs e)
         {
@@ -1577,11 +1532,11 @@ int nCount)
         {
             // 看看即将插入的位置是图书还是期刊?
             string strFirstBiblioRecPath = (string)webBrowser1.Document.InvokeScript("getFirstSelectedBiblioRecPath");
-            string strPubType = GetPublicationType(strFirstBiblioRecPath);
+            string strPubType = OrderEditForm.GetPublicationType(strFirstBiblioRecPath);
 
             OrderEditForm edit = new OrderEditForm();
 
-            SetXml(edit.OrderEditControl,
+            OrderEditForm.SetXml(edit.OrderEditControl,
                 Program.MainForm.AppInfo.GetString("batchOrderForm", "quickChangeOrderRecord", "<root />"),
                 strPubType);
             edit.Text = "快速修改订购事项";
@@ -1591,7 +1546,7 @@ int nCount)
             Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
             edit.ShowDialog(this);
 
-            string strXml = GetXml(edit.OrderEditControl);
+            string strXml = OrderEditForm.GetXml(edit.OrderEditControl);
             Program.MainForm.AppInfo.SetString("batchOrderForm", "quickChangeOrderRecord", strXml);
 
             if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -2103,7 +2058,7 @@ int nCount)
             string strError = "";
             int nRet = 0;
 
-            string strPubType = BatchOrderForm.GetPublicationType(this.RecPath);
+            string strPubType = OrderEditForm.GetPublicationType(this.RecPath);
             bool bStrict = true;    // 是否要严格检查
 
             foreach (OrderStore order in Orders)

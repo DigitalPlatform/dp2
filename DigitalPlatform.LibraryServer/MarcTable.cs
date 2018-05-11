@@ -93,7 +93,13 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='245']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("Main title", BuildFields(fields), "title"));
+                results.Add(new NameValueLine("Main title", BuildFields(fields), "title_area")); // 原 title
+            }
+
+            // TODO: 选择除了著者以外的子字段，构成题名字符串
+            if (fields.count > 0)
+            {
+                results.Add(new NameValueLine("Title", BuildFields(fields, "abhnp"), "title"));
             }
 #if NO
             foreach (MarcNode field in fields)
@@ -124,7 +130,7 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='250']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("Edition", BuildFields(fields)));
+                results.Add(new NameValueLine("Edition", BuildFields(fields), "edition_area"));
             }
 
             // Published/Created
@@ -134,7 +140,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publisher"));  // 附加的空格便于在 HTML 中自然折行
+                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publication_area"));  // 原"publisher"。附加的空格便于在 HTML 中自然折行
                 }
             }
 
@@ -237,7 +243,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // Notes
-            fields = record.select("field[@name='500'  or @name='501' or @name='504' or @name='561' or @name='583' or @name='588' or @name='590']");
+            fields = record.select("field[@name='500' or @name='501' or @name='504' or @name='561' or @name='583' or @name='588' or @name='590']");
             if (fields.count > 0)
             {
                 results.Add(new NameValueLine("Notes", BuildFields(fields)));
@@ -275,7 +281,7 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='440' or @name='490' or @name='830']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("Series", BuildFields(fields)));
+                results.Add(new NameValueLine("Series", BuildFields(fields), "series_area"));
             }
 
 

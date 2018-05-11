@@ -35,8 +35,8 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>AAA9F52CA035598ABDAF25CAD7555B113CA3313C</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2rms_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>A28484A241884B9E7F5BF5FC08811DFB259B453E</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2rms_2_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -234,6 +234,7 @@
     <Content Include="Resources\SearchDocType.bmp" />
     <None Include="app.config" />
     <None Include="dp2rms_1_TemporaryKey.pfx" />
+    <None Include="dp2rms_2_TemporaryKey.pfx" />
     <None Include="dp2rms_5_TemporaryKey.pfx" />
     <None Include="dp2rms_TemporaryKey.pfx" />
     <None Include="Resources\next.bmp" />

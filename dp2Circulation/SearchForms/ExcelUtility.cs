@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 
 using ClosedXML.Excel;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -110,5 +111,130 @@ namespace dp2Circulation
             }
         }
 
+        // 输出一行书目信息
+        public static void OutputBiblioLine(
+    string strBiblioRecPath,
+    string strXml,
+    // int nBiblioIndex,
+    IXLWorksheet sheet,
+    int nStartColIndex,     // 从 0 开始计数
+    List<string> col_list,
+    int nRowIndex)  // 从 0 开始计数。
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            List<IXLCell> cells = new List<IXLCell>();
+
+            int i = 0;
+            foreach (string col in col_list)
+            {
+                string strValue = "";
+                if (col == "recpath" || col.EndsWith("_recpath"))
+                    strValue = strBiblioRecPath;
+                else
+                    strValue = FindBiblioTableContent(dom, col);
+
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+
+            }
+        }
+
+        // 根据 type 在 Table XML 中获得一个内容值
+        static string FindBiblioTableContent(XmlDocument dom, string type)
+        {
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+            int i = 0;
+            foreach (XmlElement line in nodes)
+            {
+                string strName = line.GetAttribute("name");
+                string strValue = line.GetAttribute("value");
+                string strType = line.GetAttribute("type");
+
+                if (strName == "_coverImage")
+                    continue;
+
+                if (strType == type)
+                    return strValue;
+            }
+
+            return "";
+        }
+
+        // 输出一行实体/订购/期刊/评注信息
+        // parameters:
+        //      dropdown_list   下拉列表内容数组。每个元素为这样的格式：value1,value2,value3
+        //                      也可以选择在此函数以外设置 cell range 的 valuelist。
+        public static void OutputItemLine(
+    string strRecPath,
+    string strXml,
+    int nBiblioIndex,
+    IXLWorksheet sheet,
+    int nStartColIndex,     // 从 0 开始计数
+    List<string> col_list,
+    List<string> dropdown_list,
+    int nRowIndex,  // 从 0 开始计数。
+    XLColor backColor)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            int i = 0;
+            foreach (string col in col_list)
+            {
+                List<string> value_list = null;
+                if (dropdown_list != null)
+                    value_list = StringUtil.SplitList(dropdown_list[i]);
+
+                string strValue = "";
+                if (col == "recpath" || col.EndsWith("_recpath"))
+                    strValue = strRecPath;
+                else
+                    strValue = FindItemContent(dom, col);
+
+                {
+                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue(strValue);
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    if (backColor != XLColor.NoColor)
+                        cell.Style.Fill.BackgroundColor = backColor;
+                    if (i == 0)
+                    {
+                        cell.Style.Border.SetLeftBorderColor(XLColor.Black);
+                        cell.Style.Border.SetLeftBorder(XLBorderStyleValues.Medium);
+                    }
+                    if (i == col_list.Count - 1)
+                    {
+                        cell.Style.Border.SetRightBorderColor(XLColor.Black);
+                        cell.Style.Border.SetRightBorder(XLBorderStyleValues.Medium);
+                    }
+
+                    if (value_list != null && value_list.Count > 0)
+                    {
+                        //Pass a string in this format: "Option1,Option2,Option3"
+                        // var options = new List<string> { "Option1", "Option2", "Option3" };
+                        var validOptions = $"\"{String.Join(",", value_list)}\"";
+                        cell.DataValidation.List(validOptions, true);
+                    }
+
+                    if (col == "copy")
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                }
+
+                i++;
+            }
+        }
+
+        static string FindItemContent(XmlDocument dom, string element_name)
+        {
+            XmlElement element = dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+
+            if (element == null)
+                return "";
+            return element.InnerText.Trim();
+        }
     }
+
 }

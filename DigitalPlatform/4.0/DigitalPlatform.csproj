@@ -214,7 +214,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="..\ListViewUtil.cs" />
-    <Compile Include="..\LocationCollection.cs" />
     <Compile Include="..\LoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>

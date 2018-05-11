@@ -727,7 +727,16 @@ namespace DigitalPlatform.OPAC
         {
             strError = "";
 
-            PathUtil.TryCreateDir(strDataDir);
+            try
+            {
+                PathUtil.TryCreateDir(strDataDir);
+            }
+            catch (Exception ex)
+            {
+                // 2018/1/27
+                strError = ex.Message;
+                return -1;
+            }
 
             Debug.Assert(this.CopyFiles != null, "");
 
@@ -877,7 +886,7 @@ namespace DigitalPlatform.OPAC
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -943,7 +952,7 @@ namespace DigitalPlatform.OPAC
                 this.Enabled = true;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1091,7 +1100,7 @@ namespace DigitalPlatform.OPAC
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }

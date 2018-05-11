@@ -1406,6 +1406,12 @@ namespace DigitalPlatform.LibraryServer
 
                     ///
                     app.InitialMsmq();
+                    if (string.IsNullOrEmpty(this.OutgoingQueue))
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: Message Queue 未被启用");
+#endif
+                    }
 
                     // 初始化 mongodb 相关对象
                     nRet = InitialMongoDatabases(out strError);
@@ -1865,7 +1871,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2018, 1, 15); // 上一个版本是 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2018, 7, 15); // 上一个版本是 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)
@@ -8557,6 +8563,8 @@ out strError);
         // TODO: 判断strBarcode是否为空
         // 根据册条码号对实体库进行查重
         // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strFrom 检索途径
         // return:
         //      -1  error
         //      其他    命中记录条数(不超过nMax规定的极限)
@@ -8581,8 +8589,8 @@ out strError);
 	<operator value='OR'/>
 	<target list='图书编目实体:册条码'>
 		<item><word>0000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>
-<lang>zh</lang>
-</target>
+        <lang>zh</lang>
+    </target>
 </group>             * */
 
             // 构造检索式
@@ -14946,6 +14954,12 @@ strLibraryCode);    // 读者所在的馆代码
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(this.OutgoingQueue))
+            {
+                strError = "消息队列尚未被 dp2library 启用";
+                return -1;
+            }
 
             try
             {

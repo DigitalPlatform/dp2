@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -12,7 +10,6 @@ using System.Diagnostics;
 using System.Web;
 using System.Reflection;
 
-using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using ClosedXML.Excel;
@@ -21,14 +18,12 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.MarcDom;
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
@@ -509,7 +504,7 @@ namespace dp2Circulation
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
-            REDO_GETRECORDS:
+                REDO_GETRECORDS:
                 long lRet = channel.GetBrowseRecords(
                     this.stop,
                     paths,
@@ -755,7 +750,7 @@ namespace dp2Circulation
 
                     string[] paths = new string[lines.Count];
                     lines.CopyTo(paths);
-                REDO_GETRECORDS:
+                    REDO_GETRECORDS:
                     lRet = channel.GetBrowseRecords(
                         this.stop,
                         paths,
@@ -1087,8 +1082,10 @@ namespace dp2Circulation
             int nState = ReportLoadState(out strError);
             if (nState != 1)
                 goto ERROR1;
+
+            DisplayNotFillSummary();
             return;
-        ERROR1:
+            ERROR1:
             this.Text = "打印财产帐";
             MessageBox.Show(this, strError);
         }
@@ -1568,12 +1565,24 @@ namespace dp2Circulation
             int nState = ReportLoadState(out strError);
             if (nState != 1)
                 goto ERROR1;
+
+            DisplayNotFillSummary();
             return;
-        ERROR1:
+            ERROR1:
             this.Text = "打印财产帐";
             MessageBox.Show(this, strError);
         }
 
+        void DisplayNotFillSummary()
+        {
+            List<string> warnings = new List<string>();
+            if (this.checkBox_load_fillBiblioSummary.Checked == false)
+                warnings.Add("没有装入书目摘要");
+            if (this.checkBox_load_fillOrderInfo.Checked == false)
+                warnings.Add("没有装入订购信息");
+            if (warnings.Count > 0)
+                this.ShowMessage(StringUtil.MakePathList(warnings), "yellow", true);
+        }
 
 #if NO
         // 根据条码号文件装载
@@ -2441,7 +2450,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             ListViewUtil.ChangeItemText(item, EXTEND_COLUMN_CATALOGNO, strError);
         }
 
@@ -2476,7 +2485,7 @@ namespace dp2Circulation
 
                 for (int j = 0; j < locations.Count; j++)
                 {
-                    DigitalPlatform.Location location = locations[j];
+                    DigitalPlatform.Text.Location location = locations[j];
 
                     if (location.RefID == strRefID)
                     {
@@ -2991,7 +3000,7 @@ namespace dp2Circulation
 
             this.SetNextButtonEnable();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3156,7 +3165,8 @@ namespace dp2Circulation
                     new Fill(                                                           // Index 2 - The yellow fill.
                         new PatternFill(
                             new ForegroundColor() { Rgb = new HexBinaryValue() { Value = "FFFFFF00" } }
-                        ) { PatternType = PatternValues.Solid })
+                        )
+                        { PatternType = PatternValues.Solid })
                 ),
                 new Borders(
                     new Border(                                                         // Index 0 - The default border.
@@ -3168,16 +3178,20 @@ namespace dp2Circulation
                     new Border(                                                         // Index 1 - Applies a Left, Right, Top, Bottom border to a cell
                         new LeftBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new RightBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new TopBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new BottomBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new DiagonalBorder())
                 ),
                 new CellFormats(
@@ -3186,15 +3200,17 @@ namespace dp2Circulation
                     new CellFormat() { FontId = 2, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 2 - Italic
                     new CellFormat() { FontId = 3, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 3 - Times Roman
                     new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true },       // Index 4 - Yellow Fill
-                // 5 textwrap
+                                                                                                       // 5 textwrap
                     new CellFormat(                                                                   // Index 5 - Alignment
                         new Alignment() { Vertical = VerticalAlignmentValues.Center, WrapText = BooleanValue.FromBoolean(true) }
-                    ) { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
+                    )
+                    { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
 
                     // 6 align center
                     new CellFormat(
                         new Alignment() { Horizontal = HorizontalAlignmentValues.Center, Vertical = VerticalAlignmentValues.Center }
-                    ) { ApplyAlignment = true },
+                    )
+                    { ApplyAlignment = true },
 
 
                     new CellFormat() { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }      // Index 6 - Border
@@ -3242,7 +3258,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3372,7 +3388,7 @@ null,
             string strNamePath = "accountbook_printoption_wordxml";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -3773,7 +3789,7 @@ null,
             writer.WriteEndElement();
             // sw.WriteLine(strLineContent);
             return 0;
-        ERROR1:
+            ERROR1:
             // <w:tr>
             writer.WriteStartElement("w", "tr", m_strWordMlNsUri);
 
@@ -3980,7 +3996,7 @@ null,
             string strNamePath = "accountbook_printoption_text";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -4588,7 +4604,7 @@ strTotalPrice);
 #endif
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (sw != null)
                 sw.WriteLine(strError);
             if (sheet != null)
@@ -4619,7 +4635,7 @@ strTotalPrice);
             string strNamePath = "accountbook_printoption_html";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -5307,7 +5323,7 @@ strTotalPrice);
                     IndentString(4) + "<td class='" + strClass + "'>" + strContent + "</td>\r\n";
             }
 
-        END1:
+            END1:
 
             string strOdd = "";
             if (((nLine + 1) % 2) != 0) // 用每页内的行号来计算奇数
@@ -5968,9 +5984,10 @@ strTotalPrice);
                     strRecPathFilename = "";
                 }
             }
-            return;
 
-        ERROR1:
+            DisplayNotFillSummary();
+            return;
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7093,7 +7110,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7103,7 +7120,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_wordxml";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7113,7 +7130,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " WordML 打印配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7153,7 +7170,6 @@ MessageBoxDefaultButton.Button1);
                 "refID -- 参考ID"
             };
 
-
             Program.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_wordxml_formstate");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -7171,7 +7187,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_html";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7181,7 +7197,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " HTML 打印配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7239,7 +7255,7 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_text";
 
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7249,7 +7265,7 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 纯文本 输出配置";
-            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7416,7 +7432,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7562,7 +7578,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7614,15 +7630,15 @@ MessageBoxDefaultButton.Button1);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
@@ -7665,7 +7681,7 @@ MessageBoxDefaultButton.Button1);
                 null);
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -7816,7 +7832,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

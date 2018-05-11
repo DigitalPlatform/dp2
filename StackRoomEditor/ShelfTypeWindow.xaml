@@ -1,0 +1,17 @@
+﻿<Window x:Class="StackRoomEditor.ShelfTypeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="请选择书架类型" Height="300" Width="300">
+    <Grid>
+        <Button Content="确定" Height="23" IsEnabled="False" Margin="0,0,80,12" Name="button_OK" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="button_OK_Click" />
+        <Button Content="取消" Height="23" HorizontalAlignment="Right" Margin="0,0,0,12" Name="button_Cancel" VerticalAlignment="Bottom" Width="75" Click="button_Cancel_Click" />
+        <ListView Name="listView1" Margin="0,0,0,38" ItemsSource="{Binding ShelfModels}" SelectionChanged="listView1_SelectionChanged" MouseDoubleClick="listView1_MouseDoubleClick">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="240" Header="书架类型" DisplayMemberBinding="{Binding Caption}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace DigitalPlatform.Text
@@ -11,6 +9,138 @@ namespace DigitalPlatform.Text
     /// </summary>
     public static class dp2StringUtil
     {
+        public static List<string> FilterLocationList(List<string> location_list,
+    string strLibraryCodeList)
+        {
+            if (string.IsNullOrEmpty(strLibraryCodeList))
+                return location_list;
+            if (strLibraryCodeList == "[仅总馆]")
+                strLibraryCodeList = "";
+            List<string> results = new List<string>();
+            location_list.ForEach((o) =>
+            {
+                dp2StringUtil.ParseCalendarName(o,
+out string strLibraryCode,
+out string strPureName);
+
+                if (string.IsNullOrEmpty(strLibraryCode) && string.IsNullOrEmpty(strLibraryCodeList)
+                    || StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == true)
+                    results.Add(o);
+            });
+            return results;
+        }
+
+        public static bool IsGlobalUser(string strLibraryCodeList)
+        {
+            if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
+                return true;
+
+            return false;
+        }
+
+        // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   超过管辖范围。strError中有解释
+        //      1   在管辖范围内
+        public static int DistributeInControlled(string strDistribute,
+            string strLibraryCodeList,
+            out string strError)
+        {
+            strError = "";
+
+            //      bNarrow 如果为 true，表示 馆代码 "" 只匹配总馆，不包括各个分馆；如果为 false，表示 馆代码 "" 匹配总馆和所有分馆
+            bool bNarrow = strLibraryCodeList == "[仅总馆]";
+            if (strLibraryCodeList == "[仅总馆]")
+                strLibraryCodeList = "";
+
+            if (bNarrow == false && IsGlobalUser(strLibraryCodeList) == true)
+                return 1;
+
+            // 2018/5/9
+            if (string.IsNullOrEmpty(strDistribute))
+            {
+                // 去向分配字符串为空，表示谁都可以控制它。这样便于分馆用户修改。
+                // 若这种情况返回 0，则分馆用户修改不了，只能等总馆用户才有权限修改
+                return 1;
+            }
+
+            LocationCollection locations = new LocationCollection();
+            int nRet = locations.Build(strDistribute, out strError);
+            if (nRet == -1)
+            {
+                strError = "馆藏分配字符串 '" + strDistribute + "' 格式不正确";
+                return -1;
+            }
+
+            foreach (Location location in locations)
+            {
+                // 空的馆藏地点被视为不在分馆用户管辖范围内
+                if (bNarrow == false && string.IsNullOrEmpty(location.Name) == true)
+                {
+                    strError = "馆代码 '' 不在范围 '" + strLibraryCodeList + "' 内";
+                    return 0;
+                }
+
+                // 解析
+                ParseCalendarName(location.Name,
+            out string strLibraryCode,
+            out string strPureName);
+
+                if (string.IsNullOrEmpty(strLibraryCode) && string.IsNullOrEmpty(strLibraryCodeList))
+                    continue;
+
+                if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                {
+                    strError = "馆代码 '" + strLibraryCode + "' 不在范围 '" + strLibraryCodeList + "' 内";
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// 从一个馆藏地点字符串中解析出馆代码部分。例如 "海淀分馆/阅览室" 解析出 "海淀分馆"
+        /// </summary>
+        /// <param name="strLocationString">馆藏地点字符串</param>
+        /// <returns>返回馆代码</returns>
+        public static string GetLibraryCode(string strLocationString)
+        {
+            string strLibraryCode = "";
+            string strPureName = "";
+
+            // 解析
+            ParseCalendarName(strLocationString,
+        out strLibraryCode,
+        out strPureName);
+
+            return strLibraryCode;
+        }
+
+        /// <summary>
+        /// 解析日历名。例如 "海淀分馆/基本日历"
+        /// </summary>
+        /// <param name="strName">完整的日历名</param>
+        /// <param name="strLibraryCode">返回馆代码部分</param>
+        /// <param name="strPureName">返回纯粹日历名部分</param>
+        public static void ParseCalendarName(string strName,
+            out string strLibraryCode,
+            out string strPureName)
+        {
+            strLibraryCode = "";
+            strPureName = "";
+            int nRet = strName.IndexOf("/");
+            if (nRet == -1)
+            {
+                strPureName = strName;
+                return;
+            }
+            strLibraryCode = strName.Substring(0, nRet).Trim();
+            strPureName = strName.Substring(nRet + 1).Trim();
+        }
+
         // 从 volumeInfo.cs 中移动过来
         // 获得出版日期的年份部分
         public static string GetYearPart(string strPublishTime)

@@ -1008,6 +1008,41 @@ MessageBoxDefaultButton.Button1);
 
         }
 
+        // 2018/3/26
+        // 迁移以前版本的打印模板目录
+        void MigratePrintTemplatesDirectory()
+        {
+            string strSourceDirectory = Path.Combine(this.DataDir, "print_templates");
+            if (Directory.Exists(strSourceDirectory) == false)
+                return;
+
+            string strTargetDirectory = Path.Combine(this.UserDir, "print_templates");
+            if (Directory.Exists(strTargetDirectory) == true)
+                 return; // 如果目标目录已经存在，就不进行迁移了
+
+            int nRet = PathUtil.CopyDirectory(strSourceDirectory,
+                strTargetDirectory,
+                false,
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            try
+            {
+                PathUtil.DeleteDirectory(strSourceDirectory);
+            }
+            catch (Exception ex)
+            {
+                strError = "MigrateProjectDirectory() 删除源目录 '" + strSourceDirectory + "' 时发生异常: " + ex.Message;
+                goto ERROR1;
+            }
+
+            return;
+            ERROR1:
+            this.ReportError("dp2circulation 迁移打印模板目录时出错", strError);
+            MessageBox.Show(this, "迁移打印模板目录时出错: " + strError);
+        }
+
         // 迁移旧版本的统计方案目录和各种配套文件
         void MigrateProjectDirectory()
         {
@@ -1183,8 +1218,7 @@ MessageBoxDefaultButton.Button1);
 
             OpenBackgroundForm();
 
-            string strDriveName = "";
-            if (GetUserDiskFreeSpace(out strDriveName) < 1024 * 1024 * 10)
+            if (GetUserDiskFreeSpace(out string strDriveName) < 1024 * 1024 * 10)
             {
                 Program.PromptAndExit(this, "用户目录所在硬盘 " + strDriveName + " 剩余空间太小(已小于10M)。请先腾出足够空间，再重新启动 dp2circulation");
                 return;
@@ -1479,6 +1513,8 @@ MessageBoxDefaultButton.Button1);
             MigrateProjectDirectory();
 
             CopyJavascriptDirectories();
+
+            MigratePrintTemplatesDirectory();
 
             #region 脚本支持
             ScriptManager.applicationInfo = this.AppInfo;

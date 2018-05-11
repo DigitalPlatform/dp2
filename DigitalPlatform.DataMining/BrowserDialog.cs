@@ -9,6 +9,25 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+/*
+// https://stackoverflow.com/questions/2068159/could-not-load-file-or-assembly-microsoft-mshtml-strong-name-validation-fai
+Microsoft.mshtml.dll from PIA folder is not signed.
+If you have signed project, you must take version from "Primary Interop Assemblies" folder.
+
+To do that:
+
+1. Remove reference to Microsoft.mshtml (if you have one in your project)
+
+2. Click "Add Reference" and than DO NOT select "Extensions" but "Browse" and point to "C:\Program Files (x86)\Microsoft.NET\Primary Interop Assemblies" (for .64 bit Machines) - that version is signed.
+
+3. Edit properties (select microsoft.mshtml reference and press F4) in order to set:
+
+Embed Interop Types=false
+Copy Local=true
+
+4. Rebuild your project
+*/
+
 namespace DigitalPlatform.DataMining
 {
     public partial class BrowserDialog : Form

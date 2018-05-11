@@ -240,7 +240,7 @@ namespace dp2Circulation
         {
             StringBuilder text = new StringBuilder();
 
-            string strPubType = BatchOrderForm.GetPublicationType(item.BiblioStore.RecPath);
+            string strPubType = OrderEditForm.GetPublicationType(item.BiblioStore.RecPath);
 
             if (_tableCount == 0)
                 text.Append("\r\n<" + TABLE + " class=''>");

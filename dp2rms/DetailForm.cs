@@ -2577,7 +2577,7 @@ namespace dp2rms
 									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.library.dll",
-									Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
+									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2rms.exe"
 								};
 

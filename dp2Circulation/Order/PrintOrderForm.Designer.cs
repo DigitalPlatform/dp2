@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class PrintOrderForm
     {
@@ -43,6 +43,8 @@ namespace dp2Circulation
             this.button_saveChange_saveChange = new System.Windows.Forms.Button();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print_arriveRatioStatis = new System.Windows.Forms.Button();
+            this.contextMenuStrip_arriveRatio = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem_arriveRatio_outputExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.button_print_outputOrderOption = new System.Windows.Forms.Button();
             this.button_print_outputOrder = new System.Windows.Forms.Button();
             this.button_print_originOption = new System.Windows.Forms.Button();
@@ -57,44 +59,41 @@ namespace dp2Circulation
             this.tabPage_originItems = new System.Windows.Forms.TabPage();
             this.tabPage_mergedItems = new System.Windows.Forms.TabPage();
             this.listView_merged = new DigitalPlatform.GUI.ListViewNF();
-            this.contextMenuStrip_arriveRatio = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItem_arriveRatio_outputExcel = new System.Windows.Forms.ToolStripMenuItem();
+            this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_saveChange.SuspendLayout();
             this.tabPage_print.SuspendLayout();
+            this.contextMenuStrip_arriveRatio.SuspendLayout();
             this.contextMenuStrip_printOrder.SuspendLayout();
             this.tabControl_items.SuspendLayout();
             this.tabPage_originItems.SuspendLayout();
             this.tabPage_mergedItems.SuspendLayout();
-            this.contextMenuStrip_arriveRatio.SuspendLayout();
+            this.tableLayoutPanel_main.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_next
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_next.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_next.Location = new System.Drawing.Point(381, 171);
-            this.button_next.Margin = new System.Windows.Forms.Padding(2);
+            this.button_next.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_next.Location = new System.Drawing.Point(569, 245);
             this.button_next.Name = "button_next";
-            this.button_next.Size = new System.Drawing.Size(83, 22);
+            this.button_next.Size = new System.Drawing.Size(124, 33);
             this.button_next.TabIndex = 3;
-            this.button_next.Text = "œ¬“ª≤Ω(&N)";
+            this.button_next.Text = "‰∏ã‰∏ÄÊ≠•(&N)";
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
             // tabControl_main
             // 
-            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_main.Controls.Add(this.tabPage_load);
             this.tabControl_main.Controls.Add(this.tabPage_saveChange);
             this.tabControl_main.Controls.Add(this.tabPage_print);
-            this.tabControl_main.Location = new System.Drawing.Point(0, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl_main.Location = new System.Drawing.Point(3, 3);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(464, 157);
+            this.tabControl_main.Size = new System.Drawing.Size(690, 236);
             this.tabControl_main.TabIndex = 2;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -105,69 +104,65 @@ namespace dp2Circulation
             this.tabPage_load.Controls.Add(this.comboBox_load_type);
             this.tabPage_load.Controls.Add(this.button_load_loadFromBatchNo);
             this.tabPage_load.Controls.Add(this.button_load_loadFromFile);
-            this.tabPage_load.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_load.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_load.Location = new System.Drawing.Point(4, 28);
             this.tabPage_load.Name = "tabPage_load";
-            this.tabPage_load.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_load.Size = new System.Drawing.Size(456, 131);
+            this.tabPage_load.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_load.Size = new System.Drawing.Size(682, 204);
             this.tabPage_load.TabIndex = 0;
-            this.tabPage_load.Text = "◊∞‘ÿ";
+            this.tabPage_load.Text = "Ë£ÖËΩΩ";
             this.tabPage_load.UseVisualStyleBackColor = true;
             // 
             // checkBox_print_accepted
             // 
             this.checkBox_print_accepted.AutoSize = true;
-            this.checkBox_print_accepted.Location = new System.Drawing.Point(120, 30);
+            this.checkBox_print_accepted.Location = new System.Drawing.Point(180, 45);
+            this.checkBox_print_accepted.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_print_accepted.Name = "checkBox_print_accepted";
-            this.checkBox_print_accepted.Size = new System.Drawing.Size(90, 16);
+            this.checkBox_print_accepted.Size = new System.Drawing.Size(133, 22);
             this.checkBox_print_accepted.TabIndex = 2;
-            this.checkBox_print_accepted.Text = "—È ’«Èøˆ(&A)";
+            this.checkBox_print_accepted.Text = "È™åÊî∂ÊÉÖÂÜµ(&A)";
             this.checkBox_print_accepted.UseVisualStyleBackColor = true;
             this.checkBox_print_accepted.CheckedChanged += new System.EventHandler(this.checkBox_print_accepted_CheckedChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(5, 7);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(8, 10);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(89, 12);
+            this.label3.Size = new System.Drawing.Size(134, 18);
             this.label3.TabIndex = 0;
-            this.label3.Text = "≥ˆ∞ÊŒÔ¿‡–Õ(&T):";
+            this.label3.Text = "Âá∫ÁâàÁâ©Á±ªÂûã(&T):";
             // 
             // comboBox_load_type
             // 
             this.comboBox_load_type.FormattingEnabled = true;
             this.comboBox_load_type.Items.AddRange(new object[] {
-            "Õº È",
-            "¡¨–¯≥ˆ∞ÊŒÔ"});
-            this.comboBox_load_type.Location = new System.Drawing.Point(120, 5);
-            this.comboBox_load_type.Margin = new System.Windows.Forms.Padding(2);
+            "Âõæ‰π¶",
+            "ËøûÁª≠Âá∫ÁâàÁâ©"});
+            this.comboBox_load_type.Location = new System.Drawing.Point(180, 8);
             this.comboBox_load_type.Name = "comboBox_load_type";
-            this.comboBox_load_type.Size = new System.Drawing.Size(116, 20);
+            this.comboBox_load_type.Size = new System.Drawing.Size(172, 26);
             this.comboBox_load_type.TabIndex = 1;
-            this.comboBox_load_type.Text = "Õº È";
+            this.comboBox_load_type.Text = "Âõæ‰π¶";
             this.comboBox_load_type.SelectedIndexChanged += new System.EventHandler(this.comboBox_load_type_SelectedIndexChanged);
             // 
             // button_load_loadFromBatchNo
             // 
-            this.button_load_loadFromBatchNo.Location = new System.Drawing.Point(120, 84);
-            this.button_load_loadFromBatchNo.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load_loadFromBatchNo.Location = new System.Drawing.Point(180, 126);
             this.button_load_loadFromBatchNo.Name = "button_load_loadFromBatchNo";
-            this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(238, 22);
+            this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(357, 33);
             this.button_load_loadFromBatchNo.TabIndex = 4;
-            this.button_load_loadFromBatchNo.Text = "∏˘æ›[∂©π∫]≈˙¥Œ∫≈ºÏÀ˜◊∞‘ÿ(&B)...";
+            this.button_load_loadFromBatchNo.Text = "Ê†πÊçÆ[ËÆ¢Ë¥≠]ÊâπÊ¨°Âè∑Ê£ÄÁ¥¢Ë£ÖËΩΩ(&B)...";
             this.button_load_loadFromBatchNo.UseVisualStyleBackColor = true;
             this.button_load_loadFromBatchNo.Click += new System.EventHandler(this.button_load_loadFromBatchNo_Click);
             // 
             // button_load_loadFromFile
             // 
-            this.button_load_loadFromFile.Location = new System.Drawing.Point(120, 57);
-            this.button_load_loadFromFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_load_loadFromFile.Location = new System.Drawing.Point(180, 86);
             this.button_load_loadFromFile.Name = "button_load_loadFromFile";
-            this.button_load_loadFromFile.Size = new System.Drawing.Size(238, 22);
+            this.button_load_loadFromFile.Size = new System.Drawing.Size(357, 33);
             this.button_load_loadFromFile.TabIndex = 3;
-            this.button_load_loadFromFile.Text = "¥”[∂©π∫ø‚]º«¬º¬∑æ∂Œƒº˛◊∞‘ÿ(&F)...";
+            this.button_load_loadFromFile.Text = "‰ªé[ËÆ¢Ë¥≠Â∫ì]ËÆ∞ÂΩïË∑ØÂæÑÊñá‰ª∂Ë£ÖËΩΩ(&F)...";
             this.button_load_loadFromFile.UseVisualStyleBackColor = true;
             this.button_load_loadFromFile.Click += new System.EventHandler(this.button_load_loadFromFile_Click);
             // 
@@ -175,12 +170,11 @@ namespace dp2Circulation
             // 
             this.tabPage_saveChange.Controls.Add(this.textBox_saveChange_info);
             this.tabPage_saveChange.Controls.Add(this.button_saveChange_saveChange);
-            this.tabPage_saveChange.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_saveChange.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_saveChange.Location = new System.Drawing.Point(4, 28);
             this.tabPage_saveChange.Name = "tabPage_saveChange";
-            this.tabPage_saveChange.Size = new System.Drawing.Size(456, 131);
+            this.tabPage_saveChange.Size = new System.Drawing.Size(688, 204);
             this.tabPage_saveChange.TabIndex = 3;
-            this.tabPage_saveChange.Text = "±£¥Ê–ﬁ∏ƒ";
+            this.tabPage_saveChange.Text = "‰øùÂ≠ò‰øÆÊîπ";
             this.tabPage_saveChange.UseVisualStyleBackColor = true;
             // 
             // textBox_saveChange_info
@@ -189,23 +183,21 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_saveChange_info.BackColor = System.Drawing.SystemColors.Info;
-            this.textBox_saveChange_info.Location = new System.Drawing.Point(2, 3);
-            this.textBox_saveChange_info.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_saveChange_info.Location = new System.Drawing.Point(3, 4);
             this.textBox_saveChange_info.Multiline = true;
             this.textBox_saveChange_info.Name = "textBox_saveChange_info";
             this.textBox_saveChange_info.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_saveChange_info.Size = new System.Drawing.Size(447, 96);
+            this.textBox_saveChange_info.Size = new System.Drawing.Size(668, 142);
             this.textBox_saveChange_info.TabIndex = 3;
             // 
             // button_saveChange_saveChange
             // 
             this.button_saveChange_saveChange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_saveChange_saveChange.Location = new System.Drawing.Point(279, 107);
-            this.button_saveChange_saveChange.Margin = new System.Windows.Forms.Padding(2);
+            this.button_saveChange_saveChange.Location = new System.Drawing.Point(418, 160);
             this.button_saveChange_saveChange.Name = "button_saveChange_saveChange";
-            this.button_saveChange_saveChange.Size = new System.Drawing.Size(170, 22);
+            this.button_saveChange_saveChange.Size = new System.Drawing.Size(255, 33);
             this.button_saveChange_saveChange.TabIndex = 2;
-            this.button_saveChange_saveChange.Text = "±£¥Ê∂‘‘≠ º ˝æ›µƒ–ﬁ∏ƒ(&S)";
+            this.button_saveChange_saveChange.Text = "‰øùÂ≠òÂØπÂéüÂßãÊï∞ÊçÆÁöÑ‰øÆÊîπ(&S)";
             this.button_saveChange_saveChange.UseVisualStyleBackColor = true;
             this.button_saveChange_saveChange.Click += new System.EventHandler(this.button_saveChange_saveChange_Click);
             // 
@@ -219,110 +211,118 @@ namespace dp2Circulation
             this.tabPage_print.Controls.Add(this.button_print_printOriginList);
             this.tabPage_print.Controls.Add(this.button_print_mergedOption);
             this.tabPage_print.Controls.Add(this.button_print_printOrderList);
-            this.tabPage_print.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_print.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_print.Location = new System.Drawing.Point(4, 28);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(456, 131);
+            this.tabPage_print.Size = new System.Drawing.Size(688, 204);
             this.tabPage_print.TabIndex = 2;
-            this.tabPage_print.Text = "¥Ú”° /  ‰≥ˆ";
+            this.tabPage_print.Text = "ÊâìÂç∞ / ËæìÂá∫";
             this.tabPage_print.UseVisualStyleBackColor = true;
             // 
             // button_print_arriveRatioStatis
             // 
             this.button_print_arriveRatioStatis.ContextMenuStrip = this.contextMenuStrip_arriveRatio;
             this.button_print_arriveRatioStatis.Enabled = false;
-            this.button_print_arriveRatioStatis.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_print_arriveRatioStatis.Location = new System.Drawing.Point(5, 99);
-            this.button_print_arriveRatioStatis.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_arriveRatioStatis.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_print_arriveRatioStatis.Location = new System.Drawing.Point(8, 148);
             this.button_print_arriveRatioStatis.Name = "button_print_arriveRatioStatis";
-            this.button_print_arriveRatioStatis.Size = new System.Drawing.Size(220, 22);
+            this.button_print_arriveRatioStatis.Size = new System.Drawing.Size(330, 33);
             this.button_print_arriveRatioStatis.TabIndex = 7;
-            this.button_print_arriveRatioStatis.Text = "µΩªı¬ Õ≥º∆(&A)...";
+            this.button_print_arriveRatioStatis.Text = "Âà∞Ë¥ßÁéáÁªüËÆ°(&A)...";
             this.button_print_arriveRatioStatis.UseVisualStyleBackColor = true;
             this.button_print_arriveRatioStatis.Click += new System.EventHandler(this.button_print_arriveRatioStatis_Click);
             // 
+            // contextMenuStrip_arriveRatio
+            // 
+            this.contextMenuStrip_arriveRatio.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.contextMenuStrip_arriveRatio.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_arriveRatio_outputExcel});
+            this.contextMenuStrip_arriveRatio.Name = "contextMenuStrip_printOrder";
+            this.contextMenuStrip_arriveRatio.Size = new System.Drawing.Size(206, 32);
+            // 
+            // toolStripMenuItem_arriveRatio_outputExcel
+            // 
+            this.toolStripMenuItem_arriveRatio_outputExcel.Name = "toolStripMenuItem_arriveRatio_outputExcel";
+            this.toolStripMenuItem_arriveRatio_outputExcel.Size = new System.Drawing.Size(205, 28);
+            this.toolStripMenuItem_arriveRatio_outputExcel.Text = "ËæìÂá∫ Excel Êñá‰ª∂";
+            this.toolStripMenuItem_arriveRatio_outputExcel.Click += new System.EventHandler(this.toolStripMenuItem_arriveRatio_outputExcel_Click);
+            // 
             // button_print_outputOrderOption
             // 
-            this.button_print_outputOrderOption.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_print_outputOrderOption.Location = new System.Drawing.Point(230, 73);
-            this.button_print_outputOrderOption.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_outputOrderOption.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_print_outputOrderOption.Location = new System.Drawing.Point(345, 110);
             this.button_print_outputOrderOption.Name = "button_print_outputOrderOption";
-            this.button_print_outputOrderOption.Size = new System.Drawing.Size(152, 22);
+            this.button_print_outputOrderOption.Size = new System.Drawing.Size(228, 33);
             this.button_print_outputOrderOption.TabIndex = 6;
-            this.button_print_outputOrderOption.Text = " ‰≥ˆ—°œÓ(&F)...";
+            this.button_print_outputOrderOption.Text = "ËæìÂá∫ÈÄâÈ°π(&F)...";
             this.button_print_outputOrderOption.UseVisualStyleBackColor = true;
             this.button_print_outputOrderOption.Click += new System.EventHandler(this.button_print_outputOrderOption_Click);
             // 
             // button_print_outputOrder
             // 
-            this.button_print_outputOrder.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_print_outputOrder.Location = new System.Drawing.Point(5, 73);
-            this.button_print_outputOrder.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_outputOrder.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_print_outputOrder.Location = new System.Drawing.Point(8, 110);
             this.button_print_outputOrder.Name = "button_print_outputOrder";
-            this.button_print_outputOrder.Size = new System.Drawing.Size(220, 22);
+            this.button_print_outputOrder.Size = new System.Drawing.Size(330, 33);
             this.button_print_outputOrder.TabIndex = 5;
-            this.button_print_outputOrder.Text = " ‰≥ˆ∂©µ•(&O)...";
+            this.button_print_outputOrder.Text = "ËæìÂá∫ËÆ¢Âçï(&O)...";
             this.button_print_outputOrder.UseVisualStyleBackColor = true;
             this.button_print_outputOrder.Click += new System.EventHandler(this.button_print_outputOrder_Click);
             // 
             // button_print_originOption
             // 
-            this.button_print_originOption.Location = new System.Drawing.Point(230, 32);
-            this.button_print_originOption.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_originOption.Location = new System.Drawing.Point(345, 48);
             this.button_print_originOption.Name = "button_print_originOption";
-            this.button_print_originOption.Size = new System.Drawing.Size(152, 22);
+            this.button_print_originOption.Size = new System.Drawing.Size(228, 33);
             this.button_print_originOption.TabIndex = 4;
-            this.button_print_originOption.Text = "‘≠ º ˝æ›¥Ú”°—°œÓ(&T)...";
+            this.button_print_originOption.Text = "ÂéüÂßãÊï∞ÊçÆÊâìÂç∞ÈÄâÈ°π(&T)...";
             this.button_print_originOption.UseVisualStyleBackColor = true;
             this.button_print_originOption.Click += new System.EventHandler(this.button_print_originOption_Click);
             // 
             // button_print_printOriginList
             // 
-            this.button_print_printOriginList.Location = new System.Drawing.Point(5, 32);
-            this.button_print_printOriginList.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_printOriginList.Location = new System.Drawing.Point(8, 48);
             this.button_print_printOriginList.Name = "button_print_printOriginList";
-            this.button_print_printOriginList.Size = new System.Drawing.Size(220, 22);
+            this.button_print_printOriginList.Size = new System.Drawing.Size(330, 33);
             this.button_print_printOriginList.TabIndex = 3;
-            this.button_print_printOriginList.Text = "¥Ú”°‘≠ º ˝æ›(&R)...";
+            this.button_print_printOriginList.Text = "ÊâìÂç∞ÂéüÂßãÊï∞ÊçÆ(&R)...";
             this.button_print_printOriginList.UseVisualStyleBackColor = true;
             this.button_print_printOriginList.Click += new System.EventHandler(this.button_print_printOriginList_Click);
             // 
             // button_print_mergedOption
             // 
-            this.button_print_mergedOption.Location = new System.Drawing.Point(230, 5);
-            this.button_print_mergedOption.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_mergedOption.Location = new System.Drawing.Point(345, 8);
             this.button_print_mergedOption.Name = "button_print_mergedOption";
-            this.button_print_mergedOption.Size = new System.Drawing.Size(152, 22);
+            this.button_print_mergedOption.Size = new System.Drawing.Size(228, 33);
             this.button_print_mergedOption.TabIndex = 2;
-            this.button_print_mergedOption.Text = "∂©µ•¥Ú”°—°œÓ(&O)...";
+            this.button_print_mergedOption.Text = "ËÆ¢ÂçïÊâìÂç∞ÈÄâÈ°π(&O)...";
             this.button_print_mergedOption.UseVisualStyleBackColor = true;
             this.button_print_mergedOption.Click += new System.EventHandler(this.button_merged_print_option_Click);
             // 
             // button_print_printOrderList
             // 
             this.button_print_printOrderList.ContextMenuStrip = this.contextMenuStrip_printOrder;
-            this.button_print_printOrderList.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_print_printOrderList.Location = new System.Drawing.Point(5, 5);
-            this.button_print_printOrderList.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print_printOrderList.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_print_printOrderList.Location = new System.Drawing.Point(8, 8);
             this.button_print_printOrderList.Name = "button_print_printOrderList";
-            this.button_print_printOrderList.Size = new System.Drawing.Size(220, 22);
+            this.button_print_printOrderList.Size = new System.Drawing.Size(330, 33);
             this.button_print_printOrderList.TabIndex = 0;
-            this.button_print_printOrderList.Text = "¥Ú”°∂©µ•(&P)...";
+            this.button_print_printOrderList.Text = "ÊâìÂç∞ËÆ¢Âçï(&P)...";
             this.button_print_printOrderList.UseVisualStyleBackColor = true;
             this.button_print_printOrderList.Click += new System.EventHandler(this.button_print_printOrderList_Click);
             // 
             // contextMenuStrip_printOrder
             // 
+            this.contextMenuStrip_printOrder.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.contextMenuStrip_printOrder.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_printOrder_outputExcel});
             this.contextMenuStrip_printOrder.Name = "contextMenuStrip_printOrder";
-            this.contextMenuStrip_printOrder.Size = new System.Drawing.Size(162, 26);
+            this.contextMenuStrip_printOrder.Size = new System.Drawing.Size(206, 32);
             // 
             // toolStripMenuItem_printOrder_outputExcel
             // 
             this.toolStripMenuItem_printOrder_outputExcel.Name = "toolStripMenuItem_printOrder_outputExcel";
-            this.toolStripMenuItem_printOrder_outputExcel.Size = new System.Drawing.Size(161, 22);
-            this.toolStripMenuItem_printOrder_outputExcel.Text = " ‰≥ˆ Excel Œƒº˛";
+            this.toolStripMenuItem_printOrder_outputExcel.Size = new System.Drawing.Size(205, 28);
+            this.toolStripMenuItem_printOrder_outputExcel.Text = "ËæìÂá∫ Excel Êñá‰ª∂";
             this.toolStripMenuItem_printOrder_outputExcel.Click += new System.EventHandler(this.toolStripMenuItem_outputExcel_Click);
             // 
             // listView_origin
@@ -331,10 +331,9 @@ namespace dp2Circulation
             this.listView_origin.FullRowSelect = true;
             this.listView_origin.HideSelection = false;
             this.listView_origin.LargeImageList = this.imageList_lineType;
-            this.listView_origin.Location = new System.Drawing.Point(2, 2);
-            this.listView_origin.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_origin.Location = new System.Drawing.Point(3, 3);
             this.listView_origin.Name = "listView_origin";
-            this.listView_origin.Size = new System.Drawing.Size(452, 72);
+            this.listView_origin.Size = new System.Drawing.Size(676, 140);
             this.listView_origin.SmallImageList = this.imageList_lineType;
             this.listView_origin.TabIndex = 4;
             this.listView_origin.UseCompatibleStateImageBehavior = false;
@@ -353,40 +352,35 @@ namespace dp2Circulation
             // 
             // tabControl_items
             // 
-            this.tabControl_items.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_items.Controls.Add(this.tabPage_originItems);
             this.tabControl_items.Controls.Add(this.tabPage_mergedItems);
-            this.tabControl_items.Location = new System.Drawing.Point(0, 198);
-            this.tabControl_items.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_items.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl_items.Location = new System.Drawing.Point(3, 284);
             this.tabControl_items.Name = "tabControl_items";
             this.tabControl_items.SelectedIndex = 0;
-            this.tabControl_items.Size = new System.Drawing.Size(464, 102);
+            this.tabControl_items.Size = new System.Drawing.Size(690, 178);
             this.tabControl_items.TabIndex = 5;
             // 
             // tabPage_originItems
             // 
             this.tabPage_originItems.Controls.Add(this.listView_origin);
-            this.tabPage_originItems.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_originItems.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_originItems.Location = new System.Drawing.Point(4, 28);
             this.tabPage_originItems.Name = "tabPage_originItems";
-            this.tabPage_originItems.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_originItems.Size = new System.Drawing.Size(456, 76);
+            this.tabPage_originItems.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_originItems.Size = new System.Drawing.Size(682, 146);
             this.tabPage_originItems.TabIndex = 0;
-            this.tabPage_originItems.Text = "‘≠ º ˝æ›";
+            this.tabPage_originItems.Text = "ÂéüÂßãÊï∞ÊçÆ";
             this.tabPage_originItems.UseVisualStyleBackColor = true;
             // 
             // tabPage_mergedItems
             // 
             this.tabPage_mergedItems.Controls.Add(this.listView_merged);
-            this.tabPage_mergedItems.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_mergedItems.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_mergedItems.Location = new System.Drawing.Point(4, 28);
             this.tabPage_mergedItems.Name = "tabPage_mergedItems";
-            this.tabPage_mergedItems.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_mergedItems.Size = new System.Drawing.Size(456, 76);
+            this.tabPage_mergedItems.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_mergedItems.Size = new System.Drawing.Size(688, 121);
             this.tabPage_mergedItems.TabIndex = 1;
-            this.tabPage_mergedItems.Text = "∫œ≤¢∫Û";
+            this.tabPage_mergedItems.Text = "ÂêàÂπ∂Âêé";
             this.tabPage_mergedItems.UseVisualStyleBackColor = true;
             // 
             // listView_merged
@@ -395,10 +389,9 @@ namespace dp2Circulation
             this.listView_merged.FullRowSelect = true;
             this.listView_merged.HideSelection = false;
             this.listView_merged.LargeImageList = this.imageList_lineType;
-            this.listView_merged.Location = new System.Drawing.Point(2, 2);
-            this.listView_merged.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_merged.Location = new System.Drawing.Point(3, 3);
             this.listView_merged.Name = "listView_merged";
-            this.listView_merged.Size = new System.Drawing.Size(452, 72);
+            this.listView_merged.Size = new System.Drawing.Size(682, 115);
             this.listView_merged.SmallImageList = this.imageList_lineType;
             this.listView_merged.TabIndex = 5;
             this.listView_merged.UseCompatibleStateImageBehavior = false;
@@ -406,32 +399,32 @@ namespace dp2Circulation
             this.listView_merged.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_merged_ColumnClick);
             this.listView_merged.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_merged_MouseUp);
             // 
-            // contextMenuStrip_arriveRatio
+            // tableLayoutPanel_main
             // 
-            this.contextMenuStrip_arriveRatio.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem_arriveRatio_outputExcel});
-            this.contextMenuStrip_arriveRatio.Name = "contextMenuStrip_printOrder";
-            this.contextMenuStrip_arriveRatio.Size = new System.Drawing.Size(162, 48);
-            // 
-            // toolStripMenuItem_arriveRatio_outputExcel
-            // 
-            this.toolStripMenuItem_arriveRatio_outputExcel.Name = "toolStripMenuItem_arriveRatio_outputExcel";
-            this.toolStripMenuItem_arriveRatio_outputExcel.Size = new System.Drawing.Size(161, 22);
-            this.toolStripMenuItem_arriveRatio_outputExcel.Text = " ‰≥ˆ Excel Œƒº˛";
-            this.toolStripMenuItem_arriveRatio_outputExcel.Click += new System.EventHandler(this.toolStripMenuItem_arriveRatio_outputExcel_Click);
+            this.tableLayoutPanel_main.ColumnCount = 1;
+            this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_main.Controls.Add(this.tabControl_main, 0, 0);
+            this.tableLayoutPanel_main.Controls.Add(this.tabControl_items, 0, 2);
+            this.tableLayoutPanel_main.Controls.Add(this.button_next, 0, 1);
+            this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
+            this.tableLayoutPanel_main.RowCount = 3;
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(696, 465);
+            this.tableLayoutPanel_main.TabIndex = 6;
             // 
             // PrintOrderForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(464, 310);
-            this.Controls.Add(this.tabControl_items);
-            this.Controls.Add(this.button_next);
-            this.Controls.Add(this.tabControl_main);
+            this.ClientSize = new System.Drawing.Size(696, 465);
+            this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PrintOrderForm";
-            this.Text = "¥Ú”°∂©µ•";
+            this.Text = "ÊâìÂç∞ËÆ¢Âçï";
             this.Activated += new System.EventHandler(this.PrintOrderForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PrintOrderForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.PrintOrderForm_FormClosed);
@@ -442,11 +435,12 @@ namespace dp2Circulation
             this.tabPage_saveChange.ResumeLayout(false);
             this.tabPage_saveChange.PerformLayout();
             this.tabPage_print.ResumeLayout(false);
+            this.contextMenuStrip_arriveRatio.ResumeLayout(false);
             this.contextMenuStrip_printOrder.ResumeLayout(false);
             this.tabControl_items.ResumeLayout(false);
             this.tabPage_originItems.ResumeLayout(false);
             this.tabPage_mergedItems.ResumeLayout(false);
-            this.contextMenuStrip_arriveRatio.ResumeLayout(false);
+            this.tableLayoutPanel_main.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -482,5 +476,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_printOrder_outputExcel;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_arriveRatio;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_arriveRatio_outputExcel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
     }
 }

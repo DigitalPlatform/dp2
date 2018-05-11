@@ -1119,7 +1119,8 @@ namespace DigitalPlatform.LibraryServer
             // 1.04 (2017/1/12) Borrow() Return() 中，readerRecord 元素增加了 clipping 属性，如果值为 "true"，表示这里记载的读者记录是不完全的，不应用于快照恢复读者记录
             // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
             // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.06");
+            // 1.07 (2018/3/7) passgate 日志记录中增加了 readerRefID 元素
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.07");
 
             if (start_time != new DateTime(0))
             {

@@ -2843,7 +2843,8 @@ System.Text.Encoding.UTF8))
 
                 // 2017/12/21
                 // 既不是虚拟库也不是普通库
-                if (vdb == null)
+                // 2018/1/8 注: 特殊的名字，例如 "<全部实体>" 等要继续向后处理
+                if (vdb == null && !(strDbName.StartsWith("<") && strDbName.EndsWith(">")))
                 {
                     strError = "数据库名 '" + strDbName + "' 不存在";
                     return -1;

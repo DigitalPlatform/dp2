@@ -42,12 +42,12 @@ namespace DigitalPlatform.Marc
 
                 if (strSegment.Length < 3)
                 {
-                    strError = "每一段长度须至少 3 字符。'"+strSegment+"'";
+                    strError = "每一段长度须至少 3 字符。'" + strSegment + "'";
                     return -1;
                 }
                 // -
 
-                int nRet = strSegment.IndexOf("-",3);
+                int nRet = strSegment.IndexOf("-", 3);
                 if (nRet != -1)
                 {
                     strStart = strSegment.Substring(0, nRet).Trim();
@@ -119,8 +119,8 @@ namespace DigitalPlatform.Marc
         public FieldNameList DeleteFieldNames = new FieldNameList();
 
         // 解析分列操作的字段名列表
-        // insert:001-999;replace:001-999;delete:001-999
         // parameters:
+        //      strText 内容为这样的形态：insert:001-999;replace:001-999;delete:001-999
         //      strDefaultOperation 缺省的操作类型。就是没有冒号情况下当作什么操作 insert/replace/delete 之一
         public int Build(
             string strText,
@@ -133,7 +133,7 @@ namespace DigitalPlatform.Marc
             this.ReplaceFieldNames.Clear();
             this.DeleteFieldNames.Clear();
 
-            string[] segments = strText.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] segments = strText.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in segments)
             {
                 string strSegment = s.Trim();
@@ -157,7 +157,7 @@ namespace DigitalPlatform.Marc
                 if (string.IsNullOrEmpty(strList) == true)
                 {
                     // strList = "###,001-999";
-                    strError = "片断 '"+strSegment+"' 中没有定义字段名列表部分";
+                    strError = "片断 '" + strSegment + "' 中没有定义字段名列表部分";
                     return -1;
                 }
 
@@ -170,7 +170,7 @@ namespace DigitalPlatform.Marc
                 nRet = list.Build(strList, out strError);
                 if (nRet == -1)
                 {
-                    strError = "字段名列表部分 '"+strList+"' 不合法";
+                    strError = "字段名列表部分 '" + strList + "' 不合法";
                     return -1;
                 }
 

@@ -1802,7 +1802,16 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            PathUtil.TryCreateDir(strDataDir);
+            try
+            {
+                PathUtil.TryCreateDir(strDataDir);
+            }
+            catch(Exception ex)
+            {
+                // 2018/1/27
+                strError = ex.Message;
+                return -1;
+            }
 
             if (string.IsNullOrEmpty(this.SourceDir) == false)
             {
