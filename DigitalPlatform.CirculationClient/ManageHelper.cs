@@ -291,7 +291,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 10, 0);
+            channel.Timeout = TimeSpan.FromMinutes(11);
             try
             {
                 long lRet = channel.ManageDatabase(

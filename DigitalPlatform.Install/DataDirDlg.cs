@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,14 +24,14 @@ namespace DigitalPlatform.Install
         {
             if (this.DataDir == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Êı¾İÄ¿Â¼¡£");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ•°æ®ç›®å½•ã€‚");
                 return;
             }
 
         REDO:
             if (Directory.Exists(this.DataDir) == false)
             {
-                string strText = "Êı¾İÄ¿Â¼ '" + this.DataDir + "' ²»´æÔÚ¡£\r\n\r\nÊÇ·ñ´´½¨´ËÄ¿Â¼?";
+                string strText = "æ•°æ®ç›®å½• '" + this.DataDir + "' ä¸å­˜åœ¨ã€‚\r\n\r\næ˜¯å¦åˆ›å»ºæ­¤ç›®å½•?";
                 DialogResult result = MessageBox.Show(this,
                     strText,
                     this.MessageBoxTitle,
@@ -40,15 +40,20 @@ namespace DigitalPlatform.Install
                     MessageBoxDefaultButton.Button1);
                 if (result == DialogResult.No)
                 {
-                    MessageBox.Show(this, "ÇëÊÖ¶¯´´½¨Êı¾İÄ¿Â¼ " + this.DataDir);
+                    MessageBox.Show(this, "è¯·æ‰‹åŠ¨åˆ›å»ºæ•°æ®ç›®å½• " + this.DataDir);
                     return;
                 }
 
+                // return:
+                //      false   å·²ç»å­˜åœ¨
+                //      true    åˆšåˆšæ–°åˆ›å»º
+                // exception:
+                //      å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸ System.IO.DirectoryNotFoundException (æœªèƒ½æ‰¾åˆ°è·¯å¾„â€œ...â€çš„ä¸€éƒ¨åˆ†)
                 PathUtil.TryCreateDir(this.DataDir);
 
                 if (Directory.Exists(this.DataDir) == false)
                 {
-                    MessageBox.Show(this, "Êı¾İÄ¿Â¼ " + this.DataDir + "´´½¨Ê§°Ü¡£");
+                    MessageBox.Show(this, "æ•°æ®ç›®å½• " + this.DataDir + "åˆ›å»ºå¤±è´¥ã€‚");
                     return;
                 }
                 goto REDO;
@@ -76,7 +81,7 @@ namespace DigitalPlatform.Install
             }
         }
 
-        // ×¢ÊÍ
+        // æ³¨é‡Š
         public string Comment
         {
             get

@@ -1342,7 +1342,7 @@ namespace dp2Circulation
 
                 for (int j = 0; j < locations.Count; j++)
                 {
-                    DigitalPlatform.Location location = locations[j];
+                    DigitalPlatform.Text.Location location = locations[j];
 
                     if (string.IsNullOrEmpty(location.RefID) == true)
                         continue;
@@ -2578,7 +2578,7 @@ namespace dp2Circulation
             // 配置标题和风格
             string strNamePath = "printaccept_printoption";
 
-            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -2588,7 +2588,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(dlg, this.Font, false);
 
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 验收单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -2701,7 +2701,7 @@ namespace dp2Circulation
             string strNamePath = "printaccept_printoption";
 
             // 获得打印参数
-            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -4451,7 +4451,7 @@ out strError);
 
                 for (int i = 0; i < locations.Count; i++)
                 {
-                    DigitalPlatform.Location location = locations[i];
+                    DigitalPlatform.Text.Location location = locations[i];
 
                     if (string.IsNullOrEmpty(location.RefID) == true)
                         continue;
@@ -6030,7 +6030,7 @@ out strError);
             // 配置标题和风格
             string strNamePath = "printaccept_origin_printoption";
 
-            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -6039,7 +6039,7 @@ out strError);
             MainForm.SetControlFont(dlg, this.Font, false);
 
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 原始数据 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -6151,7 +6151,7 @@ out strError);
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.DataDir,
+            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "printaccept_origin_printoption");
@@ -7634,7 +7634,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
             // 获得打印参数
             string strNamePath = "printaccept_exchangerate_printoption";
-            ExchangeRatePrintOption option = new ExchangeRatePrintOption(Program.MainForm.DataDir,
+            ExchangeRatePrintOption option = new ExchangeRatePrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7915,7 +7915,7 @@ false);
             // 配置标题和风格
             string strNamePath = "printaccept_exchangerate_printoption";
 
-            PrintOption option = new ExchangeRatePrintOption(Program.MainForm.DataDir,
+            PrintOption option = new ExchangeRatePrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -7924,7 +7924,7 @@ false);
             MainForm.SetControlFont(dlg, this.Font, false);
 
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 汇率表 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {

@@ -112,7 +112,7 @@ namespace dp2Circulation
                 catch (Exception ex)
                 {
                     this.comboBox_seller.Text = strSeller;
-                    MessageBox.Show(this, "书商 '" + strSeller + "' 的汇率表格式不合法: " + ex.Message);
+                    MessageBox.Show(this, "渠道(书商) '" + strSeller + "' 的汇率表格式不合法: " + ex.Message);
                     return false;
                 }
             }

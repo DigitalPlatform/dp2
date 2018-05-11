@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows.Forms;
 
 using System.Xml;
-using System.Drawing;
 
-using System.Diagnostics;
-
-using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
-
-using DigitalPlatform.LibraryClient.localhost;  // IssueInfo
-using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {

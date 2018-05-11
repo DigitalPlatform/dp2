@@ -657,7 +657,7 @@ namespace DigitalPlatform.LibraryServer
             out BorrowInfo borrow_info   // 2007/12/6
             )
         {
-        REDO_WHOLE:
+            REDO_WHOLE:
             item_records = null;
             reader_records = null;
             biblio_records = null;
@@ -2285,7 +2285,7 @@ start_time_1,
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2540,7 +2540,7 @@ start_time_1,
                 goto ERROR1;
             }
 
-        SKIP0:
+            SKIP0:
 
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
@@ -2613,7 +2613,7 @@ start_time_1,
                 start_time_read_reader,
                 strActionName + " 中读取读者记录 耗时 ");
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3601,7 +3601,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-        REDO:
+            REDO:
 
             lRet = channel.GetRes(strReaderRecPath,
     out strReaderXml,
@@ -3756,7 +3756,7 @@ start_time_1,
             }
 
             return (aFoundPath.Count);
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4054,7 +4054,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-        REDO_RETURN:
+            REDO_RETURN:
 
             bool bReaderLocked = false;
             bool bEntityLocked = false;
@@ -4855,7 +4855,7 @@ start_time_1,
                         }
                     }
 #endif
-                SKIP0:
+                    SKIP0:
 
                     if (strAction == "inventory")
                     {
@@ -5421,7 +5421,7 @@ start_time_1,
                         start_time_write_item,
                         "Return() 中写回册记录 耗时 ");
 
-                WRITE_OPERLOG:
+                    WRITE_OPERLOG:
                     DateTime start_time_write_operlog = DateTime.Now;
 
                     // 写入日志
@@ -5710,7 +5710,7 @@ start_time_1,
                 // 最好超期和保留两种状态码可以并存?
             }
 
-        END3:
+            END3:
             // 输出数据
             // 把输出数据部分放在读者锁以外范围，是为了尽量减少锁定的时间，提高并发运行效率
             DateTime output_start_time = DateTime.Now;
@@ -6181,7 +6181,7 @@ start_time_1,
 
             // result.Value值在前面可能被设置成1
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                 result.ErrorInfo += "; ";
@@ -6642,7 +6642,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-        REDO:
+            REDO:
 
             lRet = channel.GetRes(strReaderRecPath,
     out strReaderXml,
@@ -9900,7 +9900,7 @@ out string strError)
                         goto ERROR1;
 
                     int nRedoDeleteCount = 0;
-                REDO_DELETE:
+                    REDO_DELETE:
                     // 删除已付违约金记录
                     lRet = channel.DoDeleteRes(strAmercedRecPath,
                         amerced_timestamp,
@@ -10016,7 +10016,7 @@ out string strError)
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -10585,7 +10585,7 @@ out string strError)
                     goto ERROR1;
                 }
 
-            SAVERECORD:
+                SAVERECORD:
 
                 // 为写回读者、册记录做准备
                 // byte[] timestamp = null;
@@ -10733,7 +10733,7 @@ out string strError)
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -11057,7 +11057,7 @@ out string strError)
                 byte[] timestamp = null;
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
-            REDO:
+                REDO:
 
                 long lRet = channel.DoDeleteRes(strPath,
                     timestamp,
@@ -12202,7 +12202,7 @@ out string strError)
                         continue;   // 重新执行刷新操作似乎没有必要，因为没有刚开始就立即结束的？
                     }
                     break;
-                FOUND:
+                    FOUND:
                     string strUnit = "";
                     long lOverduePeriod = 0;
 
@@ -12310,7 +12310,7 @@ out string strError)
                     }
 
                     break;// 没有找到下一个可启动的事项了
-                FOUND_1:
+                    FOUND_1:
 
                     TimeSpan delta;
 
@@ -13528,7 +13528,7 @@ out string strError)
                     Debug.Assert(false, "");
                 }
 
-            CONTINUE_LOSTING:
+                CONTINUE_LOSTING:
 
                 strOverdueMessage += "有丢失违约金 " + strLostPrice + "。请履行付违约金手续。";
 
@@ -13554,7 +13554,7 @@ out string strError)
             }
 
 
-        DOCHANGE:
+            DOCHANGE:
 
             XmlNode nodeOldBorrower = null;
 
@@ -14063,7 +14063,7 @@ out string strError)
             if (bChanged == false)
                 return 0;   // not changed
             return 1;   // 虽然没有找到，但是册记录发生了修改
-        FOUND:
+            FOUND:
             Debug.Assert(found_node != null, "");
             strReservationReaderBarcode = found_node.GetAttribute("reader");
 
@@ -14466,7 +14466,7 @@ out string strError)
 
             int nRedoLoadCount = 0;
 
-        REDO_LOAD_QUEUE_REC:
+            REDO_LOAD_QUEUE_REC:
 
             // 进一步检索预约到书库, 看看是否属于已经通知来取书的册, 或者是等待上普通架的预约超期未取册
             string strNotifyXml = "";
@@ -14610,7 +14610,7 @@ out string strError)
             {
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
-            REDO_DELETE:
+                REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
                     out output_timestamp,
@@ -14629,7 +14629,7 @@ out string strError)
                 }
             }
 
-        CHANGEITEMLOCATION:
+            CHANGEITEMLOCATION:
 
             // StringUtil.RemoveFromInList("#reservation", true, ref strLocation);
             strLocation = StringUtil.GetPureLocationString(strLocation);
@@ -15048,7 +15048,7 @@ out string strError)
                 }
             }
 
-        DOCHANGE:
+            DOCHANGE:
 
             // 测算本次 借阅/续借 的应还书时间
             DateTime now = app.Clock.UtcNow;  //  今天，当下。GMT时间
@@ -15186,7 +15186,7 @@ out string strError)
                 }
             }
 
-        SKIP_CHECK_RENEW_PERIOD:
+            SKIP_CHECK_RENEW_PERIOD:
 
             string strRenewComment = "";
 
@@ -15722,7 +15722,7 @@ strBookPrice);    // 图书价格
                     }
                 }
 
-            DOITEM:
+                DOITEM:
                 // 顺便获得下一个预约读者证条码号
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
@@ -16142,7 +16142,7 @@ strBookPrice);    // 图书价格
                                 goto ERROR1;
                             }
 
-                        REDO_WRITE_SOURCE:
+                            REDO_WRITE_SOURCE:
                             nRedoCount = 0;
                             lRet = channel.DoSaveTextRes(strSourceOutputReaderRecPath,
                                 source_readerdom.OuterXml,
@@ -16236,7 +16236,7 @@ strBookPrice);    // 图书价格
 
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -16474,7 +16474,7 @@ strBookPrice);    // 图书价格
                 string strOutputItemRecPath = "";
 
                 int nRedoCount = 0;
-            REDO:
+                REDO:
 
                 // 获得册记录
                 // return:
@@ -16694,7 +16694,7 @@ strBookPrice);    // 图书价格
                 this.EntityLocks.UnlockForWrite(strEntityBarcode);
             }
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -16918,7 +16918,7 @@ strBookPrice);    // 图书价格
                 result.Value = 0;
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -17179,7 +17179,7 @@ strBookPrice);    // 图书价格
                 }
             }
 
-        END1:
+            END1:
             if (String.IsNullOrEmpty(strCheckError) == false)
             {
                 result.Value = 1;
@@ -17188,7 +17188,7 @@ strBookPrice);    // 图书价格
             else
                 result.Value = 0;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -17224,7 +17224,7 @@ strBookPrice);    // 图书价格
                 strError = "册条码号不能为空。";
                 goto ERROR1;
             }
-        REDO_REPAIR:
+            REDO_REPAIR:
 
             /*
                     string strOutputReaderXml = "";
@@ -17471,7 +17471,7 @@ strBookPrice);    // 图书价格
                         goto CORRECT;
                     }
 
-                DELETE_CHAIN:
+                    DELETE_CHAIN:
 
                     // 移除读者记录侧的链
                     nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
@@ -17568,12 +17568,12 @@ strBookPrice);    // 图书价格
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
-        CORRECT:
+            CORRECT:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
@@ -17616,7 +17616,7 @@ strBookPrice);    // 图书价格
                 strError = "get channel error";
                 goto ERROR1;
             }
-        REDO_REPAIR:
+            REDO_REPAIR:
 
             // 加读者记录锁
 #if DEBUG_LOCK_READER
@@ -17998,12 +17998,12 @@ strBookPrice);    // 图书价格
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
-        CORRECT:
+            CORRECT:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
@@ -18056,7 +18056,7 @@ strBookPrice);    // 图书价格
         // result.Value -1 出错 其他 特定门(strGateName)的本次的累计量
         public LibraryServerResult PassGate(
             SessionInfo sessioninfo,
-            string strReaderBarcode,
+            string strReaderBarcodeParam,
             string strGateName,
             string strResultTypeList,
             out string[] results)
@@ -18069,6 +18069,8 @@ strBookPrice);    // 图书价格
 
             LibraryServerResult result = new LibraryServerResult();
 
+
+#if NO
             if (string.IsNullOrEmpty(strReaderBarcode) == false)
             {
                 string strOutputCode = "";
@@ -18242,6 +18244,113 @@ strBookPrice);    // 图书价格
                 this.WriteErrorLog("PassGate 结束为读者加读锁 '" + strReaderBarcode + "'");
 #endif
             }
+#endif
+
+            // 检索，定位一条读者记录
+            // return:
+            //      -1  出错
+            //      0   没有找到。strError 返回了(提示)报错信息, error_code 中有错误码
+            //      1   找到
+            nRet = SearchReaderRecord(
+        sessioninfo,
+        strReaderBarcodeParam,
+        out string strReaderXml,
+        out string strOutputReaderRecPath,
+        out byte[] reader_timestamp,
+        out ErrorCode error_code,
+        out strError);
+            if (nRet == -1)
+            {
+                strError = "读入读者记录时发生错误: " + strError;
+                goto ERROR1;
+            }
+            if (nRet == 0)
+            {
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = error_code;
+                return result;
+            }
+
+            nRet = this.GetLibraryCode(strOutputReaderRecPath,
+    out string strLibraryCode,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+                strGateName = strLibraryCode + ":" + strGateName;
+
+            // 增量总量
+            if (this.Statis != null)
+                this.Statis.IncreaseEntryValue(
+                strLibraryCode,
+                "入馆人次",
+                "所有门之总量",
+                1);
+
+            // 增量特定门的累计量
+            if (this.Statis != null)
+                nResultValue = this.Statis.IncreaseEntryValue(
+                strLibraryCode,
+                "入馆人次",
+                String.IsNullOrEmpty(strGateName) == true ? "(blank)" : strGateName,
+                (int)1);
+
+            if (this.PassgateWriteToOperLog == true)
+            {
+                nRet = LibraryApplication.LoadToDom(strReaderXml,
+                    out XmlDocument readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
+                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                string strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "passgate");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "readerBarcode",
+                    strReaderBarcode);
+                // 2018/3/7 增加
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "readerRefID",
+    strReaderRefID);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "libraryCode",
+    strLibraryCode);
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "gateName",
+                    strGateName);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                nRet = this.OperLog.WriteOperLog(domOperLog,
+                    sessioninfo.ClientAddress,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "PassGate() API 写入日志时发生错误: " + strError;
+                    goto ERROR1;
+                }
+            }
+
 
             if (String.IsNullOrEmpty(strResultTypeList) == true)
             {
@@ -18249,6 +18358,7 @@ strBookPrice);    // 图书价格
                 goto END1;
             }
 
+            // TODO: 以下用 GetReaderInfo 中的创建返回格式的代码替代
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
             results = new string[result_types.Length];
 
@@ -18317,10 +18427,10 @@ strBookPrice);    // 图书价格
                 }
             }
 
-        END1:
+            END1:
             result.Value = nResultValue;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -18388,7 +18498,7 @@ strBookPrice);    // 图书价格
 
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
-        REDO_FOREGIFT:
+            REDO_FOREGIFT:
 
 
             // 加读者记录锁
@@ -18584,7 +18694,7 @@ strBookPrice);    // 图书价格
             // END1:
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -18717,7 +18827,7 @@ strBookPrice);    // 图书价格
 
             strOverdueString = nodeOverdue.OuterXml;
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -18776,7 +18886,7 @@ strBookPrice);    // 图书价格
             }
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
-        REDO_HIRE:
+            REDO_HIRE:
 
 
             // 加读者记录锁
@@ -18972,7 +19082,7 @@ strBookPrice);    // 图书价格
             // END1:
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -19078,7 +19188,7 @@ strBookPrice);    // 图书价格
                     strStartDate = strExistStartDate;
             }
 
-        SKIP_HIRE_LATE:
+            SKIP_HIRE_LATE:
 
             int nResultValue = 0;
             string strHireExpireDate = "";
@@ -19180,7 +19290,7 @@ strBookPrice);    // 图书价格
 
             strOverdueString = nodeOverdue.OuterXml;
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -19361,7 +19471,7 @@ strBookPrice);    // 图书价格
 
             result.Value = 1;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -19406,7 +19516,7 @@ strBookPrice);    // 图书价格
             }
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
 
             long lRet = channel.GetRes(strAmercedRecPath,
                 out strAmercedXml,
@@ -19614,7 +19724,7 @@ strBookPrice);    // 图书价格
             }
 
 
-        END1:
+            END1:
             if (bCreateOperLog == true)
             {
                 if (this.Statis != null)

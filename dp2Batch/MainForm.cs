@@ -348,10 +348,10 @@ namespace dp2Batch
             // 
             this.tabPage_range.BackColor = System.Drawing.Color.Transparent;
             this.tabPage_range.Controls.Add(this.panel_range);
-            this.tabPage_range.Location = new System.Drawing.Point(4, 23);
+            this.tabPage_range.Location = new System.Drawing.Point(8, 43);
             this.tabPage_range.Name = "tabPage_range";
             this.tabPage_range.Padding = new System.Windows.Forms.Padding(6);
-            this.tabPage_range.Size = new System.Drawing.Size(626, 246);
+            this.tabPage_range.Size = new System.Drawing.Size(618, 222);
             this.tabPage_range.TabIndex = 0;
             this.tabPage_range.Text = "按记录ID导出";
             this.tabPage_range.UseVisualStyleBackColor = true;
@@ -364,7 +364,7 @@ namespace dp2Batch
             this.panel_range.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_range.Location = new System.Drawing.Point(6, 6);
             this.panel_range.Name = "panel_range";
-            this.panel_range.Size = new System.Drawing.Size(614, 234);
+            this.panel_range.Size = new System.Drawing.Size(606, 210);
             this.panel_range.TabIndex = 8;
             // 
             // panel_resdirtree
@@ -374,7 +374,7 @@ namespace dp2Batch
             this.panel_resdirtree.Location = new System.Drawing.Point(317, 0);
             this.panel_resdirtree.Name = "panel_resdirtree";
             this.panel_resdirtree.Padding = new System.Windows.Forms.Padding(0, 4, 4, 4);
-            this.panel_resdirtree.Size = new System.Drawing.Size(297, 234);
+            this.panel_resdirtree.Size = new System.Drawing.Size(289, 210);
             this.panel_resdirtree.TabIndex = 6;
             // 
             // treeView_rangeRes
@@ -386,7 +386,7 @@ namespace dp2Batch
             this.treeView_rangeRes.Location = new System.Drawing.Point(0, 4);
             this.treeView_rangeRes.Name = "treeView_rangeRes";
             this.treeView_rangeRes.SelectedImageIndex = 0;
-            this.treeView_rangeRes.Size = new System.Drawing.Size(293, 226);
+            this.treeView_rangeRes.Size = new System.Drawing.Size(285, 202);
             this.treeView_rangeRes.TabIndex = 0;
             this.treeView_rangeRes.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterCheck);
             this.treeView_rangeRes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterSelect);
@@ -395,7 +395,7 @@ namespace dp2Batch
             // 
             this.splitter_range.Location = new System.Drawing.Point(309, 0);
             this.splitter_range.Name = "splitter_range";
-            this.splitter_range.Size = new System.Drawing.Size(8, 234);
+            this.splitter_range.Size = new System.Drawing.Size(8, 210);
             this.splitter_range.TabIndex = 8;
             this.splitter_range.TabStop = false;
             // 
@@ -412,7 +412,7 @@ namespace dp2Batch
             this.panel_rangeParams.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel_rangeParams.Location = new System.Drawing.Point(0, 0);
             this.panel_rangeParams.Name = "panel_rangeParams";
-            this.panel_rangeParams.Size = new System.Drawing.Size(309, 234);
+            this.panel_rangeParams.Size = new System.Drawing.Size(309, 210);
             this.panel_rangeParams.TabIndex = 7;
             // 
             // checkBox_export_fastMode
@@ -420,7 +420,7 @@ namespace dp2Batch
             this.checkBox_export_fastMode.AutoSize = true;
             this.checkBox_export_fastMode.Location = new System.Drawing.Point(144, 198);
             this.checkBox_export_fastMode.Name = "checkBox_export_fastMode";
-            this.checkBox_export_fastMode.Size = new System.Drawing.Size(90, 18);
+            this.checkBox_export_fastMode.Size = new System.Drawing.Size(172, 33);
             this.checkBox_export_fastMode.TabIndex = 7;
             this.checkBox_export_fastMode.Text = "快速模式(&F)";
             this.checkBox_export_fastMode.UseVisualStyleBackColor = true;
@@ -449,7 +449,7 @@ namespace dp2Batch
             this.textBox_dbPath.Location = new System.Drawing.Point(75, 6);
             this.textBox_dbPath.Name = "textBox_dbPath";
             this.textBox_dbPath.ReadOnly = true;
-            this.textBox_dbPath.Size = new System.Drawing.Size(186, 22);
+            this.textBox_dbPath.Size = new System.Drawing.Size(193, 36);
             this.textBox_dbPath.TabIndex = 2;
             this.textBox_dbPath.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -473,7 +473,7 @@ namespace dp2Batch
             this.groupBox1.Controls.Add(this.radioButton_all);
             this.groupBox1.Location = new System.Drawing.Point(7, 32);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(253, 134);
+            this.groupBox1.Size = new System.Drawing.Size(260, 134);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " 输出记录范围 ";
@@ -484,7 +484,7 @@ namespace dp2Batch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_endNo.Location = new System.Drawing.Point(165, 95);
             this.textBox_endNo.Name = "textBox_endNo";
-            this.textBox_endNo.Size = new System.Drawing.Size(74, 22);
+            this.textBox_endNo.Size = new System.Drawing.Size(81, 36);
             this.textBox_endNo.TabIndex = 5;
             this.textBox_endNo.TextChanged += new System.EventHandler(this.textBox_endNo_TextChanged);
             // 
@@ -502,7 +502,7 @@ namespace dp2Batch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startNo.Location = new System.Drawing.Point(165, 63);
             this.textBox_startNo.Name = "textBox_startNo";
-            this.textBox_startNo.Size = new System.Drawing.Size(74, 22);
+            this.textBox_startNo.Size = new System.Drawing.Size(81, 36);
             this.textBox_startNo.TabIndex = 3;
             this.textBox_startNo.TextChanged += new System.EventHandler(this.textBox_startNo_TextChanged);
             // 
@@ -521,7 +521,7 @@ namespace dp2Batch
             this.radioButton_startEnd.Checked = true;
             this.radioButton_startEnd.Location = new System.Drawing.Point(21, 38);
             this.radioButton_startEnd.Name = "radioButton_startEnd";
-            this.radioButton_startEnd.Size = new System.Drawing.Size(143, 19);
+            this.radioButton_startEnd.Size = new System.Drawing.Size(150, 19);
             this.radioButton_startEnd.TabIndex = 1;
             this.radioButton_startEnd.TabStop = true;
             this.radioButton_startEnd.Text = "起止ID(&S) ";
@@ -532,7 +532,7 @@ namespace dp2Batch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_all.Location = new System.Drawing.Point(21, 19);
             this.radioButton_all.Name = "radioButton_all";
-            this.radioButton_all.Size = new System.Drawing.Size(56, 19);
+            this.radioButton_all.Size = new System.Drawing.Size(63, 19);
             this.radioButton_all.TabIndex = 0;
             this.radioButton_all.Text = "全部(&A)";
             this.radioButton_all.CheckedChanged += new System.EventHandler(this.radioButton_all_CheckedChanged);
@@ -548,9 +548,9 @@ namespace dp2Batch
             // tabPage_resultset
             // 
             this.tabPage_resultset.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage_resultset.Location = new System.Drawing.Point(4, 23);
+            this.tabPage_resultset.Location = new System.Drawing.Point(8, 43);
             this.tabPage_resultset.Name = "tabPage_resultset";
-            this.tabPage_resultset.Size = new System.Drawing.Size(626, 246);
+            this.tabPage_resultset.Size = new System.Drawing.Size(618, 222);
             this.tabPage_resultset.TabIndex = 1;
             this.tabPage_resultset.Text = "按结果集导出";
             this.tabPage_resultset.UseVisualStyleBackColor = true;
@@ -569,9 +569,9 @@ namespace dp2Batch
             this.tabPage_import.Controls.Add(this.button_import_dbMap);
             this.tabPage_import.Controls.Add(this.textBox_import_dbMap);
             this.tabPage_import.Controls.Add(this.label4);
-            this.tabPage_import.Location = new System.Drawing.Point(4, 23);
+            this.tabPage_import.Location = new System.Drawing.Point(8, 43);
             this.tabPage_import.Name = "tabPage_import";
-            this.tabPage_import.Size = new System.Drawing.Size(626, 246);
+            this.tabPage_import.Size = new System.Drawing.Size(618, 222);
             this.tabPage_import.TabIndex = 2;
             this.tabPage_import.Text = "导入";
             this.tabPage_import.UseVisualStyleBackColor = true;
@@ -581,7 +581,7 @@ namespace dp2Batch
             this.checkBox_import_fastMode.AutoSize = true;
             this.checkBox_import_fastMode.Location = new System.Drawing.Point(119, 61);
             this.checkBox_import_fastMode.Name = "checkBox_import_fastMode";
-            this.checkBox_import_fastMode.Size = new System.Drawing.Size(90, 18);
+            this.checkBox_import_fastMode.Size = new System.Drawing.Size(172, 33);
             this.checkBox_import_fastMode.TabIndex = 8;
             this.checkBox_import_fastMode.Text = "快速模式(&F)";
             this.checkBox_import_fastMode.UseVisualStyleBackColor = true;
@@ -592,7 +592,7 @@ namespace dp2Batch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_range.Location = new System.Drawing.Point(119, 33);
             this.textBox_import_range.Name = "textBox_import_range";
-            this.textBox_import_range.Size = new System.Drawing.Size(379, 22);
+            this.textBox_import_range.Size = new System.Drawing.Size(379, 36);
             this.textBox_import_range.TabIndex = 7;
             // 
             // label6
@@ -600,7 +600,7 @@ namespace dp2Batch
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(9, 36);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(76, 14);
+            this.label6.Size = new System.Drawing.Size(150, 29);
             this.label6.TabIndex = 6;
             this.label6.Text = "导入范围(&R):";
             // 
@@ -620,7 +620,7 @@ namespace dp2Batch
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_fileName.Location = new System.Drawing.Point(119, 8);
             this.textBox_import_fileName.Name = "textBox_import_fileName";
-            this.textBox_import_fileName.Size = new System.Drawing.Size(379, 22);
+            this.textBox_import_fileName.Size = new System.Drawing.Size(379, 36);
             this.textBox_import_fileName.TabIndex = 4;
             // 
             // label5
@@ -628,7 +628,7 @@ namespace dp2Batch
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(9, 10);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(63, 14);
+            this.label5.Size = new System.Drawing.Size(124, 29);
             this.label5.TabIndex = 3;
             this.label5.Text = "文件名(&F):";
             // 
@@ -659,7 +659,7 @@ namespace dp2Batch
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(9, 87);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(101, 14);
+            this.label4.Size = new System.Drawing.Size(197, 29);
             this.label4.TabIndex = 0;
             this.label4.Text = "库名映射规则(&T):";
             // 
@@ -701,6 +701,7 @@ namespace dp2Batch
             // 
             // statusStrip_main
             // 
+            this.statusStrip_main.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
             this.toolStripProgressBar_main});
@@ -724,7 +725,7 @@ namespace dp2Batch
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 29F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(634, 327);
             this.Controls.Add(this.tabControl_main);
@@ -3215,7 +3216,7 @@ this.checkBox_import_fastMode.Checked);
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
+									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2batch.exe"};
 
 
@@ -3312,7 +3313,7 @@ this.checkBox_import_fastMode.Checked);
 										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-										 Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
+										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2batch.exe",
 										 strMainCsDllName};
 

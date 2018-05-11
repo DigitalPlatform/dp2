@@ -2424,7 +2424,7 @@ Stack:
                 }
 
                 goto CONTINUE;
-            FOUND:
+                FOUND:
 
                 if (child.GetType().Equals(type) == true)
                 {
@@ -2436,7 +2436,7 @@ Stack:
                     return child;
                 }
 
-            CONTINUE:
+                CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -2810,18 +2810,29 @@ Stack:
             }
         }
 
+        public LibraryChannel GetChannel(string strServerUrl = ".",
+    string strUserName = ".",
+    GetChannelStyle style = GetChannelStyle.GUI)
+        {
+            return GetChannel(strServerUrl,
+                strUserName,
+                style,
+                null);
+        }
+
         // parameters:
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
-        public LibraryChannel GetChannel(string strServerUrl = ".",
-            string strUserName = ".",
-            GetChannelStyle style = GetChannelStyle.GUI)
+        public LibraryChannel GetChannel(string strServerUrl,   // = ".",
+            string strUserName, // = ".",
+            GetChannelStyle style,  // = GetChannelStyle.GUI,
+            string strClientIP/* = null*/)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.DefaultUserName;
 
-            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName, null, strClientIP);
             if ((style & GetChannelStyle.GUI) != 0)
                 channel.Idle += channel_Idle;
             _channelList.Add(channel);
@@ -2942,7 +2953,7 @@ Stack:
                 // EndSearch();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3033,7 +3044,7 @@ Stack:
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3827,7 +3838,7 @@ Stack:
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4457,7 +4468,7 @@ Stack:
             if (nRet == 2)
                 LoadItemBarcode();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4612,7 +4623,7 @@ Stack:
                 this.ReturnChannel(channel);
                 // EndSearch();
             }
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4721,7 +4732,7 @@ Stack:
                 // this.ReturnChannel(channel);
                 // EndSearch();
             }
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5738,7 +5749,7 @@ out strError);
             if (this.QuickPinyin != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5789,7 +5800,7 @@ out strError);
             if (this.QuickCutter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5840,7 +5851,7 @@ out strError);
             if (this.QuickSjhm != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -5891,7 +5902,7 @@ out strError);
             if (this.IsbnSplitter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -6396,7 +6407,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7351,7 +7362,7 @@ out strError);
                 goto ERROR1;
             form.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
         }
@@ -7385,7 +7396,7 @@ out strError);
             }
             form.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             form.Close();
         }
@@ -7569,7 +7580,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral,
                 this.m_speech.SpeakAsyncCancelAll();
                 this.m_speech.SpeakAsync(strText);
             }
-            catch(InvalidCastException ex)
+            catch (InvalidCastException ex)
             {
                 // 如何显示出错信息?
             }
@@ -7816,7 +7827,7 @@ Keys keyData)
             {
             }
 
-        REDO_VERIFY:
+            REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -7852,7 +7863,7 @@ Keys keyData)
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
             if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
-                // strSha1 != GetCheckCode(strSerialCode)
+                    // strSha1 != GetCheckCode(strSerialCode)
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -7997,7 +8008,7 @@ Keys keyData)
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -8050,7 +8061,7 @@ Keys keyData)
             string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
-        REDO_VERIFY:
+            REDO_VERIFY:
 
             if (strSerialCode == "test")
             {
@@ -8080,7 +8091,7 @@ Keys keyData)
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
             if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
-                // strSha1 != GetCheckCode(strSerialCode) 
+                    // strSha1 != GetCheckCode(strSerialCode) 
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -8112,7 +8123,7 @@ Keys keyData)
                 goto REDO_VERIFY;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }
@@ -8619,7 +8630,7 @@ Keys keyData)
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8843,6 +8854,275 @@ Keys keyData)
             OpenWindow<BatchOrderForm>();
         }
 
+        public delegate void ProcessOrderRecord(
+    string strBiblioRecPath,
+    string strOrderRecPath,
+    string strDistributeString,
+    Dictionary<string, string> content_table
+    );
+
+        // 从订购去向 Excel 文件导入
+        private void MenuItem_importFromOrderDistributeExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            int nOrderCount = 0;    // 修改过的订购记录数
+            int nNewOrderCount = 0; // 新创建的订购记录数。包含在 nOrderCount 中
+
+            LibraryChannel channel = this.GetChannel();
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在导入 Excel 文件 ...");
+            Stop.BeginLoop();
+            try
+            {
+                // return:
+                //      -1  导入过程出错，并且本函数已经 MessageBox 报错了
+                //      0   放弃导入
+                //      1   导入完成
+                int nImportResult = Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
+                    (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell, copyCell) =>
+                    {
+                        string strOldXml = "";
+                        byte[] timestamp = null;
+                        if (string.IsNullOrEmpty(strOrderRecPath) == false)
+                        {
+                            long lRet = channel.GetRecord(Stop,
+                                strOrderRecPath,
+                                out timestamp,
+                                out strOldXml,
+                                out strError);
+                            if (lRet == -1)
+                                throw new Exception(strError);
+                        }
+                        else
+                            strOldXml = "<root />";
+
+                        XmlDocument dom = new XmlDocument();
+                        dom.LoadXml(strOldXml);
+
+                        foreach (string key in order_content_table.Keys)
+                        {
+                            if (key == "recpath")
+                                continue;
+                            // copy 字段内容在此先兑现修改了
+                            // TODO: 是否要检查元素名的合法性?
+                            DomUtil.SetElementText(dom.DocumentElement, key, order_content_table[key]);
+                        }
+
+
+                        LocationCollection locations = new LocationCollection();
+                        int nRet = locations.Build(strDistributeString, out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
+
+                        // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
+                        string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                        string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
+                        if (strOldCopyString != strNewCopyString)
+                            DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
+
+                        if (string.IsNullOrEmpty(strOrderRecPath))
+                        {
+                            // strOrderRecPath = this.GetOrderDbName(Global.GetDbName(strBiblioRecPath)) + "/?";    // 拟新创建的订购记录路径为空，API 也能从书目记录路径中自动推导出来
+                            strOldXml = "";
+                        }
+
+                        nRet = SaveItemRecord(channel,
+                            strBiblioRecPath,
+"order",
+strOrderRecPath,
+strOldXml,
+dom.DocumentElement.OuterXml,
+"",
+timestamp,
+out string strOutputOrderRecPath,
+out byte[] baNewTimestamp,
+out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        if (string.IsNullOrEmpty(strOrderRecPath) == true || strOrderRecPath.IndexOf("?") != -1)
+                        {
+                            orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
+                            nNewOrderCount++;
+                        }
+                        if (strOldCopyString != strNewCopyString)
+                            copyCell.SetValue<string>(strNewCopyString);
+
+                        nOrderCount++;
+
+                        // TODO: 显示进度，或可以用 旋转木马进度条，或者只用文字提示进度
+                    });
+
+                // 提示完成和统计信息
+                if (nImportResult == 1)
+                    MessageDialog.Show(this,
+                        string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条。其中新创建订购记录 {1} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录", nOrderCount, nNewOrderCount));
+            }
+            finally
+            {
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+
+        }
+
+        // 修改复本字符串中，订购复本数部分的套数数字
+        // 12[13] 的 12; 或者 3*5[4*5] 的 3
+        static string ChangeCopyStringCopyPart(string strText, string strCopy)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strText,
+                out string strOldCopy,
+                out string strNewCopy);
+
+#if NO
+            // 对 strOldCopy 进一步分解
+            // string strLeft = OrderDesignControl.GetCopyFromCopyString(strOldCopy);
+            // string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+#endif
+
+            strOldCopy = OrderDesignControl.ModifyCopy(strOldCopy, strCopy);
+
+            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
+        }
+
+        // TODO: 移入通道函数库
+        public int SaveItemRecord(
+    LibraryChannel channel,
+    string strBiblioRecPath,
+    string strDbType,
+    string strRecPath,
+    string strOldXml,
+    string strNewXml,
+    string strStyle,
+    byte[] baTimestamp,
+    out string strOutputRecPath,
+    out byte[] baNewTimestamp,
+    out string strError)
+        {
+            strError = "";
+            baNewTimestamp = null;
+            strOutputRecPath = "";
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo item_info = new EntityInfo();
+
+                item_info.OldRecPath = strRecPath;
+
+                if (string.IsNullOrEmpty(strRecPath) == false
+                    && strRecPath.IndexOf("?") == -1)
+                {
+                    if (StringUtil.IsInList("force", strStyle))
+                        item_info.Action = "forcechange";
+                    else
+                        item_info.Action = "change";
+
+                    strOutputRecPath = strRecPath;
+                }
+                else
+                    item_info.Action = "new";
+
+                item_info.NewRecPath = strRecPath;
+
+                item_info.NewRecord = strNewXml;
+                item_info.NewTimestamp = null;
+
+                item_info.OldRecord = strOldXml;
+                item_info.OldTimestamp = baTimestamp;
+
+                entityArray.Add(item_info);
+            }
+
+            // 复制到目标
+            EntityInfo[] entities = null;
+            entities = new EntityInfo[entityArray.Count];
+            for (int i = 0; i < entityArray.Count; i++)
+            {
+                entities[i] = entityArray[i];
+            }
+
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+            if (strDbType == "item")
+                lRet = channel.SetEntities(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "order")
+                lRet = channel.SetOrders(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "issue")
+                lRet = channel.SetIssues(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "comment")
+                lRet = channel.SetComments(
+                     null,   // this.BiblioStatisForm.stop,
+                     strBiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else
+            {
+                strError = "未知的数据库类型 '" + strDbType + "'";
+                return -1;
+            }
+            if (lRet == -1)
+                return -1;
+
+            // string strWarning = ""; // 警告信息
+
+            if (errorinfos == null)
+                return 0;
+
+            strError = "";
+            {
+                int i = 0;
+                foreach (EntityInfo errorinfo in errorinfos)
+                {
+                    if (i == 0)
+                    {
+                        baNewTimestamp = errorinfo.NewTimestamp;
+                        strOutputRecPath = errorinfo.NewRecPath;
+                    }
+
+                    // 正常信息处理
+                    if (errorinfo.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    strError += errorinfo.RefID + "在提交保存过程中发生错误 -- " + errorinfo.ErrorInfo + "\r\n";
+
+                    i++;
+                }
+            }
+
+            //if (baNewTimestamp != null) // 2016/9/3
+            //    info.Timestamp = baNewTimestamp;    // 2013/10/17
+
+            if (String.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            return 0;
+        }
     }
 
     /// <summary>

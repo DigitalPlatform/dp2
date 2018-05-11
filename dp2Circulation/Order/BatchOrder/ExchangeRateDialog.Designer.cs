@@ -105,7 +105,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(53, 12);
             this.label2.TabIndex = 0;
-            this.label2.Text = "书商(&S):";
+            this.label2.Text = "渠道(书商)(&S):";
             // 
             // label3
             // 

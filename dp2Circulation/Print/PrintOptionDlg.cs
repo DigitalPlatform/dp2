@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -9,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.CommonControl;
 
 // 2013/3/16 添加 XML 注释
 
@@ -40,6 +38,7 @@ namespace dp2Circulation
 
         /// <summary>
         /// 数据目录。用于存储配置的模板文件等
+        /// 用法方面，2018/3/26 从 MainForm.DataDir 改为用 MainForm.UserDir
         /// </summary>
         public string DataDir = ""; // 如果此项为空，则无法创建新的模板文件
 
@@ -57,13 +56,17 @@ namespace dp2Circulation
         const int COLUMN_EVALUE = 4;
 
 
-
         /// <summary>
         /// 构造函数
         /// </summary>
         public PrintOptionDlg()
         {
             InitializeComponent();
+        }
+
+        public void HidePage(string key)
+        {
+            this.TabControl.TabPages.RemoveByKey(key);  // tabPage_normal tabPage_templates
         }
 
         private void PrintOptionDlg_Load(object sender, EventArgs e)
@@ -75,27 +78,70 @@ namespace dp2Circulation
             this.textBox_linesPerPage.Text = PrintOption.LinesPerPage.ToString();
             // this.textBox_maxSummaryChars.Text = PrintOption.MaxSummaryChars.ToString();
 
-            this.listView_columns.Items.Clear();
-            for (int i = 0; i < PrintOption.Columns.Count; i++)
+            //
+            LoadColumns(PrintOption.Columns, this.listView_columns);
+
+            LoadTemplates();
+        }
+
+        public static void LoadColumns(List<Column> column_defs, ListView list)
+        {
+            list.Items.Clear();
+            foreach (Column column in column_defs)
             {
                 ListViewItem item = new ListViewItem();
 
-#if NO
-                item.Text = PrintOption.Columns[i].Name;
-                item.SubItems.Add(PrintOption.Columns[i].Caption);
-                item.SubItems.Add(PrintOption.Columns[i].MaxChars.ToString());
-#endif
-                ListViewUtil.ChangeItemText(item, COLUMN_NAME, PrintOption.Columns[i].Name);
-                ListViewUtil.ChangeItemText(item, COLUMN_CAPTION, PrintOption.Columns[i].Caption);
-                ListViewUtil.ChangeItemText(item, COLUMN_WIDTHCHARS, PrintOption.Columns[i].WidthChars.ToString());
-                ListViewUtil.ChangeItemText(item, COLUMN_MAXCHARS, PrintOption.Columns[i].MaxChars.ToString());
-                ListViewUtil.ChangeItemText(item, COLUMN_EVALUE, PrintOption.Columns[i].Evalue);
+                ListViewUtil.ChangeItemText(item, COLUMN_NAME, column.Name);
+                ListViewUtil.ChangeItemText(item, COLUMN_CAPTION, column.Caption);
+                ListViewUtil.ChangeItemText(item, COLUMN_WIDTHCHARS, column.WidthChars.ToString());
+                ListViewUtil.ChangeItemText(item, COLUMN_MAXCHARS, column.MaxChars.ToString());
+                ListViewUtil.ChangeItemText(item, COLUMN_EVALUE, column.Evalue);
 
+                list.Items.Add(item);
+            }
+        }
 
-                this.listView_columns.Items.Add(item);
+        public static List<Column> GetColumns(ListView list)
+        {
+            List<Column> results = new List<Column>();
+            for (int i = 0; i < list.Items.Count; i++)
+            {
+                ListViewItem item = list.Items[i];
+
+                Column column = new Column();
+                column.Name = ListViewUtil.GetItemText(item, COLUMN_NAME); // item.Text;
+                column.Caption = ListViewUtil.GetItemText(item, COLUMN_CAPTION);  // item.SubItems[1].Text;
+
+                try
+                {
+                    column.WidthChars = Convert.ToInt32(
+                        ListViewUtil.GetItemText(item, COLUMN_WIDTHCHARS)
+                        // item.SubItems[2].Text
+                        );
+                }
+                catch
+                {
+                    column.WidthChars = -1;
+                }
+
+                try
+                {
+                    column.MaxChars = Convert.ToInt32(
+                        ListViewUtil.GetItemText(item, COLUMN_MAXCHARS)
+                        // item.SubItems[2].Text
+                        );
+                }
+                catch
+                {
+                    column.MaxChars = -1;
+                }
+
+                column.Evalue = ListViewUtil.GetItemText(item, COLUMN_EVALUE);
+
+                results.Add(column);
             }
 
-            LoadTemplates();
+            return results;
         }
 
         private void PrintOptionDlg_FormClosing(object sender, FormClosingEventArgs e)
@@ -139,8 +185,7 @@ namespace dp2Circulation
                 return;
             }
 
-
-
+#if NO
             PrintOption.Columns.Clear();
             for (int i = 0; i < this.listView_columns.Items.Count; i++)
             {
@@ -178,6 +223,8 @@ namespace dp2Circulation
 
                 PrintOption.Columns.Add(column);
             }
+#endif
+            PrintOption.Columns = GetColumns(this.listView_columns);
 
             // 兑现最后一次对textbox的修改
             this.RefreshContentToTemplateFile();
@@ -266,7 +313,10 @@ namespace dp2Circulation
         private void button_columns_new_Click(object sender, EventArgs e)
         {
             PrintColumnDlg dlg = new PrintColumnDlg();
-            MainForm.SetControlFont(dlg, this.Font, false);
+            if (this.Visible)
+                MainForm.SetControlFont(dlg, this.Font, false);
+            else
+                dlg.Font = this.tabPage_columns.Font;
 
             if (this.ColumnItems != null)
             {
@@ -275,10 +325,9 @@ namespace dp2Circulation
 
             if (Program.MainForm != null)
                 Program.MainForm.AppInfo.LinkFormState(dlg, "printorderdlg_formstate");
-            dlg.ShowDialog(this);
+            dlg.ShowDialog(this.Visible ? this : null); // Page 可能被挪用到另外一个 Dialog 窗口中
             if (Program.MainForm != null)
                 Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -292,7 +341,7 @@ namespace dp2Circulation
                 dup.EnsureVisible();
 
                 DialogResult result = MessageBox.Show(this,
-                    "当前已经存在名为 '"+dlg.ColumnName+"' 的栏目。继续新增?",
+                    "当前已经存在名为 '" + dlg.ColumnName + "' 的栏目。继续新增?",
                     "PrintOptionDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -400,7 +449,7 @@ namespace dp2Circulation
             }
 
             DialogResult result = MessageBox.Show(this,
-                "确实要删除选定的 "+this.listView_columns.SelectedItems.Count.ToString()+" 个事项? ",
+                "确实要删除选定的 " + this.listView_columns.SelectedItems.Count.ToString() + " 个事项? ",
                 "PrintOptionDlg",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -409,7 +458,7 @@ namespace dp2Circulation
                 return;
 
 
-            while (this.listView_columns.SelectedItems.Count>0)
+            while (this.listView_columns.SelectedItems.Count > 0)
             {
                 this.listView_columns.Items.Remove(this.listView_columns.SelectedItems[0]);
             }
@@ -516,7 +565,6 @@ namespace dp2Circulation
                 RemoveNewCreatedTemplateFiles();
             }
 
-
             this.listView_templates.Items.Clear();
             this.textBox_templates_content.Text = "";
             this.textBox_templates_content.Enabled = false;
@@ -609,7 +657,7 @@ namespace dp2Circulation
 
                 this.m_bTemplateFileContentChanged = false;
                 return;
-            ERROR1:
+                ERROR1:
                 this.m_bTemplateFileContentChanged = false;
                 MessageBox.Show(this, strError);
             }
@@ -652,7 +700,7 @@ namespace dp2Circulation
 
 
             contextMenu.Show(this.listView_templates,
-                new Point(e.X, e.Y));		
+                new Point(e.X, e.Y));
         }
 
         void menu_openTemplateFileByNotepad_Click(object sender, EventArgs e)
@@ -673,7 +721,7 @@ namespace dp2Circulation
                 System.Diagnostics.Process.Start("notepad.exe", strFilePath);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -709,11 +757,12 @@ namespace dp2Circulation
 
             string strFilePath = "";
             int nRedoCount = 0;
-            string strDir = PathUtil.MergePath(this.DataDir, "print_templates");
+            string strDir = PathUtil.MergePath(this.DataDir,    // 老用法
+                "print_templates");
             PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {
-                strFilePath = PathUtil.MergePath(strDir, "template_" + (i+1).ToString());
+                strFilePath = PathUtil.MergePath(strDir, "template_" + (i + 1).ToString());
                 if (File.Exists(strFilePath) == false)
                 {
                     // 创建一个0字节的文件
@@ -750,7 +799,7 @@ namespace dp2Circulation
             this.m_newCreateTemplateFiles.Add(strFilePath);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -803,7 +852,7 @@ namespace dp2Circulation
 
             SaveTemplatesChanges(); // 修改无法撤销
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -842,13 +891,53 @@ namespace dp2Circulation
 
             this.m_bTemplateFileContentChanged = false;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
         private void textBox_templates_content_TextChanged(object sender, EventArgs e)
         {
             this.m_bTemplateFileContentChanged = true;
+        }
+
+        public TabPage PageColumns
+        {
+            get
+            {
+                return this.tabPage_columns;
+            }
+        }
+
+        public TabControl TabControl
+        {
+            get
+            {
+                return this.tabControl_main;
+            }
+        }
+
+        public ListView ListView
+        {
+            get
+            {
+                return this.listView_columns;
+            }
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_columns);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_columns);
+                GuiState.SetUiState(controls, value);
+            }
         }
     }
 

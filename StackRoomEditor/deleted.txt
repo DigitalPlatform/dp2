@@ -1,0 +1,411 @@
+﻿        private void viewport_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Point mouseposition = e.GetPosition(viewport);
+
+            Point3D testpoing3D = new Point3D(mouseposition.X, mouseposition.Y, 0);
+            Vector3D testdirection = new Vector3D(mouseposition.X, mouseposition.Y, 10);
+            PointHitTestParameters pointparams = new PointHitTestParameters(mouseposition);
+
+            RayHitTestParameters rayparams = new RayHitTestParameters(testpoing3D, testdirection);
+
+            VisualTreeHelper.HitTest(viewport, null, HTResult, pointparams);
+        }
+
+        public HitTestResultBehavior HTResult(System.Windows.Media.HitTestResult rawresult)
+        {
+            //MessageBox.Show(rawresult.ToString());
+            RayHitTestResult rayResult = rawresult as RayHitTestResult;
+
+            if (rayResult != null)
+            {
+                RayMeshGeometry3DHitTestResult rayMeshResult = rayResult as RayMeshGeometry3DHitTestResult;
+
+                if (rayMeshResult != null)
+                {
+                    GeometryModel3D hitgeo = rayMeshResult.ModelHit as GeometryModel3D;
+
+                    //UpdateResultInfo(rayMeshResult);
+                    //UpdateMaterial(hitgeo, (side1GeometryModel3D.Material as MaterialGroup));
+                    hitgeo.Material = new DiffuseMaterial(Brushes.Red);
+                }
+            }
+
+            return HitTestResultBehavior.Continue;
+        }
+
+        private void viewport_MouseMove(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void viewport_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+		            <Viewport3D x:Name="viewport" RenderOptions.CachingHint="Cache" ClipToBounds="True" MouseDown="viewport_MouseDown" MouseMove="viewport_MouseMove" MouseUp="viewport_MouseUp">
+
+
+
+					////
+					        private void panningControl1_ButtonClick(object sender, ButtonClickEventArgs e)
+        {
+            if (this.MenuItem_view_45degree.IsChecked == true)
+            {
+                Vector3D direction = this.camera1.LookDirection;
+                direction /= direction.Length;  // 长度为一个单位的向量
+
+                double step = 1;    // 4;
+
+                direction *= step;
+
+                // Matrix3D matrix3D = this.camera1.Transform.Value;
+
+                Vector3D vector3D = new Vector3D(0, 0, 0);
+                if (e.ButtonName == "left")
+                {
+                    vector3D.X += direction.X;
+                    vector3D.Z -= direction.Z;
+                }
+                else if (e.ButtonName == "right")
+                {
+                    vector3D.X -= direction.X;
+                    vector3D.Z += direction.Z;
+                }
+                else if (e.ButtonName == "top")
+                {
+                    vector3D.X += direction.X;
+                    vector3D.Z += direction.Z;
+                }
+                else if (e.ButtonName == "bottom")
+                {
+                    vector3D.X -= direction.X;
+                    vector3D.Z -= direction.Z;
+                }
+
+                /*
+                vector3D += new Vector3D(matrix3D.OffsetX, matrix3D.OffsetY, matrix3D.OffsetZ);
+
+                matrix3D.OffsetX = vector3D.X;
+                matrix3D.OffsetY = vector3D.Y;
+                matrix3D.OffsetZ = vector3D.Z;
+                this.camera1.Transform = new MatrixTransform3D(matrix3D);
+                 * 
+                 * */
+
+                this.cameraTranslate.OffsetX += vector3D.X;
+                this.cameraTranslate.OffsetY += vector3D.Y;
+                this.cameraTranslate.OffsetZ += vector3D.Z;
+            }
+            else if (this.MenuItem_view_top.IsChecked == true)
+            {
+                double step = 4;
+
+                // Matrix3D matrix3D = this.camera1.Transform.Value;
+
+                Vector3D vector3D = new Vector3D(0, 0, 0);
+                if (e.ButtonName == "left")
+                {
+                    vector3D.X -= step;
+                }
+                else if (e.ButtonName == "right")
+                {
+                    vector3D.X += step;
+                }
+                else if (e.ButtonName == "top")
+                {
+                    vector3D.Z -= step;
+                }
+                else if (e.ButtonName == "bottom")
+                {
+                    vector3D.Z += step;
+                }
+
+                /*
+                vector3D += new Vector3D(matrix3D.OffsetX, matrix3D.OffsetY, matrix3D.OffsetZ);
+
+                matrix3D.OffsetX = vector3D.X;
+                matrix3D.OffsetY = vector3D.Y;
+                matrix3D.OffsetZ = vector3D.Z;
+                this.camera1.Transform = new MatrixTransform3D(matrix3D);
+                */
+                this.cameraTranslate.OffsetX += vector3D.X;
+                this.cameraTranslate.OffsetY += vector3D.Y;
+                this.cameraTranslate.OffsetZ += vector3D.Z;
+
+            }
+
+            // this.camera1.Transform = new TranslateTransform3D();
+        }
+
+
+		// 2012/10/21
+
+		        private Vector3D GetTranslationVector3D(DependencyObject modelHit, Point startPosition, Point endPosition)
+        {
+#if NO
+            Transform3D save = ((ModelVisual3D)modelHit).Transform.Clone();
+
+            RotateTransform3D rotate = BookShelf.ClearRotate((ModelVisual3D)modelHit);
+#endif
+            try
+            {
+                Vector3D translationVector3D = new Vector3D();
+
+                Viewport3DVisual viewport = null;
+                bool success = false;
+
+                Matrix3D matrix3D = /*MathUtils.*/TryTransformTo2DAncestor(modelHit, out viewport, out success);
+                if (success && matrix3D.HasInverse)
+                {
+                    // Debug.WriteLine(matrix3D.ToString());
+                    matrix3D.Invert();
+                    Point3D startPoint3D = new Point3D(startPosition.X, startPosition.Y, 0);
+                    Point3D endPoint3D = new Point3D(endPosition.X, endPosition.Y, 0);
+                    Vector3D vector3D = endPoint3D - startPoint3D;
+                    translationVector3D = matrix3D.Transform(vector3D);
+                    //DockPanel dockPanel = new DockPanel();
+
+                    PerspectiveCamera c = viewport.Camera as PerspectiveCamera;
+                    // translationVector3D *= c.Position.Z;
+
+
+
+                    Point3D origin = new Point3D(0, 0, 0);
+
+#if NO
+                Visual3D obj = (Visual3D)modelHit;
+                ModelVisual3D mv3d = (ModelVisual3D)obj;
+                if (mv3d.Content is GeometryModel3D)
+                {
+                    GeometryModel3D gm3d =
+                        (GeometryModel3D)mv3d.Content;
+
+                    if (gm3d.Geometry is MeshGeometry3D)
+                    {
+                        MeshGeometry3D mg3d =
+                            (MeshGeometry3D)gm3d.Geometry;
+
+                        foreach (Point3D p3d in mg3d.Positions)
+                        {
+                            origin = p3d;
+                            break;
+                        }
+                    }
+                }
+#endif
+                    Vector3D c_v = c.Position - origin;
+
+                    Vector3D direction = this.camera1.LookDirection;
+                    direction /= direction.Length;  // 长度为一个单位的向量
+                    direction.Y = 0;
+                    direction *= c_v.Length;
+
+                    translationVector3D *= c_v.Length;
+
+#if NO
+                double x_delta = 0;
+                double z_delta = 0;
+                if (translationVector3D.Z < 0)
+                    x_delta += direction.X;
+                else
+                    x_delta -= direction.X;
+
+                /*
+                if (translationVector3D.X > 0)
+                    z_delta += direction.Z;
+                else
+                    z_delta -= direction.Z;
+                 * */
+
+                translationVector3D.X += x_delta;
+                translationVector3D.Z += z_delta;
+#endif
+                    // translationVector3D += direction;
+
+                    Debug.WriteLine("vector3D:" + vector3D.ToString() + " translationVector3D:" + translationVector3D.ToString());
+
+                    /*
+                    translationVector3D.Z += -translationVector3D.Y * 5;
+                    translationVector3D.Y = 0;
+                     * */
+
+                    //translationVector3D.Z += -translationVector3D.Y * 3;
+                    //translationVector3D.X += -translationVector3D.Y * 3;
+                    translationVector3D.Y = 0;
+
+                    /*
+                    direction *= translationVector3D.Y * 5;
+                    translationVector3D += direction;
+                    */
+                }
+
+                return translationVector3D;
+            }
+            finally
+            {
+                // ((ModelVisual3D)modelHit).Transform = save;
+            }
+        }
+
+		// 2012/10/22
+
+		        // 创建图像文件
+        private void MenuItem_createImageFile_Click(object sender, RoutedEventArgs e)
+        {
+            string strError = "";
+
+            /*
+            if (m_strCurrentXmlFilename.IndexOf(".png.") != -1)
+            {
+                MessageBox.Show(this, "您打开的文件 '" + m_strCurrentXmlFilename + "' 是一个图像文件的描述文件，用再创建图像文件，容易覆盖掉自身，建议不要这样操作");
+            }
+             * */
+
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.FileName = this.m_strCurrentPngFilename;
+            dlg.Filter = "PNG files (*.png)|*.png|All files (*.*)|*.*";
+
+            Nullable<bool> dlg_result = dlg.ShowDialog();
+            if (dlg_result == false)
+                return;
+
+            FrameworkElement v = this.layout;  // this.viewport;
+
+
+            // 清除当前的选定，以便获得一个干净的图像
+            this.ClearSelection(null);
+
+            this.m_strCurrentPngFilename = dlg.FileName;
+
+            double scale = 300 / 96;   // 4开始就不正常了
+
+            RenderTargetBitmap bmp = new RenderTargetBitmap((int)(scale * (v.ActualWidth+1)),
+                (int)(scale * (v.ActualHeight+1)),
+                scale * 96,
+                scale * 96,
+                PixelFormats.Default);  // PixelFormats.Pbgra32
+            bmp.Render(v);
+
+#if NO
+
+            PngBitmapEncoder png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(bmp));
+            using (Stream s = File.Create(dlg.FileName))
+            {
+                png.Save(s);
+            }
+            
+ 
+#endif
+
+            BmpBitmapEncoder encoder = new BmpBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bmp));
+            Stream s = new MemoryStream();
+            encoder.Save(s);
+
+            System.Drawing.Image source = System.Drawing.Bitmap.FromStream(s);
+
+
+                    // 缩小图像
+        // parameters:
+        //		nNewWidth0	宽度(0表示不变化)
+        //		nNewHeight0	高度
+        //      bRatio  是否保持纵横比例
+        // return:
+        //      -1  出错
+        //      0   没有必要缩放(objBitmap未处理)
+        //      1   已经缩放
+            int nRet = GraphicsUtil.ShrinkPic(ref source,
+                (int)(bmp.PixelWidth / scale),
+                0,
+                true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            source.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+            source.Dispose();
+
+            GlobalInfo info = new GlobalInfo();
+            // info.ImagePixelSize = new Size(bmp.PixelWidth, bmp.PixelHeight);
+            info.ImagePixelSize = new Size((int)(bmp.PixelWidth / scale), (int)(bmp.PixelHeight / scale));
+
+            // 紧接着保存一个图像说明文件
+            nRet = Save(dlg.FileName + ".xml",
+                    true,
+                    info,
+                    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(strError);
+        }
+
+
+		// 2012/10/22
+		        private Vector3D GetTranslationVector3D(DependencyObject modelHit, Point startPosition, Point endPosition)
+        {
+#if NO
+            Transform3D save = ((ModelVisual3D)modelHit).Transform.Clone();
+
+            RotateTransform3D rotate = BookShelf.ClearRotate((ModelVisual3D)modelHit);
+#endif
+            try
+            {
+                Vector3D translationVector3D = new Vector3D();
+
+                Viewport3DVisual viewport = null;
+                bool success = false;
+
+                Matrix3D matrix3D = /*MathUtils.*/TryTransformTo2DAncestor(modelHit, out viewport, out success);
+                if (success && matrix3D.HasInverse)
+                {
+                    // Debug.WriteLine(matrix3D.ToString());
+                    matrix3D.Invert();
+                    Point3D startPoint3D = new Point3D(startPosition.X, startPosition.Y, 0);
+                    Point3D endPoint3D = new Point3D(endPosition.X, endPosition.Y, 0);
+                    Vector3D vector3D = endPoint3D - startPoint3D;
+                    translationVector3D = matrix3D.Transform(vector3D);
+                    //DockPanel dockPanel = new DockPanel();
+
+                    PerspectiveCamera c = viewport.Camera as PerspectiveCamera;
+
+                    Rect3D box = VisualTreeHelper.GetDescendantBounds((Visual3D)modelHit);
+                    // 取得物体的中点
+                    Point3D origin = new Point3D(box.X + (box.SizeX / 2),
+                        Math.Max(box.Y, box.Y + box.SizeY / 2),
+                        box.Z + (box.SizeZ / 2));
+
+                    // Point3D origin = new Point3D(0, 0, 0);
+                    Vector3D c_v = c.Position - origin;
+
+#if NO
+                    Vector3D direction = this.camera1.LookDirection;
+                    direction /= direction.Length;  // 长度为一个单位的向量
+                    direction.Y = 0;
+                    direction *= c_v.Length;
+#endif
+
+                    translationVector3D *= c_v.Length;
+
+                    Debug.WriteLine("vector3D 转换前:" + vector3D.ToString() + " translationVector3D:" + translationVector3D.ToString());
+                    // translationVector3D.Y = 0;
+
+                    // TODO: 限制到地板边沿?
+                    translationVector3D = Move(translationVector3D);
+                    Debug.WriteLine("vector3D 后:" + vector3D.ToString() + " translationVector3D:" + translationVector3D.ToString());
+
+                    /*
+                    direction *= translationVector3D.Y * 5;
+                    translationVector3D += direction;
+                    */
+                }
+
+                return translationVector3D;
+            }
+            finally
+            {
+                // ((ModelVisual3D)modelHit).Transform = save;
+            }
+        }

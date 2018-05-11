@@ -1,36 +1,36 @@
-using System;
+ï»¿using System;
 using System.Diagnostics;
 using System.Text;
 
 namespace DigitalPlatform.Marc
 {
-	// ISO2709ANSIHEADER½á¹¹¶¨Òå
-	// ISO2709Í·±êÇø½á¹¹
-	// charset: °´ÕÕANSI×Ö·û¼¯´æ´¢£¬³ß´ç¹Ì¶¨£¬ÊÊÓÃÓÚDBCS/UTF-8/MARC-8ÇéĞÎ
+	// ISO2709ANSIHEADERç»“æ„å®šä¹‰
+	// ISO2709å¤´æ ‡åŒºç»“æ„
+	// charset: æŒ‰ç…§ANSIå­—ç¬¦é›†å­˜å‚¨ï¼Œå°ºå¯¸å›ºå®šï¼Œé€‚ç”¨äºDBCS/UTF-8/MARC-8æƒ…å½¢
 	public class MarcHeaderStruct
 	{
-		byte[] reclen	= new byte[5];				// ¼ÇÂ¼³¤¶È
+		byte[] reclen	= new byte[5];				// è®°å½•é•¿åº¦
 		byte[] status	= new byte[1];
 		byte[] type		= new byte[1];
 		byte[] level	= new byte[1];
 		byte[] control	= new byte[1];
 		byte[] reserve	= new byte[1];
-		byte[] indicount	= new byte[1];			// ×Ö¶ÎÖ¸Ê¾·û³¤¶È
-		byte[] subfldcodecount	= new byte[1];	// ×Ó×Ö¶Î±êÊ¶·û³¤¶È
-		byte[] baseaddr	= new byte[5];			// Êı¾İ»ùµØÖ·
+		byte[] indicount	= new byte[1];			// å­—æ®µæŒ‡ç¤ºç¬¦é•¿åº¦
+		byte[] subfldcodecount	= new byte[1];	// å­å­—æ®µæ ‡è¯†ç¬¦é•¿åº¦
+		byte[] baseaddr	= new byte[5];			// æ•°æ®åŸºåœ°å€
 		byte[] res1		= new byte[3];
-		byte[] lenoffld	= new byte[1];			// Ä¿´ÎÇøÖĞ×Ö¶Î³¤¶È²¿·Ö
-		byte[] startposoffld	= new byte[1];		// Ä¿´ÎÇøÖĞ×Ö¶ÎÆğÊ¼Î»ÖÃ²¿·Ö
-		byte[] impdef	= new byte[1];				// ÊµÏÖÕß¶¨Òå²¿·Ö
+		byte[] lenoffld	= new byte[1];			// ç›®æ¬¡åŒºä¸­å­—æ®µé•¿åº¦éƒ¨åˆ†
+		byte[] startposoffld	= new byte[1];		// ç›®æ¬¡åŒºä¸­å­—æ®µèµ·å§‹ä½ç½®éƒ¨åˆ†
+		byte[] impdef	= new byte[1];				// å®ç°è€…å®šä¹‰éƒ¨åˆ†
 		byte[] res2		= new byte[1];
 
-		// °´ÕÕUNIMARC¹ßÀıÇ¿ÖÆÌî³äISO2709Í·±êÇø
+		// æŒ‰ç…§UNIMARCæƒ¯ä¾‹å¼ºåˆ¶å¡«å……ISO2709å¤´æ ‡åŒº
 		public int ForceUNIMARCHeader()
 		{
 			indicount[0] = (byte)'2';
 			subfldcodecount[0] = (byte)'2';
-			lenoffld[0] = (byte)'4';   // Ä¿´ÎÇøÖĞ×Ö¶Î³¤¶È²¿·Ö
-			startposoffld[0] = (byte)'5'; // Ä¿´ÎÇøÖĞ×Ö¶ÎÆğÊ¼Î»ÖÃ²¿·Ö
+			lenoffld[0] = (byte)'4';   // ç›®æ¬¡åŒºä¸­å­—æ®µé•¿åº¦éƒ¨åˆ†
+			startposoffld[0] = (byte)'5'; // ç›®æ¬¡åŒºä¸­å­—æ®µèµ·å§‹ä½ç½®éƒ¨åˆ†
 
 			return 0;
 		}
@@ -57,7 +57,7 @@ namespace DigitalPlatform.Marc
 			return Convert.ToInt32(encoding.GetString(baTemp));
 		}
 
-		// ¼ÇÂ¼³¤¶È
+		// è®°å½•é•¿åº¦
 		public int RecLength
 		{
 			get
@@ -72,7 +72,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// ¼ÇÂ¼³¤¶È ×Ö·û´®
+		// è®°å½•é•¿åº¦ å­—ç¬¦ä¸²
 		public string RecLengthString
 		{
 			get
@@ -81,7 +81,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// Êı¾İ»ùµØÖ·
+		// æ•°æ®åŸºåœ°å€
 		public int BaseAddress
 		{
 			get
@@ -96,7 +96,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// Êı¾İ»ùµØÖ· ×Ö·û´®
+		// æ•°æ®åŸºåœ°å€ å­—ç¬¦ä¸²
 		public string BaseAddressString
 		{
 			get
@@ -105,7 +105,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// Ä¿´ÎÇøÖĞ±íÊ¾×Ö¶Î³¤¶ÈÒªÕ¼ÓÃµÄ×Ö·ûÊı
+		// ç›®æ¬¡åŒºä¸­è¡¨ç¤ºå­—æ®µé•¿åº¦è¦å ç”¨çš„å­—ç¬¦æ•°
 		public int WidthOfFieldLength
 		{
 			get
@@ -114,7 +114,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		// ×Ö·û´®£ºÄ¿´ÎÇøÖĞ±íÊ¾×Ö¶Î³¤¶ÈÒªÕ¼ÓÃµÄ×Ö·ûÊı
+		// å­—ç¬¦ä¸²ï¼šç›®æ¬¡åŒºä¸­è¡¨ç¤ºå­—æ®µé•¿åº¦è¦å ç”¨çš„å­—ç¬¦æ•°
 		public string WidthOfFieldLengthString
 		{
 			get
@@ -131,7 +131,7 @@ namespace DigitalPlatform.Marc
 			}
 		}
 			
-		// string°æ±¾
+		// stringç‰ˆæœ¬
 		public string WidthOfStartPositionOfFieldString
 		{
 			get
@@ -145,7 +145,7 @@ namespace DigitalPlatform.Marc
         {
             if (baRecord.Length < 24)
             {
-                throw (new ArgumentException("baRecordÖĞ×Ö½ÚÊıÉÙÓÚ24"));
+                throw (new ArgumentException("baRecordä¸­å­—èŠ‚æ•°å°‘äº24"));
             }
 
             bool bUcs2 = false;
@@ -156,7 +156,7 @@ namespace DigitalPlatform.Marc
 
             if (bUcs2 == true)
             {
-                // ÏÈ°ÑbaRecord×ª»»ÎªANSIÀàĞÍµÄ»º³åÇø
+                // å…ˆæŠŠbaRecordè½¬æ¢ä¸ºANSIç±»å‹çš„ç¼“å†²åŒº
                 string strRecord = encoding.GetString(baRecord);
 
                 baRecord = Encoding.ASCII.GetBytes(strRecord);
@@ -224,7 +224,7 @@ namespace DigitalPlatform.Marc
 		{
 			if (baRecord.Length < 24) 
 			{
-				throw(new Exception("baRecordÖĞ×Ö½ÚÊıÉÙÓÚ24"));
+				throw(new Exception("baRecordä¸­å­—èŠ‚æ•°å°‘äº24"));
 			}
 
             bool bUcs2 = false;
@@ -236,7 +236,7 @@ namespace DigitalPlatform.Marc
 
             if (bUcs2 == true)
             {
-                throw new Exception("Ó¦ÓÃ¹¹Ôìº¯ÊıµÄÓ¦ÍâÒ»¸ö°æ±¾£¬²ÅÄÜÖ§³ÖUCS2±àÂë·½Ê½");
+                throw new Exception("åº”ç”¨æ„é€ å‡½æ•°çš„å¦å¤–ä¸€ä¸ªç‰ˆæœ¬ï¼Œæ‰èƒ½æ”¯æŒUCS2ç¼–ç æ–¹å¼");
             }
 
 			Array.Copy(baRecord,
@@ -316,12 +316,12 @@ namespace DigitalPlatform.Marc
 			baResult = ByteArray.Add(baResult, impdef);	// 1
 			baResult = ByteArray.Add(baResult, res2);	// 1
 
-			Debug.Assert(baResult.Length == 24, "Í·±êÇøÄÚÈİ±ØĞëÎª24×Ö·û");
+			Debug.Assert(baResult.Length == 24, "å¤´æ ‡åŒºå†…å®¹å¿…é¡»ä¸º24å­—ç¬¦");
 			if (baResult.Length != 24)
 				throw(new Exception("MarcHeader.GetBytes() error"));
 
             // 2014/5/9
-            // ·À·¶Í·±êÇø³öÏÖ 0 ×Ö·û
+            // é˜²èŒƒå¤´æ ‡åŒºå‡ºç° 0 å­—ç¬¦
             for (int i = 0; i < baResult.Length; i++)
             {
                 if (baResult[i] == 0)
@@ -351,12 +351,12 @@ namespace DigitalPlatform.Marc
             list.AddRange(impdef);	// 1
             list.AddRange(res2);	// 1
 
-            Debug.Assert(list.Count == 24, "Í·±êÇøÄÚÈİ±ØĞëÎª24×Ö·û");
+            Debug.Assert(list.Count == 24, "å¤´æ ‡åŒºå†…å®¹å¿…é¡»ä¸º24å­—ç¬¦");
             if (list.Count != 24)
                 throw (new Exception("MarcHeader.GetBytes() error"));
 
             // 2014/5/9
-            // ·À·¶Í·±êÇø³öÏÖ 0 ×Ö·û
+            // é˜²èŒƒå¤´æ ‡åŒºå‡ºç° 0 å­—ç¬¦
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i] == 0)
@@ -366,7 +366,7 @@ namespace DigitalPlatform.Marc
             return list;
         }
 #if NO
-        // 2015/5/10 ÓÅ»¯
+        // 2015/5/10 ä¼˜åŒ–
         public byte[] GetBytes()
         {
             MyByteList list = new MyByteList(24);
@@ -386,12 +386,12 @@ namespace DigitalPlatform.Marc
             list.AddRange(impdef);	// 1
             list.AddRange(res2);	// 1
 
-            Debug.Assert(list.Count == 24, "Í·±êÇøÄÚÈİ±ØĞëÎª24×Ö·û");
+            Debug.Assert(list.Count == 24, "å¤´æ ‡åŒºå†…å®¹å¿…é¡»ä¸º24å­—ç¬¦");
             if (list.Count != 24)
                 throw (new Exception("MarcHeader.GetBytes() error"));
 
             // 2014/5/9
-            // ·À·¶Í·±êÇø³öÏÖ 0 ×Ö·û
+            // é˜²èŒƒå¤´æ ‡åŒºå‡ºç° 0 å­—ç¬¦
             for (int i = 0; i < list.Count; i++)
             {
                 if (list[i] == 0)

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -11,15 +11,15 @@ namespace DigitalPlatform
 #if NO
     public enum ColumnSortStyle
     {
-        LeftAlign = 0, // ×ó¶ÔÆë×Ö·û´®
-        RightAlign = 1, // ÓÒ¶ÔÆë×Ö·û´®
-        RecPath = 2,    // ¼ÇÂ¼Â·¾¶¡£ÀıÈç¡°ÖĞÎÄÍ¼Êé/1¡±£¬ÒÔ'/'Îª½ç£¬ÓÒ±ß²¿·Öµ±×÷Êı×ÖÖµÅÅĞò¡£»òÕß¡°localhost/ÖĞÎÄÍ¼Êé/ctlno/1¡±
-        LongRecPath = 3,    // ¼ÇÂ¼Â·¾¶¡£ÀıÈç¡°ÖĞÎÄÍ¼Êé/1 @±¾µØ·şÎñÆ÷¡±
-        Extend = 4,    // À©Õ¹µÄÅÅĞò·½Ê½
+        LeftAlign = 0, // å·¦å¯¹é½å­—ç¬¦ä¸²
+        RightAlign = 1, // å³å¯¹é½å­—ç¬¦ä¸²
+        RecPath = 2,    // è®°å½•è·¯å¾„ã€‚ä¾‹å¦‚â€œä¸­æ–‡å›¾ä¹¦/1â€ï¼Œä»¥'/'ä¸ºç•Œï¼Œå³è¾¹éƒ¨åˆ†å½“ä½œæ•°å­—å€¼æ’åºã€‚æˆ–è€…â€œlocalhost/ä¸­æ–‡å›¾ä¹¦/ctlno/1â€
+        LongRecPath = 3,    // è®°å½•è·¯å¾„ã€‚ä¾‹å¦‚â€œä¸­æ–‡å›¾ä¹¦/1 @æœ¬åœ°æœåŠ¡å™¨â€
+        Extend = 4,    // æ‰©å±•çš„æ’åºæ–¹å¼
     }
 #endif
 
-    // À¸Ä¿ÅÅĞò·½Ê½
+    // æ ç›®æ’åºæ–¹å¼
     public class ColumnSortStyle
     {
         public string Name = "";
@@ -119,9 +119,9 @@ namespace DigitalPlatform
 
     public class SortColumns : List<Column>
     {
-        // °ü×°°æ±¾£¬¼æÈİÒÔÇ°µÄ¸ñÊ½
-        // Èç¹ûÕë¶ÔÍ¬Ò»ÁĞ·´¸´µ÷ÓÃ´Ëº¯Êı£¬ÔòÅÅĞò·½Ïò»átoggle
-        // ËùÒÔ£¬²»ÄÜÓÃ±¾º¯ÊıÀ´Éè¶¨¹Ì¶¨µÄÅÅĞò·½Ïò
+        // åŒ…è£…ç‰ˆæœ¬ï¼Œå…¼å®¹ä»¥å‰çš„æ ¼å¼
+        // å¦‚æœé’ˆå¯¹åŒä¸€åˆ—åå¤è°ƒç”¨æ­¤å‡½æ•°ï¼Œåˆ™æ’åºæ–¹å‘ä¼štoggle
+        // æ‰€ä»¥ï¼Œä¸èƒ½ç”¨æœ¬å‡½æ•°æ¥è®¾å®šå›ºå®šçš„æ’åºæ–¹å‘
         public void SetFirstColumn(int nFirstColumn,
             ListView.ColumnHeaderCollection columns)
         {
@@ -132,14 +132,14 @@ namespace DigitalPlatform
 
 
         // parameters:
-        //      bToggleDirection    ==true ÈônFirstColumn±¾À´ÒÑ¾­ÊÇµ±Ç°µÚÒ»ÁĞ£¬Ôò¸ü»»ÆäÅÅĞò·½Ïò
+        //      bToggleDirection    ==true è‹¥nFirstColumnæœ¬æ¥å·²ç»æ˜¯å½“å‰ç¬¬ä¸€åˆ—ï¼Œåˆ™æ›´æ¢å…¶æ’åºæ–¹å‘
         public void SetFirstColumn(int nFirstColumn,
             ListView.ColumnHeaderCollection columns,
             bool bToggleDirection)
         {
             int nIndex = -1;
             Column column = null;
-            // ÕÒµ½Õâ¸öÁĞºÅ
+            // æ‰¾åˆ°è¿™ä¸ªåˆ—å·
             for (int i = 0; i < this.Count; i++)
             {
                 column = this[i];
@@ -152,12 +152,12 @@ namespace DigitalPlatform
 
             ColumnSortStyle firstColumnStyle = ColumnSortStyle.None;   //  ColumnSortStyle.LeftAlign;
 
-            // ×Ô¶¯ÉèÖÃÓÒ¶ÔÆë·ç¸ñ
+            // è‡ªåŠ¨è®¾ç½®å³å¯¹é½é£æ ¼
             // 2008/8/30 changed
             if (columns[nFirstColumn].TextAlign == HorizontalAlignment.Right)
                 firstColumnStyle = ColumnSortStyle.RightAlign;
 
-            // ±¾À´ÒÑ¾­ÊÇµÚÒ»ÁĞ£¬Ôò¸ü»»ÅÅĞò·½Ïò
+            // æœ¬æ¥å·²ç»æ˜¯ç¬¬ä¸€åˆ—ï¼Œåˆ™æ›´æ¢æ’åºæ–¹å‘
             if (nIndex == 0 && bToggleDirection == true)
             {
                 if (column.Asc == true)
@@ -165,7 +165,7 @@ namespace DigitalPlatform
                 else
                     column.Asc = true;
 
-                // ĞŞ¸ÄÕâÒ»ÁĞµÄÊÓ¾õ
+                // ä¿®æ”¹è¿™ä¸€åˆ—çš„è§†è§‰
                 ColumnHeader header = columns[column.No];
 
                 SetHeaderText(header,
@@ -176,27 +176,27 @@ namespace DigitalPlatform
 
             if (nIndex != -1)
             {
-                // ´ÓÊı×éÖĞÒÆ×ßÒÑ¾­´æÔÚµÄÖµ
+                // ä»æ•°ç»„ä¸­ç§»èµ°å·²ç»å­˜åœ¨çš„å€¼
                 this.RemoveAt(nIndex);
             }
             else
             {
                 column = new Column();
                 column.No = nFirstColumn;
-                column.Asc = true;  // ³õÊ¼Ê±ÎªÕıÏòÅÅĞò
+                column.Asc = true;  // åˆå§‹æ—¶ä¸ºæ­£å‘æ’åº
                 column.SortStyle = firstColumnStyle;    // 2007/12/20
             }
 
-            // ·Åµ½Ê×²¿
+            // æ”¾åˆ°é¦–éƒ¨
             this.Insert(0, column);
 
-            // ĞŞ¸ÄÈ«²¿ÁĞµÄÊÓ¾õ
+            // ä¿®æ”¹å…¨éƒ¨åˆ—çš„è§†è§‰
             RefreshColumnDisplay(columns);
         }
 
-        // ĞŞ¸ÄÅÅĞòÊı×é£¬ÉèÖÃµÚÒ»ÁĞ£¬°ÑÔ­À´µÄÁĞºÅÍÆºó
+        // ä¿®æ”¹æ’åºæ•°ç»„ï¼Œè®¾ç½®ç¬¬ä¸€åˆ—ï¼ŒæŠŠåŸæ¥çš„åˆ—å·æ¨å
         // parameters:
-        //      bToggleDirection    ==true ÈônFirstColumn±¾À´ÒÑ¾­ÊÇµ±Ç°µÚÒ»ÁĞ£¬Ôò¸ü»»ÆäÅÅĞò·½Ïò
+        //      bToggleDirection    ==true è‹¥nFirstColumnæœ¬æ¥å·²ç»æ˜¯å½“å‰ç¬¬ä¸€åˆ—ï¼Œåˆ™æ›´æ¢å…¶æ’åºæ–¹å‘
         public void SetFirstColumn(int nFirstColumn,
             ColumnSortStyle firstColumnStyle,
             ListView.ColumnHeaderCollection columns,
@@ -204,7 +204,7 @@ namespace DigitalPlatform
         {
             int nIndex = -1;
             Column column = null;
-            // ÕÒµ½Õâ¸öÁĞºÅ
+            // æ‰¾åˆ°è¿™ä¸ªåˆ—å·
             for (int i = 0; i < this.Count; i++)
             {
                 column = this[i];
@@ -215,7 +215,7 @@ namespace DigitalPlatform
                 }
             }
 
-            // ±¾À´ÒÑ¾­ÊÇµÚÒ»ÁĞ£¬Ôò¸ü»»ÅÅĞò·½Ïò
+            // æœ¬æ¥å·²ç»æ˜¯ç¬¬ä¸€åˆ—ï¼Œåˆ™æ›´æ¢æ’åºæ–¹å‘
             if (nIndex == 0 && bToggleDirection == true)
             {
                 if (column.Asc == true)
@@ -225,7 +225,7 @@ namespace DigitalPlatform
 
                 column.SortStyle = firstColumnStyle;    // 2008/11/30
 
-                // ĞŞ¸ÄÕâÒ»ÁĞµÄÊÓ¾õ
+                // ä¿®æ”¹è¿™ä¸€åˆ—çš„è§†è§‰
                 ColumnHeader header = columns[column.No];
 
                 SetHeaderText(header,
@@ -236,21 +236,21 @@ namespace DigitalPlatform
 
             if (nIndex != -1)
             {
-                // ´ÓÊı×éÖĞÒÆ×ßÒÑ¾­´æÔÚµÄÖµ
+                // ä»æ•°ç»„ä¸­ç§»èµ°å·²ç»å­˜åœ¨çš„å€¼
                 this.RemoveAt(nIndex);
             }
             else
             {
                 column = new Column();
                 column.No = nFirstColumn;
-                column.Asc = true;  // ³õÊ¼Ê±ÎªÕıÏòÅÅĞò
+                column.Asc = true;  // åˆå§‹æ—¶ä¸ºæ­£å‘æ’åº
                 column.SortStyle = firstColumnStyle;    // 2007/12/20
             }
 
-            // ·Åµ½Ê×²¿
+            // æ”¾åˆ°é¦–éƒ¨
             this.Insert(0, column);
 
-            // ĞŞ¸ÄÈ«²¿ÁĞµÄÊÓ¾õ
+            // ä¿®æ”¹å…¨éƒ¨åˆ—çš„è§†è§‰
             RefreshColumnDisplay(columns);
         }
 
@@ -264,7 +264,7 @@ namespace DigitalPlatform
             Debug.WriteLine("***");
         }
 
-        // ĞŞ¸ÄÈ«²¿ÁĞµÄÊÓ¾õ
+        // ä¿®æ”¹å…¨éƒ¨åˆ—çš„è§†è§‰
         public void RefreshColumnDisplay(ListView.ColumnHeaderCollection columns)
         {
 #if DEBUG
@@ -286,7 +286,7 @@ namespace DigitalPlatform
 #endif
         }
 
-        // »Ö¸´Ã»ÓĞÈÎºÎÅÅĞò±êÖ¾µÄÁĞ±êÌâÎÄ×ÖÄÚÈİ
+        // æ¢å¤æ²¡æœ‰ä»»ä½•æ’åºæ ‡å¿—çš„åˆ—æ ‡é¢˜æ–‡å­—å†…å®¹
         public static void ClearColumnSortDisplay(ListView.ColumnHeaderCollection columns)
         {
             for (int i = 0; i < columns.Count; i++)
@@ -301,7 +301,7 @@ namespace DigitalPlatform
             }
         }
 
-        // ÉèÖÃColumnHeaderÎÄ×Ö
+        // è®¾ç½®ColumnHeaderæ–‡å­—
         public static void SetHeaderText(ColumnHeader header,
             int nSortNo,
             Column column)
@@ -316,13 +316,13 @@ namespace DigitalPlatform
             else
             {
                 // strOldText = header.Text;
-                // ¼ÇÒäÏÂÀ´
+                // è®°å¿†ä¸‹æ¥
                 prop = new ColumnProperty(header.Text);
                 header.Tag = prop; 
             }
 
             string strNewText = 
-                (column.Asc == true ? "¡ø" : "¨‹")
+                (column.Asc == true ? "â–²" : "â–¼")
                 + (nSortNo + 1).ToString()
                 + " "
                 + prop.Title;   //  strOldText;
@@ -347,7 +347,7 @@ namespace DigitalPlatform
     {
         SortColumns SortColumns = new SortColumns();
 
-        // µ±Ò»¸ö SortStyle ²»ÊÇÔ¤ÖªµÄÀàĞÍµÄÊ±ºò£¬Ê¹ÓÃÕâ¸ö handler ÅÅĞò
+        // å½“ä¸€ä¸ª SortStyle ä¸æ˜¯é¢„çŸ¥çš„ç±»å‹çš„æ—¶å€™ï¼Œä½¿ç”¨è¿™ä¸ª handler æ’åº
         public event CompareEventHandler EventCompare = null;
 
         public SortColumnsComparer()
@@ -356,14 +356,15 @@ namespace DigitalPlatform
             column.No = 0;
             this.SortColumns.Add(column);
         }
+
         public SortColumnsComparer(SortColumns sortcolumns)
         {
             this.SortColumns = sortcolumns;
         }
 
-        // ½«¼ÇÂ¼Â·¾¶ÇĞ¸îÎªÁ½¸ö²¿·Ö£º×ó±ß²¿·ÖºÍÓÒ±ß²¿·Ö¡£
-        // ÖĞÎÄÍ¼Êé/1
-        // ÓÒ±ß²¿·ÖÊÇ´ÓÓÒ¿ªÊ¼ÕÒµ½µÚÒ»¸ö'/'ÓÒ±ßµÄ²¿·Ö£¬ËùÒÔ²»ÂÛÂ·¾¶³¤¶Ì£¬Ò»¶¨ÊÇ×îÓÒ±ßµÄÊı×Ö²¿·Ö
+        // å°†è®°å½•è·¯å¾„åˆ‡å‰²ä¸ºä¸¤ä¸ªéƒ¨åˆ†ï¼šå·¦è¾¹éƒ¨åˆ†å’Œå³è¾¹éƒ¨åˆ†ã€‚
+        // ä¸­æ–‡å›¾ä¹¦/1
+        // å³è¾¹éƒ¨åˆ†æ˜¯ä»å³å¼€å§‹æ‰¾åˆ°ç¬¬ä¸€ä¸ª'/'å³è¾¹çš„éƒ¨åˆ†ï¼Œæ‰€ä»¥ä¸è®ºè·¯å¾„é•¿çŸ­ï¼Œä¸€å®šæ˜¯æœ€å³è¾¹çš„æ•°å­—éƒ¨åˆ†
         static void SplitRecPath(string strRecPath,
             out string strLeft,
             out string strRight)
@@ -371,7 +372,7 @@ namespace DigitalPlatform
             int nRet = strRecPath.LastIndexOf("/");
             if (nRet == -1)
             {
-                strLeft = strRecPath; // Èç¹ûÃ»ÓĞĞ±¸Ü£¬Ôòµ±×÷×ó±ß²¿·Ö¡£ÕâÒ»µãÓĞºÎÒâÒå»¹ĞèÒª×ĞÏ¸¿¼²ì
+                strLeft = strRecPath; // å¦‚æœæ²¡æœ‰æ–œæ ï¼Œåˆ™å½“ä½œå·¦è¾¹éƒ¨åˆ†ã€‚è¿™ä¸€ç‚¹æœ‰ä½•æ„ä¹‰è¿˜éœ€è¦ä»”ç»†è€ƒå¯Ÿ
                 strRight = "";
                 return;
             }
@@ -408,9 +409,9 @@ namespace DigitalPlatform
             strRight = strRecPath.Substring(nRet + 1);
         }
 
-        // ÓÒ¶ÔÆë±È½Ï×Ö·û´®
+        // å³å¯¹é½æ¯”è¾ƒå­—ç¬¦ä¸²
         // parameters:
-        //      chFill  Ìî³äÓÃµÄ×Ö·û
+        //      chFill  å¡«å……ç”¨çš„å­—ç¬¦
         public static int RightAlignCompare(string s1, string s2, char chFill = '0')
         {
             if (s1 == null)
@@ -422,7 +423,7 @@ namespace DigitalPlatform
                 s2.PadLeft(nMaxLength, chFill));
         }
 
-        // ±È½ÏÁ½¸ö IP µØÖ·
+        // æ¯”è¾ƒä¸¤ä¸ª IP åœ°å€
         public static int CompareIpAddress(string s1, string s2)
         {
             if (s1 == null)
@@ -480,7 +481,7 @@ namespace DigitalPlatform
                 }
                 else if (column.SortStyle.CompareFunc != null)
                 {
-                    // Èç¹ûÓĞÅÅĞòº¯Êı£¬Ö±½ÓÓÃÅÅĞòº¯Êı
+                    // å¦‚æœæœ‰æ’åºå‡½æ•°ï¼Œç›´æ¥ç”¨æ’åºå‡½æ•°
                     CompareEventArgs e = new CompareEventArgs();
                     e.Column = column;
                     e.SortColumnIndex = i;
@@ -523,7 +524,7 @@ namespace DigitalPlatform
                         goto END1;
 
 #if NO
-                    // ¶Ô¼ÇÂ¼ºÅ²¿·Ö½øĞĞÓÒ¶ÔÆëµÄ±È½Ï
+                    // å¯¹è®°å½•å·éƒ¨åˆ†è¿›è¡Œå³å¯¹é½çš„æ¯”è¾ƒ
                     int nMaxLength = strRight1.Length;
                     if (strRight2.Length > nMaxLength)
                         nMaxLength = strRight2.Length;
@@ -555,7 +556,7 @@ namespace DigitalPlatform
                     if (nRet != 0)
                         goto END1;
 
-                    // ¶Ô¼ÇÂ¼ºÅ²¿·Ö½øĞĞÓÒ¶ÔÆëµÄ±È½Ï
+                    // å¯¹è®°å½•å·éƒ¨åˆ†è¿›è¡Œå³å¯¹é½çš„æ¯”è¾ƒ
                     int nMaxLength = strRight1.Length;
                     if (strRight2.Length > nMaxLength)
                         nMaxLength = strRight2.Length;
@@ -582,7 +583,7 @@ namespace DigitalPlatform
                 }
                 else
                 {
-                    // ²»ÄÜÊ¶±ğµÄ·½Ê½£¬°´ÕÕ×ó¶ÔÆë´¦Àí
+                    // ä¸èƒ½è¯†åˆ«çš„æ–¹å¼ï¼ŒæŒ‰ç…§å·¦å¯¹é½å¤„ç†
                     nRet = String.Compare(s1, s2);
                 }
 
@@ -605,8 +606,8 @@ namespace DigitalPlatform
 
     public class CompareEventArgs : EventArgs
     {
-        public Column Column = null;    // ÅÅĞòÁĞ
-        public int SortColumnIndex = -1;    // ÅÅĞòÁĞ index¡£¼´ Column ÔÚ SortColumns Êı×éÖĞµÄÏÂ±ê
+        public Column Column = null;    // æ’åºåˆ—
+        public int SortColumnIndex = -1;    // æ’åºåˆ— indexã€‚å³ Column åœ¨ SortColumns æ•°ç»„ä¸­çš„ä¸‹æ ‡
         public string String1 = "";
         public string String2 = "";
         public int Result = 0;  // [out]

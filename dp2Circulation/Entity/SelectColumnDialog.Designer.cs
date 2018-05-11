@@ -44,10 +44,9 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(330, 227);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(495, 340);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
+            this.button_Cancel.Size = new System.Drawing.Size(112, 34);
             this.button_Cancel.TabIndex = 5;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -56,10 +55,9 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(251, 227);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(376, 340);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 23);
+            this.button_OK.Size = new System.Drawing.Size(112, 34);
             this.button_OK.TabIndex = 4;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -70,12 +68,14 @@
             this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_move_up,
             this.toolStripButton_move_down});
-            this.toolStrip1.Location = new System.Drawing.Point(11, 195);
+            this.toolStrip1.Location = new System.Drawing.Point(16, 299);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(75, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(104, 31);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -85,7 +85,7 @@
             this.toolStripButton_move_up.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_move_up.Image")));
             this.toolStripButton_move_up.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_move_up.Name = "toolStripButton_move_up";
-            this.toolStripButton_move_up.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_move_up.Size = new System.Drawing.Size(50, 28);
             this.toolStripButton_move_up.Text = "上移";
             this.toolStripButton_move_up.Click += new System.EventHandler(this.toolStripButton_move_up_Click);
             // 
@@ -95,7 +95,7 @@
             this.toolStripButton_move_down.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_move_down.Image")));
             this.toolStripButton_move_down.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_move_down.Name = "toolStripButton_move_down";
-            this.toolStripButton_move_down.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_move_down.Size = new System.Drawing.Size(50, 28);
             this.toolStripButton_move_down.Text = "下移";
             this.toolStripButton_move_down.Click += new System.EventHandler(this.toolStripButton_move_down_Click);
             // 
@@ -110,11 +110,10 @@
             this.columnHeader_name});
             this.listView_columns.FullRowSelect = true;
             this.listView_columns.HideSelection = false;
-            this.listView_columns.Location = new System.Drawing.Point(11, 11);
-            this.listView_columns.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_columns.Location = new System.Drawing.Point(16, 16);
             this.listView_columns.MultiSelect = false;
             this.listView_columns.Name = "listView_columns";
-            this.listView_columns.Size = new System.Drawing.Size(394, 182);
+            this.listView_columns.Size = new System.Drawing.Size(589, 271);
             this.listView_columns.TabIndex = 3;
             this.listView_columns.UseCompatibleStateImageBehavior = false;
             this.listView_columns.View = System.Windows.Forms.View.Details;
@@ -124,6 +123,7 @@
             // columnHeader_index
             // 
             this.columnHeader_index.Text = "原始序号";
+            this.columnHeader_index.Width = 94;
             // 
             // columnHeader_name
             // 
@@ -133,14 +133,15 @@
             // SelectColumnDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(416, 261);
+            this.ClientSize = new System.Drawing.Size(624, 392);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.listView_columns);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "SelectColumnDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

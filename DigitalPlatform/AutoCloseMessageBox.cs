@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -21,7 +21,7 @@ namespace DigitalPlatform
 
         public Thread threadWaitMessage = null;
 
-        public int m_nTimeOut = 10 * 1000;	// 10Ãë
+        public int m_nTimeOut = 10 * 1000;	// 10ç§’
 
         public System.Windows.Forms.Label label_message;
         private System.Windows.Forms.Button button_OK;
@@ -91,7 +91,7 @@ namespace DigitalPlatform
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(57, 27);
             this.button_OK.TabIndex = 1;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // AutoCloseMessageBox
@@ -103,7 +103,7 @@ namespace DigitalPlatform
             this.ClientSize = new System.Drawing.Size(400, 178);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.label_message);
-            this.Font = new System.Drawing.Font("Î¢ÈíÑÅºÚ", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Font = new System.Drawing.Font("å¾®è½¯é›…é»‘", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.ForeColor = System.Drawing.SystemColors.WindowText;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AutoCloseMessageBox";
@@ -158,7 +158,7 @@ namespace DigitalPlatform
 
         public void ThreadMain()
         {
-            int nTimeLeft = m_nTimeOut;	// Ê£ÏÂµÄÊ±¼ä
+            int nTimeLeft = m_nTimeOut;	// å‰©ä¸‹çš„æ—¶é—´
 
             WaitHandle[] events = new WaitHandle[1];
 
@@ -182,11 +182,11 @@ namespace DigitalPlatform
 
                 if (index == WaitHandle.WaitTimeout)
                 {
-                    // ĞŞ¸Ä±êÌâ
+                    // ä¿®æ”¹æ ‡é¢˜
 
-                    string strText = m_strTitleText + " (" + Convert.ToString(nTimeLeft / 1000) + " Ãëºó±¾¶Ô»°¿ò»á×Ô¶¯¹Ø±Õ)";
+                    string strText = m_strTitleText + " (" + Convert.ToString(nTimeLeft / 1000) + " ç§’åæœ¬å¯¹è¯æ¡†ä¼šè‡ªåŠ¨å…³é—­)";
 
-                    // ×¢ÒâÕâÀïÊÇ¶àÏß³Ì²Ù×÷£¬ĞèÒª¼ä½Óµ÷ÓÃ
+                    // æ³¨æ„è¿™é‡Œæ˜¯å¤šçº¿ç¨‹æ“ä½œï¼Œéœ€è¦é—´æ¥è°ƒç”¨
                     if (this.InvokeRequired == true)
                     {
                         Delegate_SetTitleText d = new Delegate_SetTitleText(SetTitleText);
@@ -204,7 +204,7 @@ namespace DigitalPlatform
                         base.Text = strText;
                     }
 
-                    if (nThisTime < nPerTime) // ×îºóÒ»´ÎÒÑ¾­×÷Íê
+                    if (nThisTime < nPerTime) // æœ€åä¸€æ¬¡å·²ç»ä½œå®Œ
                     {
                         if (this.InvokeRequired == true)
                         {
@@ -244,10 +244,12 @@ namespace DigitalPlatform
             AutoCloseMessageBox.Show(null, strText);
         }
 
+        // parameters:
+        //      nTimeout    è¶…æ—¶æ—¶é—´ã€‚æ¯«ç§’æ•°ã€‚-1 è¡¨ç¤ºæ°¸ä¸è¶…æ—¶
         // return:
-        //      DialogResult.Retry ±íÊ¾³¬Ê±ÁË
-        //      DialogResult.OK ±íÊ¾µãÁË OK °´Å¥
-        //      DialogResult.Cancel ±íÊ¾µãÁËÓÒÉÏ½ÇµÄ Close °´Å¥
+        //      DialogResult.Retry è¡¨ç¤ºè¶…æ—¶äº†
+        //      DialogResult.OK è¡¨ç¤ºç‚¹äº† OK æŒ‰é’®
+        //      DialogResult.Cancel è¡¨ç¤ºç‚¹äº†å³ä¸Šè§’çš„ Close æŒ‰é’®
         public static DialogResult Show(IWin32Window owner,
             string strText,
             int nTimeout = -1,

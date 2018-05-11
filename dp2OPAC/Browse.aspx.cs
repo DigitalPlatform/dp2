@@ -468,7 +468,7 @@ ref sessioninfo) == false)
 
         bool bRedo = false;
 
-    REDO:
+        REDO:
         // 如果文件已经存在，就不要从 dp2library 获取了
         try
         {
@@ -523,7 +523,7 @@ ref sessioninfo) == false)
             goto END1;
         }
 
-    DO_REBUILD:
+        DO_REBUILD:
 
         if (bRedo == false)
         {
@@ -554,7 +554,7 @@ ref sessioninfo) == false)
             // this.SelectedNodeCaption = strPureCaption;
         }
 
-    END1:
+        END1:
         this.CreateRssLink(strPureCaption, strRssNavigateUrl);
         this.Page.Title = strPureCaption;
 
@@ -566,7 +566,7 @@ ref sessioninfo) == false)
         this.TreeView1.SelectedNodePath = strNodePath;
 
         return;
-    ERROR1:
+        ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
     }
@@ -662,7 +662,7 @@ ref sessioninfo) == false)
         }
 
         return;
-    ERROR1:
+        ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));
         Response.End();
     }
@@ -774,6 +774,13 @@ ref sessioninfo) == false)
         int nRet = 0;
         strError = "";
 
+        // 2018/1/27
+        if (strNode == null)
+        {
+            strError = "BuildRssOutput() 失败。strNode 参数值不应为 null";
+            return -1;
+        }
+
         string strDataFilePath = app.DataDir + "/browse/" + strDataFile;
 
         XmlDocument dom = new XmlDocument();
@@ -794,8 +801,15 @@ ref sessioninfo) == false)
         if (nRet == -1)
             return -1;
 
-        XmlNode node = CacheBuilder.GetDataNode(dom.DocumentElement,
-            strNode);
+        XmlNode node = null;
+        try
+        {
+            node = CacheBuilder.GetDataNode(dom.DocumentElement, strNode);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("CacheBuilder.GetDataNode() 出现异常，strNode=[" + strNode + "]", ex);
+        }
 
         if (node == null)
         {

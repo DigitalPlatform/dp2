@@ -9,7 +9,7 @@
     <col title="复本">
         <xpath>*/copy</xpath>
     </col>
-    <col title="价格">
+    <col title="价格" type="order_price">
         <xpath>*/price</xpath>
     </col>
     <col title="状态">
@@ -17,6 +17,9 @@
     </col>
     <col title="批次号">
         <xpath>*/batchNo</xpath>
+    </col>
+    <col title="去向">
+        <xpath>*/distribute</xpath>
     </col>
   <col title="书目记录" type="parent_id">
     <xpath>*/parent</xpath>

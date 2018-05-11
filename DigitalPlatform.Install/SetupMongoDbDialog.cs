@@ -33,6 +33,11 @@ namespace DigitalPlatform.Install
                 goto ERROR1;
             }
 
+            // return:
+            //      false   已经存在
+            //      true    刚刚新创建
+            // exception:
+            //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
             PathUtil.TryCreateDir(this.textBox_dataDir.Text);
 
             if (string.IsNullOrEmpty(this.textBox_binDir.Text))

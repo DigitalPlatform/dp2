@@ -823,7 +823,21 @@ namespace DigitalPlatform.IO
                 }
 #endif
 
-                TryCreateDir(strTargetDir);
+                try
+                {
+                    // 如果目录不存在则创建之
+                    // return:
+                    //      false   已经存在
+                    //      true    刚刚新创建
+                    // exception:
+                    //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
+                    TryCreateDir(strTargetDir);
+                }
+                catch (Exception ex)
+                {
+                    strError = "创建目录 '" + strTargetDir + "' 时出现异常: " + ex.Message;
+                    return -1;
+                }
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -921,7 +935,21 @@ namespace DigitalPlatform.IO
                     }
                 }
 
-                TryCreateDir(strTargetDir);
+                try
+                {
+                    // 如果目录不存在则创建之
+                    // return:
+                    //      false   已经存在
+                    //      true    刚刚新创建
+                    // exception:
+                    //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
+                    TryCreateDir(strTargetDir);
+                }
+                catch (Exception ex)
+                {
+                    strError = "创建目录 '" + strTargetDir + "' 时出现异常: " + ex.Message;
+                    return -1;
+                }
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -954,8 +982,16 @@ namespace DigitalPlatform.IO
         }
 
         // 兼容原来函数名
+        // exception:
+        //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
         public static bool CreateDirIfNeed(string strDir)
         {
+            // 如果目录不存在则创建之
+            // return:
+            //      false   已经存在
+            //      true    刚刚新创建
+            // exception:
+            //      可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
             return TryCreateDir(strDir);
         }
 
@@ -963,6 +999,8 @@ namespace DigitalPlatform.IO
         // return:
         //      false   已经存在
         //      true    刚刚新创建
+        // exception:
+        //      盘符不存在的情况下，可能会抛出异常 System.IO.DirectoryNotFoundException (未能找到路径“...”的一部分)
         public static bool TryCreateDir(string strDir)
         {
             DirectoryInfo di = new DirectoryInfo(strDir);

@@ -432,6 +432,13 @@ namespace DigitalPlatform.CommonControl
         }
 
         public static DialogResult Show(IWin32Window owner,
+            string strText)
+        {
+            bool temp = false;
+            return Show(owner, strText, (string)null, ref temp);
+        }
+
+        public static DialogResult Show(IWin32Window owner,
             string strText,
             string strCheckBoxText,
             ref bool bCheckBox)

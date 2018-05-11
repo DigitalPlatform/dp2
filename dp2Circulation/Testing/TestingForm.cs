@@ -3559,7 +3559,8 @@ out strError);
             return 0;
         }
 
-        // 测试恢复删除 书目数据库
+        // 测试恢复删除 书目数据库 (注：“恢复删除”的意思是“重做删除动作”)
+        // TODO: 要增加测试删除一个书目库下个别下属库的功能
         // 要测试两种情况:1) 恢复操作前，数据库是存在的。这是正常情况; 2) 恢复操作前，数据库并不存在
         int TestRecoverDeletingOneBiblioDatabase(
             Stop stop,

@@ -404,8 +404,10 @@ namespace DigitalPlatform.rms
             strMethod = strMethod.Substring("join(".Length).Trim();
 
             // 去掉末尾 ')'
-            if (strMethod.Length > 1)
+            if (strMethod.Length > 0)
                 strMethod = strMethod.Substring(0, strMethod.Length - 1);
+
+            strMethod = StringUtil.UnescapeString(strMethod);
 
             // TODO: 去掉外围引号 ?
             return strMethod;

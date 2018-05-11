@@ -1810,7 +1810,7 @@ MessageBoxDefaultButton.Button2);
                         // “无在借册和违约金的”
                         if (dlg.NoBorrowAndOverdueItem == true)
                         {
-                            if (borrows.Count == 0 || overdues.Count == 0)
+                            if (borrows.Count == 0 && overdues.Count == 0)  // 2018/4/26 从 || 修改为 &&
                                 bOn = true;
                         }
 
@@ -8182,6 +8182,11 @@ out strError);
                 foreach (ListViewItem item in this.Items)
                 {
                     string strRecPath = item.Text;
+                    if (string.IsNullOrEmpty(strRecPath))
+                    {
+                        throw new Exception("Items 中包含了 路径为空的事项");
+                    }
+
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
                     BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];

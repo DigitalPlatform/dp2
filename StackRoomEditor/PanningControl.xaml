@@ -1,0 +1,165 @@
+﻿<UserControl x:Class="StackRoomEditor.PanningControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Canvas x:Name="canvas1" MouseLeftButtonDown="canvas1_MouseLeftButtonDown" MouseLeftButtonUp="canvas1_MouseLeftButtonUp">
+            <Path x:Name="circle"  Stroke="White" Stretch="Fill"  Width="{Binding Path=ActualWidth,ElementName=canvas1}" Height="{Binding Path=ActualHeight,ElementName=canvas1}">
+
+                <Path.Data>
+                    <EllipseGeometry RadiusX="100" RadiusY="100"/>
+                </Path.Data>
+                <Path.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#7CFFFFFF" Offset="0" />
+                        <GradientStop Color="#7C7F7F7E" Offset="1" />
+                        <GradientStop Color="#81C3C7C8" Offset="0.775" />
+                    </RadialGradientBrush>
+                </Path.Fill>
+            </Path>
+
+            <Path x:Name="left"  Fill="Black" Stroke="White" Stretch="Uniform"  Width="{Binding Path=ActualWidth,ElementName=canvas1}" Height="{Binding Path=ActualHeight,ElementName=canvas1}" >
+                <Path.Data>
+                    <CombinedGeometry  GeometryCombineMode="Union">
+                        <CombinedGeometry.Geometry1>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="10,50" IsClosed="True">
+                                        <LineSegment Point="30,40"/>
+                                        <LineSegment Point="30,60"/>
+                                    </PathFigure>
+                                    <PathFigure StartPoint="0,50" IsClosed="True">
+                                        <LineSegment Point="0.1,50"/>
+                                        <LineSegment Point="0.1,50.1"/>
+                                        <LineSegment Point="0,50.1"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="99,50" IsClosed="True">
+                                        <LineSegment Point="100,50"/>
+                                        <LineSegment Point="100,51"/>
+                                        <LineSegment Point="99,51"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+
+
+            <Path x:Name="right"  Fill="Black" Stroke="White" Stretch="Uniform"  Width="{Binding Path=ActualWidth,ElementName=canvas1}" Height="{Binding Path=ActualHeight,ElementName=canvas1}" >
+                <Path.Data>
+                    <CombinedGeometry  GeometryCombineMode="Union">
+                        <CombinedGeometry.Geometry1>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="0,50" IsClosed="True">
+                                        <LineSegment Point="1,50"/>
+                                        <LineSegment Point="1,51"/>
+                                        <LineSegment Point="0,51"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <!--
+                            <EllipseGeometry Center="60,25" RadiusX="26" RadiusY="26"/>
+                            -->
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="90,50" IsClosed="True">
+                                        <LineSegment Point="70,40"/>
+                                        <LineSegment Point="70,60"/>
+                                    </PathFigure>
+                                    <PathFigure StartPoint="99,50" IsClosed="True">
+                                        <LineSegment Point="100,50"/>
+                                        <LineSegment Point="100,51"/>
+                                        <LineSegment Point="99,51"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+            <Path x:Name="top"  Fill="Black" Stroke="White" Stretch="Uniform"  Width="{Binding Path=ActualWidth,ElementName=canvas1}" Height="{Binding Path=ActualHeight,ElementName=canvas1}">
+
+                <Path.Data>
+                    <CombinedGeometry  GeometryCombineMode="Union">
+                        <CombinedGeometry.Geometry1>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="50,10" IsClosed="True">
+                                        <LineSegment Point="40,30"/>
+                                        <LineSegment Point="60,30"/>
+                                    </PathFigure>
+                                    <PathFigure StartPoint="50,0" IsClosed="True">
+                                        <LineSegment Point="50,1"/>
+                                        <LineSegment Point="51,1"/>
+                                        <LineSegment Point="51,0"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="50,99" IsClosed="True">
+                                        <LineSegment Point="50,100"/>
+                                        <LineSegment Point="51,100"/>
+                                        <LineSegment Point="51,99"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+
+
+            <Path x:Name="bottom"  Fill="Black" Stroke="White" Stretch="Uniform"  Width="{Binding Path=ActualWidth,ElementName=canvas1}" Height="{Binding Path=ActualHeight,ElementName=canvas1}">
+
+                <Path.Data>
+                    <CombinedGeometry  GeometryCombineMode="Union">
+                        <CombinedGeometry.Geometry1>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="50,0" IsClosed="True">
+                                        <LineSegment Point="50,1"/>
+                                        <LineSegment Point="51,1"/>
+                                        <LineSegment Point="51,0"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry1>
+                        <CombinedGeometry.Geometry2>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="50,90" IsClosed="True">
+                                        <LineSegment Point="40,70"/>
+                                        <LineSegment Point="60,70"/>
+                                    </PathFigure>
+                                    <PathFigure StartPoint="50,99" IsClosed="True">
+                                        <LineSegment Point="50,100"/>
+                                        <LineSegment Point="51,100"/>
+                                        <LineSegment Point="51,99"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </CombinedGeometry.Geometry2>
+                    </CombinedGeometry>
+                </Path.Data>
+            </Path>
+
+        </Canvas>
+
+    </Grid>
+</UserControl>

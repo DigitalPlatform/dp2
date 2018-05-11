@@ -2745,7 +2745,7 @@ false);
 
 
             // 获得打印参数
-            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.DataDir,
+            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_source_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 "printclaim_printoption");
@@ -3370,7 +3370,7 @@ false);
             // 配置标题和风格
             string strNamePath = "printclaim_printoption";
 
-            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.DataDir,
+            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
                 this.comboBox_source_type.Text);
             option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
@@ -3380,7 +3380,7 @@ false);
             MainForm.SetControlFont(dlg, this.Font, false);
 
             // dlg.MainForm = Program.MainForm;
-            dlg.DataDir = Program.MainForm.DataDir;
+            dlg.DataDir = Program.MainForm.UserDir; // .DataDir;
             dlg.Text = this.comboBox_source_type.Text + " 催询单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
