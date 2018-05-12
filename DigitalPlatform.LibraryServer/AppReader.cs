@@ -4161,7 +4161,6 @@ out strError);
                         foreach (string strFrom in this.PatronAdditionalFroms)
                         {
                             nRet = this.GetReaderRecXmlByFrom(
-                                // sessioninfo.Channels,
 channel,
 null,
 strBarcode,
