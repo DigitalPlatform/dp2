@@ -464,6 +464,12 @@ namespace DigitalPlatform.LibraryServer
         // 访问日志每天允许创建的最多条目数
         public int AccessLogMaxCountPerDay = 10000;
 
+        // 2018/5/12
+        // 用于出纳操作的辅助性的检索途径
+        // 不要试图在运行中途修改它。它不会回写到 library.xml 中
+        public List<string> ItemAdditionalFroms = new List<string>();
+
+
         // 2013/5/24
         // 用于出纳操作的辅助性的检索途径
         // 不要试图在运行中途修改它。它不会回写到 library.xml 中
@@ -971,6 +977,15 @@ namespace DigitalPlatform.LibraryServer
                             app.WriteErrorLog(strError);
                         this.MaxPatronHistoryItems = v;
 
+                        // 2018/5/12
+                        {
+                            string strList = DomUtil.GetAttr(node, "itemAdditionalFroms");
+                            if (string.IsNullOrEmpty(strList) == false)
+                                this.ItemAdditionalFroms = StringUtil.SplitList(strList);
+                            else
+                                this.ItemAdditionalFroms = new List<string>();
+                        }
+
                         nRet = DomUtil.GetIntegerParam(node,
         "maxItemHistoryItems",
         10, // 100,
@@ -1021,6 +1036,8 @@ namespace DigitalPlatform.LibraryServer
                         this.AcceptBlankRoomName = false;
 
                         this.VerifyRegisterNoDup = true;
+
+                        this.ItemAdditionalFroms = new List<string>();
                     }
 
                     // <channel>
@@ -7384,7 +7401,6 @@ out strError);
         //      1   命中1条
         //      >1  命中多于1条
         public int GetItemRecXml(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcodeParam,
             string strStyle,
@@ -7601,7 +7617,6 @@ out strError);
         //      1   命中1条
         //      >1  命中多于1条
         public int GetOneItemRec(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strDbType,
             string strBarcode,

@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Drawing;
+using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
-using System.Diagnostics;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -922,7 +918,8 @@ namespace dp2Circulation
                 strConfirmItemRecPath,
                 task);
 #endif
-            this.Container.AddItemSummaryTask(task.ItemBarcode,
+            this.Container.AddItemSummaryTask(// task.ItemBarcode,
+                string.IsNullOrEmpty(borrow_info.ItemBarcode) ? task.ItemBarcode : borrow_info.ItemBarcode,
                 strConfirmItemRecPath,
                 task);
 
@@ -1312,9 +1309,10 @@ end_time);
                 strConfirmItemRecPath,
                 task);
 #endif
-            this.Container.AddItemSummaryTask(task.ItemBarcode,
-    strConfirmItemRecPath,
-    task);
+            this.Container.AddItemSummaryTask( // task.ItemBarcode,
+                string.IsNullOrEmpty(return_info.ItemBarcode) ? task.ItemBarcode : return_info.ItemBarcode,
+                strConfirmItemRecPath,
+                task);
 
             if (string.IsNullOrEmpty(task.ReaderBarcode) == true)
                 task.ReaderBarcode = strOutputReaderBarcode;
