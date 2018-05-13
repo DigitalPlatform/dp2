@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,12 +18,12 @@ namespace DigitalPlatform.rms.Client
 {
 
     /// <summary>
-    /// ½á¹û¼¯ÈİÆ÷
+    /// ç»“æœé›†å®¹å™¨
     /// </summary>
     public class ClientResultsetCollection
     {
         public ReaderWriterLock m_lock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 
         public Hashtable hashtable = new Hashtable();
@@ -37,7 +37,7 @@ namespace DigitalPlatform.rms.Client
 
         public ClientResultset NewResultset(string strName)
         {
-            // ¼ÓĞ´Ëø
+            // åŠ å†™é”
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
@@ -64,7 +64,7 @@ namespace DigitalPlatform.rms.Client
 
         public ClientResultset GetResultset(string strName)
         {
-            // ¼Ó¶ÁËø
+            // åŠ è¯»é”
             this.m_lock.AcquireReaderLock(m_nLockTimeout);
             try
             {
@@ -79,18 +79,18 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ¹¦ÄÜ: ºÏ²¢½á¹û¼¯
+        // åŠŸèƒ½: åˆå¹¶ç»“æœé›†
         // parameters:
-        //		strStyle	ÔËËã·ç¸ñ OR , AND , SUB
-        //		sourceLeft	Ô´,×ó±ß½á¹û¼¯
-        //		sourceRight	Ô´,ÓÒ±ß½á¹û¼¯
-        //		targetLeft	Ä¿±ê,×ó±ß½á¹û¼¯
-        //		targetMiddle	Ä¿±ê,ÖĞ¼ä½á¹û¼¯
-        //		targetRight	Ä¿±ê,ÓÒ±ß½á¹û¼¯
-        //		strDebugInfo	´¦ÀíĞÅÏ¢
+        //		strStyle	è¿ç®—é£æ ¼ OR , AND , SUB
+        //		sourceLeft	æº,å·¦è¾¹ç»“æœé›†
+        //		sourceRight	æº,å³è¾¹ç»“æœé›†
+        //		targetLeft	ç›®æ ‡,å·¦è¾¹ç»“æœé›†
+        //		targetMiddle	ç›®æ ‡,ä¸­é—´ç»“æœé›†
+        //		targetRight	ç›®æ ‡,å³è¾¹ç»“æœé›†
+        //		strDebugInfo	å¤„ç†ä¿¡æ¯
         // return:
-        //		-1	Ê§°Ü
-        //		0	³É¹¦
+        //		-1	å¤±è´¥
+        //		0	æˆåŠŸ
         public static int Merge(string strStyle,
             ClientResultset sourceLeft,
             ClientResultset sourceRight,
@@ -105,16 +105,16 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             if (bOutputDebugInfo == true)
             {
-                strDebugInfo += "strStyleÖµ:" + strStyle + "\r\n";
-                strDebugInfo += "sourceLeft½á¹û¼¯:\r\n" + sourceLeft.Dump() + "\r\n";
-                strDebugInfo += "sourceRight½á¹û¼¯:\r\n" + sourceRight.Dump() + "\r\n";
+                strDebugInfo += "strStyleå€¼:" + strStyle + "\r\n";
+                strDebugInfo += "sourceLeftç»“æœé›†:\r\n" + sourceLeft.Dump() + "\r\n";
+                strDebugInfo += "sourceRightç»“æœé›†:\r\n" + sourceRight.Dump() + "\r\n";
             }
 
             if (String.Compare(strStyle, "OR", true) == 0)
             {
                 if (targetLeft != null || targetRight != null)
                 {
-                    Exception ex = new Exception("µ±strStyle²ÎÊıÖµÎª\"OR\"Ê±£¬targetLeft²ÎÊıºÍtargetRightÎŞĞ§£¬ÖµÓ¦Îªnull");
+                    Exception ex = new Exception("å½“strStyleå‚æ•°å€¼ä¸º\"OR\"æ—¶ï¼ŒtargetLeftå‚æ•°å’ŒtargetRightæ— æ•ˆï¼Œå€¼åº”ä¸ºnull");
                     throw (ex);
                 }
             }
@@ -123,7 +123,7 @@ namespace DigitalPlatform.rms.Client
             {
                 if (sourceLeft.File.HasIndexed == false)
                 {
-                    strError = "ÎªÁËÌá¸ßÔËĞĞËÙ¶È, sourceLeftÓ¦ÔÚµ÷ÓÃMerge()Ç°È·±£indexed";
+                    strError = "ä¸ºäº†æé«˜è¿è¡Œé€Ÿåº¦, sourceLeftåº”åœ¨è°ƒç”¨Merge()å‰ç¡®ä¿indexed";
                     return -1;
                 }
             }
@@ -132,7 +132,7 @@ namespace DigitalPlatform.rms.Client
             {
                 if (sourceRight.File.HasIndexed == false)
                 {
-                    strError = "ÎªÁËÌá¸ßÔËĞĞËÙ¶È, sourceRightÓ¦ÔÚµ÷ÓÃMerge()Ç°È·±£indexed";
+                    strError = "ä¸ºäº†æé«˜è¿è¡Œé€Ÿåº¦, sourceRightåº”åœ¨è°ƒç”¨Merge()å‰ç¡®ä¿indexed";
                     return -1;
                 }
             }
@@ -149,7 +149,7 @@ namespace DigitalPlatform.rms.Client
                 if (i >= sourceLeft.Count)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "i´óÓÚµÈÓÚsourceLeftµÄ¸öÊı£¬½«i¸ÄÎª-1\r\n";
+                        strDebugInfo += "iå¤§äºç­‰äºsourceLeftçš„ä¸ªæ•°ï¼Œå°†iæ”¹ä¸º-1\r\n";
                     i = -1;
                 }
                 else if (i != -1)
@@ -158,18 +158,18 @@ namespace DigitalPlatform.rms.Client
                     {
                         dpRecordLeft = (ClientRecordItem)sourceLeft.File[i];
                         if (bOutputDebugInfo == true)
-                            strDebugInfo += "È¡³ösourceLeft¼¯ºÏÖĞµÚ " + Convert.ToString(i) + " ¸öÔªËØ£¬PathÎª '" + dpRecordLeft.Path + "' \r\n";
+                            strDebugInfo += "å–å‡ºsourceLefté›†åˆä¸­ç¬¬ " + Convert.ToString(i) + " ä¸ªå…ƒç´ ï¼ŒPathä¸º '" + dpRecordLeft.Path + "' \r\n";
                     }
                     catch
                     {
-                        Exception ex = new Exception("sourceLeftÈ¡ÔªËØÒì³£: i=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + "");
+                        Exception ex = new Exception("sourceLeftå–å…ƒç´ å¼‚å¸¸: i=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + "");
                         throw (ex);
                     }
                 }
                 if (j >= sourceRight.Count)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "j´óÓÚµÈÓÚsourceRightµÄ¸öÊı£¬½«j¸ÄÎª-1\r\n";
+                        strDebugInfo += "jå¤§äºç­‰äºsourceRightçš„ä¸ªæ•°ï¼Œå°†jæ”¹ä¸º-1\r\n";
                     j = -1;
                 }
                 else if (j != -1)
@@ -178,38 +178,38 @@ namespace DigitalPlatform.rms.Client
                     {
                         dpRecordRight = (ClientRecordItem)sourceRight.File[j];
                         if (bOutputDebugInfo == true)
-                            strDebugInfo += "È¡³ösourceRight¼¯ºÏÖĞµÚ " + Convert.ToString(j) + " ¸öÔªËØ£¬PathÎª '" + dpRecordRight.Path + "'\r\n";
+                            strDebugInfo += "å–å‡ºsourceRighté›†åˆä¸­ç¬¬ " + Convert.ToString(j) + " ä¸ªå…ƒç´ ï¼ŒPathä¸º '" + dpRecordRight.Path + "'\r\n";
                     }
                     catch
                     {
-                        Exception ex = new Exception("sourceRightÈ¡ÔªËØÒì³£: j=" + Convert.ToString(j) + "----Count=" + Convert.ToString(sourceLeft.Count) + sourceRight.GetHashCode() + "<br/>");
+                        Exception ex = new Exception("sourceRightå–å…ƒç´ å¼‚å¸¸: j=" + Convert.ToString(j) + "----Count=" + Convert.ToString(sourceLeft.Count) + sourceRight.GetHashCode() + "<br/>");
                         throw (ex);
                     }
                 }
                 if (i == -1 && j == -1)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "i,j¶¼µÈÓÚ-1Ìø³ö\r\n";
+                        strDebugInfo += "i,jéƒ½ç­‰äº-1è·³å‡º\r\n";
                     break;
                 }
 
                 if (dpRecordLeft == null)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "dpRecordLeftÎªnull£¬ÉèretµÈÓÚ1\r\n";
+                        strDebugInfo += "dpRecordLeftä¸ºnullï¼Œè®¾retç­‰äº1\r\n";
                     ret = 1;
                 }
                 else if (dpRecordRight == null)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "dpRecordRightÎªnull£¬ÉèretµÈÓÚ-1\r\n";
+                        strDebugInfo += "dpRecordRightä¸ºnullï¼Œè®¾retç­‰äº-1\r\n";
                     ret = -1;
                 }
                 else
                 {
-                    ret = dpRecordLeft.CompareTo(dpRecordRight);  //MyCompareTo(oldOneKey); //¸ÄCompareTO
+                    ret = dpRecordLeft.CompareTo(dpRecordRight);  //MyCompareTo(oldOneKey); //æ”¹CompareTO
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "dpRecordLeftÓëdpRecordRight¾ù²»Îªnull£¬±È½ÏÁ½Ìõ¼ÇÂ¼µÃµ½retµÈÓÚ" + Convert.ToString(ret) + "\r\n";
+                        strDebugInfo += "dpRecordLeftä¸dpRecordRightå‡ä¸ä¸ºnullï¼Œæ¯”è¾ƒä¸¤æ¡è®°å½•å¾—åˆ°retç­‰äº" + Convert.ToString(ret) + "\r\n";
                 }
 
 
@@ -238,7 +238,7 @@ namespace DigitalPlatform.rms.Client
                 if (ret == 0 && targetMiddle != null)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "retµÈÓÚ0,¼Óµ½targetMiddleÀïÃæ\r\n";
+                        strDebugInfo += "retç­‰äº0,åŠ åˆ°targetMiddleé‡Œé¢\r\n";
                     targetMiddle.File.Add(dpRecordLeft);
                     i++;
                     j++;
@@ -247,7 +247,7 @@ namespace DigitalPlatform.rms.Client
                 if (ret < 0)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "retĞ¡ÓÚ0,¼Óµ½targetLeftÀïÃæ\r\n";
+                        strDebugInfo += "retå°äº0,åŠ åˆ°targetLefté‡Œé¢\r\n";
 
                     if (targetLeft != null && dpRecordLeft != null)
                         targetLeft.File.Add(dpRecordLeft);
@@ -257,7 +257,7 @@ namespace DigitalPlatform.rms.Client
                 if (ret > 0)
                 {
                     if (bOutputDebugInfo == true)
-                        strDebugInfo += "ret´óÓÚ0,¼Óµ½targetRightÀïÃæ\r\n";
+                        strDebugInfo += "retå¤§äº0,åŠ åˆ°targetRighté‡Œé¢\r\n";
 
                     if (targetRight != null && dpRecordRight != null)
                         targetRight.File.Add(dpRecordRight);
@@ -273,7 +273,7 @@ namespace DigitalPlatform.rms.Client
 
 
     /// <summary>
-    /// Ç°¶Ë½á¹û¼¯
+    /// å‰ç«¯ç»“æœé›†
     /// </summary>
     public class ClientResultset
     {
@@ -282,7 +282,7 @@ namespace DigitalPlatform.rms.Client
         public ClientResultsetFile File = new ClientResultsetFile();
 
         public ReaderWriterLock m_lock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         public long Count
         {
@@ -292,10 +292,10 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // ¼ìË÷ÎÄÕÂ
+        // æ£€ç´¢æ–‡ç« 
         // return:
         //		-1	error
-        //		ÆäËû ÃüÖĞÊı
+        //		å…¶ä»– å‘½ä¸­æ•°
         public int Search(
             string strServerUrl,
             string strQueryXml,
@@ -307,25 +307,25 @@ namespace DigitalPlatform.rms.Client
 
             string strMessage = "";
 
-            // ¼ÓĞ´Ëø
+            // åŠ å†™é”
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
 
-                this.File.Clear();	// Çå¿Õ¼¯ºÏ
+                this.File.Clear();	// æ¸…ç©ºé›†åˆ
 
 
-                //if (page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                //if (page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 //	return -1;
 
                 RmsChannel channel = Channels.GetChannel(strServerUrl);
-                Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+                Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
                 strMessage += "--- begin search ...\r\n";
 
                 DateTime time = DateTime.Now;
 
-                //if (page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                //if (page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 //	return -1;
 
                 long nRet = channel.DoSearch(strQueryXml,
@@ -334,7 +334,7 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "¼ìË÷Ê±³ö´í: " + strError;
+                    strError = "æ£€ç´¢æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -347,7 +347,7 @@ namespace DigitalPlatform.rms.Client
 
                 long lTotalCount = nRet;
 
-                //if (page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                //if (page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 //	return -1;
 
                 strMessage += "--- begin get search result ...\r\n";
@@ -360,11 +360,10 @@ namespace DigitalPlatform.rms.Client
 
                 for (; ; )
                 {
-                    //if (page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                    //if (page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                     //	return -1;
 
 
-                    List<string> aPath = null;
                     lPerCount = Math.Min((lTotalCount - lStart), 1000);
 
                     nRet = channel.DoGetSearchResult(
@@ -373,11 +372,11 @@ namespace DigitalPlatform.rms.Client
                         lPerCount,
                         strLang,
                         null,	// stop,
-                        out aPath,
+                        out List<string> aPath,
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "¼ìË÷¿âÊ±³ö´í: " + strError;
+                        strError = "æ£€ç´¢åº“æ—¶å‡ºé”™: " + strError;
                         return -1;
                     }
 
@@ -386,11 +385,11 @@ namespace DigitalPlatform.rms.Client
 
                     if (aPath.Count == 0)
                     {
-                        strError = "¼ìË÷¿âÊ±»ñÈ¡µÄ¼ìË÷½á¹ûÎª¿Õ";
+                        strError = "æ£€ç´¢åº“æ—¶è·å–çš„æ£€ç´¢ç»“æœä¸ºç©º";
                         return -1;
                     }
 
-                    //if (page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                    //if (page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                     //	return -1;
 
                     strMessage += "--- begin build storage ...\r\n";
@@ -398,7 +397,7 @@ namespace DigitalPlatform.rms.Client
                     time = DateTime.Now;
 
                     int i;
-                    // ¼ÓÈëĞÂĞĞ¶ÔÏó¡£ĞÂĞĞ¶ÔÏóÖĞ£¬Ö»³õÊ¼»¯ÁËm_strRecID²ÎÊı
+                    // åŠ å…¥æ–°è¡Œå¯¹è±¡ã€‚æ–°è¡Œå¯¹è±¡ä¸­ï¼Œåªåˆå§‹åŒ–äº†m_strRecIDå‚æ•°
                     for (i = 0; i < aPath.Count; i++)
                     {
                         ClientRecordItem item = new ClientRecordItem();
@@ -432,8 +431,8 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        //¹¦ÄÜ:ÁĞ³ö¼¯ºÏÖĞµÄËùÓĞÏî
-        //·µ»ØÖµ: ·µ»Ø¼¯ºÏ³ÉÔ±×é³ÉµÄ±í¸ñ×Ö·û´®
+        //åŠŸèƒ½:åˆ—å‡ºé›†åˆä¸­çš„æ‰€æœ‰é¡¹
+        //è¿”å›å€¼: è¿”å›é›†åˆæˆå‘˜ç»„æˆçš„è¡¨æ ¼å­—ç¬¦ä¸²
         public string Dump()
         {
             string strText = "";
@@ -487,14 +486,14 @@ namespace DigitalPlatform.rms.Client
         public override void ReadData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
 
-            // ¶ÁÈëLength¸öbytesµÄÄÚÈİ
+            // è¯»å…¥Lengthä¸ªbytesçš„å†…å®¹
             m_buffer = new byte[this.Length];
             stream.Read(m_buffer, 0, m_buffer.Length);
 
-            // »¹Ô­ÄÚ´æ¶ÔÏó
+            // è¿˜åŸå†…å­˜å¯¹è±¡
             m_strPath = Encoding.Unicode.GetString(m_buffer);
         }
 
@@ -502,7 +501,7 @@ namespace DigitalPlatform.rms.Client
         public override void ReadCompareData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
 
             ReadData(stream);
@@ -512,28 +511,28 @@ namespace DigitalPlatform.rms.Client
         {
             if (m_strPath == null)
             {
-                throw (new Exception("m_strPathÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_strPathå°šæœªåˆå§‹åŒ–"));
             }
 
             if (m_buffer == null)
             {
-                throw (new Exception("m_bufferÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_bufferå°šæœªåˆå§‹åŒ–"));
             }
 
 
-            // Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+            // å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
             stream.Write(m_buffer, 0, this.Length);
         }
 
-        // ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
-        // ¸ù¾İID±È½ÏÁ½¸ö¶ÔÏóµÄ´óĞ¡£¬ÒÔ±ãÅÅĞò£¬
-        // °´ÓÒ¶ÔÆë·½Ê½±È½Ï
+        // å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
+        // æ ¹æ®IDæ¯”è¾ƒä¸¤ä¸ªå¯¹è±¡çš„å¤§å°ï¼Œä»¥ä¾¿æ’åºï¼Œ
+        // æŒ‰å³å¯¹é½æ–¹å¼æ¯”è¾ƒ
         // obj: An object to compare with this instance
-        // ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+        // è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
         // Less than zero: This instance is less than obj.
         // Zero: This instance is equal to obj.
         // Greater than zero: This instance is greater than obj.
-        // Òì³£: ArgumentException,obj is not the same type as this instance.
+        // å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
         public override int CompareTo(object obj)
         {
             ClientRecordItem item = (ClientRecordItem)obj;
@@ -545,7 +544,7 @@ namespace DigitalPlatform.rms.Client
 
 
     /// <summary>
-    /// Ò»¸ö½á¹û¼¯µÄ´ÅÅÌÎïÀí´æ´¢½á¹¹
+    /// ä¸€ä¸ªç»“æœé›†çš„ç£ç›˜ç‰©ç†å­˜å‚¨ç»“æ„
     /// </summary>
     public class ClientResultsetFile : ItemFileBase
     {

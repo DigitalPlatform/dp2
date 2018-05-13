@@ -5367,14 +5367,13 @@ namespace DigitalPlatform.LibraryServer
 
             long lHitCount = lRet;
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
                 "default",
                 0,
                 1,
                 "zh",
                 null,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -5409,7 +5408,6 @@ namespace DigitalPlatform.LibraryServer
         //      1   命中1条
         //      >1  命中多于1条
         public int GetRecXml(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strQueryXml,
             out string strXml,
@@ -5418,7 +5416,7 @@ namespace DigitalPlatform.LibraryServer
             out byte[] timestamp,
             out string strError)
         {
-            aPath = null;
+            aPath = new List<string>();
 
             strXml = "";
             strError = "";
@@ -5451,7 +5449,6 @@ namespace DigitalPlatform.LibraryServer
 
             long lHitCount = lRet;
 
-            // List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
                 "default",
                 0,
@@ -5527,7 +5524,7 @@ namespace DigitalPlatform.LibraryServer
             out byte[] timestamp,
             out string strError)
         {
-            aPath = null;
+            aPath = new List<string>();
 
             strXml = "";
             strError = "";
@@ -6572,7 +6569,6 @@ out strError);
         //      -1  error
         //      其他    命中记录条数(不超过nMax规定的极限)
         public int SearchReaderRecDup(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcode,
             int nMax,
@@ -6580,7 +6576,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            aPath = null;
+            aPath = new List<string>();
 
             Debug.Assert(String.IsNullOrEmpty(strBarcode) == false, "");
 
@@ -6684,7 +6680,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            aPath = null;
+            aPath = new List<string>();
 
             LibraryApplication app = this;
 
@@ -7628,7 +7624,7 @@ out strError);
             out byte[] timestamp,
             out string strError)
         {
-            aPath = null;
+            aPath = new List<string>();
 
             strXml = "";
             strError = "";
@@ -7761,7 +7757,6 @@ out strError);
             // 如果命中结果多余一条，则继续获得第一条以后的各条的path
             if (lHitCount > 1)  // TODO: && nMax > 1
             {
-                // List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "default",
                     0,
@@ -8543,14 +8538,13 @@ out strError);
 
             long lHitCount = lRet;
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
                 "default",
                 0,
                 1,
                 "zh",
                 null,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -8592,7 +8586,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            aPath = null;
+            aPath = new List<string>();
 
             if (strFrom == "册条码号")
                 strFrom = "册条码";    // 兼容最老的 keys 定义。可考虑在适当时候全部修改为 "册条码号"
@@ -8727,7 +8721,7 @@ out strError);
             out string strError)
         {
             strError = "";
-            aPath = null;
+            aPath = new List<string>();
 
             string strInventoryDbName = GetInventoryDbName();
 
@@ -9293,14 +9287,13 @@ out strError);
 
             lHitCount = Math.Min(lHitCount, 100);
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
                 "default",
                 0,
                 lHitCount,
                 "zh",
                 null,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -11531,7 +11524,6 @@ out strError);
             }
             else // 普通条码号
             {
-                List<string> aPath = null;
 
                 // 获得册记录
                 // return:
@@ -11545,7 +11537,7 @@ out strError);
                     strItemBarcode,
                     out strItemXml,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out item_timestamp,
                     out strError);
                 if (nRet == 0)

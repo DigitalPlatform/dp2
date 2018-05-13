@@ -177,14 +177,13 @@ namespace DigitalPlatform.Library
                 return -1;
             }
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
-                    "default",
+                "default",
                 0,
                 1,
                 "zh",
                 null,	// this.stop,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
             {
@@ -248,14 +247,13 @@ namespace DigitalPlatform.Library
                 return -1;
             }
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
-                    "default",
+                "default",
                 0,
                 -1,
                 "zh",
                 null,	// this.stop,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
             {

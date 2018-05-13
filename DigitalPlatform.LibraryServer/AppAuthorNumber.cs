@@ -151,13 +151,12 @@ namespace DigitalPlatform.LibraryServer
                     debug_info.Append("结果命中 " + Convert.ToString(lRet) + " 条。\r\n");
                 }
 
-                List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "default",
                     1000,
                     "zh",
                     null,	// stop,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -2036,13 +2035,12 @@ out string strError)
                     return 0;
                 }
 
-                List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "default",
                     1000,
                     "zh",
                     null,	// stop,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (lRet == -1)
                 {

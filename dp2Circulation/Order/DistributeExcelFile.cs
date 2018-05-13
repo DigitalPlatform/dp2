@@ -444,6 +444,7 @@ XLColor.NoColor);
                     cell.Style.Font.Bold = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Protection.SetLocked(false);
                     cells.Add(cell);
 
                     i++;

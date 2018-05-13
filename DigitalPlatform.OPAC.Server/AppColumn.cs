@@ -287,7 +287,6 @@ namespace DigitalPlatform.OPAC.Server
 
                 time = DateTime.Now;
 
-                List<string> aPath = null;
                 nRet = // sessioninfo.Channel.
                     channel.GetSearchResult(
                     null,
@@ -295,7 +294,7 @@ namespace DigitalPlatform.OPAC.Server
                     0,
                     -1,
                     "zh",
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (nRet == -1)
                 {

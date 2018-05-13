@@ -2948,7 +2948,8 @@ out strError);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = doc.Worksheets.Add("表格");
+            IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
+            // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
 
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            

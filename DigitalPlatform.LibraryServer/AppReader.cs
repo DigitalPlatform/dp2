@@ -950,7 +950,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 #endif
 
-                    List<string> aPath = null;
 
                     // 本函数只负责查重, 并不获得记录体
                     // return:
@@ -961,7 +960,7 @@ namespace DigitalPlatform.LibraryServer
                         channel,
                         strNewBarcode,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1720,7 +1719,6 @@ strLibraryCode);    // 读者所在的馆代码
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-                List<string> aPath = null;
 
                 if (String.IsNullOrEmpty(strOldBarcode) == true)
                 {
@@ -1737,7 +1735,7 @@ strLibraryCode);    // 读者所在的馆代码
                     channel,
                     strOldBarcode,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2609,7 +2607,6 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     // 从册条码号获得册记录
 
-                    List<string> aPath = null;
                     // 获得册记录
                     // return:
                     //      -1  error
@@ -2621,7 +2618,7 @@ strLibraryCode);    // 读者所在的馆代码
                         strItemBarcode,
                         out strItemXml,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out item_timestamp,
                         out strError);
                     if (nRet == 0)

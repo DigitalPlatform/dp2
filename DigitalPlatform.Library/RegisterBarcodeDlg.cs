@@ -888,13 +888,12 @@ namespace DigitalPlatform.Library
                         + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
 
                     // strItemRecPath = "";
-                    List<string> aPath = null;
 
                     nRet = this.SearchPanel.SearchMultiPath(
                         this.ServerUrl,
                         strQueryXml,
                         1000,
-                        out aPath,
+                        out List<string> aPath,
                         out strError);
                     if (nRet == -1)
                         return -1;

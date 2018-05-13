@@ -2356,7 +2356,6 @@ out strError);
             if (string.IsNullOrEmpty(strContent) == false)
             {
                 // 查重
-                List<string> aPath = null;
                 // 对实体库进行查重
                 // 本函数只负责查重, 并不获得记录体
                 // return:
@@ -2367,7 +2366,7 @@ out strError);
                     strContent,
                     strFrom,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -3440,7 +3439,6 @@ out strError);
         {
             strError = "";
 
-            List<string> aPath = null;
             // 根据册条码号对实体库进行查重
             // 本函数只负责查重, 并不获得记录体
             // return:
@@ -3452,7 +3450,7 @@ out strError);
                 strNewBarcode,
                 strCaption,
                 100,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -4055,7 +4053,6 @@ out strError);
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
-                List<string> aPath = null;
 
                 if (String.IsNullOrEmpty(strOldBarcode) == true)
                 {
@@ -4073,7 +4070,7 @@ out strError);
                     strOldBarcode,
                     "册条码",
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -5848,9 +5845,6 @@ out strError);
                 List<string> temp_results = new List<string>();
                 foreach (string temp_word in temp_words)
                 {
-                    string strXml = "";
-                    List<string> aPath = null;
-                    byte[] timestamp = null;
                     // return:
                     //      -1  error
                     //      0   not found
@@ -5862,10 +5856,10 @@ out strError);
                         temp_word,
                         strFrom,
                         "",
-                        out strXml,
+                        out string strXml,
                         10,
-                        out aPath,
-                        out timestamp,
+                        out List<string> aPath,
+                        out byte[] timestamp,
                         out strError);
                     if (nRet == -1)
                         return -1;

@@ -2438,6 +2438,7 @@ start_time_1,
             out string strOutputItemRecPath,
             out byte[] item_timestamp)
         {
+            aPath = new List<string>();
             string strError = "";
             int nRet = 0;
 
@@ -2446,7 +2447,6 @@ start_time_1,
             strOutputItemRecPath = "";
             strItemXml = "";
             item_timestamp = null;
-            aPath = new List<string>();
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -6853,7 +6853,6 @@ start_time_1,
                 return -1;
             }
 
-            List<string> aPath = null;
             // 根据馆代码、批次号和册条码号对盘点库进行查重
             // 本函数只负责查重, 并不获得记录体
             // return:
@@ -6866,7 +6865,7 @@ start_time_1,
                 strItemBarcode,
                 strItemRefID,
                 2,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -10184,12 +10183,11 @@ out string strError)
                 return -1;
             }
 
-            List<string> aPath = null;
             lRet = channel.DoGetSearchResult("amerced",
                 100,
                 "zh",
                 null,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
             {
@@ -17553,7 +17551,6 @@ strBookPrice);    // 图书价格
             else
             {
                 // 从册条码号获得册记录
-                List<string> aPath = null;
 
                 // 获得册记录
                 // return:
@@ -17567,7 +17564,7 @@ strBookPrice);    // 图书价格
                     strItemBarcode,
                     out strItemXml,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out item_timestamp,
                     out strError);
                 if (nRet == 0)

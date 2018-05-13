@@ -931,7 +931,6 @@ namespace DigitalPlatform.LibraryServer
                 + StringUtil.GetXmlStringSimple(strClass)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-            List<string> aPath = null;
             // 获得通用记录
             // 本函数可获得超过1条以上的路径
             // return:
@@ -945,7 +944,7 @@ namespace DigitalPlatform.LibraryServer
                 strQueryXml,
                 out strXml,
                 2,
-                out aPath,
+                out List<string> aPath,
                 out timestamp,
                 out strError);
             if (nRet == -1)

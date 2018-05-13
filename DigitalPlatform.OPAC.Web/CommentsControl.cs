@@ -1500,7 +1500,6 @@ namespace DigitalPlatform.OPAC.Web
         {
             strError = "";
 
-            List<string> aPath = null;
             long lRet = // this.Channel.
                 channel.GetSearchResult(
                 null,
@@ -1508,7 +1507,7 @@ namespace DigitalPlatform.OPAC.Web
                 nStart, // 0,
                 nMaxCount, // -1,
                 strLang,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
