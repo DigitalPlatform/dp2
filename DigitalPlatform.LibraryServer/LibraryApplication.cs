@@ -162,7 +162,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.118 (2017/10/21) library.xml 中 channel 元素增加了 privilegedIpList 属性，可以定义特权前端 IP，这些前端可以创建 maxChannelsLocalhost 属性定义的那么多个并发通道
         //      2.119 (2017/11/13) library.xml 中 circulation 元素增加了 verifyRegisterNoDup 属性，用于定义是否校验册记录登录号的重复情况
         //      2.120 (2017/12/16) WriteRes() API 针对上传文件也支持 gzip 风格了。此前只是对 dp2kernel 资源上传的时候支持 gzip
-        public static string Version = "2.120";
+        //      2.121 (2018/5/15) GetBiblioInfos() API 中改进了获得 table 格式的功能，允许 table: 后面携带风格列表例如 "table:price|title"，另外 UNIMARC 格式内置了 table 格式发生能力，可以删除数据目录下的 cfgs/table_unimarc.fltx 来使用这个内置的发生模块
+        public static string Version = "2.121";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

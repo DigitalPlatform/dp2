@@ -6326,6 +6326,7 @@ ref column_max_chars);
                         //      1   找到
                         nRet = this.GetTable(
                             strBiblioRecPath,
+                            StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
                             out strTableXml,
                             out string strError1);
                         if (nRet == -1)

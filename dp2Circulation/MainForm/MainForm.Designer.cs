@@ -160,6 +160,7 @@
             this.MenuItem_printBindingList = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_inventory = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importFromOrderDistributeExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openTestSearch = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_window = new System.Windows.Forms.ToolStripMenuItem();
@@ -240,7 +241,6 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_importFromOrderDistributeExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -304,12 +304,14 @@
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(357, 6);
+            this.toolStripSeparator6.Visible = false;
             // 
             // MenuItem_startAnotherDp2circulation
             // 
             this.MenuItem_startAnotherDp2circulation.Name = "MenuItem_startAnotherDp2circulation";
             this.MenuItem_startAnotherDp2circulation.Size = new System.Drawing.Size(360, 30);
             this.MenuItem_startAnotherDp2circulation.Text = "启动新的 dp2Circulation 实例(&S)";
+            this.MenuItem_startAnotherDp2circulation.Visible = false;
             this.MenuItem_startAnotherDp2circulation.Click += new System.EventHandler(this.MenuItem_startAnotherDp2circulation_Click);
             // 
             // toolStripSeparator14
@@ -1098,6 +1100,13 @@
             this.MenuItem_importExport.Text = "从书目转储文件导入(&I)";
             this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
             // 
+            // MenuItem_importFromOrderDistributeExcelFile
+            // 
+            this.MenuItem_importFromOrderDistributeExcelFile.Name = "MenuItem_importFromOrderDistributeExcelFile";
+            this.MenuItem_importFromOrderDistributeExcelFile.Size = new System.Drawing.Size(333, 30);
+            this.MenuItem_importFromOrderDistributeExcelFile.Text = "从订购去向 Excel 文件导入(&D)";
+            this.MenuItem_importFromOrderDistributeExcelFile.Click += new System.EventHandler(this.MenuItem_importFromOrderDistributeExcelFile_Click);
+            // 
             // toolStripSeparator17
             // 
             this.toolStripSeparator17.Name = "toolStripSeparator17";
@@ -1691,9 +1700,9 @@
             // tabPage_property
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_property.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_property.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_property.Size = new System.Drawing.Size(302, 394);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1701,9 +1710,9 @@
             // tabPage_verifyResult
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(302, 394);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1711,9 +1720,9 @@
             // tabPage_generateData
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_generateData.Size = new System.Drawing.Size(302, 394);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1721,9 +1730,9 @@
             // tabPage_camera
             // 
             this.tabPage_camera.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_camera.Size = new System.Drawing.Size(302, 394);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1731,9 +1740,9 @@
             // tabPage_accept
             // 
             this.tabPage_accept.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_accept.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_accept.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_accept.Size = new System.Drawing.Size(302, 394);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1745,7 +1754,7 @@
             this.tabPage_share.Controls.Add(this.tableLayoutPanel_messageHub);
             this.tabPage_share.Location = new System.Drawing.Point(4, 36);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_share.Size = new System.Drawing.Size(302, 394);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1758,23 +1767,23 @@
             this.tableLayoutPanel_messageHub.Controls.Add(this.toolStrip_messageHub, 0, 1);
             this.tableLayoutPanel_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_messageHub.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_messageHub.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_messageHub.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_messageHub.Name = "tableLayoutPanel_messageHub";
             this.tableLayoutPanel_messageHub.RowCount = 3;
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(302, 364);
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(302, 394);
             this.tableLayoutPanel_messageHub.TabIndex = 2;
             // 
             // webBrowser_messageHub
             // 
             this.webBrowser_messageHub.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_messageHub.Location = new System.Drawing.Point(4, 4);
-            this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_messageHub.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(294, 325);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(294, 355);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_messageHub
@@ -1784,7 +1793,7 @@
             this.toolStrip_messageHub.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_messageHub_userManage,
             this.toolStripButton_messageHub_relogin});
-            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 333);
+            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 363);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -1815,9 +1824,9 @@
             // tabPage_browse
             // 
             this.tabPage_browse.Location = new System.Drawing.Point(4, 36);
-            this.tabPage_browse.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_browse.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_browse.Name = "tabPage_browse";
-            this.tabPage_browse.Size = new System.Drawing.Size(302, 364);
+            this.tabPage_browse.Size = new System.Drawing.Size(302, 394);
             this.tabPage_browse.TabIndex = 7;
             this.tabPage_browse.Text = "浏览";
             this.tabPage_browse.UseVisualStyleBackColor = true;
@@ -1857,13 +1866,6 @@
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_importFromOrderDistributeExcelFile
-            // 
-            this.MenuItem_importFromOrderDistributeExcelFile.Name = "MenuItem_importFromOrderDistributeExcelFile";
-            this.MenuItem_importFromOrderDistributeExcelFile.Size = new System.Drawing.Size(333, 30);
-            this.MenuItem_importFromOrderDistributeExcelFile.Text = "从订购去向 Excel 文件导入(&D)";
-            this.MenuItem_importFromOrderDistributeExcelFile.Click += new System.EventHandler(this.MenuItem_importFromOrderDistributeExcelFile_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
@@ -1878,7 +1880,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip_main;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "dp2circulation V2 -- 内务";
             this.Activated += new System.EventHandler(this.MainForm_Activated);

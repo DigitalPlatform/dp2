@@ -514,7 +514,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-        END1:
+            END1:
             if (bIsComplete == true)
             {
                 // 多轮上传的内容完成后，最后需要单独设置文件最后修改时间
@@ -846,7 +846,7 @@ namespace DigitalPlatform.LibraryServer
 
                     count++;
 
-                CONTINUE:
+                    CONTINUE:
                     i++;
                 }
 
@@ -881,7 +881,7 @@ namespace DigitalPlatform.LibraryServer
         //      strCurrentDirectory 当前路径，注意这是物理路径
         // return:
         //      -1  出错
-        //      其他  实际删除的文件和目录个数
+        //      其他  实际删除的文件和目录个数。若 strError 中返回了值，也表示出错
         public int DeleteFile(
             // string strRootPath,
             List<string> root_paths,
@@ -905,7 +905,7 @@ namespace DigitalPlatform.LibraryServer
                     //    continue;
                     if (IsChildOrEqual(si.FullName, root_paths) == false)
                     {
-                        errors.Add("文件 " + si.Name + " 越过了限制目录，删除操作被拒绝");
+                        errors.Add("文件 " + si.Name + " 所在目录在限制范围以外，因此删除操作被拒绝");
                         continue;
                     }
 
@@ -934,7 +934,13 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 if (errors.Count > 0)
+                {
                     strError = StringUtil.MakePathList(errors, "; ");
+                    if (count == 0)
+                        return -1;
+                }
+                else
+                    strError = "";
 
                 return count;
             }

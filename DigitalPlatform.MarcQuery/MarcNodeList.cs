@@ -46,6 +46,23 @@ namespace DigitalPlatform.Marc
             return this.m_list.GetEnumerator();
         }
 
+#if NO
+        void ForEach(Action<MarcNode> action)
+        {
+            this.m_list.ForEach(action);
+        }
+#endif
+        /// <summary>
+        /// 获得 List&lt;MarcNode&gt;接口
+        /// </summary>
+        public List<MarcNode> List
+        {
+            get
+            {
+                return this.m_list;
+            }
+        }
+
         /*
         public List<MarcNode>.Enumerator GetEnumberator()
         {
@@ -459,7 +476,7 @@ namespace DigitalPlatform.Marc
             return this;
         }
 
-        #region 获得元素
+#region 获得元素
 
         // 返回第一个元素
         /// <summary>
@@ -559,9 +576,9 @@ namespace DigitalPlatform.Marc
             return results;
         }
 
-        #endregion
+#endregion
 
-        #region 获得各种值
+#region 获得各种值
 
         // 第一个元素的 Name
         /// <summary>
@@ -746,9 +763,9 @@ namespace DigitalPlatform.Marc
             }
         }
 
-        #endregion
+#endregion
 
-        #region 成批修改成员
+#region 成批修改成员
 
         /// <summary>
         /// 修改当前集合中的每个元素的 Name 值
@@ -1120,9 +1137,9 @@ namespace DigitalPlatform.Marc
             return this;
         }
 
-        #endregion
+#endregion
 
-        #region 筛选
+#region 筛选
 
         // 对一批互相没有树重叠关系的对象进行筛选
         static MarcNodeList simpleSelect(MarcNodeList source,
@@ -1281,7 +1298,7 @@ namespace DigitalPlatform.Marc
             return results;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 输出当前对象的调试用字符串

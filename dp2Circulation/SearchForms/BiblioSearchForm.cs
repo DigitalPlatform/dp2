@@ -2879,12 +2879,12 @@ out strError);
                 if (strMarcSyntax == "unimarc")
                 {
                     if (strMacroName == "@price")
-                        strValue = record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+                        strValue = record.select("field[@name='010']/subfield[@name='d'] | field[@name='011']/subfield[@name='d']").FirstContent;
                 }
                 else if (strMarcSyntax == "usmarc")
                 {
                     if (strMacroName == "@price")
-                        strValue = record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+                        strValue = record.select("field[@name='020']/subfield[@name='c'] | field[@name='022']/subfield[@name='c']").FirstContent;
                 }
 
                 if (string.IsNullOrEmpty(strValue) == false)
@@ -3347,6 +3347,7 @@ ref column_max_chars);
             //      1   找到
             int nRet = GetTable(
                 strRecPath,
+                "",
                 out strTableXml,
                 out strError);
             if (nRet == -1)

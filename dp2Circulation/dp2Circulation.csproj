@@ -21,7 +21,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>290</ApplicationRevision>
+    <ApplicationRevision>291</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>

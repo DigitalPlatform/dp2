@@ -19,9 +19,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Message;
 
+using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.rms;
 using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2Library
@@ -9721,7 +9721,7 @@ Stack:
                         // 删除文件或者目录
                         // return:
                         //      -1  出错
-                        //      其他  实际删除的文件和目录个数
+                        //      其他  实际删除的文件和目录个数。若 strError 中返回了值，也表示出错
                         nRet = app.DeleteFile(
                             root_paths,
                             strCurrentDirectory,
