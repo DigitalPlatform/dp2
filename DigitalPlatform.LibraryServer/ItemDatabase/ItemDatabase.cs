@@ -443,7 +443,7 @@ namespace DigitalPlatform.LibraryServer
             out byte[] timestamp,
             out string strError)
         {
-            aPath = null;
+            aPath = new List<string>();
 
             strXml = "";
             strError = "";
@@ -566,17 +566,12 @@ namespace DigitalPlatform.LibraryServer
             // RmsChannelCollection channels,
             RmsChannel channel,
             List<string> locateParams,
-            /*
-            string strIssueDbName,
-            string strParentID,
-            string strPublishTime,
-             * */
             int nMax,
             out List<string> aPath,
             out string strError)
         {
             strError = "";
-            aPath = null;
+            aPath = new List<string>();
 
             // 构造检索式
             string strQueryXml = "";
@@ -711,7 +706,6 @@ namespace DigitalPlatform.LibraryServer
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
-                List<string> aPath = null;
 
                 nRet = IsLocateParamNullOrEmpty(
                     oldLocateParams,
@@ -742,7 +736,7 @@ namespace DigitalPlatform.LibraryServer
                     channel,
                     oldLocateParams,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -2039,7 +2033,6 @@ out strError);
 
                             // TODO: 对于期记录，oldLocateParm和newLocateParam中的parentid应当相等，预先检查好
 
-                            List<string> aPath = null;
                             // 根据 父记录ID+出版时间 对期库进行查重
                             // 本函数只负责查重, 并不获得记录体
                             // return:
@@ -2050,7 +2043,7 @@ out strError);
                                 channel,
                                 newLocateParam,
                                 100,
-                                out aPath,
+                                out List<string> aPath,
                                 out strError);
                             if (nRet == -1)
                                 goto ERROR1;
@@ -2844,14 +2837,13 @@ out strError);
             int nRet = 0;
             string strError = "";
 
-            List<string> aPath = null;
 
             nRet = this.SearchItemRecDup(
                 // Channels,
                 channel,
                 locateParam,
                 nMax,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

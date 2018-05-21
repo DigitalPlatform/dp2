@@ -1919,13 +1919,12 @@ out strError);
 
             long lHitCount = lRet;
 
-            List<string> aPath = null;
             lRet = Channel.GetSearchResult(stop,
                 "dup",
                 0,
                 Math.Min(lHitCount, 100),
                 "zh",
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (lRet == -1)
                 return -1;

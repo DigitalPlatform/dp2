@@ -1879,11 +1879,16 @@ out strError);
         //      1   找到
         public int GetTable(
             string strRecPath,
+            string strStyleList,
             out string strXml,
             out string strError)
         {
             strError = "";
             strXml = "";
+
+            string strFormat = "table";
+            if (string.IsNullOrEmpty(strStyleList) == false)
+                strFormat += ":" + strStyleList.Replace(",", "|");
 
             LibraryChannel channel = this.GetChannel();
             try
@@ -1894,7 +1899,7 @@ out strError);
                     stop,
                     strRecPath,
                     "",
-                    new string[] { "table" },   // formats
+                    new string[] { strFormat },   // formats
                     out results,
                     out baNewTimestamp,
                     out strError);

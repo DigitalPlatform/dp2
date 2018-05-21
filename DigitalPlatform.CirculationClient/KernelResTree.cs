@@ -1009,7 +1009,6 @@ namespace DigitalPlatform.CirculationClient
                 paths.Add(strPath);
             }
 
-
             string strNameList = StringUtil.MakePathList(paths);
             if (strNameList.Length > 1000)
                 strNameList = strNameList.Substring(0, 1000) + " ... 等 " + selected_file_nodes.Count + " 个文件";

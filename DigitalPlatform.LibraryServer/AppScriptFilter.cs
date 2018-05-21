@@ -548,6 +548,25 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 包装后的版本
+        public int ConvertBiblioXmlToHtml(
+    string strFilterFileName,
+    string strBiblioXml,
+    string strSyntax,
+    string strRecPath,
+    out string strBiblio,
+    out string strError)
+        {
+            return ConvertBiblioXmlToHtml(
+            strFilterFileName,
+            strBiblioXml,
+            strSyntax,
+            strRecPath,
+            "",
+            out strBiblio,
+            out strError);
+        }
+
         // 将种记录数据从XML格式转换为HTML格式
         // parameters:
         //      strBiblioXml    XML记录，或者 MARC 记录
@@ -557,6 +576,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioXml,
             string strSyntax,
             string strRecPath,
+            string strStyle,
             out string strBiblio,
             out string strError)
         {
@@ -568,6 +588,7 @@ namespace DigitalPlatform.LibraryServer
 
             FilterHost host = new FilterHost();
             host.RecPath = strRecPath;
+            host.Style = strStyle;
             host.App = this;
 
             string strMarc = "";
@@ -670,10 +691,12 @@ ISBD Structure
         // parameters:
         //      strBiblioXml    XML记录，或者 MARC 记录
         //      strSyntax   MARC格式 usmarc/unimarc。如果strBiblioXml 第一字符为 '<' 则本参数可以为空
+        //      strStyle    创建风格。
         public int ConvertBiblioXmlToTable(
             string strBiblioXml,
             string strSyntax,
             string strRecPath,
+            string strStyle,
             out string strBiblio,
             out string strError)
         {
@@ -714,6 +737,7 @@ ISBD Structure
             strBiblioXml,
             null,
             strRecPath,
+            strStyle,
             out strBiblio,
             out strError);
                     if (nRet == -1)
@@ -727,6 +751,7 @@ ISBD Structure
                         nRet = MarcTable.ScriptMarc21(
                             strRecPath,
                             strMarc,
+                            strStyle,
                             out results,
                             out strError);
                         if (nRet == -1)
@@ -737,6 +762,7 @@ ISBD Structure
                         nRet = MarcTable.ScriptUnimarc(
     strRecPath,
     strMarc,
+    strStyle,
     out results,
     out strError);
                         if (nRet == -1)

@@ -2218,13 +2218,12 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                List<string> aPath = null;
                 lRet = channel.GetSearchResult(Stop,
                     "dup",
                     0,
                     Math.Min(lHitCount, 100),
                     "zh",
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (lRet == -1)
                     return -1;

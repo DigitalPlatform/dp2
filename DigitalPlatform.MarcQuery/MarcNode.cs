@@ -11,7 +11,7 @@ namespace DigitalPlatform.Marc
     /// <summary>
     /// MARC 基本节点
     /// </summary>
-    public class MarcNode 
+    public class MarcNode
     {
         /// <summary>
         /// 父节点
@@ -208,7 +208,7 @@ namespace DigitalPlatform.Marc
             for (int i = 0; i < this.ChildNodes.count; i++)
             {
                 MarcNode child = this.ChildNodes[i];
-                strResult.Append( child.dump() );
+                strResult.Append(child.dump());
             }
 
             return strResult.ToString();
@@ -221,7 +221,7 @@ namespace DigitalPlatform.Marc
         public virtual string dump()
         {
             // 一般实现
-            return this.Name + this.Indicator 
+            return this.Name + this.Indicator
                 + dumpChildren();
         }
 
@@ -365,10 +365,10 @@ namespace DigitalPlatform.Marc
 
             // 进行类型检查，同级只能插入相同类型的元素
             if (this.NodeType != source.NodeType)
-                throw new Exception("无法在节点同级插入不同类型的新节点。this.NodeTYpe="+this.NodeType.ToString()+", source.NodeType="+source.NodeType.ToString());
+                throw new Exception("无法在节点同级插入不同类型的新节点。this.NodeTYpe=" + this.NodeType.ToString() + ", source.NodeType=" + source.NodeType.ToString());
 
             source.detach();
-            parent.ChildNodes.insert(index+1, source);
+            parent.ChildNodes.insert(index + 1, source);
             source.Parent = this.Parent;
             return this;
         }
@@ -505,7 +505,7 @@ namespace DigitalPlatform.Marc
                 if (item.Type != NaviItemType.Element)
                 {
                     // if (bSkipNoneElement == false)
-                        throw new Exception("xpath '"+strXPath+"' 命中了非元素类型的节点，这是不允许的");
+                    throw new Exception("xpath '" + strXPath + "' 命中了非元素类型的节点，这是不允许的");
                     continue;
                 }
                 results.add(item.MarcNode);
@@ -663,6 +663,56 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        /// <summary>
+        /// 当前节点的前一个兄弟节点
+        /// </summary>
+        public MarcNode PrevSibling
+        {
+            get
+            {
+                MarcNode parent = this.Parent;
+                // 自己是根节点，无法具有兄弟
+                if (parent == null)
+                    return null;
+
+                int index = parent.ChildNodes.indexOf(this);
+                if (index == -1)
+                {
+                    throw new Exception("parent的ChildNodes中居然没有找到自己");
+                }
+
+                if (index == 0)
+                    return null;
+
+                return parent.ChildNodes[index - 1];
+            }
+        }
+
+        /// <summary>
+        /// 当前节点的下一个兄弟节点
+        /// </summary>
+        public MarcNode NextSibling
+        {
+            get
+            {
+                MarcNode parent = this.Parent;
+                // 自己是根节点，无法具有兄弟
+                if (parent == null)
+                    return null;
+
+                int index = parent.ChildNodes.indexOf(this);
+                if (index == -1)
+                {
+                    throw new Exception("parent的ChildNodes中居然没有找到自己");
+                }
+
+                if (index >= parent.ChildNodes.count - 1 )
+                    return null;
+
+                return parent.ChildNodes[index + 1];
+            }
+        }
+
         #endregion
     }
 
@@ -749,7 +799,7 @@ namespace DigitalPlatform.Marc
                     MarcNode node = this.ChildNodes[i];
 
                     if (node.NodeType != Marc.NodeType.Field)
-                        throw new Exception("根下级出现了不是 Field 类型的节点 ("+node.NodeType.ToString()+")");
+                        throw new Exception("根下级出现了不是 Field 类型的节点 (" + node.NodeType.ToString() + ")");
                     /*
                     if (i != 0 && node.Name != "hdr")
                         throw new Exception("MarcField同级第一个位置必须是Name为'hdr'的表示头标区的MarcField（而现在Name为 '" + node.Name + "'）");
@@ -994,7 +1044,7 @@ namespace DigitalPlatform.Marc
             }
             else
             {
-                MarcNodeList subfields = fields[0].select("subfield[@name='"+strSubfieldName+"']");
+                MarcNodeList subfields = fields[0].select("subfield[@name='" + strSubfieldName + "']");
                 if (subfields.count == 0)
                 {
                     fields[0].ChildNodes.insertSequence(new MarcSubfield("a", strContent));
@@ -1149,7 +1199,7 @@ namespace DigitalPlatform.Marc
 
         void newMarcField(string strName,
             string strIndicator,
-            string [] fields)
+            string[] fields)
         {
             this.NodeType = NodeType.Field;
 
@@ -1245,7 +1295,7 @@ namespace DigitalPlatform.Marc
             this.m_strName = strFieldName;
             if (MarcNode.isControlFieldName(strFieldName) == true)
             {
-                throw new Exception("MARC 外围字段的字段名不能使用控制字段名 '"+strFieldName+"'");
+                throw new Exception("MARC 外围字段的字段名不能使用控制字段名 '" + strFieldName + "'");
             }
             else
             {
@@ -1351,7 +1401,7 @@ namespace DigitalPlatform.Marc
         /// <param name="subfields">表示若干子字段的字符串数组。每个字符串的第一字符为子字段名，其余为子字段内容</param>
         public MarcInnerField(string strName,
             string strIndicator,
-            List<string> subfields) : base (strName, strIndicator, subfields)
+            List<string> subfields) : base(strName, strIndicator, subfields)
         {
         }
 
@@ -1364,7 +1414,7 @@ namespace DigitalPlatform.Marc
         /// <param name="subfields">表示若干子字段的字符串数组。每个字符串的第一字符为子字段名，其余为子字段内容</param>
         public MarcInnerField(string strName,
             string strIndicator,
-            string[] subfields) : base (strName, strIndicator, subfields)
+            string[] subfields) : base(strName, strIndicator, subfields)
         {
         }
 
@@ -1374,7 +1424,7 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="chSubfield">子字段符号的代用字符。在 strText 参数中可以用这个代用字符来表示子字段符号 (ASCII 31)</param>
         /// <param name="strText">表示一个完整的 MARC 字段的 MARC 机内格式字符串</param>
-        public MarcInnerField(char chSubfield, string strText) : base (chSubfield, strText)
+        public MarcInnerField(char chSubfield, string strText) : base(chSubfield, strText)
         {
         }
 
@@ -1628,7 +1678,7 @@ namespace DigitalPlatform.Marc
 
         void newMarcField(string strName,
             string strIndicator,
-            string [] subfields)
+            string[] subfields)
         {
             this.NodeType = NodeType.Field;
 
@@ -1837,7 +1887,7 @@ namespace DigitalPlatform.Marc
             get
             {
                 StringBuilder result = new StringBuilder(4096);
-                result.Append( this.m_strContent );   // 第一个子字段符号以前的内容
+                result.Append(this.m_strContent);   // 第一个子字段符号以前的内容
                 // 合成下级元素
                 for (int i = 0; i < this.ChildNodes.count; i++)
                 {
@@ -1987,7 +2037,7 @@ namespace DigitalPlatform.Marc
                 if (this.IsControlField == true)
                     return;
                 ensureIndicatorChars();
-                this.m_strIndicator = new string(this.m_strIndicator[0],1) + value;
+                this.m_strIndicator = new string(this.m_strIndicator[0], 1) + value;
             }
         }
 
@@ -2572,14 +2622,14 @@ namespace DigitalPlatform.Marc
         /// <param name="nStart">开始位置</param>
         /// <param name="nLength">长度。如果为-1，表示尽可能多。本参数可以缺省，缺省值为1</param>
         /// <returns>nStart 和 nLength 参数所表示范围的字符串</returns>
-        public string this [int nStart, int nLength = 1]
+        public string this[int nStart, int nLength = 1]
         {
             get
             {
                 if (nStart < 0 || nStart >= FixedLength)
                     throw new ArgumentException("nStart的取值范围应该是大于或等于 0，小于 " + FixedLength);
                 if (nLength == -1)
-                    nLength = FixedLength; 
+                    nLength = FixedLength;
                 if (nStart + nLength > FixedLength)
                     throw new ArgumentException("nStart + nLength 应该小于或等于 " + FixedLength);
                 if (nLength == 0)

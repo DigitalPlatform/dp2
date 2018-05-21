@@ -685,13 +685,12 @@ namespace dp2Manager
 
             long nSearchCount = nRet;
 
-            List<string> aPath = null;
             nRet = channel.DoGetSearchResult(
                 "default",
                 1,
                 this.Lang,
                 null,	// stop,
-                out aPath,
+                out List<string> aPath,
                 out strError);
             if (nRet == -1)
             {

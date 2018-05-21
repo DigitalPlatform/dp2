@@ -2872,13 +2872,12 @@ namespace dp2rms
                     if (nRet == 0)
                         return 0;	// not found
 
-                    List<string> aPath = null;
                     nRet = channel.DoGetSearchResult(
                         "default",
                         1,
                         this.Lang,
                         stop,
-                        out aPath,
+                        out List<string> aPath,
                         out strError);
                     if (nRet == -1)
                     {

@@ -3024,8 +3024,8 @@ namespace DigitalPlatform.rms.Client
             out List<string> aPath,
             out string strError)
         {
-            strError = "";
             aPath = new List<string>();
+            strError = "";
 
             Record[] records = null;
 

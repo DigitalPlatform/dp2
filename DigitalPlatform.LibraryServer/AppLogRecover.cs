@@ -243,7 +243,6 @@ out strError);
                 else
                 {
                     // 从册条码号获得册记录
-                    List<string> aPath = null;
 
                     // 获得册记录
                     // return:
@@ -257,7 +256,7 @@ out strError);
                         strItemBarcode,
                         out strItemXml,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out item_timestamp,
                         out strError);
                     if (nRet == 0)
@@ -459,7 +458,6 @@ out strError);
                 byte[] item_timestamp = null;
 
                 // 从册条码号获得册记录
-                List<string> aPath = null;
 
                 // 获得册记录
                 // return:
@@ -473,7 +471,7 @@ out strError);
                     strItemBarcode,
                     out strItemXml,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out item_timestamp,
                     out strError);
                 if (nRet == 0)
@@ -1413,7 +1411,6 @@ strElementName);
                 else
                 {
                     // 从册条码号获得册记录
-                    List<string> aPath = null;
 
                     // 获得册记录
                     // return:
@@ -1427,7 +1424,7 @@ strElementName);
                         strItemBarcode,
                         out strItemXml,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out item_timestamp,
                         out strError);
                     if (nRet == 0)
@@ -1694,7 +1691,6 @@ strElementName);
 
 
                 // 从册条码号获得册记录
-                List<string> aPath = null;
 
                 bool bDupItemBarcode = false;   // 册条码号是否发生了重复
 
@@ -1710,7 +1706,7 @@ strElementName);
                     strItemBarcode,
                     out strItemXml,
                     100,
-                    out aPath,
+                    out List<string> aPath,
                     out item_timestamp,
                     out strError);
                 if (nRet == 0)
@@ -3094,7 +3090,6 @@ strElementName);
                         string strOutputItemRecPath = "";
 
                         // 从册条码号获得册记录
-                        List<string> aPath = null;
 
                         // 获得册记录
                         // return:
@@ -3108,7 +3103,7 @@ strElementName);
                             strOldItemBarcode,
                             out strExistXml,
                             100,
-                            out aPath,
+                            out List<string> aPath,
                             out exist_timestamp,
                             out strError);
                         if (nRet == 0 || nRet == -1)
@@ -3398,7 +3393,6 @@ strElementName);
                     byte[] exist_timestamp = null;
 
                     // 从册条码号获得册记录
-                    List<string> aPath = null;
 
                     // 获得册记录
                     // return:
@@ -3412,7 +3406,7 @@ strElementName);
                         strOldItemBarcode,
                         out strExistXml,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out exist_timestamp,
                         out strError);
                     if (nRet == -1)
@@ -7623,14 +7617,13 @@ API: Settlement()
                     goto ERROR1;
                 }
 
-                List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "amerced",   // strResultSetName
                     0,
                     1,
                     "zh",
                     null,   // stop
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -7989,7 +7982,6 @@ DO_SNAPSHOT:
                 else
                 {
                     // 从册条码号获得册记录
-                    List<string> aPath = null;
 
                     // 获得册记录
                     // return:
@@ -8003,7 +7995,7 @@ DO_SNAPSHOT:
                         strItemBarcode,
                         out strItemXml,
                         100,
-                        out aPath,
+                        out List<string> aPath,
                         out item_timestamp,
                         out strError);
                     if (nRet == 0)

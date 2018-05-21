@@ -1198,7 +1198,9 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strBiblio = strMetadata;  // 2010/10/27 
                 }
-                else if (String.Compare(strBiblioType, "table", true) == 0)
+                else if (IsResultType(strBiblioType, "table") == true
+                    // String.Compare(strBiblioType, "table", true) == 0
+                    )
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
                     {
@@ -1206,12 +1208,16 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
 
+                    List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                    string style = parts[1].Replace("|", ",");
+
                     if (string.IsNullOrEmpty(strBiblioXml) == false)
                     {
                         nRet = this.ConvertBiblioXmlToTable(
                             strBiblioXml,
                             null,
                             strCurrentBiblioRecPath,
+                            style,
                             out strBiblio,
                             out strError);
                         if (nRet == -1)

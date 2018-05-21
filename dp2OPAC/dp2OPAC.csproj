@@ -48,11 +48,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.8.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DocumentFormat.OpenXml.2.8.1\lib\net40\DocumentFormat.OpenXml.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
@@ -125,8 +120,6 @@
     <Content Include="bin\AForge.Vision.dll" />
     <Content Include="bin\AForge.Vision.xml" />
     <Content Include="bin\AForge.xml" />
-    <Content Include="bin\ClosedXML.dll" />
-    <Content Include="bin\ClosedXML.xml" />
     <Content Include="bin\DiffPlex.dll" />
     <Content Include="bin\DiffPlex.pdb" />
     <Content Include="bin\DigitalPlatform.CirculationClient.dll" />
@@ -169,7 +162,6 @@
     <Content Include="bin\DigitalPlatform.Text.pdb" />
     <Content Include="bin\DigitalPlatform.Xml.dll" />
     <Content Include="bin\DigitalPlatform.Xml.pdb" />
-    <Content Include="bin\DocumentFormat.OpenXml.dll" />
     <Content Include="bin\en-US\DigitalPlatform.OPAC.Server.resources.dll" />
     <Content Include="bin\en-US\DigitalPlatform.OPAC.Web.resources.dll" />
     <Content Include="bin\Jurassic.dll" />

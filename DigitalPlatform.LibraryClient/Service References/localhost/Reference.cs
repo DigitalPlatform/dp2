@@ -1974,6 +1974,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string DenyPeriodField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ItemBarcodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string LatestReturnTimeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2024,6 +2027,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.DenyPeriodField, value) != true)) {
                     this.DenyPeriodField = value;
                     this.RaisePropertyChanged("DenyPeriod");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ItemBarcode {
+            get {
+                return this.ItemBarcodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ItemBarcodeField, value) != true)) {
+                    this.ItemBarcodeField = value;
+                    this.RaisePropertyChanged("ItemBarcode");
                 }
             }
         }
@@ -2084,6 +2100,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string BorrowTimeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ItemBarcodeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string LatestReturnTimeField;
@@ -2161,6 +2180,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.BorrowTimeField, value) != true)) {
                     this.BorrowTimeField = value;
                     this.RaisePropertyChanged("BorrowTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ItemBarcode {
+            get {
+                return this.ItemBarcodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ItemBarcodeField, value) != true)) {
+                    this.ItemBarcodeField = value;
+                    this.RaisePropertyChanged("ItemBarcode");
                 }
             }
         }

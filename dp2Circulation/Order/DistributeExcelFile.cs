@@ -203,6 +203,7 @@ ref List<int> column_max_chars)
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
+                    StringUtil.MakePathList(ColumnProperty.GetTypeList(biblio_col_list)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -351,6 +352,7 @@ GetOrderRecord procGetOrderRecord,
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
+                    StringUtil.MakePathList(ColumnProperty.GetTypeList(biblio_col_list)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -444,6 +446,7 @@ XLColor.NoColor);
                     cell.Style.Font.Bold = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Protection.SetLocked(false);
                     cells.Add(cell);
 
                     i++;
@@ -892,32 +895,61 @@ int MAX_CHARS = 50)
 
             // Columns缺省值
             Columns.Clear();
-
-            Column column = new Column();
-            column.Name = "biblio_recpath -- 书目记录路径";
-            column.Caption = "书目记录路径";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "biblio_title -- 题名";
-            column.Caption = "题名";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "biblio_author -- 责任者";
-            column.Caption = "责任者";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-
-            column = new Column();
-            column.Name = "biblio_publication_area -- 出版者";
-            column.Caption = "出版者";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
+            this.Columns.AddRange(GetAllColumns(true));
         }
+
+        static string GetRightPart(string strText)
+        {
+            int nRet = strText.IndexOf("--");
+            if (nRet == -1)
+                return "";
+
+            return strText.Substring(nRet + 2).Trim();
+        }
+
+        public override List<Column> GetAllColumns(bool bDefault)
+        {
+            List<Column> results = new List<Column>();
+
+            string[] lines = new string[] {
+            "biblio_recpath -- 书目记录路径",
+            "biblio_title -- 题名",
+            "biblio_titlepinyin -- 题名拼音",
+            "biblio_author -- 责任者",
+            "biblio_title_area -- 题名与责任者",
+            "biblio_edition_area -- 版本项",
+            "biblio_material_specific_area -- 资料特殊细节项",
+            "biblio_publication_area -- 出版发行项",
+            "biblio_material_description_area -- 载体形态项",
+            "biblio_material_series_area -- 丛编项",
+            "biblio_notes_area -- 附注项",
+            "biblio_resource_identifier_area -- 获得方式项",
+            "biblio_isbn -- ISBN",
+            "biblio_issn -- ISSN",
+            "biblio_price -- 价格",
+            "biblio_publisher -- 出版者",
+            "biblio_publishtime -- 出版时间",
+            "biblio_pages -- 页数",
+            "biblio_summary -- 提要文摘",
+            "biblio_subjects -- 主题分析",
+            "biblio_classes -- 分类号",
+            "biblio_clc_class -- 中图法分类号",
+            "biblio_ktf_class -- 科图法分类号",
+            "biblio_rdf_class -- 人大法分类号",
+        };
+
+            foreach (string line in lines)
+            {
+                Column column = new Column();
+                column.Name = line;
+                column.Caption = GetRightPart(line);
+                column.MaxChars = -1;
+                results.Add(column);
+            }
+
+            return results;
+        }
+
     }
 
     internal class OrderColumnOption : PrintOption

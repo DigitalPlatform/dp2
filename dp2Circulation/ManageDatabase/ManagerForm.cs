@@ -2,15 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -685,7 +681,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -856,7 +852,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -972,7 +968,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1024,7 +1020,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1080,7 +1076,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1132,7 +1128,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1186,7 +1182,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1311,7 +1307,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1587,7 +1583,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1736,7 +1732,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2177,7 +2173,7 @@ out strError);
 
             login_dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        REDO_LOGIN:
+            REDO_LOGIN:
             login_dlg.ShowDialog(this);
 
             if (login_dlg.DialogResult != DialogResult.OK)
@@ -2258,7 +2254,7 @@ out strError);
 
                     strDbPath = uri.Scheme + Uri.SchemeDelimiter + library_uri.Host
                         + (uri.IsDefaultPort == true ? "" : ":" + uri.Port.ToString())  // 2012/3/30 增加冒号
-                        // + uri.PathAndQuery 本来可以这样用的，但是汉字的数据库名被escape了
+                                                                                        // + uri.PathAndQuery 本来可以这样用的，但是汉字的数据库名被escape了
                         + uri.LocalPath
                         + strQuery;
                 }
@@ -2472,7 +2468,7 @@ out strError);
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2548,7 +2544,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2766,7 +2762,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2806,7 +2802,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2856,7 +2852,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2974,7 +2970,7 @@ out strError);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3238,7 +3234,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3456,7 +3452,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3578,7 +3574,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3691,7 +3687,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -3767,7 +3763,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3918,7 +3914,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3958,7 +3954,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4022,7 +4018,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -4145,7 +4141,7 @@ out strError);
                 goto ERROR1;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4290,7 +4286,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4469,7 +4465,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4528,7 +4524,7 @@ out strError);
                 goto ERROR1;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5136,7 +5132,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5176,7 +5172,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5381,7 +5377,7 @@ out strError);
             dlg.ItemBarcodeNullable = true;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5434,7 +5430,7 @@ out strError);
             dlg.ItemBarcodeNullable = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE) == "是") ? true : false;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -5460,7 +5456,7 @@ out strError);
             ListViewUtil.SelectLine(item, true);
             this.LocationTypesDefChanged = true;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5532,7 +5528,7 @@ out strError);
 
             this.LocationTypesDefChanged = true;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5770,7 +5766,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5876,7 +5872,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5923,7 +5919,7 @@ out strError);
             }
 
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5989,7 +5985,7 @@ out strError);
 
             this.ValueTableChanged = false;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -6104,7 +6100,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6147,7 +6143,7 @@ out strError);
                 EnableControls(true);
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6219,7 +6215,7 @@ out strError);
             this.ScriptChanged = false;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6292,7 +6288,7 @@ out strError);
             this.textBox_script.DisableEmSetSelMsg = true;
             OnScriptTextCaretChanged();
             return;
-        ERROR1:
+            ERROR1:
             // 发出警告性的响声
             Console.Beep();
         }
@@ -6595,7 +6591,7 @@ out strError);
 
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6794,7 +6790,7 @@ out strError);
             this.ZhongcihaoChanged = true;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6860,7 +6856,7 @@ out strError);
             this.ZhongcihaoChanged = true;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7176,7 +7172,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7242,7 +7238,7 @@ out strError);
             treeView_zhongcihao_AfterSelect(this, null);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7414,7 +7410,7 @@ out strError);
             dlg.AllZhongcihaoDatabaseInfoXml = GetAllZhongcihaoDbInfoXml();
             dlg.ExcludingDbNames = used_dbnames;
             dlg.StartPosition = FormStartPosition.CenterScreen;
-        REDO_INPUT:
+            REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -7488,7 +7484,7 @@ out strError);
 
             this.ArrangementChanged = true;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7590,7 +7586,7 @@ out strError);
             treeView_arrangement_AfterSelect(this, null);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7678,7 +7674,7 @@ out strError);
             this.ArrangementChanged = true;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7755,7 +7751,7 @@ out strError);
                 dlg.AllZhongcihaoDatabaseInfoXml = GetAllZhongcihaoDbInfoXml();
                 dlg.ExcludingDbNames = used_dbnames;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
-            REDO_INPUT:
+                REDO_INPUT:
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -7859,7 +7855,7 @@ out strError);
                 this.ArrangementChanged = true;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8140,7 +8136,7 @@ out strError);
             FillDefaultList(this.m_dup_dom); // 库名的集合可能发生改变
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8199,7 +8195,7 @@ out strError);
 
             this.DupChanged = true;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8544,7 +8540,7 @@ out strError);
             this.LoanPolicyDefChanged = false;
             Program.MainForm.ClearValueTableCache();   // 因为 <rightsTable> 里面的 <readerTypes> 和 <bookTypes> 元素可能发生变化，影响着值列表缓存
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8729,7 +8725,7 @@ out strError);
             // 一般编辑的时候，不可能修改日历名，所以 m_nCalendarVersion++; 就不用了
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8751,7 +8747,7 @@ out strError);
             dlg.Comment = "";
             dlg.Content = "";
 
-        REDO:
+            REDO:
             Program.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -8838,7 +8834,7 @@ out strError);
 
             m_nCalendarVersion++;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8850,7 +8846,7 @@ out strError);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8865,7 +8861,7 @@ out strError);
                     goto ERROR1;
 
                 return;
-            ERROR1:
+                ERROR1:
                 MessageBox.Show(this, strError);
             }
             finally
@@ -8992,5 +8988,5 @@ out strError);
 
     }
 
-        #endregion // 查重
+    #endregion // 查重
 }

@@ -2834,6 +2834,67 @@ out strError);
             return StringUtil.FromListString(strSellerFilter)[0];
         }
 
+        static string MacroXml(string strXml,
+            string strMARC,
+            string strMarcSyntax)
+        {
+            if (string.IsNullOrEmpty(strXml))
+                return strXml;
+
+            XmlDocument order_dom = new XmlDocument();
+            order_dom.LoadXml(strXml);
+
+            if (order_dom.DocumentElement == null)
+                return strXml;
+
+            XmlNodeList elements = order_dom.DocumentElement.SelectNodes("*");
+            foreach (XmlElement element in elements)
+            {
+                string strValue = element.InnerText.Trim();
+                if (strValue.StartsWith("@"))
+                {
+                    // 兑现宏
+                    string strResult = DoGetMacroValue(strValue, strMARC, strMarcSyntax);
+                    if (strResult != strValue)
+                        element.InnerText = strResult;
+                }
+            }
+
+            return order_dom.DocumentElement.OuterXml;
+        }
+
+        static string DoGetMacroValue(string strMacroName,
+            string strMARC,
+            string strMarcSyntax)
+        {
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return strMacroName;
+
+            if (string.IsNullOrEmpty(strMARC) == false)
+            {
+                MarcRecord record = new MarcRecord(strMARC);
+
+                string strValue = null;
+                // UNIMARC 情形
+                if (strMarcSyntax == "unimarc")
+                {
+                    if (strMacroName == "@price")
+                        strValue = record.select("field[@name='010']/subfield[@name='d'] | field[@name='011']/subfield[@name='d']").FirstContent;
+                }
+                else if (strMarcSyntax == "usmarc")
+                {
+                    if (strMacroName == "@price")
+                        strValue = record.select("field[@name='020']/subfield[@name='c'] | field[@name='022']/subfield[@name='c']").FirstContent;
+                }
+
+                if (string.IsNullOrEmpty(strValue) == false)
+                    return strValue;
+            }
+
+            return strMacroName;
+        }
+
+
         // 导出订购去向分配表 Excel 文件
         void menu_exportDistributeExcelFile_Click(object sender, EventArgs e)
         {
@@ -2887,7 +2948,8 @@ out strError);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = doc.Worksheets.Add("表格");
+            IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
+            // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
 
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
@@ -2961,7 +3023,7 @@ ref column_max_chars);
                 string strDefaultOrderXml = "";
 
                 nRet = ProcessBiblio(
-                        (strBiblioRecPath, dom, timestamp) =>
+                        (strBiblioRecPath, biblio_dom, biblio_timestamp) =>
                         {
                             this.ShowMessage("正在处理书目记录 " + strBiblioRecPath);
 
@@ -3001,6 +3063,9 @@ ref column_max_chars);
                                         edit.ShowDialog(this);
 
                                         strDefaultOrderXml = OrderEditForm.GetXml(edit.OrderEditControl);
+                                        // 删除那些空内容的元素
+                                        strDefaultOrderXml = DomUtil.RemoveEmptyElements(strDefaultOrderXml);
+
                                         Program.MainForm.AppInfo.SetString("BiblioSearchForm", "orderRecord", strDefaultOrderXml);
 
                                         if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -3011,6 +3076,7 @@ ref column_max_chars);
 
                                         XmlDocument order_dom = new XmlDocument();
                                         order_dom.LoadXml(strDefaultOrderXml);
+
                                         string strDistribute = DomUtil.GetElementInnerText(order_dom.DocumentElement, "distribute");
 
                                         // 观察一个馆藏分配字符串，看看是否在指定用户权限的管辖范围内
@@ -3032,9 +3098,34 @@ ref column_max_chars);
 
                                         // TODO: 验证一下书商名称是否在合法值范围内?
                                     }
+
+                                    // 兑现模板记录中的宏
+                                    string strResultXml = strDefaultOrderXml;
+                                    if (strDefaultOrderXml.IndexOf("@") != -1)
+                                    {
+                                        // 将XML格式转换为MARC格式
+                                        // 自动从数据记录中获得MARC语法
+                                        nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
+                                            true,
+                                            null,
+                                            out string strMarcSyntax,
+                                            out string strMARC,
+                                            out strError);
+                                        if (nRet == -1)
+                                        {
+                                            strError = "XML转换到MARC记录时出错: " + strError;
+                                            throw new Exception(strError);
+                                        }
+
+                                        // 兑现模板 XML 中的宏
+                                        strResultXml = MacroXml(strDefaultOrderXml,
+        strMARC,
+        strMarcSyntax);
+                                    }
+
                                     EntityInfo order = new EntityInfo
                                     {
-                                        OldRecord = strDefaultOrderXml
+                                        OldRecord = strResultXml
                                     };
 
                                     // 实际写入订购记录
@@ -3256,6 +3347,7 @@ ref column_max_chars);
             //      1   找到
             int nRet = GetTable(
                 strRecPath,
+                "",
                 out strTableXml,
                 out strError);
             if (nRet == -1)
@@ -10431,7 +10523,7 @@ MessageBoxDefaultButton.Button1);
             return this.listView_records.SelectedItems[0];
         }
 
-#region 停靠
+        #region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -10500,7 +10592,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-#endregion
+        #endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
