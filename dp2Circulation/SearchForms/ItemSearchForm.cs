@@ -6169,7 +6169,8 @@ out strError);
             }
 
             IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("表格");
+            sheet = doc.Worksheets.Add("订购去向分配表");
+            // sheet.Protect();
 
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
@@ -6325,6 +6326,7 @@ ref column_max_chars);
                         //      1   找到
                         nRet = this.GetTable(
                             strBiblioRecPath,
+                            StringUtil.MakePathList(Order.ColumnProperty.GetTypeList(biblio_title_list)),
                             out strTableXml,
                             out string strError1);
                         if (nRet == -1)

@@ -33,6 +33,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -942,7 +943,7 @@ true);
             this.SetMarc(strMARC);
             this.SetMarcChanged(true);
             return;
-        ERROR1:
+            ERROR1:
             e.ErrorInfo = strError;
             if (e.ShowErrorBox == true)
                 MessageBox.Show(this, strError);
@@ -1743,7 +1744,7 @@ true);
                 goto CREATE_ENTITY;
             }
 
-        CREATE_ENTITY:
+            CREATE_ENTITY:
 
             Debug.Assert(form != null, "");
 
@@ -4078,7 +4079,7 @@ true);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4313,7 +4314,7 @@ true);
                 return e1.Value;
             }
 
-        CONTINUE:
+            CONTINUE:
             // 书目记录XML格式
             string strXmlBody = "";
 
@@ -5181,7 +5182,7 @@ true);
                 if (_willCloseBrowseWindow == true)
                     CloseBrowseWindow();
 
-            END1:
+                END1:
                 this.textBox_queryWord.SelectAll();
 
                 // 焦点切换到条码textbox
@@ -5199,7 +5200,7 @@ true);
                 this._processing--;
             }
 
-        ERROR1:
+            ERROR1:
             CloseBrowseWindow();
             MessageBox.Show(this, strError);
             // 焦点仍回到种检索词
@@ -5429,7 +5430,7 @@ out strError);
             }
             return;
 #endif
-        ERROR1:
+            ERROR1:
             // 加入一个文本行
             AddErrorLine(strError);
         }
@@ -5868,7 +5869,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
                         return;
                     }
-                // break;
+                    // break;
 
             }
             base.DefWndProc(ref m);
@@ -6881,7 +6882,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             bool bForceAsk = false; // 2017/10/27
 
-        REDO_SELECTDBNAME:
+            REDO_SELECTDBNAME:
             dbname_dlg.Text = "装载书目模板 -- 请选择目标编目库名";
             //  dbname_dlg.StartPosition = FormStartPosition.CenterScreen;
 
@@ -7038,7 +7039,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 Program.MainForm.StatusBarMessage = "自动从书目库 " + strBiblioDbName + " 中装入名为 " + select_temp_dlg.SelectedName + " 的新书目记录模板。如要重新出现装载对话框，请按住Shift键再点“装载书目模板”按钮...";
             }
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -7583,7 +7584,7 @@ MessageBoxDefaultButton.Button2);
                 channel.Timeout = TimeSpan.FromMinutes(2);
             }
 
-        REDO_SAVE:
+            REDO_SAVE:
             try
             {
                 bool bPartialDenied = false;
@@ -7833,7 +7834,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -8078,7 +8079,7 @@ MessageBoxDefaultButton.Button2);
             this.SetSaveAllButtonState(true);
             this.ShowMessage(strMessage, "green", true);
             return;
-        ERROR1:
+            ERROR1:
             // MessageBox.Show(this, strError);
             this.ShowMessage(strError, "red", true);
         }
@@ -8200,7 +8201,7 @@ MessageBoxDefaultButton.Button2);
             Program.MainForm.StatusBarMessage = "修改模板成功。";
             return;
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8253,7 +8254,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8276,7 +8277,7 @@ MessageBoxDefaultButton.Button2);
             {
                 string strAction = "checkUnique";
 
-            REDO:
+                REDO:
                 byte[] baNewTimestamp = null;
                 long lRet = channel.SetBiblioInfo(
                     Progress,
@@ -8341,7 +8342,7 @@ MessageBoxDefaultButton.Button2);
                     )
                     strAction = "new";
 
-            REDO:
+                REDO:
                 long lRet = channel.SetBiblioInfo(
                     Progress,
                     strAction,
@@ -8396,7 +8397,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8599,7 +8600,7 @@ MessageBoxDefaultButton.Button1);
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog();   // ?? this
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9011,7 +9012,7 @@ MessageBoxDefaultButton.Button1);
             {
                 this._processing--;
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.ResultString = strError;
@@ -9047,22 +9048,22 @@ MessageBoxDefaultButton.Button1);
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.script.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\dp2circulation.exe"
-								};
+                                };
 
             if (saAddRef != null)
             {
@@ -9181,23 +9182,23 @@ MessageBoxDefaultButton.Button1);
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.script.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\dp2circulation.exe"
-								};
+                                };
 
             Assembly assembly = null;
             string strWarning = "";
@@ -9232,7 +9233,7 @@ MessageBoxDefaultButton.Button1);
             filter.Assembly = assembly;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -9331,27 +9332,27 @@ MessageBoxDefaultButton.Button1);
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.xmleditor.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.script.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
-								};
+                                };
 
             if (saAddRef != null)
             {
@@ -9588,7 +9589,7 @@ MessageBoxDefaultButton.Button1);
 
             MessageBox.Show(form, "保存记录时经自动查重，发现重复记录");
             return 1;
-        ERROR1:
+            ERROR1:
             this.Activate();
             MessageBox.Show(this, strError);
             return -1;
@@ -10051,7 +10052,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10162,7 +10163,7 @@ MessageBoxDefaultButton.Button1);
                 this.ReturnChannel(channel);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -10610,7 +10611,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 #if NO
             string strError = "";
@@ -10743,7 +10744,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             string strTargetBiblioRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
 
-        REDO:
+            REDO:
             strTargetBiblioRecPath = InputDlg.GetInput(
             this,
             "请指定目标记录路径",
@@ -10904,7 +10905,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-        SET:
+            SET:
 
             if (String.IsNullOrEmpty(strTargetBiblioRecPath) == false)
                 this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", strTargetBiblioRecPath);
@@ -10922,7 +10923,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11095,7 +11096,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -11120,7 +11121,7 @@ MessageBoxDefaultButton.Button1);
                 "",
                 true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11348,7 +11349,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11468,7 +11469,7 @@ MessageBoxDefaultButton.Button1);
 
             SetSaveAllButtonState(true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11541,7 +11542,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -11838,7 +11839,7 @@ Keys keyData)
 
             this.m_marcEditor.SelectCurEdit(subfield.Offset + 2, 0);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12172,7 +12173,7 @@ value);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12273,8 +12274,8 @@ value);
                     //|| this.IssuesChanged == true
                     //|| this.BiblioChanged == true
         this.ObjectChanged == true
-                    //|| this.OrdersChanged == true
-                    //|| this.CommentsChanged == true
+                //|| this.OrdersChanged == true
+                //|| this.CommentsChanged == true
                 )
                 {
                     // 警告尚未保存
@@ -12682,7 +12683,7 @@ merge_dlg.UiState);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             // MessageBox.Show(this, strError);
             return -1;
         }
@@ -12757,7 +12758,7 @@ merge_dlg.UiState);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -12789,7 +12790,7 @@ merge_dlg.UiState);
 
             form.Show();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
         string GetHeadString(bool bAjax = true)
@@ -12938,7 +12939,7 @@ strMARC);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, "DoViewComment() 出错: " + strError);
         }
 
@@ -13174,7 +13175,7 @@ strMARC);
 
             strID = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_ID);
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -13285,7 +13286,7 @@ strMARC);
                             this.binaryResControl1,
                             type.Image,
                             strType,    // "coverimage",
-                            // out strShrinkComment,
+                                        // out strShrinkComment,
                             out strID,
                             out strError);
                         if (nRet == -1)
@@ -13334,7 +13335,7 @@ strMARC);
                 // + strShrinkComment
                 + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -13430,7 +13431,7 @@ strMARC);
                     this.binaryResControl1,
                     type.Image,
                     strType,    // "coverimage",
-                    // out strShrinkComment,
+                                // out strShrinkComment,
                     out strID,
                     out strError);
                 if (nRet == -1)
@@ -13470,7 +13471,7 @@ strMARC);
                 // + strShrinkComment
                 + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -13559,7 +13560,7 @@ strMARC);
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -13619,6 +13620,7 @@ strMARC);
             }
 
             string strBiblioSummary = "";
+            string strBiblioTable = "";
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
@@ -13630,8 +13632,7 @@ strMARC);
 
             try
             {
-                string[] formats = new string[1];
-                formats[0] = "summary";
+                List<string> formats = new List<string> { "summary", "table" };
                 string[] results = null;
                 byte[] timestamp = null;
 
@@ -13639,7 +13640,7 @@ strMARC);
                     stop,
                     this.BiblioRecPath,
                     "",
-                    formats,
+                    formats.ToArray(),
                     out results,
                     out timestamp,
                     out strError);
@@ -13652,10 +13653,10 @@ strMARC);
                 }
                 else
                 {
-                    Debug.Assert(results != null && results.Length == 1, "results必须包含 1 个元素");
+                    Debug.Assert(results != null && results.Length == formats.Count, "results必须包含 " + formats.Count + " 个元素");
                     strBiblioSummary = results[0];
+                    strBiblioTable = results[1];
                 }
-
             }
             finally
             {
@@ -13669,15 +13670,19 @@ strMARC);
                 this.ReturnChannel(channel);
             }
 
+            strBiblioTable = DomUtil.GetIndentXml(strBiblioTable);
 
             HtmlViewerForm dlg = new HtmlViewerForm();
 
             dlg.Text = "书目记录摘要";
-            dlg.HtmlString = strBiblioSummary;
+            dlg.HtmlString = "<html><body>" +
+                "<div>" + HttpUtility.HtmlEncode(strBiblioSummary) + "</div>" +
+                "<div>" + HttpUtility.HtmlEncode(strBiblioTable).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
+                + "</body></html>";
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

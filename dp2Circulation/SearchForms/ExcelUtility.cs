@@ -221,6 +221,14 @@ namespace dp2Circulation
 
                     if (col == "copy")
                         cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                    if (col == "recpath" || col.EndsWith("_recpath"))
+                    {
+
+                    }
+                    else
+                        cell.Style.Protection.SetLocked(false);
+
                 }
 
                 i++;

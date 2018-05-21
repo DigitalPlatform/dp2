@@ -422,14 +422,13 @@ namespace DigitalPlatform.Library
                     strError = "命中 " + Convert.ToString(lRet) + " 条。";
                 }
 
-                List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "default",
                     0,
                     1,
                     "zh",
                     this.stop,
-                    out aPath,
+                    out List<string> aPath,
                     out strError);
                 if (lRet == -1)
                 {
@@ -463,7 +462,7 @@ namespace DigitalPlatform.Library
             out List<string> aPath,
             out string strError)
         {
-            aPath = null;
+            aPath = new List<string>();
             strError = "";
 
             if (String.IsNullOrEmpty(strServerUrl) == true)
@@ -921,7 +920,7 @@ namespace DigitalPlatform.Library
             {
                 string strOutputPath = "";
 
-            REDO:
+                REDO:
 
                 long lRet = channel.DoSaveTextRes(strPath,
                     strXml,
@@ -996,8 +995,8 @@ namespace DigitalPlatform.Library
                 long lRet = channel.DoGetKeys(
                     strPath,
                     strXml,
-                    "zh",	// strLang
-                    // "",	// strStyle
+                    "zh",   // strLang
+                            // "",	// strStyle
                     null,	// this.stop,
                     out aLine,
                     out strError);
@@ -1215,7 +1214,7 @@ namespace DigitalPlatform.Library
                     if (bGetBrowseCols == false)
                     {
                         lRet = channel.DoGetSearchResult(
-                    "default",
+                            "default",
                             nStart,
                             nCount,
                             "zh",

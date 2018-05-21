@@ -11,6 +11,9 @@ namespace DigitalPlatform.LibraryServer
         public LibraryApplication App = null;
         public string RecPath = "";
         public string ResultString = "";
+
+        // 2018/5/14
+        public string Style = "";
     }
 
     public class LoanFilterDocument : FilterDocument

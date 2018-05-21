@@ -223,12 +223,15 @@ namespace dp2Circulation.Order
             dlg.Text = "书目信息列";
             dlg.PrintOption = option;
             dlg.DataDir = Program.MainForm.UserDir;
+            dlg.ColumnItems = option.GetAllColumnItems();
+#if NO
             dlg.ColumnItems = new string[] {
                 "biblio_recpath -- 书目记录路径",
                 "biblio_title -- 题名",
                 "biblio_author -- 责任者",
                 "biblio_publication_area -- 出版者",
             };
+#endif
 
 
             dlg.UiState = Program.MainForm.AppInfo.GetString(
