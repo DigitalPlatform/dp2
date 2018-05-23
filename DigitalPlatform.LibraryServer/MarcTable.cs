@@ -109,6 +109,16 @@ namespace DigitalPlatform.LibraryServer
                         "author"));
             }
 
+            // 责任者检索点
+            if (StringUtil.IsInList("author_accesspoint", strStyle))
+            {
+                MarcNodeList fields = record.select("field[@name='701' or @name='702' or @name='711' or @name='712' or @name='700']");
+                if (fields.count > 0)
+                    results.Add(new NameValueLine("责任者检索点",
+                        BuildUnimarcFields(fields),
+                        "author_accesspoint"));
+            }
+
             // 2: Edition area
             // 205 字段
             if (StringUtil.IsInList("areas,edition_area", strStyle))
@@ -183,7 +193,7 @@ namespace DigitalPlatform.LibraryServer
             // 225 字段
             if (StringUtil.IsInList("areas,series_area", strStyle))
             {
-                MarcNodeList fields = record.select("field[@name='215']");
+                MarcNodeList fields = record.select("field[@name='225']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("丛编项", BuildUnimarcFields(fields), "series_area"));
             }
@@ -324,11 +334,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 相关题名
-            if (StringUtil.IsInList("rel_title", strStyle))
+            if (StringUtil.IsInList("other_titles", strStyle))
             {
-                MarcNodeList fields = record.select("field[@name='500' or @name='692' or @name='694']");
+                MarcNodeList fields = record.select("field[@name='500' or @name='501' or @name='503'  or @name='512' or @name='513' or @name='514' or @name='515' or @name='516' or @name='520' or @name='530' or @name='531' or @name='532' or @name='540' or @name='541']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("相关题名", BuildUnimarcFields(fields), "rel_title"));
+                    results.Add(new NameValueLine("相关题名", BuildUnimarcFields(fields), "other_titles"));
             }
 
             // 数字资源
@@ -490,6 +500,7 @@ namespace DigitalPlatform.LibraryServer
                         return new PrePostfix(" [", "] ");
                     case "c":
                     case "d":
+                    case "e":
                     case "f":
                     case "g":
                     case "h":
@@ -757,7 +768,7 @@ namespace DigitalPlatform.LibraryServer
                 switch (subfield.Name)
                 {
                     case "a":
-                        return new PrePostfix(strTypeName + ": ");
+                        return new PrePostfix(strTypeName + " ");
                     case "b":
                         return new PrePostfix(" (", ")");
                     case "d":
@@ -813,6 +824,74 @@ namespace DigitalPlatform.LibraryServer
                 {
                     case "a":
                         return new PrePostfix(strTypeName + ": ");
+                }
+            }
+
+            return null;
+        }
+
+        static string[] unimarc_7xx_relations = new string[] {
+            "b|, ",
+            "d|: ",
+            "e|: ",
+                "f|: ",
+            };
+
+
+        static PrePostfix GetUnimarc_7xx_PrePostfix(MarcSubfield subfield)
+        {
+            MarcField field = subfield.Parent as MarcField;
+            string strTypeName = "";
+            if (field.Name == "700")
+                strTypeName = "个人名称(主要责任)";
+            if (field.Name == "701")
+                strTypeName = "个人名称(等同责任)";
+            if (field.Name == "702")
+                strTypeName = "个人名称(次要责任)";
+            if (field.Name == "710")
+                strTypeName = "团体名称(主要责任)";
+            if (field.Name == "711")
+                strTypeName = "团体名称(等同责任)";
+            if (field.Name == "712")
+                strTypeName = "团体名称(次要责任)";
+            if (field.Name == "720")
+                strTypeName = "家族名称(主要责任)";
+            if (field.Name == "721")
+                strTypeName = "家族名称(等同责任)";
+            if (field.Name == "722")
+                strTypeName = "家族名称(次要责任)";
+
+            if (field.Name == "716")
+                strTypeName = "商标";
+            if (field.Name == "730")
+                strTypeName = "名称(责任实体)";
+
+            if (field.Name == "740")
+                strTypeName = "法律和宗教文本统一惯用标目(主要责任)";
+            if (field.Name == "741")
+                strTypeName = "法律和宗教文本统一惯用标目(等同责任)";
+            if (field.Name == "742")
+                strTypeName = "法律和宗教文本统一惯用标目(次要责任)";
+
+            if (string.IsNullOrEmpty(strTypeName) == false)
+            {
+                switch (subfield.Name)
+                {
+                    case "a":
+                        return new PrePostfix(strTypeName + ": ");
+                    case "b":
+                    case "c":
+                    case "d":
+                    case "e":
+                    case "f":
+                    case "g":
+                    case "h":
+                    case "i":
+                    case "l":
+                    case "n":
+                    case "p":
+                    case "t":
+                        return new PrePostfix(GetPrefix(unimarc_7xx_relations, subfield.Name));
                 }
             }
 

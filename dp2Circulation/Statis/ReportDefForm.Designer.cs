@@ -43,6 +43,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.listView_columns = new System.Windows.Forms.ListView();
             this.columnHeader_title = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_dataType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_align = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_sum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_css = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -54,7 +55,6 @@
             this.checkedComboBox_property_createFreq = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox_property_fresh = new System.Windows.Forms.CheckBox();
-            this.columnHeader_dataType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main.SuspendLayout();
             this.tabPage_title.SuspendLayout();
             this.tabPage_columns.SuspendLayout();
@@ -66,9 +66,10 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(340, 262);
+            this.button_Cancel.Location = new System.Drawing.Point(510, 393);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
+            this.button_Cancel.Size = new System.Drawing.Size(112, 34);
             this.button_Cancel.TabIndex = 4;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -77,9 +78,10 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(259, 262);
+            this.button_OK.Location = new System.Drawing.Point(388, 393);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 23);
+            this.button_OK.Size = new System.Drawing.Size(112, 34);
             this.button_OK.TabIndex = 3;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -94,10 +96,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_columns);
             this.tabControl_main.Controls.Add(this.tabPage_css);
             this.tabControl_main.Controls.Add(this.tabPage_property);
-            this.tabControl_main.Location = new System.Drawing.Point(13, 13);
+            this.tabControl_main.Location = new System.Drawing.Point(20, 20);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(402, 243);
+            this.tabControl_main.Size = new System.Drawing.Size(603, 364);
             this.tabControl_main.TabIndex = 5;
             // 
             // tabPage_title
@@ -109,10 +112,11 @@
             this.tabPage_title.Controls.Add(this.label2);
             this.tabPage_title.Controls.Add(this.textBox_title_title);
             this.tabPage_title.Controls.Add(this.label1);
-            this.tabPage_title.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_title.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_title.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_title.Name = "tabPage_title";
-            this.tabPage_title.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_title.Size = new System.Drawing.Size(394, 217);
+            this.tabPage_title.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_title.Size = new System.Drawing.Size(595, 332);
             this.tabPage_title.TabIndex = 0;
             this.tabPage_title.Text = "标题";
             this.tabPage_title.UseVisualStyleBackColor = true;
@@ -121,17 +125,19 @@
             // 
             this.textBox_title_typeName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_title_typeName.Location = new System.Drawing.Point(71, 6);
+            this.textBox_title_typeName.Location = new System.Drawing.Point(106, 9);
+            this.textBox_title_typeName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_title_typeName.Name = "textBox_title_typeName";
-            this.textBox_title_typeName.Size = new System.Drawing.Size(317, 21);
+            this.textBox_title_typeName.Size = new System.Drawing.Size(474, 28);
             this.textBox_title_typeName.TabIndex = 6;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 9);
+            this.label5.Location = new System.Drawing.Point(10, 14);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(53, 12);
+            this.label5.Size = new System.Drawing.Size(80, 18);
             this.label5.TabIndex = 5;
             this.label5.Text = "类型(&T):";
             // 
@@ -141,19 +147,21 @@
             this.textBox_title_comment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_title_comment.HideSelection = false;
-            this.textBox_title_comment.Location = new System.Drawing.Point(9, 145);
+            this.textBox_title_comment.Location = new System.Drawing.Point(14, 218);
+            this.textBox_title_comment.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_title_comment.Multiline = true;
             this.textBox_title_comment.Name = "textBox_title_comment";
             this.textBox_title_comment.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_title_comment.Size = new System.Drawing.Size(379, 62);
+            this.textBox_title_comment.Size = new System.Drawing.Size(566, 91);
             this.textBox_title_comment.TabIndex = 4;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 130);
+            this.label2.Location = new System.Drawing.Point(10, 195);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.Size = new System.Drawing.Size(80, 18);
             this.label2.TabIndex = 3;
             this.label2.Text = "注释(&C):";
             // 
@@ -163,19 +171,21 @@
             this.textBox_title_title.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_title_title.HideSelection = false;
-            this.textBox_title_title.Location = new System.Drawing.Point(9, 57);
+            this.textBox_title_title.Location = new System.Drawing.Point(14, 86);
+            this.textBox_title_title.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_title_title.Multiline = true;
             this.textBox_title_title.Name = "textBox_title_title";
             this.textBox_title_title.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_title_title.Size = new System.Drawing.Size(379, 62);
+            this.textBox_title_title.Size = new System.Drawing.Size(566, 91);
             this.textBox_title_title.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 42);
+            this.label1.Location = new System.Drawing.Point(10, 63);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 12);
+            this.label1.Size = new System.Drawing.Size(116, 18);
             this.label1.TabIndex = 0;
             this.label1.Text = "标题文字(&T):";
             // 
@@ -184,10 +194,11 @@
             this.tabPage_columns.Controls.Add(this.textBox_columns_sortStyle);
             this.tabPage_columns.Controls.Add(this.label4);
             this.tabPage_columns.Controls.Add(this.listView_columns);
-            this.tabPage_columns.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_columns.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_columns.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_columns.Name = "tabPage_columns";
-            this.tabPage_columns.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_columns.Size = new System.Drawing.Size(394, 217);
+            this.tabPage_columns.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_columns.Size = new System.Drawing.Size(595, 332);
             this.tabPage_columns.TabIndex = 1;
             this.tabPage_columns.Text = "栏目";
             this.tabPage_columns.UseVisualStyleBackColor = true;
@@ -196,17 +207,20 @@
             // 
             this.textBox_columns_sortStyle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_columns_sortStyle.Location = new System.Drawing.Point(87, 190);
+            this.textBox_columns_sortStyle.Location = new System.Drawing.Point(130, 285);
+            this.textBox_columns_sortStyle.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_columns_sortStyle.Name = "textBox_columns_sortStyle";
-            this.textBox_columns_sortStyle.Size = new System.Drawing.Size(301, 21);
+            this.textBox_columns_sortStyle.Size = new System.Drawing.Size(450, 28);
             this.textBox_columns_sortStyle.TabIndex = 2;
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(1, 193);
+            this.label4.Location = new System.Drawing.Point(2, 290);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(77, 12);
+            this.label4.Size = new System.Drawing.Size(116, 18);
             this.label4.TabIndex = 1;
             this.label4.Text = "排序方式(&S):";
             // 
@@ -224,9 +238,10 @@
             this.columnHeader_eval});
             this.listView_columns.FullRowSelect = true;
             this.listView_columns.HideSelection = false;
-            this.listView_columns.Location = new System.Drawing.Point(3, 3);
+            this.listView_columns.Location = new System.Drawing.Point(4, 4);
+            this.listView_columns.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listView_columns.Name = "listView_columns";
-            this.listView_columns.Size = new System.Drawing.Size(388, 181);
+            this.listView_columns.Size = new System.Drawing.Size(580, 270);
             this.listView_columns.TabIndex = 0;
             this.listView_columns.UseCompatibleStateImageBehavior = false;
             this.listView_columns.View = System.Windows.Forms.View.Details;
@@ -237,6 +252,11 @@
             // 
             this.columnHeader_title.Text = "标题";
             this.columnHeader_title.Width = 187;
+            // 
+            // columnHeader_dataType
+            // 
+            this.columnHeader_dataType.Text = "数据类型";
+            this.columnHeader_dataType.Width = 80;
             // 
             // columnHeader_align
             // 
@@ -262,9 +282,10 @@
             // 
             this.tabPage_css.Controls.Add(this.textBox_css_content);
             this.tabPage_css.Controls.Add(this.label3);
-            this.tabPage_css.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_css.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_css.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_css.Name = "tabPage_css";
-            this.tabPage_css.Size = new System.Drawing.Size(394, 217);
+            this.tabPage_css.Size = new System.Drawing.Size(595, 332);
             this.tabPage_css.TabIndex = 2;
             this.tabPage_css.Text = "CSS";
             this.tabPage_css.UseVisualStyleBackColor = true;
@@ -277,20 +298,22 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_css_content.HideSelection = false;
-            this.textBox_css_content.Location = new System.Drawing.Point(3, 25);
+            this.textBox_css_content.Location = new System.Drawing.Point(4, 38);
+            this.textBox_css_content.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_css_content.MaxLength = 0;
             this.textBox_css_content.Multiline = true;
             this.textBox_css_content.Name = "textBox_css_content";
             this.textBox_css_content.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_css_content.Size = new System.Drawing.Size(388, 175);
+            this.textBox_css_content.Size = new System.Drawing.Size(580, 260);
             this.textBox_css_content.TabIndex = 6;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(1, 10);
+            this.label3.Location = new System.Drawing.Point(2, 15);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 12);
+            this.label3.Size = new System.Drawing.Size(116, 18);
             this.label3.TabIndex = 5;
             this.label3.Text = "CSS 内容(&C):";
             // 
@@ -299,9 +322,10 @@
             this.tabPage_property.Controls.Add(this.checkedComboBox_property_createFreq);
             this.tabPage_property.Controls.Add(this.label6);
             this.tabPage_property.Controls.Add(this.checkBox_property_fresh);
-            this.tabPage_property.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_property.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_property.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(394, 217);
+            this.tabPage_property.Size = new System.Drawing.Size(595, 332);
             this.tabPage_property.TabIndex = 3;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -311,48 +335,46 @@
             this.checkedComboBox_property_createFreq.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_property_createFreq.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.checkedComboBox_property_createFreq.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_property_createFreq.Location = new System.Drawing.Point(138, 16);
+            this.checkedComboBox_property_createFreq.Location = new System.Drawing.Point(207, 24);
             this.checkedComboBox_property_createFreq.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_property_createFreq.Name = "checkedComboBox_property_createFreq";
             this.checkedComboBox_property_createFreq.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_property_createFreq.Size = new System.Drawing.Size(179, 24);
+            this.checkedComboBox_property_createFreq.Size = new System.Drawing.Size(268, 31);
             this.checkedComboBox_property_createFreq.TabIndex = 18;
             this.checkedComboBox_property_createFreq.DropDown += new System.EventHandler(this.checkedComboBox_property_createFreq_DropDown);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(9, 21);
+            this.label6.Location = new System.Drawing.Point(14, 32);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(113, 12);
+            this.label6.Size = new System.Drawing.Size(170, 18);
             this.label6.TabIndex = 17;
             this.label6.Text = "推荐的创建频率(&F):";
             // 
             // checkBox_property_fresh
             // 
             this.checkBox_property_fresh.AutoSize = true;
-            this.checkBox_property_fresh.Location = new System.Drawing.Point(11, 70);
+            this.checkBox_property_fresh.Location = new System.Drawing.Point(16, 105);
+            this.checkBox_property_fresh.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_property_fresh.Name = "checkBox_property_fresh";
-            this.checkBox_property_fresh.Size = new System.Drawing.Size(90, 16);
+            this.checkBox_property_fresh.Size = new System.Drawing.Size(133, 22);
             this.checkBox_property_fresh.TabIndex = 0;
             this.checkBox_property_fresh.Text = "时间敏感(&F)";
             this.checkBox_property_fresh.UseVisualStyleBackColor = true;
             // 
-            // columnHeader_dataType
-            // 
-            this.columnHeader_dataType.Text = "数据类型";
-            this.columnHeader_dataType.Width = 80;
-            // 
             // ReportDefForm
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(427, 297);
+            this.ClientSize = new System.Drawing.Size(640, 446);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "ReportDefForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

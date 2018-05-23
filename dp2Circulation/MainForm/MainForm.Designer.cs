@@ -269,7 +269,7 @@
             this.menuStrip_main.MdiWindowListItem = this.MenuItem_window;
             this.menuStrip_main.Name = "menuStrip_main";
             this.menuStrip_main.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
-            this.menuStrip_main.Size = new System.Drawing.Size(894, 34);
+            this.menuStrip_main.Size = new System.Drawing.Size(943, 34);
             this.menuStrip_main.TabIndex = 0;
             this.menuStrip_main.Text = "menuStrip1";
             // 
@@ -1354,7 +1354,7 @@
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.Padding = new System.Windows.Forms.Padding(2, 0, 21, 0);
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.statusStrip_main.Size = new System.Drawing.Size(894, 30);
+            this.statusStrip_main.Size = new System.Drawing.Size(943, 30);
             this.statusStrip_main.TabIndex = 1;
             this.statusStrip_main.Text = "statusStrip1";
             // 
@@ -1368,7 +1368,7 @@
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(719, 25);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(768, 25);
             this.toolStripStatusLabel_main.Spring = true;
             this.toolStripStatusLabel_main.Text = "欢迎使用 dp2Circulation ...";
             this.toolStripStatusLabel_main.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1401,7 +1401,7 @@
             this.toolStrip_main.Location = new System.Drawing.Point(0, 34);
             this.toolStrip_main.Name = "toolStrip_main";
             this.toolStrip_main.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_main.Size = new System.Drawing.Size(894, 32);
+            this.toolStrip_main.Size = new System.Drawing.Size(943, 32);
             this.toolStrip_main.TabIndex = 2;
             this.toolStrip_main.Text = "toolStrip1";
             this.toolStrip_main.DragDrop += new System.Windows.Forms.DragEventHandler(this.toolStrip_main_DragDrop);
@@ -1633,7 +1633,7 @@
             this.panel_fixed.Controls.Add(this.tabControl_panelFixed);
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel_fixed.Location = new System.Drawing.Point(584, 66);
+            this.panel_fixed.Location = new System.Drawing.Point(633, 66);
             this.panel_fixed.Name = "panel_fixed";
             this.panel_fixed.Size = new System.Drawing.Size(310, 459);
             this.panel_fixed.TabIndex = 5;
@@ -1860,7 +1860,7 @@
             // splitter_fixed
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter_fixed.Location = new System.Drawing.Point(581, 66);
+            this.splitter_fixed.Location = new System.Drawing.Point(630, 66);
             this.splitter_fixed.Name = "splitter_fixed";
             this.splitter_fixed.Size = new System.Drawing.Size(3, 459);
             this.splitter_fixed.TabIndex = 6;
@@ -1870,7 +1870,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(894, 555);
+            this.ClientSize = new System.Drawing.Size(943, 555);
             this.Controls.Add(this.splitter_fixed);
             this.Controls.Add(this.panel_fixed);
             this.Controls.Add(this.toolStrip_main);
