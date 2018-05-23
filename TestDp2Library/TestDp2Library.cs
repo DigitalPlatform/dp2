@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Marc;
+using System.Diagnostics;
 
 namespace TestDp2Library
 {
@@ -37,7 +38,7 @@ namespace TestDp2Library
             record.add(new MarcField('$', "2001 $atitle value$fauthor value"));
 
             List<NameValueLine> expect_results = new List<NameValueLine>() {
-                new NameValueLine{ Name = "题名与责任者1", Type = "title_area", Value = "title value / author value" },
+                new NameValueLine{ Name = "题名与责任者", Type = "title_area", Value = "title value / author value" },
             };
 
             Test(record.Text,
@@ -65,6 +66,8 @@ namespace TestDp2Library
         static void CompareResults(List<NameValueLine> results,
             List<NameValueLine> expect_results)
         {
+            Debug.WriteLine("\r\n结果:\r\n" + ToString(results) + "\r\n期望的结果:\r\n" + ToString(expect_results));
+
             if (results.Count != expect_results.Count)
                 throw new Exception("和期望的 results.Count 不符合。\r\n实际=" + results.Count + "  期望=" + expect_results.Count);
 
@@ -75,6 +78,7 @@ namespace TestDp2Library
                 if (ToString(line) != ToString(expect_line))
                     throw new Exception("两个集合不一致(集合元素 " + (i + 1) + "位置)。\r\n结果:\r\n" + ToString(line) + "\r\n期望的结果:\r\n" + ToString(expect_line));
             }
+
         }
 
         static string ToString(List<NameValueLine> results)
@@ -83,7 +87,7 @@ namespace TestDp2Library
             int i = 0;
             foreach (NameValueLine line in results)
             {
-                text.Append((i + 1).ToString() + ")\r\n" + line.ToString());
+                text.Append((i + 1).ToString() + ")\r\n" + ToString(line));
                 i++;
             }
 
