@@ -15,9 +15,9 @@ namespace TestDp2Library
         public void TestMarcTable_1()
         {
             MarcRecord record = new MarcRecord();
-            // 旧记录有三个 856 字段，第一个的权限禁止当前用户访问
+            // 
             record.add(new MarcField("001A1234567"));
-            record.add(new MarcField('$', "2001 $atitle value$fauthor vaue"));
+            record.add(new MarcField('$', "2001 $atitle value$fauthor value"));
 
             List<NameValueLine> expect_results = new List<NameValueLine>() {
                 new NameValueLine{ Name = "题名", Type = "title", Value = "title value" },
@@ -25,6 +25,23 @@ namespace TestDp2Library
 
             Test(record.Text,
                 "title",
+                expect_results);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_2()
+        {
+            MarcRecord record = new MarcRecord();
+            // 
+            record.add(new MarcField("001A1234567"));
+            record.add(new MarcField('$', "2001 $atitle value$fauthor value"));
+
+            List<NameValueLine> expect_results = new List<NameValueLine>() {
+                new NameValueLine{ Name = "题名与责任者1", Type = "title_area", Value = "title value / author value" },
+            };
+
+            Test(record.Text,
+                "title_area",
                 expect_results);
         }
 
@@ -42,9 +59,6 @@ namespace TestDp2Library
             if (nRet == -1)
                 throw new Exception(strError);
 
-            if (results.Count != expect_results.Count)
-                throw new Exception("和期望的 results.Count 不符合。实际=" + results.Count + "  期望=" + expect_results.Count);
-
             CompareResults(results, expect_results);
         }
 
@@ -52,14 +66,14 @@ namespace TestDp2Library
             List<NameValueLine> expect_results)
         {
             if (results.Count != expect_results.Count)
-                throw new Exception("和期望的 results.Count 不符合。实际=" + results.Count + "  期望=" + expect_results.Count);
+                throw new Exception("和期望的 results.Count 不符合。\r\n实际=" + results.Count + "  期望=" + expect_results.Count);
 
             for (int i = 0; i < results.Count; i++)
             {
                 NameValueLine line = results[i];
                 NameValueLine expect_line = expect_results[i];
                 if (ToString(line) != ToString(expect_line))
-                    throw new Exception("两个集合不一致(集合元素 " + (i + 1) + "位置)。结果:\r\n" + ToString(line) + "\r\n期望的结果:\r\n" + ToString(expect_line));
+                    throw new Exception("两个集合不一致(集合元素 " + (i + 1) + "位置)。\r\n结果:\r\n" + ToString(line) + "\r\n期望的结果:\r\n" + ToString(expect_line));
             }
         }
 
