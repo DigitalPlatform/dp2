@@ -8,6 +8,7 @@ using System.Xml;
 using ClosedXML.Excel;
 
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
@@ -37,7 +38,7 @@ ref List<int> column_max_chars)
             cols.AddRange(order_col_list);
 
             {
-                // 输出书目记录列标题
+                // 输出书目记录列标题和订购记录列标题
                 int i = 0;
                 foreach (ColumnProperty col in cols)
                 {
@@ -315,6 +316,37 @@ ref column_max_chars);
             return nOrderCount;
         }
 
+        static string SplitCopyString(string strXml)
+        {
+            if (string.IsNullOrEmpty(strXml))
+                return strXml;
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            if (dom.DocumentElement == null)
+                return "";
+
+            string strCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
+
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strCopyString,
+                out string strOldCopy,
+                out string strNewCopy);
+
+            if (string.IsNullOrEmpty(strOldCopy))
+                strOldCopy = "0";
+
+            // 对 strOldCopy 进一步分解
+            string strLeft = OrderDesignControl.GetCopyFromCopyString(strOldCopy);
+            string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+
+            DomUtil.SetElementText(dom.DocumentElement, "copyNumber", strLeft);
+            if (string.IsNullOrEmpty(strRight) == false)
+                DomUtil.SetElementText(dom.DocumentElement, "copyItems", strRight);
+
+            return dom.DocumentElement.OuterXml;
+        }
+
         // “获得一个订购记录”的回调函数原型
         // parameters:
         //      strOrderRecPath 订购记录路径。如果为空，表示希望获得默认记录模板内容
@@ -385,6 +417,10 @@ GetOrderRecord procGetOrderRecord,
             // 获得订购记录信息
             EntityInfo order = procGetOrderRecord(strBiblioRecPath, strOrderRecPath);
 
+            // 把订购记录中的 copy 元素进一步拆分为 copyNumber 和 copyItems 元素。注意拆分时只处理订购部分，不处理验收部分
+            order.OldRecord = SplitCopyString(order.OldRecord);
+
+            IXLCell copyNumberCell = null;
             // 输出订购信息列
             if (order != null)
             {
@@ -397,7 +433,8 @@ nStartColIndex,  // nColIndex,
 ColumnProperty.GetTypeList(order_col_list),
 ColumnProperty.GetDropDownList(order_col_list),
 nRowIndex,
-XLColor.NoColor);
+XLColor.NoColor,
+out copyNumberCell);
             }
 
             nStartColIndex += order_col_list.Count;
@@ -460,6 +497,13 @@ XLColor.NoColor);
                     dv1.ErrorStyle = XLErrorStyle.Warning;
                     dv1.ErrorTitle = "数字超出范围";
                     dv1.ErrorMessage = "本单元只允许输入 0 到 1000 之间的数字";
+                }
+
+                // 设置汇总公式
+                if (copyNumberCell != null && cells.Count > 0)
+                {
+                    var address = sheet.Range(cells[0], cells[cells.Count - 1]).RangeAddress.ToString();
+                    copyNumberCell.FormulaA1 = "SUM(" + address + ")";
                 }
             }
 
@@ -898,7 +942,7 @@ int MAX_CHARS = 50)
             this.Columns.AddRange(GetAllColumns(true));
         }
 
-        static string GetRightPart(string strText)
+        internal static string GetRightPart(string strText)
         {
             int nRet = strText.IndexOf("--");
             if (nRet == -1)
@@ -964,7 +1008,9 @@ int MAX_CHARS = 50)
 
             // Columns缺省值
             Columns.Clear();
+            this.Columns.AddRange(GetAllColumns(true));
 
+#if NO
             Column column = new Column();
             column.Name = "order_recpath -- 订购记录路径";
             column.Caption = "订购记录路径";
@@ -1037,6 +1083,38 @@ int MAX_CHARS = 50)
             column.Caption = "附注";
             column.MaxChars = -1;
             this.Columns.Add(column);
+#endif
+        }
+
+        public override List<Column> GetAllColumns(bool bDefault)
+        {
+            List<Column> results = new List<Column>();
+
+            string[] lines = new string[] {
+            "order_recpath -- 订购记录路径",
+            "order_seller -- 渠道(书商)",
+            "order_price -- 订购价",
+            "order_source -- 经费来源",
+            "order_copy -- 复本数",
+            "order_copyNumber -- 套数",
+            "order_copyItems -- 每套册数",
+            "order_orderID -- 订单号",
+            "order_class -- 类别",
+            "order_batchNo -- 批次号",
+            "order_catalogNo -- 书目号",
+            "order_comment -- 附注",
+        };
+
+            foreach (string line in lines)
+            {
+                Column column = new Column();
+                column.Name = line;
+                column.Caption = BiblioColumnOption.GetRightPart(line);
+                column.MaxChars = -1;
+                results.Add(column);
+            }
+
+            return results;
         }
     }
 

@@ -177,8 +177,11 @@ namespace dp2Circulation
     List<string> col_list,
     List<string> dropdown_list,
     int nRowIndex,  // 从 0 开始计数。
-    XLColor backColor)
+    XLColor backColor,
+    out IXLCell copyNumberCell)
         {
+            copyNumberCell = null;
+
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strXml);
 
@@ -196,7 +199,22 @@ namespace dp2Circulation
                     strValue = FindItemContent(dom, col);
 
                 {
-                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue(strValue);
+                    IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1);
+
+                    if (col == "copyNumber" || col == "copyItems")
+                    {
+                        Int32 value = 0;
+                        if (string.IsNullOrEmpty(strValue) == false)
+                        {
+                            if (Int32.TryParse(strValue, out value) == false)
+                                throw new Exception("列 '" + col + "' 的值 '" + strValue + "' 应该为纯数字");
+                        }
+                        cell.SetValue<Int32>(value);
+                    }
+                    else
+                        cell.SetValue(strValue);
+
+
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     if (backColor != XLColor.NoColor)
                         cell.Style.Fill.BackgroundColor = backColor;
@@ -229,6 +247,8 @@ namespace dp2Circulation
                     else
                         cell.Style.Protection.SetLocked(false);
 
+                    if (col == "copyNumber")
+                        copyNumberCell = cell;
                 }
 
                 i++;

@@ -268,6 +268,8 @@ dlg.UiState);
             dlg.Text = "订购信息列";
             dlg.PrintOption = option;
             dlg.DataDir = Program.MainForm.UserDir;
+            dlg.ColumnItems = option.GetAllColumnItems();
+#if NO
             dlg.ColumnItems = new string[] {
                 "order_recpath -- 订购记录路径",
                 "order_seller -- 渠道(书商)",
@@ -280,6 +282,7 @@ dlg.UiState);
                 "order_catalogNo -- 书目号",
                 "order_comment -- 附注",
             };
+#endif
 
             dlg.UiState = Program.MainForm.AppInfo.GetString(
 "save_distribute",
