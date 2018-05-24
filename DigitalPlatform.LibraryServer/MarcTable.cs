@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
@@ -105,7 +105,7 @@ namespace DigitalPlatform.LibraryServer
                 MarcNodeList fields = record.select("field[@name='200']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("责任者",
-                        BuildUnimarcFields(fields, "fg").Trim().Trim(new char[] { '/', ';' }),
+                        BuildUnimarcFields(fields, "fg").Trim().Trim(new char[] { '/', ';' }).Trim(),
                         "author"));
             }
 
@@ -153,7 +153,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 MarcNodeList fields = record.select("field[@name='210']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("出版者", 
+                    results.Add(new NameValueLine("出版者",
                         BuildUnimarcFields(fields, "c").Trim().Trim(new char[] { ':' }),
                         "publisher"));
             }
@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 MarcNodeList fields = record.select("field[@name='210']");
                 if (fields.count > 0)
-                    results.Add(new NameValueLine("出版时间", 
+                    results.Add(new NameValueLine("出版时间",
                         BuildUnimarcFields(fields, "d").Trim().Trim(new char[] { ',' }),
                         "publishtime"));
             }
@@ -223,7 +223,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='010']/subfield[@name='a' or @name='z']")
-                    .List.ForEach((o)=> {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -239,7 +240,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='011']/subfield[@name='a' or @name='z']")
-                    .List.ForEach((o) => {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -255,7 +257,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='010' or @name='011' or @name='091']/subfield[@name='d']")
-                    .List.ForEach((o) => {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -296,7 +299,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='690']/subfield[@name='a']")
-                    .List.ForEach((o) => {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -310,7 +314,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='692']/subfield[@name='a']")
-                    .List.ForEach((o) => {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -324,7 +329,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 StringBuilder text = new StringBuilder();
                 record.select("field[@name='694']/subfield[@name='a']")
-                    .List.ForEach((o) => {
+                    .List.ForEach((o) =>
+                    {
                         if (text.Length > 0)
                             text.Append(CRLF);
                         text.Append(o.Content);
@@ -1503,6 +1509,57 @@ namespace DigitalPlatform.LibraryServer
             Value = strValue;
             Type = strType;
         }
+
+        public static List<NameValueLine> FromTableXml(string strXml)
+        {
+            List<NameValueLine> results = new List<NameValueLine>();
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            XmlNodeList lines = dom.DocumentElement.SelectNodes("line");
+            foreach (XmlElement line in lines)
+            {
+                string name = line.GetAttribute("name");
+                string value = line.GetAttribute("value");
+                string type = line.GetAttribute("type");
+                string xml = line.InnerXml;
+                NameValueLine result = new NameValueLine
+                {
+                    Name = name,
+                    Value = value,
+                    Type = type,
+                    Xml = xml
+                };
+                results.Add(result);
+            }
+
+            return results;
+        }
+
+        // 创建 Table Xml
+        public static string BuildTableXml(List<NameValueLine> lines)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            foreach (NameValueLine line in lines)
+            {
+                XmlElement new_line = dom.CreateElement("line");
+                dom.DocumentElement.AppendChild(new_line);
+                new_line.SetAttribute("name", line.Name);
+
+                if (string.IsNullOrEmpty(line.Value) == false)
+                    new_line.SetAttribute("value", line.Value);
+
+                if (string.IsNullOrEmpty(line.Type) == false)
+                    new_line.SetAttribute("type", line.Type);
+
+                if (string.IsNullOrEmpty(line.Xml) == false)
+                    new_line.InnerXml = line.Xml;
+            }
+
+            return dom.OuterXml;
+        }
+
     }
 
 }

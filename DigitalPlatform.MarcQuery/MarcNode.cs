@@ -706,7 +706,7 @@ namespace DigitalPlatform.Marc
                     throw new Exception("parent的ChildNodes中居然没有找到自己");
                 }
 
-                if (index >= parent.ChildNodes.count - 1 )
+                if (index >= parent.ChildNodes.count - 1)
                     return null;
 
                 return parent.ChildNodes[index + 1];
@@ -1092,6 +1092,41 @@ namespace DigitalPlatform.Marc
             new_node.Text = this.Text;
             new_node.Parent = null; // 尚未和任何对象连接
             return new_node;
+        }
+
+        /// <summary>
+        /// 由工作单格式创建 MarcRecord 对象
+        /// </summary>
+        /// <param name="strText">工作单格式文本。注意子字段符号为 'ǂ'</param>
+        /// <returns>MarcRecord 对象</returns>
+        public static MarcRecord FromWorksheet(string strText)
+        {
+            MarcRecord record = new MarcRecord();
+
+            if (string.IsNullOrEmpty(strText))
+                return record;
+
+            string[] lines = strText.Replace("\r\n", "\r").Split(new char[] { '\r' });
+
+            // 头标区
+            string first_line = lines[0];
+            if (first_line.Length < 24)
+                first_line = first_line.PadRight(24, ' ');
+            record.Header[0, Math.Min(first_line.Length, 24)] = first_line;
+
+            int i = 0;
+            foreach (string line in lines)
+            {
+                if (i > 0)
+                {
+                    // 
+                    // record.add(new MarcField("001A1234567"));
+                    record.add(new MarcField('ǂ', line));
+                }
+                i++;
+            }
+
+            return record;
         }
     }
 

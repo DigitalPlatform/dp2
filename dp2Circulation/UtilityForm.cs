@@ -21,6 +21,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using System.Collections;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -1322,6 +1323,10 @@ MessageBoxDefaultButton.Button2);
 
                 controls.Add(this.textBox_worToIso_worFilename);
                 controls.Add(this.comboBox_worToIso_encoding);
+
+                controls.Add(this.textBox_biblioRecPath);
+                controls.Add(this.textBox_biblioTableStyle);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1335,6 +1340,10 @@ MessageBoxDefaultButton.Button2);
 
                 controls.Add(this.textBox_worToIso_worFilename);
                 controls.Add(this.comboBox_worToIso_encoding);
+
+                controls.Add(this.textBox_biblioRecPath);
+                controls.Add(this.textBox_biblioTableStyle);
+
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -1525,5 +1534,60 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
+        private void button_getBiblioTable_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.textBox_biblioTableXml.Text = "";
+
+            this.EnableControls(false);
+
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.Initial("正在获取书目 table 格式 ...");
+            this.stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                List<string> formats = new List<string> { "table:" + this.textBox_biblioTableStyle.Text.Replace(",", "|") };
+                string[] results = null;
+                byte[] timestamp = null;
+
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    this.textBox_biblioRecPath.Text,
+                    "",
+                    formats.ToArray(),
+                    out results,
+                    out timestamp,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                {
+                    if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
+                        strError = "书目记录 '" + this.textBox_biblioRecPath.Text + "' 不存在";
+
+                    goto ERROR1;
+                }
+                else
+                {
+                    Debug.Assert(results != null && results.Length == formats.Count, "results必须包含 " + formats.Count + " 个元素");
+                    this.textBox_biblioTableXml.Text = DomUtil.GetIndentXml(results[0]).Replace("\"", "\'");
+                }
+
+                return;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                this.stop.EndLoop();
+                this.stop.OnStop -= new StopEventHandler(this.DoStop);
+                this.stop.Initial("");
+
+                this.EnableControls(true);
+            }
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }
