@@ -1,32 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Marc;
-using System.Diagnostics;
 
 namespace TestDp2Library
 {
-    [TestClass]
-    public class LibraryApplicationUnitTest
+    /// <summary>
+    /// 辅助测试的一些工具函数
+    /// </summary>
+    public class TestUtility
     {
+#if NO
         [TestMethod]
         public void TestMarcTable_1()
         {
-            MarcRecord record = new MarcRecord();
-            // 
-            record.add(new MarcField("001A1234567"));
-            record.add(new MarcField('$', "2001 $atitle value$fauthor value"));
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+20010ǂa浙江1979～1988年经济发展报告ǂf浙江十年(1979～1988)经济发展的系统分析课题组编";
 
-            List<NameValueLine> expect_results = new List<NameValueLine>() {
-                new NameValueLine{ Name = "题名", Type = "title", Value = "title value" },
-            };
+            // table 的 XML 格式
+            string strTableXml =
+@"<root>
+    <line name='责任者' value='浙江十年(1979～1988)经济发展的系统分析课题组编' type='author' />
+</root>";
 
-            Test(record.Text,
-                "title",
-                expect_results);
+            VerifyTableXml(strWorksheet,
+                "author",
+                strTableXml);
         }
 
         [TestMethod]
@@ -45,15 +51,18 @@ namespace TestDp2Library
                 "title_area",
                 expect_results);
         }
+#endif
 
-        public void Test(string strMARC,
+        public static void VerifyTableXml(string strWorksheet,
             string strStyle,
-            List<NameValueLine> expect_results)
+            string strTableXml)
         {
+            MarcRecord record = MarcRecord.FromWorksheet(strWorksheet);
+            List<NameValueLine> expect_results = NameValueLine.FromTableXml(strTableXml);
 
             int nRet = MarcTable.ScriptUnimarc(
         "中文图书/1",
-        strMARC,
+        record.Text,
         strStyle,
         out List<NameValueLine> results,
         out string strError);
