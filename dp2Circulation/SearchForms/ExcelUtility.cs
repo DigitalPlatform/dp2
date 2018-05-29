@@ -138,6 +138,9 @@ namespace dp2Circulation
                 {
                     IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + (i++) + 1).SetValue(strValue);
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                    if (col == "recpath" || col.EndsWith("_recpath"))
+                        cell.Style.Font.FontColor = XLColor.LightGray;
                 }
 
             }
@@ -242,7 +245,7 @@ namespace dp2Circulation
 
                     if (col == "recpath" || col.EndsWith("_recpath"))
                     {
-
+                        cell.Style.Font.FontColor = XLColor.LightGray;
                     }
                     else
                         cell.Style.Protection.SetLocked(false);

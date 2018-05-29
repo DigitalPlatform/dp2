@@ -499,16 +499,16 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
+#if NO
                         if (subfield.PrevSibling.Name == "f" || subfield.PrevSibling.Name == "g")
                             return new PrePostfix(". ");
-                        return new PrePostfix("; ");
+#endif
+                        return new PrePostfix(" ; ");
                     case "b":
                         return new PrePostfix(" [", "] ");
                     case "c":
                     case "d":
                     case "e":
-                    case "f":
-                    case "g":
                     case "h":
                         return new PrePostfix(GetPrefix(unimarc_200_relations, subfield.Name));
                     case "i":
@@ -516,6 +516,31 @@ namespace DigitalPlatform.LibraryServer
                             && (subfield.PrevSibling.Name == "h" || subfield.PrevSibling.Name == "H"))
                             return new PrePostfix(", ");
                         return new PrePostfix(".");
+                    case "f":
+                        if (subfield.PrevSibling != null && subfield.PrevSibling.Name == "f")
+                        {
+                            if (subfield.Content.TrimStart().StartsWith("="))
+                            {
+                                // 去除子字段内容中可能出现的 = 前缀
+                                subfield.Content = subfield.Content.TrimStart(new char[] { '=' });
+                                return new PrePostfix(" = ");
+                            }
+                            return new PrePostfix(" ; ");
+                        }
+                        return new PrePostfix(" / ");
+                    case "g":
+                        if (subfield.PrevSibling != null && subfield.PrevSibling.Name == "g")
+                        {
+                            if (subfield.Content.TrimStart().StartsWith("="))
+                            {
+                                // 去除子字段内容中可能出现的 = 前缀
+                                subfield.Content = subfield.Content.TrimStart(new char[] { '=' });
+                                return new PrePostfix(" = ");
+                            }
+                            return new PrePostfix(" ; ");
+                        }
+                        return new PrePostfix(" ; ");
+
                 }
             }
 

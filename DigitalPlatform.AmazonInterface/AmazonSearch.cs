@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using System.Net;
@@ -9,16 +8,13 @@ using System.ComponentModel;
 using System.Collections;
 using System.Windows.Forms;
 using System.Xml;
+using System.Diagnostics;
 
-using AmazonProductAdvtApi;
+using dp2Secure;
 
-using DigitalPlatform;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
-using System.Diagnostics;
-using dp2Secure;
 using DigitalPlatform.IO;
 
 namespace DigitalPlatform.AmazonInterface
@@ -157,8 +153,8 @@ namespace DigitalPlatform.AmazonInterface
                 return -1;
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 strServerUrl);
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -195,8 +191,8 @@ strServerUrl);
             strUrl = "";
 
             AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 strServerUrl);
 
             if (this.m_nCurrentPageNo == -1)
@@ -388,7 +384,7 @@ strServerUrl);
 
             // 如果要求每行的检索命中装入大于 10 条，需要在这里获取后面几批的浏览结果
             return 0;
-        ERROR1:
+            ERROR1:
             // 迫使更换临时文件
             DeleteTempFile();   // 2015/8/4
             return -1;
@@ -505,7 +501,7 @@ strServerUrl);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             // 迫使更换临时文件
             DeleteTempFile();   // 2015/8/4
             return -1;
@@ -681,7 +677,7 @@ strServerUrl);
                 this.m_nCurrentPageNo++;    // 第一次 从 -1 ++ 正好等于 0
             }
             return nHitCount;
-        ERROR1:
+            ERROR1:
             if (this.m_reloadInfo != null)
                 this.m_reloadInfo.Cancel = true;
 
@@ -1343,13 +1339,36 @@ nsmgr,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:EAN");
 #endif
+#if NO
             List<string> isbns = GetFieldValues(root,
     nsmgr,
-    "amazon:ItemAttributes/amazon:EAN");
+    "amazon:ItemAttributes/amazon:EAN"
+    );
             if (isbns.Count == 0)
                 isbns = GetFieldValues(root,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:ISBN");
+#endif
+            List<string> isbns = new List<string>();
+            {
+                List<string> temp = new List<string>();
+                temp.AddRange(GetFieldValues(root,
+    nsmgr,
+    "amazon:ItemAttributes/amazon:ISBN"));
+                temp.AddRange(GetFieldValues(root,
+                    nsmgr,
+                    "amazon:ItemAttributes/amazon:EAN"));
+                // 从集合里面找 978 开头的
+                foreach (string isbn in temp)
+                {
+                    if (isbn.StartsWith("978"))
+                        isbns.Add(isbn);
+                }
+
+                // 实在没有的话，就用没有筛选时的内容
+                if (isbns.Count == 0)
+                    isbns.AddRange(temp);
+            }
 
             // Binding
             List<string> bindings = GetFieldValues(root,
@@ -1532,7 +1551,7 @@ nsmgr,
             if (StringUtil.IsInList("!856", strStyle) == false)
             {
                 // 856
-                string[] names = new string[] { 
+                string[] names = new string[] {
                 "SmallImage",
                 "MediumImage",
                 "LargeImage"};

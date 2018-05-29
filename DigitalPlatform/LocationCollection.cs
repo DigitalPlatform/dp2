@@ -425,5 +425,42 @@ namespace DigitalPlatform.Text
 
             return count;
         }
+
+        // 从 source 中复制 count 个元素构成一个新的 collection
+        // 注: 若 source 中元素少于 count，则有多少复制多少
+        // 注：本函数为浅复制。即结果集合中的元素也是源集合中的元素
+        public static LocationCollection CopyItems(LocationCollection source, int count)
+        {
+            LocationCollection result = new LocationCollection();
+            int i = 0;
+            foreach (Location location in source)
+            {
+                result.Add(location);
+                i++;
+                if (i >= count)
+                    break;
+            }
+
+            return result;
+        }
+
+        // 确保集合至少有 count 个元素
+        // 注：本函数为浅复制。即结果集合中的元素也是源集合中的元素
+        public void EnsureItems(
+            int count,
+            string default_name)
+        {
+            if (this.Count >= count)
+                return;
+
+            int delta = count - this.Count;
+            for (int i = 0; i < delta; i++)
+            {
+                Location location = new Location();
+                location.Name = default_name;
+                this.Add(location);
+            }
+
+        }
     }
 }

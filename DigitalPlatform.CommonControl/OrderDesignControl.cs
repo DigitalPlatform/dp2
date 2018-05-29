@@ -357,7 +357,14 @@ namespace DigitalPlatform.CommonControl
         {
             int nRet = strText.IndexOf("*");
             if (nRet == -1)
+            {
+                if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
+                    return strText;
                 return strText + "*" + strRightCopy;
+            }
+
+            if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
+                return strText.Substring(0, nRet).Trim();
 
             return strText.Substring(0, nRet).Trim() + "*" + strRightCopy;
         }

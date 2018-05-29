@@ -8915,19 +8915,53 @@ Keys keyData)
                         if (nRet == -1)
                             throw new Exception(strError);
 
+                        bool bCopyChanged = false;
+
                         DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
 
-                        // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
-                        string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
-                        string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
-                        if (strOldCopyString != strNewCopyString)
-                            DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
+                        // 如果存在 copyItems， 用 copyItems 值替换 copy 中的 3*5 的 5 部分
+                        if (order_content_table.ContainsKey("copyItems"))
+                        {
+                            string strCopyItems = DomUtil.GetElementText(dom.DocumentElement, "copyItems");
+                            if (string.IsNullOrEmpty(strCopyItems) == true)
+                                strCopyItems = "1";
+
+                            {
+                                string old_value = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                                string new_value = ChangeCopyStringItemsPart(old_value, strCopyItems);
+                                if (old_value != new_value)
+                                {
+                                    DomUtil.SetElementText(dom.DocumentElement, "copy", new_value);
+                                    bCopyChanged = true;
+                                }
+                            }
+
+                            DomUtil.DeleteElement(dom.DocumentElement, "copyItems");
+                        }
+
+                        // 注: copyNumber 元素不用考虑，因为这个值会被馆藏字符串计算后的个数覆盖
+                        if (order_content_table.ContainsKey("copyNumber"))
+                            DomUtil.DeleteElement(dom.DocumentElement, "copyNumber");
+
+                        {
+                            // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
+                            string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                            string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
+                            if (strOldCopyString != strNewCopyString)
+                            {
+                                DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
+                                bCopyChanged = true;
+                            }
+                        }
 
                         if (string.IsNullOrEmpty(strOrderRecPath))
                         {
                             // strOrderRecPath = this.GetOrderDbName(Global.GetDbName(strBiblioRecPath)) + "/?";    // 拟新创建的订购记录路径为空，API 也能从书目记录路径中自动推导出来
                             strOldXml = "";
                         }
+
+                        // 清除空元素
+                        DomUtil.RemoveEmptyElements(dom.DocumentElement);
 
                         nRet = SaveItemRecord(channel,
                             strBiblioRecPath,
@@ -8948,8 +8982,8 @@ out strError);
                             orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
                             nNewOrderCount++;
                         }
-                        if (strOldCopyString != strNewCopyString)
-                            copyCell.SetValue<string>(strNewCopyString);
+                        if (bCopyChanged && copyCell != null)
+                            copyCell.SetValue<string>(DomUtil.GetElementText(dom.DocumentElement, "copy"));
 
                         nOrderCount++;
 
@@ -8974,6 +9008,8 @@ out strError);
 
         // 修改复本字符串中，订购复本数部分的套数数字
         // 12[13] 的 12; 或者 3*5[4*5] 的 3
+        // return:
+        //      返回修改后的值
         static string ChangeCopyStringCopyPart(string strText, string strCopy)
         {
             // 分离 "old[new]" 内的两个值
@@ -8988,6 +9024,22 @@ out strError);
 #endif
 
             strOldCopy = OrderDesignControl.ModifyCopy(strOldCopy, strCopy);
+
+            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
+        }
+
+        // 修改复本字符串中，订购复本数部分的每套册数
+        // 12[13] 的 1(暗含); 或者 3*5[4*5] 的 5
+        // return:
+        //      返回修改后的值
+        static string ChangeCopyStringItemsPart(string strText, string strItems)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strText,
+                out string strOldCopy,
+                out string strNewCopy);
+
+            strOldCopy = OrderDesignControl.ModifyRightCopy(strOldCopy, strItems);
 
             return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
         }
