@@ -1,13 +1,8 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Xml;
 using System.Threading;
 
@@ -15,17 +10,13 @@ using System.Threading;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Z3950;
-
-using DigitalPlatform.Script;
-using DigitalPlatform.Marc;
-using DigitalPlatform.MarcDom;
 using DigitalPlatform.Xml;
 
 
 namespace dp2Catalog
 {
     /// <summary>
-    /// Á¬½ÓÈİÆ÷
+    /// è¿æ¥å®¹å™¨
     /// </summary>
     public class ZConnectionCollection : List<ZConnection>
     {
@@ -41,17 +32,17 @@ namespace dp2Catalog
         }
         public IZSearchForm IZSearchForm = null;
 
-        // »ñµÃºÍtreenode¹ØÁªµÄÒ»¸öZConnection¡£Èç¹ûÒÑ¾­ÓĞÁË£¬¾ÍÖ±½ÓÊ¹ÓÃ£»Èç¹ûÃ»ÓĞ£¬¾Í´´½¨Ò»¸ö
+        // è·å¾—å’Œtreenodeå…³è”çš„ä¸€ä¸ªZConnectionã€‚å¦‚æœå·²ç»æœ‰äº†ï¼Œå°±ç›´æ¥ä½¿ç”¨ï¼›å¦‚æœæ²¡æœ‰ï¼Œå°±åˆ›å»ºä¸€ä¸ª
         public ZConnection GetZConnection(TreeNode treenode)
         {
             ZConnection connection = null;
 
-            // ¿´¿´ÊÇ·ñÒÑ¾­ÓĞÁË
+            // çœ‹çœ‹æ˜¯å¦å·²ç»æœ‰äº†
             connection = FindZConnection(treenode);
             if (connection != null)
                 return connection;
 
-            // ĞÂ´´½¨Ò»¸ö
+            // æ–°åˆ›å»ºä¸€ä¸ª
             connection = new ZConnection();
             connection.ZChannel = new ZChannel();
             connection.TreeNode = treenode;
@@ -74,7 +65,7 @@ namespace dp2Catalog
             return connection;
         }
 
-        // ¸ù¾İtreenodeÑ°ÕÒÒÑ¾­´æÔÚµÄZConnection
+        // æ ¹æ®treenodeå¯»æ‰¾å·²ç»å­˜åœ¨çš„ZConnection
         public ZConnection FindZConnection(TreeNode treenode)
         {
             for (int i = 0; i < this.Count; i++)
@@ -88,7 +79,7 @@ namespace dp2Catalog
             return null;
         }
 
-        // ¸ù¾İStopÑ°ÕÒÒÑ¾­´æÔÚµÄZConnection
+        // æ ¹æ®Stopå¯»æ‰¾å·²ç»å­˜åœ¨çš„ZConnection
         public ZConnection FindZConnection(Stop stop)
         {
             for (int i = 0; i < this.Count; i++)
@@ -118,7 +109,7 @@ namespace dp2Catalog
             }
         }
 
-        // ½«ËùÓĞstopºÍ¹ÜÀíÆ÷ÍÑÀë¹ØÁª
+        // å°†æ‰€æœ‰stopå’Œç®¡ç†å™¨è„±ç¦»å…³è”
         public void UnlinkAllStop()
         {
             for (int i = 0; i < this.Count; i++)
@@ -134,9 +125,9 @@ namespace dp2Catalog
             }
         }
 
-        // ËÑ¼¯ZConnnectionCollectionÖĞÈ«²¿·şÎñÆ÷½ÚµãµÄ¼ìË÷Ê½XML£¬ÓÃÓÚ±£´æ
-        // Ëù´´½¨µÄXML¸ñÊ½£¬Îª<root>ÔªËØÏÂÓĞÈô¸É<connection>ÔªËØ£¬
-        // <connection>ÔªËØÓĞÁ½¸öÊôĞÔ£ºtreeNodePath£¬»úÔØTreeNodeµÄÈ«Â·¾¶£»¶øqueryXmlÔòÊÇ¼ìË÷Ê½Xml×Ö·û´®
+        // æœé›†ZConnnectionCollectionä¸­å…¨éƒ¨æœåŠ¡å™¨èŠ‚ç‚¹çš„æ£€ç´¢å¼XMLï¼Œç”¨äºä¿å­˜
+        // æ‰€åˆ›å»ºçš„XMLæ ¼å¼ï¼Œä¸º<root>å…ƒç´ ä¸‹æœ‰è‹¥å¹²<connection>å…ƒç´ ï¼Œ
+        // <connection>å…ƒç´ æœ‰ä¸¤ä¸ªå±æ€§ï¼štreeNodePathï¼Œæœºè½½TreeNodeçš„å…¨è·¯å¾„ï¼›è€ŒqueryXmlåˆ™æ˜¯æ£€ç´¢å¼Xmlå­—ç¬¦ä¸²
         public string GetAllQueryXml()
         {
             XmlDocument dom = new XmlDocument();
@@ -147,7 +138,7 @@ namespace dp2Catalog
             {
                 ZConnection connection = this[i];
 
-                // ÓÅ»¯¡£ºöÂÔÄÇĞ©Ã»ÓĞquery xmlÄÚÈİµÄÁ¬½Ó
+                // ä¼˜åŒ–ã€‚å¿½ç•¥é‚£äº›æ²¡æœ‰query xmlå†…å®¹çš„è¿æ¥
                 if (String.IsNullOrEmpty(connection.QueryXml) == true)
                     continue;
 
@@ -160,7 +151,7 @@ namespace dp2Catalog
             }
 
             if (nCount == 0)
-                return null;    // ÓÅ»¯
+                return null;    // ä¼˜åŒ–
 
             return dom.OuterXml;
         }
@@ -195,21 +186,21 @@ namespace dp2Catalog
     }
 
     /// <summary>
-    /// Á¬½Ó
+    /// è¿æ¥
     /// </summary>
     public class ZConnection
     {
-        public bool OwnerStop = true;   // ÊÇ·ñÓµÓĞ¶ÀÁ¢µÄStop
+        public bool OwnerStop = true;   // æ˜¯å¦æ‹¥æœ‰ç‹¬ç«‹çš„Stop
 
-        // TODO: ĞèÒªÊµÏÖ IDisposeable ½Ó¿Ú£¬ÊÍ·Å CompleteEvent
+        // TODO: éœ€è¦å®ç° IDisposeable æ¥å£ï¼Œé‡Šæ”¾ CompleteEvent
         public AutoResetEvent CompleteEvent = new AutoResetEvent(false);
 
-        public int Searching = 0;   // 0 »¹Ã»ÓĞ¿ªÊ¼ 1 ¿ªÊ¼ÁË 2 ½áÊøÁË
+        public int Searching = 0;   // 0 è¿˜æ²¡æœ‰å¼€å§‹ 1 å¼€å§‹äº† 2 ç»“æŸäº†
 
         public string ElementSetName = "";
 
-        // È±Ê¡µÄÔªËØ¼¯Ãû
-        // È·±£È¥µôÁË--²¿·Ö
+        // ç¼ºçœçš„å…ƒç´ é›†å
+        // ç¡®ä¿å»æ‰äº†--éƒ¨åˆ†
         public string DefaultElementSetName
         {
             get
@@ -223,8 +214,8 @@ namespace dp2Catalog
 
         public string RecordSyntax = "";
 
-        // ÍÆ¼öµÄ¼ÇÂ¼Óï·¨
-        // È·±£ÒÑ¾­È¥µôÁË--²¿·Ö
+        // æ¨èçš„è®°å½•è¯­æ³•
+        // ç¡®ä¿å·²ç»å»æ‰äº†--éƒ¨åˆ†
         public string PreferredRecordSyntax
         {
             get
@@ -240,7 +231,7 @@ namespace dp2Catalog
 
         public VirtualItemCollection VirtualItems = new VirtualItemCollection();
 
-        public bool Enabled = true; // ¼ìË÷Ê½½çÃæÊÇ·ñÓ¦µ±Enabled?
+        public bool Enabled = true; // æ£€ç´¢å¼ç•Œé¢æ˜¯å¦åº”å½“Enabled?
 
         public string CurrentRefID = "0";
 
@@ -262,17 +253,17 @@ namespace dp2Catalog
 
         public TargetInfo TargetInfo = null;
         public string QueryString = "";
-        public int ResultCount = -3; // -3±íÊ¾Î´Ôø¼ìË÷¹ı(²»ÏÔÊ¾Êı×Ö); -2±íÊ¾ÕıÔÚ¼ìË÷; -1±íÊ¾¼ìË÷³ö´í; >=0±íÊ¾ÃüÖĞÊıÁ¿
+        public int ResultCount = -3; // -3è¡¨ç¤ºæœªæ›¾æ£€ç´¢è¿‡(ä¸æ˜¾ç¤ºæ•°å­—); -2è¡¨ç¤ºæ­£åœ¨æ£€ç´¢; -1è¡¨ç¤ºæ£€ç´¢å‡ºé”™; >=0è¡¨ç¤ºå‘½ä¸­æ•°é‡
 
-        public string QueryXml = "";    // XML¼ìË÷Ê½
+        public string QueryXml = "";    // XMLæ£€ç´¢å¼
 
         public Encoding ForcedRecordsEncoding = null;
 
-        public RecordCollection Records = new RecordCollection();    // search/presentµÃµ½µÄ½á¹û¼¯
+        public RecordCollection Records = new RecordCollection();    // search/presentå¾—åˆ°çš„ç»“æœé›†
 
         public string ErrorInfo = "";
 
-        // ¹ØÁªStop
+        // å…³è”Stop
         public void LinkStop(string strStopName)
         {
             Debug.Assert(this.IZSearchForm != null, "");
@@ -281,23 +272,23 @@ namespace dp2Catalog
             this.Stop = new DigitalPlatform.Stop();
             this.Stop.Name = strStopName;
             this.Stop.Register(this.IZSearchForm.MainForm.stopManager,
-                false);	// ºÍÈİÆ÷¹ØÁª
+                false);	// å’Œå®¹å™¨å…³è”
         }
 
-        // ÍÑÀë¹ØÁª
+        // è„±ç¦»å…³è”
         public void UnlinkStop()
         {
-            if (this.Stop != null) // ÍÑÀë¹ØÁª
+            if (this.Stop != null) // è„±ç¦»å…³è”
             {
                 // Stop.DoStop();
 
-                this.Stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                this.Stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 this.Stop = null;
             }
         }
 
-        // »ñµÃµ±Ç°±àÂë·½Ê½
-        // ÈçºÎÈÃºóÃæÑ¡¶¨µÄÇ¿ÖÆ±àÂë·½Ê½ÉúĞ§?
+        // è·å¾—å½“å‰ç¼–ç æ–¹å¼
+        // å¦‚ä½•è®©åé¢é€‰å®šçš„å¼ºåˆ¶ç¼–ç æ–¹å¼ç”Ÿæ•ˆ?
         public Encoding GetRecordsEncoding(
             MainForm MainForm,
             string strRecordSyntaxOID)
@@ -352,7 +343,7 @@ namespace dp2Catalog
             }
             else if (this.ZChannel != null)
             {
-                // Èç¹û´¦ÔÚÃ»ÓĞÁ¬½ÓµÄ×´Ì¬
+                // å¦‚æœå¤„åœ¨æ²¡æœ‰è¿æ¥çš„çŠ¶æ€
                 this.ZChannel.Stop();
             }
         }
@@ -360,7 +351,7 @@ namespace dp2Catalog
         public void CloseConnection()
         {
             this.ZChannel.CloseSocket();
-            this.ZChannel.Initialized = false;  // ÆÈÊ¹ÖØĞÂ³õÊ¼»¯
+            this.ZChannel.Initialized = false;  // è¿«ä½¿é‡æ–°åˆå§‹åŒ–
 
             if (this.TreeNode != null
                 && ZTargetControl.IsServerOnlineType(this.TreeNode) == true)
@@ -368,7 +359,7 @@ namespace dp2Catalog
                 ZTargetControl.OnlineServerNodeIcon(this.TreeNode, false);
             }
 
-            // ÉèÖÃµ±Ç°Ê÷ÉÏÒÑ¾­Ñ¡ÔñµÄ½ÚµãµÄÀ©Õ¹ĞÅÏ¢
+            // è®¾ç½®å½“å‰æ ‘ä¸Šå·²ç»é€‰æ‹©çš„èŠ‚ç‚¹çš„æ‰©å±•ä¿¡æ¯
             string strError = "";
             int nRet = ZTargetControl.SetCurrentTargetExtraInfo(
                 this.TreeNode,
@@ -427,12 +418,12 @@ namespace dp2Catalog
             IZSearchForm.ShowQueryResultInfo(this, strText);
         }
 
-        // Çå³ıÒÔÍùµÄ(ÒÑ¾­»ñÈ¡µ½Ç°¶Ë)½á¹û¼¯ĞÅÏ¢ºÍÏàÓ¦µÄÏÔÊ¾
+        // æ¸…é™¤ä»¥å¾€çš„(å·²ç»è·å–åˆ°å‰ç«¯)ç»“æœé›†ä¿¡æ¯å’Œç›¸åº”çš„æ˜¾ç¤º
         // thread:
-        //      ½çÃæÏß³Ì
+        //      ç•Œé¢çº¿ç¨‹
         public void ClearResultInfo()
         {
-            this.ResultCount = -2;    // ±íÊ¾ÕıÔÚ¼ìË÷
+            this.ResultCount = -2;    // è¡¨ç¤ºæ­£åœ¨æ£€ç´¢
 
             if (this.Records != null)
                 this.Records.Clear();
@@ -442,11 +433,11 @@ namespace dp2Catalog
             {
                 this.VirtualItems.Clear();
 
-                // ÏÔÊ¾³öÀ´
+                // æ˜¾ç¤ºå‡ºæ¥
                 DisplayBrowseItem(true);
                 /*
                 if (current_connection == connection)
-                    LinkRecordsToListView(connection.VirtualItems); // listviewÊÇ¹«ÓÃµÄ
+                    LinkRecordsToListView(connection.VirtualItems); // listviewæ˜¯å…¬ç”¨çš„
                  * */
             }
 
@@ -459,8 +450,8 @@ namespace dp2Catalog
 
         }
 
-        // ¼ìË÷Ò»¸ö·şÎñÆ÷
-        // Æô¶¯¼ìË÷ÒÔºó¿ØÖÆ¾ÍÁ¢¼´·µ»Ø
+        // æ£€ç´¢ä¸€ä¸ªæœåŠ¡å™¨
+        // å¯åŠ¨æ£€ç´¢ä»¥åæ§åˆ¶å°±ç«‹å³è¿”å›
         public int Search()
         {
             Thread clientThread = new Thread(new ThreadStart(SearchThread));
@@ -468,11 +459,11 @@ namespace dp2Catalog
             return 0;
         }
 
-        // ½«ä¯ÀÀÊÂÏîÏÔÊ¾³öÀ´
+        // å°†æµè§ˆäº‹é¡¹æ˜¾ç¤ºå‡ºæ¥
         void DisplayBrowseItem(bool bTriggerSelChanged = false)
         {
             /*
-            // ÒòÎªÉæ¼°µ½Form½çÃæÔªËØ²Ù×÷£¬ËùÒÔÒªÓÃInvokeÀ´²Ù×÷
+            // å› ä¸ºæ¶‰åŠåˆ°Formç•Œé¢å…ƒç´ æ“ä½œï¼Œæ‰€ä»¥è¦ç”¨Invokeæ¥æ“ä½œ
             object[] pList = {this, bTriggerSelChanged};
             ZSearchForm.Invoke(
                 new ZSearchForm.Delegate_DisplayBrowseItems(ZSearchForm.DisplayBrowseItems), pList);
@@ -480,7 +471,7 @@ namespace dp2Catalog
             IZSearchForm.DisplayBrowseItems(this, bTriggerSelChanged);
         }
 
-        // ¼ìË÷Ïß³Ì
+        // æ£€ç´¢çº¿ç¨‹
         public void SearchThread()
         {
             this.Searching = 1;
@@ -490,16 +481,16 @@ namespace dp2Catalog
             string strError = "";
             int nRet = 0;
 
-            // ·¢³öÖ¸Áî£¬Çå³ı½á¹û¼¯ÏÔÊ¾
+            // å‘å‡ºæŒ‡ä»¤ï¼Œæ¸…é™¤ç»“æœé›†æ˜¾ç¤º
             // this.ClearResultInfo(connection);
             this.ClearResultInfo();
 
-            // °Ñ¼ìË÷Ê½½çÃæDisable
+            // æŠŠæ£€ç´¢å¼ç•Œé¢Disable
             this.EnableControls(false);
 
 
             this.Stop.OnStop += new StopEventHandler(Stop_OnStop);
-            this.Stop.SetMessage("¿ªÊ¼¼ìË÷ ...");
+            this.Stop.SetMessage("å¼€å§‹æ£€ç´¢ ...");
             this.Stop.BeginLoop();
 
             /*
@@ -509,7 +500,7 @@ namespace dp2Catalog
             try
             {
 
-                this.Stop.SetMessage("ÕıÔÚÁ¬½Ó " + this.TargetInfo.HostName + " : " + this.TargetInfo.Port.ToString() + " ...");
+                this.Stop.SetMessage("æ­£åœ¨è¿æ¥ " + this.TargetInfo.HostName + " : " + this.TargetInfo.Port.ToString() + " ...");
 
                 if (this.ZChannel.Connected == false
                     || this.ZChannel.HostName != this.TargetInfo.HostName
@@ -522,9 +513,9 @@ namespace dp2Catalog
                         goto ERROR1;
 
 
-                    this.Stop.SetMessage("ÕıÔÚÖ´ĞĞZ39.50³õÊ¼»¯ ...");
+                    this.Stop.SetMessage("æ­£åœ¨æ‰§è¡ŒZ39.50åˆå§‹åŒ– ...");
 
-                    // ÔİÊ±onlineÒ»ÏÂÍ¼±ê
+                    // æš‚æ—¶onlineä¸€ä¸‹å›¾æ ‡
                     this.TargetInfo.OnlineServerIcon(true);
 
 
@@ -541,12 +532,12 @@ namespace dp2Catalog
                         {
                             this.TargetInfo.OnlineServerIcon(false);
                         }
-                        catch { }   // ¿ÉÄÜÓÉÓÚ´°¿ÚÒÑ¾­¹Ø±Õ£¬¶ÔÏóÒÑ¾­ÊÍ·Å
+                        catch { }   // å¯èƒ½ç”±äºçª—å£å·²ç»å…³é—­ï¼Œå¯¹è±¡å·²ç»é‡Šæ”¾
 
                         goto ERROR1;
                     }
 
-                    // ÉèÖÃµ±Ç°Ê÷ÉÏÒÑ¾­Ñ¡ÔñµÄ½ÚµãµÄÀ©Õ¹ĞÅÏ¢
+                    // è®¾ç½®å½“å‰æ ‘ä¸Šå·²ç»é€‰æ‹©çš„èŠ‚ç‚¹çš„æ‰©å±•ä¿¡æ¯
                     nRet = ZTargetControl.SetCurrentTargetExtraInfo(
                         this.TreeNode,
                         strInitialResultInfo,
@@ -557,7 +548,7 @@ namespace dp2Catalog
                     // this.TargetInfo.OnlineServerIcon();
                 }
 
-                this.Stop.SetMessage("ÕıÔÚ¼ìË÷ '" + this.QueryString + "' ...");
+                this.Stop.SetMessage("æ­£åœ¨æ£€ç´¢ '" + this.QueryString + "' ...");
 
 
                 int nResultCount = 0;
@@ -586,15 +577,15 @@ namespace dp2Catalog
 
                 this.ResultCount = nResultCount;
 
-                // ÏÔÊ¾ÃüÖĞ½á¹û
-                this.ShowQueryResultInfo("ÃüÖĞ½á¹ûÌõÊı:" + this.ResultCount.ToString());
+                // æ˜¾ç¤ºå‘½ä¸­ç»“æœ
+                this.ShowQueryResultInfo("å‘½ä¸­ç»“æœæ¡æ•°:" + this.ResultCount.ToString());
 
                 if (nResultCount != 0)
                 {
 
                     int nCount = Math.Min(this.TargetInfo.PresentPerBatchCount, nResultCount);
 
-                    this.Stop.SetMessage("ÕıÔÚ»ñÈ¡ÃüÖĞ½á¹û ( 1-" + nCount.ToString() + " of " + nResultCount + " ) ...");
+                    this.Stop.SetMessage("æ­£åœ¨è·å–å‘½ä¸­ç»“æœ ( 1-" + nCount.ToString() + " of " + nResultCount + " ) ...");
 
                     // string strElementSetName = ZTargetControl.GetLeftValue(this.comboBox_elementSetName.Text);  // this.CurrentTargetInfo.DefaultElementSetName;
                     string strElementSetName = this.DefaultElementSetName;
@@ -609,11 +600,11 @@ namespace dp2Catalog
                         this.TargetInfo.DefaultResultSetName,
                         0, // nStart,
                         nCount, // nCount,
-                        this.TargetInfo.PresentPerBatchCount,   // ÍÆ¼öµÄÃ¿´ÎÊıÁ¿
+                        this.TargetInfo.PresentPerBatchCount,   // æ¨èçš„æ¯æ¬¡æ•°é‡
                         strElementSetName,    // "F" strElementSetName,
                         this.PreferredRecordSyntax,
                         // ZTargetControl.GetLeftValue(this.comboBox_recordSyntax.Text),    // this.CurrentTargetInfo.PreferredRecordSyntax,
-                        true,   // Á¢¼´ÏÔÊ¾³öÀ´
+                        true,   // ç«‹å³æ˜¾ç¤ºå‡ºæ¥
                         out records,
                         out strError);
                     if (nRet == -1)
@@ -661,7 +652,7 @@ namespace dp2Catalog
             return;
         ERROR1:
             /*
-            try // ·ÀÖ¹×îºóÍË³öÊ±±¨´í
+            try // é˜²æ­¢æœ€åé€€å‡ºæ—¶æŠ¥é”™
             {
                 MessageBox.Show(this, strError);
                 this.queryControl1.Focus();
@@ -677,10 +668,10 @@ namespace dp2Catalog
         }
 
         List<string> m_commands = null;
-        public bool Stopped = false;    // ÊÇ·ñ±»ÖĞ¶Ï
+        public bool Stopped = false;    // æ˜¯å¦è¢«ä¸­æ–­
 
-        // ¼ìË÷Ò»¸ö·şÎñÆ÷
-        // Æô¶¯¼ìË÷ÒÔºó¿ØÖÆ¾ÍÁ¢¼´·µ»Ø
+        // æ£€ç´¢ä¸€ä¸ªæœåŠ¡å™¨
+        // å¯åŠ¨æ£€ç´¢ä»¥åæ§åˆ¶å°±ç«‹å³è¿”å›
         public int BeginCommands(List<string> commands)
         {
             this.Searching = 1;
@@ -696,22 +687,22 @@ namespace dp2Catalog
 
             int nRet = 0;
 
-            // ·¢³öÖ¸Áî£¬Çå³ı½á¹û¼¯ÏÔÊ¾
+            // å‘å‡ºæŒ‡ä»¤ï¼Œæ¸…é™¤ç»“æœé›†æ˜¾ç¤º
             // this.ClearResultInfo(connection);
 
-            // Ö»ÓĞµ±°üº¬ search ÃüÁîµÄÊ±ºò²ÅÇå³ıÃüÖĞ½á¹ûÊı¡£
-            // Èç¹ûÖ»ÓĞ present ÃüÁî£¬Ôò²»Çå³ı
+            // åªæœ‰å½“åŒ…å« search å‘½ä»¤çš„æ—¶å€™æ‰æ¸…é™¤å‘½ä¸­ç»“æœæ•°ã€‚
+            // å¦‚æœåªæœ‰ present å‘½ä»¤ï¼Œåˆ™ä¸æ¸…é™¤
             if (this.m_commands.IndexOf("search") != -1)
                 this.ClearResultInfo();
 
-            // °Ñ¼ìË÷Ê½½çÃæDisable
+            // æŠŠæ£€ç´¢å¼ç•Œé¢Disable
             this.EnableControls(false);
 
             this.Stop.OnStop += new StopEventHandler(Stop_OnStop);
 
             if (this.OwnerStop == true)
             {
-                this.Stop.SetMessage("¿ªÊ¼¼ìË÷ ...");
+                this.Stop.SetMessage("å¼€å§‹æ£€ç´¢ ...");
                 this.Stop.BeginLoop();
             }
 
@@ -725,7 +716,7 @@ namespace dp2Catalog
                     || this.ZChannel.HostName != this.TargetInfo.HostName
                     || this.ZChannel.Port != this.TargetInfo.Port)
                 {
-                    this.Stop.SetMessage("ÕıÔÚÁ¬½Ó " + this.TargetInfo.HostName + " : " + this.TargetInfo.Port.ToString() + " ...");
+                    this.Stop.SetMessage("æ­£åœ¨è¿æ¥ " + this.TargetInfo.HostName + " : " + this.TargetInfo.Port.ToString() + " ...");
 
                     this.ZChannel.ConnectComplete -= new EventHandler(ZChannel_ConnectComplete);
                     this.ZChannel.ConnectComplete += new EventHandler(ZChannel_ConnectComplete);
@@ -783,7 +774,7 @@ namespace dp2Catalog
             }
         }
 
-        // Connect½áÊø£¬½øĞĞZ39.50³õÊ¼»¯
+        // Connectç»“æŸï¼Œè¿›è¡ŒZ39.50åˆå§‹åŒ–
         void ZChannel_ConnectComplete(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.ZChannel.ErrorInfo) == false)
@@ -796,9 +787,9 @@ namespace dp2Catalog
                 return;
             }
 
-            this.Stop.SetMessage("ÕıÔÚÖ´ĞĞZ39.50³õÊ¼»¯ ...");
+            this.Stop.SetMessage("æ­£åœ¨æ‰§è¡ŒZ39.50åˆå§‹åŒ– ...");
 
-            // ÔİÊ±onlineÒ»ÏÂÍ¼±ê
+            // æš‚æ—¶onlineä¸€ä¸‹å›¾æ ‡
             this.TargetInfo.OnlineServerIcon(true);
 
             // Initial
@@ -813,7 +804,7 @@ namespace dp2Catalog
                 {
                     this.TargetInfo.OnlineServerIcon(false);
                 }
-                catch { }   // ¿ÉÄÜÓÉÓÚ´°¿ÚÒÑ¾­¹Ø±Õ£¬¶ÔÏóÒÑ¾­ÊÍ·Å
+                catch { }   // å¯èƒ½ç”±äºçª—å£å·²ç»å…³é—­ï¼Œå¯¹è±¡å·²ç»é‡Šæ”¾
 
                 return;
             }
@@ -835,7 +826,7 @@ namespace dp2Catalog
             if (this.m_commands.Count > 0
                 && this.m_commands[0] == "search")
             {
-            // Ö´ĞĞSearch
+            // æ‰§è¡ŒSearch
                 this.SearchComplete -= new EventHandler(ZConnection_SearchComplete);
                 this.SearchComplete += new EventHandler(ZConnection_SearchComplete);
                 int nRet = DoSearchAsync();
@@ -845,7 +836,7 @@ namespace dp2Catalog
             else if (this.m_commands.Count > 0
                 && this.m_commands[0] == "present")
             {
-                // Ö´ĞĞPresent
+                // æ‰§è¡ŒPresent
                 this.PresentComplete -= new EventHandler(ZConnection_PresentComplete);
                 this.PresentComplete += new EventHandler(ZConnection_PresentComplete);
                 int nRet = DoPresentAsync(true);
@@ -870,12 +861,12 @@ namespace dp2Catalog
                 return;
             }
 
-            // ÏÔÊ¾¼ìË÷ÃüÖĞ½á¹û
+            // æ˜¾ç¤ºæ£€ç´¢å‘½ä¸­ç»“æœ
 
             if (this.m_commands.Count > 0
                 && this.m_commands[0] == "present")
             {
-                // ¼ÌĞøPresent
+                // ç»§ç»­Present
                 this.PresentComplete -= new EventHandler(ZConnection_PresentComplete);
                 this.PresentComplete += new EventHandler(ZConnection_PresentComplete);
                 int nRet = DoPresentAsync(true);
@@ -892,8 +883,8 @@ namespace dp2Catalog
 
         // return:
         //      -1  error
-        //      0   Ïß³ÌÒÑ¾­Æô¶¯£¬µ«ÊÇÃ»ÓĞµÈËü½áÊø
-        //      1   Ïß³ÌÒÑ¾­½áÊø
+        //      0   çº¿ç¨‹å·²ç»å¯åŠ¨ï¼Œä½†æ˜¯æ²¡æœ‰ç­‰å®ƒç»“æŸ
+        //      1   çº¿ç¨‹å·²ç»ç»“æŸ
         public int NextBatch(bool bWaitFinish)
         {
             Thread clientThread = new Thread(new ThreadStart(NextBatchThread));
@@ -946,19 +937,19 @@ namespace dp2Catalog
             return 1;
         }        
         
-        // ĞÂ×°ÈëÒ»Åú¼ÇÂ¼µÄÏß³ÌÖ÷º¯Êı
+        // æ–°è£…å…¥ä¸€æ‰¹è®°å½•çš„çº¿ç¨‹ä¸»å‡½æ•°
         public void NextBatchThread()
         {
             Debug.Assert(this.ResultCount >= 0, "");
 
-            // TODO: Ğ¡ĞÄ this.TargetInfo Îª¿Õ
+            // TODO: å°å¿ƒ this.TargetInfo ä¸ºç©º
             int nCount = Math.Min(this.TargetInfo.PresentPerBatchCount,
                 this.ResultCount - this.Records.Count);
 
             NextBatchThreadBase(nCount);
         }
 
-        // ĞÂ×°ÈëºóÃæÎ´×°µÄËùÓĞÅú¼ÇÂ¼µÄÏß³ÌÖ÷º¯Êı
+        // æ–°è£…å…¥åé¢æœªè£…çš„æ‰€æœ‰æ‰¹è®°å½•çš„çº¿ç¨‹ä¸»å‡½æ•°
         public void NextAllBatchThread()
         {
             Debug.Assert(this.ResultCount >= 0, "");
@@ -969,29 +960,29 @@ namespace dp2Catalog
         }
 
         /*
-²Ù×÷ÀàĞÍ crashReport -- Òì³£±¨¸æ 
-Ö÷Ìâ dp2catalog 
-·¢ËÍÕß xxx 
-Ã½ÌåÀàĞÍ text 
-ÄÚÈİ ·¢ÉúÎ´²¶»ñµÄÒì³£: 
+æ“ä½œç±»å‹ crashReport -- å¼‚å¸¸æŠ¥å‘Š 
+ä¸»é¢˜ dp2catalog 
+å‘é€è€… xxx 
+åª’ä½“ç±»å‹ text 
+å†…å®¹ å‘ç”Ÿæœªæ•è·çš„å¼‚å¸¸: 
 Type: System.NullReferenceException
-Message: KÎ´Œ¢Îï¼ş…¢¿¼ÔO¶¨éÎï¼şµÄˆÌĞĞ‚€ów¡£
+Message: ä¸¦æœªå°‡ç‰©ä»¶åƒè€ƒè¨­å®šç‚ºç‰©ä»¶çš„åŸ·è¡Œå€‹é«”ã€‚
 Stack:
-ì¶ dp2Catalog.ZConnection.NextBatchThreadBase(Int32 nCount)
-ì¶ dp2Catalog.ZConnection.NextAllBatchThread()
-ì¶ System.Threading.ThreadHelper.ThreadStart_Context(Object state)
-ì¶ System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
-ì¶ System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
-ì¶ System.Threading.ThreadHelper.ThreadStart()
+æ–¼ dp2Catalog.ZConnection.NextBatchThreadBase(Int32 nCount)
+æ–¼ dp2Catalog.ZConnection.NextAllBatchThread()
+æ–¼ System.Threading.ThreadHelper.ThreadStart_Context(Object state)
+æ–¼ System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
+æ–¼ System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+æ–¼ System.Threading.ThreadHelper.ThreadStart()
 
 
-dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
-²Ù×÷ÏµÍ³£ºMicrosoft Windows NT 5.1.2600 Service Pack 3 
-²Ù×÷Ê±¼ä 2015/8/25 14:00:42 (Tue, 25 Aug 2015 14:00:42 +0800) 
-Ç°¶ËµØÖ· xxx ¾­ÓÉ http://dp2003.com/dp2library 
+dp2Catalog ç‰ˆæœ¬: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
+æ“ä½œç³»ç»Ÿï¼šMicrosoft Windows NT 5.1.2600 Service Pack 3 
+æ“ä½œæ—¶é—´ 2015/8/25 14:00:42 (Tue, 25 Aug 2015 14:00:42 +0800) 
+å‰ç«¯åœ°å€ xxx ç»ç”± http://dp2003.com/dp2library 
 
          * */
-        // Ïß³ÌÖ÷º¯Êı »ù´¡º¯Êı¡£²»ÄÜµ±Ïß³Ìº¯ÊıÓÃ
+        // çº¿ç¨‹ä¸»å‡½æ•° åŸºç¡€å‡½æ•°ã€‚ä¸èƒ½å½“çº¿ç¨‹å‡½æ•°ç”¨
         public void NextBatchThreadBase(int nCount)
         {
             this.ErrorInfo = "";
@@ -1003,22 +994,22 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 this.Records = new RecordCollection();
 
             /*
-            // ĞÂ×°ÈëÒ»Åú¼ÇÂ¼
+            // æ–°è£…å…¥ä¸€æ‰¹è®°å½•
             int nCount = Math.Min(this.TargetInfo.PresentPerBatchCount,
                 this.ResultCount - this.Records.Count);
              * */
 
             if (nCount <= 0)
             {
-                // Ã»ÓĞ±ØÒªÃ´
-                strError = "ÃüÖĞ½á¹ûÒÑ¾­È«²¿»ñÈ¡Íê±Ï¡£";
+                // æ²¡æœ‰å¿…è¦ä¹ˆ
+                strError = "å‘½ä¸­ç»“æœå·²ç»å…¨éƒ¨è·å–å®Œæ¯•ã€‚";
                 goto ERROR1;
             }
 
             if (this.Stop != null)
             {
                 this.Stop.OnStop += new StopEventHandler(this.Stop_OnStop);
-                this.Stop.SetMessage("´Ó·şÎñÆ÷×°Èë¼ÇÂ¼ ...");
+                this.Stop.SetMessage("ä»æœåŠ¡å™¨è£…å…¥è®°å½• ...");
                 this.Stop.BeginLoop();
             }
 
@@ -1052,17 +1043,17 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     this.TargetInfo.DefaultResultSetName,
                     this.Records.Count, // nStart,
                     nCount, // nCount,
-                    this.TargetInfo.PresentPerBatchCount,   // ÍÆ¼öµÄÃ¿´ÎÊıÁ¿
+                    this.TargetInfo.PresentPerBatchCount,   // æ¨èçš„æ¯æ¬¡æ•°é‡
                     strElementSetName,    // "F" strElementSetName,
                     // ZTargetControl.GetLeftValue(this.comboBox_recordSyntax.Text),
                     this.PreferredRecordSyntax,
-                    true,   // Á¢¼´ÏÔÊ¾³öÀ´
+                    true,   // ç«‹å³æ˜¾ç¤ºå‡ºæ¥
                     out records,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "´Ó " + this.Records.Count.ToString()
-                        + " ¿ªÊ¼×°ÈëĞÂµÄÒ»Åú¼ÇÂ¼Ê±³ö´í£º" + strError;
+                    strError = "ä» " + this.Records.Count.ToString()
+                        + " å¼€å§‹è£…å…¥æ–°çš„ä¸€æ‰¹è®°å½•æ—¶å‡ºé”™ï¼š" + strError;
                     goto ERROR1;
                 }
                 else
@@ -1108,16 +1099,16 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             this.DoStop();
         }
 
-        #region Òì²½ Initial
+        #region å¼‚æ­¥ Initial
 
         public event EventHandler InitialComplete = null;
-        string m_strRequestRefID = "";  // ÇëÇóÖĞÊ¹ÓÃµÄrefid¡£Èç¹ûÎª""±íÊ¾²»¼ì²é
+        string m_strRequestRefID = "";  // è¯·æ±‚ä¸­ä½¿ç”¨çš„refidã€‚å¦‚æœä¸º""è¡¨ç¤ºä¸æ£€æŸ¥
         string m_strResultInfo = "";
 
-        // Ö´ĞĞ³õÊ¼»¯
-        // Òì²½Ä£Ê½
+        // æ‰§è¡Œåˆå§‹åŒ–
+        // å¼‚æ­¥æ¨¡å¼
         // parameters:
-        //      strResultInfo   [out]·µ»ØËµÃ÷³õÊ¼»¯½á¹ûµÄÎÄ×Ö
+        //      strResultInfo   [out]è¿”å›è¯´æ˜åˆå§‹åŒ–ç»“æœçš„æ–‡å­—
         int DoInitialAsync(
             bool bIgnoreReferenceID)
         {
@@ -1190,7 +1181,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (connection.ZChannel.Connected == false)
             {
-                this.ErrorInfo = "socketÉĞÎ´Á¬½Ó»òÕßÒÑ¾­±»¹Ø±Õ";
+                this.ErrorInfo = "socketå°šæœªè¿æ¥æˆ–è€…å·²ç»è¢«å…³é—­";
                 goto ERROR1;
             }
 
@@ -1205,11 +1196,11 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 #endif
             ClearSendRecvCompleteEvent();
             connection.ZChannel.SendRecvComplete += new EventHandler(ZChannel_initial_SendRecvComplete);
-                    // ·¢³öÇëÇó°ü£¬½ÓÊÕÏìÓ¦°ü
+                    // å‘å‡ºè¯·æ±‚åŒ…ï¼Œæ¥æ”¶å“åº”åŒ…
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦Æô¶¯
-        //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸå¯åŠ¨
+        //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
             nRet = connection.ZChannel.SendRecvAsync(baPackage);
             if (nRet != 0)
                 goto ERROR1;
@@ -1268,20 +1259,20 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (string.IsNullOrEmpty(this.m_strRequestRefID) == false)
             {
-                // 2007/11/2¡£¿ÉÒÔ°ïÖú·¢ÏÖ¾É°æ±¾dp2zserverµÄ´íÎó
+                // 2007/11/2ã€‚å¯ä»¥å¸®åŠ©å‘ç°æ—§ç‰ˆæœ¬dp2zserverçš„é”™è¯¯
                 if (this.m_strRequestRefID != init_response.m_strReferenceId)
                 {
-                    this.ErrorInfo = "ÇëÇóµÄ reference id [" + this.m_strRequestRefID + "] ºÍ ÏìÓ¦µÄ reference id [" + init_response.m_strReferenceId + "] ²»Ò»ÖÂ£¡";
+                    this.ErrorInfo = "è¯·æ±‚çš„ reference id [" + this.m_strRequestRefID + "] å’Œ å“åº”çš„ reference id [" + init_response.m_strReferenceId + "] ä¸ä¸€è‡´ï¼";
                     goto ERROR1;
                 }
             }
 
-            // 2007/11/5¼ì²éversionºÍoptions
+            // 2007/11/5æ£€æŸ¥versionå’Œoptions
             bool bOption_0 = BerTree.GetBit(init_response.m_strOptions,
                 0);
             if (bOption_0 == false)
             {
-                this.ErrorInfo = "·şÎñÆ÷ÏìÓ¦µÄ option bit 0 ±íÊ¾²»Ö§³Ö search";
+                this.ErrorInfo = "æœåŠ¡å™¨å“åº”çš„ option bit 0 è¡¨ç¤ºä¸æ”¯æŒ search";
                 goto ERROR1;
             }
 
@@ -1289,7 +1280,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 1);
             if (bOption_1 == false)
             {
-                this.ErrorInfo = "·şÎñÆ÷ÏìÓ¦µÄ option bit 1 ±íÊ¾²»Ö§³Ö present";
+                this.ErrorInfo = "æœåŠ¡å™¨å“åº”çš„ option bit 1 è¡¨ç¤ºä¸æ”¯æŒ present";
                 goto ERROR1;
             }
 
@@ -1299,9 +1290,9 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
             else
             {
-                this.ErrorInfo = "Initial±»¾Ü¾ø¡£\r\n\r\n´íÎóÂë ["
+                this.ErrorInfo = "Initialè¢«æ‹’ç»ã€‚\r\n\r\né”™è¯¯ç  ["
                     + init_response.m_lErrorCode.ToString()
-                    + "]\r\n´íÎóÏûÏ¢["
+                    + "]\r\né”™è¯¯æ¶ˆæ¯["
                     + init_response.m_strErrorMessage + "]";
 
                 this.m_strResultInfo = BuildInitialResultInfo(init_response);
@@ -1317,14 +1308,14 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             connection.ZChannel.Initialized = true;
 
-            // ×Ö·û¼¯Ğ­ÉÌ
+            // å­—ç¬¦é›†åå•†
             if (init_response.m_charNego != null
                 && BerTree.GetBit(init_response.m_strOptions, 17) == true)
             {
                 if (init_response.m_charNego.EncodingLevelOID == CharsetNeogatiation.Utf8OID)
                 {
-                    // ÁÙÊ±ĞŞ¸Ä¼ìË÷´ÊµÄ±àÂë·½Ê½¡£
-                    // µ«ÊÇ»¹ÎŞ·¨·´Ó³µ½PropertyDialogÉÏ¡£×îºÃÄÜ·´À¡¡£
+                    // ä¸´æ—¶ä¿®æ”¹æ£€ç´¢è¯çš„ç¼–ç æ–¹å¼ã€‚
+                    // ä½†æ˜¯è¿˜æ— æ³•åæ˜ åˆ°PropertyDialogä¸Šã€‚æœ€å¥½èƒ½åé¦ˆã€‚
                     this.TargetInfo.DefaultQueryTermEncoding = Encoding.UTF8;
                     this.TargetInfo.Changed = true;
 
@@ -1346,10 +1337,10 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
 #endregion
 
-        // Ö´ĞĞ³õÊ¼»¯
-        // Í¬²½Ä£Ê½
+        // æ‰§è¡Œåˆå§‹åŒ–
+        // åŒæ­¥æ¨¡å¼
         // parameters:
-        //      strResultInfo   [out]·µ»ØËµÃ÷³õÊ¼»¯½á¹ûµÄÎÄ×Ö
+        //      strResultInfo   [out]è¿”å›è¯´æ˜åˆå§‹åŒ–ç»“æœçš„æ–‡å­—
         int DoInitial(
             bool bIgnoreReferenceID,
             out string strResultInfo,
@@ -1423,7 +1414,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (connection.ZChannel.Connected == false)
             {
-                strError = "socketÉĞÎ´Á¬½Ó»òÕßÒÑ¾­±»¹Ø±Õ";
+                strError = "socketå°šæœªè¿æ¥æˆ–è€…å·²ç»è¢«å…³é—­";
                 goto ERROR1;
             }
 
@@ -1514,20 +1505,20 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (bIgnoreReferenceID == false)
             {
-                // 2007/11/2¡£¿ÉÒÔ°ïÖú·¢ÏÖ¾É°æ±¾dp2zserverµÄ´íÎó
+                // 2007/11/2ã€‚å¯ä»¥å¸®åŠ©å‘ç°æ—§ç‰ˆæœ¬dp2zserverçš„é”™è¯¯
                 if (struInit_request.m_strReferenceId != init_response.m_strReferenceId)
                 {
-                    strError = "ÇëÇóµÄ reference id [" + struInit_request.m_strReferenceId + "] ºÍ ÏìÓ¦µÄ reference id [" + init_response.m_strReferenceId + "] ²»Ò»ÖÂ£¡";
+                    strError = "è¯·æ±‚çš„ reference id [" + struInit_request.m_strReferenceId + "] å’Œ å“åº”çš„ reference id [" + init_response.m_strReferenceId + "] ä¸ä¸€è‡´ï¼";
                     goto ERROR1;
                 }
             }
 
-            // 2007/11/5¼ì²éversionºÍoptions
+            // 2007/11/5æ£€æŸ¥versionå’Œoptions
             bool bOption_0 = BerTree.GetBit(init_response.m_strOptions,
                 0);
             if (bOption_0 == false)
             {
-                strError = "·şÎñÆ÷ÏìÓ¦µÄ option bit 0 ±íÊ¾²»Ö§³Ö search";
+                strError = "æœåŠ¡å™¨å“åº”çš„ option bit 0 è¡¨ç¤ºä¸æ”¯æŒ search";
                 goto ERROR1;
             }
 
@@ -1535,7 +1526,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 1);
             if (bOption_1 == false)
             {
-                strError = "·şÎñÆ÷ÏìÓ¦µÄ option bit 1 ±íÊ¾²»Ö§³Ö present";
+                strError = "æœåŠ¡å™¨å“åº”çš„ option bit 1 è¡¨ç¤ºä¸æ”¯æŒ present";
                 goto ERROR1;
             }
 
@@ -1545,9 +1536,9 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
             else
             {
-                strError = "Initial±»¾Ü¾ø¡£\r\n\r\n´íÎóÂë ["
+                strError = "Initialè¢«æ‹’ç»ã€‚\r\n\r\né”™è¯¯ç  ["
                     + init_response.m_lErrorCode.ToString()
-                    + "]\r\n´íÎóÏûÏ¢["
+                    + "]\r\né”™è¯¯æ¶ˆæ¯["
                     + init_response.m_strErrorMessage + "]";
 
                 strResultInfo = BuildInitialResultInfo(init_response);
@@ -1563,14 +1554,14 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             connection.ZChannel.Initialized = true;
 
-            // ×Ö·û¼¯Ğ­ÉÌ
+            // å­—ç¬¦é›†åå•†
             if (init_response.m_charNego != null
                 && BerTree.GetBit(init_response.m_strOptions, 17) == true)
             {
                 if (init_response.m_charNego.EncodingLevelOID == CharsetNeogatiation.Utf8OID)
                 {
-                    // ÁÙÊ±ĞŞ¸Ä¼ìË÷´ÊµÄ±àÂë·½Ê½¡£
-                    // µ«ÊÇ»¹ÎŞ·¨·´Ó³µ½PropertyDialogÉÏ¡£×îºÃÄÜ·´À¡¡£
+                    // ä¸´æ—¶ä¿®æ”¹æ£€ç´¢è¯çš„ç¼–ç æ–¹å¼ã€‚
+                    // ä½†æ˜¯è¿˜æ— æ³•åæ˜ åˆ°PropertyDialogä¸Šã€‚æœ€å¥½èƒ½åé¦ˆã€‚
                     targetinfo.DefaultQueryTermEncoding = Encoding.UTF8;
                     targetinfo.Changed = true;
 
@@ -1650,7 +1641,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
 #if NOTCPIP
 	if (m_hSocket == INVALID_SOCKET) {
-		strError = "socketÒÑ¾­¹Ø±Õ!";
+		strError = "socketå·²ç»å…³é—­!";
 		return -1;
 	}
 #endif
@@ -1683,7 +1674,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 // CloseZAssociation();
                 return -1;
             }
-            //AfxMessageBox("·¢ËÍ³É¹¦");
+            //AfxMessageBox("å‘é€æˆåŠŸ");
 
 
             baPackage = null;
@@ -1748,14 +1739,14 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 	*/
             nResultCount = (int)search_response.m_lResultCount;
 
-            if (search_response.m_nSearchStatus != 0)	// ²»Ò»¶¨ÊÇ1
+            if (search_response.m_nSearchStatus != 0)	// ä¸ä¸€å®šæ˜¯1
                 return 1;
 
             strError = "Search Fail: diagRecords:\r\n" + search_response.m_diagRecords.GetMessage();
             return 0;	// search fail
         }
 
-        #region Òì²½ Search
+        #region å¼‚æ­¥ Search
 
         public event EventHandler SearchComplete = null;
 
@@ -1764,9 +1755,9 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
         string [] m_dbnames = null;
         string m_strResultSetName = "";
         // int m_nResultCount = 0;
-        int m_nSearchStatus = 0;    // ¼ìË÷ÊÇ·ñ³É¹¦ 0 Ê§°Ü 1 ³É¹¦
+        int m_nSearchStatus = 0;    // æ£€ç´¢æ˜¯å¦æˆåŠŸ 0 å¤±è´¥ 1 æˆåŠŸ
 
-        // ÉèÖÃ¼ìË÷²ÎÊı
+        // è®¾ç½®æ£€ç´¢å‚æ•°
         public void SetSearchParameters(
             string strQuery,
             Encoding queryTermEncoding,
@@ -1786,7 +1777,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
         {
             ZConnection connection = this;
 
-            this.Stop.SetMessage("ÕıÔÚ¶Ô·şÎñÆ÷ "+this.TargetInfo.ServerName+" ¼ìË÷ '" + this.m_strQuery + "' ...");
+            this.Stop.SetMessage("æ­£åœ¨å¯¹æœåŠ¡å™¨ "+this.TargetInfo.ServerName+" æ£€ç´¢ '" + this.m_strQuery + "' ...");
 
             BerTree tree = new BerTree();
             SEARCH_REQUEST struSearch_request = new SEARCH_REQUEST();
@@ -1835,13 +1826,13 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             tree.m_RootNode.DumpToFile(strLogFile);
 #endif
             ClearSendRecvCompleteEvent();
-            // TODO: ÖØ¸´¹Ò½ÓÊÂ¼şÔõÃ´°ì£¿ºÎÊ± -= ?
+            // TODO: é‡å¤æŒ‚æ¥äº‹ä»¶æ€ä¹ˆåŠï¼Ÿä½•æ—¶ -= ?
             connection.ZChannel.SendRecvComplete += new EventHandler(ZChannel_search_SendRecvComplete);
-            // ·¢³öÇëÇó°ü£¬½ÓÊÕÏìÓ¦°ü
+            // å‘å‡ºè¯·æ±‚åŒ…ï¼Œæ¥æ”¶å“åº”åŒ…
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦Æô¶¯
-            //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸå¯åŠ¨
+            //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
             nRet = connection.ZChannel.SendRecvAsync(baPackage);
             if (nRet != 0)
             {
@@ -1910,10 +1901,10 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 goto ERROR1;
             }
 
-            this.m_nSearchStatus = 1;   // search_response.m_nSearchStatus != 0	// ²»Ò»¶¨ÊÇ1
+            this.m_nSearchStatus = 1;   // search_response.m_nSearchStatus != 0	// ä¸ä¸€å®šæ˜¯1
 
-            // ÏÔÊ¾ÃüÖĞ½á¹û
-            this.AsyncShowQueryResultInfo("ÃüÖĞ½á¹ûÌõÊı:" + this.ResultCount.ToString());
+            // æ˜¾ç¤ºå‘½ä¸­ç»“æœ
+            this.AsyncShowQueryResultInfo("å‘½ä¸­ç»“æœæ¡æ•°:" + this.ResultCount.ToString());
 
             if (this.SearchComplete != null)
             {
@@ -1930,15 +1921,15 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
         #endregion
 
-        // »ñµÃ¼ÇÂ¼
-        // È·±£Ò»¶¨¿ÉÒÔ»ñµÃnCount¸ö
+        // è·å¾—è®°å½•
+        // ç¡®ä¿ä¸€å®šå¯ä»¥è·å¾—nCountä¸ª
         // parameters:
-        //          nPreferedEachCount  ÍÆ¼öµÄÃ¿´ÎÌõÊı¡£ÕâÉæ¼°µ½ÏìÓ¦µÄÃô½İĞÔ¡£Èç¹ûÎª-1»òÕß0£¬±íÊ¾×î´ó
+        //          nPreferedEachCount  æ¨èçš„æ¯æ¬¡æ¡æ•°ã€‚è¿™æ¶‰åŠåˆ°å“åº”çš„æ•æ·æ€§ã€‚å¦‚æœä¸º-1æˆ–è€…0ï¼Œè¡¨ç¤ºæœ€å¤§
         public int DoPresent(
             string strResultSetName,
             int nStart,
             int nCount,
-            int nPreferedEachCount,  // ÍÆ¼öµÄÃ¿´ÎÌõÊı¡£ÕâÉæ¼°µ½ÏìÓ¦µÄÃô½İĞÔ
+            int nPreferedEachCount,  // æ¨èçš„æ¯æ¬¡æ¡æ•°ã€‚è¿™æ¶‰åŠåˆ°å“åº”çš„æ•æ·æ€§
             string strElementSetName,
             string strPreferredRecordSyntax,
             bool bDisplay,
@@ -1950,7 +1941,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             records = new RecordCollection();
             if (nCount == 0)
             {
-                strError = "nCountÎª0";
+                strError = "nCountä¸º0";
                 return 0;
             }
 
@@ -1958,7 +1949,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             if (this.Stop != null)
             {
                 old_style = this.Stop.Style;
-                this.Stop.Style = StopStyle.EnableHalfStop; // ÔÊĞí°ëÖĞ¶Ï
+                this.Stop.Style = StopStyle.EnableHalfStop; // å…è®¸åŠä¸­æ–­
             }
 
             try
@@ -1972,7 +1963,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     {
                         if (this.Stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             break;
                         }
                     }
@@ -1984,7 +1975,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     else
                         nPerCount = Math.Min(nPreferedEachCount, nCount - nGeted);
 
-                    this.Stop.SetMessage("ÕıÔÚ»ñÈ¡ÃüÖĞ½á¹û ( " + (nStart + nGeted + 1).ToString() + "-" + (nStart + nGeted + nPerCount).ToString() + " of " + this.ResultCount + " ) ...");
+                    this.Stop.SetMessage("æ­£åœ¨è·å–å‘½ä¸­ç»“æœ ( " + (nStart + nGeted + 1).ToString() + "-" + (nStart + nGeted + nPerCount).ToString() + " of " + this.ResultCount + " ) ...");
 
                     RecordCollection temprecords = null;
                     int nRet = DoOncePresent(
@@ -2002,10 +1993,10 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
                     if (bDisplay == true)
                     {
-                        this.Stop.SetMessage("ÕıÔÚÏÔÊ¾ÒÑ¾­»ñÈ¡µÄÃüÖĞ½á¹û ( " + (nStart + nGeted + 1).ToString() + "-" + (nStart + nGeted + temprecords.Count).ToString() + " of " + this.ResultCount.ToString() + " ) ...");
+                        this.Stop.SetMessage("æ­£åœ¨æ˜¾ç¤ºå·²ç»è·å–çš„å‘½ä¸­ç»“æœ ( " + (nStart + nGeted + 1).ToString() + "-" + (nStart + nGeted + temprecords.Count).ToString() + " of " + this.ResultCount.ToString() + " ) ...");
 
                         // 
-                        // Èç¹û±ØÒª£¬¼ÓÈëĞÂµÄÒ»Åú
+                        // å¦‚æœå¿…è¦ï¼ŒåŠ å…¥æ–°çš„ä¸€æ‰¹
                         if (nStart + nGeted >= connection.Records.Count)
                             connection.Records.AddRange(temprecords);
                         else
@@ -2013,9 +2004,9 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                             for (int i = 0; i < temprecords.Count; i++)
                             {
                                 if (i + nStart + nGeted >= connection.Records.Count)
-                                    connection.Records.Add(temprecords[i]); // ×·¼Ó
+                                    connection.Records.Add(temprecords[i]); // è¿½åŠ 
                                 else
-                                    connection.Records[i + nStart + nGeted] = temprecords[i];   // Ìæ»»
+                                    connection.Records[i + nStart + nGeted] = temprecords[i];   // æ›¿æ¢
                             }
                         }
 
@@ -2029,7 +2020,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                         if (nRet == -1)
                             return -1;
 
-                        // TODO: ¿´¿´ÓĞÃ»ÓĞ±ØÒª×·¼Ó»ò²¹³ä¡£Èç¹ûÃ»ÓĞ±ØÒª×·¼Ó»ò²¹³ä£¬ÄÇ¾ÍÌæ»»²¿·Ö
+                        // TODO: çœ‹çœ‹æœ‰æ²¡æœ‰å¿…è¦è¿½åŠ æˆ–è¡¥å……ã€‚å¦‚æœæ²¡æœ‰å¿…è¦è¿½åŠ æˆ–è¡¥å……ï¼Œé‚£å°±æ›¿æ¢éƒ¨åˆ†
 
                         /*
                         nRet = FillRecordsToVirtualItems(
@@ -2062,7 +2053,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
         }
 
-        #region Òì²½ Present
+        #region å¼‚æ­¥ Present
 
         public event EventHandler CommandsComplete = null;
         public event EventHandler PresentComplete = null;
@@ -2080,7 +2071,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
         public void SetPresentParameters(string strResultSetName,
     int nStart,
     int nCount,
-    int nPreferedEachCount,  // ÍÆ¼öµÄÃ¿´ÎÌõÊı¡£ÕâÉæ¼°µ½ÏìÓ¦µÄÃô½İĞÔ
+    int nPreferedEachCount,  // æ¨èçš„æ¯æ¬¡æ¡æ•°ã€‚è¿™æ¶‰åŠåˆ°å“åº”çš„æ•æ·æ€§
     string strElementSetName,
     string strPreferredRecordSyntax,
     bool bDisplay)
@@ -2091,7 +2082,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             /*
              *             if (nCount == 0)
             {
-                strError = "nCountÎª0";
+                strError = "nCountä¸º0";
                 return 0;
             }
              * */
@@ -2114,7 +2105,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 if (this.Stop != null)
                 {
                     m_oldStopStyle = this.Stop.Style;
-                    this.Stop.Style = StopStyle.EnableHalfStop; // ÔÊĞí°ëÖĞ¶Ï
+                    this.Stop.Style = StopStyle.EnableHalfStop; // å…è®¸åŠä¸­æ–­
                 }
 
                 if (this.m_nPresentCount > this.ResultCount)
@@ -2159,11 +2150,11 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 #endif
             ClearSendRecvCompleteEvent();
             connection.ZChannel.SendRecvComplete += new EventHandler(ZChannel_present_SendRecvComplete);
-            // ·¢³öÇëÇó°ü£¬½ÓÊÕÏìÓ¦°ü
+            // å‘å‡ºè¯·æ±‚åŒ…ï¼Œæ¥æ”¶å“åº”åŒ…
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦Æô¶¯
-            //      1   ·¢³öÇ°£¬·¢ÏÖÁ÷ÖĞÓĞÎ´¶ÁÈëµÄÊı¾İ
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸå¯åŠ¨
+            //      1   å‘å‡ºå‰ï¼Œå‘ç°æµä¸­æœ‰æœªè¯»å…¥çš„æ•°æ®
             nRet = connection.ZChannel.SendRecvAsync(baPackage);
             if (nRet != 0)
             {
@@ -2178,7 +2169,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             return -1;
         }
 
-        // TODO: µ± SendRecvComplete Í¬Ê±¹Ò½ÓÁËÈı¸öº¯ÊıÊ±£¬ÓĞÊ²Ã´¸±×÷ÓÃÃ´? »òÕßËµÕâÖÖ¼õÈ¥Èı¸öº¯ÊıµÄÓÃ·¨ÊÇ·À·¶ĞÔµÄÓÃ·¨?
+        // TODO: å½“ SendRecvComplete åŒæ—¶æŒ‚æ¥äº†ä¸‰ä¸ªå‡½æ•°æ—¶ï¼Œæœ‰ä»€ä¹ˆå‰¯ä½œç”¨ä¹ˆ? æˆ–è€…è¯´è¿™ç§å‡å»ä¸‰ä¸ªå‡½æ•°çš„ç”¨æ³•æ˜¯é˜²èŒƒæ€§çš„ç”¨æ³•?
         void ClearSendRecvCompleteEvent()
         {
             this.ZChannel.SendRecvComplete -= new EventHandler(ZChannel_initial_SendRecvComplete);
@@ -2231,13 +2222,13 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 goto ERROR1;
             }
 
-            int nGeted = m_records.Count;   // ±¾´Î²Ù×÷Ç°¼¯ºÏµÄ³ß´ç
+            int nGeted = m_records.Count;   // æœ¬æ¬¡æ“ä½œå‰é›†åˆçš„å°ºå¯¸
 
             // 2011/11/1
             if (records == null)
                 goto ERROR1;
 
-            m_records.AddRange(records);    // ±¾´Î
+            m_records.AddRange(records);    // æœ¬æ¬¡
 
             SetElementSetName(records, this.m_strElementSetName);
 
@@ -2249,11 +2240,11 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (this.m_bDisplayPresentResult == true)
             {
-                this.Stop.SetMessage("ÕıÔÚÏÔÊ¾ÒÑ¾­»ñÈ¡µÄÃüÖĞ½á¹û ( " + (m_nPresentStart + 1).ToString() + "-" + (m_nPresentStart + nGeted).ToString() + " of " + this.ResultCount.ToString() + " ) ...");
+                this.Stop.SetMessage("æ­£åœ¨æ˜¾ç¤ºå·²ç»è·å–çš„å‘½ä¸­ç»“æœ ( " + (m_nPresentStart + 1).ToString() + "-" + (m_nPresentStart + nGeted).ToString() + " of " + this.ResultCount.ToString() + " ) ...");
 
 #if NO
                 // 
-                // Èç¹û±ØÒª£¬¼ÓÈëĞÂµÄÒ»Åú
+                // å¦‚æœå¿…è¦ï¼ŒåŠ å…¥æ–°çš„ä¸€æ‰¹
                 if (m_nPresentStart + nGeted >= connection.Records.Count)
                     connection.Records.AddRange(records);
                 else
@@ -2261,20 +2252,20 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     for (int i = 0; i < records.Count; i++)
                     {
                         if (i + m_nPresentStart + nGeted >= connection.Records.Count)
-                            connection.Records.Add(records[i]); // ×·¼Ó
+                            connection.Records.Add(records[i]); // è¿½åŠ 
                         else
-                            connection.Records[i + m_nPresentStart + nGeted] = records[i];   // Ìæ»»
+                            connection.Records[i + m_nPresentStart + nGeted] = records[i];   // æ›¿æ¢
                     }
                 }
 #endif
                 // 2013/11/25
                 for (int i = 0; i < records.Count; i++)
                 {
-                    int index = m_nPresentStart + i;    // connection.Records ÖĞµÄÏÂ±ê
+                    int index = m_nPresentStart + i;    // connection.Records ä¸­çš„ä¸‹æ ‡
                     while (index >= connection.Records.Count)
-                        connection.Records.Add(null);   // Ìî³ä¿Õ°×
+                        connection.Records.Add(null);   // å¡«å……ç©ºç™½
 
-                    connection.Records[index] = records[i];   // Ìæ»»
+                    connection.Records[index] = records[i];   // æ›¿æ¢
                 }
 
                 nRet = FillRecordsToVirtualItems(
@@ -2300,7 +2291,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
             else
             {
-                // ½áÊø
+                // ç»“æŸ
                 if (this.Stop != null)
                 {
                     this.Stop.Style = m_oldStopStyle;
@@ -2328,7 +2319,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             foreach(DigitalPlatform.Z3950.Record record in records)
             {
-                // ·ÇÕï¶Ï¼ÇÂ¼
+                // éè¯Šæ–­è®°å½•
                 if (record.m_nDiagCondition == 0)
                 {
                     record.m_strElementSetName = strElementSetName;
@@ -2336,10 +2327,10 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             }
         }
 
-        // »ñµÃ¼ÇÂ¼
-        // ²»È·±£Ò»¶¨¿ÉÒÔ»ñµÃnCount¸ö
+        // è·å¾—è®°å½•
+        // ä¸ç¡®ä¿ä¸€å®šå¯ä»¥è·å¾—nCountä¸ª
         // parameters:
-        //		nStart	¿ªÊ¼¼ÇÂ¼(´Ó0¼ÆËã)
+        //		nStart	å¼€å§‹è®°å½•(ä»0è®¡ç®—)
         int DoOncePresent(
             string strResultSetName,
             int nStart,
@@ -2356,7 +2347,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (nCount == 0)
             {
-                strError = "nCountÎª0";
+                strError = "nCountä¸º0";
                 return 0;
             }
 
@@ -2545,7 +2536,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             return strText;
         }
 
-        // ·¢ËÍÊı¾İÇ°¼ì²éÁ¬½Ó
+        // å‘é€æ•°æ®å‰æ£€æŸ¥è¿æ¥
         int CheckConnect(
             out string strError)
         {
@@ -2557,11 +2548,11 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             if (connection.ZChannel.DataAvailable == true)
             {
                 string strMessage = "";
-                // ´¦ÀíServer¿ÉÄÜ·¢À´µÄClose
+                // å¤„ç†Serverå¯èƒ½å‘æ¥çš„Close
                 // return:
                 //      -1  error
-                //      0   ²»ÊÇClose
-                //      1   ÊÇClose£¬ÒÑ¾­ÆÈÊ¹ZChannel´¦ÓÚÉĞÎ´³õÊ¼»¯×´Ì¬
+                //      0   ä¸æ˜¯Close
+                //      1   æ˜¯Closeï¼Œå·²ç»è¿«ä½¿ZChannelå¤„äºå°šæœªåˆå§‹åŒ–çŠ¶æ€
                 nRet = CheckServerCloseRequest(
                     out strMessage,
                     out strError);
@@ -2595,7 +2586,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                         return -1;
                     }
 
-                    // ÉèÖÃµ±Ç°Ê÷ÉÏÒÑ¾­Ñ¡ÔñµÄ½ÚµãµÄÀ©Õ¹ĞÅÏ¢
+                    // è®¾ç½®å½“å‰æ ‘ä¸Šå·²ç»é€‰æ‹©çš„èŠ‚ç‚¹çš„æ‰©å±•ä¿¡æ¯
                     nRet = ZTargetControl.SetCurrentTargetExtraInfo(
                         this.TreeNode,  // this.zTargetControl1.SelectedNode,
                         strInitialResultInfo,
@@ -2609,9 +2600,9 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             return 0;
         }
 
-        // ½á¹û¼¯×·¼Óµ½listviewÖĞ
+        // ç»“æœé›†è¿½åŠ åˆ°listviewä¸­
         // parameters:
-        //      records µ±Ç°ĞÂ»ñµÃÒ»Åú¼ÇÂ¼¡£ĞèÒª×·¼Óµ½connectionµÄRecordsÖĞ
+        //      records å½“å‰æ–°è·å¾—ä¸€æ‰¹è®°å½•ã€‚éœ€è¦è¿½åŠ åˆ°connectionçš„Recordsä¸­
         public int FillRecordsToVirtualItems(
             Stop stop,
             RecordCollection records,
@@ -2621,7 +2612,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             VirtualItemCollection items = this.VirtualItems;
 
-            // Debug.Assert(connection == this.GetCurrentZConnection(), "²»ÊÇµ±Ç°connection£¬×°Èëlistview»áÆÆ»µ½çÃæ");
+            // Debug.Assert(connection == this.GetCurrentZConnection(), "ä¸æ˜¯å½“å‰connectionï¼Œè£…å…¥listviewä¼šç ´åç•Œé¢");
 
             strError = "";
             if (connection.Records == null)
@@ -2630,7 +2621,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             int nExistCount = connection.Records.Count;
             Debug.Assert(items.Count == nExistCount, "");
 
-            // ¼ÓÈëĞÂµÄÒ»Åú
+            // åŠ å…¥æ–°çš„ä¸€æ‰¹
             connection.Records.AddRange(records);
 
             int nRet = FillRecordsToVirtualItems(
@@ -2645,7 +2636,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             return 0;
         }
 
-        // °Ñ´æ´¢ÔÚrecords½á¹¹ÖĞµÄĞÅÏ¢ÌîÈëĞéÄâlistview
+        // æŠŠå­˜å‚¨åœ¨recordsç»“æ„ä¸­çš„ä¿¡æ¯å¡«å…¥è™šæ‹Ÿlistview
         // parameters:
         int FillRecordsToVirtualItems(
             Stop stop,
@@ -2666,22 +2657,22 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (nStart + nCount > records.Count)
             {
-                strError = "nStart[" + nStart.ToString() + "]ºÍnCount[" + nCount.ToString() + "]²ÎÊıÖ®ºÍ³¬³örecords¼¯ºÏµÄ³ß´ç[" + records.Count.ToString() + "]";
+                strError = "nStart[" + nStart.ToString() + "]å’ŒnCount[" + nCount.ToString() + "]å‚æ•°ä¹‹å’Œè¶…å‡ºrecordsé›†åˆçš„å°ºå¯¸[" + records.Count.ToString() + "]";
                 return -1;
             }
 
             for (int i = nStart; i < nStart + nCount; i++)
             {
-                // Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨ BUG Èç¹ûÔÚ·Ç½çÃæÏß³ÌÖĞÖ´ĞĞ»áµ¼ÖÂ InvalidOperationException
+                // Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ BUG å¦‚æœåœ¨éç•Œé¢çº¿ç¨‹ä¸­æ‰§è¡Œä¼šå¯¼è‡´ InvalidOperationException
 
                 /*
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
-                        // TODO: ÖĞ¶ÏºóÔõÃ´°ì£¿ËÆ×îºóÒ»Ìõ¼ÇÂ¼²»´ú±íRecordsÖĞµÄ×îºóÁË
+                        // TODO: ä¸­æ–­åæ€ä¹ˆåŠï¼Ÿä¼¼æœ€åä¸€æ¡è®°å½•ä¸ä»£è¡¨Recordsä¸­çš„æœ€åäº†
                     }
                 }*/
 
@@ -2699,7 +2690,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                 nRet = this.IZSearchForm.BuildBrowseText(
                     connection,
                     record,
-                    "marc", // Æ«ÏòMARC
+                    "marc", // åå‘MARC
                     out strBrowseText,
                     out nImageIndex,
                     out strError);
@@ -2726,7 +2717,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     while (i > items.Count)
                         items.Add(null);
 
-                    // Ô­À´µÄÓï¾ä
+                    // åŸæ¥çš„è¯­å¥
                     items.Add(item);
                 }
                 else
@@ -2735,7 +2726,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
                     items[i] = item;
 
                     // 2011/9/11
-                    // ¼Ì³ĞÒÔÇ°µÄÑ¡Ôñ×´Ì¬
+                    // ç»§æ‰¿ä»¥å‰çš„é€‰æ‹©çŠ¶æ€
                     if (old_item != null)
                         item.Selected = old_item.Selected;
                 }
@@ -2744,11 +2735,11 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
         }
 
 
-        // ´¦ÀíServer¿ÉÄÜ·¢À´µÄClose
+        // å¤„ç†Serverå¯èƒ½å‘æ¥çš„Close
         // return:
         //      -1  error
-        //      0   ²»ÊÇClose
-        //      1   ÊÇClose£¬ÒÑ¾­ÆÈÊ¹ZChannel´¦ÓÚÉĞÎ´³õÊ¼»¯×´Ì¬
+        //      0   ä¸æ˜¯Close
+        //      1   æ˜¯Closeï¼Œå·²ç»è¿«ä½¿ZChannelå¤„äºå°šæœªåˆå§‹åŒ–çŠ¶æ€
         int CheckServerCloseRequest(
             out string strMessage,
             out string strError)
@@ -2780,7 +2771,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
             if (tree1.GetAPDuRoot().m_uTag != BerTree.z3950_close)
             {
-                // ²»ÊÇClose
+                // ä¸æ˜¯Close
                 return 0;
             }
 

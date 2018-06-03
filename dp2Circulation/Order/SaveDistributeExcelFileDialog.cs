@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
 
 namespace dp2Circulation.Order
 {
@@ -196,6 +195,7 @@ namespace dp2Circulation.Order
                 controls.Add(this.comboBox_seller);
                 controls.Add(this.textBox_outputFileName);
                 controls.Add(this.checkBox_createNewOrderRecord);
+                controls.Add(this.checkBox_onlyOutputBlankStateOrderRecord);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -204,7 +204,20 @@ namespace dp2Circulation.Order
                 controls.Add(this.comboBox_seller);
                 controls.Add(this.textBox_outputFileName);
                 controls.Add(this.checkBox_createNewOrderRecord);
+                controls.Add(this.checkBox_onlyOutputBlankStateOrderRecord);
                 GuiState.SetUiState(controls, value);
+            }
+        }
+
+        public bool OnlyOutputBlankStateOrderRecord
+        {
+            get
+            {
+                return this.checkBox_onlyOutputBlankStateOrderRecord.Checked;
+            }
+            set
+            {
+                this.checkBox_onlyOutputBlankStateOrderRecord.Checked = value;
             }
         }
 

@@ -2665,7 +2665,7 @@ out strError);
         int VerifyBiblioRecord(out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -2932,10 +2932,7 @@ out strError);
                 strError = "获得馆藏地配置参数时出错: " + strError;
                 goto ERROR1;
             }
-            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
-            // 增加 (空) 这一项
-            location_list.Add(Order.DistributeExcelFile.NULL_LOCATION_CAPTION);
-
+            location_list = Order.DistributeExcelFile.FilterLocationList(location_list, dlg.LibraryCode);
 
             bool bLaunchExcel = true;
 
@@ -3002,24 +2999,19 @@ out strError);
 
                 Order.ExportDistributeContext context = new Order.ExportDistributeContext
                 {
-                    sheet = sheet,
-                    location_list = location_list,
-                    biblio_col_list = biblio_title_list,
-                    order_col_list = order_title_list,
-                    column_max_chars = column_max_chars,
-                    nRowIndex = 2,
+                    Sheet = sheet,
+                    LocationList = location_list,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = order_title_list,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                    OnlyOutputBlankStateOrderRecord = dlg.OnlyOutputBlankStateOrderRecord,
                 };
 
                 // 输出标题行
                 Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
                     context,
-// location_list,
-//sheet,
 ""
-//biblio_title_list,
-//order_title_list,
-//ref nRowIndex,
-//ref column_max_chars
 );
 
                 /*
@@ -3048,16 +3040,12 @@ out strError);
                             nOrderCount += Order.DistributeExcelFile.OutputDistributeInfos(
                                 context,
                                 this,
-                                // location_list,
                                 strSellerFilter,
                                 dlg.LibraryCode,
                                 //sheet,
                                 strBiblioRecPath,
                                 ref nLineNumber,
                                 "",
-                                //biblio_title_list,
-                                //ref nRowIndex,
-                                //order_title_list,
                                 (biblio_recpath, order_recpath) =>
                                 {
                                     if (string.IsNullOrEmpty(strDefaultOrderXml))
@@ -3178,7 +3166,6 @@ out strError);
                                     nNewOrderCount++;
                                     return order;
                                 }
-                                // ref column_max_chars
                                 );
 
                             nBiblioCount++;
@@ -3188,11 +3175,12 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                context.ContentEndRow = context.nRowIndex - 1;
+                context.ContentEndRow = context.RowIndex - 1;
 
                 Order.DistributeExcelFile.OutputSumLine(context);
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
+
                 bDone = true;
             }
             catch (InterruptException ex)

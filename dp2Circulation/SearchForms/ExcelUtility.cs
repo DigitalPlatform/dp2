@@ -185,6 +185,9 @@ namespace dp2Circulation
         {
             copyNumberCell = null;
 
+            //string strState = "";
+            //List<IXLCell> cells = new List<IXLCell>();
+
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strXml);
 
@@ -201,8 +204,12 @@ namespace dp2Circulation
                 else
                     strValue = FindItemContent(dom, col);
 
+                //if (col == "state" || col.EndsWith("_state"))
+                //    strState = strValue;
+
                 {
                     IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1);
+                    //cells.Add(cell);
 
                     if (col == "copyNumber" || col == "copyItems")
                     {
@@ -219,8 +226,8 @@ namespace dp2Circulation
 
 
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                    if (backColor != XLColor.NoColor)
-                        cell.Style.Fill.BackgroundColor = backColor;
+                    //if (backColor != XLColor.NoColor)
+                    //    cell.Style.Fill.BackgroundColor = backColor;
                     if (i == 0)
                     {
                         cell.Style.Border.SetLeftBorderColor(XLColor.Black);
@@ -243,7 +250,8 @@ namespace dp2Circulation
                     if (col == "copy")
                         cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
 
-                    if (col == "recpath" || col.EndsWith("_recpath"))
+                    if ((col == "recpath" || col.EndsWith("_recpath"))
+                        || (col == "state" || col.EndsWith("_state")))
                     {
                         cell.Style.Font.FontColor = XLColor.LightGray;
                     }
@@ -256,6 +264,7 @@ namespace dp2Circulation
 
                 i++;
             }
+
         }
 
         static string FindItemContent(XmlDocument dom, string element_name)

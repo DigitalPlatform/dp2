@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation

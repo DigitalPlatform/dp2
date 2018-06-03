@@ -6151,10 +6151,7 @@ out strError);
                 strError = "获得馆藏地配置参数时出错: " + strError;
                 goto ERROR1;
             }
-            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
-            // 增加 (空) 这一项
-            location_list.Add(Order.DistributeExcelFile.NULL_LOCATION_CAPTION);
-
+            location_list = Order.DistributeExcelFile.FilterLocationList(location_list, dlg.LibraryCode);
 
             bool bLaunchExcel = true;
 
@@ -6217,12 +6214,13 @@ out strError);
 
                 Order.ExportDistributeContext context = new Order.ExportDistributeContext
                 {
-                    sheet = sheet,
-                    location_list = location_list,
-                    biblio_col_list = biblio_title_list,
-                    order_col_list = order_title_list,
-                    column_max_chars = column_max_chars,
-                    nRowIndex = 2,
+                    Sheet = sheet,
+                    LocationList = location_list,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = order_title_list,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                    OnlyOutputBlankStateOrderRecord = dlg.OnlyOutputBlankStateOrderRecord,
                 };
 
                 // 输出标题行
@@ -6310,6 +6308,7 @@ out strError);
                     if (Order.DistributeExcelFile.FilterOrderRecord(order_dom,
                         strSellerFilter,
                         dlg.LibraryCode,
+                        dlg.OnlyOutputBlankStateOrderRecord,
                         strOrderRecPath) == false)
                         return;
 
@@ -6376,7 +6375,7 @@ out strError);
 
         // ref column_max_chars
         );
-                        context.nRowIndex++;
+                        context.RowIndex++;
                     }
 
                     nOrderCount++;
@@ -6385,7 +6384,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                context.ContentEndRow = context.nRowIndex - 1;
+                context.ContentEndRow = context.RowIndex - 1;
 
                 Order.DistributeExcelFile.OutputSumLine(context);
 
