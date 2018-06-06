@@ -27,7 +27,7 @@ namespace dp2Circulation
 
         ItemDisplayState _createState = ItemDisplayState.Normal;
         // 创建状态
-        public virtual ItemDisplayState CreateState 
+        public virtual ItemDisplayState CreateState
         {
             get
             {
@@ -373,7 +373,7 @@ namespace dp2Circulation
             }
             finally
             {
-                this._inRefreshDom --;
+                this._inRefreshDom--;
             }
         }
 
@@ -421,6 +421,10 @@ namespace dp2Circulation
                 strError = "RefreshDom() exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+
+            // 2018/6/5
+            if (this._dataDom.DocumentElement != null)
+                DomUtil.RemoveEmptyElements(this._dataDom.DocumentElement);
 
             strXml = this._dataDom.OuterXml;
             return 0;
@@ -657,7 +661,7 @@ namespace dp2Circulation
                 {
                     // 第三列
                     Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
-                    if (edit_control != null 
+                    if (edit_control != null
                         && edit_control.Visible == true
                         && edit_control.Enabled == true)
                     {
@@ -906,7 +910,7 @@ namespace dp2Circulation
             Label color = this._tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
             if (color == null)
                 throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
-            
+
             Control edit = this._tableLayoutPanel_main.GetControlFromPosition(2, nRowNumber);
 
             color.Tag = newState;
@@ -1160,7 +1164,7 @@ namespace dp2Circulation
         XmlDocument _configDom = null;
 
         // 从配置文件装载字段配置，初始化这些字段
-        public int LoadConfig(string strFileName, 
+        public int LoadConfig(string strFileName,
             out string strError)
         {
             strError = "";
@@ -1225,7 +1229,7 @@ namespace dp2Circulation
 
                     nRow++;
                 }
-            AddEvents(nStart, nRow, true);
+                AddEvents(nStart, nRow, true);
             }
             finally
             {
@@ -1346,7 +1350,7 @@ namespace dp2Circulation
                     return;
                 if (this._labelColor.Tag == null)
                     this._labelColor.Tag = new dp2Circulation.ItemEditControlBase.EditLineState();
-                
+
                 dp2Circulation.ItemEditControlBase.EditLineState state = this._labelColor.Tag as dp2Circulation.ItemEditControlBase.EditLineState;
                 if (state.Active == value)
                     return;

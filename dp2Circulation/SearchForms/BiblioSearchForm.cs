@@ -2477,7 +2477,6 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
-
             }
 
             // 标记空下级记录的事项

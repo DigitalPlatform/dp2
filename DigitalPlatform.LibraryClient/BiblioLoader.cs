@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
@@ -11,6 +12,7 @@ namespace DigitalPlatform.LibraryClient
 {
     /// <summary>
     /// 快速获得书目记录信息
+    /// 可以用字符串集合，或者用 TextReader 来驱动
     /// </summary>
     public class BiblioLoader : IEnumerable
     {
@@ -32,6 +34,21 @@ namespace DigitalPlatform.LibraryClient
                 this.m_recpaths = value;
             }
         }
+
+        TextReader _textReader = null;
+
+        public TextReader TextReader
+        {
+            get
+            {
+                return this._textReader;
+            }
+            set
+            {
+                this._textReader = value;
+            }
+        }
+
 
         // 目前 format 只允许一种格式
         public string Format
@@ -77,42 +94,80 @@ namespace DigitalPlatform.LibraryClient
                 format_list.Add("metadata");
             }
 
-            string[] formats = new string[format_list.Count];
-            format_list.CopyTo(formats);
+            //string[] formats = new string[format_list.Count];
+            //format_list.CopyTo(formats);
 
             List<string> batch = new List<string>();
+            /*
             for (int index = 0; index < m_recpaths.Count; index++)
             {
                 string s = m_recpaths[index];
                 batch.Add(s);
+                */
+            bool bEOF = false;
+            for (int index = 0; ; index++)
+            {
+
+                // 2018/6/5
+                if (this._textReader != null)
+                {
+                    string strRecPath = this._textReader.ReadLine();
+
+                    if (strRecPath == null)
+                    {
+                        if (bEOF == true)
+                            break;
+                        bEOF = true;
+                    }
+                    else
+                    {
+                        strRecPath = strRecPath.Trim();
+                        int nRet = strRecPath.IndexOf("\t");
+                        if (nRet != -1)
+                            strRecPath = strRecPath.Substring(0, nRet).Trim();
+
+                        if (String.IsNullOrEmpty(strRecPath) == true)
+                            continue;
+
+                        batch.Add(strRecPath);
+                    }
+                }
+                else
+                {
+                    if (index >= m_recpaths.Count)
+                        break;
+                    string s = m_recpaths[index];
+                    batch.Add(s);
+                    if (index == m_recpaths.Count - 1)
+                        bEOF = true;
+                }
 
                 // 每100个一批，或者最后一次
                 if (batch.Count >= 100 ||
-                    (index == m_recpaths.Count - 1 && batch.Count > 0))
+                    (bEOF == true && batch.Count > 0))
                 {
-                REDO:
+                    REDO:
                     string strCommand = "@path-list:" + StringUtil.MakePathList(batch);
 
-                    string[] results = null;
-                    byte[] timestamp = null;
-                    string strError = "";
                     // Channel.Timeout = new TimeSpan(0, 0, 5); 应该让调主设置这个值
                     long lRet = Channel.GetBiblioInfos(
                         this.Stop,
                         strCommand,
                         "",
-                        formats,
-                        out results,
-                        out timestamp,
-                        out strError);
+                        format_list.ToArray(),
+                        out string[] results,
+                        out byte[] timestamp,
+                        out string strError);
                     if (lRet == -1)
                     {
                         if (this.Prompt != null)
                         {
-                            MessagePromptEventArgs e = new MessagePromptEventArgs();
-                            // e.MessageText = "获得书目记录 '"+strCommand+"' ("+StringUtil.MakePathList(format_list)+") 时发生错误： " + strError;
-                            e.MessageText = "获得书目记录时发生错误： " + strError + "\r\ncommand='" + strCommand + "' (" + StringUtil.MakePathList(format_list) + ")";
-                            e.Actions = "yes,no,cancel";
+                            MessagePromptEventArgs e = new MessagePromptEventArgs
+                            {
+                                // e.MessageText = "获得书目记录 '"+strCommand+"' ("+StringUtil.MakePathList(format_list)+") 时发生错误： " + strError;
+                                MessageText = "获得书目记录时发生错误： " + strError + "\r\ncommand='" + strCommand + "' (" + StringUtil.MakePathList(format_list) + ")",
+                                Actions = "yes,no,cancel"
+                            };
                             this.Prompt(this, e);
                             if (e.ResultAction == "cancel")
                                 throw new ChannelException(Channel.ErrorCode, strError);
@@ -134,10 +189,12 @@ namespace DigitalPlatform.LibraryClient
                         {
                             foreach (string path in batch)
                             {
-                                BiblioItem item = new BiblioItem();
-                                item.RecPath = path;
-                                item.ErrorCode = ErrorCode.NotFound;
-                                item.ErrorInfo = "书目记录 '" + path + "' 不存在";
+                                BiblioItem item = new BiblioItem
+                                {
+                                    RecPath = path,
+                                    ErrorCode = ErrorCode.NotFound,
+                                    ErrorInfo = "书目记录 '" + path + "' 不存在"
+                                };
                                 yield return item;
                             }
                             goto CONTINUE;
@@ -155,10 +212,12 @@ namespace DigitalPlatform.LibraryClient
                             {
                                 foreach (string path in batch)
                                 {
-                                    BiblioItem item = new BiblioItem();
-                                    item.RecPath = path;
-                                    item.ErrorCode = ErrorCode.NotFound;
-                                    item.ErrorInfo = "书目记录 '" + path + "' 不存在";
+                                    BiblioItem item = new BiblioItem
+                                    {
+                                        RecPath = path,
+                                        ErrorCode = ErrorCode.NotFound,
+                                        ErrorInfo = "书目记录 '" + path + "' 不存在"
+                                    };
                                     yield return item;
                                 }
                                 goto CONTINUE;
@@ -174,16 +233,16 @@ namespace DigitalPlatform.LibraryClient
                         throw new Exception(strError);
                     }
 
-                    for (int i = 0; i < results.Length / formats.Length; i++)
+                    for (int i = 0; i < results.Length / format_list.Count; i++)
                     {
                         BiblioItem item = new BiblioItem();
                         item.RecPath = batch[i];
                         if (nContentIndex != -1)
-                            item.Content = results[i * formats.Length + nContentIndex];
+                            item.Content = results[i * format_list.Count + nContentIndex];
                         if (nTimestampIndex != -1)
-                            item.Timestamp = ByteArray.GetTimeStampByteArray(results[i * formats.Length + nTimestampIndex]);
+                            item.Timestamp = ByteArray.GetTimeStampByteArray(results[i * format_list.Count + nTimestampIndex]);
                         if (nMetadataIndex != -1)
-                            item.Metadata = results[i * formats.Length + nMetadataIndex];
+                            item.Metadata = results[i * format_list.Count + nMetadataIndex];
                         if (string.IsNullOrEmpty(item.Content) == true)
                         {
                             item.ErrorCode = ErrorCode.NotFound;
@@ -193,12 +252,12 @@ namespace DigitalPlatform.LibraryClient
 
                     }
 
-                CONTINUE:
-                    if (batch.Count > results.Length / formats.Length)
+                    CONTINUE:
+                    if (batch.Count > results.Length / format_list.Count)
                     {
                         // 有本次没有获取到的记录
-                        batch.RemoveRange(0, results.Length / formats.Length);
-                        if (index == m_recpaths.Count - 1)
+                        batch.RemoveRange(0, results.Length / format_list.Count);
+                        if (bEOF)
                             goto REDO;  // 当前已经是最后一轮了，需要继续做完
 
                         // 否则可以留给下一轮处理
