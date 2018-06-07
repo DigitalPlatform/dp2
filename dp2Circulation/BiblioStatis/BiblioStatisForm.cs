@@ -428,6 +428,8 @@ Stack:
                 objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
 
+                objStatis.Prompt += ObjStatis_Prompt;
+
                 // 执行脚本的OnInitial()
 
                 // 触发Script中OnInitial()代码
@@ -483,7 +485,10 @@ Stack:
             finally
             {
                 if (objStatis != null)
+                {
                     objStatis.FreeResources();
+                    objStatis.Prompt -= ObjStatis_Prompt;
+                }
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -494,6 +499,22 @@ Stack:
                 EnableControls(true);
 
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+            }
+        }
+
+        private void ObjStatis_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "BiblioSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
             }
         }
 

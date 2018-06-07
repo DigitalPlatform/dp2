@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
 using System.IO;
 using System.Xml;
-using System.Web;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
-using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Marc;
-using DigitalPlatform.Script;
-
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 // 2013/3/16 添加 XML 注释
 
@@ -25,6 +18,11 @@ namespace dp2Circulation
     /// </summary>
     public class BiblioStatis : StatisHostBase
     {
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         /// <summary>
         /// 本对象所关联的 BiblioStatisForm (书目统计窗)
         /// </summary>
@@ -152,7 +150,7 @@ namespace dp2Circulation
             // TODO: 是否需要用hashtable优化速度?
             string strBiblioDBName = Global.GetDbName(this.CurrentRecPath);
             string strItemDbName = "";
-            
+
             if (strDbType == "item")
                 strItemDbName = this.BiblioStatisForm.MainForm.GetItemDbName(strBiblioDBName);
             else if (strDbType == "order")
@@ -163,7 +161,7 @@ namespace dp2Circulation
                 strItemDbName = this.BiblioStatisForm.MainForm.GetCommentDbName(strBiblioDBName);
             else
             {
-                throw new Exception("未知的 strDbType '"+strDbType+"'");
+                throw new Exception("未知的 strDbType '" + strDbType + "'");
             }
 
             if (String.IsNullOrEmpty(strItemDbName) == true)
@@ -187,17 +185,19 @@ namespace dp2Circulation
                 EntityInfo[] infos = null;
                 string strError = "";
                 long lRet = 0;
-                
+
+                REDO:
+
                 if (strDbType == "item")
-                lRet = this.BiblioStatisForm.Channel.GetEntities(
-                     null,
-                     this.CurrentRecPath,
-                     lStart,
-                     lCount,
-                     strStyle,
-                     "zh",
-                     out infos,
-                     out strError);
+                    lRet = this.BiblioStatisForm.Channel.GetEntities(
+                         null,
+                         this.CurrentRecPath,
+                         lStart,
+                         lCount,
+                         strStyle,
+                         "zh",
+                         out infos,
+                         out strError);
                 else if (strDbType == "order")
                     lRet = this.BiblioStatisForm.Channel.GetOrders(
                          null,
@@ -230,7 +230,29 @@ namespace dp2Circulation
                          out strError);
 
                 if (lRet == -1)
-                    throw new Exception(strError);
+                {
+                    // 2018/6/6
+                    if (this.Prompt != null)
+                    {
+                        MessagePromptEventArgs e = new MessagePromptEventArgs
+                        {
+                            MessageText = "获得 " + strDbType + " 记录时发生错误： " + strError,
+                            Actions = "yes,no,cancel"
+                        };
+                        this.Prompt(this, e);
+                        if (e.ResultAction == "cancel")
+                            throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
+                        else if (e.ResultAction == "yes")
+                            goto REDO;
+                        else
+                        {
+                            // no 也是抛出异常。因为继续下一批代价太大
+                            throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
+                        }
+                    }
+                    else
+                        throw new ChannelException(this.BiblioStatisForm.Channel.ErrorCode, strError);
+                }
 
                 lResultCount = lRet;    // 2009/11/23 
 
@@ -675,19 +697,19 @@ namespace dp2Circulation
                 string strBiblioRecPath = "";
                 string strError = "";
                 long lRet = 0;
-                
+
                 if (this.DbType == "item")
-                lRet = this.Container.BiblioStatisForm.Channel.GetItemInfo(
-     null,
-     strBarcodeOrRecPath,
-     "xml",
-     out strItemXml,
-     out strOutputItemRecPath,
-     out item_timestamp,
-     "",
-     out strBiblioText,
-     out strBiblioRecPath,
-     out strError);
+                    lRet = this.Container.BiblioStatisForm.Channel.GetItemInfo(
+         null,
+         strBarcodeOrRecPath,
+         "xml",
+         out strItemXml,
+         out strOutputItemRecPath,
+         out item_timestamp,
+         "",
+         out strBiblioText,
+         out strBiblioRecPath,
+         out strError);
                 else if (this.DbType == "order")
                     lRet = this.Container.BiblioStatisForm.Channel.GetOrderInfo(
          null,
