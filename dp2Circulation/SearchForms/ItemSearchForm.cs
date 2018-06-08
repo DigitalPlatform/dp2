@@ -6151,8 +6151,7 @@ out strError);
                 strError = "获得馆藏地配置参数时出错: " + strError;
                 goto ERROR1;
             }
-            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
-
+            location_list = Order.DistributeExcelFile.FilterLocationList(location_list, dlg.LibraryCode);
 
             bool bLaunchExcel = true;
 
@@ -6174,7 +6173,7 @@ out strError);
 
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
-            int nRowIndex = 2;  // 跟踪行号            
+            // int nRowIndex = 2;  // 跟踪行号            
             bool bDone = false; // 是否成功走完全部流程
 
             int nOrderCount = 0;    // 导出订购记录计数
@@ -6213,15 +6212,28 @@ out strError);
                     }
                 }
 
+                Order.ExportDistributeContext context = new Order.ExportDistributeContext
+                {
+                    Sheet = sheet,
+                    LocationList = location_list,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = order_title_list,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                    OnlyOutputBlankStateOrderRecord = dlg.OnlyOutputBlankStateOrderRecord,
+                };
+
                 // 输出标题行
                 Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
-location_list,
-sheet,
-"",
-biblio_title_list,
-order_title_list,
-ref nRowIndex,
-ref column_max_chars);
+                    context,
+// location_list,
+//sheet,
+""
+//biblio_title_list,
+//order_title_list,
+//ref nRowIndex,
+//ref column_max_chars
+);
 
                 /*
 * content_form_area
@@ -6296,6 +6308,7 @@ ref column_max_chars);
                     if (Order.DistributeExcelFile.FilterOrderRecord(order_dom,
                         strSellerFilter,
                         dlg.LibraryCode,
+                        dlg.OnlyOutputBlankStateOrderRecord,
                         strOrderRecPath) == false)
                         return;
 
@@ -6339,16 +6352,17 @@ ref column_max_chars);
                         order.OldRecord = order_dom.DocumentElement.OuterXml;
 
                         Order.DistributeExcelFile.OutputDistributeInfo(
+                            context,
                             this,
-        location_list,
-        sheet,
+        // location_list,
+        //sheet,
         strBiblioRecPath,
         ref nLineNumber,
         strTableXml,
         "", // strStyle,
-        biblio_title_list,
-        nRowIndex,
-        order_title_list,
+        //biblio_title_list,
+        //nRowIndex,
+        //order_title_list,
         strOrderRecPath,
                                         (biblio_recpath, order_recpath) =>
                                         {
@@ -6357,10 +6371,11 @@ ref column_max_chars);
                                                 throw new Exception("尚未处理订购记录模板");
                                             }
                                             return order;
-                                        },
+                                        }
 
-        ref column_max_chars);
-                        nRowIndex++;
+        // ref column_max_chars
+        );
+                        context.RowIndex++;
                     }
 
                     nOrderCount++;
@@ -6368,6 +6383,10 @@ ref column_max_chars);
     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                context.ContentEndRow = context.RowIndex - 1;
+
+                Order.DistributeExcelFile.OutputSumLine(context);
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 

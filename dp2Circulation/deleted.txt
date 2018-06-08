@@ -3194,3 +3194,415 @@ merge_dlg.UiState);
         ERROR1:
             return -1;
         }
+
+
+		~~~~~~~~~~~~
+		        // TODO: 可否把循环过程做成一个 Loader 类？注意解决网络环境不良时候的重试操作问题
+        // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
+        // 对每个书目记录进行循环
+        // return:
+        //      0   普通返回
+        //      1   要全部中断
+        int DoLoop(out string strError,
+            out string strWarning)
+        {
+            strError = "";
+            strWarning = "";
+
+            int nRet = 0;
+            long lRet = 0;
+
+            bool bSyntaxWarned = false;
+            bool bFilterWarned = false;
+
+            // List<string> LogFileNames = null;
+
+            // 清除错误信息窗口中残余的内容
+            ClearErrorInfoForm();
+
+            /*
+            // 馆藏地点过滤列表
+            string strLocationList = this.textBox_locationNames.Text;
+            if (String.IsNullOrEmpty(strLocationList) == true)
+                strLocationList = "*";
+
+            string[] locations = strLocationList.Split(new char[] { ',' });
+
+            StringMatchList location_matchlist = new StringMatchList(locations);
+
+            // 读者类型过滤列表
+            string strItemTypeList = this.textBox_itemTypes.Text;
+            if (String.IsNullOrEmpty(strItemTypeList) == true)
+                strItemTypeList = "*";
+
+            string[] itemtypes = strItemTypeList.Split(new char[] { ',' });
+
+            StringMatchList itemtype_matchlist = new StringMatchList(itemtypes);
+             * */
+
+            // 记录路径临时文件
+            string strTempRecPathFilename = Path.GetTempFileName();
+
+            string strInputFileName = "";   // 外部制定的输入文件，为条码号文件或者记录路径文件格式
+            string strAccessPointName = "";
+
+            try
+            {
+
+                if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
+                {
+                    nRet = SearchBiblioRecPath(
+                        this.tabComboBox_inputBatchNo.Text,
+                        strTempRecPathFilename,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    strInputFileName = strTempRecPathFilename;
+                    strAccessPointName = "记录路径";
+                }
+                else if (this.InputStyle == BiblioStatisInputStyle.RecPathFile)
+                {
+                    strInputFileName = this.textBox_inputRecPathFilename.Text;
+                    strAccessPointName = "记录路径";
+                }
+                else if (this.InputStyle == BiblioStatisInputStyle.RecPaths)
+                {
+                    using (StreamWriter sw = new StreamWriter(strTempRecPathFilename, false, Encoding.UTF8))
+                    {
+                        sw.Write(this.textBox_inputStyle_recPaths.Text);
+                    }
+
+                    strInputFileName = strTempRecPathFilename;
+                    strAccessPointName = "记录路径";
+                }
+                else
+                {
+                    Debug.Assert(false, "");
+                }
+
+                StreamReader sr = null;
+
+                try
+                {
+                    sr = new StreamReader(strInputFileName, Encoding.UTF8);
+                }
+                catch (Exception ex)
+                {
+                    strError = "打开文件 " + strInputFileName + " 失败: " + ex.Message;
+                    return -1;
+                }
+
+                this.progressBar_records.Minimum = 0;
+                this.progressBar_records.Maximum = (int)sr.BaseStream.Length;
+                this.progressBar_records.Value = 0;
+
+                /*
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在获取书目记录 ...");
+                stop.BeginLoop();
+
+                EnableControls(false);
+                 * */
+
+                try
+                {
+                    int nCount = 0;
+
+                    for (int i = 0; ; i++)
+                    {
+                        Application.DoEvents();	// 出让界面控制权
+
+                        if (stop != null)
+                        {
+                            if (stop.State != 0)
+                            {
+                                DialogResult result = MessageBox.Show(this,
+                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                    "bibliostatisform",
+                                    MessageBoxButtons.YesNoCancel,
+                                    MessageBoxIcon.Question,
+                                    MessageBoxDefaultButton.Button3);
+
+                                if (result == DialogResult.Yes)
+                                {
+                                    strError = "用户中断";
+                                    return -1;
+                                }
+                                if (result == DialogResult.No)
+                                    return 0;   // 假装loop正常结束
+
+                                stop.Continue(); // 继续循环
+                            }
+                        }
+
+                        // string strItemBarcode = barcodes[i];
+                        string strRecPath = sr.ReadLine();
+
+                        if (strRecPath == null)
+                            break;
+
+                        strRecPath = strRecPath.Trim();
+                        nRet = strRecPath.IndexOf("\t");
+                        if (nRet != -1)
+                            strRecPath = strRecPath.Substring(0, nRet).Trim();
+
+                        if (String.IsNullOrEmpty(strRecPath) == true)
+                            continue;
+
+                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + strRecPath);
+                        this.progressBar_records.Value = (int)sr.BaseStream.Position;
+
+                        // 获得书目记录
+                        // string strOutputRecPath = "";
+                        // byte[] baTimestamp = null;
+
+
+                        string strAccessPoint = "";
+                        if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
+                            strAccessPoint = strRecPath;
+                        else if (this.InputStyle == BiblioStatisInputStyle.RecPathFile)
+                            strAccessPoint = strRecPath;
+                        else if (this.InputStyle == BiblioStatisInputStyle.RecPaths)
+                            strAccessPoint = strRecPath;
+                        else
+                        {
+                            Debug.Assert(false, "");
+                        }
+
+                        string strBiblio = "";
+                        // string strBiblioRecPath = "";
+
+#if NO
+                        // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+                        lRet = Channel.GetBiblioInfo(
+                            stop,
+                            strAccessPoint,
+                            "", // strBiblioXml
+                            "xml",   // strResultType
+                            out strBiblio,
+                            out strError);
+#endif
+                        string[] formats = new string[1];
+                        formats[0] = "xml";
+                        string[] results = null;
+                        byte[] baTimestamp = null;
+                        lRet = Channel.GetBiblioInfos(
+                            stop,
+                            strAccessPoint,
+                            "",
+                            formats,
+                            out results,
+                            out baTimestamp,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "获得书目记录 " + strAccessPoint + " 时发生错误: " + strError;
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+
+                        if (lRet == 0)
+                        {
+                            strError = "书目记录" + strAccessPointName + " " + strRecPath + " 对应的XML数据没有找到。";
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+
+                        if (lRet > 1)
+                        {
+                            strError = "书目记录" + strAccessPointName + " " + strRecPath + " 对应数据多于一条。";
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+
+                        if (results == null || results.Length == 0)
+                        {
+                            strError = "书目记录" + strAccessPointName + " " + strRecPath + " 获取时 results 出错。";
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+                        strBiblio = results[0];
+                        objStatis.Timestamp = baTimestamp;
+
+                        string strXml = "";
+
+                        strXml = strBiblio;
+
+
+                        // 看看是否在希望统计的范围内
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(strXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "书目记录装入DOM发生错误: " + ex.Message;
+                            continue;
+                        }
+
+                        /*
+                        // 按照馆藏地点筛选
+                        if (this.textBox_locationNames.Text != ""
+                            && this.textBox_locationNames.Text != "*")
+                        {
+                            // 注：空字符串或者"*"表示什么都满足。也就等于不使用此筛选项
+
+                            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
+                                "location");
+                            if (location_matchlist.Match(strLocation) == false)
+                                continue;
+                        }
+
+                        // 按照册类型筛选
+                        if (this.textBox_itemTypes.Text != ""
+                            && this.textBox_itemTypes.Text != "*")
+                        {
+                            // 注：空字符串或者"*"表示什么都满足。也就等于不使用此筛选项
+
+                            string strItemType = DomUtil.GetElementText(dom.DocumentElement,
+                                "bookType");
+                            if (itemtype_matchlist.Match(strItemType) == false)
+                                continue;
+                        }
+                         * */
+
+                        // Debug.Assert(false, "");
+
+                        // strXml中为书目记录
+                        string strBiblioDbName = Global.GetDbName(strRecPath);
+
+                        string strSyntax = Program.MainForm.GetBiblioSyntax(strBiblioDbName);
+                        if (String.IsNullOrEmpty(strSyntax) == true)
+                            strSyntax = "unimarc";
+
+                        bool bItemDomsCleared = false;
+
+                        if (strSyntax == "usmarc" || strSyntax == "unimarc")
+                        {
+                            // 将XML书目记录转换为MARC格式
+                            string strOutMarcSyntax = "";
+                            string strMarc = "";
+
+                            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                            // parameters:
+                            //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                            nRet = MarcUtil.Xml2Marc(strXml,
+                                true,   // 2013/1/12 修改为true
+                                "", // strMarcSyntax
+                                out strOutMarcSyntax,
+                                out strMarc,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            if (String.IsNullOrEmpty(strOutMarcSyntax) == false)
+                            {
+                                if (strOutMarcSyntax != strSyntax
+                                    && bSyntaxWarned == false)
+                                {
+                                    strWarning += "书目记录 " + strRecPath + " 的syntax '" + strOutMarcSyntax + "' 和其所属数据库 '" + strBiblioDbName + "' 的定义syntax '" + strSyntax + "' 不一致\r\n";
+                                    bSyntaxWarned = true;
+                                }
+                            }
+
+                            objStatis.MarcRecord = strMarc;
+
+                            if (this.MarcFilter != null)
+                            {
+                                // 触发Script中PreFilter()代码
+                                if (objStatis != null)
+                                {
+                                    objStatis.Xml = strXml;
+                                    objStatis.BiblioDom = dom;
+                                    objStatis.CurrentDbSyntax = strSyntax;  // strOutputMarcSyntax?
+                                    objStatis.CurrentRecPath = strRecPath;
+                                    objStatis.CurrentRecordIndex = i;
+                                    bItemDomsCleared = true;
+                                    objStatis.ClearItemDoms();
+                                    objStatis.ClearOrderDoms();
+                                    objStatis.ClearIssueDoms();
+                                    objStatis.ClearCommentDoms();
+
+                                    StatisEventArgs args = new StatisEventArgs();
+                                    objStatis.PreFilter(this, args);
+                                    if (args.Continue == ContinueType.SkipAll)
+                                        return 1;
+                                }
+
+                                // 触发filter中的Record相关动作
+                                nRet = this.MarcFilter.DoRecord(
+                                    null,
+                                    objStatis.MarcRecord,
+                                    strOutMarcSyntax,   // 2012/9/6
+                                    i,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+                        }
+                        else
+                        {
+                            objStatis.MarcRecord = "";
+
+                            if (this.MarcFilter != null
+                                && bFilterWarned == false)
+                            {
+                                // TODO: 是否需要警告？因为配置了filter, 但是因为所涉及的库不是MARC格式，没有办法应用
+                                // 可以最后集中警告一次
+                                strWarning += "当前统计方案中配置了MarcFilter，但是因为数据库 '" + strBiblioDbName + "' (可能不仅限于这一个数据库)的定义syntax '" + strSyntax + "' 不是MARC类格式，所以统计过程中至少对这个库无法启用MarcFilter功能。\r\n";
+                                bFilterWarned = true;
+                            }
+                        }
+
+                        // 触发Script中OnRecord()代码
+                        if (objStatis != null)
+                        {
+                            objStatis.Xml = strXml;
+                            objStatis.BiblioDom = dom;
+                            objStatis.CurrentDbSyntax = strSyntax;  // strOutputMarcSyntax?
+                            objStatis.CurrentRecPath = strRecPath;
+                            objStatis.CurrentRecordIndex = i;
+                            if (bItemDomsCleared == false)
+                            {
+                                objStatis.ClearItemDoms();
+                                objStatis.ClearOrderDoms();
+                                objStatis.ClearIssueDoms();
+                                objStatis.ClearCommentDoms();
+                                bItemDomsCleared = true;
+                            }
+
+                            StatisEventArgs args = new StatisEventArgs();
+                            objStatis.OnRecord(this, args);
+                            if (args.Continue == ContinueType.SkipAll)
+                                return 1;
+                        }
+
+                        nCount++;
+                    }
+
+                }
+                finally
+                {
+                    /*
+                    EnableControls(true);
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                     * */
+
+                    if (sr != null)
+                        sr.Close();
+                }
+            }
+            finally
+            {
+                File.Delete(strTempRecPathFilename);
+            }
+
+            return 0;
+        }

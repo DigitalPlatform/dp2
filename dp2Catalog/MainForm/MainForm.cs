@@ -802,8 +802,6 @@ string strError)
             this.toolButton_loadFullRecord.Enabled = false;
         }
 
-
-
         // 装载检索途径信息
         int LoadFroms(string strFileName,
             out string strError)
@@ -835,7 +833,6 @@ string strError)
 
                 this.Froms.Add(from);
             }
-
 
             return 0;
         }

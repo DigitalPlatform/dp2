@@ -1,29 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
 using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.Remoting;
-using System.Web;   // HttpUtility
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
-using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-
-using DigitalPlatform.dp2.Statis;
-
-using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -186,149 +174,10 @@ namespace dp2Circulation
                 "biblio",
                 this.stop,
                 this.Channel);
-
-#if NOOOOOOOOOOOOOOOOOOOOOOOOOO
-            string strError = "";
-
-            if (e.KeyCounts == null)
-                e.KeyCounts = new List<KeyCount>();
-
-            EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在列出全部编目批次号 ...");
-            stop.BeginLoop();
-
-            try
-            {
-                string strQueryXml = "";
-
-                long lRet = Channel.SearchBiblio(
-                    stop,
-                    "<all>",    // 尽管可以用 this.comboBox_inputBiblioDbName.Text, 以便获得和少数书目库相关的批次号实例，但是容易造成误会：因为数据库名列表刷新后，这里却不会刷新？
-                    "", // strBatchNo,
-                    2000,   // -1,    // nPerMax
-                    "batchno",
-                    "left",
-                    this.Lang,
-                    "batchno",   // strResultSetName
-                    "keycount", // strOutputStyle
-                    out strQueryXml,
-                    out strError);
-                /*
-                long lRet = Channel.SearchItem(
-                    stop,
-                    "<all>",
-                    "", // strBatchNo
-                    -1,
-                    "批次号",
-                    "left",
-                    this.Lang,
-                    "batchno",   // strResultSetName
-                    "keycount", // strOutputStyle
-                    out strError);
-                 * */
-                if (lRet == -1)
-                    goto ERROR1;
-
-                if (lRet == 0)
-                {
-                    strError = "没有找到任何编目批次号检索点";
-                    return;
-                }
-
-                long lHitCount = lRet;
-
-                long lStart = 0;
-                long lCount = lHitCount;
-                SearchResult[] searchresults = null;
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
-                    }
-
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        "batchno",   // strResultSetName
-                        lStart,
-                        lCount,
-                        "keycount",
-                        this.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "GetSearchResult() error: " + strError;
-                        goto ERROR1;
-                    }
-
-                    if (lRet == 0)
-                    {
-                        // MessageBox.Show(this, "未命中");
-                        return;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        if (searchresults[i].Cols == null)
-                        {
-                            strError = "请更新应用服务器和数据库内核到最新版本";
-                            goto ERROR1;
-                        }
-
-                        KeyCount keycount = new KeyCount();
-                        keycount.Key = searchresults[i].Path;
-                        keycount.Count = Convert.ToInt32(searchresults[i].Cols[0]);
-                        e.KeyCounts.Add(keycount);
-                    }
-
-                    lStart += searchresults.Length;
-                    lCount -= searchresults.Length;
-
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
-
-                    if (lStart >= lHitCount || lCount <= 0)
-                        break;
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-
-                EnableControls(true);
-            }
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
         }
 
         private void BiblioStatisForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            /*
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-
-            }
-             * */
 
         }
 
@@ -340,7 +189,6 @@ namespace dp2Circulation
                     "bibliostatisform",
                     "inputstyle_recpathfile",
                     this.radioButton_inputStyle_recPathFile.Checked);
-
 
                 Program.MainForm.AppInfo.SetBoolean(
                     "bibliostatisform",
@@ -397,29 +245,6 @@ namespace dp2Circulation
                 e.Created = false;
             }
         }
-
-#if NO
-        private void scriptManager_CreateDefaultContent(object sender, CreateDefaultContentEventArgs e)
-        {
-            string strPureFileName = Path.GetFileName(e.FileName);
-
-            if (String.Compare(strPureFileName, "main.cs", true) == 0)
-            {
-                CreateDefaultMainCsFile(e.FileName);
-                e.Created = true;
-            }
-            else if (String.Compare(strPureFileName, "marcfilter.fltx", true) == 0)
-            {
-                CreateDefaultMarcFilterFile(e.FileName);
-                e.Created = true;
-            }
-            else
-            {
-                e.Created = false;
-            }
-
-        }
-#endif
 
         // 创建缺省的main.cs文件
         static void CreateDefaultMainCsFile(string strFileName)
@@ -603,6 +428,8 @@ Stack:
                 objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
 
+                objStatis.Prompt += ObjStatis_Prompt;
+
                 // 执行脚本的OnInitial()
 
                 // 触发Script中OnInitial()代码
@@ -634,7 +461,7 @@ Stack:
 
                 if (nRet == 1)
                     goto END1;  // 实际上 SkipAll 是要执行 OnEnd() 的，而 Error 才是不执行 OnEnd()
-            END1:
+                END1:
                 // 触发Script的OnEnd()代码
                 if (objStatis != null)
                 {
@@ -647,7 +474,7 @@ Stack:
                     }
                 }
                 return 0;
-            ERROR1:
+                ERROR1:
                 return -1;
             }
             catch (Exception ex)
@@ -658,7 +485,10 @@ Stack:
             finally
             {
                 if (objStatis != null)
+                {
                     objStatis.FreeResources();
+                    objStatis.Prompt -= ObjStatis_Prompt;
+                }
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -669,6 +499,22 @@ Stack:
                 EnableControls(true);
 
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+            }
+        }
+
+        private void ObjStatis_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "BiblioSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
             }
         }
 
@@ -705,18 +551,18 @@ Stack:
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\digitalplatform.statis.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
@@ -807,18 +653,18 @@ Stack:
 
                 // 一些必要的链接库
                 string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2circulation.exe",
-										 strMainCsDllName};
+                                         strMainCsDllName};
 
                 // fltx文件里显式增补的链接库
                 string[] saAdditionalRef = filter.GetRefs();
@@ -865,10 +711,11 @@ Stack:
                 filter.Assembly = assemblyFilter;
             }
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
+        // TODO: 可否把循环过程做成一个 Loader 类？注意解决网络环境不良时候的重试操作问题
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
         // 对每个书目记录进行循环
         // return:
@@ -890,26 +737,6 @@ Stack:
 
             // 清除错误信息窗口中残余的内容
             ClearErrorInfoForm();
-
-            /*
-            // 馆藏地点过滤列表
-            string strLocationList = this.textBox_locationNames.Text;
-            if (String.IsNullOrEmpty(strLocationList) == true)
-                strLocationList = "*";
-
-            string[] locations = strLocationList.Split(new char[] { ',' });
-
-            StringMatchList location_matchlist = new StringMatchList(locations);
-
-            // 读者类型过滤列表
-            string strItemTypeList = this.textBox_itemTypes.Text;
-            if (String.IsNullOrEmpty(strItemTypeList) == true)
-                strItemTypeList = "*";
-
-            string[] itemtypes = strItemTypeList.Split(new char[] { ',' });
-
-            StringMatchList itemtype_matchlist = new StringMatchList(itemtypes);
-             * */
 
             // 记录路径临时文件
             string strTempRecPathFilename = Path.GetTempFileName();
@@ -968,45 +795,57 @@ Stack:
                 this.progressBar_records.Maximum = (int)sr.BaseStream.Length;
                 this.progressBar_records.Value = 0;
 
-                /*
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在获取书目记录 ...");
-                stop.BeginLoop();
-
-                EnableControls(false);
-                 * */
-
                 try
                 {
-                    int nCount = 0;
+                    if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
+                    { }
+                    else if (this.InputStyle == BiblioStatisInputStyle.RecPathFile)
+                    { }
+                    else if (this.InputStyle == BiblioStatisInputStyle.RecPaths)
+                    { }
+                    else
+                    {
+                        Debug.Assert(false, "不允许使用的输入方式 " + this.InputStyle.ToString() + "。因为和 BiblioLoader 不相容");
+                    }
 
-                    for (int i = 0; ; i++)
+                    BiblioLoader loader = new BiblioLoader();
+                    loader.Channel = Channel;
+                    loader.Stop = stop;
+                    loader.TextReader = sr;
+                    loader.Format = "xml";
+                    loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
+
+                    loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                    loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+
+                    int nCount = 0;
+                    int i = 0;
+                    foreach (BiblioItem item in loader)
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
+                            DialogResult result = MessageBox.Show(this,
+                                "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
+                                "bibliostatisform",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button3);
+
+                            if (result == DialogResult.Yes)
                             {
-                                DialogResult result = MessageBox.Show(this,
-                                    "准备中断。\r\n\r\n确实要中断全部操作? (Yes 全部中断；No 中断循环，但是继续收尾处理；Cancel 放弃中断，继续操作)",
-                                    "bibliostatisform",
-                                    MessageBoxButtons.YesNoCancel,
-                                    MessageBoxIcon.Question,
-                                    MessageBoxDefaultButton.Button3);
-
-                                if (result == DialogResult.Yes)
-                                {
-                                    strError = "用户中断";
-                                    return -1;
-                                }
-                                if (result == DialogResult.No)
-                                    return 0;   // 假装loop正常结束
-
-                                stop.Continue(); // 继续循环
+                                strError = "用户中断";
+                                return -1;
                             }
+                            if (result == DialogResult.No)
+                                return 0;   // 假装loop正常结束
+
+                            stop.Continue(); // 继续循环
                         }
 
+#if NO
                         // string strItemBarcode = barcodes[i];
                         string strRecPath = sr.ReadLine();
 
@@ -1020,15 +859,13 @@ Stack:
 
                         if (String.IsNullOrEmpty(strRecPath) == true)
                             continue;
+#endif
 
-                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + strRecPath);
+                        stop.SetMessage("正在获取第 " + ((i++) + 1).ToString() + " 个书目记录，" + strAccessPointName + "为 " + item.RecPath);
                         this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
+#if NO
                         // 获得书目记录
-                        // string strOutputRecPath = "";
-                        // byte[] baTimestamp = null;
-
-
                         string strAccessPoint = "";
                         if (this.InputStyle == BiblioStatisInputStyle.BatchNo)
                             strAccessPoint = strRecPath;
@@ -1044,16 +881,6 @@ Stack:
                         string strBiblio = "";
                         // string strBiblioRecPath = "";
 
-#if NO
-                        // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
-                        lRet = Channel.GetBiblioInfo(
-                            stop,
-                            strAccessPoint,
-                            "", // strBiblioXml
-                            "xml",   // strResultType
-                            out strBiblio,
-                            out strError);
-#endif
                         string[] formats = new string[1];
                         formats[0] = "xml";
                         string[] results = null;
@@ -1093,14 +920,33 @@ Stack:
                             GetErrorInfoForm().WriteHtml(strError + "\r\n");
                             continue;
                         }
+
                         strBiblio = results[0];
                         objStatis.Timestamp = baTimestamp;
-
 
                         string strXml = "";
 
                         strXml = strBiblio;
+#endif
+                        string strRecPath = item.RecPath;
 
+                        if (item.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NoError)
+                        {
+                            strError = "获得书目记录" + strAccessPointName + " " + strRecPath + " 时出错：" + item.ErrorInfo;
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+
+                        string strXml = item.Content;
+
+                        if (string.IsNullOrEmpty(strXml))
+                        {
+                            strError = "书目记录" + strAccessPointName + " " + strRecPath + " 对应的XML记录为空。被跳过";
+                            GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+                        }
+
+                        objStatis.Timestamp = item.Timestamp;
 
                         // 看看是否在希望统计的范围内
                         XmlDocument dom = new XmlDocument();
@@ -1113,32 +959,6 @@ Stack:
                             strError = "书目记录装入DOM发生错误: " + ex.Message;
                             continue;
                         }
-
-                        /*
-                        // 按照馆藏地点筛选
-                        if (this.textBox_locationNames.Text != ""
-                            && this.textBox_locationNames.Text != "*")
-                        {
-                            // 注：空字符串或者"*"表示什么都满足。也就等于不使用此筛选项
-
-                            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
-                                "location");
-                            if (location_matchlist.Match(strLocation) == false)
-                                continue;
-                        }
-
-                        // 按照册类型筛选
-                        if (this.textBox_itemTypes.Text != ""
-                            && this.textBox_itemTypes.Text != "*")
-                        {
-                            // 注：空字符串或者"*"表示什么都满足。也就等于不使用此筛选项
-
-                            string strItemType = DomUtil.GetElementText(dom.DocumentElement,
-                                "bookType");
-                            if (itemtype_matchlist.Match(strItemType) == false)
-                                continue;
-                        }
-                         * */
 
                         // Debug.Assert(false, "");
 
@@ -1153,10 +973,6 @@ Stack:
 
                         if (strSyntax == "usmarc" || strSyntax == "unimarc")
                         {
-                            // 将XML书目记录转换为MARC格式
-                            string strOutMarcSyntax = "";
-                            string strMarc = "";
-
                             // 将MARCXML格式的xml记录转换为marc机内格式字符串
                             // parameters:
                             //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
@@ -1165,8 +981,8 @@ Stack:
                             nRet = MarcUtil.Xml2Marc(strXml,
                                 true,   // 2013/1/12 修改为true
                                 "", // strMarcSyntax
-                                out strOutMarcSyntax,
-                                out strMarc,
+                                out string strOutMarcSyntax,
+                                out string strMarc,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
@@ -1248,7 +1064,15 @@ Stack:
                             }
 
                             StatisEventArgs args = new StatisEventArgs();
-                            objStatis.OnRecord(this, args);
+                            try
+                            {
+                                objStatis.OnRecord(this, args);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "处理书目记录 '" + strRecPath + "' 过程中出现异常:" + ex.Message;
+                                throw new Exception(strError, ex);
+                            }
                             if (args.Continue == ContinueType.SkipAll)
                                 return 1;
                         }
@@ -1259,14 +1083,6 @@ Stack:
                 }
                 finally
                 {
-                    /*
-                    EnableControls(true);
-
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                     * */
-
                     if (sr != null)
                         sr.Close();
                 }
@@ -1277,6 +1093,22 @@ Stack:
             }
 
             return 0;
+        }
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "BiblioStatisForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
         }
 
         // 注意：上级函数RunScript()已经使用了BeginLoop()和EnableControls()
@@ -1422,7 +1254,7 @@ Stack:
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1541,7 +1373,7 @@ Stack:
             if (String.IsNullOrEmpty(strWarning) == false)
                 MessageBox.Show(this, "警告: \r\n" + strWarning);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1880,7 +1712,7 @@ Stack:
 
             // MessageBox.Show(this, "统计完成。");
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1982,7 +1814,7 @@ Stack:
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
     }

@@ -2477,7 +2477,6 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
-
             }
 
             // 标记空下级记录的事项
@@ -2665,7 +2664,7 @@ out strError);
         int VerifyBiblioRecord(out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -2932,7 +2931,7 @@ out strError);
                 strError = "获得馆藏地配置参数时出错: " + strError;
                 goto ERROR1;
             }
-            location_list = dp2StringUtil.FilterLocationList(location_list, dlg.LibraryCode);
+            location_list = Order.DistributeExcelFile.FilterLocationList(location_list, dlg.LibraryCode);
 
             bool bLaunchExcel = true;
 
@@ -2953,7 +2952,7 @@ out strError);
 
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
-            int nRowIndex = 2;  // 跟踪行号            
+            // int nRowIndex = 2;  // 跟踪行号            
             bool bDone = false; // 是否成功走完全部流程
 
             int nBiblioCount = 0;   // 导出书目计数
@@ -2997,15 +2996,22 @@ out strError);
                     }
                 }
 
+                Order.ExportDistributeContext context = new Order.ExportDistributeContext
+                {
+                    Sheet = sheet,
+                    LocationList = location_list,
+                    BiblioColList = biblio_title_list,
+                    OrderColList = order_title_list,
+                    ColumnMaxChars = column_max_chars,
+                    RowIndex = 2,
+                    OnlyOutputBlankStateOrderRecord = dlg.OnlyOutputBlankStateOrderRecord,
+                };
+
                 // 输出标题行
                 Order.DistributeExcelFile.OutputDistributeInfoTitleLine(
-location_list,
-sheet,
-"",
-biblio_title_list,
-order_title_list,
-ref nRowIndex,
-ref column_max_chars);
+                    context,
+""
+);
 
                 /*
 * content_form_area
@@ -3031,18 +3037,14 @@ ref column_max_chars);
                             Order.DistributeExcelFile.WarningRecPath("书目记录 " + strBiblioRecPath, null);
 
                             nOrderCount += Order.DistributeExcelFile.OutputDistributeInfos(
+                                context,
                                 this,
-                                location_list,
                                 strSellerFilter,
                                 dlg.LibraryCode,
-                                sheet,
-                                // dom,
+                                //sheet,
                                 strBiblioRecPath,
                                 ref nLineNumber,
                                 "",
-                                biblio_title_list,
-                                ref nRowIndex,
-                                order_title_list,
                                 (biblio_recpath, order_recpath) =>
                                 {
                                     if (string.IsNullOrEmpty(strDefaultOrderXml))
@@ -3162,8 +3164,8 @@ ref column_max_chars);
 
                                     nNewOrderCount++;
                                     return order;
-                                },
-                                ref column_max_chars);
+                                }
+                                );
 
                             nBiblioCount++;
                             return true;
@@ -3172,7 +3174,12 @@ ref column_max_chars);
                 if (nRet == -1)
                     goto ERROR1;
 
+                context.ContentEndRow = context.RowIndex - 1;
+
+                Order.DistributeExcelFile.OutputSumLine(context);
+
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
+
                 bDone = true;
             }
             catch (InterruptException ex)

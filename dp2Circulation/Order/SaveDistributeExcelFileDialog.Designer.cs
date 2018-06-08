@@ -43,6 +43,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.comboBox_seller = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.checkBox_onlyOutputBlankStateOrderRecord = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_output.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
@@ -85,7 +86,7 @@
             // button_getOutputFileName
             // 
             this.button_getOutputFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getOutputFileName.Location = new System.Drawing.Point(508, 165);
+            this.button_getOutputFileName.Location = new System.Drawing.Point(508, 184);
             this.button_getOutputFileName.Margin = new System.Windows.Forms.Padding(4);
             this.button_getOutputFileName.Name = "button_getOutputFileName";
             this.button_getOutputFileName.Size = new System.Drawing.Size(72, 34);
@@ -98,7 +99,7 @@
             // 
             this.textBox_outputFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_outputFileName.Location = new System.Drawing.Point(21, 165);
+            this.textBox_outputFileName.Location = new System.Drawing.Point(21, 184);
             this.textBox_outputFileName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_outputFileName.Name = "textBox_outputFileName";
             this.textBox_outputFileName.Size = new System.Drawing.Size(479, 28);
@@ -107,7 +108,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(18, 143);
+            this.label2.Location = new System.Drawing.Point(18, 162);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(215, 18);
@@ -159,6 +160,7 @@
             // 
             // tabPage_output
             // 
+            this.tabPage_output.Controls.Add(this.checkBox_onlyOutputBlankStateOrderRecord);
             this.tabPage_output.Controls.Add(this.comboBox_libraryCode);
             this.tabPage_output.Controls.Add(this.label3);
             this.tabPage_output.Controls.Add(this.label1);
@@ -218,6 +220,16 @@
             this.tabPage_cfg.Text = "配置";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // checkBox_onlyOutputBlankStateOrderRecord
+            // 
+            this.checkBox_onlyOutputBlankStateOrderRecord.AutoSize = true;
+            this.checkBox_onlyOutputBlankStateOrderRecord.Location = new System.Drawing.Point(21, 112);
+            this.checkBox_onlyOutputBlankStateOrderRecord.Name = "checkBox_onlyOutputBlankStateOrderRecord";
+            this.checkBox_onlyOutputBlankStateOrderRecord.Size = new System.Drawing.Size(277, 22);
+            this.checkBox_onlyOutputBlankStateOrderRecord.TabIndex = 8;
+            this.checkBox_onlyOutputBlankStateOrderRecord.Text = "仅输出状态为空的订购记录(&B)";
+            this.checkBox_onlyOutputBlankStateOrderRecord.UseVisualStyleBackColor = true;
+            // 
             // SaveDistributeExcelFileDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -258,5 +270,6 @@
         private System.Windows.Forms.TabPage tabPage_cfg;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox comboBox_libraryCode;
+        private System.Windows.Forms.CheckBox checkBox_onlyOutputBlankStateOrderRecord;
     }
 }

@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Reflection;
 
@@ -25,8 +20,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Interfaces;
-
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
@@ -7869,10 +7862,10 @@ XLColor.DarkGreen,
     out string strError);
 
         static void OutputOverdues(IXLWorksheet sheet,
-    XmlDocument dom,
-           Delegate_GetBiblioSummary procGetBiblioSummary,
-    ref int nRowIndex,
-    ref List<int> column_max_chars)
+            XmlDocument dom,
+            Delegate_GetBiblioSummary procGetBiblioSummary,
+            ref int nRowIndex,
+            ref List<int> column_max_chars)
         {
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdues/overdue");
             if (nodes.Count == 0)
