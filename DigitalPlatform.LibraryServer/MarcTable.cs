@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
@@ -471,8 +472,7 @@ namespace DigitalPlatform.LibraryServer
 || field.Name == "312" || field.Name == "314" || field.Name == "320" || field.Name == "324"
 || field.Name == "326" || field.Name == "327" || field.Name == "330")
                 return GetUnimarc_3xx_PrePostfix(subfield);
-            if (field.Name == "010" || field.Name == "011"
-|| field.Name == "091")
+            if (StringUtil.IsInList(field.Name, "010,011,013,015,016,091"))
                 return GetUnimarc_0xx_PrePostfix(subfield);
             if (StringUtil.IsInList(field.Name, "500,501,503,512,513,514,515,516,520,530,531,532,540,541"))
                 return GetUnimarc_5xx_PrePostfix(subfield);
@@ -499,16 +499,16 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
+#if NO
                         if (subfield.PrevSibling.Name == "f" || subfield.PrevSibling.Name == "g")
                             return new PrePostfix(". ");
-                        return new PrePostfix("; ");
+#endif
+                        return new PrePostfix(" ; ");
                     case "b":
                         return new PrePostfix(" [", "] ");
                     case "c":
                     case "d":
                     case "e":
-                    case "f":
-                    case "g":
                     case "h":
                         return new PrePostfix(GetPrefix(unimarc_200_relations, subfield.Name));
                     case "i":
@@ -516,6 +516,31 @@ namespace DigitalPlatform.LibraryServer
                             && (subfield.PrevSibling.Name == "h" || subfield.PrevSibling.Name == "H"))
                             return new PrePostfix(", ");
                         return new PrePostfix(".");
+                    case "f":
+                        if (subfield.PrevSibling != null && subfield.PrevSibling.Name == "f")
+                        {
+                            if (subfield.Content.TrimStart().StartsWith("="))
+                            {
+                                // 去除子字段内容中可能出现的 = 前缀
+                                subfield.Content = subfield.Content.TrimStart(new char[] { '=' });
+                                return new PrePostfix(" = ");
+                            }
+                            return new PrePostfix(" ; ");
+                        }
+                        return new PrePostfix(" / ");
+                    case "g":
+                        if (subfield.PrevSibling != null && subfield.PrevSibling.Name == "g")
+                        {
+                            if (subfield.Content.TrimStart().StartsWith("="))
+                            {
+                                // 去除子字段内容中可能出现的 = 前缀
+                                subfield.Content = subfield.Content.TrimStart(new char[] { '=' });
+                                return new PrePostfix(" = ");
+                            }
+                            return new PrePostfix(" ; ");
+                        }
+                        return new PrePostfix(" ; ");
+
                 }
             }
 
@@ -766,6 +791,12 @@ namespace DigitalPlatform.LibraryServer
                 strTypeName = "ISBN";
             if (field.Name == "011")
                 strTypeName = "ISSN";
+            if (field.Name == "013")
+                strTypeName = "ISMN";
+            if (field.Name == "015")
+                strTypeName = "ISRN";
+            if (field.Name == "016")
+                strTypeName = "ISRC";
             if (field.Name == "091")
                 strTypeName = "统一书刊号";
 
@@ -776,7 +807,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         return new PrePostfix(strTypeName + " ");
                     case "b":
-                        return new PrePostfix(" (", ")");
+                        return new PrePostfix(" (", ") ");
                     case "d":
                         return new PrePostfix(" : ");
                     case "y":

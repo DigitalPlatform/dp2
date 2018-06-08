@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
 using System.ServiceModel;
-using System.Text;
-
-using System.Net.Security;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Message;

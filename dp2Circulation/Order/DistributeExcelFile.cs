@@ -16,26 +16,87 @@ using DigitalPlatform.Xml;
 
 namespace dp2Circulation.Order
 {
+    // 导出 Excel 文件时用到的上下文结构
+    public class ExportDistributeContext
+    {
+        // 左边留白栏数
+        public int LeftBlankColCount { get; set; }
+
+        // 是否只输出空白状态的订购记录。否则就是任何状态的订购记录都输出
+        public bool OnlyOutputBlankStateOrderRecord { get; set; }
+
+        private int _copyNumberColumn = -1; // -1 表示尚未初始化
+        private int _contentStartRow = -1;
+        private int _contentEndRow = -1;
+        private int _firstContentColumn = -1;
+
+        public IXLWorksheet Sheet { get; set; }
+        public List<string> LocationList { get; set; }
+
+        public List<ColumnProperty> BiblioColList { get; set; }
+        public List<ColumnProperty> OrderColList { get; set; }
+        public int RowIndex { get; set; }
+        public List<int> ColumnMaxChars { get; set; }
+
+        // 去向栏的开始，结束列号。从 0 开始计数
+        public int DistributeStartColumn { get; set; }
+        public int DistributeEndColumn { get; set; }
+
+        // 复本数字栏的列号。从 0 开始计数
+        public int CopyNumberColumn { get => _copyNumberColumn; set => _copyNumberColumn = value; }
+
+        // 内容行的开始，结束行号。从 0 开始计数
+        public int ContentStartRow { get => _contentStartRow; set => _contentStartRow = value; }
+        public int ContentEndRow { get => _contentEndRow; set => _contentEndRow = value; }
+
+        // 内容区域第一列的列号
+        public int FirstContentColumn { get => _firstContentColumn; set => _firstContentColumn = value; }
+
+
+        public void Clear()
+        {
+            _copyNumberColumn = -1; // -1 表示尚未初始化
+            _contentStartRow = -1;
+            _contentEndRow = -1;
+        }
+    }
+
     // 输出订购去向分配表 Excel 文件的相关功能
     public static class DistributeExcelFile
     {
         // 向 Excel 文件输出列标题行。包括内部命令行
         public static void OutputDistributeInfoTitleLine(
-List<string> location_list,
-IXLWorksheet sheet,
-string strStyle,
-List<ColumnProperty> biblio_col_list,
-List<ColumnProperty> order_col_list,
-ref int nRowIndex,
-ref List<int> column_max_chars)
+ExportDistributeContext context,
+string strStyle
+            )
         {
-            int nStartColIndex = 2;
+            // 检查订购列定义中，copy 是否和 copyNumber copyItems 同时存在了
+            ColumnProperty c1 = context.OrderColList.Find((o) =>
+            {
+                if (o.Type == "order_copy")
+                    return true;
+                return false;
+            });
+
+            ColumnProperty c2 = context.OrderColList.Find((o) =>
+            {
+                if (o.Type == "order_copyNumber" || o.Type == "order_copyItems")
+                    return true;
+                return false;
+            });
+
+            if (c1 != null && c2 != null)
+                throw new Exception("copy(复本) 栏 和 copyNumber(套数) copyItems(每套册数) 栏不允许同时出现");
+
+            int nStartColIndex = context.LeftBlankColCount;
+
+            context.FirstContentColumn = nStartColIndex;
 
             List<ColumnProperty> cols = new List<ColumnProperty>() {
                 new ColumnProperty("序号", "no")
             };
-            cols.AddRange(biblio_col_list);
-            cols.AddRange(order_col_list);
+            cols.AddRange(context.BiblioColList);
+            cols.AddRange(context.OrderColList);
 
             {
                 // 输出书目记录列标题和订购记录列标题
@@ -43,43 +104,47 @@ ref List<int> column_max_chars)
                 foreach (ColumnProperty col in cols)
                 {
                     {
-                        IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1)
+                        IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + i + 1)
                             .SetValue("{" + col.Type + "}");
                     }
 
                     {
-                        IXLCell cell = sheet.Cell((nRowIndex + 1) + 1, nStartColIndex + i + 1).SetValue(col.Caption);
+                        IXLCell cell = context.Sheet.Cell((context.RowIndex + 1) + 1, nStartColIndex + i + 1).SetValue(col.Caption);
 
                         // 最大字符数
-                        PrintOrderForm.SetMaxChars(ref column_max_chars,
+                        SetMaxChars(context.ColumnMaxChars,
                         nStartColIndex + i,
                         ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
                     }
+
+                    if (col.Type == "order_copyNumber")
+                        context.CopyNumberColumn = nStartColIndex + i;
 
                     i++;
                 }
             }
 
             // 把订购列做成一个 Group
-            sheet.Columns(nStartColIndex + 1 + 1 + biblio_col_list.Count,
-                nStartColIndex + 1 + 1 + biblio_col_list.Count + order_col_list.Count - 1)
+            context.Sheet.Columns(nStartColIndex + 1 + 1 + context.BiblioColList.Count,
+                nStartColIndex + 1 + 1 + context.BiblioColList.Count + context.OrderColList.Count - 1)
                 .Group();
 
             // 书目信息右边输出馆藏地列表
             {
                 nStartColIndex += cols.Count;
+                context.DistributeStartColumn = nStartColIndex;
                 int i = 0;
-                foreach (string location in location_list)
+                foreach (string location in context.LocationList)
                 {
                     {
                         // 命令行
-                        IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1)
+                        IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + i + 1)
                                 .SetValue("{location:" + location + "}");
                     }
 
                     {
                         // 供阅读的标题
-                        IXLCell cell = sheet.Cell((nRowIndex + 1) + 1, nStartColIndex + i + 1)
+                        IXLCell cell = context.Sheet.Cell((context.RowIndex + 1) + 1, nStartColIndex + i + 1)
                             .SetValue(location);
 
                         cell.Style.Font.Bold = true;
@@ -87,20 +152,80 @@ ref List<int> column_max_chars)
                         cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                         // 最大字符数
-                        PrintOrderForm.SetMaxChars(ref column_max_chars,
+                        SetMaxChars(context.ColumnMaxChars,
                         nStartColIndex + i,
                         ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
                     }
 
                     i++;
                 }
+
+                context.DistributeEndColumn = context.DistributeStartColumn + i - 1;
             }
 
-            sheet.Row(nRowIndex + 1).Height = 0;
-            sheet.SheetView.FreezeRows(nRowIndex + 1 + 1);
+            context.Sheet.Row(context.RowIndex + 1).Height = 0;
+            context.Sheet.SheetView.FreezeRows(context.RowIndex + 1 + 1);
 
-            nRowIndex += 2;
+            context.RowIndex += 2;
+            context.ContentStartRow = context.RowIndex;
         }
+
+        public static void OutputSumLine(ExportDistributeContext context)
+        {
+            if (context.ContentStartRow != -1 && context.ContentEndRow != -1)
+            {
+                if (context.CopyNumberColumn != -1)
+                {
+                    IXLRange range = context.Sheet.Range(context.ContentStartRow + 1, context.CopyNumberColumn + 1,
+                        context.ContentEndRow + 1, context.CopyNumberColumn + 1);
+                    range.LastCell().CellBelow().FormulaA1 = "SUM(" + range.RangeAddress.ToString() + ")";
+                }
+
+                for (int column = context.DistributeStartColumn; column <= context.DistributeEndColumn; column++)
+                {
+                    if (context.DistributeStartColumn != -1 && context.DistributeEndColumn != -1)
+                    {
+                        IXLRange range = context.Sheet.Range(context.ContentStartRow + 1, column + 1,
+            context.ContentEndRow + 1, column + 1);
+                        IXLCell cell = range.LastCell().CellBelow();
+                        cell.FormulaA1 = "SUM(" + range.RangeAddress.ToString() + ")";
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    }
+                }
+                if (context.FirstContentColumn != -1)
+                {
+                    IXLRange range = context.Sheet.Range(context.ContentEndRow + 1 + 1, context.FirstContentColumn + 1,
+context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
+                    range.FirstCell().Value = "合计";
+                    range.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+#if NO
+                    foreach (IXLCell cell in range.Cells())
+                    {
+                        cell.Value = cell.Value;
+                    }
+#endif
+                }
+            }
+
+        }
+
+        public static void SetMaxChars(List<int> column_max_chars, int index, int chars)
+        {
+            // 确保空间足够
+            while (column_max_chars.Count < index + 1)
+            {
+                column_max_chars.Add(0);
+            }
+
+            // 统计最大字符数
+            int nOldChars = column_max_chars[index];
+            if (chars > nOldChars)
+            {
+                column_max_chars[index] = chars;
+            }
+        }
+
 
         public static void Warning(string strText)
         {
@@ -127,13 +252,17 @@ ref List<int> column_max_chars)
         public static bool FilterOrderRecord(XmlDocument order_dom,
             string strSellerFilter,
             string strLibraryCode,
+            bool bOnlyOutputBlankStateOrderRecord,
             string strOrderRecPath)
         {
-            string strState = DomUtil.GetElementText(order_dom.DocumentElement, "state");
-            if (string.IsNullOrEmpty(strState) == false)
+            if (bOnlyOutputBlankStateOrderRecord)
             {
-                Warning(string.Format("订购记录 {0} 因状态为 '{1}'，被忽略导出", strOrderRecPath, strState));
-                return false;   // 只处理状态为空的订购记录。也就是说 “已订购” 和 “已验收” 的都不会被处理
+                string strState = DomUtil.GetElementText(order_dom.DocumentElement, "state");
+                if (string.IsNullOrEmpty(strState) == false)
+                {
+                    Warning(string.Format("订购记录 {0} 因状态为 '{1}'，被忽略导出", strOrderRecPath, strState));
+                    return false;   // 只处理状态为空的订购记录。也就是说 “已订购” 和 “已验收” 的都不会被处理
+                }
             }
 
             string strSeller = DomUtil.GetElementText(order_dom.DocumentElement, "seller");
@@ -180,20 +309,15 @@ ref List<int> column_max_chars)
         // return:
         //      共输出了多少条订购记录
         public static int OutputDistributeInfos(
+            ExportDistributeContext context,
             MyForm form,
-            List<string> location_list,
             string strSellerFilter,
             string strLibraryCode,
-            IXLWorksheet sheet,
-    // XmlDocument dom,
     string strBiblioRecPath,
     ref int nLineIndex,
     string strStyle,
-    List<Order.ColumnProperty> biblio_col_list,
-    ref int nRowIndex,
-    List<Order.ColumnProperty> order_col_list,
-    GetOrderRecord procGetOrderRecord,
-                ref List<int> column_max_chars)
+    GetOrderRecord procGetOrderRecord
+                )
         {
             string strTableXml = "";
 
@@ -204,7 +328,7 @@ ref List<int> column_max_chars)
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
-                    StringUtil.MakePathList(ColumnProperty.GetTypeList(biblio_col_list)),
+                    StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
@@ -247,6 +371,7 @@ ref List<int> column_max_chars)
                     if (FilterOrderRecord(order_dom,
                         strSellerFilter,
                         strLibraryCode,
+                        context.OnlyOutputBlankStateOrderRecord,
                         info.OldRecPath) == false)
                     {
                         i++;
@@ -269,20 +394,16 @@ ref List<int> column_max_chars)
             if (orders.Count == 0)
             {
                 OutputDistributeInfo(
+                    context,
                     form,
-location_list,
-sheet,
 strBiblioRecPath,
 ref nLineIndex,
 strTableXml,
 strStyle,
-biblio_col_list,
-nRowIndex,
-order_col_list,
 "", // 表示希望获得订购记录模板
-procGetOrderRecord,
-ref column_max_chars);
-                nRowIndex++;
+procGetOrderRecord
+);
+                context.RowIndex++;
                 nOrderCount++;
             }
             else
@@ -290,30 +411,53 @@ ref column_max_chars);
                 foreach (EntityInfo order in orders)
                 {
                     OutputDistributeInfo(
+                        context,
                         form,
-    location_list,
-    sheet,
     strBiblioRecPath,
     ref nLineIndex,
     strTableXml,
     strStyle,
-    biblio_col_list,
-    nRowIndex,
-    order_col_list,
     order.OldRecPath,
     (biblio_recpath, order_recpath) =>
     {
         Debug.Assert(strBiblioRecPath == biblio_recpath, "");
         Debug.Assert(order_recpath == order.OldRecPath, "");
         return order;
-    },
-    ref column_max_chars);
-                    nRowIndex++;
+    }
+    );
+                    context.RowIndex++;
                     nOrderCount++;
                 }
             }
 
             return nOrderCount;
+        }
+
+        static string GetCopyNumber(string strCopyString)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strCopyString,
+                out string strOldCopy,
+                out string strNewCopy);
+
+            if (string.IsNullOrEmpty(strOldCopy))
+                strOldCopy = "0";
+
+            // 对 strOldCopy 进一步分解
+            return OrderDesignControl.GetCopyFromCopyString(strOldCopy);
+        }
+
+        static string GetState(string strXml)
+        {
+            if (string.IsNullOrEmpty(strXml))
+                return "";
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            if (dom.DocumentElement == null)
+                return "";
+
+            return DomUtil.GetElementText(dom.DocumentElement, "state");
         }
 
         static string SplitCopyString(string strXml)
@@ -339,13 +483,21 @@ ref column_max_chars);
             // 对 strOldCopy 进一步分解
             string strLeft = OrderDesignControl.GetCopyFromCopyString(strOldCopy);
             string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+            if (string.IsNullOrEmpty(strRight))
+                strRight = "1"; // 默认 1
 
             DomUtil.SetElementText(dom.DocumentElement, "copyNumber", strLeft);
             if (string.IsNullOrEmpty(strRight) == false)
                 DomUtil.SetElementText(dom.DocumentElement, "copyItems", strRight);
+            else
+            {
+                Debug.Assert(false, "不应该不写入 copyItems 元素。因为这样会被后面当作空或者 0");
+            }
 
             return dom.DocumentElement.OuterXml;
         }
+
+        public static string NULL_LOCATION_CAPTION = "(空)";
 
         // “获得一个订购记录”的回调函数原型
         // parameters:
@@ -358,22 +510,16 @@ ref column_max_chars);
         // parameters:
         //      order   订购记录信息。如果为 null，表示订购信息为空
         static public void OutputDistributeInfo(
+            ExportDistributeContext context,
             MyForm form,
-    List<string> location_list,
-    IXLWorksheet sheet,
 string strBiblioRecPath,
 ref int nLineIndex,
 string strTableXml,
 string strStyle,
-List<Order.ColumnProperty> biblio_col_list,
-int nRowIndex,
-List<Order.ColumnProperty> order_col_list,
-// EntityInfo order,
 string strOrderRecPath,
-GetOrderRecord procGetOrderRecord,
-        ref List<int> column_max_chars)
+GetOrderRecord procGetOrderRecord)
         {
-            int nStartColIndex = 2;
+            int nStartColIndex = context.LeftBlankColCount;
 
             int nOldStartColIndex = nStartColIndex;
 
@@ -384,21 +530,25 @@ GetOrderRecord procGetOrderRecord,
                 //      1   找到
                 int nRet = form.GetTable(
                     strBiblioRecPath,
-                    StringUtil.MakePathList(ColumnProperty.GetTypeList(biblio_col_list)),
+                    StringUtil.MakePathList(ColumnProperty.GetTypeList(context.BiblioColList)),
                     out strTableXml,
                     out string strError);
                 if (nRet == -1)
                     throw new Exception(strError);
             }
 
+            IXLCell first_cell = null;
+            IXLCell last_cell = null;
+
             // 行序号
             {
-                IXLCell cell = sheet.Cell(nRowIndex + 1, nStartColIndex + 1).SetValue(nLineIndex + 1);
+                IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + 1).SetValue(nLineIndex + 1);
                 cell.Style.Fill.BackgroundColor = XLColor.LightGray;
                 cell.Style.Font.FontColor = XLColor.White;
                 cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
                 cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 nStartColIndex++;
+                first_cell = cell;
             }
 
 
@@ -407,18 +557,19 @@ GetOrderRecord procGetOrderRecord,
             strBiblioRecPath,
             strTableXml,
             // ref nLineIndex,
-            sheet,
+            context.Sheet,
             nStartColIndex,  // nColIndex,
-            ColumnProperty.GetTypeList(biblio_col_list),
-            nRowIndex);
+            ColumnProperty.GetTypeList(context.BiblioColList),
+            context.RowIndex);
 
-            nStartColIndex += biblio_col_list.Count;
+            nStartColIndex += context.BiblioColList.Count;
 
             // 获得订购记录信息
             EntityInfo order = procGetOrderRecord(strBiblioRecPath, strOrderRecPath);
 
             // 把订购记录中的 copy 元素进一步拆分为 copyNumber 和 copyItems 元素。注意拆分时只处理订购部分，不处理验收部分
             order.OldRecord = SplitCopyString(order.OldRecord);
+            string strOrderState = GetState(order.OldRecord);
 
             IXLCell copyNumberCell = null;
             // 输出订购信息列
@@ -428,16 +579,16 @@ GetOrderRecord procGetOrderRecord,
 order.OldRecPath,
 order.OldRecord,
 0,
-sheet,
+context.Sheet,
 nStartColIndex,  // nColIndex,
-ColumnProperty.GetTypeList(order_col_list),
-ColumnProperty.GetDropDownList(order_col_list),
-nRowIndex,
+ColumnProperty.GetTypeList(context.OrderColList),
+ColumnProperty.GetDropDownList(context.OrderColList),
+context.RowIndex,
 XLColor.NoColor,
 out copyNumberCell);
             }
 
-            nStartColIndex += order_col_list.Count;
+            nStartColIndex += context.OrderColList.Count;
 
             // 记载 cell 最大宽度
             for (int j = 0; j < nStartColIndex - nOldStartColIndex; j++)
@@ -446,10 +597,10 @@ out copyNumberCell);
                 //if (col == "recpath" || col == "书目记录路径")
                 //    continue;
 
-                IXLCell cell = sheet.Cell(nRowIndex + 1, nOldStartColIndex + j + 1);
+                IXLCell cell = context.Sheet.Cell(context.RowIndex + 1, nOldStartColIndex + j + 1);
 
                 // 最大字符数
-                PrintOrderForm.SetMaxChars(ref column_max_chars,
+                SetMaxChars(context.ColumnMaxChars,
                 nOldStartColIndex + j,
                 ReaderSearchForm.GetCharWidth(cell.GetValue<string>()));
             }
@@ -458,6 +609,11 @@ out copyNumberCell);
             {
                 XmlDocument order_dom = new XmlDocument();
                 order_dom.LoadXml(order != null ? order.OldRecord : "<root />");
+
+                string strCopyNumber = GetCopyNumber(DomUtil.GetElementText(order_dom.DocumentElement, "copy"));
+                if (int.TryParse(strCopyNumber, out int copy_number) == false)
+                    throw new Exception("复本数字部分 '" + strCopyNumber + "' 不合法");
+
                 string strDistribute = DomUtil.GetElementText(order_dom.DocumentElement, "distribute");
 
                 LocationCollection locations = new LocationCollection();
@@ -465,33 +621,44 @@ out copyNumberCell);
                 if (nRet == -1)
                     throw new Exception("订购记录 '" + order.OldRecPath + "' 的去向字段格式错误:" + strError);
 
-                List<IXLCell> cells = new List<IXLCell>();
+                // 对去向字符串进行规范化处理。注意 count 比 copyNumber 大或者小的情形，要进行修正
+                if (locations.Count > copy_number)
+                    locations = LocationCollection.CopyItems(locations, copy_number);
+                else if (locations.Count < copy_number)
+                    locations.EnsureItems(copy_number, "");
+
+                List<IXLCell> location_cells = new List<IXLCell>();
                 int i = 0;
-                foreach (string location in location_list)
+                foreach (string location0 in context.LocationList)
                 {
+                    string location = location0;
+                    if (location == NULL_LOCATION_CAPTION)
+                        location = "";
                     int number = locations.GetLocationCopy(location);
                     // 文本为空，只要格子存在即可
                     IXLCell cell = null;
 
                     if (nLineIndex == -1)
-                        cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue(location);
+                        cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + i + 1).SetValue(location);
                     else if (number == 0)
-                        cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue<string>("");
+                        cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + i + 1).SetValue<string>("");
                     else
-                        cell = sheet.Cell(nRowIndex + 1, nStartColIndex + i + 1).SetValue<int>(number);
+                        cell = context.Sheet.Cell(context.RowIndex + 1, nStartColIndex + i + 1).SetValue<int>(number);
 
                     cell.Style.Font.Bold = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     cell.Style.Protection.SetLocked(false);
-                    cells.Add(cell);
+                    if (string.IsNullOrEmpty(location) || IsNullLocation(location))
+                        cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                    location_cells.Add(cell);
 
                     i++;
                 }
 
-                if (cells.Count > 0)
+                if (location_cells.Count > 0)
                 {
-                    var dv1 = sheet.Range(cells[0], cells[cells.Count - 1]).SetDataValidation();
+                    var dv1 = context.Sheet.Range(location_cells[0], location_cells[location_cells.Count - 1]).SetDataValidation();
                     dv1.WholeNumber.Between(0, 1000);
 
                     dv1.ErrorStyle = XLErrorStyle.Warning;
@@ -500,15 +667,62 @@ out copyNumberCell);
                 }
 
                 // 设置汇总公式
-                if (copyNumberCell != null && cells.Count > 0)
+                if (copyNumberCell != null && location_cells.Count > 0)
                 {
-                    var address = sheet.Range(cells[0], cells[cells.Count - 1]).RangeAddress.ToString();
+                    var address = context.Sheet.Range(location_cells[0], location_cells[location_cells.Count - 1]).RangeAddress.ToString();
                     copyNumberCell.FormulaA1 = "SUM(" + address + ")";
+                    // copyNumberCell.Value = copyNumberCell.Value;
                 }
+
+                if (location_cells.Count > 0)
+                    last_cell = location_cells[location_cells.Count - 1];
+
+            }
+
+            // 订购记录状态不为空的行底色为灰色
+            if (first_cell != null && last_cell != null
+                && string.IsNullOrEmpty(strOrderState) == false)
+            {
+                var range = context.Sheet.Range(first_cell, last_cell);
+                range.Style.Fill.BackgroundColor = XLColor.DarkGray;
             }
 
             nLineIndex++;
         }
+
+        // 判断 馆代码/阅览室名 中 阅览室名部分是否为空
+        static bool IsNullLocation(string strLocation)
+        {
+            // 解析
+            Global.ParseCalendarName(strLocation,
+        out string strLibraryCode,
+        out string strRoom);
+            if (string.IsNullOrEmpty(strRoom))
+                return true;
+            return false;
+        }
+
+        // 根据分馆身份过滤馆藏地列表。并在列表末尾自动添加空馆藏地事项
+        public static List<string> FilterLocationList(List<string> location_list, string strLibraryCode)
+        {
+            location_list = dp2StringUtil.FilterLocationList(location_list, strLibraryCode);
+            // 增加 (空) 这一项
+            string strBlank = Order.DistributeExcelFile.NULL_LOCATION_CAPTION;
+            if (string.IsNullOrEmpty(strLibraryCode) == false && strLibraryCode != "[仅总馆]")
+                strBlank = strLibraryCode + "/";
+            if (location_list.IndexOf(strBlank) == -1)
+                location_list.Add(strBlank);
+            else
+            {
+                // 移动到列表末尾。这样在 Excel 文件中处在最末一栏显示，还需要变为深灰色背景表示不希望用户随便选用它
+                location_list.Remove(strBlank);
+                location_list.Add(strBlank);
+            }
+
+            return location_list;
+        }
+
+
 
         public static void AdjectColumnWidth(IXLWorksheet sheet,
 List<int> column_max_chars,
@@ -590,18 +804,18 @@ int MAX_CHARS = 50)
                     // 第一个 Worksheet
                     var sheet = doc.Worksheets.Worksheet(1);
 
-                    CommandRowInfo info = new CommandRowInfo(sheet);
+                    ImportContext context = new ImportContext(sheet);
 
-                    while (info.NextDataRow(sheet) == false)
+                    while (context.NextDataRow(sheet) == false)
                     {
                         // 保存一条订购记录
                         proc(
-                            info._content_name_value_table["biblio_recpath"],
-                            info._content_name_value_table["order_recpath"],
-                            info.DistributeString,
-                            info.GetOrderTable(),
-                            info.OrderRecPathCell,
-                            info.CopyCell
+                            context._content_name_value_table["biblio_recpath"],
+                            context._content_name_value_table["order_recpath"],
+                            context.DistributeString,
+                            context.GetOrderTable(),
+                            context.OrderRecPathCell,
+                            context.CopyCell
                             );
                     }
 
@@ -620,7 +834,7 @@ int MAX_CHARS = 50)
             return -1;
         }
 
-        public class CommandRowInfo
+        public class ImportContext
         {
             // 类型定义 type name --> column index
             Dictionary<string, int> _type_name_index_table { get; set; }
@@ -668,7 +882,8 @@ int MAX_CHARS = 50)
                 return results;
             }
 
-            public CommandRowInfo(IXLWorksheet sheet)
+            // 导入 Excel 文件时，用到的上下文结构
+            public ImportContext(IXLWorksheet sheet)
             {
                 this._type_name_index_table = new Dictionary<string, int>();
                 this._type_index_name_table = new Dictionary<int, string>();
@@ -765,7 +980,12 @@ int MAX_CHARS = 50)
                                 // 空或者 "0" 表示这个馆藏地没有册。跳过，不处理
                             }
                             else
-                                location_list.Add(type.Substring("location:".Length) + ":" + strNumber);
+                            {
+                                string strLocation = type.Substring("location:".Length);
+                                if (strLocation == NULL_LOCATION_CAPTION)
+                                    strLocation = "";
+                                location_list.Add(strLocation + ":" + strNumber);
+                            }
                         }
 
                         if (cell == this.CurrentDataRow.LastCellUsed())
@@ -849,6 +1069,8 @@ int MAX_CHARS = 50)
 
             return results;
         }
+
+
 
 
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
@@ -993,7 +1215,6 @@ int MAX_CHARS = 50)
 
             return results;
         }
-
     }
 
     internal class OrderColumnOption : PrintOption
@@ -1009,81 +1230,6 @@ int MAX_CHARS = 50)
             // Columns缺省值
             Columns.Clear();
             this.Columns.AddRange(GetAllColumns(true));
-
-#if NO
-            Column column = new Column();
-            column.Name = "order_recpath -- 订购记录路径";
-            column.Caption = "订购记录路径";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_seller -- 渠道(书商)";
-            column.Caption = "渠道(书商)";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_price -- 订购价";
-            column.Caption = "订购价";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_source -- 经费来源";
-            column.Caption = "经费来源";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-#if NO
-            column = new Column();
-            column.Name = "range -- 时间范围";
-            column.Caption = "时间范围";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "issueCount -- 包含期数";
-            column.Caption = "包含期数";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-#endif
-            column = new Column();
-            column.Name = "order_copy -- 复本数";
-            column.Caption = "复本数";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_orderID -- 订单号";
-            column.Caption = "订单号";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_class -- 类别";
-            column.Caption = "类别";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_batchNo -- 批次号";
-            column.Caption = "批次号";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_catalogNo -- 书目号";
-            column.Caption = "书目号";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-
-            column = new Column();
-            column.Name = "order_comment -- 附注";
-            column.Caption = "附注";
-            column.MaxChars = -1;
-            this.Columns.Add(column);
-#endif
         }
 
         public override List<Column> GetAllColumns(bool bDefault)
@@ -1095,7 +1241,7 @@ int MAX_CHARS = 50)
             "order_seller -- 渠道(书商)",
             "order_price -- 订购价",
             "order_source -- 经费来源",
-            "order_copy -- 复本数",
+            // "order_copy -- 复本数",
             "order_copyNumber -- 套数",
             "order_copyItems -- 每套册数",
             "order_orderID -- 订单号",
@@ -1103,6 +1249,7 @@ int MAX_CHARS = 50)
             "order_batchNo -- 批次号",
             "order_catalogNo -- 书目号",
             "order_comment -- 附注",
+            "order_state -- 订购记录状态",
         };
 
             foreach (string line in lines)

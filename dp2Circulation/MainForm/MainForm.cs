@@ -8866,8 +8866,14 @@ Keys keyData)
         {
             string strError = "";
 
-            int nOrderCount = 0;    // 修改过的订购记录数
+            int nIgnoreCount = 0;   // 被忽略导入的订购记录数。包含在 nOrderCount 中
+            int nOrderCount = 0;    // 处理过的订购记录数
             int nNewOrderCount = 0; // 新创建的订购记录数。包含在 nOrderCount 中
+            bool bHideMessageBox = false;
+            DialogResult result = DialogResult.Yes;
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始从 Excel 文件导入</div>");
 
             LibraryChannel channel = this.GetChannel();
             Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -8882,6 +8888,9 @@ Keys keyData)
                 int nImportResult = Order.DistributeExcelFile.ImportFromOrderDistributeExcelFile(
                     (strBiblioRecPath, strOrderRecPath, strDistributeString, order_content_table, orderRecPathCell, copyCell) =>
                     {
+                        Order.DistributeExcelFile.WarningRecPath("===", null);
+                        Order.DistributeExcelFile.WarningRecPath("订购记录 " + strOrderRecPath, null);
+
                         string strOldXml = "";
                         byte[] timestamp = null;
                         if (string.IsNullOrEmpty(strOrderRecPath) == false)
@@ -8900,9 +8909,34 @@ Keys keyData)
                         XmlDocument dom = new XmlDocument();
                         dom.LoadXml(strOldXml);
 
+                        // 清除空元素
+                        DomUtil.RemoveEmptyElements(dom.DocumentElement);
+                        strOldXml = dom.DocumentElement.OuterXml;   // strOldXml 中的内容形态规范化一下。避免含有 prolog 影响比较
+
+                        // 检查 strOldXml 中的 state 是否已经变得不适合导入？比如 state 已经变为“已订购”
+                        string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
+                        if (string.IsNullOrEmpty(strState) == false)
+                        {
+                            strError = string.Format("订购记录 {0} 因状态为 '{1}'，无法被来自 Excel 文件中的内容覆盖修改", strOrderRecPath, strState);
+
+                            if (bHideMessageBox == false)
+                                result = MessageDialog.Show(this,
+                                    strError + "\r\n\r\n是否继续处理其它记录?",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxDefaultButton.Button1,
+                    "不再显示本对话框",
+                    ref bHideMessageBox,
+                    new string[] { "跳过并继续", "中断处理" });
+
+                            if (result == DialogResult.No)
+                                throw new Exception("中断处理");
+                            return;
+                        }
+
+
                         foreach (string key in order_content_table.Keys)
                         {
-                            if (key == "recpath")
+                            if (key == "recpath" || key == "state")
                                 continue;
                             // copy 字段内容在此先兑现修改了
                             // TODO: 是否要检查元素名的合法性?
@@ -8915,13 +8949,44 @@ Keys keyData)
                         if (nRet == -1)
                             throw new Exception(strError);
 
+                        bool bCopyChanged = false;
+
                         DomUtil.SetElementText(dom.DocumentElement, "distribute", strDistributeString);
 
-                        // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
-                        string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
-                        string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
-                        if (strOldCopyString != strNewCopyString)
-                            DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
+                        // 如果存在 copyItems， 用 copyItems 值替换 copy 中的 3*5 的 5 部分
+                        if (order_content_table.ContainsKey("copyItems"))
+                        {
+                            string strCopyItems = DomUtil.GetElementText(dom.DocumentElement, "copyItems");
+                            if (string.IsNullOrEmpty(strCopyItems) == true)
+                                strCopyItems = "1";
+
+                            {
+                                string old_value = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                                string new_value = ChangeCopyStringItemsPart(old_value, strCopyItems);
+                                if (old_value != new_value)
+                                {
+                                    DomUtil.SetElementText(dom.DocumentElement, "copy", new_value);
+                                    bCopyChanged = true;
+                                }
+                            }
+
+                            DomUtil.DeleteElement(dom.DocumentElement, "copyItems");
+                        }
+
+                        // 注: copyNumber 元素不用考虑，因为这个值会被馆藏字符串计算后的个数覆盖
+                        if (order_content_table.ContainsKey("copyNumber"))
+                            DomUtil.DeleteElement(dom.DocumentElement, "copyNumber");
+
+                        {
+                            // 注意复本数除了纯数字以外，还有 3*5 形态。此外还有订购复本和验收复本共存的情况(order[accept])。 需要重新合成字符串
+                            string strOldCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
+                            string strNewCopyString = ChangeCopyStringCopyPart(strOldCopyString, locations.Count.ToString());
+                            if (strOldCopyString != strNewCopyString)
+                            {
+                                DomUtil.SetElementText(dom.DocumentElement, "copy", strNewCopyString);
+                                bCopyChanged = true;
+                            }
+                        }
 
                         if (string.IsNullOrEmpty(strOrderRecPath))
                         {
@@ -8929,12 +8994,21 @@ Keys keyData)
                             strOldXml = "";
                         }
 
+                        string strNewXml = dom.DocumentElement.OuterXml;
+                        // 检查新旧记录是否发生了实质性修改
+                        if (strOldXml == strNewXml)
+                        {
+                            nIgnoreCount++;
+                            Order.DistributeExcelFile.Warning("订购记录没有发生实质性修改，忽略导入");
+                            goto CONTINUE;
+                        }
+
                         nRet = SaveItemRecord(channel,
-                            strBiblioRecPath,
+        strBiblioRecPath,
 "order",
 strOrderRecPath,
 strOldXml,
-dom.DocumentElement.OuterXml,
+strNewXml,
 "",
 timestamp,
 out string strOutputOrderRecPath,
@@ -8943,14 +9017,18 @@ out strError);
                         if (nRet == -1)
                             throw new Exception(strError);
 
+                        Order.DistributeExcelFile.WarningGreen("保存订购记录如下：");
+                        Order.DistributeExcelFile.WarningRecPath(strOutputOrderRecPath, DomUtil.GetIndentXml(DomUtil.RemoveEmptyElements(strNewXml)));
+
                         if (string.IsNullOrEmpty(strOrderRecPath) == true || strOrderRecPath.IndexOf("?") != -1)
                         {
                             orderRecPathCell.SetValue<string>(strOutputOrderRecPath);
                             nNewOrderCount++;
                         }
-                        if (strOldCopyString != strNewCopyString)
-                            copyCell.SetValue<string>(strNewCopyString);
+                        if (bCopyChanged && copyCell != null)
+                            copyCell.SetValue<string>(DomUtil.GetElementText(dom.DocumentElement, "copy"));
 
+                        CONTINUE:
                         nOrderCount++;
 
                         // TODO: 显示进度，或可以用 旋转木马进度条，或者只用文字提示进度
@@ -8958,8 +9036,12 @@ out strError);
 
                 // 提示完成和统计信息
                 if (nImportResult == 1)
-                    MessageDialog.Show(this,
-                        string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条。其中新创建订购记录 {1} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录", nOrderCount, nNewOrderCount));
+                {
+                    string strText = string.Format("导入完成。\r\n\r\n共处理订购记录 {0} 条，修改 {1} 条。其中新创建订购记录 {2} 条，其余的是根据 Excel 文件内容覆盖修改订购库中的已有订购记录",
+                        nOrderCount, nOrderCount - nIgnoreCount, nNewOrderCount);
+                    Order.DistributeExcelFile.WarningRecPath(strText, null);
+                    MessageDialog.Show(this, strText);
+                }
             }
             finally
             {
@@ -8968,12 +9050,18 @@ out strError);
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 结束从 Excel 文件导入</div>");
+
             }
 
         }
 
         // 修改复本字符串中，订购复本数部分的套数数字
         // 12[13] 的 12; 或者 3*5[4*5] 的 3
+        // return:
+        //      返回修改后的值
         static string ChangeCopyStringCopyPart(string strText, string strCopy)
         {
             // 分离 "old[new]" 内的两个值
@@ -8988,6 +9076,22 @@ out strError);
 #endif
 
             strOldCopy = OrderDesignControl.ModifyCopy(strOldCopy, strCopy);
+
+            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
+        }
+
+        // 修改复本字符串中，订购复本数部分的每套册数
+        // 12[13] 的 1(暗含); 或者 3*5[4*5] 的 5
+        // return:
+        //      返回修改后的值
+        static string ChangeCopyStringItemsPart(string strText, string strItems)
+        {
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strText,
+                out string strOldCopy,
+                out string strNewCopy);
+
+            strOldCopy = OrderDesignControl.ModifyRightCopy(strOldCopy, strItems);
 
             return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
         }

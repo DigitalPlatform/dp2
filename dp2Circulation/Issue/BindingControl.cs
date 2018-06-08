@@ -13392,7 +13392,6 @@ MessageBoxDefaultButton.Button2);
             // 以前就存在的属于自由期的册，用于直接作为合订册对象
             List<Cell> target_cells = new List<Cell>();
 
-
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
@@ -13447,8 +13446,6 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
-
-
                     Debug.Assert(cell.item.IsParent == true, "");
 
                     target_cells.Add(cell);
@@ -13477,8 +13474,6 @@ MessageBoxDefaultButton.Button2);
                     strError = "预测格子不能参与合订";
                     goto ERROR1;
                 }
-
-
 
                 if (cell.IsMember == true)
                     binded_cells.Add(cell);
@@ -13586,12 +13581,22 @@ MessageBoxDefaultButton.Button2);
             parent_cell = null;
             if (target_cells.Count == 0)
             {
-
                 ItemBindingItem parent_item = new ItemBindingItem();
                 this.ParentItems.Add(parent_item);
                 bAddToParentItems = true;
+
+                // 2018/6/5
+                // 设置册记录默认值
+                string strXml = "<root />";
+                nRet = this.SetItemDefaultValues("quickRegister_default",
+                    true,
+                    ref strXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
                 // 初始化册信息
-                nRet = parent_item.Initial("<root />",
+                nRet = parent_item.Initial(strXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -13654,13 +13659,12 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            string strPreferredLocationString = "";
-            // 检查官仓地点字符串是否在当前用户管辖范围内
+            // 检查馆藏地点字符串是否在当前用户管辖范围内
             // return:
             //      0   在当前用户管辖范围内，不需要修改
             //      1   不在当前用户管辖范围内，需要修改。strPreferredLocationString中已经设置了一个值，但只到了分馆代码一级，库房名称为空
             nRet = CheckLocationString(parent_cell.item.LocationString,
-            out strPreferredLocationString,
+            out string strPreferredLocationString,
             out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -16155,6 +16159,7 @@ Color.FromArgb(100, color)
             return null;
         }
 
+        // 为 strXml 中设置默认的字段值
         public int SetItemDefaultValues(
     string strCfgEntry,
     bool bGetMacroValue,
@@ -16221,6 +16226,8 @@ Color.FromArgb(100, color)
                     }
                 }
             }
+
+            DomUtil.RemoveEmptyElements(new_dom.DocumentElement);
 
             strXml = new_dom.OuterXml;
 #if NO
