@@ -74,12 +74,14 @@ namespace DigitalPlatform.LibraryServer
             if (StringUtil.IsInList("titlepinyin", strStyle))
             {
                 MarcNodeList subfields = record.select("field[@name='200']/subfield[@name='9']");
+                if (subfields.count == 0)
+                    subfields = record.select("field[@name='200']/subfield[@name='A']");    // 兼容 CALIS 习惯
                 if (subfields.count > 0)
                 {
                     List<string> texts = new List<string>();
                     subfields.Contents.ForEach((o) => { texts.Add(o); });
                     if (texts.Count > 0)
-                        results.Add(new NameValueLine("题名与责任说明拼音", StringUtil.MakePathList(texts, "; "), "titlepinyin"));
+                        results.Add(new NameValueLine("题名与责任说明拼音", StringUtil.MakePathList(texts, " ; "), "titlepinyin"));
                 }
             }
 
@@ -103,11 +105,40 @@ namespace DigitalPlatform.LibraryServer
             // 作者
             if (StringUtil.IsInList("author", strStyle))
             {
+#if NO
                 MarcNodeList fields = record.select("field[@name='200']");
                 if (fields.count > 0)
+                {
                     results.Add(new NameValueLine("责任者",
                         BuildUnimarcFields(fields, "fg").Trim().Trim(new char[] { '/', ';' }).Trim(),
                         "author"));
+                }
+#endif
+
+                MarcNodeList subfields = record.select("field[@name='200']/subfield[@name='f' or @name='g']");
+                if (subfields.count > 0)
+                {
+                    List<string> texts = new List<string>();
+                    subfields.Contents.ForEach((o) =>
+                    {
+                        if (string.IsNullOrEmpty(o))
+                            return;
+                        if (texts.Count > 0 && o[0] != '=')
+                            texts.Add(" ; " + o);
+                        else
+                        {
+                            if (o[0] == '=')
+                            {
+                                // 确保 等号+空
+                                o = RemovePrefixChar(o, "=");
+                                o = "= " + o;
+                            }
+                            texts.Add(o);
+                        }
+                    });
+                    if (texts.Count > 0)
+                        results.Add(new NameValueLine("责任者", StringUtil.MakePathList(texts, ""), "author"));
+                }
             }
 
             // 责任者检索点
@@ -131,10 +162,10 @@ namespace DigitalPlatform.LibraryServer
 
             // 资料特殊细节
             // 3: Material or type of resource specific area(e.g., the scale of a map or the numbering of a periodical)
-            // 207 208 字段
+            // 206 207 208 字段
             if (StringUtil.IsInList("areas,material_specific_area", strStyle))
             {
-                MarcNodeList fields = record.select("field[@name='207' or @name='208']");
+                MarcNodeList fields = record.select("field[@name='206' or @name='207' or @name='208']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("资料特殊细节项", BuildUnimarcFields(fields), "material_specific_area"));
             }
@@ -152,21 +183,60 @@ namespace DigitalPlatform.LibraryServer
             // 出版者
             if (StringUtil.IsInList("publisher", strStyle))
             {
+#if NO
                 MarcNodeList fields = record.select("field[@name='210']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("出版者",
                         BuildUnimarcFields(fields, "c").Trim().Trim(new char[] { ':' }),
                         "publisher"));
+#endif
+                MarcNodeList subfields = record.select("field[@name='210']/subfield[@name='c']");
+                if (subfields.count > 0)
+                {
+                    List<string> texts = new List<string>();
+                    subfields.Contents.ForEach((o) =>
+                    {
+                        if (string.IsNullOrEmpty(o))
+                            return;
+                        if (texts.Count > 0)
+                            texts.Add(" : " + o);
+                        else
+
+                            texts.Add(o);
+                    });
+                    if (texts.Count > 0)
+                        results.Add(new NameValueLine("出版者", StringUtil.MakePathList(texts, ""), "publisher"));
+                }
+
             }
 
             // 出版时间
             if (StringUtil.IsInList("publishtime", strStyle))
             {
+#if NO
                 MarcNodeList fields = record.select("field[@name='210']");
                 if (fields.count > 0)
                     results.Add(new NameValueLine("出版时间",
                         BuildUnimarcFields(fields, "d").Trim().Trim(new char[] { ',' }),
                         "publishtime"));
+#endif
+                MarcNodeList subfields = record.select("field[@name='210']/subfield[@name='d']");
+                if (subfields.count > 0)
+                {
+                    List<string> texts = new List<string>();
+                    subfields.Contents.ForEach((o) =>
+                    {
+                        if (string.IsNullOrEmpty(o))
+                            return;
+                        if (texts.Count > 0)
+                            texts.Add(", " + o);
+                        else
+
+                            texts.Add(o);
+                    });
+                    if (texts.Count > 0)
+                        results.Add(new NameValueLine("出版时间", StringUtil.MakePathList(texts, ""), "publishtime"));
+                }
             }
 
             // 载体形态项
@@ -367,8 +437,11 @@ namespace DigitalPlatform.LibraryServer
         {
             StringBuilder text = new StringBuilder(4096);
             int i = 0;
-            foreach (MarcNode field in fields)
+            foreach (MarcField field in fields)
             {
+                if (field.Name == "206")
+                    Process206def(field);
+
                 MarcNodeList nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
@@ -386,7 +459,16 @@ namespace DigitalPlatform.LibraryServer
 
                         PrePostfix prefix = GetUnimarcPrePostfix(subfield);
                         if (prefix != null)
-                            temp.Append(prefix.Prefix + subfield.Content + prefix.Postfix);
+                        {
+                            string current = prefix.Prefix
+                                + RemovePrefixChar(subfield.Content, prefix.Prefix)
+                                + prefix.Postfix;
+                            // 上次的末尾和这次的头部，只允许有一个空格。多余的空格要舍掉
+                            if (HasTailBlank(temp) == true
+                                && string.IsNullOrEmpty(current) == false && current[0] == ' ')
+                                current = current.Substring(1);
+                            temp.Append(current);
+                        }
                     }
 
                     if (temp.Length > 0)
@@ -394,7 +476,7 @@ namespace DigitalPlatform.LibraryServer
                         if (i > 0)
                             text.Append(CRLF);
                         if (field.Name == "225")
-                            text.Append("(" + temp.ToString().Trim() + ")");
+                            text.Append((Left_Parentheses + temp.ToString().Trim() + Right_Parentheses).Trim());
                         else
                             text.Append(temp.ToString().Trim());
                         i++;
@@ -403,6 +485,87 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return text.ToString().Trim();
+        }
+
+        static void Process206def(MarcField field)
+        {
+            bool bRange = false;
+            // 把 $d$e$f 聚集在一起
+            foreach(MarcSubfield subfield in field.ChildNodes)
+            {
+                if (subfield.Name == "d" || subfield.Name == "e" || subfield.Name == "f")
+                {
+                    if (bRange == false)
+                    {
+                        subfield.Content = " (" + subfield.Content;
+                        bRange = true;  // 表示进入了连续 $d$e$f 范围
+                    }
+                    else
+                    {
+                        string strPrefix = " ";
+                        if (subfield.Name == "f")
+                            strPrefix = " ; ";
+                        subfield.Content = strPrefix + subfield.Content;
+                    }
+                }
+                else
+                {
+                    if (bRange)
+                    {
+                        subfield.Content += ") ";
+                        bRange = false;
+                    }
+                }
+            }
+
+            if (bRange)
+                field.ChildNodes[field.ChildNodes.count - 1].Content += ")";
+        }
+
+        const string Left_Parentheses = " (";
+        const string Right_Parentheses = ") ";
+
+
+        static bool HasTailBlank(StringBuilder text)
+        {
+            if (text.Length == 0)
+                return false;
+            if (text[text.Length - 1] == ' ')
+                return true;
+            return false;
+        }
+
+        static bool HasLeadBlank(StringBuilder text)
+        {
+            if (text.Length == 0)
+                return false;
+            if (text[0] == ' ')
+                return true;
+            return false;
+        }
+
+        static bool HasLeadChar(string strText, char ch)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return false;
+            if (strText[0] == ch)
+                return true;
+            return false;
+        }
+
+        // 去掉可能的前缀字符
+        static string RemovePrefixChar(string strContent, string strPrefix)
+        {
+            if (string.IsNullOrEmpty(strPrefix))
+                return strContent;
+            strPrefix = strPrefix.Trim();
+            if (string.IsNullOrEmpty(strPrefix))
+                return strContent;
+            string strSave = strContent.TrimStart();    // 去掉左边可能的空格字符，并保留这个结果
+            string strResult = strSave.TrimStart(new char[] { strPrefix[0] });
+            if (strSave == strResult)
+                return strContent;  // 没有匹配的前缀字符，返回原始字符串
+            return strResult.TrimStart();   // 返回去除了前缀连同空格的字符串
         }
 
         public class PrePostfix
@@ -454,6 +617,8 @@ namespace DigitalPlatform.LibraryServer
                 return GetUnimarc_200_PrePostfix(subfield);
             if (field.Name == "205")
                 return GetUnimarc_205_PrePostfix(subfield);
+            if (field.Name == "206")
+                return GetUnimarc_206_PrePostfix(subfield);
             if (field.Name == "207" || field.Name == "208")
                 return GetUnimarc_207_208_PrePostfix(subfield);
             if (field.Name == "210")
@@ -486,7 +651,7 @@ namespace DigitalPlatform.LibraryServer
                 "e| : ",
                 "f| / ",
                 "g| ; ",
-                "h| . ",
+                "h|. ",
             };
 
         static PrePostfix GetUnimarc_200_PrePostfix(MarcSubfield subfield)
@@ -499,10 +664,8 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-#if NO
                         if (subfield.PrevSibling.Name == "f" || subfield.PrevSibling.Name == "g")
                             return new PrePostfix(". ");
-#endif
                         return new PrePostfix(" ; ");
                     case "b":
                         return new PrePostfix(" [", "] ");
@@ -515,7 +678,7 @@ namespace DigitalPlatform.LibraryServer
                         if (subfield.PrevSibling != null
                             && (subfield.PrevSibling.Name == "h" || subfield.PrevSibling.Name == "H"))
                             return new PrePostfix(", ");
-                        return new PrePostfix(".");
+                        return new PrePostfix(". ");
                     case "f":
                         if (subfield.PrevSibling != null && subfield.PrevSibling.Name == "f")
                         {
@@ -564,7 +727,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "b":
                     case "d":
                     case "f":
@@ -576,6 +739,36 @@ namespace DigitalPlatform.LibraryServer
             return null;
         }
 
+        static PrePostfix GetUnimarc_206_PrePostfix(MarcSubfield subfield)
+        {
+            MarcField field = subfield.Parent as MarcField;
+            if (field.Name == "206")
+            {
+                switch (subfield.Name)
+                {
+                    case "a":
+                        if (subfield.PrevSibling == null)
+                            return new PrePostfix("");
+                        return new PrePostfix(" ; ");
+                    case "b":
+                        if (subfield.PrevSibling == null)
+                            return new PrePostfix("");
+                        return new PrePostfix(". ");
+                    case "c":
+                        return new PrePostfix(" ; ");
+
+                        // 注: $d$e$f 已经预处理过了，包含了标点符号在内容中
+                    case "d":
+                    case "e":
+                    case "f":
+                        return new PrePostfix("");
+                }
+            }
+
+            return null;
+        }
+
+
         static PrePostfix GetUnimarc_207_208_PrePostfix(MarcSubfield subfield)
         {
             MarcField field = subfield.Parent as MarcField;
@@ -586,7 +779,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "d":
                         return new PrePostfix(" = ");
                 }
@@ -598,9 +791,9 @@ namespace DigitalPlatform.LibraryServer
         static string[] unimarc_210_relations = new string[] {
             "c| : ",
                 "d|, ",
-                "e| (",
+                "e|" + Left_Parentheses,
                 "g| : ",
-                "h|,"
+                "h|, "
             };
 
         static PrePostfix GetUnimarc_210_PrePostfix(MarcSubfield subfield)
@@ -611,14 +804,14 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (subfield.NextSibling == null
                     && subfield.Parent.select("subfield[@name='e']").count > 0)
-                    strPostfix = ")";
+                    strPostfix = Right_Parentheses;
 
                 switch (subfield.Name)
                 {
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "c":
                     case "d":
                     case "e":
@@ -634,7 +827,7 @@ namespace DigitalPlatform.LibraryServer
         static string[] unimarc_215_relations = new string[] {
             "c| : ",
                 "d| ; ",
-                "e| +",
+                "e| + ",
             };
 
         static PrePostfix GetUnimarc_215_PrePostfix(MarcSubfield subfield)
@@ -647,7 +840,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "c":
                     case "d":
                     case "e":
@@ -662,7 +855,7 @@ namespace DigitalPlatform.LibraryServer
                 "d| = ",
                 "e| : ",
                 "f| / ",
-                "h| . ",
+                "h|. ",
                 "v| ; ",
                 "x|, ",
             };
@@ -677,19 +870,19 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "d":
                     case "e":
                     case "f":
                     case "h":
                     case "v":
                     case "x":
-                        return new PrePostfix(GetPrefix(unimarc_215_relations, subfield.Name));
+                        return new PrePostfix(GetPrefix(unimarc_225_relations, subfield.Name));
                     case "i":
                         if (subfield.PrevSibling != null
                             && (subfield.PrevSibling.Name == "h" || subfield.PrevSibling.Name == "H"))
                             return new PrePostfix(", ");
-                        return new PrePostfix(".");
+                        return new PrePostfix(". ");
                 }
             }
 
@@ -707,7 +900,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         if (subfield.PrevSibling == null)
                             return new PrePostfix("");
-                        return new PrePostfix("; ");
+                        return new PrePostfix(" ; ");
                     case "b":
                     case "f":
                         return new PrePostfix("--");
@@ -807,7 +1000,7 @@ namespace DigitalPlatform.LibraryServer
                     case "a":
                         return new PrePostfix(strTypeName + " ");
                     case "b":
-                        return new PrePostfix(" (", ") ");
+                        return new PrePostfix(Left_Parentheses, Right_Parentheses);
                     case "d":
                         return new PrePostfix(" : ");
                     case "y":
@@ -936,7 +1129,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        #endregion
+#endregion
 
         public static int ScriptMarc21(
             string strRecPath,

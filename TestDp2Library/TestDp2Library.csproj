@@ -68,6 +68,10 @@
       <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

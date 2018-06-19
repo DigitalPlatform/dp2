@@ -1,4 +1,5 @@
 ﻿using System;
+using DigitalPlatform.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestDp2Library
@@ -39,7 +40,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='题名与责任者' value='AAAA / FFFF ; AAAA / FFFF' type='title_area' />
+    <line name='题名与责任者' value='AAAA / FFFF. AAAA / FFFF' type='title_area' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -98,6 +99,7 @@ namespace TestDp2Library
 2001 ǂa经贸合作研究ǂb专著ǂf何军明著";
 
             // table 的 XML 格式
+            // 注意，] 后面携带一个空格，/ 之前又有一个空格，两个空格要舍掉一个才是正确的，这个测试比较重要
             string strTableXml =
 @"<root>
     <line name='题名与责任者' value='经贸合作研究 [专著] / 何军明著' type='title_area' />
@@ -176,7 +178,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='题名与责任者' value='解读中原地区三大国家战略规划与“一带一路”战略 = Interpretation of three strategic of planning of central plains region and the belt & road / 张改素, 丁志伟主编' type='title_area' />
+    <line name='题名与责任者' value='解读中原地区三大国家战略规划与“一带一路”战略 = Interpretation of three strategic of planning of central plains region and the belt &amp; road / 张改素, 丁志伟主编' type='title_area' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -193,6 +195,7 @@ namespace TestDp2Library
 2001 ǂa“一带一路”与中亚的繁荣稳定ǂA“yi Dai Yi Lu ”yu Zhong Ya De Fan Rong Wen Dingǂe“一带一路”与中亚国际论坛论文集ǂd= 《Один пояс, один путь》и стабильность, процветание в ЦАǂeмаждународный форум《одни пояс, один путь》и ЦА сборник статйǂf主编张恒龙ǂzrus";
 
             // table 的 XML 格式
+            // $d 内容前面的 “= ” 要去掉，避免和另外添加的 = 重复
             string strTableXml =
 @"<root>
     <line name='题名与责任者' value='“一带一路”与中亚的繁荣稳定 : “一带一路”与中亚国际论坛论文集 = 《Один пояс, один путь》и стабильность, процветание в ЦА : маждународный форум《одни пояс, один путь》и ЦА сборник статй / 主编张恒龙' type='title_area' />
@@ -271,7 +274,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='题名与责任者' value='一带一路”国家国情 / 总主编刘作奎. 俄罗斯 [专著] : 政治、经济、文化 = One belt and one road national condition / Liu Zuokui. Russia : Politics, economy, culture / 主编李晶' type='title_area' />
+    <line name='题名与责任者' value='“一带一路”国家国情 / 总主编刘作奎. 俄罗斯 [专著] : 政治、经济、文化 = One belt and one road national condition / Liu Zuokui. Russia : Politics, economy, culture / 主编李晶' type='title_area' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -482,7 +485,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='题名' value='一带一路”国家国情 : 政治、经济、文化 = One belt and one road national condition : Politics, economy, culture' type='title' />
+    <line name='题名' value='“一带一路”国家国情. 俄罗斯 : 政治、经济、文化 = One belt and one road national condition. Russia : Politics, economy, culture' type='title' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -501,7 +504,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='责任者' value='总主编刘作奎 ; Liu Zuokui ; 主编李晶' type='authore' />
+    <line name='责任者' value='总主编刘作奎 ; Liu Zuokui ; 主编李晶' type='author' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -520,7 +523,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='责任者' value='何军明主编 ; 张晓涛编' type='authore' />
+    <line name='责任者' value='何军明主编 ; 张晓涛编' type='author' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -584,6 +587,122 @@ namespace TestDp2Library
                 "material_specific_area",
                 strTableXml);
         }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex1()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+2060 ǂbScale 1:6 336 000ǂdW 170º-W 50º/N 80º-N 40º";
+
+            // table 的 XML 格式
+            string strTableXml =
+@"<root>
+    <line name='资料特殊细节项' value='Scale 1:6 336 000 (W 170º-W 50º/N 80º-N 40º)' type='material_specific_area' />
+</root>";
+            TestUtility.VerifyTableXml(strWorksheet,
+    "material_specific_area",
+    strTableXml);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex2()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+2060 ǂbScale 1:250 000ǂbVertical scale 1:125 000ǂcUniversal Transverse Mercator proj.ǂdW 124º- W 122º/N 58º-N57º";
+
+            // table 的 XML 格式
+            string strTableXml =
+@"<root>
+    <line name='资料特殊细节项' value='Scale 1:250 000. Vertical scale 1:125 000 ; Universal Transverse Mercator proj. (W 124º- W 122º/N 58º-N57º)' type='material_specific_area' />
+</root>";
+            TestUtility.VerifyTableXml(strWorksheet,
+    "material_specific_area",
+    strTableXml);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex3()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+2060 ǂeRA 16 hr. 30 min. to 19 hr. 30min./Decl. -16º to -49ºǂfeq. 1950, epoch 1948";
+
+            // table 的 XML 格式
+            string strTableXml =
+@"<root>
+    <line name='资料特殊细节项' value='(RA 16 hr. 30 min. to 19 hr. 30min./Decl. -16º to -49º ; eq. 1950, epoch 1948)' type='material_specific_area' />
+</root>";
+            TestUtility.VerifyTableXml(strWorksheet,
+    "material_specific_area",
+    strTableXml);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex5()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+2060 ǂbScale [ca. 1:500.000]ǂbVertical scale [ca. 1:100.000]";
+
+            // table 的 XML 格式
+            string strTableXml =
+@"<root>
+    <line name='资料特殊细节项' value='Scale [ca. 1:500.000]. Vertical scale [ca. 1:100.000]' type='material_specific_area' />
+</root>";
+
+            TestUtility.VerifyTableXml(strWorksheet,
+                "material_specific_area",
+                strTableXml);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex6()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+"01106nam2 2200253   45__\r\n"
+ + "2060 ǂbScale 1:25.000ǂcGauss-Kruger projectionǂdW 8º 42' 37\" W 8º 42' 34\" W 8º 31' 03\" W 8º 31' 01\" / N 41º 55' 01\" N 41º 54' 58\" N 41º 49' 37\" N 41º 49' 34\"";
+
+            // table 的 XML 格式
+            // $c 前置分号 $d 内容括在圆括号里面
+            string strTableXml =
+@"<root>"
++ "    <line name='资料特殊细节项' value='" +
+StringUtil.GetXmlStringSimple("Scale 1:25.000 ; Gauss-Kruger projection (W 8º 42\' 37\" W 8º 42\' 34\" W 8º 31\' 03\" W 8º 31\' 01\" / N 41º 55\' 01\" N 41º 54\' 58\" N 41º 49\' 37\" N 41º 49\' 34\")")
++ "' type='material_specific_area' />"
++ "</root>";
+
+            TestUtility.VerifyTableXml(strWorksheet,
+                "material_specific_area",
+                strTableXml);
+        }
+
+        [TestMethod]
+        public void TestMarcTable_206_ex7()
+        {
+            // MARC 工作单格式
+            string strWorksheet =
+@"01106nam2 2200253   45__
+2060 ǂbScale not givenǂeRA 16 hr. 30 min. to 19 hr. 30 min. / Decl. -16° to -49°ǂfeq. 1950, epoch 1948";
+
+            // table 的 XML 格式
+            // $e $f 之间用空格相接。然后把两者一起扩在圆括号里
+            string strTableXml =
+@"<root>
+    <line name='资料特殊细节项' value='Scale not given (RA 16 hr. 30 min. to 19 hr. 30 min. / Decl. -16° to -49° ; eq. 1950, epoch 1948)' type='material_specific_area' />
+</root>";
+
+            TestUtility.VerifyTableXml(strWorksheet,
+                "material_specific_area",
+                strTableXml);
+        }
+
 
         [TestMethod]
         public void TestMarcTable_specific_2()
@@ -729,7 +848,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='出版发行项' value='北京 : 中国发展出版社 ; 上海 : 北京出版社, 2017' type='publication_area' />
+    <line name='出版发行项' value='北京 : 中国发展出版社 ; 上海 : 上海出版社, 2017' type='publication_area' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
@@ -748,7 +867,7 @@ namespace TestDp2Library
             // table 的 XML 格式
             string strTableXml =
 @"<root>
-    <line name='出版发行项' value='北京 : 中国音像出版社, 2001(北京 : 北京电影制片厂, 2002)' type='publication_area' />
+    <line name='出版发行项' value='北京 : 中国音像出版社, 2001 (北京 : 北京电影制片厂, 2002)' type='publication_area' />
 </root>";
 
             TestUtility.VerifyTableXml(strWorksheet,
