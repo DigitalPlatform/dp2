@@ -345,6 +345,14 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strCategory == "system")
                 {
+                    // 2018/6/19
+                    // 获得系统挂起状态
+                    if (strName == "hangup")
+                    {
+                        strValue = StringUtil.MakePathList(this.HangupList);
+                        goto END1;
+                    }
+
                     // 2016/6/25
                     // MSMQ 队列名
                     if (strName == "outgoingQueue")
