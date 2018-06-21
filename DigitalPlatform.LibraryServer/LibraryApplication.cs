@@ -717,7 +717,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (app.HasAppBeenKilled() == true)
                         {
-                            app.WriteErrorLog("*** 发现library application先前曾被意外终止 ***");
+                            app.WriteErrorLog("*** 发现 LibraryService 先前曾被意外终止 ***");
                         }
                     }
 
@@ -1860,14 +1860,14 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     if (bReload == true)
-                        app.WriteErrorLog("library application结束重新装载 " + this.m_strFileName);
+                        app.WriteErrorLog("LibraryService 结束重新装载 " + this.m_strFileName);
                     else
                     {
                         TimeSpan delta = DateTime.Now - start;
-                        app.WriteErrorLog("library application成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
+                        app.WriteErrorLog("LibraryService 成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
 
                         // 写入down机检测文件
-                        app.WriteAppDownDetectFile("library application成功初始化。");
+                        app.WriteAppDownDetectFile("LibraryService 成功初始化。");
 
                         if (this.watcher == null)
                         {
@@ -1948,11 +1948,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (bReload == true)
-                app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
+                app.WriteErrorLog("LibraryService 重新装载 " + this.m_strFileName + " 的过程发生严重错误 [" + strError + "]，服务处于残缺状态，请及时排除故障后重新启动");
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
+                app.WriteErrorLog("LibraryService 初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
                 app.AddHangup("StartingError");
             }
             return -1;
@@ -3079,11 +3079,11 @@ namespace DigitalPlatform.LibraryServer
 
                 // stream.Close();
 
-                this.WriteErrorLog("library application 被重新初始化。");
+                this.WriteErrorLog("LibraryService 被重新初始化。");
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("library application 重新初始化时发生错误：" + ExceptionUtil.GetDebugText(ex));
+                this.WriteErrorLog("LibraryService 重新初始化时发生错误：" + ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -3868,7 +3868,7 @@ namespace DigitalPlatform.LibraryServer
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
 
-            this.WriteErrorLog("LibraryApplication 开始下降");
+            this.WriteErrorLog("LibraryService 开始下降");
             this.AddHangup("Exit");
 
             DateTime start = DateTime.Now;
@@ -15005,6 +15005,13 @@ strLibraryCode);    // 读者所在的馆代码
                 strError += "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
+        }
+
+        // 2018/6/21
+        // 为了兼容旧的脚本文件 table_unimarc.fltx。时间长了以后可以考虑删除本函数
+        public static string BuildTableXml(List<NameValueLine> lines)
+        {
+            return NameValueLine.BuildTableXml(lines);
         }
     }
 
