@@ -45,7 +45,7 @@ namespace DigitalPlatform.CirculationClient
 #endif
             string path = url.Substring(Name.Length + 1);
             var stream = new dp2ResStream(_manager, path, _progressChanged);
-            return TaskEx.FromResult((Stream)stream);
+            return Task.FromResult((Stream)stream);
         }
     }
 

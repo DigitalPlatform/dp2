@@ -31,7 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.1.*")]
-[assembly: AssemblyFileVersion("2.1.0.0")]
+[assembly: AssemblyVersion("3.0.*")]
+[assembly: AssemblyFileVersion("3.0.0.0")]
 
 // V2.1 2015/12/14 剥离纯粹通讯功能到 DigitalPlatform.LibraryClient.dll 中
+// V3.0 2018/6/23 改为用 .NET Framework 4.6.1 编译

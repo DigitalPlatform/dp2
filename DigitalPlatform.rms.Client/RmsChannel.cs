@@ -1428,10 +1428,10 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            LogicNameItem[] logicnames = new LogicNameItem[logicNames.Count];
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
             for (int i = 0; i < logicnames.Length; i++)
             {
-                logicnames[i] = new LogicNameItem();
+                logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
                 string[] cols = (string[])logicNames[i];
                 logicnames[i].Lang = cols[1];
                 logicnames[i].Value = cols[0];
@@ -1532,7 +1532,7 @@ namespace DigitalPlatform.rms.Client
             strKeysDef = "";
             strBrowseDef = "";
 
-            LogicNameItem[] logicnames = null;
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = null;
 
         REDO:
             try
@@ -1632,10 +1632,10 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            LogicNameItem[] logicnames = new LogicNameItem[logicNames.Count];
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
             for (int i = 0; i < logicnames.Length; i++)
             {
-                logicnames[i] = new LogicNameItem();
+                logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
                 string[] cols = (string[])logicNames[i];
                 logicnames[i].Lang = cols[1];
                 logicnames[i].Value = cols[0];
