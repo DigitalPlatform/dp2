@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 // 您可以指定所有这些值，也可以使用“修订号”和“内部版本号”的默认值，方法是按
 // 如下所示使用 '*':
 
-[assembly: AssemblyVersion("2.0.*")]
+[assembly: AssemblyVersion("3.0.*")]
 
 //
 // 要对程序集进行签名，必须指定要使用的密钥。有关程序集签名的更多信息，请参考 

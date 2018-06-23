@@ -1,4 +1,4 @@
-using System.Reflection;
+锘縰sing System.Reflection;
 using System.Runtime.CompilerServices;
 
 //
@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 // associated with an assembly.
 //
 [assembly: AssemblyTitle("dp2rms")]
-[assembly: AssemblyDescription("dp2资源加工")]
+[assembly: AssemblyDescription("dp2璧勬簮鍔犲伐")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DigitalPlatform 数字平台(北京)软件有限责任公司")]
-[assembly: AssemblyProduct("dp2rms -- dp2资源加工")]
-[assembly: AssemblyCopyright("(C) 2005-2011 DigitalPlatform 数字平台(北京)软件有限责任公司")]
+[assembly: AssemblyCompany("DigitalPlatform 鏁板瓧骞冲彴(鍖椾含)杞欢鏈夐檺璐ｄ换鍏徃")]
+[assembly: AssemblyProduct("dp2rms -- dp2璧勬簮鍔犲伐")]
+[assembly: AssemblyCopyright("(C) 2005-2011 DigitalPlatform 鏁板瓧骞冲彴(鍖椾含)杞欢鏈夐檺璐ｄ换鍏徃")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
 
@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("2.0.*")]
+[assembly: AssemblyVersion("3.0.*")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

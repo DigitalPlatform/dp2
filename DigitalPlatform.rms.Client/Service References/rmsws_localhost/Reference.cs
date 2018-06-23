@@ -698,6 +698,67 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="LogicNameItem", Namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms")]
+    [System.SerializableAttribute()]
+    public partial class LogicNameItem : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LangField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ValueField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Lang {
+            get {
+                return this.LangField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LangField, value) != true)) {
+                    this.LangField = value;
+                    this.RaisePropertyChanged("Lang");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Value {
+            get {
+                return this.ValueField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ValueField, value) != true)) {
+                    this.ValueField = value;
+                    this.RaisePropertyChanged("Value");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="KeyInfo", Namespace="http://dp2003.com/dp2kernel/")]
     [System.SerializableAttribute()]
     public partial class KeyInfo : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -1268,26 +1329,26 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         DigitalPlatform.rms.Client.rmsws_localhost.Result EndRebuildResKeys(out string strOutputResPath, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2kernel/KernelService/SetDbInfo", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SetDbInfoResponse")]
-        DigitalPlatform.rms.Client.rmsws_localhost.Result SetDbInfo(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result SetDbInfo(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2kernel/KernelService/SetDbInfo", ReplyAction="http://dp2003.com/dp2kernel/KernelService/SetDbInfoResponse")]
-        System.IAsyncResult BeginSetDbInfo(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetDbInfo(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.rms.Client.rmsws_localhost.Result EndSetDbInfo(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2kernel/KernelService/GetDbInfo", ReplyAction="http://dp2003.com/dp2kernel/KernelService/GetDbInfoResponse")]
-        DigitalPlatform.rms.Client.rmsws_localhost.Result GetDbInfo(out DigitalPlatform.rms.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, string strDbName, string strStyle);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result GetDbInfo(out DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, string strDbName, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2kernel/KernelService/GetDbInfo", ReplyAction="http://dp2003.com/dp2kernel/KernelService/GetDbInfoResponse")]
         System.IAsyncResult BeginGetDbInfo(string strDbName, string strStyle, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.rms.Client.rmsws_localhost.Result EndGetDbInfo(out DigitalPlatform.rms.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, System.IAsyncResult result);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result EndGetDbInfo(out DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2kernel/KernelService/CreateDb", ReplyAction="http://dp2003.com/dp2kernel/KernelService/CreateDbResponse")]
-        DigitalPlatform.rms.Client.rmsws_localhost.Result CreateDb(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault);
+        DigitalPlatform.rms.Client.rmsws_localhost.Result CreateDb(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2kernel/KernelService/CreateDb", ReplyAction="http://dp2003.com/dp2kernel/KernelService/CreateDbResponse")]
-        System.IAsyncResult BeginCreateDb(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginCreateDb(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.rms.Client.rmsws_localhost.Result EndCreateDb(System.IAsyncResult result);
         
@@ -1825,10 +1886,10 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             this.results = results;
         }
         
-        public DigitalPlatform.rms.LogicNameItem[] logicNames {
+        public DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.rms.LogicNameItem[])(this.results[0]));
+                return ((DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[])(this.results[0]));
             }
         }
         
@@ -3364,12 +3425,12 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
                         strStyle}, this.onEndRebuildResKeysDelegate, this.onRebuildResKeysCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result SetDbInfo(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText) {
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result SetDbInfo(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText) {
             return base.Channel.SetDbInfo(strDbName, logicNames, strType, strSqlDbName, strKeysText, strBrowseText);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetDbInfo(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginSetDbInfo(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginSetDbInfo(strDbName, logicNames, strType, strSqlDbName, strKeysText, strBrowseText, callback, asyncState);
         }
         
@@ -3380,7 +3441,7 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         
         private System.IAsyncResult OnBeginSetDbInfo(object[] inValues, System.AsyncCallback callback, object asyncState) {
             string strDbName = ((string)(inValues[0]));
-            DigitalPlatform.rms.LogicNameItem[] logicNames = ((DigitalPlatform.rms.LogicNameItem[])(inValues[1]));
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames = ((DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[])(inValues[1]));
             string strType = ((string)(inValues[2]));
             string strSqlDbName = ((string)(inValues[3]));
             string strKeysText = ((string)(inValues[4]));
@@ -3401,11 +3462,11 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             }
         }
         
-        public void SetDbInfoAsync(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText) {
+        public void SetDbInfoAsync(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText) {
             this.SetDbInfoAsync(strDbName, logicNames, strType, strSqlDbName, strKeysText, strBrowseText, null);
         }
         
-        public void SetDbInfoAsync(string strDbName, DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, object userState) {
+        public void SetDbInfoAsync(string strDbName, DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysText, string strBrowseText, object userState) {
             if ((this.onBeginSetDbInfoDelegate == null)) {
                 this.onBeginSetDbInfoDelegate = new BeginOperationDelegate(this.OnBeginSetDbInfo);
             }
@@ -3424,7 +3485,7 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
                         strBrowseText}, this.onEndSetDbInfoDelegate, this.onSetDbInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result GetDbInfo(out DigitalPlatform.rms.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, string strDbName, string strStyle) {
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result GetDbInfo(out DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, string strDbName, string strStyle) {
             return base.Channel.GetDbInfo(out logicNames, out strType, out strSqlDbName, out strKeysText, out strBrowseText, strDbName, strStyle);
         }
         
@@ -3434,7 +3495,7 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndGetDbInfo(out DigitalPlatform.rms.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, System.IAsyncResult result) {
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result EndGetDbInfo(out DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, out string strType, out string strSqlDbName, out string strKeysText, out string strBrowseText, System.IAsyncResult result) {
             return base.Channel.EndGetDbInfo(out logicNames, out strType, out strSqlDbName, out strKeysText, out strBrowseText, result);
         }
         
@@ -3445,7 +3506,7 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         private object[] OnEndGetDbInfo(System.IAsyncResult result) {
-            DigitalPlatform.rms.LogicNameItem[] logicNames = this.GetDefaultValueForInitialization<DigitalPlatform.rms.LogicNameItem[]>();
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames = this.GetDefaultValueForInitialization<DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[]>();
             string strType = this.GetDefaultValueForInitialization<string>();
             string strSqlDbName = this.GetDefaultValueForInitialization<string>();
             string strKeysText = this.GetDefaultValueForInitialization<string>();
@@ -3486,12 +3547,12 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
                         strStyle}, this.onEndGetDbInfoDelegate, this.onGetDbInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.rms.Client.rmsws_localhost.Result CreateDb(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault) {
+        public DigitalPlatform.rms.Client.rmsws_localhost.Result CreateDb(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault) {
             return base.Channel.CreateDb(logicNames, strType, strSqlDbName, strKeysDefault, strBrowseDefault);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginCreateDb(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, System.AsyncCallback callback, object asyncState) {
+        public System.IAsyncResult BeginCreateDb(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, System.AsyncCallback callback, object asyncState) {
             return base.Channel.BeginCreateDb(logicNames, strType, strSqlDbName, strKeysDefault, strBrowseDefault, callback, asyncState);
         }
         
@@ -3501,7 +3562,7 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         }
         
         private System.IAsyncResult OnBeginCreateDb(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            DigitalPlatform.rms.LogicNameItem[] logicNames = ((DigitalPlatform.rms.LogicNameItem[])(inValues[0]));
+            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames = ((DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[])(inValues[0]));
             string strType = ((string)(inValues[1]));
             string strSqlDbName = ((string)(inValues[2]));
             string strKeysDefault = ((string)(inValues[3]));
@@ -3522,11 +3583,11 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
             }
         }
         
-        public void CreateDbAsync(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault) {
+        public void CreateDbAsync(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault) {
             this.CreateDbAsync(logicNames, strType, strSqlDbName, strKeysDefault, strBrowseDefault, null);
         }
         
-        public void CreateDbAsync(DigitalPlatform.rms.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, object userState) {
+        public void CreateDbAsync(DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicNames, string strType, string strSqlDbName, string strKeysDefault, string strBrowseDefault, object userState) {
             if ((this.onBeginCreateDbDelegate == null)) {
                 this.onBeginCreateDbDelegate = new BeginOperationDelegate(this.OnBeginCreateDb);
             }

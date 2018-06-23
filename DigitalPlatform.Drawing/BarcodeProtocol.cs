@@ -36,7 +36,7 @@ namespace DigitalPlatform.Drawing
         public Task<Stream> GetStreamAsync(string url)
         {
             string path = url.Substring(Name.Length + 1);
-            return TaskEx.FromResult(BuildQrCodeImage(path));
+            return Task.FromResult(BuildQrCodeImage(path));
         }
 
         // 将逗号间隔的参数表解析到Hashtable中

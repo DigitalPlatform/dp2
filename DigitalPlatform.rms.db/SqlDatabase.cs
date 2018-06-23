@@ -482,6 +482,8 @@ namespace DigitalPlatform.rms
                         + "Data Source=" + this.container.SqlServerName + ";"
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";"
+                        // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
+                        + "SslMode=none;"
                         + "charset=utf8;";
 
                 }

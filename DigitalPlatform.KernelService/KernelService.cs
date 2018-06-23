@@ -331,11 +331,14 @@ namespace dp2Kernel
         //                      '->' 分隔的第一个部分默认就是 XPath。
         //      2.68 2017/6/7 为 WriteRes() API 的 strStyle 参数增加 simulate 用法 (当写入对象资源时)
         //      2.69 2017/10/7 为 GetRes() 和 WriteRes() API 的 strStyle 参数增加 gzip 用法
+        //      3.0 2018/6/23 改为用 .NET Framework 4.6.1 编译
         public Result GetVersion()
         {
-            Result result = new Result();
-            result.Value = 0;
-            result.ErrorString = "2.69";
+            Result result = new Result
+            {
+                Value = 0,
+                ErrorString = "3.0"
+            };
             return result;
         }
 
