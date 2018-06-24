@@ -176,7 +176,7 @@ MessageBoxDefaultButton.Button1);
             if (string.Compare(this.textBox_server_dp2LibraryServerUrl.Text,
                 CirculationLoginDlg.dp2LibraryXEServerUrl, true) == 0)
             {
-                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2Library XE");
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
                 if (File.Exists(strShortcutFilePath) == false)
                 {
                     // 安装和启动
@@ -252,7 +252,7 @@ MessageBoxDefaultButton.Button1);
             messageBar.BackColor = SystemColors.Info;
             messageBar.ForeColor = SystemColors.InfoText;
             messageBar.Text = "dp2 内务";
-            messageBar.MessageText = "正在启动 dp2Library XE，请等待 ...";
+            messageBar.MessageText = "正在启动 dp2Library XE V3，请等待 ...";
             messageBar.StartPosition = FormStartPosition.CenterScreen;
             messageBar.Show(owner);
             messageBar.Update();
@@ -264,16 +264,16 @@ MessageBoxDefaultButton.Button1);
 
                 string strShortcutFilePath = "";
                 if (bLocal == true)
-                    strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2Library XE");
+                    strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
                 else
                 {
-                    strShortcutFilePath = "http://dp2003.com/dp2libraryxe/v1/dp2libraryxe.application";
+                    strShortcutFilePath = "http://dp2003.com/dp2libraryxe/v3/dp2libraryxe.application";
                     waitTime = new TimeSpan(0, 5, 0);  // 安装需要的等待时间更长
                 }
 
                 // TODO: detect if already started
                 using (EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset,
-                    "dp2libraryXE V1 library host started"))
+                    "dp2libraryXE V3 library host started"))
                 {
                     Application.DoEvents();
 
@@ -292,7 +292,7 @@ MessageBoxDefaultButton.Button1);
                         if (DateTime.Now - start > waitTime)
                         {
                             DialogResult result = MessageBox.Show(owner,
-    "dp2libraryXE 暂时没有响应。\r\n\r\n是否继续等待其响应?",
+    "dp2libraryXE V3 暂时没有响应。\r\n\r\n是否继续等待其响应?",
     strDialogTitle,
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -316,7 +316,7 @@ MessageBoxDefaultButton.Button1);
         {
             bool createdNew = true;
             // mutex name need contains windows account name. or us programes file path, hashed
-            using (Mutex mutex = new Mutex(true, "dp2libraryXE V1", out createdNew))
+            using (Mutex mutex = new Mutex(true, "dp2libraryXE V3", out createdNew))
             {
                 if (createdNew)
                 {

@@ -708,7 +708,7 @@ namespace DigitalPlatform.IO
 
         // get clickonce shortcut filename
         // parameters:
-        //      strApplicationName  "DigitalPlatform/dp2 V2/dp2内务 V2"
+        //      strApplicationName  "DigitalPlatform/dp2 V3/dp2内务 V3"
         public static string GetShortcutFilePath(string strApplicationName)
         {
             // string publisherName = "Publisher Name";

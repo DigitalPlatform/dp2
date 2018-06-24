@@ -32,12 +32,12 @@
     <InstallUrl>http://dp2003.com/dp2LibraryXE/v3/</InstallUrl>
     <UpdateUrl>http://dp2003.com/dp2LibraryXE/v3/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
-    <ProductName>dp2Library XE</ProductName>
+    <ProductName>dp2Library XE V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>

@@ -68,13 +68,15 @@ namespace dp2Circulation
 
             List<string> args = StringUtil.GetCommandLineArgs();
 
+            // TODO: 检查 Windows 环境，如果可行就提示安装更高版本(如果更高版本的菜单事项还没有的话)
+
             // 绿色安装方式下，如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
             if (ApplicationDeployment.IsNetworkDeployed == false
                 && Control.ModifierKeys != Keys.Control
                 && args.IndexOf("green") == -1
                 && StringUtil.IsDevelopMode() == false)
             {
-                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2内务 V3");
                 if (File.Exists(strShortcutFilePath) == true)
                 {
                     try

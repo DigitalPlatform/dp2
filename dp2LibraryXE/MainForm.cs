@@ -284,7 +284,7 @@ FormWindowState.Normal);
             this.MenuItem_resetSerialCode.Visible = false;
 #endif
 
-            this._floatingMessage.Text = "正在启动 dp2Library XE，请等待 ...";
+            this._floatingMessage.Text = "正在启动 dp2Library XE V3，请等待 ...";
 
             Application.DoEvents();
 
@@ -402,7 +402,7 @@ FormWindowState.Normal);
                 // 2014/11/16
                 try
                 {
-                    EventWaitHandle.OpenExisting("dp2libraryXE V1 library host started").Set();
+                    EventWaitHandle.OpenExisting("dp2libraryXE V3 library host started").Set();
                 }
                 catch
                 {
@@ -516,22 +516,22 @@ this.Font);
             if (this.IsServer == true)
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE 小型服务器 [社区版]";
+                    this.Text = "dp2Library XE V3 小型服务器 [社区版]";
                 else
-                    this.Text = "dp2Library XE 小型服务器 [专业版]";
+                    this.Text = "dp2Library XE V3 小型服务器 [专业版]";
             }
             else
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE 单机 [社区版]";
+                    this.Text = "dp2Library XE V3 单机 [社区版]";
                 else
-                    this.Text = "dp2Library XE 单机 [专业版]";
+                    this.Text = "dp2Library XE V3 单机 [专业版]";
             }
 
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
 
             string strContent = @"
-dp2Library XE
+dp2Library XE V3
 ---
 dp2 图书馆集成系统 图书馆应用服务器 "
                 + (this.IsServer == false ? "单机" : "小型服务器")

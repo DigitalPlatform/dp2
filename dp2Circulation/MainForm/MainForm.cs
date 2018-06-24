@@ -5270,12 +5270,12 @@ dlg.TempCode);
 
         void AutoStartDp2libraryXE()
         {
-            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2Library XE");
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
             if (File.Exists(strShortcutFilePath) == false)
             {
                 // 安装和启动
                 DialogResult result = MessageBox.Show(this,
-"dp2libraryXE 在本机尚未安装。\r\ndp2Circulation (内务)即将访问 dp2LibraryXE 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
+"dp2libraryXE V3 在本机尚未安装。\r\ndp2Circulation V3 (内务)即将访问 dp2LibraryXE V3 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
 "dp2Circulation",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -8698,7 +8698,7 @@ Keys keyData)
                 Process.Start(strUrl);
 #endif
 
-                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2内务 V2");
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2内务 V3");
                 if (File.Exists(strShortcutFilePath) == false)
                 {
                     return 0;

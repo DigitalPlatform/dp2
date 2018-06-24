@@ -1882,7 +1882,7 @@
             this.MainMenuStrip = this.menuStrip_main;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
-            this.Text = "dp2circulation V2 -- 内务";
+            this.Text = "dp2circulation V3 -- 内务";
             this.Activated += new System.EventHandler(this.MainForm_Activated);
             this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
