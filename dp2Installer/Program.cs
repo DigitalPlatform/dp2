@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -11,7 +10,6 @@ using System.Security.Principal;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2Installer
@@ -110,6 +108,8 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
 #endif
                         if (IsDevelopMode() == false)
                             PrepareCatchException();
+
+                        ProgramUtil.SetDpiAwareness();
 
                         Application.EnableVisualStyles();
                         Application.SetCompatibleTextRenderingDefault(false);

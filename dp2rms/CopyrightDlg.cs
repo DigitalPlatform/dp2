@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -73,7 +73,7 @@ namespace dp2rms
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(348, 18);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2×ÊÔ´¹ÜÀí dp2rms V2.0";
+            this.label1.Text = "dp2èµ„æºç®¡ç† dp2rms V3";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
@@ -84,7 +84,7 @@ namespace dp2rms
             this.label_copyright.Name = "label_copyright";
             this.label_copyright.Size = new System.Drawing.Size(346, 37);
             this.label_copyright.TabIndex = 1;
-            this.label_copyright.Text = "(C) °æÈ¨ËùÓĞ 2005-2011 Êı×ÖÆ½Ì¨(±±¾©)Èí¼şÓĞÏŞÔğÈÎ¹«Ë¾\\r\\nDigital Platform (Beijing) Software Corp. " +
+            this.label_copyright.Text = "(C) ç‰ˆæƒæ‰€æœ‰ 2005-2011 æ•°å­—å¹³å°(åŒ—äº¬)è½¯ä»¶æœ‰é™è´£ä»»å…¬å¸\\r\\nDigital Platform (Beijing) Software Corp. " +
     "Ltd.";
             this.label_copyright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -109,7 +109,7 @@ namespace dp2rms
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(84, 23);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_environment
@@ -140,7 +140,7 @@ namespace dp2rms
             this.Name = "CopyrightDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "Copyright °æÈ¨";
+            this.Text = "Copyright ç‰ˆæƒ";
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -175,12 +175,12 @@ namespace dp2rms
 
 		private void CopyrightDlg_Load(object sender, System.EventArgs e)
 		{
-			label_copyright.Text = "(C) °æÈ¨ËùÓĞ 2005-2011 Êı×ÖÆ½Ì¨(±±¾©)Èí¼şÓĞÏŞÔğÈÎ¹«Ë¾\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+			label_copyright.Text = "(C) ç‰ˆæƒæ‰€æœ‰ 2005-2011 æ•°å­—å¹³å°(åŒ—äº¬)è½¯ä»¶æœ‰é™è´£ä»»å…¬å¸\r\nDigital Platform (Beijing) Software Corp. Ltd.";
 
 			Assembly myAssembly;
 
 			myAssembly = Assembly.GetAssembly(this.GetType());
-			textBox_environment.Text = "±¾»ú .NET Framework °æ±¾: " + myAssembly.ImageRuntimeVersion
+			textBox_environment.Text = "æœ¬æœº .NET Framework ç‰ˆæœ¬: " + myAssembly.ImageRuntimeVersion
 				+ "\r\ndp2rms: " + myAssembly.FullName;
 			 
 			/*
