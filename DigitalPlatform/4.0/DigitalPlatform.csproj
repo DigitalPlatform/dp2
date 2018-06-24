@@ -265,6 +265,7 @@
     <Compile Include="FileDownloadDialog.Designer.cs">
       <DependentUpon>FileDownloadDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProgramUtil.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
       <SubType>Designer</SubType>

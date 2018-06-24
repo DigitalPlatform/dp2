@@ -529,53 +529,53 @@
             // MenuItem_cfg
             // 
             this.MenuItem_cfg.Name = "MenuItem_cfg";
-            this.MenuItem_cfg.Size = new System.Drawing.Size(244, 30);
+            this.MenuItem_cfg.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_cfg.Text = "参数配置(&P)...";
             this.MenuItem_cfg.Click += new System.EventHandler(this.MenuItem_cfg_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(241, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(244, 30);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(244, 30);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(244, 30);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator19
             // 
             this.toolStripSeparator19.Name = "toolStripSeparator19";
-            this.toolStripSeparator19.Size = new System.Drawing.Size(241, 6);
+            this.toolStripSeparator19.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(244, 30);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
-            this.MenuItem_copyright.Size = new System.Drawing.Size(244, 30);
-            this.MenuItem_copyright.Text = "版权(&C)...";
+            this.MenuItem_copyright.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_copyright.Text = "关于(&A)...";
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
             // 
             // toolStrip_main
@@ -927,7 +927,7 @@
             // 
             this.tabPage_operHistory.Controls.Add(this.webBrowser_history);
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
             this.tabPage_operHistory.Size = new System.Drawing.Size(236, 318);
             this.tabPage_operHistory.TabIndex = 4;
@@ -938,7 +938,7 @@
             // 
             this.webBrowser_history.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_history.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_history.Name = "webBrowser_history";
             this.webBrowser_history.Size = new System.Drawing.Size(236, 318);
@@ -947,9 +947,9 @@
             // tabPage_property
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_property.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_property.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(236, 289);
+            this.tabPage_property.Size = new System.Drawing.Size(236, 318);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -957,9 +957,9 @@
             // tabPage_verifyResult
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_verifyResult.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(236, 289);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(236, 318);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -967,9 +967,9 @@
             // tabPage_generateData
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 31);
-            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_generateData.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(236, 289);
+            this.tabPage_generateData.Size = new System.Drawing.Size(236, 318);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;

@@ -18,19 +18,6 @@ namespace dp2Circulation
 
     static class Program
     {
-        [DllImport("SHCore.dll", SetLastError = true)]
-        private static extern bool SetProcessDpiAwareness(PROCESS_DPI_AWARENESS awareness);
-
-        [DllImport("SHCore.dll", SetLastError = true)]
-        private static extern void GetProcessDpiAwareness(IntPtr hprocess, out PROCESS_DPI_AWARENESS awareness);
-
-        private enum PROCESS_DPI_AWARENESS
-        {
-            Process_DPI_Unaware = 0,
-            Process_System_DPI_Aware = 1,
-            Process_Per_Monitor_DPI_Aware = 2
-        }
-
         /// <summary>
         /// 前端，也就是 dp2circulation.exe 的版本号
         /// </summary>
@@ -125,6 +112,8 @@ namespace dp2Circulation
                     if (StringUtil.IsDevelopMode() == false)
                         PrepareCatchException();
 
+                    ProgramUtil.SetDpiAwareness();
+#if NO
                     // Vista on up = 6
                     // http://stackoverflow.com/questions/17406850/how-can-we-check-if-the-current-os-is-win8-or-blue
                     if (
@@ -155,6 +144,7 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
                         var getDpiError = Marshal.GetLastWin32Error();
 #endif
                     }
+#endif
 
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
