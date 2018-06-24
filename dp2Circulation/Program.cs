@@ -68,6 +68,57 @@ namespace dp2Circulation
 
             List<string> args = StringUtil.GetCommandLineArgs();
 
+            // 2018/6/24
+            // 观察 V3 版本是否已经安装。如果没有安装，并且当前操作系统条件具备，则提示升级到 V3
+            if (ApplicationDeployment.IsNetworkDeployed == true
+                // https://stackoverflow.com/questions/2819934/detect-windows-version-in-net
+                && (Environment.OSVersion.Version.Major > 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 1)))
+            {
+                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2内务 V3");
+                if (File.Exists(strShortcutFilePath) == false)
+                {
+                    // 提示可以安装 V3
+                    DialogResult result = MessageBox.Show(
+        "内务当前有 V3 版本可以安装。强烈推荐升级到 V3 版本。\r\n\r\n是否现在立即安装 内务 V3 版本? ",
+        "dp2circulation",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Yes)
+                    {
+                        strShortcutFilePath = "http://dp2003.com/dp2circulation/v3/dp2circulation.application";
+                        try
+                        {
+                            Process.Start(strShortcutFilePath);
+                            return;
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+                else
+                {
+                    // 启动 V3
+                    try
+                    {
+                        MessageBox.Show("启动已经安装在本机的内务 V3 版本");
+                        Process.Start(strShortcutFilePath);
+                        return;
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            else
+            {
+                // MessageBox.Show("Environment.OSVersion.Version.Major: " + Environment.OSVersion.Version.Major);
+            }
+
+
             // 绿色安装方式下，如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
             if (ApplicationDeployment.IsNetworkDeployed == false
                 && Control.ModifierKeys != Keys.Control
