@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -11,7 +10,6 @@ using System.Security.Principal;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2Installer
@@ -37,6 +35,16 @@ namespace dp2Installer
         static void Main()
         {
             ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
+
+            // return:
+            //      true    函数返回后需要立即退出程序
+            //      false   返回返回后继续后面处理
+            if (ProgramUtil.TryUpgrade("dp2 Installer 安装实用工具",
+                "V3",
+                "DigitalPlatform/dp2 V3/dp2 Installer 安装实用工具",
+                "http://dp2003.com/dp2installer/v3/dp2installer.application"
+                ) == true)
+                return;
 
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
@@ -108,7 +116,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                         Application.Run(new MainForm());
                         // SingleInstanceApplication.Run(new MainForm(), StartupNextInstanceHandler);
 #endif
-                        if (IsDevelopMode() == false)
+                        if (StringUtil.IsDevelopMode() == false)
                             PrepareCatchException();
 
                         Application.EnableVisualStyles();
@@ -138,6 +146,7 @@ http://www.cnblogs.com/riasky/p/3481795.html
             }
         }
 
+#if NO
         public static bool IsDevelopMode()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -151,6 +160,7 @@ http://www.cnblogs.com/riasky/p/3481795.html
 
             return false;
         }
+#endif
 
         // 准备接管未捕获的异常
         static void PrepareCatchException()

@@ -68,6 +68,16 @@ namespace dp2Circulation
 
             List<string> args = StringUtil.GetCommandLineArgs();
 
+            // return:
+            //      true    函数返回后需要立即退出程序
+            //      false   返回返回后继续后面处理
+            if (ProgramUtil.TryUpgrade("内务(dp2Circulation)",
+                "V3",
+                "DigitalPlatform/dp2 V3/dp2内务 V3",
+                "http://dp2003.com/dp2circulation/v3/dp2circulation.application"
+                ) == true)
+                return;
+#if NO
             // 2018/6/24
             // 观察 V3 版本是否已经安装。如果没有安装，并且当前操作系统条件具备，则提示升级到 V3
             if (ApplicationDeployment.IsNetworkDeployed == true
@@ -117,7 +127,7 @@ namespace dp2Circulation
             {
                 // MessageBox.Show("Environment.OSVersion.Version.Major: " + Environment.OSVersion.Version.Major);
             }
-
+#endif
 
             // 绿色安装方式下，如果没有按住 Ctrl 键启动，会优先用 ClickOnce 方式启动
             if (ApplicationDeployment.IsNetworkDeployed == false
