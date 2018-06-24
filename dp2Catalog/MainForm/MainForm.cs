@@ -4316,11 +4316,11 @@ out string strError)
         void SetTitle()
         {
             if (this.TestMode == true)
-                this.Text = "dp2Catalog V2 -- 编目 [评估模式]";
+                this.Text = "dp2Catalog V3 -- 编目 [评估模式]";
             else if (this.CommunityMode == true)
-                this.Text = "dp2Catalog V2 -- 编目 [社区版]";
+                this.Text = "dp2Catalog V3 -- 编目 [社区版]";
             else
-                this.Text = "dp2Catalog V2 -- 编目 [专业版]";
+                this.Text = "dp2Catalog V3 -- 编目 [专业版]";
         }
 
 #if SN

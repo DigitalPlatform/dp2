@@ -344,7 +344,7 @@ namespace dp2Manager
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Menu = this.mainMenu1;
             this.Name = "MainForm";
-            this.Text = "dp2manager V2 -- 内核管理";
+            this.Text = "dp2manager V3 -- 内核管理";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.MainForm_Closing);
             this.Closed += new System.EventHandler(this.Form1_Closed);
             this.Load += new System.EventHandler(this.Form1_Load);
