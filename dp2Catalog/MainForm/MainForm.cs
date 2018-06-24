@@ -1431,7 +1431,7 @@ string strError)
                 }
 
                 goto CONTINUE;
-            FOUND:
+                FOUND:
 
                 if (child.GetType().Equals(type) == true)
                 {
@@ -1443,7 +1443,7 @@ string strError)
                     return child;
                 }
 
-            CONTINUE:
+                CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -1474,16 +1474,15 @@ string strError)
                 dynamic o = form;
                 o.MdiParent = this;
 
-                if (o.MainForm == null)
+                try
                 {
-                    try
-                    {
+                    // 2018/6/24 MainForm 成员可能不存在，可能会抛出异常
+                    if (o.MainForm == null)
                         o.MainForm = this;
-                    }
-                    catch
-                    {
-                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
-                    }
+                }
+                catch
+                {
+                    // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
                 }
                 o.Show();
                 return form;
@@ -1506,17 +1505,16 @@ string strError)
                 dynamic o = form;
                 o.MdiParent = this;
 
-                // 2013/3/26
-                if (o.MainForm == null)
+                try
                 {
-                    try
-                    {
+                    // 2013/3/26
+                    // 2018/6/24 MainForm 成员可能不存在，可能会抛出异常
+                    if (o.MainForm == null)
                         o.MainForm = this;
-                    }
-                    catch
-                    {
-                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
-                    }
+                }
+                catch
+                {
+                    // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
                 }
                 o.Show();
             }
@@ -2184,7 +2182,7 @@ out string strError)
             if (this.QuickSjhm != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -2230,7 +2228,7 @@ out string strError)
             if (this.QuickPinyin != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -2275,7 +2273,7 @@ out string strError)
             if (this.IsbnSplitter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
@@ -3025,7 +3023,7 @@ out string strError)
                         return;
                     }
 
-                // break;
+                    // break;
 
             }
             base.DefWndProc(ref m);
@@ -3055,7 +3053,7 @@ out string strError)
                 return;
             }
 
-        DELETE_FILES:
+            DELETE_FILES:
             FileInfo[] fis = di.GetFiles();
             for (int i = 0; i < fis.Length; i++)
             {
@@ -4013,7 +4011,7 @@ out string strError)
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
             {
                 if (strError[0] != ' ')
@@ -4065,7 +4063,7 @@ out string strError)
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4132,7 +4130,7 @@ out string strError)
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             // 不让缓存，因为可能出现了编译错误
             // TODO: 精确区分编译错误
             this.Filters.ClearFilter(strFilterFileName);
@@ -4199,13 +4197,13 @@ out string strError)
             string strBinDir = Environment.CurrentDirectory;
 
             string[] saAddRef1 = {
-					Path.Combine(strBinDir , "digitalplatform.marcdom.dll"),
-					Path.Combine(strBinDir , "digitalplatform.marckernel.dll"),
-					Path.Combine(strBinDir , "digitalplatform.marcquery.dll"),
-					Path.Combine(strBinDir , "digitalplatform.dll"),
-					Path.Combine(strBinDir , "digitalplatform.Text.dll"),
-					Path.Combine(strBinDir , "digitalplatform.IO.dll"),
-					Path.Combine(strBinDir , "digitalplatform.Xml.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.marcdom.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.marckernel.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.marcquery.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.Text.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.IO.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.Xml.dll"),
                     Path.Combine(strBinDir , "digitalplatform.LibraryClient.dll"),  // 2017/1/14
 					Path.Combine(strBinDir , "dp2catalog.exe") };
 
@@ -4240,7 +4238,7 @@ out string strError)
 
             filter.Assembly = assembly;
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4382,7 +4380,7 @@ out string strError)
             {
             }
 
-        REDO_VERIFY:
+            REDO_VERIFY:
             if (strSerialCode == "test")
             {
                 if (string.IsNullOrEmpty(strRequirFuncList) == true)
@@ -4416,7 +4414,7 @@ out string strError)
             //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
 
             if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
-                // strSha1 != GetCheckCode(strSerialCode) 
+                    // strSha1 != GetCheckCode(strSerialCode) 
                     MatchLocalString(strSerialCode) == false
                     || String.IsNullOrEmpty(strSerialCode) == true)
             {
@@ -4564,7 +4562,7 @@ out string strError)
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.OriginCode = strOriginCode;
 
-        REDO:
+            REDO:
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -4636,7 +4634,7 @@ out string strError)
             string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
 
             string strSerialCode = "";
-        REDO_VERIFY:
+            REDO_VERIFY:
             if (strSerialCode == "test")
             {
                 this.TestMode = true;
@@ -4697,7 +4695,7 @@ out string strError)
                 goto REDO_VERIFY;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 #endif
         }

@@ -1274,16 +1274,15 @@ Stack:
                 dynamic o = form;
                 o.MdiParent = this;
 
-                if (o.MainForm == null)
+                try
                 {
-                    try
-                    {
+                    // 2018/6/24 MainForm 成员可能不存在，可能会抛出异常
+                    if (o.MainForm == null)
                         o.MainForm = this;
-                    }
-                    catch
-                    {
-                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
-                    }
+                }
+                catch
+                {
+                    // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
                 }
                 o.Show();
             }
@@ -8705,7 +8704,7 @@ Keys keyData)
                 }
                 else
                 {
-                    Process.Start(strShortcutFilePath);
+                    ProcessStart(strShortcutFilePath);  // Process.Start
                     return 1;
                 }
             }
@@ -8713,6 +8712,31 @@ Keys keyData)
             {
                 MessageBox.Show(this, "dp2circulation 启动失败" + ex.Message);
                 return -1;
+            }
+        }
+
+        static bool ProcessStart(string filename, string arguments = "")
+        {
+            ProcessStartInfo startinfo = new ProcessStartInfo();
+            startinfo.FileName = filename;
+            startinfo.Arguments = arguments;
+            {
+                startinfo.UseShellExecute = true;   // 看看这样启动是否还会抛出异常
+                // startinfo.CreateNoWindow = true;
+            }
+
+            Process process = new Process();
+            process.StartInfo = startinfo;
+            process.EnableRaisingEvents = true;
+
+            try
+            {
+                process.Start();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 
