@@ -1,4 +1,4 @@
-namespace dp2rms
+Ôªønamespace dp2rms
 {
     partial class MainForm
     {
@@ -135,13 +135,13 @@ namespace dp2rms
             this.MenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
             this.MenuItem_file.Size = new System.Drawing.Size(58, 21);
-            this.MenuItem_file.Text = "Œƒº˛(&F)";
+            this.MenuItem_file.Text = "Êñá‰ª∂(&F)";
             // 
             // MenuItem_open
             // 
             this.MenuItem_open.Name = "MenuItem_open";
             this.MenuItem_open.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_open.Text = "¥Úø™(&O)";
+            this.MenuItem_open.Text = "ÊâìÂºÄ(&O)";
             this.MenuItem_open.Click += new System.EventHandler(this.MenuItem_open_Click);
             // 
             // toolStripSeparator1
@@ -155,7 +155,7 @@ namespace dp2rms
             this.MenuItem_openSearch.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.MenuItem_openSearch.Name = "MenuItem_openSearch";
             this.MenuItem_openSearch.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_openSearch.Text = "¥Úø™ºÏÀ˜¥∞(&S)";
+            this.MenuItem_openSearch.Text = "ÊâìÂºÄÊ£ÄÁ¥¢Á™ó(&S)";
             this.MenuItem_openSearch.Click += new System.EventHandler(this.MenuItem_openSearch_Click);
             // 
             // toolStripSeparator2
@@ -169,7 +169,7 @@ namespace dp2rms
             this.MenuItem_openDetail.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.MenuItem_openDetail.Name = "MenuItem_openDetail";
             this.MenuItem_openDetail.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_openDetail.Text = "¥Úø™œÍœ∏¥∞[ø’∞◊](&D)";
+            this.MenuItem_openDetail.Text = "ÊâìÂºÄËØ¶ÁªÜÁ™ó[Á©∫ÁôΩ](&D)";
             this.MenuItem_openDetail.Click += new System.EventHandler(this.MenuItem_openDetail_Click);
             // 
             // MenuItem_openDetailWithTemplate
@@ -178,7 +178,7 @@ namespace dp2rms
             this.MenuItem_openDetailWithTemplate.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.MenuItem_openDetailWithTemplate.Name = "MenuItem_openDetailWithTemplate";
             this.MenuItem_openDetailWithTemplate.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_openDetailWithTemplate.Text = "¥Úø™œÍœ∏¥∞[¥¯ƒ£∞Â](&T)";
+            this.MenuItem_openDetailWithTemplate.Text = "ÊâìÂºÄËØ¶ÁªÜÁ™ó[Â∏¶Ê®°Êùø](&T)";
             this.MenuItem_openDetailWithTemplate.Click += new System.EventHandler(this.MenuItem_openDetailWithTemplate_Click);
             // 
             // toolStripSeparator3
@@ -193,7 +193,7 @@ namespace dp2rms
             this.MenuItem_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.MenuItem_save.Name = "MenuItem_save";
             this.MenuItem_save.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_save.Text = "±£¥Ê(&S)";
+            this.MenuItem_save.Text = "‰øùÂ≠ò(&S)";
             this.MenuItem_save.Click += new System.EventHandler(this.MenuItem_save_Click);
             // 
             // MenuItem_saveas
@@ -201,7 +201,7 @@ namespace dp2rms
             this.MenuItem_saveas.Enabled = false;
             this.MenuItem_saveas.Name = "MenuItem_saveas";
             this.MenuItem_saveas.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_saveas.Text = "¡Ì¥ÊŒ™(&A)...";
+            this.MenuItem_saveas.Text = "Âè¶Â≠ò‰∏∫(&A)...";
             this.MenuItem_saveas.Click += new System.EventHandler(this.MenuItem_saveas_Click);
             // 
             // MenuItem_saveasToDB
@@ -209,7 +209,7 @@ namespace dp2rms
             this.MenuItem_saveasToDB.Enabled = false;
             this.MenuItem_saveasToDB.Name = "MenuItem_saveasToDB";
             this.MenuItem_saveasToDB.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_saveasToDB.Text = "¡Ì¥ÊµΩ ˝æ›ø‚(&A)...";
+            this.MenuItem_saveasToDB.Text = "Âè¶Â≠òÂà∞Êï∞ÊçÆÂ∫ì(&A)...";
             this.MenuItem_saveasToDB.Click += new System.EventHandler(this.MenuItem_saveasToDB_Click);
             // 
             // toolStripSeparator4
@@ -222,14 +222,14 @@ namespace dp2rms
             this.MenuItem_properties.Enabled = false;
             this.MenuItem_properties.Name = "MenuItem_properties";
             this.MenuItem_properties.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_properties.Text = " Ù–‘(&A)...";
+            this.MenuItem_properties.Text = "Â±ûÊÄß(&A)...";
             this.MenuItem_properties.Click += new System.EventHandler(this.MenuItem_properties_Click);
             // 
             // MenuItem_serversManagement
             // 
             this.MenuItem_serversManagement.Name = "MenuItem_serversManagement";
             this.MenuItem_serversManagement.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_serversManagement.Text = "»± °’ ªßπ‹¿Ì(&M)...";
+            this.MenuItem_serversManagement.Text = "Áº∫ÁúÅÂ∏êÊà∑ÁÆ°ÁêÜ(&M)...";
             this.MenuItem_serversManagement.Click += new System.EventHandler(this.MenuItem_serversManagement_Click);
             // 
             // toolStripSeparator5
@@ -241,7 +241,7 @@ namespace dp2rms
             // 
             this.MenuItem_exit.Name = "MenuItem_exit";
             this.MenuItem_exit.Size = new System.Drawing.Size(195, 22);
-            this.MenuItem_exit.Text = "ÕÀ≥ˆ(&X)";
+            this.MenuItem_exit.Text = "ÈÄÄÂá∫(&X)";
             this.MenuItem_exit.Click += new System.EventHandler(this.MenuItem_exit_Click);
             // 
             // MenuItem_function
@@ -256,14 +256,14 @@ namespace dp2rms
             this.MenuItem_clearCfgCache});
             this.MenuItem_function.Name = "MenuItem_function";
             this.MenuItem_function.Size = new System.Drawing.Size(61, 21);
-            this.MenuItem_function.Text = "π¶ƒ‹(&U)";
+            this.MenuItem_function.Text = "ÂäüËÉΩ(&U)";
             // 
             // MenuItem_viewAccessPoint
             // 
             this.MenuItem_viewAccessPoint.Enabled = false;
             this.MenuItem_viewAccessPoint.Name = "MenuItem_viewAccessPoint";
             this.MenuItem_viewAccessPoint.Size = new System.Drawing.Size(197, 22);
-            this.MenuItem_viewAccessPoint.Text = "π€≤ÏºÏÀ˜µ„(&A)...";
+            this.MenuItem_viewAccessPoint.Text = "ËßÇÂØüÊ£ÄÁ¥¢ÁÇπ(&A)...";
             this.MenuItem_viewAccessPoint.Click += new System.EventHandler(this.MenuItem_viewAccessPoint_Click);
             // 
             // MenuItem_saveToTemplate
@@ -271,7 +271,7 @@ namespace dp2rms
             this.MenuItem_saveToTemplate.Enabled = false;
             this.MenuItem_saveToTemplate.Name = "MenuItem_saveToTemplate";
             this.MenuItem_saveToTemplate.Size = new System.Drawing.Size(197, 22);
-            this.MenuItem_saveToTemplate.Text = "±£¥ÊµΩƒ£∞Â(&T)...";
+            this.MenuItem_saveToTemplate.Text = "‰øùÂ≠òÂà∞Ê®°Êùø(&T)...";
             this.MenuItem_saveToTemplate.Click += new System.EventHandler(this.MenuItem_saveToTemplate_Click);
             // 
             // MenuItem_autoGenerate
@@ -279,7 +279,7 @@ namespace dp2rms
             this.MenuItem_autoGenerate.Enabled = false;
             this.MenuItem_autoGenerate.Name = "MenuItem_autoGenerate";
             this.MenuItem_autoGenerate.Size = new System.Drawing.Size(197, 22);
-            this.MenuItem_autoGenerate.Text = " ˝æ›º”π§(&D)...";
+            this.MenuItem_autoGenerate.Text = "Êï∞ÊçÆÂä†Â∑•(&D)...";
             this.MenuItem_autoGenerate.Visible = false;
             this.MenuItem_autoGenerate.Click += new System.EventHandler(this.MenuItem_autoGenerate_Click);
             // 
@@ -294,7 +294,7 @@ namespace dp2rms
             this.MenuItem_dup.Enabled = false;
             this.MenuItem_dup.Name = "MenuItem_dup";
             this.MenuItem_dup.Size = new System.Drawing.Size(197, 22);
-            this.MenuItem_dup.Text = "≤È÷ÿ(&U)...";
+            this.MenuItem_dup.Text = "Êü•Èáç(&U)...";
             this.MenuItem_dup.Visible = false;
             this.MenuItem_dup.Click += new System.EventHandler(this.MenuItem_dup_Click);
             // 
@@ -307,7 +307,7 @@ namespace dp2rms
             // 
             this.MenuItem_clearCfgCache.Name = "MenuItem_clearCfgCache";
             this.MenuItem_clearCfgCache.Size = new System.Drawing.Size(197, 22);
-            this.MenuItem_clearCfgCache.Text = "«Â≥˝≈‰÷√Œƒº˛ª∫¥Ê(&C)...";
+            this.MenuItem_clearCfgCache.Text = "Ê∏ÖÈô§ÈÖçÁΩÆÊñá‰ª∂ÁºìÂ≠ò(&C)...";
             this.MenuItem_clearCfgCache.Click += new System.EventHandler(this.MenuItem_clearCfgCache_Click);
             // 
             // MenuItem_tools
@@ -322,13 +322,13 @@ namespace dp2rms
             this.MenuItem_isbnAddHypen});
             this.MenuItem_tools.Name = "MenuItem_tools";
             this.MenuItem_tools.Size = new System.Drawing.Size(83, 21);
-            this.MenuItem_tools.Text = " µ”√π§æﬂ(&T)";
+            this.MenuItem_tools.Text = "ÂÆûÁî®Â∑•ÂÖ∑(&T)";
             // 
             // MenuItem_manageZhongcihao
             // 
             this.MenuItem_manageZhongcihao.Name = "MenuItem_manageZhongcihao";
             this.MenuItem_manageZhongcihao.Size = new System.Drawing.Size(174, 22);
-            this.MenuItem_manageZhongcihao.Text = "Œ¨ª§÷÷¥Œ∫≈(&Z)...";
+            this.MenuItem_manageZhongcihao.Text = "Áª¥Êä§ÁßçÊ¨°Âè∑(&Z)...";
             this.MenuItem_manageZhongcihao.Visible = false;
             this.MenuItem_manageZhongcihao.Click += new System.EventHandler(this.MenuItem_manageZhongcihao_Click);
             // 
@@ -336,7 +336,7 @@ namespace dp2rms
             // 
             this.MenuItem_class2Subject.Name = "MenuItem_class2Subject";
             this.MenuItem_class2Subject.Size = new System.Drawing.Size(174, 22);
-            this.MenuItem_class2Subject.Text = "∑÷¿‡÷˜Ã‚∂‘’’(&C)...";
+            this.MenuItem_class2Subject.Text = "ÂàÜÁ±ª‰∏ªÈ¢òÂØπÁÖß(&C)...";
             this.MenuItem_class2Subject.Click += new System.EventHandler(this.MenuItem_class2Subject_Click);
             // 
             // toolStripSeparator12
@@ -348,7 +348,7 @@ namespace dp2rms
             // 
             this.MenuItem_registerItems.Name = "MenuItem_registerItems";
             this.MenuItem_registerItems.Size = new System.Drawing.Size(174, 22);
-            this.MenuItem_registerItems.Text = "µ‰≤ÿ≤·µ«¬º(&R)...";
+            this.MenuItem_registerItems.Text = "ÂÖ∏ËóèÂÜåÁôªÂΩï(&R)...";
             this.MenuItem_registerItems.Visible = false;
             this.MenuItem_registerItems.Click += new System.EventHandler(this.MenuItem_registerItems_Click);
             // 
@@ -356,7 +356,7 @@ namespace dp2rms
             // 
             this.MenuItem_itemSearch.Name = "MenuItem_itemSearch";
             this.MenuItem_itemSearch.Size = new System.Drawing.Size(174, 22);
-            this.MenuItem_itemSearch.Text = "µ‰≤ÿ≤·≤È—Ø(I)...";
+            this.MenuItem_itemSearch.Text = "ÂÖ∏ËóèÂÜåÊü•ËØ¢(I)...";
             this.MenuItem_itemSearch.Visible = false;
             this.MenuItem_itemSearch.Click += new System.EventHandler(this.MenuItem_itemSearch_Click);
             // 
@@ -370,7 +370,7 @@ namespace dp2rms
             // 
             this.MenuItem_isbnAddHypen.Name = "MenuItem_isbnAddHypen";
             this.MenuItem_isbnAddHypen.Size = new System.Drawing.Size(174, 22);
-            this.MenuItem_isbnAddHypen.Text = "ISBN∫≈º”»Î∫·∏‹...";
+            this.MenuItem_isbnAddHypen.Text = "ISBNÂè∑Âä†ÂÖ•Ê®™Êù†...";
             this.MenuItem_isbnAddHypen.Click += new System.EventHandler(this.MenuItem_isbnAddHypen_Click);
             // 
             // MenuItem_ui
@@ -379,13 +379,13 @@ namespace dp2rms
             this.MenuItem_font});
             this.MenuItem_ui.Name = "MenuItem_ui";
             this.MenuItem_ui.Size = new System.Drawing.Size(56, 21);
-            this.MenuItem_ui.Text = "Õ‚π€(&I)";
+            this.MenuItem_ui.Text = "Â§ñËßÇ(&I)";
             // 
             // MenuItem_font
             // 
             this.MenuItem_font.Name = "MenuItem_font";
             this.MenuItem_font.Size = new System.Drawing.Size(147, 22);
-            this.MenuItem_font.Text = "…Ë÷√◊÷ÃÂ(&F)...";
+            this.MenuItem_font.Text = "ËÆæÁΩÆÂ≠ó‰Ωì(&F)...";
             this.MenuItem_font.Click += new System.EventHandler(this.MenuItem_font_Click);
             // 
             // MenuItem_window
@@ -397,7 +397,7 @@ namespace dp2rms
             this.MenuItem_arrangeIcons});
             this.MenuItem_window.Name = "MenuItem_window";
             this.MenuItem_window.Size = new System.Drawing.Size(64, 21);
-            this.MenuItem_window.Text = "¥∞ø⁄(&W)";
+            this.MenuItem_window.Text = "Á™óÂè£(&W)";
             // 
             // MenuItem_tileHorizontal
             // 
@@ -405,14 +405,14 @@ namespace dp2rms
             this.MenuItem_tileHorizontal.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.MenuItem_tileHorizontal.Name = "MenuItem_tileHorizontal";
             this.MenuItem_tileHorizontal.Size = new System.Drawing.Size(147, 22);
-            this.MenuItem_tileHorizontal.Text = "∆Ω∆Ã[ÀÆ∆Ω](&T)";
+            this.MenuItem_tileHorizontal.Text = "Âπ≥Èì∫[Ê∞¥Âπ≥](&T)";
             this.MenuItem_tileHorizontal.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_tileVertical
             // 
             this.MenuItem_tileVertical.Name = "MenuItem_tileVertical";
             this.MenuItem_tileVertical.Size = new System.Drawing.Size(147, 22);
-            this.MenuItem_tileVertical.Text = "∆Ω∆Ã[¥π÷±](&I)";
+            this.MenuItem_tileVertical.Text = "Âπ≥Èì∫[ÂûÇÁõ¥](&I)";
             this.MenuItem_tileVertical.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_cascade
@@ -421,14 +421,14 @@ namespace dp2rms
             this.MenuItem_cascade.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.MenuItem_cascade.Name = "MenuItem_cascade";
             this.MenuItem_cascade.Size = new System.Drawing.Size(147, 22);
-            this.MenuItem_cascade.Text = "≤„µ˛(&C)";
+            this.MenuItem_cascade.Text = "Â±ÇÂè†(&C)";
             this.MenuItem_cascade.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_arrangeIcons
             // 
             this.MenuItem_arrangeIcons.Name = "MenuItem_arrangeIcons";
             this.MenuItem_arrangeIcons.Size = new System.Drawing.Size(147, 22);
-            this.MenuItem_arrangeIcons.Text = "≈≈¡–Õº±Í(&A)";
+            this.MenuItem_arrangeIcons.Text = "ÊéíÂàóÂõæÊ†á(&A)";
             this.MenuItem_arrangeIcons.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_help
@@ -441,13 +441,13 @@ namespace dp2rms
             this.MenuItem_downloadIsbnXmlFile});
             this.MenuItem_help.Name = "MenuItem_help";
             this.MenuItem_help.Size = new System.Drawing.Size(61, 21);
-            this.MenuItem_help.Text = "∞Ô÷˙(&H)";
+            this.MenuItem_help.Text = "Â∏ÆÂä©(&H)";
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
             this.MenuItem_copyright.Size = new System.Drawing.Size(234, 22);
-            this.MenuItem_copyright.Text = "∞Ê»®(&C)...";
+            this.MenuItem_copyright.Text = "ÁâàÊùÉ(&C)...";
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
             // 
             // toolStripSeparator8
@@ -459,21 +459,21 @@ namespace dp2rms
             // 
             this.MenuItem_preference.Name = "MenuItem_preference";
             this.MenuItem_preference.Size = new System.Drawing.Size(234, 22);
-            this.MenuItem_preference.Text = "œµÕ≥≤Œ ˝…Ë÷√(&P)...";
+            this.MenuItem_preference.Text = "Á≥ªÁªüÂèÇÊï∞ËÆæÁΩÆ(&P)...";
             this.MenuItem_preference.Click += new System.EventHandler(this.MenuItem_preference_Click);
             // 
             // MenuItem_downloadPinyinXmlFile
             // 
             this.MenuItem_downloadPinyinXmlFile.Name = "MenuItem_downloadPinyinXmlFile";
             this.MenuItem_downloadPinyinXmlFile.Size = new System.Drawing.Size(234, 22);
-            this.MenuItem_downloadPinyinXmlFile.Text = "œ¬‘ÿpinyin.xmlŒƒº˛µΩ±æµÿ(&D)";
+            this.MenuItem_downloadPinyinXmlFile.Text = "‰∏ãËΩΩpinyin.xmlÊñá‰ª∂Âà∞Êú¨Âú∞(&D)";
             this.MenuItem_downloadPinyinXmlFile.Click += new System.EventHandler(this.MenuItem_downloadPinyinXmlFile_Click);
             // 
             // MenuItem_downloadIsbnXmlFile
             // 
             this.MenuItem_downloadIsbnXmlFile.Name = "MenuItem_downloadIsbnXmlFile";
             this.MenuItem_downloadIsbnXmlFile.Size = new System.Drawing.Size(234, 22);
-            this.MenuItem_downloadIsbnXmlFile.Text = "œ¬‘ÿisbn.xmlŒƒº˛µΩ±æµÿ(&I)";
+            this.MenuItem_downloadIsbnXmlFile.Text = "‰∏ãËΩΩisbn.xmlÊñá‰ª∂Âà∞Êú¨Âú∞(&I)";
             this.MenuItem_downloadIsbnXmlFile.Click += new System.EventHandler(this.MenuItem_downloadIsbnXmlFile_Click);
             // 
             // statusStrip_main
@@ -538,8 +538,8 @@ namespace dp2rms
             this.toolBarButton_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_save.Name = "toolBarButton_save";
             this.toolBarButton_save.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_save.Text = "±£¥Ê";
-            this.toolBarButton_save.ToolTipText = "±£¥Ê";
+            this.toolBarButton_save.Text = "‰øùÂ≠ò";
+            this.toolBarButton_save.ToolTipText = "‰øùÂ≠ò";
             // 
             // toolBarButton_delete
             // 
@@ -549,7 +549,7 @@ namespace dp2rms
             this.toolBarButton_delete.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_delete.Name = "toolBarButton_delete";
             this.toolBarButton_delete.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_delete.Text = "…æ≥˝";
+            this.toolBarButton_delete.Text = "Âà†Èô§";
             // 
             // toolStripSeparator9
             // 
@@ -564,7 +564,7 @@ namespace dp2rms
             this.toolBarButton_loadTemplate.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_loadTemplate.Name = "toolBarButton_loadTemplate";
             this.toolBarButton_loadTemplate.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_loadTemplate.Text = "◊∞‘ÿƒ£∞Â";
+            this.toolBarButton_loadTemplate.Text = "Ë£ÖËΩΩÊ®°Êùø";
             // 
             // toolBarButton_refresh
             // 
@@ -574,7 +574,7 @@ namespace dp2rms
             this.toolBarButton_refresh.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_refresh.Name = "toolBarButton_refresh";
             this.toolBarButton_refresh.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_refresh.Text = "À¢–¬";
+            this.toolBarButton_refresh.Text = "Âà∑Êñ∞";
             // 
             // toolStripSeparator11
             // 
@@ -589,7 +589,7 @@ namespace dp2rms
             this.toolBarButton_prev.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_prev.Name = "toolBarButton_prev";
             this.toolBarButton_prev.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_prev.Text = "«∞“ªÃı";
+            this.toolBarButton_prev.Text = "Ââç‰∏ÄÊù°";
             // 
             // toolBarButton_next
             // 
@@ -599,7 +599,7 @@ namespace dp2rms
             this.toolBarButton_next.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_next.Name = "toolBarButton_next";
             this.toolBarButton_next.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_next.Text = "∫Û“ªÃı";
+            this.toolBarButton_next.Text = "Âêé‰∏ÄÊù°";
             // 
             // toolStripLabel_searching
             // 
@@ -610,7 +610,7 @@ namespace dp2rms
             this.toolStripLabel_searching.Name = "toolStripLabel_searching";
             this.toolStripLabel_searching.Padding = new System.Windows.Forms.Padding(0, 0, 8, 0);
             this.toolStripLabel_searching.Size = new System.Drawing.Size(32, 23);
-            this.toolStripLabel_searching.ToolTipText = "’˝‘⁄ºÏÀ˜...";
+            this.toolStripLabel_searching.ToolTipText = "Ê≠£Âú®Ê£ÄÁ¥¢...";
             // 
             // toolStripSeparator14
             // 
@@ -625,7 +625,7 @@ namespace dp2rms
             this.toolBarButton_search.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolBarButton_search.Name = "toolBarButton_search";
             this.toolBarButton_search.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_search.Text = "ºÏÀ˜";
+            this.toolBarButton_search.Text = "Ê£ÄÁ¥¢";
             // 
             // toolStripSplitButton_moreSearch
             // 
@@ -636,14 +636,14 @@ namespace dp2rms
             this.toolStripSplitButton_moreSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_moreSearch.Name = "toolStripSplitButton_moreSearch";
             this.toolStripSplitButton_moreSearch.Size = new System.Drawing.Size(16, 23);
-            this.toolStripSplitButton_moreSearch.Text = "∏¸∂‡ºÏÀ˜√¸¡Ó";
-            this.toolStripSplitButton_moreSearch.ToolTipText = "∏¸∂‡ºÏÀ˜√¸¡Ó";
+            this.toolStripSplitButton_moreSearch.Text = "Êõ¥Â§öÊ£ÄÁ¥¢ÂëΩ‰ª§";
+            this.toolStripSplitButton_moreSearch.ToolTipText = "Êõ¥Â§öÊ£ÄÁ¥¢ÂëΩ‰ª§";
             // 
             // ToolStripMenuItem_searchKeyID
             // 
             this.ToolStripMenuItem_searchKeyID.Name = "ToolStripMenuItem_searchKeyID";
             this.ToolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(188, 22);
-            this.ToolStripMenuItem_searchKeyID.Text = "∑µªÿºÏÀ˜µ„µƒºÏÀ˜(&K)";
+            this.ToolStripMenuItem_searchKeyID.Text = "ËøîÂõûÊ£ÄÁ¥¢ÁÇπÁöÑÊ£ÄÁ¥¢(&K)";
             this.ToolStripMenuItem_searchKeyID.Click += new System.EventHandler(this.ToolStripMenuItem_searchKeyID_Click);
             // 
             // toolBarButton_stop
@@ -654,7 +654,7 @@ namespace dp2rms
             this.toolBarButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolBarButton_stop.Name = "toolBarButton_stop";
             this.toolBarButton_stop.Size = new System.Drawing.Size(23, 23);
-            this.toolBarButton_stop.Text = "Õ£÷π";
+            this.toolBarButton_stop.Text = "ÂÅúÊ≠¢";
             // 
             // MainForm
             // 
@@ -668,7 +668,7 @@ namespace dp2rms
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.menuStrip_main;
             this.Name = "MainForm";
-            this.Text = "dp2rms V2 -- ◊ ‘¥º”π§";
+            this.Text = "dp2rms V3 -- ËµÑÊ∫êÂä†Â∑•";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainFormNew_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainFormNew_FormClosed);
             this.Load += new System.EventHandler(this.MainFormNew_Load);

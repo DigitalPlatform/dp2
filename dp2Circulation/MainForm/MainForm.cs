@@ -7764,11 +7764,11 @@ Keys keyData)
             }
 
             if (this.TestMode == true)
-                this.Text = "dp2Circulation V2 -- 内务 [评估模式]";
+                this.Text = "dp2Circulation V3 -- 内务 [评估模式]";
             else if (this.CommunityMode == true)
-                this.Text = "dp2Circulation V2 -- 内务 [社区版]";
+                this.Text = "dp2Circulation V3 -- 内务 [社区版]";
             else
-                this.Text = "dp2Circulation V2 -- 内务 [专业版]";
+                this.Text = "dp2Circulation V3 -- 内务 [专业版]";
         }
 
 #if SN
