@@ -99,7 +99,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
                 bool createdNew = true;
                 // mutex name need contains windows account name. or us programes file path, hashed
-                using (Mutex mutex = new Mutex(true, "dp2libraryXE V1", out createdNew))
+                using (Mutex mutex = new Mutex(true, "dp2libraryXE V3", out createdNew))
                 {
                     if (createdNew)
                     {
