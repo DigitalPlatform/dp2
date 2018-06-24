@@ -41,7 +41,7 @@ namespace dp2Installer
             //      false   返回返回后继续后面处理
             if (ProgramUtil.TryUpgrade("dp2 Installer 安装实用工具",
                 "V3",
-                "DigitalPlatform/dp2 V3/dp2 Installer 安装实用工具",
+                "DigitalPlatform/dp2 V3/dp2 Installer 安装实用工具 V3",   // 注意最后的 V3 字样
                 "http://dp2003.com/dp2installer/v3/dp2installer.application"
                 ) == true)
                 return;
