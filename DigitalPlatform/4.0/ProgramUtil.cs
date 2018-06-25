@@ -11,14 +11,16 @@ namespace DigitalPlatform
 {
     public static class ProgramUtil
     {
+        // parameters:
+        //      old_shortcut_path_deleting 打算删除的，旧版本的 shortcut path。自动启动新版本后删除旧版本的 short cut。如果为空，表示不删除
         // return:
         //      true    函数返回后需要立即退出程序
         //      false   返回返回后继续后面处理
         public static bool TryUpgrade(string module_name,   // "内务"
             string new_version, // "V3"
-            string shortcut_path,    // "DigitalPlatform/dp2 V3/dp2内务 V3"
-            string app_url  // "http://dp2003.com/dp2circulation/v3/dp2circulation.application"
-            )
+            string new_shortcut_path,    // "DigitalPlatform/dp2 V3/dp2内务 V3"
+            string new_app_url,  // "http://dp2003.com/dp2circulation/v3/dp2circulation.application"
+            string old_shortcut_path_deleting = "")
         {
             // 2018/6/24
             // 观察 V3 版本是否已经安装。如果没有安装，并且当前操作系统条件具备，则提示升级到 V3
@@ -26,7 +28,7 @@ namespace DigitalPlatform
                 // https://stackoverflow.com/questions/2819934/detect-windows-version-in-net
                 && (Environment.OSVersion.Version.Major > 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor >= 1)))
             {
-                string strShortcutFilePath = GetShortcutFilePath(shortcut_path);
+                string strShortcutFilePath = GetShortcutFilePath(new_shortcut_path);
                 if (File.Exists(strShortcutFilePath) == false)
                 {
                     // 提示可以安装 V3
@@ -38,7 +40,7 @@ namespace DigitalPlatform
         MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Yes)
                     {
-                        strShortcutFilePath = app_url;
+                        strShortcutFilePath = new_app_url;
                         try
                         {
                             Process.Start(strShortcutFilePath);
@@ -57,6 +59,13 @@ namespace DigitalPlatform
                     {
                         MessageBox.Show("启动已经安装在本机的" + module_name + " " + new_version + " 版本");
                         Process.Start(strShortcutFilePath);
+                        // 删除以前的 shortcut
+                        if (string.IsNullOrEmpty(old_shortcut_path_deleting) == false)
+                        {
+                            string strOldShortcutFilePath = GetShortcutFilePath(old_shortcut_path_deleting);
+                            if (string.IsNullOrEmpty(strOldShortcutFilePath) == false)
+                                File.Delete(strOldShortcutFilePath);
+                        }
                         return true;
                     }
                     catch
