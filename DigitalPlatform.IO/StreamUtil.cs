@@ -301,6 +301,9 @@ namespace DigitalPlatform.IO
         // 写入文本文件。
         // 如果文件不存在, 会自动创建新文件
         // 如果文件已经存在，则追加在尾部。
+        // Exception:
+        //      可能会抛出异常。
+        //      System.UnauthorizedAccessException 对路径的访问被拒绝。
         public static void WriteText(string strFileName,
             string strText)
         {

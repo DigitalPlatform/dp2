@@ -295,20 +295,16 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
 
             // TODO: 给出操作系统的一般信息
 
+            MainForm.WriteErrorLog(strError);
+#if NO
             // MainForm main_form = Form.ActiveForm as MainForm;
             if (_mainForm != null)
             {
-                try
-                {
-                    _mainForm.WriteErrorLog(strError);
-                }
-                catch
-                {
-                    WriteWindowsLog(strError, EventLogEntryType.Error);
-                }
+                _mainForm.TryWriteErrorLog(strError);
             }
             else
                 WriteWindowsLog(strError, EventLogEntryType.Error);
+#endif
 
             return strError;
         }
@@ -400,10 +396,13 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
                 strError = "向 dp2003.com 发送异常报告时出错，未能发送成功。详细情况: " + strError;
                 MessageBox.Show(_mainForm, strError);
                 // 写入错误日志
+                MainForm.WriteErrorLog(strError);
+#if NO
                 if (_mainForm != null)
                     _mainForm.WriteErrorLog(strError);
                 else
                     WriteWindowsLog(strError, EventLogEntryType.Error);
+#endif
             }
         }
 
@@ -411,9 +410,16 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
         public static void WriteWindowsLog(string strText,
             EventLogEntryType type)
         {
-            EventLog Log = new EventLog("Application");
-            Log.Source = "dp2Circulation";
-            Log.WriteEntry(strText, type);
+            try
+            {
+                EventLog Log = new EventLog("Application");
+                Log.Source = "dp2Circulation";
+                Log.WriteEntry(strText, type);
+            }
+            catch
+            {
+
+            }
         }
     }
 }

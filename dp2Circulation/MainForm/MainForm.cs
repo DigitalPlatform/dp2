@@ -41,6 +41,7 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using log4net;
 
 namespace dp2Circulation
 {
@@ -694,7 +695,7 @@ Stack:
             catch (Exception ex)
             {
                 strError = "CrashReport() (退出前的提示) 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.WriteErrorLog(strError);
+                MainForm.TryWriteErrorLog(strError);
             }
 
             Program.ClearPromptStringLines();   // 防止以后再次重复发送
@@ -769,7 +770,7 @@ Stack:
                 if (nRet == -1)
                 {
                     if (string.IsNullOrEmpty(this.UserLogDir) == false)
-                        this.WriteErrorLog(strError);
+                        MainForm.WriteErrorLog(strError);
                     // MessageBox.Show(this, strError);
                 }
             }
@@ -8542,19 +8543,95 @@ Keys keyData)
             OpenWindow<ReservationListForm>();
         }
 
+        // 不会抛出异常的版本
+        public static void TryWriteErrorLog(string strText)
+        {
+            try
+            {
+                WriteErrorLog(strText);
+            }
+            catch
+            {
+                Program.WriteWindowsLog(strText, EventLogEntryType.Error);
+            }
+        }
+
+        static ILog _log = null;
+
+        public static ILog Log
+        {
+            get
+            {
+                return _log;
+            }
+        }
+
+        // 写入全局日志文件
+        public static void WriteErrorLog(string strText)
+        {
+            WriteLog("error", strText);
+        }
+
+        public static void WriteInfoLog(string strText)
+        {
+            WriteLog("info", strText);
+        }
+
+        // 写入全局日志文件
+        // parameters:
+        //      level   info/error
+        public static void WriteLog(string level, string strText)
+        {
+            // Console.WriteLine(strText);
+
+            if (_log == null) // 先前写入实例的日志文件发生过错误，所以改为写入 Windows 日志。会加上实例名前缀字符串
+                Program.WriteWindowsLog(strText, EventLogEntryType.Error);
+            else
+            {
+                try
+                {
+                    if (level == "info")
+                        _log.Info(strText);
+                    else
+                        _log.Error(strText);
+                }
+                catch (Exception ex)
+                {
+                    Program.WriteWindowsLog("因为原本要写入日志文件的操作发生异常， 所以不得不改为写入 Windows 日志(见后一条)。异常信息如下：'" + ExceptionUtil.GetDebugText(ex) + "'", EventLogEntryType.Error);
+                    Program.WriteWindowsLog(strText, EventLogEntryType.Error);
+                }
+            }
+        }
+
+        // 写入 Windows 日志
+        public static void WriteWindowsLog(string strText)
+        {
+            Program.WriteWindowsLog(strText, EventLogEntryType.Error);
+        }
+
+#if NO
+        private static readonly Object _syncRoot_errorLog = new Object(); // 2018/6/26
+
         // 写入日志文件。每天创建一个单独的日志文件
+        // Exception:
+        //      可能会抛出异常。
+        //      System.UnauthorizedAccessException 对路径的访问被拒绝。
         public void WriteErrorLog(string strText)
         {
             if (string.IsNullOrEmpty(this.UserLogDir) == true)
                 throw new ArgumentException("this.UserLogDir 不应为空");
 
+            // Exception:
+            //      可能会抛出异常。
+            //      System.UnauthorizedAccessException 对路径的访问被拒绝。
             FileUtil.WriteErrorLog(
-                this.UserLogDir,
+                _syncRoot_errorLog,// 多线程同时写入错误日志的时候，可能会造成冲突
                 this.UserLogDir,
                 strText,
                 "log_",
                 ".txt");
         }
+#endif
 
         // 打包错误日志
         private void menuItem_packageErrorLog_Click(object sender, EventArgs e)

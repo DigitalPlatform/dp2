@@ -1006,7 +1006,7 @@ this.Operator);
                         {
                             // 2016/12/6 返回 -1
                             strError = "ItemOperLogLine.SetData() 内部出现异常: " + ExceptionUtil.GetExceptionText(ex);
-                            Program.MainForm.WriteErrorLog(strError + "\r\nXML记录: " + dom.OuterXml);
+                            MainForm.TryWriteErrorLog(strError + "\r\nXML记录: " + dom.OuterXml);
                             return -1;
                         }
                     }
@@ -1271,7 +1271,7 @@ this.OperTime);
                         // strError = "amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，需要用详细级获取日志信息";
                         // return -1;
                         strError = "ReportForm SetData(): amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，此日志记录并不具备(可能属于早期的不完备的日志记录)。因此无法计算修改金额的差值。strDate=" + strDate + ", lIndex=" + lIndex;
-                        Program.MainForm.WriteErrorLog(strError);
+                        MainForm.WriteErrorLog(strError);
                     }
                     else
                     {

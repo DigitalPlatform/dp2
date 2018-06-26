@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 
 namespace DigitalPlatform.CirculationClient

@@ -834,7 +834,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 string strError = "OperHistory 的工作线程出现异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                Program.MainForm.WriteErrorLog(strError);
+                MainForm.TryWriteErrorLog(strError);
 
                 string strText = "<div class='item error'>"
                 + "<div class='item_line'>"

@@ -139,6 +139,8 @@ namespace dp2Catalog
                 DataDir = Environment.CurrentDirectory;
             }
 
+            bool bDp2catalogXmlExist = false;
+
             {
                 // 2015/5/8
                 this.UserDir = Path.Combine(
@@ -153,7 +155,7 @@ namespace dp2Catalog
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.TryCreateDir(this.UserLogDir);
 
-                // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                // 将 dp2catalog.xml 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
                 nRet = MoveDp2catalogXml(out strError);
                 if (nRet == -1)
                 {
@@ -161,7 +163,10 @@ namespace dp2Catalog
                     MessageBox.Show(this, strError);
                 }
 
-                this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2catalog.xml"));
+                string strDp2catalogXmlFileName = Path.Combine(this.UserDir, "dp2catalog.xml");
+                bDp2catalogXmlExist = File.Exists(strDp2catalogXmlFileName);
+
+                this.AppInfo = new ApplicationInfo(strDp2catalogXmlFileName);
 
                 string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
                 string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
@@ -225,15 +230,17 @@ namespace dp2Catalog
             this.SetMenuItemState();
 
             // cfgcache
-            nRet = cfgCache.Load(Path.Combine(this.DataDir, "cfgcache.xml"),
+            Debug.Assert(string.IsNullOrEmpty(this.UserDir) == false, "");
+            // 2018/6/25 改在 UserDir 下
+            nRet = cfgCache.Load(Path.Combine(this.UserDir, "cfgcache.xml"),    // this.DataDir
                 out strError);
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError);
+                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
 
-            cfgCache.TempDir = Path.Combine(this.DataDir, "cfgcache");
+            cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir
             cfgCache.InstantSave = true;
 
             // Z39.50 froms
@@ -286,7 +293,10 @@ namespace dp2Catalog
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
-            if (IsFirstRun == true && this.Servers.Count == 0)
+            if (IsFirstRun == true 
+                && bDp2catalogXmlExist == false
+                // && this.Servers.Count == 0
+                )
             {
 #if NO
                 MessageBox.Show(this, "欢迎您安装使用dp2Catalog -- 编目前端");
@@ -4723,11 +4733,13 @@ out string strError)
             }
         }
 
+        private static readonly Object _syncRoot_errorLog = new Object(); // 2018/6/26
+
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)
         {
             FileUtil.WriteErrorLog(
-                this.UserLogDir,
+                _syncRoot_errorLog,
                 this.UserLogDir,
                 strText,
                 "log_",

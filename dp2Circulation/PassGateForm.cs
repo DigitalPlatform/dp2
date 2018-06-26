@@ -283,7 +283,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 string strErrorText = "PassGateForm ThreadMain() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                Program.MainForm.WriteErrorLog(strErrorText);
+                MainForm.TryWriteErrorLog(strErrorText);
             }
         }
 
@@ -464,7 +464,7 @@ namespace dp2Circulation
             catch(Exception ex)
             {
                 string strErrorText = "PassGateForm Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                Program.MainForm.WriteErrorLog(strErrorText);
+                MainForm.TryWriteErrorLog(strErrorText);
             }
         }
 

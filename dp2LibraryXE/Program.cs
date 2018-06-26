@@ -38,7 +38,7 @@ namespace dp2LibraryXE
 
             var wi = WindowsIdentity.GetCurrent();
             var wp = new WindowsPrincipal(wi);
- 
+
             bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
 
             if (!runAsAdmin /*&& Environment.OSVersion.Version.Major >= 6*/)
@@ -69,6 +69,10 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 processInfo.Arguments = "\"datadir=" + strDataDir
                     + "\" \"userdir=" + strUserDir + "\"";
 
+                if (ApplicationDeployment.IsNetworkDeployed
+    && ApplicationDeployment.CurrentDeployment.IsFirstRun == true)
+                    processInfo.Arguments += " \"firstrun\"";
+
                 // Start the new process
                 try
                 {
@@ -88,6 +92,28 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             else
             {
 #if NO
+                // firstrun 参数
+                bool bFirstRun = false;
+                string[] args = Environment.GetCommandLineArgs();
+                if (args != null && args.Length >= 2)
+                {
+                    bFirstRun = Array.IndexOf(args, "firstrun") != -1;
+                    // MessageBox.Show("first run=" + bFirstRun);
+                }
+
+                // 2018/6/25
+                try
+                {
+                    if (bFirstRun)
+                        KillV2Process();    // 安装后第一次运行，Kill 所有其他 dp2libraryxe process。避免正在运行中的旧版本程序导致当前程序无法监听成功
+                }
+                catch
+                {
+
+                }
+#endif
+
+#if NO
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.Run(new MainForm());
@@ -106,7 +132,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                         Application.Run(new MainForm());
                         // SingleInstanceApplication.Run(new MainForm(), StartupNextInstanceHandler);
 #endif
-                        if (IsDevelopMode() == false)
+                        if (StringUtil.IsDevelopMode() == false)
                             PrepareCatchException();
 
                         ProgramUtil.SetDpiAwareness();
@@ -146,6 +172,7 @@ http://www.cnblogs.com/riasky/p/3481795.html
         }
 #endif
 
+#if NO
         public static bool IsDevelopMode()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -159,6 +186,7 @@ http://www.cnblogs.com/riasky/p/3481795.html
 
             return false;
         }
+#endif
 
         // 准备接管未捕获的异常
         static void PrepareCatchException()
@@ -329,7 +357,25 @@ http://www.cnblogs.com/riasky/p/3481795.html
             Log.WriteEntry(strText, type);
         }
 
+        // Kill 除了当前 Process 以外的其他所有同名 Process
+        static void KillV2Process()
+        {
+            Process current = Process.GetCurrentProcess();
+            //MessageBox.Show("current.ProcessName=" + current.ProcessName);
+            foreach (Process process in Process.GetProcessesByName("dp2LibraryXE"/*current.ProcessName*/))
+            {
+                if (process.Id != current.Id)
+                {
+                    MessageBox.Show("发现有其他 dp2LibraryXE 进程正在运行中。点“确定”关闭它并继续启动过程");
+                    process.Kill();
+                    Thread.Sleep(500);
+                    process.WaitForExit();
+                }
+            }
+        }
     }
+
+
 
 #if NO
     public class SingleInstanceApplication : WindowsFormsApplicationBase 
