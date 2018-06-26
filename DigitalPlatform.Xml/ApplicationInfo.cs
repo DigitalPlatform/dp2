@@ -67,8 +67,7 @@ namespace DigitalPlatform.Xml
         {
             if (FileName != "")
             {
-                string strErrorInfo;
-                Save(out strErrorInfo);
+                Save(out string strErrorInfo);
             }
         }
 
@@ -140,11 +139,18 @@ namespace DigitalPlatform.Xml
         {
             strErrorInfo = "";
 
-            if (FileName == "")
+            if (string.IsNullOrEmpty(FileName) == true)
             {
                 strErrorInfo = "FileName为空...";
                 return -1;
             }
+
+            // 2018/6/25
+            // 先把以前的文件改名作为备份保存
+            string strTempFileName = FileName + ".save";
+            FileInfo fi = new FileInfo(FileName);
+            if (File.Exists(FileName) && fi.Length != 0)
+                File.Copy(FileName, strTempFileName, true);
 
             dom.Save(FileName);
             return 0;

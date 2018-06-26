@@ -10112,73 +10112,159 @@ Stack:
     {
         public override bool CheckAccess(EndpointIdentity identity, AuthorizationContext authContext)
         {
-            foreach (ClaimSet claimset in authContext.ClaimSets)
+            LibraryChannelManager.Log?.Debug("Enter CheckAccess().");
+            try
             {
-                if (claimset.ContainsClaim(identity.IdentityClaim))
-                    return true;
-
-                // string expectedSpn = null;
-                if (ClaimTypes.Dns.Equals(identity.IdentityClaim.ClaimType))
+                foreach (ClaimSet claimset in authContext.ClaimSets)
                 {
-                    string strHost = (string)identity.IdentityClaim.Resource;
+                    LibraryChannelManager.Log?.Debug("loop.");
 
-                    /*
-                    expectedSpn = string.Format(CultureInfo.InvariantCulture, "host/{0}",
-                        strHost);
-                     * */
-                    Claim claim = CheckDnsEquivalence(claimset, strHost);
-                    if (claim != null)
+                    if (claimset.ContainsClaim(identity.IdentityClaim))
                     {
+                        LibraryChannelManager.Log?.Debug("ContainsClaim.");
                         return true;
                     }
+
+                    // string expectedSpn = null;
+                    if (ClaimTypes.Dns.Equals(identity.IdentityClaim.ClaimType))
+                    {
+                        string strHost = (string)identity.IdentityClaim.Resource;
+                        LibraryChannelManager.Log?.Debug("strHost='" + strHost + "'");
+
+                        /*
+                        expectedSpn = string.Format(CultureInfo.InvariantCulture, "host/{0}",
+                            strHost);
+                         * */
+                        Claim claim = CheckDnsEquivalence(claimset, strHost);
+                        if (claim != null)
+                        {
+                            LibraryChannelManager.Log?.Debug("CheckDnsEquivalence() return not null.");
+                            return true;
+                        }
+                    }
                 }
+
+                //Stopwatch stopwath = new Stopwatch();
+                //stopwath.Start();
+
+                LibraryChannelManager.Log?.Debug("IdentityVerifier.CreateDefault().CheckAccess()");
+
+                bool bRet = IdentityVerifier.CreateDefault().CheckAccess(identity, authContext);
+
+                LibraryChannelManager.Log?.Debug("return bRet='" + bRet + "'");
+
+                //stopwath.Stop();
+                //Debug.WriteLine("CheckAccess " + stopwath.Elapsed.ToString());
+
+                if (bRet == true)
+                    return true;
+
+                return false;
             }
-
-            //Stopwatch stopwath = new Stopwatch();
-            //stopwath.Start();
-
-            bool bRet = IdentityVerifier.CreateDefault().CheckAccess(identity, authContext);
-
-            //stopwath.Stop();
-            //Debug.WriteLine("CheckAccess " + stopwath.Elapsed.ToString());
-
-            if (bRet == true)
-                return true;
-
-            return false;
+            finally
+            {
+                LibraryChannelManager.Log?.Debug("Exit CheckAccess().");
+            }
         }
 
-        Claim CheckDnsEquivalence(ClaimSet claimSet, string expedtedDns)
+        static string ToString(ClaimSet claimSet)
         {
-            IEnumerable<Claim> claims = claimSet.FindClaims(ClaimTypes.Dns, Rights.PossessProperty);
-            foreach (Claim claim in claims)
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach (Claim claim in claimSet)
             {
-                // 格外允许"localhost"
-                if (expedtedDns.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                text.Append((i + 1).ToString() + "\r\n");
+                text.Append("ClaimType=" + claim.ClaimType + "\r\n");
+                text.Append("Right=" + claim.Right + "\r\n");
+                try
                 {
-                    return claim;
+                    text.Append("Resource=" + claim.Resource.ToString() + "\r\n");
                 }
-
-                string strCurrent = (string)claim.Resource;
-
-                // 格外允许"DigitalPlatform"和任意出发字符串匹配
-                if (strCurrent.Equals("DigitalPlatform", StringComparison.OrdinalIgnoreCase))
-                    return claim;
-
-                if (expedtedDns.Equals(strCurrent, StringComparison.OrdinalIgnoreCase))
+                catch
                 {
-                    return claim;
+
                 }
+                i++;
             }
-            return null;
+
+            return text.ToString();
+        }
+
+        Claim CheckDnsEquivalence(ClaimSet claimSet, string expectedDns)
+        {
+            LibraryChannelManager.Log?.Debug("Enter CheckDnsEquivalence(). expectedDns='" + expectedDns + "'");
+            try
+            {
+                LibraryChannelManager.Log?.Debug("claimSet.Count='" + claimSet.Count + "' elements:\r\n" + ToString(claimSet));
+                IEnumerable<Claim> claims = claimSet.FindClaims(ClaimTypes.Dns, Rights.PossessProperty);
+                // 可能找不到结果
+                foreach (Claim claim in claims)
+                {
+                    // 格外允许"localhost"
+                    if (expectedDns.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        LibraryChannelManager.Log?.Debug("expectedDns Match 'localhost'");
+                        return claim;
+                    }
+
+                    string strCurrentDns = (string)claim.Resource;
+
+                    LibraryChannelManager.Log?.Debug("strCurrentDns='" + strCurrentDns + "'");
+
+                    // 格外允许"DigitalPlatform"和任意出发字符串匹配
+                    if (strCurrentDns.Equals("DigitalPlatform", StringComparison.OrdinalIgnoreCase))
+                    {
+                        LibraryChannelManager.Log?.Debug("strCurrentDns Match 'DigitalPlatform'");
+                        return claim;
+                    }
+
+                    if (expectedDns.Equals(strCurrentDns, StringComparison.OrdinalIgnoreCase))
+                    {
+                        LibraryChannelManager.Log?.Debug("strCurrentDns Match expectedDns");
+                        return claim;
+                    }
+                }
+
+                // 2018/6/26
+                // 如果 Dns 事项没有找到，再尝试找 Name 事项。这一般是有问题的 Windows 7 换进该
+                claims = claimSet.FindClaims(ClaimTypes.Name, Rights.PossessProperty);
+                foreach (Claim claim in claims)
+                {
+                    string strCurrentName = (string)claim.Resource;
+
+                    LibraryChannelManager.Log?.Debug("strCurrentName='" + strCurrentName + "'");
+
+                    // 格外允许"DigitalPlatform"和任意出发字符串匹配
+                    if (strCurrentName.Equals("DigitalPlatform", StringComparison.OrdinalIgnoreCase))
+                    {
+                        LibraryChannelManager.Log?.Debug("strCurrentName Match 'DigitalPlatform'");
+                        return claim;
+                    }
+                }
+
+                return null;
+            }
+            finally
+            {
+                LibraryChannelManager.Log?.Debug("Exit CheckDnsEquivalence().");
+            }
         }
 
         public override bool TryGetIdentity(EndpointAddress reference, out EndpointIdentity identity)
         {
-            return IdentityVerifier.CreateDefault().TryGetIdentity(reference, out identity);
+            LibraryChannelManager.Log?.Debug("Enter TryGetIdentity().");
+            try
+            {
+                return IdentityVerifier.CreateDefault().TryGetIdentity(reference, out identity);
+            }
+            finally
+            {
+                LibraryChannelManager.Log?.Debug("Exit TryGetIdentity().");
+            }
         }
     }
 
+#if NO
     public class OrgEndpointIdentity : EndpointIdentity
     {
         private string orgClaim;
@@ -10193,7 +10279,7 @@ Stack:
             set { orgClaim = value; }
         }
     }
-
+#endif
 
     /// <summary>
     /// 登录前的事件

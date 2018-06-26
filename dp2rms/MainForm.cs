@@ -201,7 +201,7 @@ namespace dp2rms
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError);
+                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
 
 

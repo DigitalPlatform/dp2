@@ -813,7 +813,8 @@ namespace dp2Batch
                 out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this, strError);
+                if (IsFirstRun == false)
+                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
