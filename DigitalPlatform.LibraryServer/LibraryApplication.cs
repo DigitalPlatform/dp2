@@ -15137,6 +15137,21 @@ strLibraryCode);    // 读者所在的馆代码
             other.ErrorInfo = this.ErrorInfo;
             return other;
         }
+
+        // 把内核错误码转换为 dp2library 错误码
+        public static ErrorCode FromErrorValue(DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue error_code,
+            bool throw_exception = false)
+        {
+            string text = error_code.ToString();
+            if (Enum.TryParse<ErrorCode>(text, out ErrorCode result) == false)
+            {
+                if (throw_exception == true)
+                    throw new Exception("无法将字符串 '" + text + "' 转换为 LibraryServer.ErrorCode 类型");
+                else
+                    return ErrorCode.SystemError;
+            }
+            return result;
+        }
     }
 
     // 帐户信息

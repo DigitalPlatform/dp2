@@ -1266,11 +1266,9 @@ namespace dp2Kernel
         //		strLang	语言版本，用来获得记录路径
         //		strStyle	样式,以逗号分隔，id:表示取id,cols表示取浏览格式
         //		records	得到的记录数组，成员为类型为Record
-        // result:
-        //		Result对象,
-        //		value == -1	出错
-        //			  >= 1	结果集的总数
-        //			  == 0	0条
+        // Result.Value
+        //		value == -1	出错。如果错误码为 ErrorCodeValue.NotFound，表示结果集不存在
+        //			  >= 0	结果集内的记录总数
         public Result GetRecords(
             string strResultSetName,
             long lStart,
