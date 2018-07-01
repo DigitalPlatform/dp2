@@ -2890,8 +2890,7 @@ namespace dp2Library
         //      searchresults   返回包含记录信息的SearchResult对象数组
         // rights:
         //      没有限制
-        // return:
-        //      result.Value    -1 出错；>=0 结果集内记录的总数(注意，并不是本批返回的记录数)
+        // result.Value    -1 出错；>=0 结果集内记录的总数(注意，并不是本批返回的记录数)
         public LibraryServerResult GetSearchResult(
             string strResultSetName,
             long lStart,
@@ -2935,13 +2934,14 @@ namespace dp2Library
                 {
                     result.Value = -1;
                     result.ErrorInfo = strError;
-                    result.ErrorCode = ErrorCode.SystemError;
+                    // 2018/7/1
+                    result.ErrorCode = LibraryServerResult.FromErrorValue(channel.OriginErrorCode); // localhost.ErrorCodeValue --> LibraryServer.ErrorCode
+                    // result.ErrorCode = ErrorCode.SystemError;
                     return result;
                 }
 
                 result.Value = lRet;
                 result.ErrorInfo = strError;
-
                 return result;
             }
             catch (Exception ex)
