@@ -21,7 +21,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>16</ApplicationRevision>
+    <ApplicationRevision>17</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -150,24 +150,12 @@
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
-    <Reference Include="System.IO, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.IO.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Net" />
-    <Reference Include="System.Runtime, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Runtime.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Speech" />
-    <Reference Include="System.Threading.Tasks, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
