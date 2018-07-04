@@ -1,12 +1,14 @@
-﻿using DigitalPlatform.GUI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -25,14 +27,15 @@ namespace DigitalPlatform.MessageClient
             InitializeComponent();
         }
 
-        private void UsersDialog_Load(object sender, EventArgs e)
+        private async void UsersDialog_Load(object sender, EventArgs e)
         {
             listView1_SelectedIndexChanged(this, new EventArgs());
 
-            this.BeginInvoke(new Action(ListAllUsers));
+            // this.BeginInvoke(new Action(ListAllUsers));
+            await ListAllUsers();
         }
 
-        void ListAllUsers()
+        async Task ListAllUsers()
         {
             string strError = "";
 
@@ -44,7 +47,7 @@ namespace DigitalPlatform.MessageClient
                 int start = 0;
                 while (true)
                 {
-                    var result = this.Connection.GetUsers("*", start, 100);
+                    var result = await this.Connection.GetUsers("*", start, 100);
                     if (result.Value == -1)
                     {
                         strError = result.ErrorInfo;
@@ -82,8 +85,12 @@ namespace DigitalPlatform.MessageClient
             {
                 this.EnableControls(true);
             }
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }
+));
         }
 
         private void toolStripButton_refresh_Click(object sender, EventArgs e)
@@ -96,7 +103,7 @@ namespace DigitalPlatform.MessageClient
             NewUser();
         }
 
-        void NewUser()
+        async Task NewUser()
         {
             string strError = "";
 
@@ -113,7 +120,7 @@ namespace DigitalPlatform.MessageClient
             this.EnableControls(false);
             try
             {
-                MessageResult result = this.Connection.SetUsers("create", users);
+                MessageResult result = await this.Connection.SetUsers("create", users);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -142,8 +149,12 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }
+));
         }
 
         const int COLUMN_USERNAME = 0;
@@ -178,16 +189,20 @@ namespace DigitalPlatform.MessageClient
 
         void EnableControls(bool bEnable)
         {
-            this.listView1.Enabled = bEnable;
-            this.toolStrip1.Enabled = bEnable;
+            this.Invoke((Action)(() =>
+            {
+                this.listView1.Enabled = bEnable;
+                this.toolStrip1.Enabled = bEnable;
+            }
+));
         }
 
-        private void toolStripButton_modify_Click(object sender, EventArgs e)
+        private async void toolStripButton_modify_Click(object sender, EventArgs e)
         {
-            ModifyUser();
+            await ModifyUser();
         }
 
-        void ModifyUser()
+        async Task ModifyUser()
         {
             string strError = "";
 
@@ -222,7 +237,7 @@ namespace DigitalPlatform.MessageClient
             {
                 if (dlg.Changed == true)
                 {
-                    MessageResult result = this.Connection.SetUsers("change", users);
+                    MessageResult result = await this.Connection.SetUsers("change", users);
                     if (result.Value == -1)
                     {
                         strError = result.ErrorInfo;
@@ -234,7 +249,7 @@ namespace DigitalPlatform.MessageClient
 
                 if (dlg.ChangePassword)
                 {
-                    MessageResult result = this.Connection.SetUsers("changePassword", users);
+                    MessageResult result = await this.Connection.SetUsers("changePassword", users);
                     if (result.Value == -1)
                     {
                         if (string.IsNullOrEmpty(strError) == false)
@@ -266,16 +281,20 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }
+));
         }
 
-        private void toolStripButton_delete_Click(object sender, EventArgs e)
+        private async void toolStripButton_delete_Click(object sender, EventArgs e)
         {
-            this.DeleteUser();
+            await this.DeleteUser();
         }
 
-        void DeleteUser()
+        async Task DeleteUser()
         {
             string strError = "";
 
@@ -306,7 +325,7 @@ namespace DigitalPlatform.MessageClient
             this.EnableControls(false);
             try
             {
-                MessageResult result = this.Connection.SetUsers("delete", users);
+                MessageResult result = await this.Connection.SetUsers("delete", users);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -335,8 +354,12 @@ namespace DigitalPlatform.MessageClient
 
             this.Changed = true;
             return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }
+));
         }
 
         private void listView1_DoubleClick(object sender, EventArgs e)
