@@ -151,7 +151,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="UpgradeDt1000ToDp2_4_TemporaryKey.pfx" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -175,7 +174,6 @@
     <Compile Include="XmlViewerForm.designer.cs">
       <DependentUpon>XmlViewerForm.cs</DependentUpon>
     </Compile>
-    <None Include="UpgradeDt1000ToDp2_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">

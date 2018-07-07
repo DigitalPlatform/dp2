@@ -30,6 +30,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
+using log4net;
 
 namespace dp2Circulation
 {
@@ -59,13 +60,13 @@ namespace dp2Circulation
                 if (nRet == -1)
                 {
                     strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
-                    this.WriteErrorLog(strError);
+                    MainForm.WriteErrorLog(strError);
                 }
             }
             catch (Exception ex)
             {
                 strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.WriteErrorLog(strError);
+                MainForm.TryWriteErrorLog(strError);
             }
         }
 
@@ -1260,8 +1261,17 @@ MessageBoxDefaultButton.Button1);
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.TryCreateDir(this.UserLogDir);
 
+                var repository = log4net.LogManager.CreateRepository("main");
+                log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(this.UserLogDir, "log_");
+                log4net.Config.XmlConfigurator.Configure(repository);
+
+                LibraryChannelManager.Log = LogManager.GetLogger("main", "channellib");
+                _log = LogManager.GetLogger("main", "dp2circulation");
+
+
                 // 启动时在日志中记载当前 dp2circulation 版本号
-                this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
+                // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
+                MainForm.WriteInfoLog(Assembly.GetAssembly(this.GetType()).FullName);
 
                 // 检查 KB????
                 /*
@@ -1298,7 +1308,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     Application.DoEvents();
 
-                    this.WriteErrorLog("dp2circulation 启动时，发现本机尚未安装 .NET Framework 4 更新 KB2468871");
+                    MainForm.WriteErrorLog("dp2circulation 启动时，发现本机尚未安装 .NET Framework 4 更新 KB2468871");
 
 #if NO
                     DialogResult result = MessageBox.Show(this,
@@ -1471,7 +1481,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError);
+                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
 
             cfgCache.TempDir = Path.Combine(this.UserDir, "cfgcache");  // this.DataDir

@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.ServiceProcess;
 using System.IO;
 using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Remoting.Channels;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -32,7 +27,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Interfaces;
 
 namespace dp2Installer
 {
@@ -4092,7 +4086,7 @@ MessageBoxDefaultButton.Button2);
         "IIS-ISAPIExtensions",
         "IIS-ISAPIFilter",
         "IIS-ManagementConsole",
-        "IIS-NetFxExtensibility",
+        //"IIS-NetFxExtensibility",
         "IIS-RequestFiltering",
         "IIS-Security",
         "IIS-StaticContent",
@@ -4155,7 +4149,7 @@ MessageBoxDefaultButton.Button2);
         "IIS-ISAPIExtensions",
         "IIS-ISAPIFilter",
         "IIS-ManagementConsole",
-        "IIS-NetFxExtensibility",
+        //"IIS-NetFxExtensibility",
         "IIS-RequestFiltering",
         "IIS-Security",
         "IIS-StaticContent",
@@ -4751,11 +4745,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             MessageBox.Show(this, strError);
         }
 
+        private static readonly Object _syncRoot_errorLog = new Object(); // 2018/6/26
+
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)
         {
             FileUtil.WriteErrorLog(
-                this.UserLogDir,
+                _syncRoot_errorLog,
                 this.UserLogDir,
                 strText,
                 "log_",

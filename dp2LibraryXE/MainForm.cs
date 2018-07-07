@@ -1,11 +1,9 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Deployment.Application;
@@ -20,8 +18,6 @@ using System.Threading.Tasks;
 
 using Ionic.Zip;
 
-using Microsoft.Win32;
-
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
@@ -32,9 +28,6 @@ using DigitalPlatform.Install;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.LibraryClient.localhost;
-
-using dp2LibraryXE.Properties;
 
 namespace dp2LibraryXE
 {
@@ -4788,11 +4781,13 @@ Stack:
             MessageBox.Show(this, FindExePath("sqllocaldb.exe"));
         }
 
+        private static readonly Object _syncRoot_errorLog = new Object(); // 2018/6/26
+
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)
         {
             FileUtil.WriteErrorLog(
-                this.UserLogDir,
+                _syncRoot_errorLog,
                 this.UserLogDir,
                 strText,
                 "log_",

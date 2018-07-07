@@ -311,7 +311,6 @@
             this.MenuItem_startAnotherDp2circulation.Name = "MenuItem_startAnotherDp2circulation";
             this.MenuItem_startAnotherDp2circulation.Size = new System.Drawing.Size(360, 30);
             this.MenuItem_startAnotherDp2circulation.Text = "启动新的 dp2Circulation 实例(&S)";
-            this.MenuItem_startAnotherDp2circulation.Visible = false;
             this.MenuItem_startAnotherDp2circulation.Click += new System.EventHandler(this.MenuItem_startAnotherDp2circulation_Click);
             // 
             // toolStripSeparator14

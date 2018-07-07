@@ -168,8 +168,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 string strText = "SummaryList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                if (this.Container != null && this.Container.MainForm != null)
-                    this.Container.MainForm.WriteErrorLog(strText);
+                MainForm.TryWriteErrorLog(strText);
                 if (this.Container != null)
                     this.Container.ShowMessage(strText, "red", true);
             }

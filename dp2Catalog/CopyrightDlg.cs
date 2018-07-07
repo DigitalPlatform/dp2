@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -77,11 +77,11 @@ namespace dp2Catalog
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.BackColor = System.Drawing.Color.Honeydew;
             this.label1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 131);
+            this.label1.Location = new System.Drawing.Point(20, 196);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(457, 42);
+            this.label1.Size = new System.Drawing.Size(695, 64);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2±‡ƒø«∞∂À dp2Catalog V2.5";
+            this.label1.Text = "dp2ÁºñÁõÆÂâçÁ´Ø dp2Catalog V3";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
@@ -89,21 +89,21 @@ namespace dp2Catalog
             this.label_copyright.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_copyright.BackColor = System.Drawing.Color.PaleGreen;
-            this.label_copyright.Location = new System.Drawing.Point(12, 173);
+            this.label_copyright.Location = new System.Drawing.Point(20, 260);
             this.label_copyright.Name = "label_copyright";
-            this.label_copyright.Size = new System.Drawing.Size(457, 41);
+            this.label_copyright.Size = new System.Drawing.Size(695, 94);
             this.label_copyright.TabIndex = 1;
-            this.label_copyright.Text = "(C) ∞Ê»®À˘”– 2006-2015  ˝◊÷∆ΩÃ®(±±æ©)»Ìº˛”–œﬁ‘»Œπ´Àæ Digital Platform (Beijing) Software Corp. Ltd" +
-    ".";
+            this.label_copyright.Text = "(C) ÁâàÊùÉÊâÄÊúâ 2006-2015 Êï∞Â≠óÂπ≥Âè∞(Âåó‰∫¨)ËΩØ‰ª∂ÊúâÈôêË¥£‰ªªÂÖ¨Âè∏; \r\n2015 Âπ¥‰ª• Apache 2.0 License ÂºÄÊ∫ê:\r\nhttp://git" +
+    "hub.com/DigitalPlatform/dp2";
             this.label_copyright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // linkLabel1
             // 
             this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.linkLabel1.Location = new System.Drawing.Point(12, 214);
+            this.linkLabel1.Location = new System.Drawing.Point(20, 354);
             this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(457, 18);
+            this.linkLabel1.Size = new System.Drawing.Size(695, 27);
             this.linkLabel1.TabIndex = 2;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "http://www.dp2003.com";
@@ -115,11 +115,11 @@ namespace dp2Catalog
             this.button_OK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button_OK.AutoSize = true;
             this.button_OK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_OK.Location = new System.Drawing.Point(192, 298);
+            this.button_OK.Location = new System.Drawing.Point(286, 492);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(96, 29);
+            this.button_OK.Size = new System.Drawing.Size(160, 54);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_environment
@@ -129,12 +129,12 @@ namespace dp2Catalog
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_environment.BackColor = System.Drawing.Color.Honeydew;
             this.textBox_environment.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_environment.Location = new System.Drawing.Point(12, 235);
+            this.textBox_environment.Location = new System.Drawing.Point(20, 384);
             this.textBox_environment.Multiline = true;
             this.textBox_environment.Name = "textBox_environment";
             this.textBox_environment.ReadOnly = true;
             this.textBox_environment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_environment.Size = new System.Drawing.Size(457, 60);
+            this.textBox_environment.Size = new System.Drawing.Size(695, 102);
             this.textBox_environment.TabIndex = 6;
             this.textBox_environment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -144,9 +144,9 @@ namespace dp2Catalog
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.InitialImage = null;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(20, 18);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(457, 116);
+            this.pictureBox1.Size = new System.Drawing.Size(695, 174);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pictureBox1.TabIndex = 7;
             this.pictureBox1.TabStop = false;
@@ -154,9 +154,9 @@ namespace dp2Catalog
             // CopyrightDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+            this.AutoScaleBaseSize = new System.Drawing.Size(10, 24);
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(481, 336);
+            this.ClientSize = new System.Drawing.Size(735, 548);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBox_environment);
             this.Controls.Add(this.button_OK);
@@ -164,13 +164,13 @@ namespace dp2Catalog
             this.Controls.Add(this.label_copyright);
             this.Controls.Add(this.label1);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("Œ¢»Ì—≈∫⁄", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("ÂæÆËΩØÈõÖÈªë", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CopyrightDlg";
             this.ShowInTaskbar = false;
-            this.Text = "Copyright ∞Ê»®";
+            this.Text = "ÂÖ≥‰∫é";
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -207,14 +207,17 @@ namespace dp2Catalog
 
 		private void CopyrightDlg_Load(object sender, System.EventArgs e)
 		{
-			label_copyright.Text = "(C) ∞Ê»®À˘”– 2006-2015  ˝◊÷∆ΩÃ®(±±æ©)»Ìº˛”–œﬁ‘»Œπ´Àæ\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+			// label_copyright.Text = "(C) ÁâàÊùÉÊâÄÊúâ 2006-2015 Êï∞Â≠óÂπ≥Âè∞(Âåó‰∫¨)ËΩØ‰ª∂ÊúâÈôêË¥£‰ªªÂÖ¨Âè∏\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+            label_copyright.Text = @"(C) ÁâàÊùÉÊâÄÊúâ 2006-2015 Êï∞Â≠óÂπ≥Âè∞(Âåó‰∫¨)ËΩØ‰ª∂ÊúâÈôêË¥£‰ªªÂÖ¨Âè∏; 
+2015 Âπ¥‰ª• Apache 2.0 License ÂºÄÊ∫ê:
+http://github.com/DigitalPlatform/dp2";
 
-			Assembly myAssembly;
+            Assembly myAssembly;
 
 			myAssembly = Assembly.GetAssembly(this.GetType());
-			textBox_environment.Text = "±æª˙ .NET Framework ∞Ê±æ: " + myAssembly.ImageRuntimeVersion
-				+ "\r\n±æ»Ìº˛: " + myAssembly.FullName
-                + "\r\n\r\n±æª˙ MAC µÿ÷∑: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
+			textBox_environment.Text = "Êú¨Êú∫ .NET Framework ÁâàÊú¨: " + myAssembly.ImageRuntimeVersion
+				+ "\r\nÊú¨ËΩØ‰ª∂: " + myAssembly.FullName
+                + "\r\n\r\nÊú¨Êú∫ MAC Âú∞ÂùÄ: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
 
 			/*
 			for(int i = 0; i<100; i++) 

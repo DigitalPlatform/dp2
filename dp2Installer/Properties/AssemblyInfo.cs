@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // 特性集控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("dp2Installer")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("dp2 安装实用工具")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("dp2Installer")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("DigitalPlatform 数字平台(北京)软件有限责任公司")]
+[assembly: AssemblyProduct("dp2Installer -- dp2 安装实用工具")]
+[assembly: AssemblyCopyright("Copyright © 2006-2015 DigitalPlatform 数字平台(北京)软件有限责任公司")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
