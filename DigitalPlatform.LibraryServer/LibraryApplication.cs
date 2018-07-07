@@ -164,7 +164,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.120 (2017/12/16) WriteRes() API 针对上传文件也支持 gzip 风格了。此前只是对 dp2kernel 资源上传的时候支持 gzip
         //      2.121 (2018/5/15) GetBiblioInfos() API 中改进了获得 table 格式的功能，允许 table: 后面携带风格列表例如 "table:price|title"，另外 UNIMARC 格式内置了 table 格式发生能力，可以删除数据目录下的 cfgs/table_unimarc.fltx 来使用这个内置的发生模块
         //      3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
-        public static string Version = "3.0";
+        //      3.1 (2018/7/1) GetSearchResult() API 在返回 -1 的时候，ErrorCode 的错误码不再是 CommonError，而是具体的错误码值。比如 NotFound 表示结果集不存在
+        public static string Version = "3.1";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -377,7 +378,36 @@ namespace DigitalPlatform.LibraryServer
         // 读者记录锁。避免多线程改写同一读者记录造成的故障
         public RecordLockCollection ReaderLocks = new RecordLockCollection();
 
-        public XmlDocument LibraryCfgDom = null;   // library.xml配置文件内容
+        private XmlDocument _libraryCfgDom = null;   // library.xml配置文件内容
+        internal ReaderWriterLockSlim _lockLibraryCfgDom = new ReaderWriterLockSlim();
+
+        public XmlDocument LibraryCfgDom
+        {
+            get
+            {
+                _lockLibraryCfgDom.EnterReadLock();
+                try
+                {
+                    return _libraryCfgDom;
+                }
+                finally
+                {
+                    _lockLibraryCfgDom.ExitReadLock();
+                }
+            }
+            set
+            {
+                _lockLibraryCfgDom.EnterWriteLock();
+                try
+                {
+                    _libraryCfgDom = value;
+                }
+                finally
+                {
+                    _lockLibraryCfgDom.ExitWriteLock();
+                }
+            }
+        }
 
         public Clock Clock = new Clock();
 
@@ -749,7 +779,6 @@ namespace DigitalPlatform.LibraryServer
                     app.WriteErrorLog("INFO: 开始装载 " + strFileName + " 到 XMLDOM");
 #endif
 
-                    //
 
                     XmlDocument dom = new XmlDocument();
                     try
@@ -768,6 +797,8 @@ namespace DigitalPlatform.LibraryServer
                         // throw ex;
                         goto ERROR1;
                     }
+
+                    // TODO: 此处可能会有并发问题。需要锁定一段时间，让使用 LibraryCfgDom 的地方暂时等待
 
                     app.LibraryCfgDom = dom;
 
@@ -1926,8 +1957,8 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
             }
-        // 2008/10/13 
-        ERROR1:
+            // 2008/10/13 
+            ERROR1:
             if (bReload == false)
             {
                 if (this.watcher == null)
@@ -2261,12 +2292,15 @@ namespace DigitalPlatform.LibraryServer
                 // 升级 library.xml 中的用户账户相关信息
                 // 文件格式 0.03-->0.04
                 // accounts/account 中 password 存储方式改变
+                XmlDocument temp = this.LibraryCfgDom;
                 int nRet = LibraryServerUtil.UpgradeLibraryXmlUserInfo(
                     EncryptKey,
-                    ref this.LibraryCfgDom,
+                    ref temp,
                     out strError);
                 if (nRet == -1)
                     WriteErrorLog("自动升级 library.xml v2.00(或以下)到v2.01 时出错: " + strError + "。为了修复这个问题，请系统管理员重设所有工作人员账户的密码");
+
+                this.LibraryCfgDom = temp;
 
                 // 升级完成后，修改版本号
                 nodeVersion.InnerText = "2.01";
@@ -4438,7 +4472,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "没有找到名为 '" + strChildDbName + "' 的种下属库";
             return 0;
 
-        FOUND:
+            FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4481,7 +4515,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-        FOUND:
+            FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
 
@@ -4551,7 +4585,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-        FOUND:
+            FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4594,7 +4628,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-        FOUND:
+            FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -4637,7 +4671,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
-        FOUND:
+            FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -5397,7 +5431,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5483,7 +5517,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5618,7 +5652,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5809,7 +5843,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 再尝试检索全部读者库一次
             nRet = GetReaderRecXml(
-                // channels,
+// channels,
 channel,
 strBarcode,
 1,
@@ -5838,7 +5872,7 @@ out strError);
             strOutputPath = "";
             List<string> recpaths = null;
             int nRet = GetReaderRecXml(
-                // channels,
+            // channels,
             channel,
             strBarcode,
             1,
@@ -6026,7 +6060,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6048,7 +6082,7 @@ out strError);
             out string strError)
         {
             return GetReaderRecXmlByFrom(
-                // channels,
+            // channels,
             channel,
             strDisplayName,
             "显示名",
@@ -6070,7 +6104,7 @@ out strError);
     out string strError)
         {
             return GetReaderRecXmlByFrom(
-                // channels,
+    // channels,
     channel,
     null,
     strWord,
@@ -6526,7 +6560,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6661,7 +6695,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6766,7 +6800,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -6898,7 +6932,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -7227,7 +7261,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -7780,7 +7814,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8220,7 +8254,7 @@ out strError);
             info_list.CopyTo(infos);
 
             return infos.Length;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8430,7 +8464,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8567,7 +8601,7 @@ out strError);
                 goto ERROR1;
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8690,7 +8724,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -8790,7 +8824,7 @@ out strError);
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -9415,7 +9449,7 @@ out strError);
                 output_timestamp = aTimestamp[nIndex];
             }
             return aPathNew.Count;
-        ERROR1:
+            ERROR1:
             return -1;
             /*
         LOADONE:
@@ -9875,7 +9909,7 @@ out strError);
             record.RecPath,
             readerdom,
             strReaderTempPassword,
-                        // strExpireTime,
+            // strExpireTime,
             record.Timestamp,
             out output_timestamp,
             out strError);
@@ -10273,7 +10307,7 @@ out strError);
                 }
             }
 
-        DO_LOGIN:
+            DO_LOGIN:
 
             bool bTempPassword = false;
             string strToken = "";
@@ -11030,7 +11064,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -11136,7 +11170,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -11647,7 +11681,7 @@ out strError);
                 }
             }
 
-        GET_BIBLIO:
+            GET_BIBLIO:
 
             string strItemDbName = "";  // 实体库名
             string strBiblioRecID = ""; // 种记录id
@@ -12275,7 +12309,7 @@ out strError);
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -12337,7 +12371,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
 
             // 修改读者密码
             // return:
@@ -12431,7 +12465,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -12485,7 +12519,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
 
             // 修改读者临时密码
             // return:
@@ -12584,7 +12618,7 @@ strLibraryCode);    // 读者所在的馆代码
             // this.LoginCache.Remove(strReaderBarcode);   // 及时失效登录缓存
             this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -13654,7 +13688,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;   // 为.fltx文件
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -15104,6 +15138,21 @@ strLibraryCode);    // 读者所在的馆代码
             other.ErrorInfo = this.ErrorInfo;
             return other;
         }
+
+        // 把内核错误码转换为 dp2library 错误码
+        public static ErrorCode FromErrorValue(DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue error_code,
+            bool throw_exception = false)
+        {
+            string text = error_code.ToString();
+            if (Enum.TryParse<ErrorCode>(text, out ErrorCode result) == false)
+            {
+                if (throw_exception == true)
+                    throw new Exception("无法将字符串 '" + text + "' 转换为 LibraryServer.ErrorCode 类型");
+                else
+                    return ErrorCode.SystemError;
+            }
+            return result;
+        }
     }
 
     // 帐户信息
@@ -15398,7 +15447,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return false;
             }
 
-        END1:
+            END1:
             if (alter_type_list != null)
                 alter_type_list.Add("router_ip"); // 表示已经验证了 router_ip: 绑定
             return true;
@@ -15597,7 +15646,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 results.Add(type);  // 没有替代
                 continue;
-            FOUND:
+                FOUND:
                 // 发现了可以替代的
                 continue;
             }
@@ -15761,7 +15810,7 @@ strLibraryCode);    // 读者所在的馆代码
                 nDayCount++;
 
 
-            CONTINUE:
+                CONTINUE:
                 TimeSpan delta = new TimeSpan(24, 0, 0);    // 24小时
                 curDay = curDay + delta;
             }

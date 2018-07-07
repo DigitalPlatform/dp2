@@ -756,8 +756,21 @@ dlg.UiState);
         internal void WriteErrorLog(string strText)
         {
             if (this.LogOperTime)
-                Program.MainForm.WriteErrorLog(strText);
+            {
+                try
+                {
+                    MainForm.WriteErrorLog(strText);
+                }
+                catch (Exception ex)
+                {
+                    // 这样在 dp2003.com 的异常汇报里面就能看到 strText 内容了
+                    throw new Exception("在 QuickChargingForm::WriteErrorLog() 中尝试写入错误日志时出错。"
+                        + "拟写入错误日志的内容为 '" + strText + "'",
+                        ex);
+                }
+            }
         }
+
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
@@ -993,7 +1006,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 #endif
             int nRedoCount = 0;
-        REDO:
+            REDO:
             try
             {
                 if (strHtml == "(空)")
@@ -1040,7 +1053,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
             try
             {
                 this.m_webExternalHost_readerInfo.SetTextString(strText, "reader_text");
@@ -3035,7 +3048,7 @@ MessageBoxDefaultButton.Button2);
                 form.LoadRecord(selected_task.ReaderBarcode);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3066,7 +3079,7 @@ MessageBoxDefaultButton.Button2);
 
             form.LoadRecord(selected_task.ItemBarcode);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3091,7 +3104,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             this.ShowMessage(strError, "error", true);
         }
 
@@ -3122,7 +3135,7 @@ MessageBoxDefaultButton.Button2);
 
             form.LoadItemByBarcode(selected_task.ItemBarcode, false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3548,7 +3561,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

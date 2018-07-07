@@ -890,7 +890,7 @@ errorInfo);
             }
         }
 
-        public GetUserResult GetUsers(string userName, int start, int count)
+        public Task<GetUserResult> GetUsers(string userName, int start, int count)
         {
 #if NO
             var task = HubProxy.Invoke<GetUserResult>("GetUsers",
@@ -903,10 +903,10 @@ errorInfo);
             return HubProxy.Invoke<GetUserResult>("GetUsers",
                 userName,
                 start,
-                count).Result;
+                count);
         }
 
-        public MessageResult SetUsers(string action, List<User> users)
+        public Task<MessageResult> SetUsers(string action, List<User> users)
         {
 #if NO
             var task = HubProxy.Invoke<MessageResult>("SetUsers",
@@ -917,7 +917,7 @@ errorInfo);
 #endif
             return HubProxy.Invoke<MessageResult>("SetUsers",
                 action,
-                users).Result;
+                users);
         }
 
 #if NO
