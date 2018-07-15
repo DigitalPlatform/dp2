@@ -194,7 +194,7 @@ namespace dp2Kernel
             //      -1  出错
             //      0   成功
             int nRet = sessioninfo.Initial(app,
-                 OperationContext.Current.SessionId,
+                OperationContext.Current.SessionId,
                 strIP,
                 strVia,
                 out strError);

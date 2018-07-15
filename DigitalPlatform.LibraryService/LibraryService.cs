@@ -542,19 +542,25 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
-                nRet = app.UserNameTable.BeforeLogin(strUserName,
-                    sessioninfo.ClientIP,
-                    out strError);
-                if (nRet == -1)
+                if (String.IsNullOrEmpty(strParameters) == false
+    && strParameters.IndexOf("=") == -1)
                 {
-                    // app.WriteErrorLog("前端 ["+sessioninfo.ClientIP+"] 对用户名 ["+strUserName+"] 进行了密码试探攻击，被惩罚延时: " + strError);
+                    strError = "strParameters参数应该采用新的用法： location=???,index=???";
                     goto ERROR1;
                 }
 
-                if (String.IsNullOrEmpty(strParameters) == false
-                    && strParameters.IndexOf("=") == -1)
+                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+
+                // 2018/7/11
+                // 使用可信的前端提供的 clientip 参数
+                string strClientIP = parameters.ContainsKey("clientip") == true ? parameters["clientip"] as string : sessioninfo.ClientIP;
+
+                nRet = app.UserNameTable.BeforeLogin(strUserName,
+                strClientIP,
+                out strError);
+                if (nRet == -1)
                 {
-                    strError = "strParameters参数应该采用新的用法： location=???,index=???";
+                    // app.WriteErrorLog("前端 ["+sessioninfo.ClientIP+"] 对用户名 ["+strUserName+"] 进行了密码试探攻击，被惩罚延时: " + strError);
                     goto ERROR1;
                 }
 
@@ -569,8 +575,6 @@ namespace dp2Library
                     strError = "不允许用 token 登录";
                     goto ERROR1;
                 }
-
-                Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
 
                 // 评估模式
                 if (parameters.ContainsKey("testmode") == true)
@@ -709,7 +713,7 @@ namespace dp2Library
                                 if (nRet == 0 || nRet == 1)
                                 {
                                     string strLogText = app.UserNameTable.AfterLogin(info.ManagerUserName,
-                                        sessioninfo.ClientIP,
+                                        strClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
                                         app.WriteErrorLog("!!!(simulate 1) " + strLogText);
@@ -831,7 +835,7 @@ namespace dp2Library
                                 if (nRet == 0 || nRet == 1)
                                 {
                                     string strLogText = app.UserNameTable.AfterLogin(info.ManagerUserName,
-                                        sessioninfo.ClientIP,
+                                        strClientIP,
                                         nRet);
                                     if (string.IsNullOrEmpty(strLogText) == false)
                                         app.WriteErrorLog("!!!(simulate 2) " + strLogText);
@@ -907,7 +911,7 @@ namespace dp2Library
                 if (nRet == 0 || nRet == 1)
                 {
                     string strLogText = app.UserNameTable.AfterLogin(strUserName,
-                        sessioninfo.ClientIP,
+                        strClientIP,
                         nRet);
                     if (string.IsNullOrEmpty(strLogText) == false)
                         app.WriteErrorLog("!!! " + strLogText);
