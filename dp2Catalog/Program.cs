@@ -45,17 +45,20 @@ namespace dp2Catalog
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
 #endif
-
             // return:
             //      true    函数返回后需要立即退出程序
-            //      false   返回返回后继续后面处理
+            //      false   返回后继续后面处理
             if (ProgramUtil.TryUpgrade("编目(dp2Catalog)",
                 "V3",
                 "DigitalPlatform/dp2 V3/dp2编目 V3",
                 "http://dp2003.com/dp2catalog/v3/dp2catalog.application"
                 ) == true)
+            {
+                // 要把 servers.bin 从数据目录移动到用户目录，再从 V2 升级到 V3 了，servers.bin 文件内容就不会丢失
+                // 将 servers.bin 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                MainForm.MoveDataFile("servers.bin", out string strError);
                 return;
-
+            }
 
             if (StringUtil.IsDevelopMode() == false)
                 PrepareCatchException();
@@ -202,7 +205,7 @@ namespace dp2Catalog
             {
                 string strSender = "";
                 // if (_mainForm != null)
-                    strSender = "@MAC:" + GetMacAddressString();
+                strSender = "@MAC:" + GetMacAddressString();
 
                 // 崩溃报告
                 nRet = LibraryChannel.CrashReport(

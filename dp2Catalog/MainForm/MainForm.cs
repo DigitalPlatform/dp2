@@ -153,8 +153,8 @@ namespace dp2Catalog
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.TryCreateDir(this.UserLogDir);
 
-                // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-                nRet = MoveDp2catalogXml(out strError);
+                // 将 dp2catalog.xml 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                nRet = MoveDataFile("dp2catalog.xml", out strError);
                 if (nRet == -1)
                 {
                     this.ReportError("dp2catalog 移动 dp2catalog.xml 时出现错误", "(安静报错)" + strError);
@@ -257,6 +257,15 @@ namespace dp2Catalog
                 MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
             }
 
+
+            // 将 servers.bin 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+            nRet = MoveDataFile("servers.bin", out strError);
+            if (nRet == -1)
+            {
+                this.ReportError("dp2catalog 移动 servers.bin 文件时出现错误", "(安静报错)" + strError);
+                MessageBox.Show(this, strError);
+            }
+
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
             //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
@@ -268,7 +277,7 @@ namespace dp2Catalog
             {
 
                 Servers = dp2ServerCollection.Load(
-                    Path.Combine(this.DataDir, "servers.bin"),
+                    Path.Combine(this.UserDir, "servers.bin"),  // this.DataDir
                     true);
                 Servers.ownerForm = this;
             }
@@ -366,12 +375,20 @@ namespace dp2Catalog
 #endif
         }
 
-        // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-        int MoveDp2catalogXml(out string strError)
+        // 将绿色安装目录或者 ClickOnce 安装的数据目录中指定的文件移动到用户目录
+        public static int MoveDataFile(
+            string strPureFileName,
+            out string strError)
         {
             strError = "";
 
-            string strTargetFileName = Path.Combine(this.UserDir, "dp2catalog.xml");
+            // 2017/7/17
+            string strUserDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "dp2Catalog_v2");
+            PathUtil.TryCreateDir(strUserDir);
+
+            string strTargetFileName = Path.Combine(strUserDir, strPureFileName);
             if (File.Exists(strTargetFileName) == true)
                 return 0;
 
@@ -385,7 +402,7 @@ namespace dp2Catalog
                 strSourceDirectory = Environment.CurrentDirectory;
             }
 
-            string strSourceFileName = Path.Combine(strSourceDirectory, "dp2catalog.xml");
+            string strSourceFileName = Path.Combine(strSourceDirectory, strPureFileName);
             if (File.Exists(strSourceFileName) == false)
                 return 0;   // 没有源文件，无法做什么
 
