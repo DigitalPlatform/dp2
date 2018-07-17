@@ -257,7 +257,7 @@ namespace DigitalPlatform.CirculationClient
         //			SerializationException	版本迁移时容易出现
         public static dp2ServerCollection Load(
             string strFileName,
-            bool bIgnorFileNotFound)
+            bool bIgnoreFileNotFound)
         {
             dp2ServerCollection servers = null;
 
@@ -274,7 +274,7 @@ namespace DigitalPlatform.CirculationClient
             }
             catch (FileNotFoundException ex)
             {
-                if (bIgnorFileNotFound == false)
+                if (bIgnoreFileNotFound == false)
                     throw ex;
 
                 servers = new dp2ServerCollection();

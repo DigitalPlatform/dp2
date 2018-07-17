@@ -156,7 +156,7 @@ namespace dp2Catalog
                 PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 将 dp2catalog.xml 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-                nRet = MoveDp2catalogXml(out strError);
+                nRet = MoveDp2catalogXml("dp2catalog.xml", out strError);
                 if (nRet == -1)
                 {
                     this.ReportError("dp2catalog 移动 dp2catalog.xml 时出现错误", "(安静报错)" + strError);
@@ -168,6 +168,7 @@ namespace dp2Catalog
 
                 this.AppInfo = new ApplicationInfo(strDp2catalogXmlFileName);
 
+#if NO
                 string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
                 string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
                 if (File.Exists(strNewFileName) == false)
@@ -193,7 +194,8 @@ namespace dp2Catalog
                         MessageBox.Show(this, "复制 zserver.xml 文件时出错: " + ex.Message);
                     }
                 }
-
+#endif
+                MoveZServerXml();
             }
 
             // 设置窗口尺寸状态
@@ -264,6 +266,14 @@ namespace dp2Catalog
                 MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
             }
 
+            // 将 servers.bin 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+            nRet = MoveDp2catalogXml("servers.bin", out strError);
+            if (nRet == -1)
+            {
+                this.ReportError("dp2catalog 移动 servers.bin 文件时出现错误", "(安静报错)" + strError);
+                MessageBox.Show(this, strError);
+            }
+
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
             //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
@@ -273,9 +283,8 @@ namespace dp2Catalog
             //			SerializationException	版本迁移时容易出现
             try
             {
-
                 Servers = dp2ServerCollection.Load(
-                    Path.Combine(this.DataDir, "servers.bin"),
+                    Path.Combine(this.UserDir, "servers.bin"),  // this.DataDir
                     true);
                 Servers.ownerForm = this;
             }
@@ -376,12 +385,44 @@ namespace dp2Catalog
 #endif
         }
 
+        // 将 zserver.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+        void MoveZServerXml()
+        {
+            string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
+            string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
+            if (File.Exists(strNewFileName) == false)
+            {
+                try
+                {
+                    if (File.Exists(strOldFileName) == true)
+                    {
+                        // 升级到 2.4 的情况。原来数据目录中的 zserver.xml 文件移动过来
+                        File.Copy(strOldFileName, strNewFileName, true);
+                        File.Delete(strOldFileName);    // 删除源文件，以免用户不清楚哪个文件起作用
+                    }
+                    else
+                    {
+                        // 刚安装好的时候，用户目录中还没有文件，于是从 default_zserver.xml 中复制过来
+                        string strDefaultFileName = Path.Combine(this.DataDir, "default_zserver.xml");
+                        Debug.Assert(File.Exists(strDefaultFileName) == true, "");
+                        File.Copy(strDefaultFileName, strNewFileName, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "复制 zserver.xml 文件时出错: " + ex.Message);
+                }
+            }
+        }
+
         // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-        int MoveDp2catalogXml(out string strError)
+        int MoveDp2catalogXml(
+            string strPureFileName,
+            out string strError)
         {
             strError = "";
 
-            string strTargetFileName = Path.Combine(this.UserDir, "dp2catalog.xml");
+            string strTargetFileName = Path.Combine(this.UserDir, strPureFileName);
             if (File.Exists(strTargetFileName) == true)
                 return 0;
 
@@ -395,7 +436,7 @@ namespace dp2Catalog
                 strSourceDirectory = Environment.CurrentDirectory;
             }
 
-            string strSourceFileName = Path.Combine(strSourceDirectory, "dp2catalog.xml");
+            string strSourceFileName = Path.Combine(strSourceDirectory, strPureFileName);
             if (File.Exists(strSourceFileName) == false)
                 return 0;   // 没有源文件，无法做什么
 
@@ -912,7 +953,7 @@ string strError)
             }
         }
 
-        #region 按钮事件
+#region 按钮事件
 
         // 检索
         private void toolButton_search_Click(object sender, EventArgs e)
@@ -1306,7 +1347,7 @@ string strError)
 
         }
 
-        #endregion
+#endregion
 
 
         // 当前顶层的SearchForm
@@ -1460,7 +1501,7 @@ string strError)
             return null;
         }
 
-        #region 菜单事件
+#region 菜单事件
 
         // 打开Z39.50检索窗
         private void MenuItem_openZSearchForm_Click(object sender, EventArgs e)
@@ -2022,7 +2063,7 @@ string strError)
             OpenWindow<TestForm>();
         }
 
-        #endregion
+#endregion
 
 
         public ToolStripProgressBar ToolStripProgressBar
@@ -4252,7 +4293,7 @@ out string strError)
             return -1;
         }
 
-        #region 序列号机制
+#region 序列号机制
 
 #if SN
         internal void WriteSerialNumberStatusFile()
@@ -4625,7 +4666,7 @@ out string strError)
 
 #endif
 
-        #endregion
+#endregion
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
@@ -4824,7 +4865,7 @@ out string strError)
             }
         }
 
-        #region dp2library 通道
+#region dp2library 通道
 
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
@@ -5086,7 +5127,7 @@ out string strError)
             }
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_editMarcoTable_Click(object sender, EventArgs e)
         {

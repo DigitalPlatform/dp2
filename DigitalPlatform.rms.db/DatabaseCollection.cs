@@ -27,6 +27,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
+using Ghostscript.NET;
 
 namespace DigitalPlatform.rms
 {
@@ -151,6 +152,8 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public static GhostscriptVersionInfo gvi = null;
+
         // parameter:
         //		strDataDir	data目录
         //		strError	out参数，返回出错信息
@@ -177,6 +180,10 @@ namespace DigitalPlatform.rms
                 return -1;
             }
             this.BinDir = strBinDir;
+
+            string path = Path.Combine(this.BinDir, "gsdll32.dll");
+            gvi = new GhostscriptVersionInfo(path);
+
 
             if (String.IsNullOrEmpty(this.DataDir) == true)
             {
@@ -4600,6 +4607,20 @@ namespace DigitalPlatform.rms
                 // bObject = false;
             }
 
+            if (strObjectID.IndexOf("/") != -1)
+            {
+                // 有可能 strObjectID 是 0/page:1 这样的形态
+                strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+
+                strXPath = StringUtil.GetFirstPartPath(ref strPath);
+                if (strXPath.StartsWith("page:") == false)
+                {
+                    strError = "资源路径 '" + strResPath + "' 不合法,第 5 级必须是 'page:xxx' 形态";
+                    return -7;
+                }
+            }
+
+
             info.DbName = strDbName;
             info.RecordID = strRecordID;
             info.XPath = strXPath;
@@ -4911,6 +4932,7 @@ namespace DigitalPlatform.rms
                     //		>=0 资源总长度
                     lRet = info.Database.GetObject(info.RecordID,
                         info.ObjectID,
+                        info.XPath,
                         lStart,
                         nLength,
                         nMaxLength,

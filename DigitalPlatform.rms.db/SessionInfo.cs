@@ -1234,6 +1234,7 @@ out strError);
                     //		>=0 资源总长度
                     long lRet = info.Database.GetObject(info.RecordID,
                         info.ObjectID,
+                        null,
                         0,
                         0,
                         -1,

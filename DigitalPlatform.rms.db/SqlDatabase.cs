@@ -27,6 +27,10 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using Ghostscript.NET.Rasterizer;
+using System.Drawing;
+using Ghostscript.NET;
+using System.Drawing.Imaging;
 
 namespace DigitalPlatform.rms
 {
@@ -4672,7 +4676,7 @@ namespace DigitalPlatform.rms
     " SELECT "
     + strDistinct
     + strTop
-                                // + " idstring" + strSelectKeystring + " "
+    // + " idstring" + strSelectKeystring + " "
     + strColumnList
     + " FROM " + strTableName + " "
     + strWhere
@@ -4709,7 +4713,7 @@ namespace DigitalPlatform.rms
                             strOneCommand = " SELECT "
     + strDistinct
     + strTop
-                                // + " idstring" + strSelectKeystring + " "  //DISTINCT 去重
+    // + " idstring" + strSelectKeystring + " "  //DISTINCT 去重
     + strColumnList
     + " FROM " + strTableName + " "
     + strWhere
@@ -6343,6 +6347,9 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(strXPath) == false
                             || StringUtil.IsInList("withresmetadata", strStyle) == true)
                         {
+                            // 2018/7/16
+                            // TODO: 这里要限制一下记录的尺寸，一面内存被爆掉。另外还需要预先看看 metadata，看看记录是不是 XML 内容，如果不是，就不让用 XPath 取得局部
+
                             // return:
                             //		-1  出错
                             //		-4  记录不存在
@@ -6351,6 +6358,7 @@ namespace DigitalPlatform.rms
                             lRet = this.GetImage(connection,
                                 null,
                                 strRecordID,
+                                "",
                                 false,  // "data",
                                 0,
                                 -1,
@@ -6365,7 +6373,7 @@ namespace DigitalPlatform.rms
 
                             if (baWholeXml == null && string.IsNullOrEmpty(strXPath) == false)
                             {
-                                strError = "您虽然使用了xpath，但未取得数据，可以是由于style风格不正确，当前style的值为 '" + strStyle + "'。";
+                                strError = "您虽然使用了 XPath，但未取得数据，可能是因为 strStyle 风格不正确，当前 strStyle 值为 '" + strStyle + "'。";
                                 return -1;
                             }
 
@@ -6457,6 +6465,7 @@ namespace DigitalPlatform.rms
                                     lRet = this.GetImage(connection,
                                         null,
                                         strObjectFullID,
+                                        "",
                                         false,  // "data",
                                         lStart,
                                         nLength,
@@ -6516,15 +6525,11 @@ namespace DigitalPlatform.rms
                         {
                             if (dom != null)
                             {
-                                string strLocateXPath = "";
-                                string strCreatePath = "";
-                                string strNewRecordTemplate = "";
-                                string strAction = "";
                                 nRet = DatabaseUtil.ParseXPathParameter(strXPath,
-                                    out strLocateXPath,
-                                    out strCreatePath,
-                                    out strNewRecordTemplate,
-                                    out strAction,
+                                    out string strLocateXPath,
+                                    out string strCreatePath,
+                                    out string strNewRecordTemplate,
+                                    out string strAction,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -6553,14 +6558,13 @@ namespace DigitalPlatform.rms
                                 }
                                 else
                                 {
-                                    strError = "通过xpath '" + strXPath + "' 找到的节点的类型不支持。";
+                                    strError = "通过 XPath '" + strXPath + "' 找到的节点的类型为 '" + node.NodeType.ToString() + "'，属于不支持的情况";
                                     return -1;
                                 }
 
                                 byte[] baOutputText = DatabaseUtil.StringToByteArray(strOutputText,
                                     baPreamble);
 
-                                long lRealLength;
                                 // return:
                                 //		-1  出错
                                 //		0   成功
@@ -6568,7 +6572,7 @@ namespace DigitalPlatform.rms
                                     nLength,
                                     baOutputText.Length,
                                     nMaxLength,
-                                    out lRealLength,
+                                    out long lRealLength,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -6662,6 +6666,7 @@ namespace DigitalPlatform.rms
                         lRet = this.GetImage(connection,
                             null,
                             strRecordID,
+                            "",
                             false,  // "data",
                             lStart,
                             nLength,
@@ -6855,6 +6860,7 @@ namespace DigitalPlatform.rms
             long lRet = this.GetImage(connection,
                 row_info,
                 strID,
+                "",
                 // strFieldName,
                 bTempField,
                 0,
@@ -6875,7 +6881,7 @@ namespace DigitalPlatform.rms
 
         // 按指定范围读资源
         // parameter:
-        //		strID       记录ID
+        //		strRecordID       记录ID
         //		nStart      开始位置
         //		nLength     长度 -1:开始到结束
         //		destBuffer  out参数，返回字节数组
@@ -6887,6 +6893,7 @@ namespace DigitalPlatform.rms
         //		>=0 资源总长度
         public override long GetObject(string strRecordID,
             string strObjectID,
+            string strXPath,
             long lStart,
             int nLength,
             int nMaxLength,
@@ -6916,30 +6923,48 @@ namespace DigitalPlatform.rms
 #endif
                 try  // 记录锁
                 {
-
                     Connection connection = new Connection(this,
                         this.m_strConnString);
                     connection.TryOpen();
                     try // 连接
                     {
                         string strObjectFullID = strRecordID + "_" + strObjectID;
-                        // return:
-                        //		-1  出错
-                        //		-4  记录不存在
-                        //      -100    对象文件不存在
-                        //		>=0 资源总长度
+
+                        if (string.IsNullOrEmpty(strXPath))
+                        {
+                            // return:
+                            //		-1  出错
+                            //		-4  记录不存在
+                            //      -100    对象文件不存在
+                            //		>=0 资源总长度
+                            return this.GetImage(connection,
+                                null,
+                                strObjectFullID,
+                                "",
+                                false,  // "data",
+                                lStart,
+                                nLength,
+                                nMaxLength,
+                                strStyle,
+                                out destBuffer,
+                                out strMetadata,
+                                out outputTimestamp,
+                                out strError);
+                        }
+
                         return this.GetImage(connection,
-                            null,
-                            strObjectFullID,
-                            false,  // "data",
-                            lStart,
-                            nLength,
-                            nMaxLength,
-                            strStyle,
-                            out destBuffer,
-                            out strMetadata,
-                            out outputTimestamp,
-                            out strError);
+    null,
+    strObjectFullID,
+    strXPath,
+    false,  // "data",
+    lStart,
+    nLength,
+    nMaxLength,
+    strStyle,
+    out destBuffer,
+    out strMetadata,
+    out outputTimestamp,
+    out strError);
                     }
                     catch (SqlException sqlEx)
                     {
@@ -7016,11 +7041,173 @@ namespace DigitalPlatform.rms
             return rangeList[0].lLength;
         }
 
+        private static ImageFormat GetImageFormat(string format)
+        {
+            ImageFormat imageFormat = null;
+
+            try
+            {
+                var imageFormatConverter = new ImageFormatConverter();
+                imageFormat = (ImageFormat)imageFormatConverter.ConvertFromString(format);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return imageFormat;
+        }
+
+        int GetPageImage(string strPdfFileName,
+            string strPartCmd,
+            string strPageImageFileName,
+            out string strError)
+        {
+            strError = "";
+
+            // page:1
+            Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
+            string strPage = (string)parameters["page"];
+            if (Int32.TryParse(strPage, out int nPageNo) == false)
+            {
+                strError = "对象局部描述命令 '" + strPartCmd + "' 格式错误: 子参数 page 值 '" + strPage + "' 应为纯数字";
+                return -1;
+            }
+
+            string strDPI = (string)parameters["dpi"];
+            int nDPI = 100;
+            if (string.IsNullOrEmpty(strDPI) == false)
+            {
+                if (Int32.TryParse(strDPI, out nDPI) == false)
+                {
+                    strError = "对象局部描述命令 '" + strPartCmd + "' 格式错误: 子参数 dpi 值 '" + strDPI + "' 应为纯数字";
+                    return -1;
+                }
+            }
+
+            string strFormat = (string)parameters["format"];
+            if (string.IsNullOrEmpty(strFormat))
+                strFormat = "png";
+            ImageFormat format = GetImageFormat(strFormat);
+            if (format == null)
+            {
+                strError = "对象局部描述命令 '" + strPartCmd + "' 格式错误: 无法识别的图像格式名 '" + strFormat + "'";
+                return -1;
+            }
+
+
+            try
+            {
+                using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
+                {
+                    rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);
+
+                    if (nPageNo > rasterizer.PageCount)
+                        throw new Exception("超过页码范围");
+
+                    using (Image img = rasterizer.GetPage(nDPI, nDPI, nPageNo))
+                    {
+                        img.Save(strPageImageFileName, format);
+                    }
+#if NO
+                }
+                catch (GhostscriptException ex)
+                {
+                    // .Code == -1000
+                    MessageBox.Show(this, ex.Message);
+                }
+#endif
+                    rasterizer.Close();
+                }
+
+                GC.Collect();
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
+
+        // 得到一个 pdf 页面图像的指定范围的 byte []
+        // parameters:
+        //      nPage   页码。从 1 开始计数
+        //      lTotalLength [in][out] 返回的时候，是页面图像的 bytes
+        int GetPageImagePart(string strObjectFilename,
+            string strPartCmd,
+            long lStart,
+            int nReadLength,
+            int nMaxLength,
+            ref long lTotalLength,
+            ref byte[] destBuffer,
+            out string strError)
+        {
+            strError = "";
+
+            string strPageImageFileName = this.container.GetTempFileName();
+            try
+            {
+                // 先读出整个页面的 png 内容
+                int nRet = GetPageImage(strObjectFilename,
+                    strPartCmd,
+                    strPageImageFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                FileInfo fi = new FileInfo(strPageImageFileName);
+                lTotalLength = fi.Length;
+
+                // 得到实际读的长度
+                // return:
+                //		-1  出错
+                //		0   成功
+                nRet = ConvertUtil.GetRealLengthNew(lStart,
+                nReadLength,
+                lTotalLength,
+                nMaxLength,
+                out long lOutputLength,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+
+                Debug.Assert(lOutputLength < Int32.MaxValue && lOutputLength > Int32.MinValue, "");
+
+                if (lTotalLength == 0)  // 总长度为0
+                {
+                    destBuffer = new byte[0];
+                    // goto END1;
+                    return 0;
+                }
+
+                // return:
+                //      1   成功
+                //      -100    文件不存在
+                nRet = ReadObjectFile(strPageImageFileName,
+    lStart,
+    lOutputLength,
+    out destBuffer,
+    out strError);
+                if (nRet < 0)
+                    return nRet;
+                // goto END1;
+                return 0;
+            }
+            finally
+            {
+                // File.Delete(strPageImageFileName);
+                this._streamCache.FileDelete(strPageImageFileName);
+
+                // TODO: 是否要实现一个文件缓存复用的机制? 应确保文件内容 hashcode 完全一致才复用
+            }
+        }
 
         // 按指定范围读资源
         // parameter:
         //      row_info    如果row_info != null，则不理会strID参数了
         //		strID       记录ID。用于在row_info == null的情况下获得行信息
+        //      strPartCmd       要限定读取的 pdf 页命令。空 为不使用读取页功能，读出的为对象的 bytes。如果使用了读取页功能，则函数的语义变为读取指定的页的 png 文件“对象”内的指定范围 bytes
         //      bTempField  是否需要从临时 data 字段中提取数据? (在没有reverse的情况下，临时data字段指 newdata 字段)
         //		nStart      开始位置
         //		nLength     长度 -1:开始到结束
@@ -7036,6 +7223,7 @@ namespace DigitalPlatform.rms
         private long GetImage(Connection connection,
             RecordRowInfo row_info,
             string strID,
+            string strPartCmd,
             // string strImageFieldName,
             bool bTempField,    // 是否需要从临时 data 字段中提取数据?
             long lStart,
@@ -7521,17 +7709,33 @@ namespace DigitalPlatform.rms
                         goto END1;
                     }
 
-                    long lOutputLength = 0;
+                    // 从对象文件读取指定 pdf 页码内容
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
+                    {
+                        // 得到一个 pdf 页面图像的指定范围的 byte []
+                        nRet = GetPageImagePart(strObjectFilename,
+                            strPartCmd,
+                            lStart,
+                            nReadLength,
+                            nMaxLength,
+                            ref lTotalLength,
+                            ref destBuffer,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        goto END1;
+                    }
+
                     // 得到实际读的长度
                     // return:
                     //		-1  出错
                     //		0   成功
                     nRet = ConvertUtil.GetRealLengthNew(lStart,
-                        nReadLength,
-                        lTotalLength,
-                        nMaxLength,
-                        out lOutputLength,
-                        out strError);
+                    nReadLength,
+                    lTotalLength,
+                    nMaxLength,
+                    out long lOutputLength,
+                    out strError);
                     if (nRet == -1)
                         return -1;
 
@@ -7923,7 +8127,23 @@ namespace DigitalPlatform.rms
                         goto END1;
                     }
 
-                    long lOutputLength = 0;
+                    // 从对象文件读取指定 pdf 页码内容
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
+                    {
+                        // 得到一个 pdf 页面图像的指定范围的 byte []
+                        nRet = GetPageImagePart(strObjectFilename,
+                            strPartCmd,
+                            lStart,
+                            nReadLength,
+                            nMaxLength,
+                            ref lTotalLength,
+                            ref destBuffer,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        goto END1;
+                    }
+
                     // 得到实际读的长度
                     // return:
                     //		-1  出错
@@ -7932,7 +8152,7 @@ namespace DigitalPlatform.rms
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
-                        out lOutputLength,
+                        out long lOutputLength,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -8254,7 +8474,23 @@ namespace DigitalPlatform.rms
                         goto END1;
                     }
 
-                    long lOutputLength = 0;
+                    // 从对象文件读取指定 pdf 页码内容
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
+                    {
+                        // 得到一个 pdf 页面图像的指定范围的 byte []
+                        nRet = GetPageImagePart(strObjectFilename,
+                            strPartCmd,
+                            lStart,
+                            nReadLength,
+                            nMaxLength,
+                            ref lTotalLength,
+                            ref destBuffer,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        goto END1;
+                    }
+
                     // 得到实际读的长度
                     // return:
                     //		-1  出错
@@ -8263,7 +8499,7 @@ namespace DigitalPlatform.rms
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
-                        out lOutputLength,
+                        out long lOutputLength,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -8585,7 +8821,23 @@ namespace DigitalPlatform.rms
                         goto END1;
                     }
 
-                    long lOutputLength = 0;
+                    // 从对象文件读取指定 pdf 页码内容
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
+                    {
+                        // 得到一个 pdf 页面图像的指定范围的 byte []
+                        nRet = GetPageImagePart(strObjectFilename,
+                            strPartCmd,
+                            lStart,
+                            nReadLength,
+                            nMaxLength,
+                            ref lTotalLength,
+                            ref destBuffer,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        goto END1;
+                    }
+
                     // 得到实际读的长度
                     // return:
                     //		-1  出错
@@ -8594,7 +8846,7 @@ namespace DigitalPlatform.rms
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
-                        out lOutputLength,
+                        out long lOutputLength,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -8660,14 +8912,13 @@ namespace DigitalPlatform.rms
             }
             strError = "未知的 connection 类型 '" + connection.SqlServerType.ToString() + "'";
             return -1;
-        END1:
+            END1:
             int nBufferLength = 0;
             if (destBuffer != null)
                 nBufferLength = destBuffer.Length;
             if (StringUtil.IsInList("incReadCount", strStyle) == true
                 && lStart + nBufferLength >= lTotalLength && lTotalLength != -1)
             {
-                string strResultMetadata = "";
                 // return:
                 //		-1	出错
                 //		0	成功
@@ -8675,7 +8926,7 @@ namespace DigitalPlatform.rms
                     "",
                     -2,
                     "+1",
-                    out strResultMetadata,
+                    out string strResultMetadata,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -10370,7 +10621,7 @@ OracleDbType.NVarchar2);
             }
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
             try
             {
                 _streamCache.ClearItems(strFileName);
@@ -10600,7 +10851,7 @@ FileShare.ReadWrite))
                                     dr.GetBytes(12, 0, row_info.NewData, 0, (int)row_info.newdata_length);
                                 }
                             }
-                        CONTINUE:
+                            CONTINUE:
                             row_infos.Add(row_info);
                         }
                     }
@@ -12191,7 +12442,7 @@ start_time,
                     + "\r\n");
             }
             return 0;
-        ERROR2:
+            ERROR2:
             if (bDelete == true)
             {
                 string strError1 = "";
@@ -13151,7 +13402,7 @@ start_time,
                     }
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     try
                     {
 #if NO
@@ -13908,7 +14159,7 @@ lStart > CACHE_SIZE);
             strError = "";
 
             int nRedoCount = 0;
-        REDO:
+            REDO:
             try
             {
                 _streamCache.ClearItems(strFileName);
@@ -16042,7 +16293,7 @@ FileShare.ReadWrite))
                                 strError = "处理记录路径为 '" + this.GetCaption("zh") + "/" + strID + "' 的子文件发生错误:" + ex.Message + ",sql命令:\r\n" + strCommand;
                                 return -1;
                             }
-                        CONTINUE_1:
+                            CONTINUE_1:
                             command.Parameters.Clear();
                         }
                     }
@@ -16096,7 +16347,7 @@ FileShare.ReadWrite))
             }
             #endregion // Oracle
 
-        DELETE_OBJECTFILE:
+            DELETE_OBJECTFILE:
             // 删除对象文件
             foreach (string strShortFilename in filenames)
             {
@@ -17974,7 +18225,7 @@ bool bTempObject)
 
             //********对数据库加读锁*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
-#if DEBUG_LOCK_SQLDATABASE		
+#if DEBUG_LOCK_SQLDATABASE
 			this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
 
@@ -18188,7 +18439,7 @@ bool bTempObject)
                 {
                     //**************对记录解写锁**********
                     m_recordLockColl.UnlockForWrite(strRecordID);
-#if DEBUG_LOCK_SQLDATABASE			
+#if DEBUG_LOCK_SQLDATABASE
 					this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
 #endif
 
@@ -18198,7 +18449,7 @@ bool bTempObject)
             {
                 //***************对数据库解读锁*****************
                 m_db_lock.ReleaseReaderLock();
-#if DEBUG_LOCK_SQLDATABASE		
+#if DEBUG_LOCK_SQLDATABASE
 				this.container.WriteDebugInfo("DeleteRecordForce()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
@@ -18243,7 +18494,7 @@ bool bTempObject)
 
             //********对数据库加读锁*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
-#if DEBUG_LOCK_SQLDATABASE		
+#if DEBUG_LOCK_SQLDATABASE
 			this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
             ////
@@ -18381,11 +18632,11 @@ bool bTempObject)
 
 
                     } // end of lock record
-                finally // 记录锁
+                    finally // 记录锁
                     {
                         //**************对记录解写锁**********
                         m_recordLockColl.UnlockForWrite(strRecordID);
-#if DEBUG_LOCK_SQLDATABASE			
+#if DEBUG_LOCK_SQLDATABASE
 					this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
 #endif
                     }
@@ -18412,7 +18663,7 @@ bool bTempObject)
             {
                 //***************对数据库解读锁*****************
                 m_db_lock.ReleaseReaderLock();
-#if DEBUG_LOCK_SQLDATABASE		
+#if DEBUG_LOCK_SQLDATABASE
 				this.container.WriteDebugInfo("RebuildRecordKeys()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
