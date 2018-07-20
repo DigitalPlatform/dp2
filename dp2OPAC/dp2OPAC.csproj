@@ -965,6 +965,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Web References\localhost\gcat.disco" />
+    <Content Include="ViewPdf.aspx" />
     <Content Include="Web1.config" />
     <Content Include="Web1.Debug.config">
       <DependentUpon>Web1.config</DependentUpon>
@@ -1245,6 +1246,13 @@
     </Compile>
     <Compile Include="UserInfo.aspx.designer.cs">
       <DependentUpon>UserInfo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ViewPdf.aspx.cs">
+      <DependentUpon>ViewPdf.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ViewPdf.aspx.designer.cs">
+      <DependentUpon>ViewPdf.aspx</DependentUpon>
     </Compile>
     <Compile Include="Web References\localhost\Reference.cs">
       <AutoGen>True</AutoGen>

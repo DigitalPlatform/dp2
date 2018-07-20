@@ -40,6 +40,9 @@ namespace DigitalPlatform.rms
         // 对物理文件开始缓存和加速的开始尺寸
         const int CACHE_SIZE = 10 * 1024;   // -1;  // 10 * 1024;
 
+        // PDF 单页缓存
+        internal PageCache _pageCache = new PageCache();
+
         internal StreamCache _streamCache = new StreamCache(100);
 
         const string KEY_COL_LIST = "(keystring, idstring)";
@@ -7060,10 +7063,13 @@ namespace DigitalPlatform.rms
 
         int GetPageImage(string strPdfFileName,
             string strPartCmd,
-            string strPageImageFileName,
+            out int nPageCount,
+            out string strPageImageFileName,
             out string strError)
         {
             strError = "";
+            strPageImageFileName = "";
+            nPageCount = 0;
 
             // page:1
             Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
@@ -7095,20 +7101,29 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-
             try
             {
-                using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
-                {
-                    rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);
-
-                    if (nPageNo > rasterizer.PageCount)
-                        throw new Exception("超过页码范围");
-
-                    using (Image img = rasterizer.GetPage(nDPI, nDPI, nPageNo))
+                PageItem item = _pageCache.GetPage(strPdfFileName, nPageNo, nDPI, strFormat,
+                    () =>
                     {
-                        img.Save(strPageImageFileName, format);
-                    }
+                        int nTotalPage = 0;
+                        string strTempFileName = this.container.GetTempFileName();
+                        using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
+                        {
+                            rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);
+
+                            nTotalPage = rasterizer.PageCount;
+                            // 0 表示最后一页
+                            if (nPageNo == 0)
+                                nPageNo = nTotalPage;
+
+                            if (nPageNo > nTotalPage)
+                                throw new Exception("超过页码范围");
+
+                            using (Image img = rasterizer.GetPage(nDPI, nDPI, nPageNo))
+                            {
+                                img.Save(strTempFileName, format);
+                            }
 #if NO
                 }
                 catch (GhostscriptException ex)
@@ -7117,10 +7132,16 @@ namespace DigitalPlatform.rms
                     MessageBox.Show(this, ex.Message);
                 }
 #endif
-                    rasterizer.Close();
-                }
+                            rasterizer.Close();
+                        }
 
-                GC.Collect();
+                        GC.Collect();
+                        return new Tuple<string, int>(strTempFileName, nTotalPage);
+                    });
+
+
+                strPageImageFileName = item.FilePath;
+                nPageCount = item.TotalPage;
                 return 0;
             }
             catch (Exception ex)
@@ -7145,13 +7166,13 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            string strPageImageFileName = this.container.GetTempFileName();
             try
             {
                 // 先读出整个页面的 png 内容
                 int nRet = GetPageImage(strObjectFilename,
                     strPartCmd,
-                    strPageImageFileName,
+                    out int nPageCount,
+                    out string strPageImageFileName,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -7196,8 +7217,7 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                // File.Delete(strPageImageFileName);
-                this._streamCache.FileDelete(strPageImageFileName);
+                // this._streamCache.FileDelete(strPageImageFileName);
 
                 // TODO: 是否要实现一个文件缓存复用的机制? 应确保文件内容 hashcode 完全一致才复用
             }

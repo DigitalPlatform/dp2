@@ -493,6 +493,10 @@ namespace DigitalPlatform.rms
                     {
                         SqlDatabase sql_db = (SqlDatabase)db;
                         sql_db._streamCache.ClearIdle(TimeSpan.FromSeconds(60));
+
+                        sql_db._pageCache.Clean((filename) => {
+                            sql_db._streamCache.FileDelete(filename);
+                        });
                     }
                 }
             }

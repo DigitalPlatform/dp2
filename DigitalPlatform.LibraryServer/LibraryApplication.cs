@@ -165,7 +165,11 @@ namespace DigitalPlatform.LibraryServer
         //      2.121 (2018/5/15) GetBiblioInfos() API 中改进了获得 table 格式的功能，允许 table: 后面携带风格列表例如 "table:price|title"，另外 UNIMARC 格式内置了 table 格式发生能力，可以删除数据目录下的 cfgs/table_unimarc.fltx 来使用这个内置的发生模块
         //      3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
         //      3.1 (2018/7/1) GetSearchResult() API 在返回 -1 的时候，ErrorCode 的错误码不再是 CommonError，而是具体的错误码值。比如 NotFound 表示结果集不存在
-        public static string Version = "3.1";
+        //      3.2 (2018/7/17) GetSystemParameter() API 增加了 system/expire 获取 dp2library 失效日期的功能
+        public static string Version = "3.2";
+
+        internal static DateTime _expire = new DateTime(2018, 9, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1921,12 +1925,12 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2018, 9, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
-                        if (DateTime.Now > expire)
+                        // DateTime expire = new DateTime(2018, 9, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+                        if (DateTime.Now > _expire)
                         {
                             if (this.MaxClients == 255)
                             {
-                                this.WriteErrorLog("*** 当前 dp2library 版本已于 " + expire.ToLongDateString() + " 失效。请系统管理员注意主动升级 dp2library");
+                                this.WriteErrorLog("*** 当前 dp2library 版本已于 " + _expire.ToLongDateString() + " 失效。请系统管理员注意主动升级 dp2library");
                             }
                             else
                             {
