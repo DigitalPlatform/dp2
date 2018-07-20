@@ -4435,6 +4435,110 @@ out strError);
         {
             Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
+
+        // 测试获取 PDF 文件单页
+        private void ToolStripMenuItem_getPdfSinglePage_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                GetPdfSinglePage();
+            });
+            Task.Factory.StartNew(() =>
+            {
+                GetPdfSinglePage();
+            });
+        }
+
+        void GetPdfSinglePage()
+        {
+            DownloadFile("中文图书/612/object/0/page:1,format:png,dpi:300");
+        }
+
+        // 一次函数运行中，连续做十次下载
+        void DownloadFile(string strServerFilePath)
+        {
+            string strError = "";
+
+            List<string> filenames = new List<string>();
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+
+            Progress.Style = StopStyle.EnableHalfStop;
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在进行测试 ...");
+            Progress.BeginLoop();
+
+            this.Invoke((Action)(() =>
+                EnableControls(false)
+                ));
+
+            try
+            {
+                string strPrevFileName = "";
+                for (int i = 0; i < 10; i++)
+                {
+                    string strLocalFilePath = Program.MainForm.GetTempFileName("test");
+                    Progress.SetMessage(strServerFilePath + "-->" + strLocalFilePath);
+                    // parameters:
+                    //		strOutputFileName	输出文件名。可以为null。如果调用前文件已经存在, 会被覆盖。
+                    // return:
+                    //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                    //		0	成功
+                    long lRet = this.Channel.GetRes(
+                        this.stop,
+                        strServerFilePath,
+                        strLocalFilePath,
+                        "content,data,metadata,timestamp,outputpath,gzip",
+                        out string strMetaData,
+                        out byte[] baOutputTimeStamp,
+                        out string strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    filenames.Add(strLocalFilePath);
+
+                    // TODO: 将文件内容和标准文件进行比较
+                    if (string.IsNullOrEmpty(strPrevFileName) == false)
+                    {
+                        int nRet = CompareFile(strLocalFilePath, strPrevFileName, out strError);
+                        if (nRet != 0)
+                            goto ERROR1;
+                    }
+
+                    strPrevFileName = strLocalFilePath;
+
+                    // 根据返回的时间戳设置文件最后修改时间
+                    // FileUtil.SetFileLastWriteTimeByTimestamp(strLocalFilePath, baOutputTimeStamp);
+                }
+
+                // 最后删除测试用的本地文件
+                foreach(string filename in filenames)
+                {
+                    File.Delete(filename);
+                }
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                Progress.HideProgress();
+
+                this.Invoke((Action)(() =>
+                    EnableControls(true)
+                    ));
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
     }
 
     // 验证异常

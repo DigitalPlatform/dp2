@@ -1245,12 +1245,15 @@ namespace DigitalPlatform.rms
 
 
         // 按指定范围读对象
-        // strRecordID  从属的记录ID
-        // strObjectID  资源对象ID
+        // parameters:
+        //      strRecordID  从属的记录ID
+        //      strObjectID  资源对象ID
+        //      strXPath    要获取的记录局部描述
         // 其它参数GetXml(),无strOutputResPath参数
         // 线: 安全的
         public virtual long GetObject(string strRecordID,
             string strObjectID,
+            string strXPath,
             long lStart,
             int nLength,
             int nMaxLength,

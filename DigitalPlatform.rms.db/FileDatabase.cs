@@ -602,6 +602,7 @@ namespace DigitalPlatform.rms
         //		>=0 资源总长度
         public override long GetObject(string strRecordID,
             string strObjectID,
+            string strXPath,
             long lStart,
             int nLength,
             int nMaxLength,

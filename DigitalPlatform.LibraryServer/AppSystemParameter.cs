@@ -345,6 +345,14 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strCategory == "system")
                 {
+                    // 2018/7/17
+                    // 获得 dp2library 失效期
+                    if (strName == "expire")
+                    {
+                        strValue = _expire.ToLongDateString();
+                        goto END1;
+                    }
+
                     // 2018/6/19
                     // 获得系统挂起状态
                     if (strName == "hangup")
