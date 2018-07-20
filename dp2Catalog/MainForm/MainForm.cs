@@ -156,7 +156,7 @@ namespace dp2Catalog
                 PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 将 dp2catalog.xml 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-                nRet = MoveDp2catalogXml("dp2catalog.xml", out strError);
+                nRet = MoveDataFile("dp2catalog.xml", out strError);
                 if (nRet == -1)
                 {
                     this.ReportError("dp2catalog 移动 dp2catalog.xml 时出现错误", "(安静报错)" + strError);
@@ -267,7 +267,7 @@ namespace dp2Catalog
             }
 
             // 将 servers.bin 文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-            nRet = MoveDp2catalogXml("servers.bin", out strError);
+            nRet = MoveDataFile("servers.bin", out strError);
             if (nRet == -1)
             {
                 this.ReportError("dp2catalog 移动 servers.bin 文件时出现错误", "(安静报错)" + strError);
@@ -415,8 +415,8 @@ namespace dp2Catalog
             }
         }
 
-        // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
-        int MoveDp2catalogXml(
+        // 将指定文件文件从绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+        int MoveDataFile(
             string strPureFileName,
             out string strError)
         {

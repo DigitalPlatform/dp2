@@ -220,6 +220,7 @@
     <Compile Include="KernelApplication.cs" />
     <Compile Include="MySqlBulkCopy.cs" />
     <Compile Include="OracleBulkCopy.cs" />
+    <Compile Include="PageCache.cs" />
     <Compile Include="Query.cs">
       <SubType>Code</SubType>
     </Compile>
