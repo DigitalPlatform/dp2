@@ -6745,6 +6745,7 @@ out strError);
                     return -1;
                 }
 
+                // soapresult.AsyncState;
                 LibraryServerResult result = this.ws.EndGetRes(
                     out baContent,
                     out strMetadata,

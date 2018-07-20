@@ -42,6 +42,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
+            this.ToolStripMenuItem_getPdfSinglePage = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -70,7 +71,8 @@
             this.ToolStripMenuItem_compileAllProjects,
             this.ToolStripMenuItem_parsePriceUnit,
             this.ToolStripMenuItem_objectWriteRead,
-            this.ToolStripMenuItem_logAndRecover});
+            this.ToolStripMenuItem_logAndRecover,
+            this.ToolStripMenuItem_getPdfSinglePage});
             this.ToolStripMenuItem_test.Name = "ToolStripMenuItem_test";
             this.ToolStripMenuItem_test.Size = new System.Drawing.Size(170, 28);
             this.ToolStripMenuItem_test.Text = "测试";
@@ -170,6 +172,13 @@
             this.menuStrip2.Text = "menuStrip2";
             this.menuStrip2.Visible = false;
             // 
+            // ToolStripMenuItem_getPdfSinglePage
+            // 
+            this.ToolStripMenuItem_getPdfSinglePage.Name = "ToolStripMenuItem_getPdfSinglePage";
+            this.ToolStripMenuItem_getPdfSinglePage.Size = new System.Drawing.Size(308, 30);
+            this.ToolStripMenuItem_getPdfSinglePage.Text = "测试获取 PDF 单页";
+            this.ToolStripMenuItem_getPdfSinglePage.Click += new System.EventHandler(this.ToolStripMenuItem_getPdfSinglePage_Click);
+            // 
             // TestingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -210,5 +219,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_logAndRecover;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_getPdfSinglePage;
     }
 }

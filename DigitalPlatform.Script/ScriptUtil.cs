@@ -330,11 +330,14 @@ namespace DigitalPlatform.Script
                 }
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
+                string strPdfUrl = "";
                 if (StringUtil.IsHttpUrl(strUri) == false)
                 {
                     // 内部对象
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                    if (s_q == "application/pdf")
+                        strPdfUrl = "./viewpdf.aspx?uri=" + HttpUtility.UrlEncode(strUri);
                 }
                 else
                 {
@@ -382,6 +385,13 @@ namespace DigitalPlatform.Script
                     urlTemp += "<a href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
                     urlTemp += urlLabel;
                     urlTemp += "</a>";
+
+                    if (string.IsNullOrEmpty(strPdfUrl) == false)
+                    {
+                        urlTemp += "<a href='" + strPdfUrl + "' >";
+                        urlTemp += "在线阅读";
+                        urlTemp += "</a>";
+                    }
                 }
                 else
                     urlTemp = urlLabel;

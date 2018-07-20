@@ -26,6 +26,9 @@ namespace DigitalPlatform.rms
             byte [] textPtr,
             long lTotalLength)
         {
+            if (connection.SqlServerType != SqlServerType.MsSqlServer)
+                throw new ArgumentException("SqlImageStream 只能用于 MS SQL Server 类型");
+
             this.m_lLength = lTotalLength;
             this.m_strSqlDbName = strSqlDbName;
             this.m_strDataFieldName = strDataFieldName;

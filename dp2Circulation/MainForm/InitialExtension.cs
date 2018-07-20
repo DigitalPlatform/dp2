@@ -2868,6 +2868,11 @@ Culture=neutral, PublicKeyToken=null
         /// </summary>
         public string ServerUID { get; set; }   // 注意初始值为 null
 
+        /// <summary>
+        /// 当前连接的 dp2library 的失效期
+        /// </summary>
+        public string ExpireDate { get; set; }
+
         // return:
         //      -2  出现严重错误，希望退出 Application
         //      -1  一般错误
@@ -2904,8 +2909,6 @@ Culture=neutral, PublicKeyToken=null
 
             try
             {
-                string strVersion = "";
-                string strUID = "";
 
 #if NO
                 strError = "测试退出";
@@ -2913,8 +2916,8 @@ Culture=neutral, PublicKeyToken=null
 #endif
 
                 long lRet = channel.GetVersion(Stop,
-    out strVersion,
-    out strUID,
+    out string strVersion,
+    out string strUID,
     out strError);
                 if (lRet == -1)
                 {
@@ -3600,20 +3603,18 @@ Culture=neutral, PublicKeyToken=null
 
                 this.SetServerName(channel.Url, this.LibraryName);
 
-                /*
-                lRet = Channel.GetSystemParameter(Stop,
-                    "library",
-                    "serverDirectory",
+                lRet = channel.GetSystemParameter(Stop,
+                    "system",
+                    "expire",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得图书馆一般信息library/serverDirectory过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " system/expire 过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
-                this.LibraryServerDiretory = strValue;
-                 * */
+                this.ExpireDate = strValue;
             }
             finally
             {
