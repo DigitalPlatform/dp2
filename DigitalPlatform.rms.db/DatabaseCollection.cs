@@ -21,13 +21,14 @@ using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
+using Ghostscript.NET;
+
 using DigitalPlatform;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
-using Ghostscript.NET;
 
 namespace DigitalPlatform.rms
 {
@@ -487,16 +488,21 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-                foreach(Database db in this)
+                foreach (Database db in this)
                 {
                     if (db is SqlDatabase)
                     {
                         SqlDatabase sql_db = (SqlDatabase)db;
                         sql_db._streamCache.ClearIdle(TimeSpan.FromSeconds(60));
 
-                        sql_db._pageCache.Clean((filename) => {
-                            sql_db._streamCache.FileDelete(filename);
-                        });
+                        sql_db._pageCache.Clean(
+                            true,
+                            TimeSpan.FromMinutes(2),
+                            (filename) =>
+                            {
+                                sql_db._streamCache.FileDelete(filename);
+                            }
+                            );
                     }
                 }
             }
@@ -2510,7 +2516,7 @@ namespace DigitalPlatform.rms
                 Debug.Assert(existing_dom != null, "");
 
                 Debug.Assert(StringUtil.IsInList("reserve_target", strMergeStyle) == true, "");
-                
+
                 target_dom = new XmlDocument();
                 target_dom.LoadXml(existing_dom.OuterXml);  // target_dom 依然是目标位置的记录内容，意思就是目标位置元数据记录不会被源参数所提供的内容覆盖
 
@@ -3572,16 +3578,13 @@ namespace DigitalPlatform.rms
                         bObject = false;
                     }
 
+                    //------------------------------------------------
+                    //开始处理资源
+                    //---------------------------------------------------
 
-                //------------------------------------------------
-                //开始处理资源
-                //---------------------------------------------------
-
-                DOWRITE:
+                    DOWRITE:
 
                     // ****************************************
-
-
                     string strOutputRecordID = "";
                     nRet = db.CanonicalizeRecordID(strRecordID,
                         out strOutputRecordID,
@@ -3624,7 +3627,6 @@ namespace DigitalPlatform.rms
                             out strError);
 
                         strOutputResPath = strDbName + "/" + strRecordID + "/object/" + strObjectID;
-
                     }
                     else  // 记录体
                     {
@@ -4034,7 +4036,7 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-        DOWRITE:
+            DOWRITE:
 
             string strFilePath = "";//GetCfgItemLacalPath(strCfgItemPath);
             // return:
@@ -4070,7 +4072,7 @@ namespace DigitalPlatform.rms
                      strRanges,
                      lTotalLength,
                      baSource,
-                    // streamSource,
+                     // streamSource,
                      strMetadata,
                      strStyle,
                      baInputTimestamp,
@@ -4449,7 +4451,7 @@ namespace DigitalPlatform.rms
                 baOutputTimestamp = DatabaseUtil.CreateTimestampForCfg(strNewFilePath);
             }
 
-        END1:
+            END1:
 
             // 写metadata
             if (strMetadata != "")
@@ -4617,13 +4619,14 @@ namespace DigitalPlatform.rms
                 strObjectID = StringUtil.GetFirstPartPath(ref strPath);
 
                 strXPath = StringUtil.GetFirstPartPath(ref strPath);
+#if NO
                 if (strXPath.StartsWith("page:") == false)
                 {
                     strError = "资源路径 '" + strResPath + "' 不合法,第 5 级必须是 'page:xxx' 形态";
                     return -7;
                 }
+#endif
             }
-
 
             info.DbName = strDbName;
             info.RecordID = strRecordID;
@@ -4778,7 +4781,7 @@ namespace DigitalPlatform.rms
     nMaxLength,
     strStyle,
     out baData,
-                        // out strMetadata,
+    // out strMetadata,
     out baOutputTimestamp,
     out strError);
                     if (StringUtil.IsInList("outputpath", strStyle) == true)
@@ -5412,11 +5415,10 @@ namespace DigitalPlatform.rms
                     string strDbName = info.DbName;
 
                     // 检查当前帐户是否有删除记录
-                    string strExistRights = "";
                     bool bHasRight = user.HasRights(strResPath,//db.GetCaption("zh-CN"),
                         ResType.Record,
                         "delete",
-                        out strExistRights);
+                        out string strExistRights);
                     if (bHasRight == false)
                     {
                         strError = "您的帐户名为'" + user.Name + "'，对'" + strDbName + "'数据库没有'删除记录(delete)'权限，目前的权限值为'" + strExistRights + "'。";
@@ -5452,7 +5454,7 @@ namespace DigitalPlatform.rms
 #endif
             }
 
-        CHECK_CHANGED:
+            CHECK_CHANGED:
             //及时保存database.xml // 是用加锁的函数吗？
             if (this.Changed == true)
                 this.SaveXmlSafety(true);
@@ -5876,7 +5878,7 @@ namespace DigitalPlatform.rms
 #endif
             }
 
-        END1:
+            END1:
             // 列出实际需要的项
             nTotalLength = aItem.Count;
             long lOutputLength;
@@ -6064,7 +6066,7 @@ namespace DigitalPlatform.rms
 
                     count++;
 
-                CONTINUE:
+                    CONTINUE:
                     i++;
                 }
 

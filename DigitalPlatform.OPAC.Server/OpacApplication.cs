@@ -4105,10 +4105,6 @@ out strError);
             // return:
             //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
             //		0	成功
-            string strMetaData = "";
-            string strOutputPath;
-            byte[] baOutputTimeStamp = null;
-            byte[] baContent = null;
             // 只获得媒体类型
             long lRet = channel.GetRes(
                 stop,
@@ -4116,10 +4112,10 @@ out strError);
                 0,
                 0,
                 "metadata",
-                out baContent,
-                out strMetaData,
-                out strOutputPath,
-                out baOutputTimeStamp,
+                out byte[] baContent,
+                out string strMetaData,
+                out string strOutputPath,
+                out byte[] baOutputTimeStamp,
                 out strError);
             if (lRet == -1)
             {

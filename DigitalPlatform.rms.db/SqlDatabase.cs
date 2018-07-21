@@ -12,6 +12,8 @@ using System.Collections;
 using System.Data;
 using System.Threading;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -22,15 +24,13 @@ using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 
+using Ghostscript.NET.Rasterizer;
+
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using Ghostscript.NET.Rasterizer;
-using System.Drawing;
-using Ghostscript.NET;
-using System.Drawing.Imaging;
 
 namespace DigitalPlatform.rms
 {
@@ -41,7 +41,7 @@ namespace DigitalPlatform.rms
         const int CACHE_SIZE = 10 * 1024;   // -1;  // 10 * 1024;
 
         // PDF 单页缓存
-        internal PageCache _pageCache = new PageCache();
+        internal PageCache _pageCache = new PageCache(1000);
 
         internal StreamCache _streamCache = new StreamCache(100);
 
@@ -760,6 +760,7 @@ namespace DigitalPlatform.rms
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                             {
                                 _streamCache.ClearAll();
+                                _pageCache.ClearAll();
                                 PathUtil.DeleteDirectory(this.m_strObjectDir);
                                 PathUtil.TryCreateDir(this.m_strObjectDir);
                             }
@@ -880,6 +881,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             _streamCache.ClearAll();
+                            _pageCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
 
                             PathUtil.TryCreateDir(this.m_strObjectDir);
@@ -1075,6 +1077,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             _streamCache.ClearAll();
+                            _pageCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -1199,6 +1202,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             _streamCache.ClearAll();
+                            _pageCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -2987,6 +2991,7 @@ namespace DigitalPlatform.rms
                         if (Directory.Exists(strRealDir) == true)
                         {
                             _streamCache.ClearAll();
+                            _pageCache.ClearAll();
                             PathUtil.DeleteDirectory(strRealDir);
                         }
                     }
@@ -3004,6 +3009,7 @@ namespace DigitalPlatform.rms
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                     {
                         _streamCache.ClearAll();
+                        _pageCache.ClearAll();
                         PathUtil.DeleteDirectory(this.m_strObjectDir);
                     }
                 }
@@ -7044,6 +7050,62 @@ namespace DigitalPlatform.rms
             return rangeList[0].lLength;
         }
 
+        // 把整个对象文件写入物理文件。为 PDF 创建单页图像文件做准备
+        // parameters:
+        //      bFreely [out] 是否为独立文件。独立文件需要在使用后立即删除
+        int GetObjectFile(Connection connection,
+            string strRecPath,
+            string strDataFieldName,
+            byte[] textPtr,
+            long lTotalLength,
+            out bool bFreely,
+            out string strObjectFileName,
+            out string strError)
+        {
+            strError = "";
+            strObjectFileName = "";
+            bFreely = false;
+
+            try
+            {
+                PageItem item = _pageCache.GetPage(strRecPath, 0, 0, "object_file",
+                    () =>
+                    {
+                        string strTempFileName = this.container.GetTempFileName();
+                        // 先把整个对象文件写入一个对象文件
+                        using (SqlImageStream source = new SqlImageStream(connection,
+                                this.m_strSqlDbName,
+                                strDataFieldName,
+                                textPtr,
+                                lTotalLength))
+                        {
+                            using (FileStream output = File.Create(strTempFileName))
+                            {
+                                source.Seek(0, SeekOrigin.Begin);
+                                StreamUtil.DumpStream(source, output);
+                            }
+                        }
+
+                        return new Tuple<string, int>(strTempFileName, (int)lTotalLength);
+                    },
+                    (filename) =>
+                    {
+                        this._streamCache.FileDelete(filename);
+                    });
+                strObjectFileName = item.FilePath;
+                Debug.Assert(string.IsNullOrEmpty(strObjectFileName) == false, "");
+                if (item.State == "Freely")
+                    bFreely = true;
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "GetObjectFile() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
+
+        // 将图像文件格式 string 转换为 ImageFormat 对象。jpeg/png 等
         private static ImageFormat GetImageFormat(string format)
         {
             ImageFormat imageFormat = null;
@@ -7061,19 +7123,59 @@ namespace DigitalPlatform.rms
             return imageFormat;
         }
 
-        int GetPageImage(string strPdfFileName,
+        // 从 PDF 文件中按照 strPartCmd 命令要求，解析出单页图片文件
+        // parameters:
+        //      strPartCmd  一般为 "page:1,format:png,dpi:300" 形态
+        //                  如果为 "page:?" 表示只想获取 PDF 文件中的总页数，并不创建单页图像文件
+        // return:
+        //      -1  出错
+        //      0   成功。仅获得 nPageCount
+        //      1   成功。同时获得了单页图像文件
+        int GetPageImage(
+            string strRecPath,
+            string strPdfFileName,
             string strPartCmd,
             out int nPageCount,
+            out bool bFreely,
             out string strPageImageFileName,
             out string strError)
         {
             strError = "";
             strPageImageFileName = "";
             nPageCount = 0;
+            bFreely = false;
 
             // page:1
             Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
             string strPage = (string)parameters["page"];
+
+            if (strPage == "?")
+            {
+                try
+                {
+                    // 单独一次调用检测 PDF 文件中的页码数
+                    using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
+                    {
+                        rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);
+
+                        nPageCount = rasterizer.PageCount;
+
+                        rasterizer.Close();
+                    }
+
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    strError = ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+                finally
+                {
+                    GC.Collect();
+                }
+            }
+
             if (Int32.TryParse(strPage, out int nPageNo) == false)
             {
                 strError = "对象局部描述命令 '" + strPartCmd + "' 格式错误: 子参数 page 值 '" + strPage + "' 应为纯数字";
@@ -7103,7 +7205,7 @@ namespace DigitalPlatform.rms
 
             try
             {
-                PageItem item = _pageCache.GetPage(strPdfFileName, nPageNo, nDPI, strFormat,
+                PageItem item = _pageCache.GetPage(strRecPath, nPageNo, nDPI, strFormat,
                     () =>
                     {
                         int nTotalPage = 0;
@@ -7137,12 +7239,18 @@ namespace DigitalPlatform.rms
 
                         GC.Collect();
                         return new Tuple<string, int>(strTempFileName, nTotalPage);
+                    },
+                    (filename) =>
+                    {
+                        this._streamCache.FileDelete(filename);
                     });
 
 
                 strPageImageFileName = item.FilePath;
+                if (item.State == "Freely")
+                    bFreely = true;
                 nPageCount = item.TotalPage;
-                return 0;
+                return 1;
             }
             catch (Exception ex)
             {
@@ -7153,9 +7261,12 @@ namespace DigitalPlatform.rms
 
         // 得到一个 pdf 页面图像的指定范围的 byte []
         // parameters:
-        //      nPage   页码。从 1 开始计数
+        //      strPartCmd  描述单页部分的命令。形如 "page:1,format:png,dpi:300"
+        //                  如果为 "page:?" 表示只想获取 PDF 文件中的总页数，并不创建单页图像文件
         //      lTotalLength [in][out] 返回的时候，是页面图像的 bytes
-        int GetPageImagePart(string strObjectFilename,
+        int GetPageImagePart(
+            string strRecPath,
+            string strObjectFilename,
             string strPartCmd,
             long lStart,
             int nReadLength,
@@ -7166,16 +7277,33 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
+            string strPageImageFileName = "";
+            bool bFreely = false;
+
             try
             {
-                // 先读出整个页面的 png 内容
-                int nRet = GetPageImage(strObjectFilename,
+                // 先读出整个单页的 png 图像文件内容
+                // return:
+                //      -1  出错
+                //      0   成功。仅获得 nPageCount
+                //      1   成功。同时获得了单页图像文件
+                int nRet = GetPageImage(
+                    strRecPath,
+                    strObjectFilename,
                     strPartCmd,
                     out int nPageCount,
-                    out string strPageImageFileName,
+                    out bFreely,
+                    out strPageImageFileName,
                     out strError);
                 if (nRet == -1)
                     return -1;
+
+                if (nRet == 0)
+                {
+                    destBuffer = new byte[0];
+                    lTotalLength = nPageCount;
+                    return 0;
+                }
 
                 FileInfo fi = new FileInfo(strPageImageFileName);
                 lTotalLength = fi.Length;
@@ -7217,9 +7345,8 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                // this._streamCache.FileDelete(strPageImageFileName);
-
-                // TODO: 是否要实现一个文件缓存复用的机制? 应确保文件内容 hashcode 完全一致才复用
+                if (bFreely && string.IsNullOrEmpty(strPageImageFileName) == false)
+                    this._streamCache.FileDelete(strPageImageFileName);
             }
         }
 
@@ -7722,18 +7849,13 @@ namespace DigitalPlatform.rms
                 // 需要提取数据时,才会取数据
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // 取0长度
-                    {
-                        destBuffer = new byte[0];
-                        // return lTotalLength;    // >= 0
-                        goto END1;
-                    }
-
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
                     {
                         // 得到一个 pdf 页面图像的指定范围的 byte []
-                        nRet = GetPageImagePart(strObjectFilename,
+                        nRet = GetPageImagePart(
+                            GetCacheRecPath(strID),
+                            strObjectFilename,
                             strPartCmd,
                             lStart,
                             nReadLength,
@@ -7746,16 +7868,66 @@ namespace DigitalPlatform.rms
                         goto END1;
                     }
 
+                    if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == false)
+                    {
+                        bool bFreely = false;
+                        string strObjectFilePath = "";
+
+                        try
+                        {
+                            nRet = GetObjectFile(connection,
+        this.GetCacheRecPath(strID),    // this.m_strSqlDbName + "/" + strID,
+        strDataFieldName,
+        textPtr,
+        lTotalLength,
+        out bFreely,
+        out strObjectFilePath,
+        out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            // 得到一个 pdf 页面图像的指定范围的 byte []
+                            nRet = GetPageImagePart(
+                                GetCacheRecPath(strID),
+                                strObjectFilePath,
+                                strPartCmd,
+                                lStart,
+                                nReadLength,
+                                nMaxLength,
+                                ref lTotalLength,
+                                ref destBuffer,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                        }
+                        finally
+                        {
+                            // 释放对象文件
+                            if (bFreely && string.IsNullOrEmpty(strObjectFilePath) == false)
+                                _streamCache.FileDelete(strObjectFilePath);
+                        }
+
+                        goto END1;
+                    }
+
+                    if (nReadLength == 0)  // 取0长度
+                    {
+                        destBuffer = new byte[0];
+                        // return lTotalLength;    // >= 0
+                        goto END1;
+                    }
+
                     // 得到实际读的长度
                     // return:
                     //		-1  出错
                     //		0   成功
                     nRet = ConvertUtil.GetRealLengthNew(lStart,
-                    nReadLength,
-                    lTotalLength,
-                    nMaxLength,
-                    out long lOutputLength,
-                    out strError);
+                nReadLength,
+                lTotalLength,
+                nMaxLength,
+                out long lOutputLength,
+                out strError);
                     if (nRet == -1)
                         return -1;
 
@@ -8140,18 +8312,13 @@ namespace DigitalPlatform.rms
                 // 需要提取数据时,才会取数据
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // 取0长度
-                    {
-                        destBuffer = new byte[0];
-                        // return lTotalLength;    // >= 0
-                        goto END1;
-                    }
-
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
                     {
                         // 得到一个 pdf 页面图像的指定范围的 byte []
-                        nRet = GetPageImagePart(strObjectFilename,
+                        nRet = GetPageImagePart(
+                            GetCacheRecPath(strID),
+                            strObjectFilename,
                             strPartCmd,
                             lStart,
                             nReadLength,
@@ -8161,6 +8328,13 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        goto END1;
+                    }
+
+                    if (nReadLength == 0)  // 取0长度
+                    {
+                        destBuffer = new byte[0];
+                        // return lTotalLength;    // >= 0
                         goto END1;
                     }
 
@@ -8487,18 +8661,12 @@ namespace DigitalPlatform.rms
                 // 需要提取数据时,才会取数据
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // 取0长度
-                    {
-                        destBuffer = new byte[0];
-                        // return lTotalLength;    // >= 0
-                        goto END1;
-                    }
-
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
                     {
                         // 得到一个 pdf 页面图像的指定范围的 byte []
-                        nRet = GetPageImagePart(strObjectFilename,
+                        nRet = GetPageImagePart(GetCacheRecPath(strID),
+                            strObjectFilename,
                             strPartCmd,
                             lStart,
                             nReadLength,
@@ -8508,6 +8676,13 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        goto END1;
+                    }
+
+                    if (nReadLength == 0)  // 取0长度
+                    {
+                        destBuffer = new byte[0];
+                        // return lTotalLength;    // >= 0
                         goto END1;
                     }
 
@@ -8834,18 +9009,13 @@ namespace DigitalPlatform.rms
                 // 需要提取数据时,才会取数据
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // 取0长度
-                    {
-                        destBuffer = new byte[0];
-                        // return lTotalLength;    // >= 0
-                        goto END1;
-                    }
-
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
                     {
                         // 得到一个 pdf 页面图像的指定范围的 byte []
-                        nRet = GetPageImagePart(strObjectFilename,
+                        nRet = GetPageImagePart(
+                            GetCacheRecPath(strID),
+                            strObjectFilename,
                             strPartCmd,
                             lStart,
                             nReadLength,
@@ -8855,6 +9025,13 @@ namespace DigitalPlatform.rms
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        goto END1;
+                    }
+
+                    if (nReadLength == 0)  // 取0长度
+                    {
+                        destBuffer = new byte[0];
+                        // return lTotalLength;    // >= 0
                         goto END1;
                     }
 
@@ -12518,7 +12695,6 @@ start_time,
             string strRanges,
             long lTotalLength,
             byte[] baSource,
-            // Stream streamSource,
             string strMetadata,
             string strStyle,
             byte[] inputTimestamp,
@@ -12691,6 +12867,17 @@ start_time,
                         //string strCurrentRange = this.GetRange(connection,strObjectID);
                         if (bFull == true)  //覆盖完了
                         {
+                            // TODO: 可否异步滞后执行?
+                            if (strObjectID.Length > 10)
+                            {
+                                // strID 为 10 字符，或者 0000000000_0000 形态
+                                string record_path = this.GetCacheRecPath(strObjectID);
+                                _pageCache.ClearByRecPath(record_path,
+                                    (filename) =>
+                                    {
+                                        this._streamCache.FileDelete(filename);
+                                    });
+                            }
 #if NO111
                             // 1. 用newdata替换data字段
                             // return:
@@ -15861,6 +16048,7 @@ FileShare.ReadWrite))
                 return 0;
 
             List<string> filenames = new List<string>();    // 对象文件名数组 (短文件名)
+            List<string> ids = new List<string>();  // 对象 ID 数组 (Length >= 10)
 
             #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
@@ -15899,7 +16087,7 @@ FileShare.ReadWrite))
 
                             if (string.IsNullOrEmpty(strWhere) == false)
                             {
-                                strCommand = " SELECT filename, newfilename FROM records WHERE " + strWhere + " \n";
+                                strCommand = " SELECT filename, newfilename, id FROM records WHERE " + strWhere + " \n";
                                 strCommand = "use " + this.m_strSqlDbName + " \n"
         + strCommand
         + " use master " + "\n";
@@ -15915,6 +16103,8 @@ FileShare.ReadWrite))
                                                 filenames.Add(dr.GetString(0));
                                             if (dr.IsDBNull(1) == false)
                                                 filenames.Add(dr.GetString(1));
+                                            if (dr.IsDBNull(2) == false)
+                                                ids.Add(dr.GetString(2));
                                         }
                                     }
                                 }
@@ -16023,7 +16213,7 @@ FileShare.ReadWrite))
 
                         if (string.IsNullOrEmpty(strWhere) == false)
                         {
-                            strCommand = " SELECT filename, newfilename FROM records WHERE " + strWhere + " \n";
+                            strCommand = " SELECT filename, newfilename, id FROM records WHERE " + strWhere + " \n";
                             command.CommandText = strCommand;
 
                             using (SQLiteDataReader dr = command.ExecuteReader())
@@ -16036,6 +16226,8 @@ FileShare.ReadWrite))
                                             filenames.Add(dr.GetString(0));
                                         if (dr.IsDBNull(1) == false)
                                             filenames.Add(dr.GetString(1));
+                                        if (dr.IsDBNull(2) == false)
+                                            ids.Add(dr.GetString(2));
                                     }
                                 }
                             }
@@ -16150,7 +16342,7 @@ FileShare.ReadWrite))
 
                         if (string.IsNullOrEmpty(strWhere) == false)
                         {
-                            strCommand = " SELECT filename, newfilename FROM records WHERE " + strWhere + " \n";
+                            strCommand = " SELECT filename, newfilename, id FROM records WHERE " + strWhere + " \n";
                             strCommand = "use `" + this.m_strSqlDbName + "` ;\n"
                                 + strCommand;
                             command.CommandText = strCommand;
@@ -16165,6 +16357,8 @@ FileShare.ReadWrite))
                                             filenames.Add(dr.GetString(0));
                                         if (dr.IsDBNull(1) == false)
                                             filenames.Add(dr.GetString(1));
+                                        if (dr.IsDBNull(2) == false)
+                                            ids.Add(dr.GetString(2));
                                     }
                                 }
                             }
@@ -16387,6 +16581,21 @@ FileShare.ReadWrite))
                     strError = "删除数据库 '" + this.GetCaption("zh-CN") + "' 中 ID为 '" + strID + "' 的对象文件时发生错误: " + ex.Message;
                     this.container.KernelApplication.WriteErrorLog(strError);
                     return -1;
+                }
+            }
+
+            // 清除 PDF 单页 cache
+            foreach(string strObjectID in ids)
+            {
+                if (strObjectID.Length > 10)
+                {
+                    // strID 为 10 字符，或者 0000000000_0000 形态
+                    string record_path = this.GetCacheRecPath(strObjectID);
+                    _pageCache.ClearByRecPath(record_path,
+                        (filename) =>
+                        {
+                            this._streamCache.FileDelete(filename);
+                        });
                 }
             }
 
@@ -19271,7 +19480,7 @@ bool bTempObject)
             return 0;
         }
 
-        // 从库中删除指定的记录,可以是记录也可以是资源
+        // 从库中删除指定的记录或者对象资源
         // parameters:
         //      connection  连接对象
         //      strID       记录id
@@ -19832,9 +20041,26 @@ bool bTempObject)
                 }
             }
 
+            // 2018/7/21
+            // 第四步，清除 PDF 页面文件缓存
+            {
+                // strID 为 10 字符，或者 0000000000_0000 形态
+                string record_path = this.GetCacheRecPath(strID);
+                _pageCache.ClearByRecPath(record_path,
+                    (filename) =>
+                    {
+                        this._streamCache.FileDelete(filename);
+                    });
+            }
+
             return nDeletedCount;
         }
 
+        string GetCacheRecPath(string strID)
+        {
+            Debug.Assert(strID.Length >= 10, "");
+            return this.FullID + "/" + strID;
+        }
 
         Connection GetConnection(
             string strConnectionString,
