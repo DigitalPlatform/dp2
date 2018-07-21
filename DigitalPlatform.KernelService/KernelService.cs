@@ -2200,9 +2200,6 @@ namespace dp2Kernel
                 }
 
                 // 调数据库集合的WriteRes();
-                int nRet = 0;
-                string strError = "";
-                string strOutputValue = "";
                 // return:
                 //		-1	一般性错误
                 //		-2	时间戳不匹配
@@ -2213,7 +2210,7 @@ namespace dp2Kernel
                 //		-8	已经存在同名同类型的项
                 //		-9	已经存在同名但不同类型的项
                 //		0	成功
-                nRet = app.Dbs.API_WriteRes(strResPath,
+                int nRet = app.Dbs.API_WriteRes(strResPath,
                     strRanges,
                     lTotalLength,
                     baContent,
@@ -2224,8 +2221,8 @@ namespace dp2Kernel
                     user,
                     out strOutputResPath,
                     out baOutputTimestamp,
-                    out strOutputValue,
-                    out strError);
+                    out string strOutputValue,
+                    out string strError);
                 if (nRet <= -1)
                 {
                     result.Value = -1;

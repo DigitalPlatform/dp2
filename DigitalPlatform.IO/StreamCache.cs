@@ -25,7 +25,6 @@ namespace DigitalPlatform.IO
             MAX_ITEMS = nMaxItems;
         }
 
-
         public void FileDelete(string filename)
         {
             this.ClearItems(filename);
@@ -120,7 +119,7 @@ namespace DigitalPlatform.IO
             bool bAddToCollection = true)
         {
             // 防备尺寸过大
-            if (bAddToCollection && _items.Count > 100)
+            if (bAddToCollection && _items.Count > MAX_ITEMS)
                 ClearAll();
 
             StreamItem item = new StreamItem();

@@ -388,7 +388,7 @@ namespace DigitalPlatform.Script
 
                     if (string.IsNullOrEmpty(strPdfUrl) == false)
                     {
-                        urlTemp += "<a href='" + strPdfUrl + "' >";
+                        urlTemp += " <a href='" + strPdfUrl + "' target='_blank'>";
                         urlTemp += "在线阅读";
                         urlTemp += "</a>";
                     }

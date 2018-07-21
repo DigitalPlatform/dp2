@@ -12,6 +12,7 @@
         <div>
             <asp:HiddenField ID="PageNo" runat="server" />
             <asp:HiddenField ID="PageCount" runat="server" />
+            <asp:HiddenField ID="Uri" runat="server" />
 
             <asp:Button ID="FirstPage" runat="server" Text="|<" OnClick="FirstPage_Click" />
 
@@ -20,7 +21,6 @@
             <asp:Button ID="NextPage" runat="server" Text=">" OnClick="NextPage_Click" />
 
             <asp:Button ID="TailPage" runat="server" Text=">|" OnClick="TailPage_Click" />
-
         </div>
 
         <div>

@@ -186,6 +186,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="gsdll32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config" />
     <Content Include="deleted.txt" />
     <Content Include="digitalplatform.pfx">
