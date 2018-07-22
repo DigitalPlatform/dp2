@@ -4199,6 +4199,9 @@ out strError);
 #endif
 
             string strLastModifyTime = (string)values["lastmodifytime"];
+            // 2018/7/22
+            if (string.IsNullOrEmpty(strLastModifyTime))
+                strLastModifyTime = (string)values["lastmodified"];
             if (String.IsNullOrEmpty(strLastModifyTime) == false)
             {
                 DateTime lastmodified = DateTime.Parse(strLastModifyTime).ToUniversalTime();

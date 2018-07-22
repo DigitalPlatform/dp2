@@ -632,12 +632,18 @@ namespace DigitalPlatform.Drawing
             Bitmap bitmapDest = null;
 
             SizeF size;
+            SizeF sizeSingleLine;
             using (Font font = new Font(strFontFace, fFontSize, fontstyle))
             {
                 using (Bitmap bitmapTemp = new Bitmap(1, 1))
                 {
                     using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
                     {
+                        sizeSingleLine = graphicsTemp.MeasureString(
+                            "1234",
+                            font,
+                            nWidth);
+
                         size = graphicsTemp.MeasureString(
                             strText,
                             font,
@@ -664,8 +670,14 @@ namespace DigitalPlatform.Drawing
                     // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
                     //设置高质量,低速度呈现平滑程度 
                     objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                    objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+                    // 注: 当文字行较多时，AntiAlias 会引起上部的字发虚缺扫描行的问题
+                    if ((int)(size.Height / sizeSingleLine.Height) <= 10)
+                        objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    else
+                        objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+
+                    // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
                     StringFormat stringFormat = new StringFormat();
                     stringFormat.Alignment = StringAlignment.Near;

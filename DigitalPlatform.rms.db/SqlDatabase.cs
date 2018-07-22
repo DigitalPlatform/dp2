@@ -7405,6 +7405,8 @@ namespace DigitalPlatform.rms
 
                 bool bObjectFile = false;
 
+                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
+
                 if (row_info != null)
                 {
                     bool bReverse = false;  // 方向标志。如果为false，表示 data 为正式内容，newdata为暂时内容
@@ -7468,7 +7470,8 @@ namespace DigitalPlatform.rms
                     string strPartComm = "";
 
                     // 1.textPtr
-                    if (StringUtil.IsInList("data", strStyle) == true)
+                    if (StringUtil.IsInList("data", strStyle) == true
+                        || bNeedPage)
                     {
                         if (string.IsNullOrEmpty(strPartComm) == false)
                             strPartComm += ",";
@@ -7542,7 +7545,8 @@ namespace DigitalPlatform.rms
                         // 1.textPtr
                         SqlParameter textPtrParam = null;
                         SqlParameter textPtrParamNew = null;
-                        if (StringUtil.IsInList("data", strStyle) == true)
+                        if (StringUtil.IsInList("data", strStyle) == true
+                            || bNeedPage)
                         {
                             textPtrParam =
                                 command.Parameters.Add("@textPtr",
@@ -7692,7 +7696,8 @@ namespace DigitalPlatform.rms
                                 strDataFieldName = "newdata";
 
                             // 1.textPtr
-                            if (StringUtil.IsInList("data", strStyle) == true)
+                            if (StringUtil.IsInList("data", strStyle) == true
+                                || bNeedPage)
                             {
                                 if (bReverse == false)
                                 {
@@ -7847,7 +7852,8 @@ namespace DigitalPlatform.rms
                 }
 
                 // 需要提取数据时,才会取数据
-                if (StringUtil.IsInList("data", strStyle) == true)
+                if (StringUtil.IsInList("data", strStyle) == true
+                    || bNeedPage)
                 {
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
@@ -8309,8 +8315,11 @@ namespace DigitalPlatform.rms
                     lTotalLength = fi.Length;
                 }
 
+                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
+
                 // 需要提取数据时,才会取数据
-                if (StringUtil.IsInList("data", strStyle) == true)
+                if (StringUtil.IsInList("data", strStyle) == true
+                    || bNeedPage)
                 {
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
@@ -8658,8 +8667,11 @@ namespace DigitalPlatform.rms
                     lTotalLength = fi.Length;
                 }
 
+                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
+
                 // 需要提取数据时,才会取数据
-                if (StringUtil.IsInList("data", strStyle) == true)
+                if (StringUtil.IsInList("data", strStyle) == true
+                    || bNeedPage)
                 {
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
@@ -9006,8 +9018,11 @@ namespace DigitalPlatform.rms
                     lTotalLength = fi.Length;
                 }
 
+                bool bNeedPage = StringUtil.IsInList("metadata", strStyle) == true && string.IsNullOrEmpty(strPartCmd) == false;
+
                 // 需要提取数据时,才会取数据
-                if (StringUtil.IsInList("data", strStyle) == true)
+                if (StringUtil.IsInList("data", strStyle) == true
+                    || bNeedPage)
                 {
                     // 从对象文件读取指定 pdf 页码内容
                     if (string.IsNullOrEmpty(strPartCmd) == false && bObjectFile == true)
@@ -9141,9 +9156,53 @@ namespace DigitalPlatform.rms
                     strMetadata = "";
             }
 
+            // PDF 单页图像时要修正用于返回的 metadata。mimetype size localpath
+            if (string.IsNullOrEmpty(strPartCmd) == false)
+            {
+                nRet = DatabaseUtil.ChangeMetadata(strMetadata,
+lTotalLength,
+GetMime(strPartCmd),
+null,
+out string strResult,
+out strError);
+                if (nRet == -1)
+                    return -1;
+                strMetadata = strResult;
+            }
             return lTotalLength;
         }
 
+        static string GetMime(string strPartCmd)
+        {
+            Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
+            string strFormat = (string)parameters["format"];
+            if (string.IsNullOrEmpty(strFormat))
+                strFormat = "png";
+            switch (strFormat)
+            {
+                case "jpeg":
+                    return "image/jpeg";
+                case "png":
+                    return "image/png";
+                case "gif":
+                    return "image/gif";
+                case "bmp":
+                    return "image/bmp";
+                case "tif":
+                case "tiff":
+                    return "image/tiff";
+                case "emf":
+                    return "image/x-emf";
+                case "wmf":
+                    return "image/x-wmf";
+                case "exif":
+                    return "image/x-exif";
+                case "icon":
+                    return "image/x-icon";
+            }
+
+            return null;
+        }
 #if NO
         // 按指定范围读资源
         // GetBytes()版本。下载大尺寸对象的时候速度非常慢
@@ -16585,7 +16644,7 @@ FileShare.ReadWrite))
             }
 
             // 清除 PDF 单页 cache
-            foreach(string strObjectID in ids)
+            foreach (string strObjectID in ids)
             {
                 if (strObjectID.Length > 10)
                 {
