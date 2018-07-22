@@ -17,13 +17,26 @@ ref app,
 ref sessioninfo) == false)
             return;
 
+        string strError = "";
+
         if (string.IsNullOrEmpty(sessioninfo.UserID))
         {
             sessioninfo.UserID = "public";
             sessioninfo.IsReader = false;
         }
 
+        string strTitle = Request.QueryString["title"];
+        this.TitleParam.Value = strTitle;
+        if (string.IsNullOrEmpty(strTitle) == false)
+            this.Title = strTitle;
+
         string strURI = Request.QueryString["uri"]; // uri 参数里面是到对象这一级的 URI。更深部分由程序自动生成
+        if (string.IsNullOrEmpty(strURI))
+        {
+            strError = "缺乏 uri 参数";
+            goto ERROR1;
+        }
+
         this.Uri.Value = strURI;
 
         // 参数里面可以主动带上 pagecount 参数，这样后面就不用专门用一次 API 去获取页数了
@@ -51,6 +64,10 @@ ref sessioninfo) == false)
         this.PrevPage.PostBackUrl = "./viewpdf.aspx?uri=" + strURI + "&page=" + (nPageNo - 1);
         this.NextPage.PostBackUrl = "./viewpdf.aspx?uri=" + strURI + "&page=" + (nPageNo - 1);
 #endif
+        return;
+        ERROR1:
+        this.Response.Write(strError);
+        this.Response.End();
     }
 
     protected void PrevPage_Click(object sender, EventArgs e)

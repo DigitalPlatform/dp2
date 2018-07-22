@@ -4951,6 +4951,7 @@ namespace DigitalPlatform.rms
 
                     if (StringUtil.IsInList("outputpath", strStyle) == true)
                     {
+                        // TODO: 当获得 PDF 单页图像的时候，这里返回的路径应该比 object 要深一层
                         strOutputResPath = info.DbName + "/" + info.RecordID + "/object/" + info.ObjectID;
                     }
                 }

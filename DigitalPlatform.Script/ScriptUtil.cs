@@ -331,13 +331,17 @@ namespace DigitalPlatform.Script
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
                 string strPdfUrl = "";
+                string strThumbnailUrl = "";
                 if (StringUtil.IsHttpUrl(strUri) == false)
                 {
                     // 内部对象
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                     if (s_q == "application/pdf")
+                    {
                         strPdfUrl = "./viewpdf.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                        strThumbnailUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri + "/page:1,format=jpeg,dpi:24");
+                    }
                 }
                 else
                 {
@@ -374,6 +378,10 @@ namespace DigitalPlatform.Script
 
                 if (strUri.StartsWith("!error:"))
                     urlLabel += strUri;
+
+                if (string.IsNullOrEmpty(strPdfUrl) == false && string.IsNullOrEmpty(urlLabel) == false)
+                    strPdfUrl += "&title=" + HttpUtility.UrlEncode(urlLabel);
+
                 string urlTemp = "";
                 if (String.IsNullOrEmpty(strObjectUrl) == false)
                 {
@@ -382,14 +390,22 @@ namespace DigitalPlatform.Script
                     {
                         strParameters += HttpUtility.HtmlAttributeEncode(name) + "='" + HttpUtility.HtmlAttributeEncode(parameters[name] as string) + "' "; // 注意，内容里面是否有单引号？
                     }
-                    urlTemp += "<a href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
-                    urlTemp += urlLabel;
+                    urlTemp += "<a class='link' href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
+                    urlTemp += HttpUtility.HtmlEncode("下载 " + urlLabel);
                     urlTemp += "</a>";
 
                     if (string.IsNullOrEmpty(strPdfUrl) == false)
                     {
-                        urlTemp += " <a href='" + strPdfUrl + "' target='_blank'>";
-                        urlTemp += "在线阅读";
+#if NO
+                        // 预览 按钮
+                        urlTemp += "<br/><a href='" + strPdfUrl + "' target='_blank'>";
+                        urlTemp += HttpUtility.HtmlEncode("预览 " + urlLabel);
+                        urlTemp += "</a>";
+#endif
+
+                        // 缩略图 点按和预览按钮效果相同
+                        urlTemp += "<br/><a class='thumbnail' href='" + strPdfUrl + "' target='_blank' alt='" + HttpUtility.HtmlEncode("在线阅读 " + urlLabel) + "'>";
+                        urlTemp += "<img src='" + strThumbnailUrl + "' alt='" + HttpUtility.HtmlEncode("在线阅读 " + urlLabel) + "'></img>";
                         urlTemp += "</a>";
                     }
                 }

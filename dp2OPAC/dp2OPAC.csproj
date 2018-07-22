@@ -746,6 +746,7 @@
     <Content Include="style\0\title_logo.gif" />
     <Content Include="style\0\total.jpg" />
     <Content Include="style\0\userinfoaspx.css" />
+    <Content Include="style\0\viewpdf.css" />
     <Content Include="style\1\batchtaskmonitor.css" />
     <Content Include="style\1\biblio.css" />
     <Content Include="style\1\borrowhistory.css" />
