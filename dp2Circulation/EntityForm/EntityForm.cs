@@ -13316,9 +13316,17 @@ strMARC);
                         else
                             field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
 
+#if NO
                         field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
                             + (string.IsNullOrEmpty(type.ProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(type.ProcessCommand, ";:"))
                             + "$2dp2res").Replace('$', (char)31);
+#endif
+                        field_856.IndicatorAndValue = Build856IndiAndValue(
+this.MarcSyntax,
+strID,
+strType,
+strSize,
+type.ProcessCommand);
                     }
                 }
             }
@@ -13461,7 +13469,13 @@ strMARC);
                 else
                     field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
 
-                field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                // field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                field_856.IndicatorAndValue = Build856IndiAndValue(
+    this.MarcSyntax,
+    strID,
+    strType,
+    strSize,
+    "");
             }
 
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
@@ -13473,6 +13487,39 @@ strMARC);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+#if NO
+        static string Build856IndiAndValue(
+            string strMarcSyntax,
+            string strID,
+            string strType,
+            string strSize)
+        {
+            string strAccessMethodSubfieldName = "2";
+            if (strMarcSyntax == "unimarc")
+                strAccessMethodSubfieldName = "y";
+            return ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$"+strAccessMethodSubfieldName+"dp2res").Replace('$', (char)31);
+        }
+#endif
+
+        static string Build856IndiAndValue(
+    string strMarcSyntax,
+    string strID,
+    string strType,
+    string strSize,
+    string strProcessCommand)
+        {
+            string strAccessMethodSubfieldName = "2";
+            if (strMarcSyntax == "unimarc")
+                strAccessMethodSubfieldName = "y";
+
+            string strIndicators = "72";
+            if (strMarcSyntax == "unimarc")
+                strIndicators = "7 ";
+            return (strIndicators + "$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
+                + (string.IsNullOrEmpty(strProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(strProcessCommand, ";:"))
+                + "$" + strAccessMethodSubfieldName + "dp2res").Replace('$', (char)31);
         }
 
         private void checkedComboBox_dbName_DropDown(object sender, EventArgs e)

@@ -1,11 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <filter>
   <using>
     <![CDATA[
 
-// USMARC格式期刊 html 格式构造
+// USMARC格式期刊 OPAC 书目详细格式构造
 // (C)Copyright 2006-2011 数字平台(北京)软件有限责任公司
 // 最后修改时间: 2011/4/13
+
+// 修改历史:
+//  
+
 
 using System;
 using System.IO;
