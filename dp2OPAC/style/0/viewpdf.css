@@ -34,7 +34,6 @@ div#main {
     .toolbar input, #LabelPageNo {
         background-color: darkslategray;
         color: white;
-
         margin-left: 16px;
         margin-right: 16px;
         font-size: 24px;
@@ -42,3 +41,11 @@ div#main {
         border-width: 0px;
         padding: 4px;
     }
+
+#LabelErrorInfo {
+    padding: 16px;
+    font-size: 24px;
+    font-weight: bolder;
+    color: darkred;
+    background-color: yellow;
+}

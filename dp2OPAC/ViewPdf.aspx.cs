@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
@@ -58,7 +59,7 @@ ref sessioninfo) == false)
         this.PageNo.Value = strPageNo;
 
         string strURI = Request.QueryString["uri"]; // uri 参数里面是到对象这一级的 URI。更深部分由程序自动生成
-        this.Image1.ImageUrl = "./getobject.aspx?uri=" + strURI + "/page:"+strPageNo+",format:png,dpi:75";
+        this.Image1.ImageUrl = "./getobject.aspx?uri=" + strURI + "/page:"+strPageNo+",format:jpeg,dpi:75";
 
         Int32.TryParse(strPageNo, out int nPageNo);
         this.PrevPage.PostBackUrl = "./viewpdf.aspx?uri=" + strURI + "&page=" + (nPageNo - 1);
@@ -66,8 +67,7 @@ ref sessioninfo) == false)
 #endif
         return;
         ERROR1:
-        this.Response.Write(strError);
-        this.Response.End();
+        this.SetErrorInfo(strError);
     }
 
     protected void PrevPage_Click(object sender, EventArgs e)
@@ -79,9 +79,15 @@ ref sessioninfo) == false)
 
     protected void NextPage_Click(object sender, EventArgs e)
     {
+        int nPageCount = GetPageCount();
+
         string strPageNo = this.PageNo.Value;
         Int32.TryParse(strPageNo, out int nPageNo);
-        SetPageNo(nPageNo);
+
+        if (nPageNo <= nPageCount)
+            SetPageNo(nPageNo);
+        else
+            SetPageNo(nPageCount);
     }
 
     protected void FirstPage_Click(object sender, EventArgs e)
@@ -91,12 +97,13 @@ ref sessioninfo) == false)
 
     protected void TailPage_Click(object sender, EventArgs e)
     {
+#if NO
         string strUri = this.Uri.Value;
 
         string strPageCount = this.PageCount.Value;
         if (string.IsNullOrEmpty(strPageCount))
         {
-            strPageCount =  GetPageCount(strUri).ToString();
+            strPageCount = GetPageCount(strUri).ToString();
             this.PageCount.Value = strPageCount;
         }
 
@@ -104,6 +111,33 @@ ref sessioninfo) == false)
 
         Int32.TryParse(strPageCount, out int nPageCount);
         SetPageNo(nPageCount);
+#endif
+        int nPageCount = GetPageCount();
+        if (nPageCount == -1)
+        {
+            SetErrorInfo("GetPageCount() error");
+            return;
+        }
+        SetPageNo(nPageCount);
+    }
+
+    int GetPageCount()
+    {
+        string strUri = this.Uri.Value;
+        if (string.IsNullOrEmpty(strUri))
+            return -1;
+        string strPageCount = this.PageCount.Value;
+        if (string.IsNullOrEmpty(strPageCount))
+        {
+            strPageCount = GetPageCount(strUri).ToString();
+            this.PageCount.Value = strPageCount;
+        }
+
+        this.TailPage.Text = ">| " + this.PageCount.Value;
+
+        if (Int32.TryParse(strPageCount, out int nPageCount) == false)
+            return -1;
+        return nPageCount;
     }
 
     void SetPageNo(int nPageNo)
@@ -112,7 +146,7 @@ ref sessioninfo) == false)
         this.LabelPageNo.Text = nPageNo.ToString();
 
         string strURI = Request.QueryString["uri"]; // uri 参数里面是到对象这一级的 URI。更深部分由程序自动生成
-        this.Image1.ImageUrl = "./getobject.aspx?uri=" + strURI + "/page:" + nPageNo.ToString() + ",format:png,dpi:75";
+        this.Image1.ImageUrl = "./getobject.aspx?uri=" + strURI + "/page:" + nPageNo.ToString() + ",format:jpeg,dpi:75";
 
         if (nPageNo > 1)
         {
@@ -122,7 +156,14 @@ ref sessioninfo) == false)
         else
             this.PrevPage.Enabled = false;
 
-        this.NextPage.PostBackUrl = "./viewpdf.aspx?uri=" + strURI + "&page=" + (nPageNo + 1);
+        int nPageCount = GetPageCount();
+        if (nPageCount != -1 && nPageNo >= nPageCount)
+            this.NextPage.Enabled = false;
+        else
+        {
+            this.NextPage.PostBackUrl = "./viewpdf.aspx?uri=" + strURI + "&page=" + (nPageNo + 1);
+            this.NextPage.Enabled = true;
+        }
     }
 
     int GetPageCount(string strUri)
@@ -151,5 +192,11 @@ ref sessioninfo) == false)
         {
             sessioninfo.ReturnChannel(channel);
         }
+    }
+
+    void SetErrorInfo(string strText)
+    {
+        this.LabelErrorInfo.Text = strText;
+        this.LabelErrorInfo.Visible = !string.IsNullOrEmpty(strText);
     }
 }

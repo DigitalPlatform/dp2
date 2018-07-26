@@ -7123,6 +7123,8 @@ namespace DigitalPlatform.rms
             return imageFormat;
         }
 
+        static readonly string DefaultPageFormat = "jpeg"; // 图像文件格式默认 jpeg
+
         // 从 PDF 文件中按照 strPartCmd 命令要求，解析出单页图片文件
         // parameters:
         //      strPartCmd  一般为 "page:1,format:png,dpi:300" 形态
@@ -7195,7 +7197,7 @@ namespace DigitalPlatform.rms
 
             string strFormat = (string)parameters["format"];
             if (string.IsNullOrEmpty(strFormat))
-                strFormat = "png";
+                strFormat = DefaultPageFormat;
             ImageFormat format = GetImageFormat(strFormat);
             if (format == null)
             {
@@ -9172,12 +9174,13 @@ out strError);
             return lTotalLength;
         }
 
+        // 从单页图像描述命令中，获得 MIME 信息
         static string GetMime(string strPartCmd)
         {
             Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
             string strFormat = (string)parameters["format"];
             if (string.IsNullOrEmpty(strFormat))
-                strFormat = "png";
+                strFormat = DefaultPageFormat;
             switch (strFormat)
             {
                 case "jpeg":

@@ -2,11 +2,14 @@
 <filter>
   <using>
     <![CDATA[
-// USMARC格式图书 html 格式构造
+
+// USMARC格式图书 OPAC 书目详细格式构造
 // (C)Copyright 2006-2013 数字平台(北京)软件有限责任公司
+
 // 修改历史:
 // 2013/1/7
 // 2018/4/19 封面图片
+// 2018/7/26 ScriptUtil.BuildObjectHtmlTable() 增加 "usimarc" 参数。
 
 using System;
 using System.Collections.Generic;
@@ -791,7 +794,7 @@ using DigitalPlatform.Text;
       <![CDATA[
     Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
     XmlElement container = Host.App.WebUiDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
-    Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container);
+    Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container, "usmarc");
     ]]>
     </end>
   </record>

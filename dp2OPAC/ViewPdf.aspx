@@ -39,6 +39,10 @@
                 <asp:Button ID="TailPage" runat="server" Text=">|" OnClick="TailPage_Click" />
             </div>
 
+            <div>
+                <asp:Label ID="LabelErrorInfo" runat="server" Visible="false"></asp:Label>
+            </div>
+
             <div id="imageframe">
                 <asp:Image ID="Image1" runat="server"></asp:Image>
             </div>

@@ -182,7 +182,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             // MessageBox.Show(this, "虽然刚才的创建登录名操作失败了，但您也可以在重新指定登录名和密码后，再次按“确定”按钮创建登录名，继续进行安装");
         }
@@ -206,7 +206,10 @@ namespace DigitalPlatform.rms
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码
                 + "Password=" + strSqlUserPassword + ";"
                 + "Data Source=" + strSqlServerName + ";"
-                + "Connect Timeout=30";
+                + "Connect Timeout=30;"
+                + "SslMode=none;";  // 2018/7/24
+            // "charset=utf8;";
+
 
             if (bSSPI == true)
             {
