@@ -554,7 +554,6 @@ namespace DigitalPlatform.LibraryServer
 
                 if (formats != null)
                 {
-                    List<string> temp_results = null;
                     // TODO: getbibliopart 应能返回函数的值
                     nRet = BuildFormats(
                         sessioninfo,
@@ -564,7 +563,7 @@ namespace DigitalPlatform.LibraryServer
                         strMetaData,
                         timestamp,
                         formats,
-                        out temp_results,
+                        out List<string> temp_results,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -896,9 +895,10 @@ namespace DigitalPlatform.LibraryServer
                     strBiblio = Convert.ToBase64String(result);
                 }
                 // 2017/6/16
-                else if (IsResultType(strBiblioType, "marc") == true)
+                else if (IsResultType(strBiblioType, "marc") == true
+                    || IsResultType(strBiblioType, "marcquery") == true)
                 {
-                    // marc:syntax 表示希望返回 syntax|marc机内格式 这样的字符串；marc 表示只返回 marc机内格式
+                    // marc:syntax (或者 marcquery:syntax)表示希望返回 syntax|marc机内格式 这样的字符串；marc 表示只返回 marc机内格式
                     List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
                     string strParam = parts[1];
 
@@ -917,11 +917,10 @@ namespace DigitalPlatform.LibraryServer
                 // 模拟创建检索点
                 else if (String.Compare(strBiblioType, "keys", true) == 0)
                 {
-                    string strResultXml = "";
                     nRet = GetKeys(sessioninfo,
                         strCurrentBiblioRecPath,
                         strBiblioXml,
-                        out strResultXml,
+                        out string strResultXml,
                         out strError);
                     if (nRet == -1)
                     {
@@ -4392,6 +4391,7 @@ nsmgr);
         // 修改编目记录
         // parameters:
         //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord" "checkunique" 之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
+        //      strBiblioRecPath    书目记录路径。TODO: 这个参数的值是否允许为空？如果不允许，要在函数中检查和尽早报错
         //      strBiblioType   xml 或 iso2709。iso2709 格式可以包含编码方式，例如 iso2709:utf-8
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
@@ -4551,7 +4551,8 @@ nsmgr);
             string strFormat = "";
             Encoding encoding = Encoding.UTF8;
 
-            if (strBiblioType == "xml")
+            if (strBiblioType == "xml" 
+                || (strBiblioType == "marcquery" || strBiblioType == "marc"))
                 strFormat = strBiblioType;
             else if (IsResultType(strBiblioType, "iso2709") == true)
             {
@@ -4574,7 +4575,7 @@ nsmgr);
             }
             else
             {
-                strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" 之一";
+                strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" \"marcquery\"之一";
                 goto ERROR1;
             }
 
@@ -4736,7 +4737,6 @@ nsmgr);
                 {
                     try
                     {
-                        string strMARC = "";
                         byte[] baRecord = Convert.FromBase64String(strBiblio);
                         // return:
                         //		-2	MARC格式错
@@ -4745,7 +4745,7 @@ nsmgr);
                         nRet = MarcUtil.ConvertByteArrayToMarcRecord(baRecord,
                             encoding,
                             true,
-                            out strMARC,
+                            out string strMARC,
                             out strError);
                         if (nRet != 0)
                         {
@@ -4755,7 +4755,7 @@ nsmgr);
 
                         if (cfg == null)
                         {
-                            strError = "cfg == null";
+                            strError = "cfg == null。因参数 strBiblioRecPath 为空 (1)";
                             goto ERROR1;
                         }
 
@@ -4774,16 +4774,26 @@ nsmgr);
                         goto ERROR1;
                     }
                 }
+                else if (strFormat == "marcquery" || strFormat == "marc")
+                {
+                    string strBiblioXml = "";
+                    nRet = MarcUtil.Marc2XmlEx(strBiblio,
+cfg.BiblioDbSyntax,
+ref strBiblioXml,
+out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    strBiblio = strBiblioXml;
+                }
                 else
                 {
-                    string strMarcSyntax = "";
                     // 获得 MARCXML 字符串的 MARC 格式类型
                     // return:
                     //      -1  出错
                     //      0   无法探测
                     //      1   成功探测
                     nRet = MarcUtil.GetMarcSyntax(strBiblio,
-        out strMarcSyntax,
+        out string strMarcSyntax,
         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4796,7 +4806,7 @@ nsmgr);
 
                     if (cfg == null)
                     {
-                        strError = "cfg == null";
+                        strError = "cfg == null。因参数 strBiblioRecPath 为空 (2)";
                         goto ERROR1;
                     }
 
@@ -7543,7 +7553,7 @@ out strError);
 
             string strKey = Get997a(strBiblioXml, out strError);
             if (strKey == null)
-               return -1;
+                return -1;
             //if (strKey == null)
             //    return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
 
