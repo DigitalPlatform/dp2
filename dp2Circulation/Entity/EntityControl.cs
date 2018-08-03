@@ -26,7 +26,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class EntityControl : EntityControlBase
     {
-        public event ShowMessageEventHandler ShowMessage = null;
 
         /*
         // 创建索取号
@@ -3607,19 +3606,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             return this.AppendItem(item, out strError);
         }
 
-        public void ParentShowMessage(string strMessage, string strColor, bool bClickClose)
-        {
-            if (this.ShowMessage != null)
-            {
-                ShowMessageEventArgs e = new ShowMessageEventArgs();
-                e.Message = strMessage;
-                e.Color = strColor;
-                e.ClickClose = bClickClose;
-                this.ShowMessage(this, e);
-                if (string.IsNullOrEmpty(strMessage) == false)
-                    Application.DoEvents();
-            }
-        }
     }
 
     /// <summary>

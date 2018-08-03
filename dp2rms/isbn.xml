@@ -1,1553 +1,1554 @@
-<?xml version='1.0' encoding='GB2312' ?>
+锘�<?xml version='1.0' encoding='GB2312' ?>
 <Root>
-<!-- 来源于http://www.isbn-international.org/html/prefix.htm -->
-<!-- A -->
-<agency name='AL' fullname='Albania'>
-	<group name='99927'>
-		<range     value='0 - 2'/>
-		<range    value='30 - 59'/>
-		<range   value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='DZ' fullname='Algeria'>
-	<group name='9961'>
-		<range    value='0 - 2'/>
-		<range   value='30 - 69'/>
-		<range  value='700 - 949'/>
-		<range value='9500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='AD' fullname='Andorra'>
-	<group name='99913'>
-		<range    value=' - '/>
-	</group>
-	<group name='99920'>
-		<range   value='0 - 4'/>
-		<range  value='50 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency>
-
-<agency name='AR' fullname='Argentina'>
-	<group name='950'>
-		<range    value='00 - 49'/>
-		<range   value='500 - 899'/>
-		<range  value='9000 - 9899'/>
-		<range value='99000 - 99999'/>
-	</group>
-	<group name='987'>
-		<range    value='00 - 09'/>
-		<range  value='1000 - 1999'/>
-		<range value='20000 - 29999'/>
-		<range    value='30 - 49'/>
-		<range   value='500 - 899'/>
-		<range  value='9000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='AM' fullname='Armenia'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='99930'>
-		<range   value='0 - 4'/>
-		<range  value='50 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<agency name='AU' fullname='Australia'>
-	<group name='0' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range  value='74000 - 76999'/>
-		<range  value='86250 - 86799'/>
-		<range value='875100 - 877099'/>
-		<range value='920680 - 926429'/>
-	</group>
-</agency>
-
-<agency name='AT' fullname='Austria'>
-	<group name='3' style='Contingent'>
-		<range      value='01 - 02'/>
-		<range     value='200 - 249'/>
-		<range    value='7000 - 7149'/>
-		<range   value='85000 - 85499'/>
-		<range  value='900000 - 904999'/>
-		<range value='9500000 - 9519999'/>
-	</group>
-</agency>
-
-<agency name='AZ' fullname='Azerbaijan'>
-	<group name='9952'>
-		<range      value='0'/>
-		<range   value='20 - 29'/>
-		<range  value='400 - 599'/>
-		<range value='8000 - 9999'/>
-	</group>
-</agency>
-
-<!-- B -->
-
-<agency name='BH' fullname='Bahrain'>
-	<group name='99901'>
-		<range  value='00 - 49'/>
-		<range value='500 - 799'/>
-		<range  value='80 - 99'/>
-	</group>
-</agency>
-
-<agency name='BD' fullname='Bangladesh'>
-	<group name='984'>
-		<range    value='00 - 39'/>
-		<range   value='400 - 799'/>
-		<range  value='8000 - 8999'/>
-		<range value='90000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='BY' fullname='Belarus'>
-	<group name='5' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 919999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='985'>
-		<range    value='00 - 39'/>
-		<range   value='400 - 599'/>
-		<range  value='6000 - 8999'/>
-		<range value='90000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='BE' fullname='Belgium(French speaking)'>
-	<group name='2' style='Contingent'>
-		<range     value='500 - 549'/>
-		<range    value='8000 - 8249'/>
-		<range   value='87000 - 87949'/>
-		<range  value='930000 - 939999'/>
-		<range value='9600000 - 9699999'/>
-	</group>
-</agency>
-
-<agency name='BE' fullname='Belgium(Flemish speaking)'>
-	<group name='90' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 499'/>
-		<range   value='5000 - 6999'/>
-		<range  value='70000 - 79999'/>
-		<range value='800000 - 899999'/>
-	</group>
-</agency>
-
-<agency name='BT' fullname='Bhutan'>
-	<group name='99936'>
-		<range     value='0'/>
-		<range  value='10 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='BJ' fullname='Benin'>
-	<group name='99919'>
-		<range   value='0 - 2'/>
-		<range  value='40 - 69'/>
-		<range value='900 - 999'/>
-	</group>
-</agency>
-
-<agency name='BO' fullname='Bolivia'>
-	<group name='99905'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<agency name='BA' fullname='Bosnia and Herzegovina'>
-	<group name='86' style='Contingent'>
-		<range     value='00 - 29'/>
-		<range    value='300 - 699'/>
-		<range   value='7000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-	<group name='9958'>
-		<range      value='0'/>
-		<range   value='10 - 49'/>
-		<range  value='500 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='BW' fullname='Botswana'>
-	<group name='99912'>
-		<range   value='0 - 5'/>
-		<range  value='60 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency>  
-
-<agency name='BR' fullname='Brazil'>
-	<group name='85'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='BN' fullname='Brunei Darussalam'>
-	<group name='99917'>
-		<range    value='0 - 2'/>
-		<range   value='30 - 89'/>
-		<range  value='900 - 999'/>
-	</group>
-</agency>
-
-<agency name='BG' fullname='Bulgaria'>
-	<group name='954'>
-		<range    value='00 - 29'/>
-		<range   value='300 - 799'/>
-		<range  value='8000 - 8999'/>
-		<range value='90000 - 94999'/>
-		<range  value='9500 - 9999'/>
-	</group>
-</agency>
-
-<!-- C -->  
-
-<agency name='CM' fullname='Cameroon'>
-	<group name='9956'>
-		<range      value='0'/>
-		<range   value='10 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='CA' fullname='Canada (English speaking)'>
-	<group name='0' style='Contingent'>
-		<range    value='7700 - 7799'/>
-		<range   value='88500 - 88999'/>
-		<range  value='919000 - 919699'/>
-		<range value='9690000 - 9690999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range value='55000 - 55499'/>
-	</group>
-</agency>
-
-<agency name='CA' fullname='Canada (French speaking)'>
-	<group name='2' style='Contingent'>
-		<range     value='550 - 599'/>
-		<range    value='7655 - 7776'/>
-		<range    value='7778 - 7999'/>
-		<range   value='89000 - 89999'/>
-		<range  value='920000 - 929999'/>
-		<range value='9800000 - 9999999'/>
-	</group>
-</agency> 
-
-<agency name='Antigua AG, Bahamas BS, Barbados BB, Belize BZ, Cayman Islands KY,Dominica DM, Grenada GD, Guyana GY, Jamaica JM, Montserrat MS, St. Kitts-Nevis KN, St. Lucia LC, St. Vincent VC, Trinidad and Tobago TT, Virgin Islands (Br.) VG'   fullname='Caribbean Community (CARICOM)'>
-	<group name='976'>
-		<range     value='0 - 3'/>
-		<range    value='40 - 59'/>
-		<range   value='600 - 799'/>
-		<range  value='8000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='CL' fullname='Chile'>
-	<group name='956'>
-		<range   value='00 - 19'/>
-		<range  value='200 - 699'/>
-		<range value='7000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='CN' fullname='China'>
-	<group name='7'>
-		<range     value='00 - 09'/>
-		<range    value='100 - 499'/>
-		<range   value='5000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>   
-
-<agency name='CO' fullname='Colombia'>
-	<group name='958'>
-		<range    value='00 - 59'/>
-		<range   value='600 - 799'/>
-		<range  value='8000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='CR' fullname='Costa Rica'>
-	<group name='9968'>
-		<range   value='00 - 49'/>
-		<range  value='500 - 939'/>
-		<range value='9400 - 9999'/>
-	</group>
-	<group name='9977'>
-		<range   value='00 - 89'/>
-		<range  value='900 - 989'/>
-		<range value='9900 - 9999'/>
-	</group>
-</agency>
-
-<agency name='HR' fullname='Croatia'>
-	<group name='86' style='Contingent'>
-		<range     value='00 - 29'/>
-		<range    value='300 - 699'/>
-		<range   value='7000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-	<group name='953'>
-		<range       value='0'/>
-		<range    value='10 - 14'/>
-		<range   value='150 - 599'/>
-		<range  value='6000 - 9599'/>
-		<range value='96000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='CU' fullname='Cuba'>
-	<group name='959'>
-		<range   value='00 - 19'/>
-		<range  value='200 - 699'/>
-		<range value='7000 - 8499'/>
-	</group>
-</agency>
-
-<agency name='CY' fullname='Cyprus'>
-	<group name='9963'>
-		<range    value='0 - 2'/>
-		<range   value='30 - 54'/>
-		<range  value='550 - 749'/>
-		<range value='7500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='CZ' fullname='Czech Republic'>
-	<group name='80' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>
-
-<!-- D -->
-
-<agency name='DK' fullname='Denmark'>
-	<group name='87'>
-		<range     value='00 - 29'/>
-		<range    value='400 - 649'/>
-		<range   value='7000 - 7999'/>
-		<range  value='85000 - 94999'/>
-		<range value='970000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='DO' fullname='Dominican Republic'>
-	<group name='99934'>
-		<range   value='0 - 1'/>
-		<range  value='20 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<!-- E -->
-
-<agency name='EC' fullname='Ecuador'>
-	<group name='9978'>
-		<range   value='00 - 94'/>
-		<range  value='950 - 989'/>
-		<range value='9900 - 9999'/>
-	</group>
-</agency>
-
-<agency name='EG' fullname='Egypt'>
-	<group name='977'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 499'/>
-		<range  value='5000 - 6999'/>
-		<range value='70000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='SV' fullname='El Salvador'>
-	<group name='99923'>
-		<range   value='0 - 1'/>
-		<range  value='20 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<agency name='EE' fullname='Estonia'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9949'>
-		<range      value='0'/>
-		<range   value='10 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-	<group name='9985'>
-		<range    value='0 - 4'/>
-		<range   value='50 - 79'/>
-		<range  value='800 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='IP' fullname='European Community Organizations'>
-	<group name='92'>
-		<range  value=' - '/>
-	</group>
-</agency>
-
-<!-- F -->
-
-<agency name='FO' fullname='Faroe Islands'>
-	<group name='99918'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency>
-
-<agency name='FI' fullname='Finland'>
-	<group name='951'>
-		<range     value='0 - 1'/>
-		<range    value='20 - 54'/>
-		<range   value='550 - 889'/>
-		<range  value='8900 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-	<group name='952'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 499'/>
-		<range  value='5000 - 8899'/>
-		<range    value='89 - 94'/>
-		<range  value='9500 - 9899'/>
-		<range value='99000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='FR' fullname='France'>
-	<group name='2' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 399'/>
-		<range    value='7000 - 7599'/>
-		<range       value='7654'/>
-		<range       value='7777'/>
-		<range   value='84000 - 86999'/>
-		<range  value='900000 - 919768'/>
-		<range value='9500000 - 9599768'/>
-	</group>
-</agency>
-
-<!-- G -->
-
-<agency name='GM' fullname='Gambia'>
-	<group name='9983'>
-		<range   value='80 - 94'/>
-		<range  value='950 - 989'/>
-		<range value='9900 - 9999'/>
-	</group>
-</agency>
-
-<agency name='GE' fullname='Georgia'>
-	<group name='99928'>
-		<range    value=' 0 '/>
-		<range  value='10 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<agency name='DE' fullname='Germany'>
-	<group name='3' style='Contingent'>
-		<range       value=' 00 '/>
-		<range      value='05 - 19'/>
-		<range     value='320 - 379'/>
-		<range     value='400 - 699'/>
-		<range    value='7300 - 7499'/>
-		<range    value='7600 - 8499'/>
-		<range   value='86000 - 86499'/>
-		<range   value='87000 - 89999'/>
-		<range  value='910000 - 949999'/>
-		<range value='9700000 - 9899999'/>
-	</group>
-</agency>
-
-<agency name='GH' fullname='Ghana'>
-	<group name='9964'>
-		<range   value='0 - 6'/>
-		<range  value='70 - 94'/>
-		<range value='950 - 999'/>
-	</group>
-	<group name='9988'>
-		<range    value='0 - 2'/>
-		<range   value='30 - 54'/>
-		<range  value='550 - 749'/>
-		<range value='7500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='GI' fullname='Gibraltar'>
-	<group name='0' style='Contingent'>
-		<range  value='9583000 - 9583049'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range  value='919655 - 919679'/>
-	</group>
-</agency>
-
-<agency name='GR' fullname='Greece'>
-	<group name='960'>
-		<range   value=' 00 - 19 '/>
-		<range   value='200 - 659'/>
-		<range  value='6600 - 6899'/>
-		<range   value='690 - 699'/>
-		<range value='85000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='GH' fullname='Guatemala'>
-	<group name='99922'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 69'/>
-		<range value='700 - 999'/>
-	</group>
-	<group name='99939'>
-		<range value=' - '/>
-	</group>
-</agency>
-
-<!-- H -->
-
-<agency name='HT' fullname='Haiti'>
-	<group name='99935'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='HN' fullname='Honduras'>
-	<group name='99926'>
-		<range    value=' 0 '/>
-		<range  value='10 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='HK' fullname='Hong Kong'>
-	<group name='962'> 
-		<range    value='00 - 19'/>
-		<range   value='200 - 699'/>
-		<range  value='7000 - 8499'/>
-		<range value='85000 - 86999'/>
-		<range  value='8700 - 8999'/>
-		<range   value='900 - 999'/>
-	</group>
-	<group name='988'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 799'/>
-		<range  value='8000 - 9699'/>
-		<range value='97000 - 99999'/>
- 	</group>
-</agency>
-
-<agency name='HU' fullname='Hungary'>
-	<group name='963'>
-		<range   value=' 00 - 19 '/>
-		<range   value='200 - 699'/>
-		<range  value='7000 - 8499'/>
-		<range value='85000 - 89999'/>
-		<range  value='9000 - 9999'/>
-	</group>
-</agency>
-
-<!-- I -->
-
-<agency name='IS' fullname='Iceland'>
-	<group name='9979'>
-		<range   value=' 0 - 4 '/>
-		<range   value='50 - 79'/>
-		<range  value='800 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='IN' fullname='India'>
-	<group name='81'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-	<group name='93'>
-		<range value=' - '/>
-	</group>
-</agency>
-
-<agency name='IP' fullname='International Publishers (Unesco, EU)'>
-	<group name='92'>
-		<range      value='0 - 5'/>
-		<range     value='60 - 79'/>
-		<range    value='800 - 899'/>
-		<range   value='9000 - 9499'/>
-		<range  value='95000 - 98999'/>
-		<range value='990000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='IR' fullname='Iran'>
-	<group name='964'>
-		<range    value='00 - 29'/>
-		<range   value='300 - 549'/>
-		<range  value='5500 - 8999'/>
-		<range value='90000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='IE(United Kingdom and Republic of Ireland both share the same allocated ranges.)' fullname='Ireland'>
-	<group name='0' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range value=' - '/>
-	</group>
-</agency>
-
-<agency name='IL' fullname='Israel'>
-	<group name='965'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 599'/>
-		<range  value='7000 - 7999'/>
-		<range value='90000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='IT' fullname='Italy'>
-	<group name='88'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>
-
-<!-- J -->
-
-<agency name='JP' fullname='Japan'>
-	<group name='4'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-</agency>
-
-<agency name='JO' fullname='Jordan'>
-	<group name='9957'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 849'/>
-		<range value='8500 - 9999'/>
-	</group>
-</agency>
-
-<!-- K --> 
-
-<agency name='KZ' fullname='Kazakhstan'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9965'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='KE' fullname='Kenya'>
-	<group name='9966'>
-		<range   value='00 - 69'/>
-		<range  value='800 - 959'/>
-		<range value='9600 - 9999'/>
-	</group>
-</agency>
-
-<agency name='KR' fullname='Korea (Republic)'>
-	<group name='89'>
-		<range     value='00 - 24'/>
-		<range    value='250 - 549'/>
-		<range   value='5500 - 8499'/>
-		<range  value='85000 - 94999'/>
-		<range value='950000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='YU' fullname='Kosova'>
-	<group name='9951'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 849'/>
-		<range value='8500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='KW' fullname='Kuwait'>
-	<group name='99906'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='KG' fullname='Kyrgyzstan'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9967'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<!-- L -->
-
-<agency name='LV' fullname='Latvia'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9984'>
-		<range   value='00 - 49'/>
-		<range  value='500 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='LB' fullname='Lebanon'>
-	<group name='9953'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='LS' fullname='Lesotho'>
-	<group name='99911'>
-		<range  value='00 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='LY' fullname='Libya'>
-	<group name='9959'>
-		<range    value='0 - 1'/>
-		<range   value='20 - 79'/>
-		<range  value='800 - 949'/>
-		<range value='9500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='LT' fullname='Lithuania'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9955'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 929'/>
-		<range value='9300 - 9999'/>
-	</group>
-	<group name='9986'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9399'/>
-		<range  value='940 - 969'/>
-		<range   value='97 - 99'/>
-	</group>
-</agency>
-
-<agency name='LU' fullname='Luxembourg'>
-	<group name='2' style='Contingent'>
-		<range     value='495 - 499'/>
-		<range   value='87950 - 87999'/>
-		<range  value='919769 - 919999'/>
-		<range value='9599769 - 9599999'/>
-	</group>
-</agency> 
-
-<!-- M -->
-
-<agency name='MO' fullname='Macau'>
-	<group name='99937'>
-		<range   value='0 - 1'/>
-		<range  value='20 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency> 
-
-<agency name='MK' fullname='Macedonia'>
-	<group name='86' style='Contingent'>
-		<range     value='00 - 29'/>
-		<range    value='300 - 699'/>
-		<range   value='7000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-	<group name='9989'>
-		<range     value=' 0 '/>
-		<range  value='100 - 199'/>
-		<range value='2000 - 2999'/>
-		<range   value='30 - 59'/>
-	</group>
-</agency> 
-
-<agency name='MW' fullname='Malawi'>
-	<group name='99908'>
-		<range    value=' 0 '/>
-		<range  value='10 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency> 
-
-<agency name='MY' fullname='Malaysia'>
-	<group name='967'>
-		<range     value='0 - 5'/>
-		<range    value='60 - 89'/>
-		<range   value='900 - 989'/>
-		<range  value='9900 - 9989'/>
-		<range value='99900 - 99999'/>
-	</group>
-	<group name='983'>
-		<range    value='00 - 01'/>
-		<range   value='020 - 199'/>
-		<range  value='2000 - 3999'/>
-		<range value='40000 - 49999'/>
-		<range    value='50 - 79'/>
-		<range   value='800 - 899'/>
-		<range  value='9000 - 9899'/>
-		<range value='99000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='MV' fullname='Maldives'>
-	<group name='99915'>
-		<range   value='0 - 4'/>
-		<range  value='50 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency> 
-
-<agency name='MT' fullname='Malta'>
-	<group name='99909'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 94'/>
-		<range value='950 - 999'/>
-	</group>
-	<group name='99932'>
-		<range    value=' 0 '/>
-		<range  value='10 - 59'/>
-		<range value='600 -999'/>
-	</group>
-</agency> 
-
-<agency name='MU' fullname='Mauritius'>
-	<group name='99903'>
-		<range   value='0 - 1'/>
-		<range  value='20 - 89'/>
-		<range value='900 -999'/>
-	</group>
-</agency> 
-
-<agency name='MX' fullname='Mexico'>
-	<group name='968'>
-		<range   value='10 - 39'/>
-		<range  value='400 - 499'/>
-		<range value='5000 - 7999'/>
-		<range  value='800 - 899'/>
-	</group>
-	<group name='970'>
-		<range    value='00 - 59'/>
-		<range   value='600 - 899'/>
-		<range  value='9000 - 9099'/>
-		<range value='91000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='MX' fullname='Moldova'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='9975'>
-		<range    value='0 - 4'/>
-		<range   value='50 - 89'/>
-		<range  value='900 - 949'/>
-		<range value='9500 - 9999'/>
-	</group>
-</agency> 
-
-<agency name='MN' fullname='Mongolia'>
-	<group name='99929'>
-		<range value=' - '/>
-	</group>
-</agency> 
-
-<agency name='MA' fullname='Morocco'>
-	<group name='9981'>
-		<range   value='00 - 09'/>
-		<range  value='100 - 159'/>
-		<range value='1600 - 1999'/>
-		<range   value='20 - 79'/>
-		<range  value='800 - 949'/>
-		<range value='9500 - 9999'/>
-	</group>
-	<group name='9954'>
-		<range    value='0 - 1'/>
-		<range   value='20 - 39'/>
-		<range  value='400 - 799'/>
-		<range value='8000 - 9999'/>
-	</group>
-</agency> 
-
-<!-- N -->
-
-<agency name='NA' fullname='Namibia'>
-	<group name='99916'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 69'/>
-		<range value='700 - 999'/>
-	</group>
-</agency> 
-
-<agency name='NP' fullname='Nepal'>
-	<group name='99933'>
-		<range value=' - '/>
-	</group>
-</agency> 
-
-<agency name='NL' fullname='Netherlands'>
-	<group name='90'  style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 499'/>
-		<range   value='5000 - 6999'/>
-		<range  value='70000 - 79999'/>
-		<range value='800000 - 849999'/>
-		<range   value='8500 - 8999'/>
-	</group>
-</agency> 
-
-<agency name='AN' fullname='Netherlands Antilles'>
-	<group name='99904'>
-		<range   value='0 - 5'/>
-		<range  value='60 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency> 
-
-<agency name='NZ' fullname='New Zealand'>
-	<group name='0' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range  value='86930 - 86979'/>
-		<range value='877130 - 877579'/>
-	</group>
-</agency> 
-
-<agency name='NI' fullname='Nicaragua'>
-	<group name='99924'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 79'/>
-		<range value='800 - 900'/>
-	</group>
-</agency> 
-
-<agency name='NG' fullname='Nigeria'>
-	<group name='978'>
-		<range   value='000 - 199'/>
-		<range  value='2000 - 2999'/>
-		<range value='30000 - 79999'/>
-		<range  value='8000 - 8999'/>
-		<range   value='900 - 999'/>
-	</group>
-</agency> 
-
-<agency name='NO' fullname='Norway'>
-	<group name='82'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8999'/>
-		<range   value='90000 - 98999'/>
-		<range  value='990000 - 999999'/>
-	</group>
-</agency> 
-
-<!-- P -->
-
-<agency name='PK' fullname='Pakistan'>
-	<group name='969'>
-		<range    value='0 - 1'/>
-		<range   value='20 - 39'/>
-		<range  value='400 - 799'/>
-		<range value='8000 - 9999'/>
-	</group>
-</agency> 
-
-<agency name='PS' fullname='Palestine'>
-	<group name='9950'>
-		<range value=' - '/>
-	</group>
-</agency> 
-
-<agency name='PA' fullname='Panama'>
-	<group name='9962'>
-		<range   value='00 - 59'/>
-		<range  value='600 - 849'/>
-		<range value='8500 - 9999'/>
-	</group>
-</agency> 
-
-<agency name='PG' fullname='Papua New Guinea'>
-	<group name='9980'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 89'/>
-		<range value='900 - 989'/>
-	</group>
-</agency> 
-
-<agency name='PY' fullname='Paraguay'>
-	<group name='99925'>
-		<range   value='0 - 3'/>
-		<range  value='40 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency> 
-
-<agency name='PE' fullname='Peru'>
-	<group name='9972'>
-		<range   value='00 - 09'/>
-		<range    value='1 - 3'/>
-		<range   value='40 - 59'/>
-		<range  value='600 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency> 
-
-<agency name='PH' fullname='Philippines'>
-	<group name='971'>
-		<range    value='00 - 49'/>
-		<range   value='500 - 849'/>
-		<range  value='8500 - 9099'/>
-		<range value='91000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='PL' fullname='Poland'>
-	<group name='83'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency> 
-
-<agency name='PT' fullname='Portugal'>
-	<group name='972'>
-		<range     value='0 - 1'/>
-		<range    value='20 - 54'/>
-		<range   value='550 - 799'/>
-		<range  value='8000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-	<group name='989'>
-		<range     value='0 - 1'/>
-		<range    value='20 - 54'/>
-		<range   value='550 - 799'/>
-		<range  value='8000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='PR' fullname='Puerto  Rico'>
-	<group name='0'  style='Contingent'>
-		<range value='9633400 - 9633499'/>
-	</group>
-	<group name='1'  style='Contingent'>
-		<range value='881700 - 881749'/>
-	</group>
-</agency> 
-
-<!-- Q -->
-
-<agency name='QA' fullname='Qatar'>
-	<group name='99921'>
-		<range   value='0 - 1'/>
-		<range  value='20 - 69'/>
-		<range value='700 - 999'/>
-	</group>
-</agency> 
-
-<!-- R -->
-
-<agency name='RO' fullname='Romania'>
-	<group name='973'>
-		<range     value='0 - 1'/>
-		<range    value='20 - 54'/>
-		<range   value='550 - 799'/>
-		<range  value='8000 - 8499'/>
-		<range value='85000 - 99999'/>
-	</group>
-</agency> 
-
-<agency name='RU' fullname='Russian Federation'>
-	<group name='5' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range    value='9200 - 9299'/>
-		<range   value='93000 - 94999'/>
-		<range   value='98000 - 98999'/>
-		<range value='9900000 - 9999999'/>
-	</group>
-</agency>
-
-<!-- S -->
-
-<agency name='SA' fullname='Saudi Arabia'>
-	<group name='9960'>
-		<range   value='00 - 59'/>
-		<range  value='600 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='SC' fullname='Seychelles'>
-	<group name='99931'>
-		<range   value='0 - 4'/>
-		<range  value='50 - 79'/>
-		<range value='800 - 999'/>
-	</group>
-</agency>
-
-<agency name='SL' fullname='Sierra Leone'>
-	<group name='99910'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 89'/>
-		<range value='900 - 999'/>
-	</group>
-</agency>
-
-<agency name='SG' fullname='Singapore'>
-	<group name='981'>
-		<range   value='00 - 19'/>
-		<range  value='200 - 299'/>
-		<range value='3000 - 9999'/>
-	</group>
-	<group name='9971'>
-		<range    value='0 - 5'/>
-		<range   value='60 - 89'/>
-		<range  value='900 - 989'/>
-		<range value='9900 - 9999'/>
-	</group>
-</agency>
-
-<agency name='SK' fullname='Slovakia'>
-	<group name='80' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='SI' fullname='Slovenia'>
-	<group name='86' style='Contingent'>
-		<range     value='00 - 29'/>
-		<range    value='300 - 699'/>
-		<range   value='7000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-	<group name='961'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 599'/>
-		<range  value='6000 - 8999'/>
-		<range value='90000 - 94999'/>
-	</group>
-</agency>
-
-<agency name='ZA' fullname='South Africa'>
-	<group name='0' style='Contingent'>
-		<range     value='620 - 629'/>
-		<range     value='636 - 639'/>
-		<range    value='7954 - 7973'/>
-		<range    value='7975 - 7999'/>
-		<range   value='86483 - 86487'/>
-		<range   value='86808 - 86817'/>
-		<range   value='86843 - 86852'/>
-		<range   value='86873 - 86887'/>
-		<range   value='86950 - 86999'/>
-		<range  value='907980 - 907999'/>
-		<range  value='908352 - 908409'/>
-		<range  value='909060 - 909079'/>
-		<range  value='909230 - 909239'/>
-		<range  value='947000 - 947059'/>
-		<range  value='949934 - 949998'/>
-		<range value='9583050 - 9583249'/>
-		<range value='9583750 - 9585149'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range   value='4150 - 4154'/>
-		<range  value='86800 - 86929'/>
-		<range value='874800 - 875099'/>
-		<range value='919680 - 920679'/>
-	</group>
-</agency>
-
-<agency name='Cook Islands CK, Fiji FJ, Kiribati KI, Nauru NR, New Caledonia NC, Niue NU, Samoa WS, Solomon Islands SB, Tokelau TK, Tonga TO, Tuvalu TV, Vanuatu VU' fullname='South Pacific'>
-	<group name='982'>
-		<range   value='00 - 09'/>
-		<range  value='100 - 699'/>
-		<range   value='70 - 89'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='ES' fullname='Spain'>
-	<group name='84'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 949999'/>
-		<range  value='95000 - 96999'/>
-		<range   value='9700 - 9999'/>
-	</group>
-</agency>
-
-<agency name='LK' fullname='Sri Lanka'>
-	<group name='955'>
-		<range     value='0 - 1'/>
-		<range    value='20 - 54'/>
-		<range   value='550 - 799'/>
-		<range  value='8000 - 9499'/>
-		<range value='95000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='BA' fullname='Srpska (Republic of)'>
-	<group name='99938'>
-		<range   value='0 - 2'/>
-		<range  value='30 - 59'/>
-		<range value='600 - 999'/>
-	</group>
-</agency>
-
-<agency name='SR' fullname='Suriname'>
-	<group name='99914'>
-		<range   value='0 - 4'/>
-		<range  value='50 - 89'/>
-		<range value='900 - 949'/>
-	</group>
-</agency>
-
-<agency name='SZ' fullname='Swaziland'>
-	<group name='0'>
-		<range value=' - '/>
-	</group>
-</agency>
-
-<agency name='SE' fullname='Sweden'>
-	<group name='91'>
-		<range      value='0 - 1'/>
-		<range     value='20 - 49'/>
-		<range    value='500 - 649'/>
-		<range   value='7000 - 7999'/>
-		<range  value='85000 - 94999'/>
-		<range value='970000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='CH' fullname='Switzerland (French speaking)'>
-	<group name='2' style='Contingent'>
-		<range     value='600 - 699'/>
-		<range    value='8250 - 8399'/>
-		<range   value='88000 - 88999'/>
-		<range  value='940000 - 949999'/>
-		<range value='9700000 - 9799999'/>
-		<range  value='970000 - 999999'/>
-	</group>
-</agency>
-
-<agency name='CH' fullname='Switzerland (German speaking)'>
-	<group name='2' style='Contingent'>
-		<range     value='030 - 033'/>
-		<range    value='0340 - 0369'/>
-		<range   value='03700 - 03999'/>
-		<range     value='250 - 319'/>
-		<range    value='7150 - 7299'/>
-		<range   value='85500 - 85999'/>
-		<range  value='905000 - 909999'/>
-		<range value='9520000 - 9539999'/>
-	</group>
-</agency>
-
-<!-- T -->
-
-<agency name='TW' fullname='Taiwan, China'>
-	<group name='957'>
-		<range    value='00 - 02'/>
-		<range  value='0300 - 0499'/>
-		<range    value='05 - 19'/>
-		<range  value='2000 - 2099'/>
-		<range    value='21 - 29'/>
-		<range value='30000 - 30999'/>
-		<range    value='31 - 43'/>
-		<range   value='440 - 819'/>
-		<range  value='8200 - 9699'/>
-		<range value='97000 - 99999'/>
-	</group>
-	<group name='986'>
-		<range    value='00 - 11'/>
-		<range   value='120 - 559'/>
-		<range  value='5600 - 7999'/>
-		<range value='80000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='TZ' fullname='Tanzania'>
-	<group name='9976'>
-		<range    value='0 - 5'/>
-		<range   value='60 - 89'/>
-		<range  value='900 - 989'/>
-		<range value='9990 - 9999'/>
-	</group>
-	<group name='9987'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 879'/>
-		<range value='8800 - 9999'/>
-	</group>
-</agency>
-
-<agency name='TH' fullname='Thailand'>
-	<group name='974'>
-		<range    value='00 - 19'/>
-		<range   value='200 - 699'/>
-		<range  value='7000 - 8499'/>
-		<range value='85000 - 89999'/>
-		<range value='90000 - 94999'/>
-		<range  value='9500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='TN' fullname='Tunisia'>
-	<group name='9973'>
-		<range     value=' 0 '/>
-		<range   value='10 - 69'/>
-		<range  value='700 - 969'/>
-		<range value='9700 - 9999'/>
-	</group>
-</agency>
-
-<agency name='TR' fullname='Turkey'>
-	<group name='975'>
-		<range    value='00 - 24'/>
-		<range   value='250 - 599'/>
-		<range  value='6000 - 9199'/>
-		<range value='92000 - 97999'/>
-	</group>
-</agency>
-
-<!-- U -->
-
-<agency name='UG' fullname='Uganda'>
-	<group name='9970'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 899'/>
-		<range value='9000 - 9999'/>
-	</group>
-</agency>
-
-<agency name='UA' fullname='Ukraine'>
-	<group name='5' style='Contingent'>
-		<range     value='00 - 19'/>
-		<range    value='200 - 699'/>
-		<range   value='7000 - 8499'/>
-		<range  value='85000 - 89999'/>
-		<range value='900000 - 919999'/>
-	</group>
-	<group name='966'>
-		<range    value='00 - 29'/>
-		<range   value='300 - 699'/>
-		<range  value='7000 - 8999'/>
-		<range value='90000 - 99999'/>
-	</group>
-</agency>
-
-<agency name='' fullname='United Arab Emirates'>
-	<group name='9948'>
-		<range   value='00 - 39'/>
-		<range  value='400 - 849'/>
-		<range value='8500 - 9999'/>
-	</group>
-</agency>
-
-<agency name='GB(United Kingdom and Republic of Ireland both share the same allocated ranges.)' fullname='United Kingdom'>
-	<group name='0' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range   value='4050 - 4099'/>
-		<range  value='84000 - 86249'/>
-		<range value='869800 - 874799'/>
-		<range value='897580 - 919654'/>
-	</group>
-</agency>
-
-<agency name='US' fullname='United States of America'>
-	<group name='0' style='Contingent'>
-		<range      value='00 - 19'/>
-		<range     value='200 - 699'/>
-		<range    value='7000 - 8499'/>
-		<range   value='85000 - 89999'/>
-		<range  value='900000 - 949999'/>
-		<range value='9500000 - 9999999'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range   value='4000 - 4049'/>
-		<range   value='4100 - 4149'/>
-		<range  value='55500 - 59999'/>
-		<range value='877580 - 897579'/>
-	</group>
-</agency>
-
-<agency name='UY' fullname='Uruguay'>
-	<group name='9974'>
-		<range    value='0 - 2'/>
-		<range   value='30 - 54'/>
-		<range  value='550 - 749'/>
-		<range value='7500 - 9999'/>
-	</group>
-</agency>
-
-<!-- V -->
-
-<agency name='VE' fullname='Venezuela'>
-	<group name='980'>
-		<range   value='00 - 19'/>
-		<range  value='200 - 599'/>
-		<range value='6000 - 9999'/>
-	</group>
-</agency>
-
-<!-- Y -->
-
-<agency name='YU' fullname='Yugoslavia'>
-	<group name='86'>
-		<range     value='00 - 29'/>
-		<range    value='300 - 699'/>
-		<range   value='7000 - 7999'/>
-		<range  value='80000 - 89999'/>
-		<range value='900000 - 999999'/>
-	</group>
-</agency>
-
-<!-- Z --> 
-
-<agency name='ZM' fullname='Zambia'>
-	<group name='9982'>
-		<range   value='00 - 79'/>
-		<range  value='800 - 889'/>
-		<range value='9900 - 9999'/>
-	</group>
-</agency>
-
-<agency name='ZW' fullname='Zimbabwe'>
-	<group name='0' style='Contingent'>
-		<range      value=' 7974 '/>
-		<range   value='86918 - 86929'/>
-		<range  value='908300 - 908305'/>
-		<range  value='949225 - 949933'/>
-	</group>
-	<group name='1' style='Contingent'>
-		<range  value='77900 - 77939'/>
-		<range value='877100 - 877129'/>
-	</group>
-</agency>
+  <!-- 娉ㄦ剰鏈枃浠跺凡缁忓簾姝紝鏀圭敤 rangemessage.xml -->
+  <!-- 鏉ユ簮浜巋ttp://www.isbn-international.org/html/prefix.htm -->
+  <!-- A -->
+  <agency name='AL' fullname='Albania'>
+    <group name='99927'>
+      <range     value='0 - 2'/>
+      <range    value='30 - 59'/>
+      <range   value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='DZ' fullname='Algeria'>
+    <group name='9961'>
+      <range    value='0 - 2'/>
+      <range   value='30 - 69'/>
+      <range  value='700 - 949'/>
+      <range value='9500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='AD' fullname='Andorra'>
+    <group name='99913'>
+      <range    value=' - '/>
+    </group>
+    <group name='99920'>
+      <range   value='0 - 4'/>
+      <range  value='50 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='AR' fullname='Argentina'>
+    <group name='950'>
+      <range    value='00 - 49'/>
+      <range   value='500 - 899'/>
+      <range  value='9000 - 9899'/>
+      <range value='99000 - 99999'/>
+    </group>
+    <group name='987'>
+      <range    value='00 - 09'/>
+      <range  value='1000 - 1999'/>
+      <range value='20000 - 29999'/>
+      <range    value='30 - 49'/>
+      <range   value='500 - 899'/>
+      <range  value='9000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='AM' fullname='Armenia'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='99930'>
+      <range   value='0 - 4'/>
+      <range  value='50 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='AU' fullname='Australia'>
+    <group name='0' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range  value='74000 - 76999'/>
+      <range  value='86250 - 86799'/>
+      <range value='875100 - 877099'/>
+      <range value='920680 - 926429'/>
+    </group>
+  </agency>
+
+  <agency name='AT' fullname='Austria'>
+    <group name='3' style='Contingent'>
+      <range      value='01 - 02'/>
+      <range     value='200 - 249'/>
+      <range    value='7000 - 7149'/>
+      <range   value='85000 - 85499'/>
+      <range  value='900000 - 904999'/>
+      <range value='9500000 - 9519999'/>
+    </group>
+  </agency>
+
+  <agency name='AZ' fullname='Azerbaijan'>
+    <group name='9952'>
+      <range      value='0'/>
+      <range   value='20 - 29'/>
+      <range  value='400 - 599'/>
+      <range value='8000 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- B -->
+
+  <agency name='BH' fullname='Bahrain'>
+    <group name='99901'>
+      <range  value='00 - 49'/>
+      <range value='500 - 799'/>
+      <range  value='80 - 99'/>
+    </group>
+  </agency>
+
+  <agency name='BD' fullname='Bangladesh'>
+    <group name='984'>
+      <range    value='00 - 39'/>
+      <range   value='400 - 799'/>
+      <range  value='8000 - 8999'/>
+      <range value='90000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='BY' fullname='Belarus'>
+    <group name='5' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 919999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='985'>
+      <range    value='00 - 39'/>
+      <range   value='400 - 599'/>
+      <range  value='6000 - 8999'/>
+      <range value='90000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='BE' fullname='Belgium(French speaking)'>
+    <group name='2' style='Contingent'>
+      <range     value='500 - 549'/>
+      <range    value='8000 - 8249'/>
+      <range   value='87000 - 87949'/>
+      <range  value='930000 - 939999'/>
+      <range value='9600000 - 9699999'/>
+    </group>
+  </agency>
+
+  <agency name='BE' fullname='Belgium(Flemish speaking)'>
+    <group name='90' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 499'/>
+      <range   value='5000 - 6999'/>
+      <range  value='70000 - 79999'/>
+      <range value='800000 - 899999'/>
+    </group>
+  </agency>
+
+  <agency name='BT' fullname='Bhutan'>
+    <group name='99936'>
+      <range     value='0'/>
+      <range  value='10 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='BJ' fullname='Benin'>
+    <group name='99919'>
+      <range   value='0 - 2'/>
+      <range  value='40 - 69'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='BO' fullname='Bolivia'>
+    <group name='99905'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='BA' fullname='Bosnia and Herzegovina'>
+    <group name='86' style='Contingent'>
+      <range     value='00 - 29'/>
+      <range    value='300 - 699'/>
+      <range   value='7000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+    <group name='9958'>
+      <range      value='0'/>
+      <range   value='10 - 49'/>
+      <range  value='500 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='BW' fullname='Botswana'>
+    <group name='99912'>
+      <range   value='0 - 5'/>
+      <range  value='60 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='BR' fullname='Brazil'>
+    <group name='85'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='BN' fullname='Brunei Darussalam'>
+    <group name='99917'>
+      <range    value='0 - 2'/>
+      <range   value='30 - 89'/>
+      <range  value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='BG' fullname='Bulgaria'>
+    <group name='954'>
+      <range    value='00 - 29'/>
+      <range   value='300 - 799'/>
+      <range  value='8000 - 8999'/>
+      <range value='90000 - 94999'/>
+      <range  value='9500 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- C -->
+
+  <agency name='CM' fullname='Cameroon'>
+    <group name='9956'>
+      <range      value='0'/>
+      <range   value='10 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='CA' fullname='Canada (English speaking)'>
+    <group name='0' style='Contingent'>
+      <range    value='7700 - 7799'/>
+      <range   value='88500 - 88999'/>
+      <range  value='919000 - 919699'/>
+      <range value='9690000 - 9690999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range value='55000 - 55499'/>
+    </group>
+  </agency>
+
+  <agency name='CA' fullname='Canada (French speaking)'>
+    <group name='2' style='Contingent'>
+      <range     value='550 - 599'/>
+      <range    value='7655 - 7776'/>
+      <range    value='7778 - 7999'/>
+      <range   value='89000 - 89999'/>
+      <range  value='920000 - 929999'/>
+      <range value='9800000 - 9999999'/>
+    </group>
+  </agency>
+
+  <agency name='Antigua AG, Bahamas BS, Barbados BB, Belize BZ, Cayman Islands KY,Dominica DM, Grenada GD, Guyana GY, Jamaica JM, Montserrat MS, St. Kitts-Nevis KN, St. Lucia LC, St. Vincent VC, Trinidad and Tobago TT, Virgin Islands (Br.) VG'   fullname='Caribbean Community (CARICOM)'>
+    <group name='976'>
+      <range     value='0 - 3'/>
+      <range    value='40 - 59'/>
+      <range   value='600 - 799'/>
+      <range  value='8000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='CL' fullname='Chile'>
+    <group name='956'>
+      <range   value='00 - 19'/>
+      <range  value='200 - 699'/>
+      <range value='7000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='CN' fullname='China'>
+    <group name='7'>
+      <range     value='00 - 09'/>
+      <range    value='100 - 499'/>
+      <range   value='5000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='CO' fullname='Colombia'>
+    <group name='958'>
+      <range    value='00 - 59'/>
+      <range   value='600 - 799'/>
+      <range  value='8000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='CR' fullname='Costa Rica'>
+    <group name='9968'>
+      <range   value='00 - 49'/>
+      <range  value='500 - 939'/>
+      <range value='9400 - 9999'/>
+    </group>
+    <group name='9977'>
+      <range   value='00 - 89'/>
+      <range  value='900 - 989'/>
+      <range value='9900 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='HR' fullname='Croatia'>
+    <group name='86' style='Contingent'>
+      <range     value='00 - 29'/>
+      <range    value='300 - 699'/>
+      <range   value='7000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+    <group name='953'>
+      <range       value='0'/>
+      <range    value='10 - 14'/>
+      <range   value='150 - 599'/>
+      <range  value='6000 - 9599'/>
+      <range value='96000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='CU' fullname='Cuba'>
+    <group name='959'>
+      <range   value='00 - 19'/>
+      <range  value='200 - 699'/>
+      <range value='7000 - 8499'/>
+    </group>
+  </agency>
+
+  <agency name='CY' fullname='Cyprus'>
+    <group name='9963'>
+      <range    value='0 - 2'/>
+      <range   value='30 - 54'/>
+      <range  value='550 - 749'/>
+      <range value='7500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='CZ' fullname='Czech Republic'>
+    <group name='80' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <!-- D -->
+
+  <agency name='DK' fullname='Denmark'>
+    <group name='87'>
+      <range     value='00 - 29'/>
+      <range    value='400 - 649'/>
+      <range   value='7000 - 7999'/>
+      <range  value='85000 - 94999'/>
+      <range value='970000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='DO' fullname='Dominican Republic'>
+    <group name='99934'>
+      <range   value='0 - 1'/>
+      <range  value='20 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <!-- E -->
+
+  <agency name='EC' fullname='Ecuador'>
+    <group name='9978'>
+      <range   value='00 - 94'/>
+      <range  value='950 - 989'/>
+      <range value='9900 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='EG' fullname='Egypt'>
+    <group name='977'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 499'/>
+      <range  value='5000 - 6999'/>
+      <range value='70000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='SV' fullname='El Salvador'>
+    <group name='99923'>
+      <range   value='0 - 1'/>
+      <range  value='20 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='EE' fullname='Estonia'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9949'>
+      <range      value='0'/>
+      <range   value='10 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+    <group name='9985'>
+      <range    value='0 - 4'/>
+      <range   value='50 - 79'/>
+      <range  value='800 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='IP' fullname='European Community Organizations'>
+    <group name='92'>
+      <range  value=' - '/>
+    </group>
+  </agency>
+
+  <!-- F -->
+
+  <agency name='FO' fullname='Faroe Islands'>
+    <group name='99918'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='FI' fullname='Finland'>
+    <group name='951'>
+      <range     value='0 - 1'/>
+      <range    value='20 - 54'/>
+      <range   value='550 - 889'/>
+      <range  value='8900 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+    <group name='952'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 499'/>
+      <range  value='5000 - 8899'/>
+      <range    value='89 - 94'/>
+      <range  value='9500 - 9899'/>
+      <range value='99000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='FR' fullname='France'>
+    <group name='2' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 399'/>
+      <range    value='7000 - 7599'/>
+      <range       value='7654'/>
+      <range       value='7777'/>
+      <range   value='84000 - 86999'/>
+      <range  value='900000 - 919768'/>
+      <range value='9500000 - 9599768'/>
+    </group>
+  </agency>
+
+  <!-- G -->
+
+  <agency name='GM' fullname='Gambia'>
+    <group name='9983'>
+      <range   value='80 - 94'/>
+      <range  value='950 - 989'/>
+      <range value='9900 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='GE' fullname='Georgia'>
+    <group name='99928'>
+      <range    value=' 0 '/>
+      <range  value='10 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='DE' fullname='Germany'>
+    <group name='3' style='Contingent'>
+      <range       value=' 00 '/>
+      <range      value='05 - 19'/>
+      <range     value='320 - 379'/>
+      <range     value='400 - 699'/>
+      <range    value='7300 - 7499'/>
+      <range    value='7600 - 8499'/>
+      <range   value='86000 - 86499'/>
+      <range   value='87000 - 89999'/>
+      <range  value='910000 - 949999'/>
+      <range value='9700000 - 9899999'/>
+    </group>
+  </agency>
+
+  <agency name='GH' fullname='Ghana'>
+    <group name='9964'>
+      <range   value='0 - 6'/>
+      <range  value='70 - 94'/>
+      <range value='950 - 999'/>
+    </group>
+    <group name='9988'>
+      <range    value='0 - 2'/>
+      <range   value='30 - 54'/>
+      <range  value='550 - 749'/>
+      <range value='7500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='GI' fullname='Gibraltar'>
+    <group name='0' style='Contingent'>
+      <range  value='9583000 - 9583049'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range  value='919655 - 919679'/>
+    </group>
+  </agency>
+
+  <agency name='GR' fullname='Greece'>
+    <group name='960'>
+      <range   value=' 00 - 19 '/>
+      <range   value='200 - 659'/>
+      <range  value='6600 - 6899'/>
+      <range   value='690 - 699'/>
+      <range value='85000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='GH' fullname='Guatemala'>
+    <group name='99922'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 69'/>
+      <range value='700 - 999'/>
+    </group>
+    <group name='99939'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <!-- H -->
+
+  <agency name='HT' fullname='Haiti'>
+    <group name='99935'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='HN' fullname='Honduras'>
+    <group name='99926'>
+      <range    value=' 0 '/>
+      <range  value='10 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='HK' fullname='Hong Kong'>
+    <group name='962'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 699'/>
+      <range  value='7000 - 8499'/>
+      <range value='85000 - 86999'/>
+      <range  value='8700 - 8999'/>
+      <range   value='900 - 999'/>
+    </group>
+    <group name='988'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 799'/>
+      <range  value='8000 - 9699'/>
+      <range value='97000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='HU' fullname='Hungary'>
+    <group name='963'>
+      <range   value=' 00 - 19 '/>
+      <range   value='200 - 699'/>
+      <range  value='7000 - 8499'/>
+      <range value='85000 - 89999'/>
+      <range  value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- I -->
+
+  <agency name='IS' fullname='Iceland'>
+    <group name='9979'>
+      <range   value=' 0 - 4 '/>
+      <range   value='50 - 79'/>
+      <range  value='800 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='IN' fullname='India'>
+    <group name='81'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+    <group name='93'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='IP' fullname='International Publishers (Unesco, EU)'>
+    <group name='92'>
+      <range      value='0 - 5'/>
+      <range     value='60 - 79'/>
+      <range    value='800 - 899'/>
+      <range   value='9000 - 9499'/>
+      <range  value='95000 - 98999'/>
+      <range value='990000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='IR' fullname='Iran'>
+    <group name='964'>
+      <range    value='00 - 29'/>
+      <range   value='300 - 549'/>
+      <range  value='5500 - 8999'/>
+      <range value='90000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='IE(United Kingdom and Republic of Ireland both share the same allocated ranges.)' fullname='Ireland'>
+    <group name='0' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='IL' fullname='Israel'>
+    <group name='965'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 599'/>
+      <range  value='7000 - 7999'/>
+      <range value='90000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='IT' fullname='Italy'>
+    <group name='88'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <!-- J -->
+
+  <agency name='JP' fullname='Japan'>
+    <group name='4'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+  </agency>
+
+  <agency name='JO' fullname='Jordan'>
+    <group name='9957'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 849'/>
+      <range value='8500 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- K -->
+
+  <agency name='KZ' fullname='Kazakhstan'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9965'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='KE' fullname='Kenya'>
+    <group name='9966'>
+      <range   value='00 - 69'/>
+      <range  value='800 - 959'/>
+      <range value='9600 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='KR' fullname='Korea (Republic)'>
+    <group name='89'>
+      <range     value='00 - 24'/>
+      <range    value='250 - 549'/>
+      <range   value='5500 - 8499'/>
+      <range  value='85000 - 94999'/>
+      <range value='950000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='YU' fullname='Kosova'>
+    <group name='9951'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 849'/>
+      <range value='8500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='KW' fullname='Kuwait'>
+    <group name='99906'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='KG' fullname='Kyrgyzstan'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9967'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- L -->
+
+  <agency name='LV' fullname='Latvia'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9984'>
+      <range   value='00 - 49'/>
+      <range  value='500 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='LB' fullname='Lebanon'>
+    <group name='9953'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='LS' fullname='Lesotho'>
+    <group name='99911'>
+      <range  value='00 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='LY' fullname='Libya'>
+    <group name='9959'>
+      <range    value='0 - 1'/>
+      <range   value='20 - 79'/>
+      <range  value='800 - 949'/>
+      <range value='9500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='LT' fullname='Lithuania'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9955'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 929'/>
+      <range value='9300 - 9999'/>
+    </group>
+    <group name='9986'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9399'/>
+      <range  value='940 - 969'/>
+      <range   value='97 - 99'/>
+    </group>
+  </agency>
+
+  <agency name='LU' fullname='Luxembourg'>
+    <group name='2' style='Contingent'>
+      <range     value='495 - 499'/>
+      <range   value='87950 - 87999'/>
+      <range  value='919769 - 919999'/>
+      <range value='9599769 - 9599999'/>
+    </group>
+  </agency>
+
+  <!-- M -->
+
+  <agency name='MO' fullname='Macau'>
+    <group name='99937'>
+      <range   value='0 - 1'/>
+      <range  value='20 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='MK' fullname='Macedonia'>
+    <group name='86' style='Contingent'>
+      <range     value='00 - 29'/>
+      <range    value='300 - 699'/>
+      <range   value='7000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+    <group name='9989'>
+      <range     value=' 0 '/>
+      <range  value='100 - 199'/>
+      <range value='2000 - 2999'/>
+      <range   value='30 - 59'/>
+    </group>
+  </agency>
+
+  <agency name='MW' fullname='Malawi'>
+    <group name='99908'>
+      <range    value=' 0 '/>
+      <range  value='10 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='MY' fullname='Malaysia'>
+    <group name='967'>
+      <range     value='0 - 5'/>
+      <range    value='60 - 89'/>
+      <range   value='900 - 989'/>
+      <range  value='9900 - 9989'/>
+      <range value='99900 - 99999'/>
+    </group>
+    <group name='983'>
+      <range    value='00 - 01'/>
+      <range   value='020 - 199'/>
+      <range  value='2000 - 3999'/>
+      <range value='40000 - 49999'/>
+      <range    value='50 - 79'/>
+      <range   value='800 - 899'/>
+      <range  value='9000 - 9899'/>
+      <range value='99000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='MV' fullname='Maldives'>
+    <group name='99915'>
+      <range   value='0 - 4'/>
+      <range  value='50 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='MT' fullname='Malta'>
+    <group name='99909'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 94'/>
+      <range value='950 - 999'/>
+    </group>
+    <group name='99932'>
+      <range    value=' 0 '/>
+      <range  value='10 - 59'/>
+      <range value='600 -999'/>
+    </group>
+  </agency>
+
+  <agency name='MU' fullname='Mauritius'>
+    <group name='99903'>
+      <range   value='0 - 1'/>
+      <range  value='20 - 89'/>
+      <range value='900 -999'/>
+    </group>
+  </agency>
+
+  <agency name='MX' fullname='Mexico'>
+    <group name='968'>
+      <range   value='10 - 39'/>
+      <range  value='400 - 499'/>
+      <range value='5000 - 7999'/>
+      <range  value='800 - 899'/>
+    </group>
+    <group name='970'>
+      <range    value='00 - 59'/>
+      <range   value='600 - 899'/>
+      <range  value='9000 - 9099'/>
+      <range value='91000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='MX' fullname='Moldova'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='9975'>
+      <range    value='0 - 4'/>
+      <range   value='50 - 89'/>
+      <range  value='900 - 949'/>
+      <range value='9500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='MN' fullname='Mongolia'>
+    <group name='99929'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='MA' fullname='Morocco'>
+    <group name='9981'>
+      <range   value='00 - 09'/>
+      <range  value='100 - 159'/>
+      <range value='1600 - 1999'/>
+      <range   value='20 - 79'/>
+      <range  value='800 - 949'/>
+      <range value='9500 - 9999'/>
+    </group>
+    <group name='9954'>
+      <range    value='0 - 1'/>
+      <range   value='20 - 39'/>
+      <range  value='400 - 799'/>
+      <range value='8000 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- N -->
+
+  <agency name='NA' fullname='Namibia'>
+    <group name='99916'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 69'/>
+      <range value='700 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='NP' fullname='Nepal'>
+    <group name='99933'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='NL' fullname='Netherlands'>
+    <group name='90'  style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 499'/>
+      <range   value='5000 - 6999'/>
+      <range  value='70000 - 79999'/>
+      <range value='800000 - 849999'/>
+      <range   value='8500 - 8999'/>
+    </group>
+  </agency>
+
+  <agency name='AN' fullname='Netherlands Antilles'>
+    <group name='99904'>
+      <range   value='0 - 5'/>
+      <range  value='60 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='NZ' fullname='New Zealand'>
+    <group name='0' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range  value='86930 - 86979'/>
+      <range value='877130 - 877579'/>
+    </group>
+  </agency>
+
+  <agency name='NI' fullname='Nicaragua'>
+    <group name='99924'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 79'/>
+      <range value='800 - 900'/>
+    </group>
+  </agency>
+
+  <agency name='NG' fullname='Nigeria'>
+    <group name='978'>
+      <range   value='000 - 199'/>
+      <range  value='2000 - 2999'/>
+      <range value='30000 - 79999'/>
+      <range  value='8000 - 8999'/>
+      <range   value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='NO' fullname='Norway'>
+    <group name='82'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8999'/>
+      <range   value='90000 - 98999'/>
+      <range  value='990000 - 999999'/>
+    </group>
+  </agency>
+
+  <!-- P -->
+
+  <agency name='PK' fullname='Pakistan'>
+    <group name='969'>
+      <range    value='0 - 1'/>
+      <range   value='20 - 39'/>
+      <range  value='400 - 799'/>
+      <range value='8000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='PS' fullname='Palestine'>
+    <group name='9950'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='PA' fullname='Panama'>
+    <group name='9962'>
+      <range   value='00 - 59'/>
+      <range  value='600 - 849'/>
+      <range value='8500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='PG' fullname='Papua New Guinea'>
+    <group name='9980'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 89'/>
+      <range value='900 - 989'/>
+    </group>
+  </agency>
+
+  <agency name='PY' fullname='Paraguay'>
+    <group name='99925'>
+      <range   value='0 - 3'/>
+      <range  value='40 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='PE' fullname='Peru'>
+    <group name='9972'>
+      <range   value='00 - 09'/>
+      <range    value='1 - 3'/>
+      <range   value='40 - 59'/>
+      <range  value='600 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='PH' fullname='Philippines'>
+    <group name='971'>
+      <range    value='00 - 49'/>
+      <range   value='500 - 849'/>
+      <range  value='8500 - 9099'/>
+      <range value='91000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='PL' fullname='Poland'>
+    <group name='83'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='PT' fullname='Portugal'>
+    <group name='972'>
+      <range     value='0 - 1'/>
+      <range    value='20 - 54'/>
+      <range   value='550 - 799'/>
+      <range  value='8000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+    <group name='989'>
+      <range     value='0 - 1'/>
+      <range    value='20 - 54'/>
+      <range   value='550 - 799'/>
+      <range  value='8000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='PR' fullname='Puerto  Rico'>
+    <group name='0'  style='Contingent'>
+      <range value='9633400 - 9633499'/>
+    </group>
+    <group name='1'  style='Contingent'>
+      <range value='881700 - 881749'/>
+    </group>
+  </agency>
+
+  <!-- Q -->
+
+  <agency name='QA' fullname='Qatar'>
+    <group name='99921'>
+      <range   value='0 - 1'/>
+      <range  value='20 - 69'/>
+      <range value='700 - 999'/>
+    </group>
+  </agency>
+
+  <!-- R -->
+
+  <agency name='RO' fullname='Romania'>
+    <group name='973'>
+      <range     value='0 - 1'/>
+      <range    value='20 - 54'/>
+      <range   value='550 - 799'/>
+      <range  value='8000 - 8499'/>
+      <range value='85000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='RU' fullname='Russian Federation'>
+    <group name='5' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range    value='9200 - 9299'/>
+      <range   value='93000 - 94999'/>
+      <range   value='98000 - 98999'/>
+      <range value='9900000 - 9999999'/>
+    </group>
+  </agency>
+
+  <!-- S -->
+
+  <agency name='SA' fullname='Saudi Arabia'>
+    <group name='9960'>
+      <range   value='00 - 59'/>
+      <range  value='600 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='SC' fullname='Seychelles'>
+    <group name='99931'>
+      <range   value='0 - 4'/>
+      <range  value='50 - 79'/>
+      <range value='800 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='SL' fullname='Sierra Leone'>
+    <group name='99910'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 89'/>
+      <range value='900 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='SG' fullname='Singapore'>
+    <group name='981'>
+      <range   value='00 - 19'/>
+      <range  value='200 - 299'/>
+      <range value='3000 - 9999'/>
+    </group>
+    <group name='9971'>
+      <range    value='0 - 5'/>
+      <range   value='60 - 89'/>
+      <range  value='900 - 989'/>
+      <range value='9900 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='SK' fullname='Slovakia'>
+    <group name='80' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='SI' fullname='Slovenia'>
+    <group name='86' style='Contingent'>
+      <range     value='00 - 29'/>
+      <range    value='300 - 699'/>
+      <range   value='7000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+    <group name='961'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 599'/>
+      <range  value='6000 - 8999'/>
+      <range value='90000 - 94999'/>
+    </group>
+  </agency>
+
+  <agency name='ZA' fullname='South Africa'>
+    <group name='0' style='Contingent'>
+      <range     value='620 - 629'/>
+      <range     value='636 - 639'/>
+      <range    value='7954 - 7973'/>
+      <range    value='7975 - 7999'/>
+      <range   value='86483 - 86487'/>
+      <range   value='86808 - 86817'/>
+      <range   value='86843 - 86852'/>
+      <range   value='86873 - 86887'/>
+      <range   value='86950 - 86999'/>
+      <range  value='907980 - 907999'/>
+      <range  value='908352 - 908409'/>
+      <range  value='909060 - 909079'/>
+      <range  value='909230 - 909239'/>
+      <range  value='947000 - 947059'/>
+      <range  value='949934 - 949998'/>
+      <range value='9583050 - 9583249'/>
+      <range value='9583750 - 9585149'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range   value='4150 - 4154'/>
+      <range  value='86800 - 86929'/>
+      <range value='874800 - 875099'/>
+      <range value='919680 - 920679'/>
+    </group>
+  </agency>
+
+  <agency name='Cook Islands CK, Fiji FJ, Kiribati KI, Nauru NR, New Caledonia NC, Niue NU, Samoa WS, Solomon Islands SB, Tokelau TK, Tonga TO, Tuvalu TV, Vanuatu VU' fullname='South Pacific'>
+    <group name='982'>
+      <range   value='00 - 09'/>
+      <range  value='100 - 699'/>
+      <range   value='70 - 89'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='ES' fullname='Spain'>
+    <group name='84'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 949999'/>
+      <range  value='95000 - 96999'/>
+      <range   value='9700 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='LK' fullname='Sri Lanka'>
+    <group name='955'>
+      <range     value='0 - 1'/>
+      <range    value='20 - 54'/>
+      <range   value='550 - 799'/>
+      <range  value='8000 - 9499'/>
+      <range value='95000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='BA' fullname='Srpska (Republic of)'>
+    <group name='99938'>
+      <range   value='0 - 2'/>
+      <range  value='30 - 59'/>
+      <range value='600 - 999'/>
+    </group>
+  </agency>
+
+  <agency name='SR' fullname='Suriname'>
+    <group name='99914'>
+      <range   value='0 - 4'/>
+      <range  value='50 - 89'/>
+      <range value='900 - 949'/>
+    </group>
+  </agency>
+
+  <agency name='SZ' fullname='Swaziland'>
+    <group name='0'>
+      <range value=' - '/>
+    </group>
+  </agency>
+
+  <agency name='SE' fullname='Sweden'>
+    <group name='91'>
+      <range      value='0 - 1'/>
+      <range     value='20 - 49'/>
+      <range    value='500 - 649'/>
+      <range   value='7000 - 7999'/>
+      <range  value='85000 - 94999'/>
+      <range value='970000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='CH' fullname='Switzerland (French speaking)'>
+    <group name='2' style='Contingent'>
+      <range     value='600 - 699'/>
+      <range    value='8250 - 8399'/>
+      <range   value='88000 - 88999'/>
+      <range  value='940000 - 949999'/>
+      <range value='9700000 - 9799999'/>
+      <range  value='970000 - 999999'/>
+    </group>
+  </agency>
+
+  <agency name='CH' fullname='Switzerland (German speaking)'>
+    <group name='2' style='Contingent'>
+      <range     value='030 - 033'/>
+      <range    value='0340 - 0369'/>
+      <range   value='03700 - 03999'/>
+      <range     value='250 - 319'/>
+      <range    value='7150 - 7299'/>
+      <range   value='85500 - 85999'/>
+      <range  value='905000 - 909999'/>
+      <range value='9520000 - 9539999'/>
+    </group>
+  </agency>
+
+  <!-- T -->
+
+  <agency name='TW' fullname='Taiwan, China'>
+    <group name='957'>
+      <range    value='00 - 02'/>
+      <range  value='0300 - 0499'/>
+      <range    value='05 - 19'/>
+      <range  value='2000 - 2099'/>
+      <range    value='21 - 29'/>
+      <range value='30000 - 30999'/>
+      <range    value='31 - 43'/>
+      <range   value='440 - 819'/>
+      <range  value='8200 - 9699'/>
+      <range value='97000 - 99999'/>
+    </group>
+    <group name='986'>
+      <range    value='00 - 11'/>
+      <range   value='120 - 559'/>
+      <range  value='5600 - 7999'/>
+      <range value='80000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='TZ' fullname='Tanzania'>
+    <group name='9976'>
+      <range    value='0 - 5'/>
+      <range   value='60 - 89'/>
+      <range  value='900 - 989'/>
+      <range value='9990 - 9999'/>
+    </group>
+    <group name='9987'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 879'/>
+      <range value='8800 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='TH' fullname='Thailand'>
+    <group name='974'>
+      <range    value='00 - 19'/>
+      <range   value='200 - 699'/>
+      <range  value='7000 - 8499'/>
+      <range value='85000 - 89999'/>
+      <range value='90000 - 94999'/>
+      <range  value='9500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='TN' fullname='Tunisia'>
+    <group name='9973'>
+      <range     value=' 0 '/>
+      <range   value='10 - 69'/>
+      <range  value='700 - 969'/>
+      <range value='9700 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='TR' fullname='Turkey'>
+    <group name='975'>
+      <range    value='00 - 24'/>
+      <range   value='250 - 599'/>
+      <range  value='6000 - 9199'/>
+      <range value='92000 - 97999'/>
+    </group>
+  </agency>
+
+  <!-- U -->
+
+  <agency name='UG' fullname='Uganda'>
+    <group name='9970'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 899'/>
+      <range value='9000 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='UA' fullname='Ukraine'>
+    <group name='5' style='Contingent'>
+      <range     value='00 - 19'/>
+      <range    value='200 - 699'/>
+      <range   value='7000 - 8499'/>
+      <range  value='85000 - 89999'/>
+      <range value='900000 - 919999'/>
+    </group>
+    <group name='966'>
+      <range    value='00 - 29'/>
+      <range   value='300 - 699'/>
+      <range  value='7000 - 8999'/>
+      <range value='90000 - 99999'/>
+    </group>
+  </agency>
+
+  <agency name='' fullname='United Arab Emirates'>
+    <group name='9948'>
+      <range   value='00 - 39'/>
+      <range  value='400 - 849'/>
+      <range value='8500 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='GB(United Kingdom and Republic of Ireland both share the same allocated ranges.)' fullname='United Kingdom'>
+    <group name='0' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range   value='4050 - 4099'/>
+      <range  value='84000 - 86249'/>
+      <range value='869800 - 874799'/>
+      <range value='897580 - 919654'/>
+    </group>
+  </agency>
+
+  <agency name='US' fullname='United States of America'>
+    <group name='0' style='Contingent'>
+      <range      value='00 - 19'/>
+      <range     value='200 - 699'/>
+      <range    value='7000 - 8499'/>
+      <range   value='85000 - 89999'/>
+      <range  value='900000 - 949999'/>
+      <range value='9500000 - 9999999'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range   value='4000 - 4049'/>
+      <range   value='4100 - 4149'/>
+      <range  value='55500 - 59999'/>
+      <range value='877580 - 897579'/>
+    </group>
+  </agency>
+
+  <agency name='UY' fullname='Uruguay'>
+    <group name='9974'>
+      <range    value='0 - 2'/>
+      <range   value='30 - 54'/>
+      <range  value='550 - 749'/>
+      <range value='7500 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- V -->
+
+  <agency name='VE' fullname='Venezuela'>
+    <group name='980'>
+      <range   value='00 - 19'/>
+      <range  value='200 - 599'/>
+      <range value='6000 - 9999'/>
+    </group>
+  </agency>
+
+  <!-- Y -->
+
+  <agency name='YU' fullname='Yugoslavia'>
+    <group name='86'>
+      <range     value='00 - 29'/>
+      <range    value='300 - 699'/>
+      <range   value='7000 - 7999'/>
+      <range  value='80000 - 89999'/>
+      <range value='900000 - 999999'/>
+    </group>
+  </agency>
+
+  <!-- Z -->
+
+  <agency name='ZM' fullname='Zambia'>
+    <group name='9982'>
+      <range   value='00 - 79'/>
+      <range  value='800 - 889'/>
+      <range value='9900 - 9999'/>
+    </group>
+  </agency>
+
+  <agency name='ZW' fullname='Zimbabwe'>
+    <group name='0' style='Contingent'>
+      <range      value=' 7974 '/>
+      <range   value='86918 - 86929'/>
+      <range  value='908300 - 908305'/>
+      <range  value='949225 - 949933'/>
+    </group>
+    <group name='1' style='Contingent'>
+      <range  value='77900 - 77939'/>
+      <range value='877100 - 877129'/>
+    </group>
+  </agency>
 
 </Root>

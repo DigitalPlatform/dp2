@@ -1,4 +1,4 @@
-namespace DigitalPlatform.CommonControl
+Ôªønamespace DigitalPlatform.CommonControl
 {
     partial class OrderDesignControl
     {
@@ -38,6 +38,8 @@ namespace DigitalPlatform.CommonControl
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label_copy = new System.Windows.Forms.Label();
+            this.label_fixedPrice = new System.Windows.Forms.Label();
+            this.label_discount = new System.Windows.Forms.Label();
             this.label_price = new System.Windows.Forms.Label();
             this.label_topleft = new System.Windows.Forms.Label();
             this.label_location = new System.Windows.Forms.Label();
@@ -73,7 +75,7 @@ namespace DigitalPlatform.CommonControl
             this.tableLayoutPanel_content.AutoSize = true;
             this.tableLayoutPanel_content.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel_content.BackColor = System.Drawing.SystemColors.Window;
-            this.tableLayoutPanel_content.ColumnCount = 12;
+            this.tableLayoutPanel_content.ColumnCount = 14;
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 15F));
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -86,18 +88,23 @@ namespace DigitalPlatform.CommonControl
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_content.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_content.Controls.Add(this.label_topleft, 0, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label6, 1, 0);
             this.tableLayoutPanel_content.Controls.Add(this.label1, 2, 0);
             this.tableLayoutPanel_content.Controls.Add(this.label3, 3, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label_copy, 6, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label_price, 7, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label_topleft, 0, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label_location, 8, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label7, 11, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label6, 1, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label8, 9, 0);
             this.tableLayoutPanel_content.Controls.Add(this.label_range, 4, 0);
             this.tableLayoutPanel_content.Controls.Add(this.label_issueCount, 5, 0);
-            this.tableLayoutPanel_content.Controls.Add(this.label2, 10, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label_copy, 6, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label_fixedPrice, 7, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label_discount, 8, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label_price, 9, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label_location, 10, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label8, 11, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label2, 12, 0);
+            this.tableLayoutPanel_content.Controls.Add(this.label7, 13, 0);
+
             this.tableLayoutPanel_content.Location = new System.Drawing.Point(0, 102);
             this.tableLayoutPanel_content.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel_content.Name = "tableLayoutPanel_content";
@@ -112,135 +119,157 @@ namespace DigitalPlatform.CommonControl
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(65, 5);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "«˛µ¿";
+            this.label1.Text = "Ê∏†ÈÅì";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label3.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.Location = new System.Drawing.Point(100, 5);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(57, 12);
             this.label3.TabIndex = 2;
-            this.label3.Text = "æ≠∑—¿¥‘¥";
+            this.label3.Text = "ÁªèË¥πÊù•Ê∫ê";
             // 
             // label_copy
             // 
             this.label_copy.AutoSize = true;
-            this.label_copy.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_copy.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_copy.Location = new System.Drawing.Point(283, 5);
             this.label_copy.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_copy.Name = "label_copy";
             this.label_copy.Size = new System.Drawing.Size(44, 12);
             this.label_copy.TabIndex = 3;
-            this.label_copy.Text = "∏¥±æ ˝";
+            this.label_copy.Text = "Â§çÊú¨Êï∞";
+            // 
+            // label_fixedPrice
+            // 
+            this.label_fixedPrice.AutoSize = true;
+            this.label_fixedPrice.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_fixedPrice.Location = new System.Drawing.Point(331, 5);
+            this.label_fixedPrice.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
+            this.label_fixedPrice.Name = "label_fixedPrice";
+            this.label_fixedPrice.Size = new System.Drawing.Size(31, 12);
+            this.label_fixedPrice.TabIndex = 4;
+            this.label_fixedPrice.Text = "Á†ÅÊ¥ã";
+            // 
+            // label_discount
+            // 
+            this.label_discount.AutoSize = true;
+            this.label_discount.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_discount.Location = new System.Drawing.Point(331, 5);
+            this.label_discount.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
+            this.label_discount.Name = "label_discount";
+            this.label_discount.Size = new System.Drawing.Size(31, 12);
+            this.label_discount.TabIndex = 5;
+            this.label_discount.Text = "ÊäòÊâ£";
             // 
             // label_price
             // 
             this.label_price.AutoSize = true;
-            this.label_price.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_price.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_price.Location = new System.Drawing.Point(331, 5);
             this.label_price.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_price.Name = "label_price";
             this.label_price.Size = new System.Drawing.Size(31, 12);
-            this.label_price.TabIndex = 4;
-            this.label_price.Text = "µ•º€";
+            this.label_price.TabIndex = 6;
+            this.label_price.Text = "Âçï‰ª∑";
             // 
             // label_topleft
             // 
             this.label_topleft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_topleft.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_topleft.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_topleft.Location = new System.Drawing.Point(2, 5);
             this.label_topleft.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_topleft.Name = "label_topleft";
             this.label_topleft.Size = new System.Drawing.Size(11, 17);
-            this.label_topleft.TabIndex = 5;
+            this.label_topleft.TabIndex = 6;
             this.label_topleft.MouseUp += new System.Windows.Forms.MouseEventHandler(this.label_topleft_MouseUp);
             // 
             // label_location
             // 
             this.label_location.AutoSize = true;
-            this.label_location.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_location.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_location.Location = new System.Drawing.Point(366, 5);
             this.label_location.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_location.Name = "label_location";
             this.label_location.Size = new System.Drawing.Size(31, 12);
-            this.label_location.TabIndex = 6;
-            this.label_location.Text = "»•œÚ";
+            this.label_location.TabIndex = 8;
+            this.label_location.Text = "ÂéªÂêë";
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label7.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label7.Location = new System.Drawing.Point(497, 5);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(31, 12);
-            this.label7.TabIndex = 7;
-            this.label7.Text = "∆‰À˚";
+            this.label7.TabIndex = 9;
+            this.label7.Text = "ÂÖ∂‰ªñ";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label6.Location = new System.Drawing.Point(17, 5);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(44, 12);
-            this.label6.TabIndex = 8;
-            this.label6.Text = " Èƒø∫≈";
+            this.label6.TabIndex = 10;
+            this.label6.Text = "‰π¶ÁõÆÂè∑";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label8.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label8.Location = new System.Drawing.Point(401, 5);
             this.label8.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(31, 12);
-            this.label8.TabIndex = 9;
-            this.label8.Text = "¿‡±";
+            this.label8.TabIndex = 11;
+            this.label8.Text = "Á±ªÂà´";
             // 
             // label_range
             // 
             this.label_range.AutoSize = true;
-            this.label_range.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_range.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_range.Location = new System.Drawing.Point(161, 5);
             this.label_range.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_range.Name = "label_range";
             this.label_range.Size = new System.Drawing.Size(83, 12);
-            this.label_range.TabIndex = 10;
-            this.label_range.Text = "‘§º∆≥ˆ∞Ê ±º‰";
+            this.label_range.TabIndex = 12;
+            this.label_range.Text = "È¢ÑËÆ°Âá∫ÁâàÊó∂Èó¥";
             // 
             // label_issueCount
             // 
             this.label_issueCount.AutoSize = true;
-            this.label_issueCount.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_issueCount.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_issueCount.Location = new System.Drawing.Point(248, 5);
             this.label_issueCount.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label_issueCount.Name = "label_issueCount";
             this.label_issueCount.Size = new System.Drawing.Size(31, 12);
-            this.label_issueCount.TabIndex = 11;
-            this.label_issueCount.Text = "∆⁄ ˝";
+            this.label_issueCount.TabIndex = 13;
+            this.label_issueCount.Text = "ÊúüÊï∞";
             this.label_issueCount.Visible = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.Location = new System.Drawing.Point(436, 5);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 5, 2, 2);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(57, 12);
-            this.label2.TabIndex = 12;
-            this.label2.Text = "«˛µ¿µÿ÷∑";
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Ê∏†ÈÅìÂú∞ÂùÄ";
             // 
             // label_newlyOrderTotalCopy
             // 
@@ -251,7 +280,7 @@ namespace DigitalPlatform.CommonControl
             this.label_newlyOrderTotalCopy.Name = "label_newlyOrderTotalCopy";
             this.label_newlyOrderTotalCopy.Size = new System.Drawing.Size(65, 26);
             this.label_newlyOrderTotalCopy.TabIndex = 3;
-            this.label_newlyOrderTotalCopy.Text = "–¬∂©π∫(&N):";
+            this.label_newlyOrderTotalCopy.Text = "Êñ∞ËÆ¢Ë¥≠(&N):";
             this.label_newlyOrderTotalCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // textBox_newlyOrderTotalCopy
@@ -285,7 +314,7 @@ namespace DigitalPlatform.CommonControl
             this.label_orderedTotalCopy.Name = "label_orderedTotalCopy";
             this.label_orderedTotalCopy.Size = new System.Drawing.Size(65, 25);
             this.label_orderedTotalCopy.TabIndex = 5;
-            this.label_orderedTotalCopy.Text = "“—∂©π∫(&O):";
+            this.label_orderedTotalCopy.Text = "Â∑≤ËÆ¢Ë¥≠(&O):";
             this.label_orderedTotalCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_orderedTotalCopy.Visible = false;
             // 
@@ -328,7 +357,7 @@ namespace DigitalPlatform.CommonControl
             this.label_newlyArriveTotalCopy.Name = "label_newlyArriveTotalCopy";
             this.label_newlyArriveTotalCopy.Size = new System.Drawing.Size(65, 26);
             this.label_newlyArriveTotalCopy.TabIndex = 9;
-            this.label_newlyArriveTotalCopy.Text = "–¬—È ’(&R):";
+            this.label_newlyArriveTotalCopy.Text = "Êñ∞È™åÊî∂(&R):";
             this.label_newlyArriveTotalCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_newlyArriveTotalCopy.Visible = false;
             // 
@@ -339,7 +368,7 @@ namespace DigitalPlatform.CommonControl
             this.button_newItem.Name = "button_newItem";
             this.button_newItem.Size = new System.Drawing.Size(88, 22);
             this.button_newItem.TabIndex = 7;
-            this.button_newItem.Text = "–¬‘ˆ ¬œÓ(&N)";
+            this.button_newItem.Text = "Êñ∞Â¢û‰∫ãÈ°π(&N)";
             this.button_newItem.UseVisualStyleBackColor = true;
             this.button_newItem.Click += new System.EventHandler(this.button_newItem_Click);
             // 
@@ -352,7 +381,7 @@ namespace DigitalPlatform.CommonControl
             this.label_arrivedTotalCopy.Name = "label_arrivedTotalCopy";
             this.label_arrivedTotalCopy.Size = new System.Drawing.Size(65, 25);
             this.label_arrivedTotalCopy.TabIndex = 8;
-            this.label_arrivedTotalCopy.Text = "“——È ’(&A):";
+            this.label_arrivedTotalCopy.Text = "Â∑≤È™åÊî∂(&A):";
             this.label_arrivedTotalCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_arrivedTotalCopy.Visible = false;
             // 
@@ -385,7 +414,7 @@ namespace DigitalPlatform.CommonControl
             this.button_fullyAccept.Name = "button_fullyAccept";
             this.button_fullyAccept.Size = new System.Drawing.Size(88, 22);
             this.button_fullyAccept.TabIndex = 12;
-            this.button_fullyAccept.Text = "»´≤ø—È ’(&F)";
+            this.button_fullyAccept.Text = "ÂÖ®ÈÉ®È™åÊî∂(&F)";
             this.button_fullyAccept.UseVisualStyleBackColor = true;
             this.button_fullyAccept.Visible = false;
             this.button_fullyAccept.Click += new System.EventHandler(this.button_fullyAccept_Click);
@@ -427,7 +456,7 @@ namespace DigitalPlatform.CommonControl
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(59, 12);
             this.label9.TabIndex = 0;
-            this.label9.Text = "ƒø±Íº«¬º:";
+            this.label9.Text = "ÁõÆÊ†áËÆ∞ÂΩï:";
             // 
             // tableLayoutPanel_main
             // 
@@ -499,5 +528,8 @@ namespace DigitalPlatform.CommonControl
         private System.Windows.Forms.Label label_range;
         private System.Windows.Forms.Label label_issueCount;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label_fixedPrice;
+        private System.Windows.Forms.Label label_discount;
+
     }
 }

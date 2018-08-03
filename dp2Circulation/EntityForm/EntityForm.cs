@@ -655,6 +655,9 @@ namespace dp2Circulation
             this.orderControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
             this.orderControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
 
+            this.orderControl1.ShowMessage -= entityControl1_ShowMessage;
+            this.orderControl1.ShowMessage += entityControl1_ShowMessage;
+
             this.orderControl1.Stop = this.Progress;
             // this.orderControl1.MainForm = Program.MainForm;
 
@@ -13898,6 +13901,12 @@ Program.MainForm.DefaultFont);
                 true);
         }
 
+
+        private void TabControl_itemAndIssue_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            this.contextMenuStrip_itemArea.Show(this.tabControl_itemAndIssue.PointToScreen(
+                e.Location));
+        }
 
         private void contextMenuStrip_itemArea_Opening(object sender, CancelEventArgs e)
         {

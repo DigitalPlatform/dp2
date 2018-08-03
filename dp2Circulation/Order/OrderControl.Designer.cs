@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class OrderControl
     {
@@ -31,31 +31,33 @@ namespace dp2Circulation
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OrderControl));
             this.listView = new DigitalPlatform.GUI.ListViewNF();
-            this.columnHeader_index = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_errorInfo = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_state = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_catalogNo = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_seller = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_source = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_range = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_issueCount = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_copy = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_price = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_totalPrice = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_orderTime = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_orderID = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_distribute = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_class = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_comment = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_batchNo = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_sellerAddress = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_refID = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader_recpath = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_index = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_state = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_catalogNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_seller = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_source = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_range = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_issueCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_copy = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_price = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_totalPrice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_orderTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_orderID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_distribute = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_class = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_batchNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_sellerAddress = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_refID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_operations = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_recpath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_operations = new System.Windows.Forms.ColumnHeader();
+            this.columnHeader_fixedPrice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_discount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
-            // ListView
+            // listView
             // 
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_index,
@@ -69,6 +71,8 @@ namespace dp2Circulation
             this.columnHeader_copy,
             this.columnHeader_price,
             this.columnHeader_totalPrice,
+            this.columnHeader_fixedPrice,
+            this.columnHeader_discount,
             this.columnHeader_orderTime,
             this.columnHeader_orderID,
             this.columnHeader_distribute,
@@ -84,113 +88,119 @@ namespace dp2Circulation
             this.listView.HideSelection = false;
             this.listView.LargeImageList = this.imageList_itemType;
             this.listView.Location = new System.Drawing.Point(0, 0);
-            this.listView.Name = "ListView";
-            this.listView.Size = new System.Drawing.Size(464, 224);
+            this.listView.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(522, 269);
             this.listView.SmallImageList = this.imageList_itemType;
             this.listView.TabIndex = 1;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
+            this.listView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.ListView_ColumnClick);
             this.listView.DoubleClick += new System.EventHandler(this.ListView_DoubleClick);
             this.listView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ListView_MouseUp);
-            this.listView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.ListView_ColumnClick);
             // 
             // columnHeader_index
             // 
-            this.columnHeader_index.Text = "±‡∫≈";
+            this.columnHeader_index.Text = "ÁºñÂè∑";
             // 
             // columnHeader_errorInfo
             // 
-            this.columnHeader_errorInfo.Text = "¥ÌŒÛ–≈œ¢";
+            this.columnHeader_errorInfo.Text = "ÈîôËØØ‰ø°ÊÅØ";
             this.columnHeader_errorInfo.Width = 120;
             // 
             // columnHeader_state
             // 
-            this.columnHeader_state.Text = "◊¥Ã¨";
+            this.columnHeader_state.Text = "Áä∂ÊÄÅ";
             // 
             // columnHeader_catalogNo
             // 
-            this.columnHeader_catalogNo.Text = " Èƒø∫≈";
+            this.columnHeader_catalogNo.Text = "‰π¶ÁõÆÂè∑";
             this.columnHeader_catalogNo.Width = 120;
             // 
             // columnHeader_seller
             // 
-            this.columnHeader_seller.Text = "«˛µ¿";
+            this.columnHeader_seller.Text = "Ê∏†ÈÅì";
             this.columnHeader_seller.Width = 120;
             // 
             // columnHeader_source
             // 
-            this.columnHeader_source.Text = "æ≠∑—¿¥‘¥";
+            this.columnHeader_source.Text = "ÁªèË¥πÊù•Ê∫ê";
             this.columnHeader_source.Width = 120;
             // 
             // columnHeader_range
             // 
-            this.columnHeader_range.Text = " ±º‰∑∂Œß";
+            this.columnHeader_range.Text = "Êó∂Èó¥ËåÉÂõ¥";
             this.columnHeader_range.Width = 120;
             // 
             // columnHeader_issueCount
             // 
-            this.columnHeader_issueCount.Text = "∞¸∫¨∆⁄ ˝";
+            this.columnHeader_issueCount.Text = "ÂåÖÂê´ÊúüÊï∞";
             this.columnHeader_issueCount.Width = 80;
             // 
             // columnHeader_copy
             // 
-            this.columnHeader_copy.Text = "∏¥±æ ˝";
+            this.columnHeader_copy.Text = "Â§çÊú¨Êï∞";
             this.columnHeader_copy.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.columnHeader_copy.Width = 66;
             // 
             // columnHeader_price
             // 
-            this.columnHeader_price.Text = "º€∏Ò";
+            this.columnHeader_price.Text = "‰ª∑Ê†º";
             this.columnHeader_price.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.columnHeader_price.Width = 120;
             // 
             // columnHeader_totalPrice
             // 
-            this.columnHeader_totalPrice.Text = "◊‹º€∏Ò";
+            this.columnHeader_totalPrice.Text = "ÊÄª‰ª∑Ê†º";
             this.columnHeader_totalPrice.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // columnHeader_orderTime
             // 
-            this.columnHeader_orderTime.Text = "∂©π∫ ±º‰";
+            this.columnHeader_orderTime.Text = "ËÆ¢Ë¥≠Êó∂Èó¥";
             this.columnHeader_orderTime.Width = 120;
             // 
             // columnHeader_orderID
             // 
-            this.columnHeader_orderID.Text = "∂©µ•∫≈";
+            this.columnHeader_orderID.Text = "ËÆ¢ÂçïÂè∑";
             // 
             // columnHeader_distribute
             // 
-            this.columnHeader_distribute.Text = "π›≤ÿ∑÷≈‰";
+            this.columnHeader_distribute.Text = "È¶ÜËóèÂàÜÈÖç";
             this.columnHeader_distribute.Width = 120;
             // 
             // columnHeader_class
             // 
-            this.columnHeader_class.Text = "¿‡±";
+            this.columnHeader_class.Text = "Á±ªÂà´";
             this.columnHeader_class.Width = 120;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "∏Ω◊¢";
+            this.columnHeader_comment.Text = "ÈôÑÊ≥®";
             this.columnHeader_comment.Width = 231;
             // 
             // columnHeader_batchNo
             // 
-            this.columnHeader_batchNo.Text = "≈˙¥Œ∫≈";
+            this.columnHeader_batchNo.Text = "ÊâπÊ¨°Âè∑";
             this.columnHeader_batchNo.Width = 66;
             // 
             // columnHeader_sellerAddress
             // 
-            this.columnHeader_sellerAddress.Text = "«˛µ¿µÿ÷∑";
+            this.columnHeader_sellerAddress.Text = "Ê∏†ÈÅìÂú∞ÂùÄ";
             this.columnHeader_sellerAddress.Width = 100;
             // 
             // columnHeader_refID
             // 
-            this.columnHeader_refID.Text = "≤ŒøºID";
+            this.columnHeader_refID.Text = "ÂèÇËÄÉID";
             this.columnHeader_refID.Width = 100;
+            // 
+            // columnHeader_operations
+            // 
+            this.columnHeader_operations.Text = "Êìç‰Ωú";
+            this.columnHeader_operations.Width = 150;
             // 
             // columnHeader_recpath
             // 
-            this.columnHeader_recpath.Text = "º«¬º¬∑æ∂";
+            this.columnHeader_recpath.Text = "ËÆ∞ÂΩïË∑ØÂæÑ";
             this.columnHeader_recpath.Width = 120;
             // 
             // imageList_itemType
@@ -203,18 +213,25 @@ namespace dp2Circulation
             this.imageList_itemType.Images.SetKeyName(3, "deleted_entity.bmp");
             this.imageList_itemType.Images.SetKeyName(4, "error_entity.bmp");
             // 
-            // columnHeader_operations
+            // columnHeader_fixedPrice
             // 
-            this.columnHeader_operations.Text = "≤Ÿ◊˜";
-            this.columnHeader_operations.Width = 150;
+            this.columnHeader_fixedPrice.Text = "Á†ÅÊ¥ã";
+            this.columnHeader_fixedPrice.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader_fixedPrice.Width = 90;
+            // 
+            // columnHeader_discount
+            // 
+            this.columnHeader_discount.Text = "ÊäòÊâ£";
+            this.columnHeader_discount.Width = 90;
             // 
             // OrderControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "OrderControl";
-            this.Size = new System.Drawing.Size(464, 224);
+            this.Size = new System.Drawing.Size(522, 269);
             this.ResumeLayout(false);
 
         }
@@ -244,5 +261,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_sellerAddress;
         private System.Windows.Forms.ColumnHeader columnHeader_refID;
         private System.Windows.Forms.ColumnHeader columnHeader_operations;
+        private System.Windows.Forms.ColumnHeader columnHeader_fixedPrice;
+        private System.Windows.Forms.ColumnHeader columnHeader_discount;
     }
 }

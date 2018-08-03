@@ -37,6 +37,8 @@ namespace DigitalPlatform.LibraryServer
                 "sellerAddress",    // 书商地址。用于非大宗订购情形 2009/2/13
                 "refID",    // 参考ID 2010/3/15 add
                 "operations", // 2010/4/8
+                "fixedPrice",   // 码洋。 2018/7/31
+                "discount", // 折扣。形态为 0.80 这样的。 2018/7/31
         };
 
         // DoOperChange()和DoOperMove()的下级函数
@@ -65,29 +67,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
-
-            /*
-            // 要害元素名列表
-            string[] element_names = new string[] {
-                "parent",   // 父记录ID
-                "index",    // 编号
-                "state",    // 状态
-                "catalogNo",    // 书目号 2008/8/31
-                "seller",   // 书商
-                "source",   // 2008/2/15 经费来源
-                "range",    // 订购的时间范围
-                "issueCount",   // 订购(时间范围内)跨越多少期? 以便算出总价
-                "copy", // 复本数
-                "price",    // 册、期单价
-                "totalPrice",   // 总价
-                "orderTime",    // 订购时间
-                "orderID",  // 订单号
-                "distribute",   // 馆藏分配
-                "class",    // 类别 2008/8/31
-                "comment",  // 注释
-                "batchNo",  // 批次号
-            };
-             * */
 
             bool bControlled = true;
             if (sessioninfo.GlobalUser == false)
@@ -130,14 +109,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 for (int i = 0; i < core_order_element_names.Length; i++)
                 {
-                    /*
-                    string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
-                        core_order_element_names[i]);
-
-                    DomUtil.SetElementText(domExist.DocumentElement,
-                        core_order_element_names[i], strTextNew);
-                     * */
-
                     // 2009/10/23 changed inner-->outer
                     string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
                         core_order_element_names[i]);
@@ -283,23 +254,23 @@ namespace DigitalPlatform.LibraryServer
 
             string strExistCopy = DomUtil.GetElementText(exist_node, "copy");
             string strExistPrice = DomUtil.GetElementText(exist_node, "price");
+            string strExistFixedPrice = DomUtil.GetElementText(exist_node, "fixedPrice");
+            string strExistDiscount = DomUtil.GetElementText(exist_node, "discount");
 
             string strChangedCopy = DomUtil.GetElementText(new_node, "copy");
             string strChangedPrice = DomUtil.GetElementText(new_node, "price");
+            string strChangedFixedPrice = DomUtil.GetElementText(new_node, "fixedPrice");
+            string strChangedDiscount = DomUtil.GetElementText(new_node, "discount");
 
             // 比较两个复本字符串
             {
-                string strExistOldValue = "";
-                string strExistNewValue = "";
                 IssueItemDatabase.ParseOldNewValue(strExistCopy,
-            out strExistOldValue,
-            out strExistNewValue);
+            out string strExistOldValue,
+            out string strExistNewValue);
 
-                string strChangedOldValue = "";
-                string strChangedNewValue = "";
                 IssueItemDatabase.ParseOldNewValue(strChangedCopy,
-            out strChangedOldValue,
-            out strChangedNewValue);
+            out string strChangedOldValue,
+            out string strChangedNewValue);
 
                 if (strExistOldValue != strChangedOldValue)
                 {
@@ -312,17 +283,13 @@ namespace DigitalPlatform.LibraryServer
 
             // 比较两个价格字符串
             {
-                string strExistOldValue = "";
-                string strExistNewValue = "";
                 IssueItemDatabase.ParseOldNewValue(strExistPrice,
-            out strExistOldValue,
-            out strExistNewValue);
+            out string strExistOldValue,
+            out string strExistNewValue);
 
-                string strChangedOldValue = "";
-                string strChangedNewValue = "";
                 IssueItemDatabase.ParseOldNewValue(strChangedPrice,
-            out strChangedOldValue,
-            out strChangedNewValue);
+            out string strChangedOldValue,
+            out string strChangedNewValue);
 
                 if (strExistOldValue != strChangedOldValue)
                 {
@@ -332,6 +299,47 @@ namespace DigitalPlatform.LibraryServer
                 if (strExistNewValue != strChangedNewValue)
                 {
                     strError = "验收价(方括中的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
+                    return 1;
+                }
+            }
+
+            // 2018/7/31
+            // 比较两个码洋字符串
+            {
+                IssueItemDatabase.ParseOldNewValue(strExistFixedPrice,
+            out string strExistOldValue,
+            out string strExistNewValue);
+
+                IssueItemDatabase.ParseOldNewValue(strChangedFixedPrice,
+            out string strChangedOldValue,
+            out string strChangedNewValue);
+
+                if (strExistOldValue != strChangedOldValue)
+                {
+                    strError = "订购码洋(方括号左边的部分)不允许修改。(原来='" + strExistPrice + "', 新的='" + strChangedPrice + "')";
+                    return 1;
+                }
+                if (strExistNewValue != strChangedNewValue)
+                {
+                    strError = "验收码洋(方括中的部分)不允许修改。(原来='" + strExistPrice + "', 新的='" + strChangedPrice + "')";
+                    return 1;
+                }
+            }
+
+            // 2018/7/31
+            // 比较两个折扣字符串
+            {
+                IssueItemDatabase.ParseOldNewValue(strExistDiscount,
+            out string strExistOldValue,
+            out string strExistNewValue);
+
+                IssueItemDatabase.ParseOldNewValue(strChangedDiscount,
+            out string strChangedOldValue,
+            out string strChangedNewValue);
+
+                if (strExistOldValue != strChangedOldValue)
+                {
+                    strError = "订购折扣(方括号左边的部分)不允许修改。(原来='" + strExistCopy + "', 新的='" + strChangedCopy + "')";
                     return 1;
                 }
             }
@@ -498,12 +506,6 @@ namespace DigitalPlatform.LibraryServer
         {
             for (int i = 0; i < core_order_element_names.Length; i++)
             {
-                /*
-                string strText1 = DomUtil.GetElementText(domExist.DocumentElement,
-                    core_order_element_names[i]);
-                string strText2 = DomUtil.GetElementText(domOldRec.DocumentElement,
-                    core_order_element_names[i]);
-                 * */
                 // 2009/10/24 changed
                 string strText1 = DomUtil.GetElementOuterXml(domExist.DocumentElement,
                     core_order_element_names[i]);

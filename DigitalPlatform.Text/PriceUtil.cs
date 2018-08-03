@@ -460,15 +460,12 @@ namespace DigitalPlatform.Text
         // 货币单位不同的，互相独立
         // 本函数主要用于显示，可以自动处理出错情况 -- 把错误字符串当作结果返回
         // return:
-        //      汇总后的价格字符串
+        //      汇总后的价格字符串，或者报错信息
         public static string TotalPrice(List<string> prices)
         {
-            string strResult = "";
-            string strError = "";
-
             int nRet = TotalPrice(prices,
-                out strResult,
-                out strError);
+                out string strResult,
+                out string strError);
             if (nRet == -1)
                 return strError;
 
@@ -857,6 +854,9 @@ namespace DigitalPlatform.Text
         {
             strError = "";
             prices = new List<string>();
+
+            if (strPrices == null)
+                strPrices = "";
 
             // 2018/2/6
             // 这里假定字符 ` 在数据中不常见。或者可以考虑使用一个更不常见的字符
@@ -1428,7 +1428,8 @@ namespace DigitalPlatform.Text
                 CurrencyItem item = items[i];
                 decimal value = item.Value;
 
-                string fmt = "0.00";    // #.##
+                // string fmt = "0.00";    // #.##
+                string fmt = CurrencyItem.fmt;
 
                 // 负号要放在最前面
                 if (value < 0)
@@ -1495,12 +1496,48 @@ namespace DigitalPlatform.Text
             return item;
         }
 
+#if NO
+        public string ToStringOrigin()
+        {
+            // 要去掉小数点两位以后的多余的 0
+            // https://msdn.microsoft.com/en-us/library/fzeeb5cd(v=vs.110).aspx
+            // https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-numeric-format-strings
+            return this.Prefix + this.Value.ToString("0.00##########################") + this.Postfix;
+        }
+#endif
+
+        public static string fmt = "0.00##########################";  // 两位小数(包括0)，或者多于两位(去掉了多余的0)
+
         public override string ToString()
         {
-            string fmt = "0.00";    // #.##
+            // "0.00";    // #.##
 
             return this.Prefix + this.Value.ToString(fmt) + this.Postfix;
             // 注: value.ToString("#.##") 采用的是四舍五入的方法
+        }
+
+        public bool IsEqual(CurrencyItem item, string strDefaultPrefix)
+        {
+            string strThisPrefix = this.Prefix;
+            string strItemPrefix = item.Prefix;
+
+            if (string.IsNullOrEmpty(strThisPrefix) && string.IsNullOrEmpty(this.Postfix))
+                strThisPrefix = strDefaultPrefix;
+            if (string.IsNullOrEmpty(strItemPrefix) && string.IsNullOrEmpty(item.Postfix))
+                strItemPrefix = strDefaultPrefix;
+
+            if (this.Prefix != item.Prefix
+                || this.Value != item.Value
+                || this.Postfix != item.Postfix)
+                return false;
+            return true;
+        }
+
+        // 给空的 Prefix 设置默认值
+        public void EnsurePrefix(string strPrefix)
+        {
+            if (string.IsNullOrEmpty(this.Prefix) && string.IsNullOrEmpty(this.Postfix))
+                this.Prefix = strPrefix;
         }
     }
 }

@@ -5902,20 +5902,22 @@ out strError);
             if (this.IsbnSplitter != null)
                 return 0;
 
+            string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
+
             REDO:
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(this.DataDir + "\\rangemessage.xml");  // "\\isbn.xml"
+                this.IsbnSplitter = new IsbnSplitter(strFileName);  // "\\isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
-                strError = "装载本地 isbn 规则文件 rangemessage.xml 发生错误 :" + ex.Message;
+                strError = "装载本地 isbn 规则文件 "+strFileName+" 发生错误 :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
                     string strError1 = "";
-                    int nRet = this.DownloadDataFile("rangemessage.xml",    // "isbn.xml"
+                    int nRet = this.DownloadDataFile(Path.GetFileName(strFileName),    // "isbn.xml"
                         out strError1);
                     if (nRet == -1)
                     {
