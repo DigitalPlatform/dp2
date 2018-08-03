@@ -2369,6 +2369,8 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // TODO: 检查 discount 元素是否合法。为 0.80[0.90] 这样的形态
+
             return 0;
         }
 
