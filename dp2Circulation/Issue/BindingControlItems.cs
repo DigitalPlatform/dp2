@@ -762,10 +762,10 @@ namespace dp2Circulation
         {
             string strTempNewValue = "";
             string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(strExistString,
+            dp2StringUtil.ParseOldNewValue(strExistString,
                 out strOldValue,
                 out strTempNewValue);
-            return OrderDesignControl.LinkOldNewValue(strOldValue,
+            return dp2StringUtil.LinkOldNewValue(strOldValue,
                 strNewValue);
         }
 
@@ -774,7 +774,7 @@ namespace dp2Circulation
         {
             string strNewValue = "";
             string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
             return strNewValue;
@@ -786,7 +786,7 @@ namespace dp2Circulation
         {
             string strNewValue = "";
             string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
             if (String.IsNullOrEmpty(strNewValue) == false)
@@ -799,7 +799,7 @@ namespace dp2Circulation
         {
             string strNewValue = "";
             string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
             if (String.IsNullOrEmpty(strOldValue) == false)
@@ -812,7 +812,7 @@ namespace dp2Circulation
         {
             string strNewValue = "";
             string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
             return strOldValue;
@@ -1976,11 +1976,9 @@ namespace dp2Circulation
                             // 仅仅修改<copy>里面的oldvalue部分；增补<distribute>
                             // 
                             string strCopy = DomUtil.GetElementText(node, "copy");
-                            string strNewValue = "";
-                            string strOldValue = "";
-                            OrderDesignControl.ParseOldNewValue(strCopy,
-                                out strOldValue,
-                                out strNewValue);
+                            dp2StringUtil.ParseOldNewValue(strCopy,
+                                out string strOldValue,
+                                out string strNewValue);
 
                             string strDistribute = DomUtil.GetElementText(node, "distribute");
 
@@ -1999,13 +1997,11 @@ namespace dp2Circulation
 
                             DomUtil.SetElementText(node, "distribute", strMerged);
                             strCopy = DomUtil.GetElementText(node, "copy");
-                            string strNewValue1 = "";
-                            string strOldValue1 = "";
-                            OrderDesignControl.ParseOldNewValue(strCopy,
-                                out strOldValue1,
-                                out strNewValue1);
+                            dp2StringUtil.ParseOldNewValue(strCopy,
+                                out string strOldValue1,
+                                out string strNewValue1);
                             DomUtil.SetElementText(node, "copy",
-                                OrderDesignControl.LinkOldNewValue(strOldValue1,
+                                dp2StringUtil.LinkOldNewValue(strOldValue1,
                                 strNewValue));
 
                             /*
@@ -7794,11 +7790,9 @@ rectFrame);
         {
             strError = "";
 
-            string strNewValue = "";
-            string strOldValue = "";
-            OrderDesignControl.ParseOldNewValue(this.Copy,
-                out strOldValue,
-                out strNewValue);
+            dp2StringUtil.ParseOldNewValue(this.Copy,
+                out string strOldValue,
+                out string strNewValue);
             int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
             int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
 
@@ -7831,7 +7825,7 @@ rectFrame);
 
             if (bChanged == true)
             {
-                this.Copy = OrderDesignControl.LinkOldNewValue(nOldCopy.ToString(),
+                this.Copy = dp2StringUtil.LinkOldNewValue(nOldCopy.ToString(),
          nNewCopy.ToString());
                 return 1;
             }
@@ -7875,11 +7869,9 @@ rectFrame);
             // 刷新<copy>元素中的订购和已到册数值
             if (nOrderCountDelta != 0 || nArrivedCountDelta != 0)
             {
-                string strNewValue = "";
-                string strOldValue = "";
-                OrderDesignControl.ParseOldNewValue(this.Copy,
-                    out strOldValue,
-                    out strNewValue);
+                dp2StringUtil.ParseOldNewValue(this.Copy,
+                    out string strOldValue,
+                    out string strNewValue);
                 int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
                 int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
                 nOldCopy += nOrderCountDelta;
@@ -7899,7 +7891,7 @@ rectFrame);
                 }
 
                 Debug.Assert(nNewCopy >= 0, "");
-                this.Copy = OrderDesignControl.LinkOldNewValue(nOldCopy.ToString(),
+                this.Copy = dp2StringUtil.LinkOldNewValue(nOldCopy.ToString(),
                      nNewCopy.ToString());
             }
 

@@ -4321,7 +4321,7 @@ out strError);
             string strNewValue = "";
 
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strCopy,
+            dp2StringUtil.ParseOldNewValue(strCopy,
                 out strOldValue,
                 out strNewValue);
             if ((string.IsNullOrEmpty(strOldValue) == true || strOldValue == "0")
@@ -4362,7 +4362,7 @@ out strError);
             string strNewValue = "";
 
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
 

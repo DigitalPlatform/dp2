@@ -332,64 +332,6 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // 修改复本字符串中的套数部分
-        // parameters:
-        //      strText     待修改的整个复本字符串
-        //      strCopy     要改成的套数部分
-        // return:
-        //      返回修改后的整个复本字符串
-        public static string ModifyCopy(string strText, string strCopy)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return strCopy;
-
-            return strCopy + "*" + strText.Substring(nRet + 1).Trim();
-        }
-
-        // 修改复本字符串中的套内册数部分
-        // parameters:
-        //      strText     待修改的整个复本字符串
-        //      strRightCopy     要改成的套内册数部分
-        // return:
-        //      返回修改后的整个复本字符串
-        public static string ModifyRightCopy(string strText, string strRightCopy)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-            {
-                if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
-                    return strText;
-                return strText + "*" + strRightCopy;
-            }
-
-            if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
-                return strText.Substring(0, nRet).Trim();
-
-            return strText.Substring(0, nRet).Trim() + "*" + strRightCopy;
-        }
-
-        // 从复本数字符串中得到套数部分
-        // 也就是 "3*5"返回"3"部分。如果只有一个数字，就取它
-        public static string GetCopyFromCopyString(string strText)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return strText;
-
-            return strText.Substring(0, nRet).Trim();
-        }
-
-        // 从复本数字符串中得到套内册数部分
-        // 也就是 "3*5"返回"5"部分。如果只有一个数字，就返回""
-        public static string GetRightFromCopyString(string strText)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return "";
-
-            return strText.Substring(nRet + 1).Trim();
-        }
 
         // return:
         //      -1  error
@@ -1407,50 +1349,8 @@ namespace DigitalPlatform.CommonControl
             return item;
         }
 
-        // TODO: 代码移动到OrderDesignControl中
-        public static string LinkOldNewValue(string strOldValue,
-            string strNewValue)
-        {
-            if (String.IsNullOrEmpty(strNewValue) == true)
-                return strOldValue;
-
-            if (strOldValue == strNewValue)
-            {
-                if (String.IsNullOrEmpty(strOldValue) == true)  // 新旧均为空
-                    return "";
-
-                return strOldValue + "[=]";
-            }
-
-            return strOldValue + "[" + strNewValue + "]";
-        }
 
 
-        // 分离 "old[new]" 内的两个值
-        public static void ParseOldNewValue(string strValue,
-            out string strOldValue,
-            out string strNewValue)
-        {
-            strOldValue = "";
-            strNewValue = "";
-            int nRet = strValue.IndexOf("[");
-            if (nRet == -1)
-            {
-                strOldValue = strValue;
-                strNewValue = "";
-                return;
-            }
-
-            strOldValue = strValue.Substring(0, nRet).Trim();
-            strNewValue = strValue.Substring(nRet + 1).Trim();
-
-            // 去掉末尾的']'
-            if (strNewValue.Length > 0 && strNewValue[strNewValue.Length - 1] == ']')
-                strNewValue = strNewValue.Substring(0, strNewValue.Length - 1);
-
-            if (strNewValue == "=")
-                strNewValue = strOldValue;
-        }
 
         // 根据缺省XML订购记录填充必要的字段
         int SetDefaultRecord(Item item,
@@ -1504,7 +1404,7 @@ namespace DigitalPlatform.CommonControl
 
             string strNewSource = "";
             string strOldSource = "";
-            ParseOldNewValue(strSource,
+            dp2StringUtil.ParseOldNewValue(strSource,
                 out strOldSource,
                 out strNewSource);
 
@@ -1530,7 +1430,7 @@ namespace DigitalPlatform.CommonControl
 
                 string strNewCopy = "";
                 string strOldCopy = "";
-                ParseOldNewValue(strCopy,
+                dp2StringUtil.ParseOldNewValue(strCopy,
                     out strOldCopy,
                     out strNewCopy);
 
@@ -1587,7 +1487,7 @@ namespace DigitalPlatform.CommonControl
                 string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
                     "fixedPrice");
 
-                ParseOldNewValue(strFixedPrice,
+                dp2StringUtil.ParseOldNewValue(strFixedPrice,
                     out string strOldPrice,
                     out string strNewPrice);
 
@@ -1604,7 +1504,7 @@ namespace DigitalPlatform.CommonControl
                 string strDiscount = DomUtil.GetElementText(dom.DocumentElement,
                         "discount");
 
-                ParseOldNewValue(strDiscount,
+                dp2StringUtil.ParseOldNewValue(strDiscount,
                     out string strOldValue,
                     out string strNewValue);
 
@@ -1639,7 +1539,7 @@ namespace DigitalPlatform.CommonControl
                 string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                     "price");
 
-                ParseOldNewValue(strPrice,
+                dp2StringUtil.ParseOldNewValue(strPrice,
                     out string strOldPrice,
                     out string strNewPrice);
 
@@ -2522,15 +2422,15 @@ namespace DigitalPlatform.CommonControl
         {
             strError = "";
 
-            ParseOldNewValue(strFixedPrice,
+            dp2StringUtil.ParseOldNewValue(strFixedPrice,
     out string strOldFixedPrice,
     out string strNewFixedPrice);
 
-            ParseOldNewValue(strDiscount,
+            dp2StringUtil.ParseOldNewValue(strDiscount,
 out string strOldDiscount,
 out string strNewDiscount);
 
-            ParseOldNewValue(strOrderPrice,
+            dp2StringUtil.ParseOldNewValue(strOrderPrice,
 out string strOldOrderPrice,
 out string strNewOrderPrice);
 
@@ -2673,6 +2573,40 @@ out string strNewOrderPrice);
                 strError = ex.Message;
                 return -1;
             }
+        }
+
+        // 价格乘以一个倍率
+        // 注：可以处理 "{CNY10.00}" 这样的字符串。结果字符串依然保留 {} 形态
+        public static string MultiplePrice(string price,
+            int count,
+            string position)
+        {
+            string changed_price = StringUtil.Unquote(price, "{}");
+
+            int nRet = PriceUtil.MultiPrice(changed_price, count, out string result, out string strError);
+            if (nRet == -1)
+                throw new PositionException(strError, position);
+            if (string.IsNullOrEmpty(price) == false && price[0] == '{')
+                return "{" + result + "}";
+            return result;
+        }
+
+        // 累加价格字符串
+        // 注：可以处理 "{CNY10.00}" 这样的字符串。但结果字符串不带有 {}
+        public static string GetTotalPrice(List<string> prices,
+            string strPosition)
+        {
+            List<string> changed_prices = new List<string>();
+            foreach (string price in prices)
+            {
+                changed_prices.Add(StringUtil.Unquote(price, "{}"));
+            }
+            int nRet = PriceUtil.TotalPrice(changed_prices,
+    out string strResult,
+    out string strError);
+            if (nRet == -1)
+                throw new PositionException(strError, strPosition);
+            return strResult;
         }
     }
 
@@ -3756,23 +3690,23 @@ out string strNewOrderPrice);
             string strCount = this.location.ArrivedCount.ToString();
 
             // 2010/12/1
-            string strCopy = OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text);
+            string strCopy = dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text);
 
             if (strCopy != strCount)
             {
                 // 如果到书copy字符串为空，则需要从订购copy字符串中寻找可能的套内册数
                 if (String.IsNullOrEmpty(this.comboBox_copy.Text) == true)
                 {
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(this.comboBox_copy.OldText);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(this.comboBox_copy.OldText);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                     {
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
                         return;
                     }
                 }
 
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
             }
 
 
@@ -3935,7 +3869,7 @@ out string strNewOrderPrice);
             {
                 // location控件联动
                 // 2010/12/1 changed
-                int nCopy = Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                int nCopy = Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
 
                 // 如果当前为订购模式
                 if (this.Container.ArriveMode == false)
@@ -3974,7 +3908,7 @@ out string strNewOrderPrice);
                         {
                             // 2010/12/1 changed
                             // this.comboBox_copy.Text = this.location.ArrivedCount.ToString();    // 恢复原来的值或者最近可用的值
-                            this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                            this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                                 this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                             return;
                         }
@@ -3995,7 +3929,7 @@ out string strNewOrderPrice);
                         // this.comboBox_copy.Text = this.location.ArrivedCount.ToString(); 
                         // 恢复原来的值或者最近可用的值
                         // 2010/12/1 changed
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                             this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                         return;
                     }
@@ -4698,7 +4632,7 @@ out string strNewOrderPrice);
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
                 }
                 catch
                 {
@@ -4709,7 +4643,7 @@ out string strNewOrderPrice);
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.Text = value.ToString();
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, value.ToString());
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, value.ToString());
             }
         }
 
@@ -4735,7 +4669,7 @@ out string strNewOrderPrice);
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.OldText));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.OldText));
                 }
                 catch
                 {
@@ -4746,7 +4680,7 @@ out string strNewOrderPrice);
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.OldText = value.ToString();
-                this.comboBox_copy.OldText = OrderDesignControl.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
+                this.comboBox_copy.OldText = dp2StringUtil.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
             }
         }
 
@@ -4823,7 +4757,7 @@ out string strNewOrderPrice);
             {
                 try
                 {
-                    return Convert.ToDecimal(OrderDesignControl.GetCopyFromCopyString(this.comboBox_discount.OldText));
+                    return Convert.ToDecimal(dp2StringUtil.GetCopyFromCopyString(this.comboBox_discount.OldText));
                 }
                 catch
                 {
@@ -4832,7 +4766,7 @@ out string strNewOrderPrice);
             }
             set
             {
-                this.comboBox_discount.OldText = OrderDesignControl.ModifyCopy(this.comboBox_discount.OldText, value.ToString());
+                this.comboBox_discount.OldText = dp2StringUtil.ModifyCopy(this.comboBox_discount.OldText, value.ToString());
             }
         }
 
@@ -5322,21 +5256,21 @@ out string strNewOrderPrice);
             DomUtil.SetElementText(dom.DocumentElement,
                 "seller", this.Seller);
             DomUtil.SetElementText(dom.DocumentElement,
-                "source", OrderDesignControl.LinkOldNewValue(this.OldSource, this.Source));
+                "source", dp2StringUtil.LinkOldNewValue(this.OldSource, this.Source));
             DomUtil.SetElementText(dom.DocumentElement,
                 "range", this.RangeString);
             DomUtil.SetElementText(dom.DocumentElement,
                 "issueCount", this.IssueCountString);
             DomUtil.SetElementText(dom.DocumentElement,
-                "copy", OrderDesignControl.LinkOldNewValue(this.OldCopyString, this.CopyString));
+                "copy", dp2StringUtil.LinkOldNewValue(this.OldCopyString, this.CopyString));
             DomUtil.SetElementText(dom.DocumentElement,
-    "fixedPrice", OrderDesignControl.LinkOldNewValue(this.OldFixedPrice, this.FixedPrice));
+    "fixedPrice", dp2StringUtil.LinkOldNewValue(this.OldFixedPrice, this.FixedPrice));
             DomUtil.SetElementText(dom.DocumentElement,
-    "discount", OrderDesignControl.LinkOldNewValue(this.OldDiscount, this.Discount));
+    "discount", dp2StringUtil.LinkOldNewValue(this.OldDiscount, this.Discount));
 
 
             DomUtil.SetElementText(dom.DocumentElement,
-                "price", OrderDesignControl.LinkOldNewValue(this.OldPrice, this.Price));
+                "price", dp2StringUtil.LinkOldNewValue(this.OldPrice, this.Price));
             DomUtil.SetElementText(dom.DocumentElement,
                 "distribute", this.Distribute);
             DomUtil.SetElementText(dom.DocumentElement,
@@ -5451,4 +5385,6 @@ VerifyLibraryCodeEventArgs e);
         /// </summary>
         public string ErrorInfo = "";   // [out]检查结果。非空表示检查发现了问题
     }
+
+
 }

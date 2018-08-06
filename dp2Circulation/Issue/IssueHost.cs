@@ -2264,13 +2264,13 @@ out strError);
                 string strOldValue = "";
                 string strNewValue = "";
                 // 分离 "old[new]" 内的两个值
-                OrderDesignControl.ParseOldNewValue(this.Copy,
+                dp2StringUtil.ParseOldNewValue(this.Copy,
                     out strOldValue,
                     out strNewValue);
 
                 // 可能有乘号
-                string strLeftCopy = OrderDesignControl.GetCopyFromCopyString(strOldValue);
-                string strRightCopy = OrderDesignControl.GetRightFromCopyString(strOldValue);
+                string strLeftCopy = dp2StringUtil.GetCopyFromCopyString(strOldValue);
+                string strRightCopy = dp2StringUtil.GetRightFromCopyString(strOldValue);
 
                 try
                 {
@@ -2293,13 +2293,13 @@ out strError);
                 string strOldValue = "";
                 string strNewValue = "";
                 // 分离 "old[new]" 内的两个值
-                OrderDesignControl.ParseOldNewValue(this.Copy,
+                dp2StringUtil.ParseOldNewValue(this.Copy,
                     out strOldValue,
                     out strNewValue);
 
                 // 可能有乘号
-                string strLeftCopy = OrderDesignControl.GetCopyFromCopyString(strNewValue);
-                string strRightCopy = OrderDesignControl.GetRightFromCopyString(strNewValue);
+                string strLeftCopy = dp2StringUtil.GetCopyFromCopyString(strNewValue);
+                string strRightCopy = dp2StringUtil.GetRightFromCopyString(strNewValue);
 
                 try
                 {

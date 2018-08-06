@@ -2332,7 +2332,6 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
-            int nRet = 0;
 
             string strOrderTime = DomUtil.GetElementText(itemdom.DocumentElement, "orderTime");
 
@@ -2345,7 +2344,7 @@ namespace DigitalPlatform.LibraryServer
                 catch (Exception ex)
                 {
                     strError = "订购日期字符串 '" + strOrderTime + "' 格式错误: " + ex.Message;
-                    return -1;
+                    return 1;
                 }
             }
 
@@ -2359,17 +2358,173 @@ namespace DigitalPlatform.LibraryServer
                 // return:
                 //      -1  出错
                 //      0   正确
-                nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                int nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
                     true,   // TODO: 期刊要用 false
                     out strError);
                 if (nRet == -1)
                 {
                     strError = "时间范围字符串 '" + strRange + "' 格式错误: " + strError;
-                    return -1;
+                    return 1;
                 }
             }
 
-            // TODO: 检查 discount 元素是否合法。为 0.80[0.90] 这样的形态
+            {
+                string strIssueCount = DomUtil.GetElementText(itemdom.DocumentElement, "issueCount");
+
+                if (string.IsNullOrEmpty(strIssueCount) == false)
+                {
+                    if (Int32.TryParse(strIssueCount, out int value) == false)
+                    {
+                        strError = "期数 '"+strIssueCount+"' 不合法。应为正整数";
+                        return 1;
+                    }
+                }
+            }
+
+            {
+                // 检查 discount 元素是否合法。为 0.80[0.90] 这样的形态
+                string strDiscount = DomUtil.GetElementText(itemdom.DocumentElement, "discount");
+
+                if (string.IsNullOrEmpty(strDiscount) == false)
+                {
+                    OldNewValue discount = OldNewValue.Parse(strDiscount);
+                    if (string.IsNullOrEmpty(discount.OldValue) == false
+                        && decimal.TryParse(discount.OldValue, out decimal value) == false)
+                    {
+                        strError = "折扣字符串 '" + strDiscount + "' 中左边部分 '" + discount.OldValue + "' 不合法。应为一个小数";
+                        return -1;
+                    }
+                    if (string.IsNullOrEmpty(discount.NewValue) == false
+        && decimal.TryParse(discount.NewValue, out value) == false)
+                    {
+                        strError = "折扣字符串 '" + strDiscount + "' 中右边部分 '" + discount.NewValue + "' 不合法。应为一个小数";
+                        return -1;
+                    }
+                }
+            }
+
+            {
+                // 检查 fixedPrice 字段值是否合法
+                string strFixedPrice = DomUtil.GetElementText(itemdom.DocumentElement, "fixedPrice");
+
+                if (string.IsNullOrEmpty(strFixedPrice) == false)
+                {
+                    string strPosition = "码洋字段";
+                    // 检查订购价字段内容是否合法
+                    // return:
+                    //      -1  校验过程出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    int nRet = dp2StringUtil.VerifyOrderPriceField(strFixedPrice, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return 1;
+                    }
+                }
+            }
+
+            {
+                // 检查 price 字段值是否合法
+                string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+
+                if (string.IsNullOrEmpty(strPrice) == false)
+                {
+                    string strPosition = "单价字段";
+                    // 检查订购价字段内容是否合法
+                    // return:
+                    //      -1  校验过程出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    int nRet = dp2StringUtil.VerifyOrderPriceField(strPrice, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return 1;
+                    }
+                }
+            }
+
+            {
+                // 检查 totalPrice 字段值是否合法
+                string strTotalPrice = DomUtil.GetElementText(itemdom.DocumentElement, "totalPrice");
+
+                if (string.IsNullOrEmpty(strTotalPrice) == false)
+                {
+                    string strPosition = "总价字段";
+                    // 检查订购价字段内容是否合法
+                    // return:
+                    //      -1  校验过程出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    int nRet = dp2StringUtil.VerifyOrderPriceField(strTotalPrice, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return 1;
+                    }
+                }
+            }
+
+            {
+                // 检查 copy 字段值是否合法
+                string strCopy = DomUtil.GetElementText(itemdom.DocumentElement, "copy");
+
+                if (string.IsNullOrEmpty(strCopy) == false)
+                {
+                    string strPosition = "复本字段";
+                    // 检查订购价字段内容是否合法
+                    // return:
+                    //      -1  校验过程出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    int nRet = dp2StringUtil.VerifyOrderCopyField(strCopy, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return -1;
+                    }
+                    if (nRet == 1)
+                    {
+                        strError = strPosition + ": " + strError;
+                        return 1;
+                    }
+                }
+            }
+
+            {
+                // 检查 distribute 字段是否合法
+                // 验证馆藏分配字符串
+                string strDistribute = DomUtil.GetElementText(itemdom.DocumentElement, "distribute");
+
+                if (string.IsNullOrEmpty(strDistribute) == false)
+                {
+                    LocationCollection locations = new LocationCollection();
+                    int nRet = locations.Build(strDistribute, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "馆藏分配字符串 '" + strDistribute + "' 格式错误: " + strError;
+                        return 1;
+                    }
+                }
+            }
+
+            // 检查几个字段值之间的相互运算关系
 
             return 0;
         }

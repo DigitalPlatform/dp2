@@ -1123,17 +1123,17 @@ namespace dp2Circulation
                 orderitem.CatalogNo = design_item.CatalogNo;    // 2008/8/31
                 orderitem.Seller = design_item.Seller;
 
-                orderitem.Source = OrderDesignControl.LinkOldNewValue(design_item.OldSource, design_item.Source);
+                orderitem.Source = dp2StringUtil.LinkOldNewValue(design_item.OldSource, design_item.Source);
 
                 orderitem.Range = design_item.RangeString;  // 2008/12/17
                 orderitem.IssueCount = design_item.IssueCountString;    // 2008/12/17
 
-                orderitem.Copy = OrderDesignControl.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
+                orderitem.Copy = dp2StringUtil.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
 
-                orderitem.FixedPrice = OrderDesignControl.LinkOldNewValue(design_item.OldFixedPrice, design_item.FixedPrice);
-                orderitem.Discount = OrderDesignControl.LinkOldNewValue(design_item.OldDiscount, design_item.Discount);
+                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValue(design_item.OldFixedPrice, design_item.FixedPrice);
+                orderitem.Discount = dp2StringUtil.LinkOldNewValue(design_item.OldDiscount, design_item.Discount);
 
-                orderitem.Price = OrderDesignControl.LinkOldNewValue(design_item.OldPrice, design_item.Price);
+                orderitem.Price = dp2StringUtil.LinkOldNewValue(design_item.OldPrice, design_item.Price);
 
                 // 2018/8/2
                 orderitem.TotalPrice = design_item.TotalPrice;
@@ -1345,7 +1345,7 @@ namespace dp2Circulation
                 // 2010/12/1 add
                 string strOldCopyValue = "";
                 string strNewCopyValue = "";
-                OrderDesignControl.ParseOldNewValue(order_item.Copy,
+                dp2StringUtil.ParseOldNewValue(order_item.Copy,
                     out strOldCopyValue,
                     out strNewCopyValue);
                 string strCopyString = strNewCopyValue;
@@ -1354,7 +1354,7 @@ namespace dp2Circulation
 
                 // 2010/12/1 add
                 int nRightCopy = 1;  // 套内册数
-                string strRightCopy = OrderDesignControl.GetRightFromCopyString(strCopyString);
+                string strRightCopy = dp2StringUtil.GetRightFromCopyString(strCopyString);
                 if (String.IsNullOrEmpty(strRightCopy) == false)
                 {
                     try
@@ -1427,7 +1427,7 @@ namespace dp2Circulation
 
                             // source内采用新值
                             // 分离 "old[new]" 内的两个值
-                            OrderDesignControl.ParseOldNewValue(order_item.Source,
+                            dp2StringUtil.ParseOldNewValue(order_item.Source,
                                 out strOldValue,
                                 out strNewValue);
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -1435,7 +1435,7 @@ namespace dp2Circulation
                         }
 
                         // 分离两个价格
-                        OrderDesignControl.ParseOldNewValue(order_item.Price,
+                        dp2StringUtil.ParseOldNewValue(order_item.Price,
                             out string strOrderPrice,
                             out string strArrivePrice);
                         string strPriceValue = "";
