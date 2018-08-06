@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
 using System.Web;
 
-using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 
@@ -23,8 +19,8 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using static DigitalPlatform.CommonControl.OrderDesignControl;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -147,30 +143,56 @@ namespace dp2Circulation
         /// 原始数据列号: 订购时间
         /// </summary>
         public static int ORIGIN_COLUMN_ORDERTIME = 17;    // 订购时间
+
+        /// <summary>
+        /// 原始数据列号: (订购记录中的)订购码洋
+        /// </summary>
+        public static int ORIGIN_COLUMN_ORDER_FIXEDPRICE = 18;
+
+        /// <summary>
+        /// 原始数据列号: (订购记录中的)订购折扣
+        /// </summary>
+        public static int ORIGIN_COLUMN_ORDER_DISCOUNT = 19;
+
         /// <summary>
         /// 原始数据列号: (订购记录中的)订购价
         /// </summary>
-        public static int ORIGIN_COLUMN_ORDERPRICE = 18;    // (订购记录中的)订购价
+        public static int ORIGIN_COLUMN_ORDER_PRICE = 20;    // (订购记录中的)订购价
+
+        /// <summary>
+        /// 原始数据列号: (订购记录中的)到书码洋
+        /// </summary>
+        public static int ORIGIN_COLUMN_ACCEPT_FIXEDPRICE = 21;
+
+
+        /// <summary>
+        /// 原始数据列号: (订购记录中的)到书折扣
+        /// </summary>
+        public static int ORIGIN_COLUMN_ACCEPT_DISCOUNT = 22;
+
+
         /// <summary>
         /// 原始数据列号: (订购记录中的)到书价
         /// </summary>
-        public static int ORIGIN_COLUMN_ACCEPTPRICE = 19;    // (订购记录中的)到书价
+        public static int ORIGIN_COLUMN_ACCEPT_PRICE = 23;    // (订购记录中的)到书价
         /// <summary>
         /// 原始数据列号: 所关联的订购记录的渠道地址
         /// </summary>
-        public static int ORIGIN_COLUMN_SELLERADDRESS = 20;    // 所关联的订购记录的渠道地址
+        public static int ORIGIN_COLUMN_SELLERADDRESS = 24;    // 所关联的订购记录的渠道地址
         /// <summary>
         /// 原始数据列号: 所关联的订购记录路径
         /// </summary>
-        public static int ORIGIN_COLUMN_ORDERRECPATH = 21;    // 所关联的订购记录路径
+        public static int ORIGIN_COLUMN_ORDERRECPATH = 25;    // 所关联的订购记录路径
+
+        // TODO: ORIGIN_COLUMN_ACCEPTSUBCOPY 名字容易引起误解，需要修改
         /// <summary>
-        /// 原始数据列号: 套内详情
+        /// 原始数据列号: 套内详情 
         /// </summary>
-        public static int ORIGIN_COLUMN_ACCEPTSUBCOPY = 22;    // 套内详情 1:2 第一套内的第二册
+        public static int ORIGIN_COLUMN_ACCEPTSUBCOPY = 26;    // 套内详情 1:2 第一套内的第二册
         /// <summary>
         /// 原始数据列号: 订购时的每套册数
         /// </summary>
-        public static int ORIGIN_COLUMN_ORDERSUBCOPY = 23;    // 订购时的每套册数
+        public static int ORIGIN_COLUMN_ORDERSUBCOPY = 27;    // 订购时的每套册数
 
         #endregion
 
@@ -227,50 +249,89 @@ namespace dp2Circulation
         /// 合并后数据列号: 每套册数
         /// </summary>
         public static int MERGED_COLUMN_SUBCOPY = 10;              // 每套册数
+
+        /// <summary>
+        /// 合并后数据列号: 订购码洋
+        /// </summary>
+        public static int MERGED_COLUMN_ORDER_FIXEDPRICE = 11;             // 订购码洋
+
+        /// <summary>
+        /// 合并后数据列号: 订购折扣
+        /// </summary>
+        public static int MERGED_COLUMN_ORDER_DISCOUNT = 12;             // 订购折扣
+
         /// <summary>
         /// 合并后数据列号: 订购单价
         /// </summary>
-        public static int MERGED_COLUMN_ORDERPRICE = 11;             // 订购单价
+        public static int MERGED_COLUMN_ORDER_PRICE = 13;             // 订购单价
+
+        /// <summary>
+        /// 合并后数据列号: (订购)总价格
+        /// </summary>
+        public static int MERGED_COLUMN_ORDER_TOTALPRICE = 14;        // (订购)总价格
+
+        /// <summary>
+        /// 合并后数据列号: (订购)总码洋
+        /// </summary>
+        public static int MERGED_COLUMN_ORDER_TOTALFIXEDPRICE = 15;        // (订购)总码洋
+
+        /// <summary>
+        /// 合并后数据列号: 验收码洋
+        /// </summary>
+        public static int MERGED_COLUMN_ACCEPT_FIXEDPRICE = 16;             // 验收码洋
+
+        /// <summary>
+        /// 合并后数据列号: 验收折扣
+        /// </summary>
+        public static int MERGED_COLUMN_ACCEPT_DISCOUNT = 17;             // 验收折扣
+
         /// <summary>
         /// 合并后数据列号: (验收)单价
         /// </summary>
-        public static int MERGED_COLUMN_PRICE = 12;             // (验收)单价
+        public static int MERGED_COLUMN_ACCEPT_PRICE = 18;             // (验收)单价
+
         /// <summary>
-        /// 合并后数据列号: 总价格
+        /// 合并后数据列号: (验收)总价格
         /// </summary>
-        public static int MERGED_COLUMN_TOTALPRICE = 13;        // 总价格
+        public static int MERGED_COLUMN_ACCEPT_TOTALPRICE = 19;        // (验收)总价格
+
+        /// <summary>
+        /// 合并后数据列号: (验收)总码洋
+        /// </summary>
+        public static int MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE = 20;        // (验收)总码洋
+
         /// <summary>
         /// 合并后数据列号: 实体(册)单价
         /// </summary>
-        public static int MERGED_COLUMN_ITEMPRICE = 14;             // 实体(册)单价
+        public static int MERGED_COLUMN_ITEMPRICE = 21;             // 实体(册)单价
         /// <summary>
         /// 合并后数据列号: 订购时间
         /// </summary>
-        public static int MERGED_COLUMN_ORDERTIME = 15;        // 订购时间
+        public static int MERGED_COLUMN_ORDERTIME = 22;        // 订购时间
         /// <summary>
         /// 合并后数据列号: 订单号
         /// </summary>
-        public static int MERGED_COLUMN_ORDERID = 16;          // 订单号
+        public static int MERGED_COLUMN_ORDERID = 23;          // 订单号
         /// <summary>
         /// 合并后数据列号: 馆藏分配
         /// </summary>
-        public static int MERGED_COLUMN_DISTRIBUTE = 17;       // 馆藏分配
+        public static int MERGED_COLUMN_DISTRIBUTE = 24;       // 馆藏分配
         /// <summary>
         /// 合并后数据列号: 类别
         /// </summary>
-        public static int MERGED_COLUMN_CLASS = 18;             // 类别
+        public static int MERGED_COLUMN_CLASS = 25;             // 类别
         /// <summary>
         /// 合并后数据列号: 附注
         /// </summary>
-        public static int MERGED_COLUMN_COMMENT = 19;          // 附注
+        public static int MERGED_COLUMN_COMMENT = 26;          // 附注
         /// <summary>
         /// 合并后数据列号: 渠道地址
         /// </summary>
-        public static int MERGED_COLUMN_SELLERADDRESS = 20;          // 渠道地址
+        public static int MERGED_COLUMN_SELLERADDRESS = 27;          // 渠道地址
         /// <summary>
         /// 合并后数据列号: 种记录路径
         /// </summary>
-        public static int MERGED_COLUMN_BIBLIORECPATH = 21;    // 种记录路径
+        public static int MERGED_COLUMN_BIBLIORECPATH = 28;    // 种记录路径
 
         #endregion
 
@@ -734,7 +795,7 @@ namespace dp2Circulation
 
                     sr = new StreamReader(strFilename);
 
-                    for (int i = 0; ; )
+                    for (int i = 0; ;)
                     {
                         if (stop != null && stop.State != 0)
                         {
@@ -858,7 +919,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             this.Text = "打印验收单";
             MessageBox.Show(this, strError);
         }
@@ -913,7 +974,6 @@ namespace dp2Circulation
 
                 // 将新加入的事项滚入视野
                 list.EnsureVisible(list.Items.Count - 1);
-
                 goto ERROR1;
             }
 
@@ -979,7 +1039,6 @@ namespace dp2Circulation
             }
 
             // 剖析一个册xml记录，取出有关信息放入listview中
-
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -992,6 +1051,7 @@ namespace dp2Circulation
             }
 
             {
+                // 把册信息列加入 ListView 创建一个新 ListViewItem
                 ListViewItem item = AddToListView(list,
                     dom,
                     strOutputOrderRecPath,
@@ -1013,7 +1073,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1033,6 +1093,8 @@ namespace dp2Circulation
 
             string strError = "";
             int nRet = 0;
+
+            string strPosition = "";
 
             XmlDocument dom = new XmlDocument();
             string strOrderOrIssueRecPath = "";
@@ -1074,6 +1136,8 @@ namespace dp2Circulation
                     strError = "订购记录XML装入DOM时出错: " + ex.Message;
                     goto ERROR1;
                 }
+
+                strPosition = "订购记录 '" + strOrderOrIssueRecPath + "' ";
             }
             else
             {
@@ -1148,6 +1212,8 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
+                strPosition = "订购记录 '" + strOrderOrIssueRecPath + "' 内，包含 '" + strRefID + "' 的订购记录片段中 ";
+
                 try
                 {
                     dom.LoadXml(strOrderXml);
@@ -1167,11 +1233,14 @@ namespace dp2Circulation
                 "class");
             string strOrderTime = DomUtil.GetElementText(dom.DocumentElement,
                 "orderTime");
-            string strPrice = DomUtil.GetElementText(dom.DocumentElement,
-                "price");
             string strSellerAddress = DomUtil.GetElementInnerXml(dom.DocumentElement,
                 "sellerAddress");
+            string strPrice = DomUtil.GetElementText(dom.DocumentElement,
+                "price");
 
+            var price = OldNewValue.Parse(strPrice);
+
+#if NO
             string strOrderPrice = "";  // 订购记录中的订购价
             string strAcceptPrice = "";    // 订购记录中的到书价
 
@@ -1188,16 +1257,31 @@ namespace dp2Circulation
                 strOrderPrice = strCurrentOldPrice;  // 订购记录中的订购价
                 strAcceptPrice = strCurrentNewPrice;    // 订购记录中的到书价
             }
+#endif
+
+            string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
+    "fixedPrice");
+            var fixedPrice = OldNewValue.Parse(strFixedPrice);
+
+            // 如果码洋为空，则用单价填充
+            if (string.IsNullOrEmpty(fixedPrice.OldValue) && string.IsNullOrEmpty(price.OldValue) == false)
+                fixedPrice.OldValue = "{" + price.OldValue + "}";
+            if (string.IsNullOrEmpty(fixedPrice.NewValue) && string.IsNullOrEmpty(price.NewValue) == false)
+                fixedPrice.NewValue = "{" + price.NewValue + "}";
+
+            string strDiscount = DomUtil.GetElementText(dom.DocumentElement,
+    "discount");
+            var discount = OldNewValue.Parse(strDiscount);
 
             // 2010/4/27
             // 如果期刊缺乏到书价
-            if (bSeries == true && string.IsNullOrEmpty(strAcceptPrice) == true)
+            if (bSeries == true && string.IsNullOrEmpty(price.NewValue) == true)
             {
                 // 先取册价格
-                strAcceptPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ITEMPRICE);
+                price.NewValue = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ITEMPRICE);
                 // 然后取订购价
-                if (String.IsNullOrEmpty(strAcceptPrice) == true)
-                    strAcceptPrice = strOrderPrice;
+                if (String.IsNullOrEmpty(price.NewValue) == true)
+                    price.NewValue = price.OldValue;
             }
 
             try
@@ -1213,8 +1297,28 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDERID, strOrderID);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDERCLASS, strClass);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDERTIME, strOrderTime);
-            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDERPRICE, strOrderPrice);
-            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPTPRICE, strAcceptPrice);
+
+            try
+            {
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDER_FIXEDPRICE, fixedPrice.OldValue);
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDER_DISCOUNT, dp2StringUtil.CanonicalizeDiscount(discount.OldValue, strPosition));
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDER_PRICE, price.OldValue);
+
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPT_FIXEDPRICE, fixedPrice.NewValue);
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPT_DISCOUNT, dp2StringUtil.CanonicalizeDiscount(discount.NewValue, strPosition));
+                ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPT_PRICE, price.NewValue);
+            }
+            catch (PositionException ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_SELLERADDRESS, strSellerAddress);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ORDERRECPATH, strOrderOrIssueRecPath);
 
@@ -1251,12 +1355,12 @@ namespace dp2Circulation
                 string strNewCopy = "";
 
                 // 分离 "old[new]" 内的两个值
-                OrderDesignControl.ParseOldNewValue(strCopy,
+                dp2StringUtil.ParseOldNewValue(strCopy,
                     out strOldCopy,
                     out strNewCopy);
 
                 // 订购时每套包含册数 2012/9/4
-                string strOrderRightCopy = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+                string strOrderRightCopy = dp2StringUtil.GetRightFromCopyString(strOldCopy);
                 if (string.IsNullOrEmpty(strOrderRightCopy) == true)
                     strOrderRightCopy = "1";
 
@@ -1265,7 +1369,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strCopyDetail) == false)
                 {
                     // 一套包含的册数
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(strNewCopy);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(strNewCopy);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                         strCopyDetail += "/" + strRightCopy;
                 }
@@ -1273,7 +1377,7 @@ namespace dp2Circulation
 
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ACCEPTSUBCOPY, strCopyDetail);
             return;
-        ERROR1:
+            ERROR1:
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ERRORINFO, strError);
             SetItemColor(item, TYPE_ERROR);
         }
@@ -1481,7 +1585,7 @@ namespace dp2Circulation
             long lRet = channel.GetIssueInfo(
                 stop,
                 strIndex,   // strPublishTime
-                // "", // strBiblioRecPath
+                            // "", // strBiblioRecPath
                 "xml",
                 out strItemXml,
                 out strItemRecPath,
@@ -1884,6 +1988,7 @@ namespace dp2Circulation
 
         }
 
+        // 把册信息列加入 ListView 创建一个新 ListViewItem
         /*public*/
         static ListViewItem AddToListView(ListView list,
             XmlDocument dom,
@@ -1906,7 +2011,7 @@ namespace dp2Circulation
             return item;
         }
 
-        // 根据订购记录DOM设置ListViewItem除第一列以外的文字
+        // 根据订购(??? 应该是册)记录DOM设置ListViewItem除第一列以外的文字
         // parameters:
         //      bSetBarcodeColumn   是否要设置第一列记录路径的内容
         /*public*/
@@ -2041,7 +2146,11 @@ namespace dp2Circulation
             ColumnHeader columnHeader_orderID = new ColumnHeader();
             ColumnHeader columnHeader_orderClass = new ColumnHeader();
             ColumnHeader columnHeader_orderTime = new ColumnHeader();
+            ColumnHeader columnHeader_orderFixedPrice = new ColumnHeader();
+            ColumnHeader columnHeader_orderDiscount = new ColumnHeader();
             ColumnHeader columnHeader_orderPrice = new ColumnHeader();
+            ColumnHeader columnHeader_acceptFixedPrice = new ColumnHeader();
+            ColumnHeader columnHeader_acceptDiscount = new ColumnHeader();
             ColumnHeader columnHeader_acceptPrice = new ColumnHeader();
             ColumnHeader columnHeader_sellerAddress = new ColumnHeader();
             ColumnHeader columnHeader_orderRecpath = new ColumnHeader();
@@ -2070,7 +2179,11 @@ namespace dp2Circulation
             columnHeader_orderID,
             columnHeader_orderClass,
             columnHeader_orderTime,
+                        columnHeader_orderFixedPrice,
+                                    columnHeader_orderDiscount,
             columnHeader_orderPrice,
+                                    columnHeader_acceptFixedPrice,
+                                    columnHeader_acceptDiscount,
             columnHeader_acceptPrice,
             columnHeader_sellerAddress,
             columnHeader_orderRecpath,
@@ -2174,11 +2287,35 @@ namespace dp2Circulation
             columnHeader_orderTime.Text = "订购时间";
             columnHeader_orderTime.Width = 150;
             // 
+            // columnHeader_orderFixedPrice
+            // 
+            columnHeader_orderFixedPrice.Text = "订购码洋";
+            columnHeader_orderFixedPrice.Width = 150;
+            columnHeader_orderFixedPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_orderDiscount
+            // 
+            columnHeader_orderDiscount.Text = "订购折扣";
+            columnHeader_orderDiscount.Width = 150;
+            columnHeader_orderDiscount.TextAlign = HorizontalAlignment.Right;
+            // 
             // columnHeader_orderPrice
             // 
             columnHeader_orderPrice.Text = "订购价";
             columnHeader_orderPrice.Width = 150;
             columnHeader_orderPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptFixedPrice
+            // 
+            columnHeader_acceptFixedPrice.Text = "到书码洋";
+            columnHeader_acceptFixedPrice.Width = 150;
+            columnHeader_acceptFixedPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptDiscount
+            // 
+            columnHeader_acceptDiscount.Text = "到书折扣";
+            columnHeader_acceptDiscount.Width = 150;
+            columnHeader_acceptDiscount.TextAlign = HorizontalAlignment.Right;
             // 
             // columnHeader_acceptPrice
             // 
@@ -2222,9 +2359,19 @@ namespace dp2Circulation
             ColumnHeader columnHeader_issueCount = new ColumnHeader();
             ColumnHeader columnHeader_copy = new ColumnHeader();
             ColumnHeader columnHeader_subcopy = new ColumnHeader();
+
+            ColumnHeader columnHeader_orderFixedPrice = new ColumnHeader();
+            ColumnHeader columnHeader_orderDiscount = new ColumnHeader();
             ColumnHeader columnHeader_orderPrice = new ColumnHeader();
-            ColumnHeader columnHeader_price = new ColumnHeader();
-            ColumnHeader columnHeader_totalPrice = new ColumnHeader();
+            ColumnHeader columnHeader_orderTotalPrice = new ColumnHeader();
+            ColumnHeader columnHeader_orderTotalFixedPrice = new ColumnHeader();
+
+            ColumnHeader columnHeader_acceptFixedPrice = new ColumnHeader();
+            ColumnHeader columnHeader_acceptDiscount = new ColumnHeader();
+            ColumnHeader columnHeader_acceptPrice = new ColumnHeader();
+            ColumnHeader columnHeader_acceptTotalPrice = new ColumnHeader();
+            ColumnHeader columnHeader_acceptTotalFixedPrice = new ColumnHeader();
+
             ColumnHeader columnHeader_itemPrice = new ColumnHeader();
             ColumnHeader columnHeader_orderTime = new ColumnHeader();
             ColumnHeader columnHeader_orderID = new ColumnHeader();
@@ -2248,9 +2395,19 @@ namespace dp2Circulation
             columnHeader_issueCount,
             columnHeader_copy,
             columnHeader_subcopy,
+
+            columnHeader_orderFixedPrice,
+            columnHeader_orderDiscount,
             columnHeader_orderPrice,
-            columnHeader_price,
-            columnHeader_totalPrice,
+            columnHeader_orderTotalPrice,
+            columnHeader_orderTotalFixedPrice,
+
+            columnHeader_acceptFixedPrice,
+            columnHeader_acceptDiscount,
+            columnHeader_acceptPrice,
+            columnHeader_acceptTotalPrice,
+            columnHeader_acceptTotalFixedPrice,
+
             columnHeader_itemPrice,
             columnHeader_orderTime,
             columnHeader_orderID,
@@ -2320,23 +2477,65 @@ namespace dp2Circulation
             columnHeader_subcopy.Width = 100;
             columnHeader_subcopy.TextAlign = HorizontalAlignment.Right;
             // 
+            // columnHeader_orderFixedPrice
+            // 
+            columnHeader_orderFixedPrice.Text = "订购码洋";
+            columnHeader_orderFixedPrice.Width = 150;
+            columnHeader_orderFixedPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_orderDiscount
+            // 
+            columnHeader_orderDiscount.Text = "订购折扣";
+            columnHeader_orderDiscount.Width = 150;
+            columnHeader_orderDiscount.TextAlign = HorizontalAlignment.Right;
+            // 
             // columnHeader_orderPrice
             // 
             columnHeader_orderPrice.Text = "订购单价";
             columnHeader_orderPrice.Width = 150;
             columnHeader_orderPrice.TextAlign = HorizontalAlignment.Right;
             // 
-            // columnHeader_price
+            // columnHeader_orderTotalPrice
             // 
-            columnHeader_price.Text = "验收单价";
-            columnHeader_price.Width = 150;
-            columnHeader_price.TextAlign = HorizontalAlignment.Right;
+            columnHeader_orderTotalPrice.Text = "订购总价";
+            columnHeader_orderTotalPrice.Width = 150;
+            columnHeader_orderTotalPrice.TextAlign = HorizontalAlignment.Right;
             // 
-            // columnHeader_totalPrice
+            // columnHeader_orderTotalFixedPrice
             // 
-            columnHeader_totalPrice.Text = "总价";
-            columnHeader_totalPrice.Width = 150;
-            columnHeader_totalPrice.TextAlign = HorizontalAlignment.Right;
+            columnHeader_orderTotalFixedPrice.Text = "订购总码洋";
+            columnHeader_orderTotalFixedPrice.Width = 150;
+            columnHeader_orderTotalFixedPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptFixedPrice
+            // 
+            columnHeader_acceptFixedPrice.Text = "验收码洋";
+            columnHeader_acceptFixedPrice.Width = 150;
+            columnHeader_acceptFixedPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptDiscount
+            // 
+            columnHeader_acceptDiscount.Text = "验收折扣";
+            columnHeader_acceptDiscount.Width = 150;
+            columnHeader_acceptDiscount.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptPrice
+            // 
+            columnHeader_acceptPrice.Text = "验收单价";
+            columnHeader_acceptPrice.Width = 150;
+            columnHeader_acceptPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptTotalPrice
+            // 
+            columnHeader_acceptTotalPrice.Text = "验收总价";
+            columnHeader_acceptTotalPrice.Width = 150;
+            columnHeader_acceptTotalPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_acceptTotalFixedPrice
+            // 
+            columnHeader_acceptTotalFixedPrice.Text = "验收总码洋";
+            columnHeader_acceptTotalFixedPrice.Width = 150;
+            columnHeader_acceptTotalFixedPrice.TextAlign = HorizontalAlignment.Right;
             // 
             // columnHeader_itemPrice
             // 
@@ -2520,7 +2719,6 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
                 printform.ShowDialog(this);
                 Program.MainForm.AppInfo.UnlinkFormState(printform);
-
             }
             finally
             {
@@ -2532,7 +2730,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2604,9 +2802,18 @@ namespace dp2Circulation
                 "series -- 套数",
                 "subcopy -- 每套册数",
 
+                "orderFixedPrice -- 订购码洋",
+                "orderDiscount -- 订购折扣",
                 "orderPrice -- 订购单价",
+                "orderTotalPrice -- 订购总价格",
+                "orderTotalFixedPrice -- 订购总码洋",
+
+                "acceptFixedPrice -- 验收码洋",
+                "acceptDiscount -- 验收折扣",
                 "acceptPrice -- 验收单价",
-                "totalPrice -- 总价格",
+                "totalPrice -- 验收总价格",
+                "acceptTotalFixedPrice -- 验收总码洋",
+
                 "itemPrice -- 实体单价",
                 "orderTime -- 订购时间",
                 "orderID -- 订单号",
@@ -2782,14 +2989,16 @@ namespace dp2Circulation
                 int nTotalCopies = GetMergedTotalCopies(items);
                 int nTotalSeries = GetMergedTotalSeries(items);
                 int nBiblioCount = GetMergedBiblioCount(items);
-                string strTotalPrice = GetMergedTotalPrice(items);
+                string strAcceptTotalPrice = GetMergedTotalPrice("acceptPrice", items);
+                string strAcceptTotalFixedPrice = GetMergedTotalPrice("acceptFixedPrice", items);
+                // TODO: 还可以计算出平均折扣。不过要注意验收总价和码洋总价中包含多种货币的时候，除法会无法完成，需要在平均折扣位置显示警告语
 
                 macro_table["%itemcount%"] = nItemCount.ToString(); // 事项数
                 macro_table["%totalcopies%"] = nTotalCopies.ToString(); // 总册数(注意每套可以有多册)
                 macro_table["%totalseries%"] = nTotalSeries.ToString(); // 总套数(注意每项可以有多套)
                 macro_table["%bibliocount%"] = nBiblioCount.ToString(); // 种数
-                macro_table["%totalprice%"] = strTotalPrice;    // 总价格 可能为多个币种的价格串联形态
-
+                macro_table["%totalprice%"] = strAcceptTotalPrice;    // 验收总价格 可能为多个币种的价格串联形态
+                macro_table["%totalfixedprice%"] = strAcceptTotalPrice;      // 验收总码洋
 
                 macro_table["%pageno%"] = "1";
 
@@ -2819,6 +3028,7 @@ namespace dp2Circulation
     <div class='copies'>册数: %totalcopies%</div>
     <div class='bibliocount'>种数: %bibliocount%</div>
     <div class='totalprice'>总价: %totalprice%</div>
+    <div class='totalprice'>总码洋: %totalfixedprice%</div>
     <div class='sepline'><hr/></div>
     <div class='batchno'>批次号: %batchno%</div>
     <div class='location'>记录路径文件: %recpathfilepath%</div>
@@ -2829,14 +3039,13 @@ namespace dp2Circulation
                      * * */
 
                     // 根据模板打印
-                    string strContent = "";
                     // 能自动识别文件内容的编码方式的读入文本文件内容模块
                     // return:
                     //      -1  出错
                     //      0   文件不存在
                     //      1   文件存在
                     int nRet = Global.ReadTextFileContent(strTemplateFilePath,
-                        out strContent,
+                        out string strContent,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -2848,7 +3057,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // 缺省的固定内容打印
+                    // 默认的固定内容打印
 
                     BuildMergedPageTop(option,
                         macro_table,
@@ -2865,16 +3074,16 @@ namespace dp2Circulation
                     StreamUtil.WriteText(strFileName,
                         "<div class='copies'>册数: " + nTotalCopies.ToString() + "</div>");
                     StreamUtil.WriteText(strFileName,
-                        "<div class='totalprice'>总价: " + strTotalPrice + "</div>");
+                        "<div class='totalprice'>总价: " + strAcceptTotalPrice + "</div>");
+                    StreamUtil.WriteText(strFileName,
+    "<div class='totalfixedprice'>总码洋: " + strAcceptTotalFixedPrice + "</div>");
 
                     BuildMergedPageBottom(option,
                         macro_table,
                         strFileName,
                         false);
                 }
-
             }
-
 
             string strMarcFilterFilePath = option.GetTemplatePageFilePath("MARC过滤器");
             if (String.IsNullOrEmpty(strMarcFilterFilePath) == false)
@@ -3128,7 +3337,7 @@ namespace dp2Circulation
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-        END1:
+            END1:
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
 
@@ -3226,20 +3435,49 @@ namespace dp2Circulation
                             return strCopy + "(每套含 " + strSubCopy + " 册)";
                         }
 
+                    case "orderFixedPrice":
+                    case "订购码洋":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDER_FIXEDPRICE);
+
+                    case "orderDiscount":
+                    case "订购折扣":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDER_DISCOUNT);
+
                     case "orderPrice":
                     case "订购单价":
-                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDERPRICE);
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDER_PRICE);
 
+                    case "orderTotalPrice":
+                    case "订购总价":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDER_TOTALPRICE);
+
+                    case "orderTotalFixedPrice":
+                    case "订购总码洋":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE);
+
+                    case "acceptFixedPrice":
+                    case "验收码洋":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_FIXEDPRICE);
+
+                    case "acceptDiscount":
+                    case "验收折扣":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_DISCOUNT);
 
                     case "price":
                     case "acceptPrice":
                     case "单价":
                     case "验收单价":
-                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_PRICE);
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_PRICE);
 
                     case "totalPrice":
+                    case "acceptTotalPrice":
                     case "总价格":
-                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTALPRICE);
+                    case "验收总价":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_TOTALPRICE);
+
+                    case "acceptTotalFixedPrice":
+                    case "验收总码洋":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE);
 
                     // 2013/5/31
                     case "itemPrice":
@@ -3508,18 +3746,33 @@ namespace dp2Circulation
         }
 
 
-        static string GetMergedTotalPrice(NamedListViewItems items)
+        static string GetMergedTotalPrice(string strFieldName,
+            NamedListViewItems items)
         {
+            Debug.Assert(strFieldName == "acceptPrice"
+                || strFieldName == "acceptFixedPrice"
+                || strFieldName == "orderPrice"
+                || strFieldName == "orderFixedPrice",
+                "");
+            int nColumnIndex = 0;
+            if (strFieldName == "acceptPrice")
+                nColumnIndex = MERGED_COLUMN_ACCEPT_TOTALPRICE;
+            else if (strFieldName == "acceptFixedPrice")
+                nColumnIndex = MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE;
+            else if (strFieldName == "orderPrice")
+                nColumnIndex = MERGED_COLUMN_ORDER_TOTALPRICE;
+            else if (strFieldName == "orderFixedPrice")
+                nColumnIndex = MERGED_COLUMN_ORDER_TOTALFIXEDPRICE;
+            else
+                throw new ArgumentException("strFieldName 参数值必须为 acceptPrice/acceptFieldPrice/orderPrice/prderFieldPrice 之一");
+
             List<string> prices = new List<string>();
-            for (int i = 0; i < items.Count; i++)
+            foreach (ListViewItem item in items)
             {
-                ListViewItem item = items[i];
-
                 string strPrice = "";
-
                 try
                 {
-                    strPrice = ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTALPRICE);
+                    strPrice = ListViewUtil.GetItemText(item, nColumnIndex);
                 }
                 catch
                 {
@@ -3532,7 +3785,7 @@ namespace dp2Circulation
                 prices.Add(strPrice);
             }
 
-            return PriceUtil.TotalPrice(prices);
+            return GetTotalPrice(prices, "汇总金额 (strFieldName=" + strFieldName + ") 时");
         }
 
         // 根据验收批次号检索装载
@@ -3663,7 +3916,7 @@ namespace dp2Circulation
                     lRet = channel.SearchItem(
 stop,
 this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
-                        //"<all>",
+//"<all>",
 dlg.BatchNo,
 -1,
 "批次号",
@@ -3837,7 +4090,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4222,7 +4475,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4280,7 +4533,6 @@ out strError);
 
                 // 将新加入的事项滚入视野
                 list.EnsureVisible(list.Items.Count - 1);
-
                 return -1;
             }
 
@@ -4377,7 +4629,7 @@ out strError);
                         lRet = channel.GetIssueInfo(
     stop,
     "@path:" + strIssueRecPath,
-                            // "",
+    // "",
     "xml",
     out strIssueXml,
     out strOutputIssueRecPath,
@@ -4485,7 +4737,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             {
                 ListViewItem item = new ListViewItem(strRecPath, 0);
 
@@ -4984,7 +5236,7 @@ out strError);
                 EnableControls(true);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5087,7 +5339,7 @@ out strError);
             // item.ImageIndex = TYPE_NORMAL;
             SetItemColor(item, TYPE_NORMAL);
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5215,7 +5467,7 @@ out strError);
                 // 检查序号连续性
                 // 2014/6/21 修改排序方法
                 tao.IDs.Sort(
-                    delegate(string s1, string s2)
+                    delegate (string s1, string s2)
                     {
                         return StringUtil.RightAlignCompare(s1, s2);
                     }
@@ -5365,16 +5617,30 @@ out strError);
                 string strItemPrice = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_ITEMPRICE);
 
+                // 订购码洋
+                string strOrderFixedPrice = ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_ORDER_FIXEDPRICE);
+
+                // 订购折扣
+                string strOrderDiscount = ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_ORDER_DISCOUNT);
 
                 // 2013/5/31
                 // 单价，订购价
                 string strOrderPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ORDERPRICE);
+                    ORIGIN_COLUMN_ORDER_PRICE);
 
+                // 验收码洋
+                string strAcceptFixedPrice = ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
+
+                // 验收折扣
+                string strAcceptDiscount = ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_ACCEPT_DISCOUNT);
 
                 // 单价，到书价
                 string strAcceptPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ACCEPTPRICE);  // 2009/11/23 changed
+                    ORIGIN_COLUMN_ACCEPT_PRICE);  // 2009/11/23 changed
 
                 string strPublishTime = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_PUBLISHTIME);
@@ -5405,7 +5671,13 @@ out strError);
                     ORIGIN_COLUMN_CATALOGNO);
 
                 string strMergeComment = "";    // 合并注释
-                List<string> totalprices = new List<string>();  // 累积的价格字符串
+
+                List<string> total_orderprices = new List<string>();  // 累积的订购价格字符串
+                List<string> total_orderfixedprices = new List<string>();  // 累积的订购码洋价格字符串
+
+                List<string> total_acceptprices = new List<string>();  // 累积的验收价格字符串
+                List<string> total_acceptfixedprices = new List<string>();  // 累积的验收码洋价格字符串
+
                 List<ListViewItem> origin_items = new List<ListViewItem>();
 
                 string strComments = "";    // 原始注释(积累)
@@ -5436,12 +5708,21 @@ out strError);
                     string strCurrentItemPrice = ListViewUtil.GetItemText(current_source,
                         ORIGIN_COLUMN_ITEMPRICE);
 
+                    string strCurrentOrderFixedPrice = ListViewUtil.GetItemText(current_source,
+    ORIGIN_COLUMN_ORDER_FIXEDPRICE);
+                    string strCurrentOrderDiscount = ListViewUtil.GetItemText(current_source,
+     ORIGIN_COLUMN_ORDER_DISCOUNT);
                     string strCurrentOrderPrice = ListViewUtil.GetItemText(current_source,
-                        ORIGIN_COLUMN_ORDERPRICE);
+                        ORIGIN_COLUMN_ORDER_PRICE);
 
-                    // 单价(册记录中的)
+                    string strCurrentAcceptFixedPrice = ListViewUtil.GetItemText(current_source,
+    ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
+                    string strCurrentAcceptDiscount = ListViewUtil.GetItemText(current_source,
+                        ORIGIN_COLUMN_ACCEPT_DISCOUNT);
+
+                    // 验收单价
                     string strCurrentAcceptPrice = ListViewUtil.GetItemText(current_source,
-                        ORIGIN_COLUMN_ACCEPTPRICE); // 2009/11/23 changed
+                        ORIGIN_COLUMN_ACCEPT_PRICE); // 2009/11/23 changed
 
                     string strCurrentPublishTime = ListViewUtil.GetItemText(current_source,
                         ORIGIN_COLUMN_PUBLISHTIME);
@@ -5472,30 +5753,54 @@ out strError);
 
                     if (this.comboBox_load_type.Text == "图书")
                     {
-                        // 七元组判断
+                        // 十一元组判断
                         if (strBiblioRecPath != strCurrentBiblioRecPath
                             || strSeller != strCurrentSeller
                             || strItemPrice != strCurrentItemPrice
+
+                            || strOrderFixedPrice != strCurrentOrderFixedPrice
+                            || strOrderDiscount != strCurrentOrderDiscount
+
                             || strOrderPrice != strCurrentOrderPrice
+
+                            || strAcceptFixedPrice != strCurrentAcceptFixedPrice
+                            || strAcceptDiscount != strCurrentAcceptDiscount
+
                             || strAcceptPrice != strCurrentAcceptPrice
                             || strCatalogNo != strCurrentCatalogNo
                             || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                        {
+                            if (j == i)
+                                throw new Exception("j == i (j=" + j + ") 十一元组比较不应该出现不相等的结果");
                             break;
+                        }
                     }
                     else
                     {
                         Debug.Assert(this.comboBox_load_type.Text == "连续出版物", "");
-                        // 九元组判断
+                        // 十三元组判断
                         if (strBiblioRecPath != strCurrentBiblioRecPath
                             || strSeller != strCurrentSeller
                             || strItemPrice != strCurrentItemPrice
+
+                            || strOrderFixedPrice != strCurrentOrderFixedPrice
+                            || strOrderDiscount != strCurrentOrderDiscount
+
                             || strOrderPrice != strCurrentOrderPrice
+
+                            || strAcceptFixedPrice != strCurrentAcceptFixedPrice
+                            || strAcceptDiscount != strCurrentAcceptDiscount
+
                             || strAcceptPrice != strCurrentAcceptPrice
                             || strCatalogNo != strCurrentCatalogNo
                             || strPublishTime != strCurrentPublishTime
                             || strVolume != strCurrentVolume
                             || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                        {
+                            if (j == i)
+                                throw new Exception("j == i (j=" + j + ") 十三元组比较不应该出现不相等的结果");
                             break;
+                        }
                     }
 
                     int nCurCopy = 1;
@@ -5518,8 +5823,16 @@ out strError);
                     else
                     {
                         // 汇总价格
-                        totalprices.Add(strCurrentAcceptPrice);
+                        total_acceptprices.Add(strCurrentAcceptPrice);
                     }
+
+                    if (String.IsNullOrEmpty(strCurrentAcceptFixedPrice) == false)
+                        total_acceptfixedprices.Add(strCurrentAcceptFixedPrice);
+
+                    if (String.IsNullOrEmpty(strCurrentOrderFixedPrice) == false)
+                        total_orderfixedprices.Add(strCurrentOrderFixedPrice);
+                    if (String.IsNullOrEmpty(strCurrentOrderPrice) == false)
+                        total_orderprices.Add(strCurrentOrderPrice);
 
                     // 汇总注释
                     string strComment = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_COMMENT);
@@ -5603,17 +5916,34 @@ out strError);
                 ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ITEMPRICE,
                     strItemPrice);
 
-                // order price
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERPRICE,
+                // 订购码洋
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_FIXEDPRICE,
+                    strOrderFixedPrice);
+
+                // 订购折扣
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_DISCOUNT,
+                    strOrderDiscount);
+
+                // 订购单价
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_PRICE,
                     strOrderPrice);
 
-                // price
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_PRICE,
+                // 验收码洋
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_FIXEDPRICE,
+                    strAcceptFixedPrice);
+
+                // 验收折扣
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_DISCOUNT,
+                    strAcceptDiscount);
+
+                // 验收单价
+                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_PRICE,
                     strAcceptPrice);
 
+#if NO
                 List<string> sum_prices = null;
                 nRet = TotalPrice(totalprices,
-                    out sum_prices,
+                     out sum_prices,
                     out strError);
                 if (nRet == -1)
                 {
@@ -5630,9 +5960,38 @@ out strError);
                     //strSumPrice = sum_prices[0];
                     strSumPrice = PriceUtil.JoinPriceString(sum_prices);    // 2017/2/23
                 }
-                // total price
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_TOTALPRICE,
-                    strSumPrice);
+#endif
+                {
+                    string strSumPrice = GetTotalPrice(total_acceptprices,
+                        "累计验收单价字符串 '" + StringUtil.MakePathList(total_acceptprices) + "' 时");
+                    // 验收总价
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALPRICE,
+                        strSumPrice);
+                }
+
+                {
+                    string strSumPrice = GetTotalPrice(total_acceptfixedprices,
+                        "累计验收码洋字符串 '" + StringUtil.MakePathList(total_acceptfixedprices) + "' 时");
+                    // 验收总码洋
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE,
+                        strSumPrice);
+                }
+
+                {
+                    string strSumPrice = GetTotalPrice(total_orderprices,
+                        "累计订购单价字符串 '" + StringUtil.MakePathList(total_orderprices) + "' 时");
+                    // 订购总价
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALPRICE,
+                        strSumPrice);
+                }
+
+                {
+                    string strSumPrice = GetTotalPrice(total_orderfixedprices,
+                        "累计订购码洋字符串 '" + StringUtil.MakePathList(total_orderfixedprices) + "' 时");
+                    // 订购总码洋
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE,
+                        strSumPrice);
+                }
 
                 /* 打印验收单时间
                 // order time
@@ -5729,6 +6088,7 @@ out strError);
             }
         }
 
+#if NO
         // 汇总价格
         // 货币单位不同的，互相独立
         static int TotalPrice(List<string> prices,
@@ -5809,6 +6169,8 @@ out strError);
             public string Postfix = "";
             public decimal Value = 0;
         }
+#endif
+
 #if NOOOOOOOOOOOOOOO
         // 计算价格乘积
         static int MultiPrice(string strPrice,
@@ -5866,7 +6228,7 @@ out strError);
 
             column = new DigitalPlatform.Column();
             column.Asc = true;
-            column.No = ORIGIN_COLUMN_ACCEPTPRICE;  // 2009/11/23 changed
+            column.No = ORIGIN_COLUMN_ACCEPT_PRICE;  // 2009/11/23 changed
             column.SortStyle = ColumnSortStyle.LeftAlign;
             sort_columns.Add(column);
 
@@ -5984,7 +6346,7 @@ out strError);
 
             column = new DigitalPlatform.Column();
             column.Asc = true;
-            column.No = MERGED_COLUMN_PRICE;
+            column.No = MERGED_COLUMN_ACCEPT_PRICE;
             column.SortStyle = ColumnSortStyle.LeftAlign;
             sort_columns.Add(column);
 
@@ -6135,7 +6497,7 @@ out strError);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6556,7 +6918,7 @@ out strError);
                     "<td class='" + strClass + "'>" + strContent + "</td>";
             }
 
-        END1:
+            END1:
 
             StreamUtil.WriteText(strFileName,
     "<tr class='content'>");
@@ -6652,7 +7014,7 @@ out strError);
                     case "单价":
                     case "验收单价":
                     case "到书价":
-                        return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTPRICE);
+                        return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPT_PRICE);
 
                     // 实体记录中的价格
                     case "itemprice":
@@ -6665,7 +7027,7 @@ out strError);
                     case "orderPrice":
                     case "订购单价":
                     case "订购价":
-                        return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERPRICE);
+                        return ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDER_PRICE);
 
 
                     case "comment":
@@ -6939,7 +7301,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 try
                 {
                     // 用到书价进行计算
-                    strPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTPRICE);
+                    strPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPT_PRICE);
                 }
                 catch
                 {
@@ -7279,7 +7641,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7314,7 +7676,8 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     new Fill(                                                           // Index 2 - The yellow fill.
                         new PatternFill(
                             new ForegroundColor() { Rgb = new HexBinaryValue() { Value = "FFFFFF00" } }
-                        ) { PatternType = PatternValues.Solid })
+                        )
+                        { PatternType = PatternValues.Solid })
                 ),
                 new Borders(
                     new Border(                                                         // Index 0 - The default border.
@@ -7326,16 +7689,20 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     new Border(                                                         // Index 1 - Applies a Left, Right, Top, Bottom border to a cell
                         new LeftBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new RightBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new TopBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new BottomBorder(
                             new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
-                        ) { Style = BorderStyleValues.Thin },
+                        )
+                        { Style = BorderStyleValues.Thin },
                         new DiagonalBorder())
                 ),
                 new CellFormats(
@@ -7346,7 +7713,8 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true },       // Index 4 - Yellow Fill
                     new CellFormat(                                                                   // Index 5 - Alignment
                         new Alignment() { Horizontal = HorizontalAlignmentValues.Center, Vertical = VerticalAlignmentValues.Center }
-                    ) { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
+                    )
+                    { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
                     new CellFormat() { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }      // Index 6 - Border
                 )
             ); // return
@@ -7497,7 +7865,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -7743,8 +8111,8 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 if (string.IsNullOrEmpty(strOrderRecPath) == true)
                     continue;
 
-                string strOrderPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERPRICE);
-                string strAcceptPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTPRICE);
+                string strOrderPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDER_PRICE);
+                string strAcceptPrice = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPT_PRICE);
 
                 string strOrderSubCopy = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERSUBCOPY);
                 string strAcceptSubCopy = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ACCEPTSUBCOPY);
@@ -7948,7 +8316,7 @@ false);
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

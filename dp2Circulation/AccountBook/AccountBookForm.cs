@@ -2058,7 +2058,7 @@ namespace dp2Circulation
             string strNewValue = "";
 
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strValue,
+            dp2StringUtil.ParseOldNewValue(strValue,
                 out strOldValue,
                 out strNewValue);
 
@@ -2405,7 +2405,7 @@ namespace dp2Circulation
                 string strCurrentNewPrice = "";
 
                 // 分离 "old[new]" 内的两个值
-                OrderDesignControl.ParseOldNewValue(strPrice,
+                dp2StringUtil.ParseOldNewValue(strPrice,
                     out strCurrentOldPrice,
                     out strCurrentNewPrice);
 

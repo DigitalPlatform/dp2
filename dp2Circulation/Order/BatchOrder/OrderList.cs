@@ -877,7 +877,7 @@ namespace dp2Circulation
                     string strNewPrice = "";
 
                     // 分离 "old[new]" 内的两个值
-                    OrderDesignControl.ParseOldNewValue(strPrice,
+                    dp2StringUtil.ParseOldNewValue(strPrice,
                         out strOldPrice,
                         out strNewPrice);
 
@@ -908,7 +908,7 @@ namespace dp2Circulation
                     string strOldCopy = "";
                     string strNewCopy = "";
                     // 分离 "old[new]" 内的两个值
-                    OrderDesignControl.ParseOldNewValue(strTempCopy,
+                    dp2StringUtil.ParseOldNewValue(strTempCopy,
                         out strOldCopy,
                         out strNewCopy);
                     strTempCopy = strOldCopy;
@@ -916,7 +916,7 @@ namespace dp2Circulation
                 }
 
                 int nCopy = 0;
-                string strLeftCopy = OrderDesignControl.GetCopyFromCopyString(strTempCopy);
+                string strLeftCopy = dp2StringUtil.GetCopyFromCopyString(strTempCopy);
                 if (string.IsNullOrEmpty(strLeftCopy) == false)
                 {
                     try
@@ -934,7 +934,7 @@ namespace dp2Circulation
 
                 int nSubCopy = 1;
                 {
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(strTempCopy);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(strTempCopy);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                     {
                         try
@@ -953,7 +953,7 @@ namespace dp2Circulation
 
                 int nAcceptSubCopy = 1;
                 {
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(strTempAcceptCopy);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(strTempAcceptCopy);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                     {
                         try

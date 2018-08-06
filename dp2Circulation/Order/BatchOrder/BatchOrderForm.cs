@@ -576,11 +576,11 @@ namespace dp2Circulation
 
             string strNewCopy = "";
             string strOldCopy = "";
-            OrderDesignControl.ParseOldNewValue(strCopy,
+            dp2StringUtil.ParseOldNewValue(strCopy,
                 out strOldCopy,
                 out strNewCopy);
             int copy = -1;
-            Int32.TryParse(OrderDesignControl.GetCopyFromCopyString(strOldCopy), out copy);
+            Int32.TryParse(dp2StringUtil.GetCopyFromCopyString(strOldCopy), out copy);
 
             string strDistribute = order.GetFieldValue("distribute");
             DistributeDialog dlg = new DistributeDialog();
@@ -625,11 +625,11 @@ namespace dp2Circulation
 
             string strNewCopy = "";
             string strOldCopy = "";
-            OrderDesignControl.ParseOldNewValue(strCopy,
+            dp2StringUtil.ParseOldNewValue(strCopy,
                 out strOldCopy,
                 out strNewCopy);
             int copy = -1;
-            Int32.TryParse(OrderDesignControl.GetCopyFromCopyString(strOldCopy), out copy);
+            Int32.TryParse(dp2StringUtil.GetCopyFromCopyString(strOldCopy), out copy);
 
             string strDistribute = order.GetFieldValue("distribute");
 

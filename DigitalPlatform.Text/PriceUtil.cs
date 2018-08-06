@@ -6,6 +6,7 @@ namespace DigitalPlatform.Text
 {
     public class PriceUtil
     {
+
         #region 级联操作函数
 
         public static string Add(string strText1, string strText2)

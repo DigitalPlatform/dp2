@@ -1992,7 +1992,7 @@ Color.FromArgb(0, Color.Gray)
             {
                 string strNewValue = "";
                 string strOldValue = "";
-                OrderDesignControl.ParseOldNewValue(this.order.Copy,
+                dp2StringUtil.ParseOldNewValue(this.order.Copy,
                     out strOldValue,
                     out strNewValue);
                 int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
@@ -2007,7 +2007,7 @@ Color.FromArgb(0, Color.Gray)
                 if (nNewCopy < 0)
                     nNewCopy = 0;
                 Debug.Assert(nNewCopy >= 0, "");
-                this.order.Copy = OrderDesignControl.LinkOldNewValue(nOldCopy.ToString(),
+                this.order.Copy = dp2StringUtil.LinkOldNewValue(nOldCopy.ToString(),
                      nNewCopy.ToString());
                 bChanged = true;
             }
@@ -2119,15 +2119,13 @@ Color.FromArgb(0, Color.Gray)
 
             // 除了修改<distribute>内容，还要修改<copy>内容
             {
-                string strNewValue = "";
-                string strOldValue = "";
-                OrderDesignControl.ParseOldNewValue(this.order.Copy,
-                    out strOldValue,
-                    out strNewValue);
+                dp2StringUtil.ParseOldNewValue(this.order.Copy,
+                    out string strOldValue,
+                    out string strNewValue);
                 int nOldCopy = IssueBindingItem.GetNumberValue(strOldValue);
                 int nNewCopy = IssueBindingItem.GetNumberValue(strNewValue);
                 nOldCopy++;
-                this.order.Copy = OrderDesignControl.LinkOldNewValue(nOldCopy.ToString(),
+                this.order.Copy = dp2StringUtil.LinkOldNewValue(nOldCopy.ToString(),
                      nNewCopy.ToString());
             }
 
