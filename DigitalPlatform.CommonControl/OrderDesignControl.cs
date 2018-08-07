@@ -535,7 +535,7 @@ namespace DigitalPlatform.CommonControl
                     out strError);
                         if (nRet == -1)
                         {
-                            strError = "第 " + (i + 1).ToString() + " 行: 根据验收码洋 '" + item.OldFixedPrice + "' 和验收折扣 '" + item.OldDiscount + "' 自动计算验收价时出错: " + strError;
+                            strError = "第 " + (i + 1).ToString() + " 行: 根据验收码洋 '" + item.FixedPrice + "' 和验收折扣 '" + item.Discount + "' 自动计算验收价时出错: " + strError;
                             return -1;
                         }
                         if (nRet == 1)
@@ -571,6 +571,8 @@ namespace DigitalPlatform.CommonControl
 
                 if (this.SeriesMode == true)
                 {
+                    // 期刊
+
                     if (String.IsNullOrEmpty(item.RangeString) == true)
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入时间范围";
@@ -598,6 +600,17 @@ namespace DigitalPlatform.CommonControl
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入期数";
                         return 1;
+                    }
+                }
+                else
+                {
+                    // 图书
+
+                    if (item.IssueCountValue != 1)
+                    {
+                        item.IssueCountValue = 1;
+                        //strError = "第 " + (i + 1).ToString() + " 行: 图书订购只允许期数为 1";
+                        //return 1;
                     }
                 }
 
@@ -3480,11 +3493,10 @@ out string strNewOrderPrice);
                 this.comboBox_discount.Enter += new EventHandler(control_Enter);
                 this.comboBox_discount.ComboBox.TextChanged += new EventHandler(comboBox_discount_TextChanged);
 
-
                 // price
                 this.textBox_price.TextBox.TextChanged += new EventHandler(Price_TextChanged);
-
                 this.textBox_price.TextBox.Enter += new EventHandler(control_Enter);
+                this.textBox_price.TextBox.KeyDown += TextBox_price_KeyDown;
 
                 // location
                 this.location.GetValueTable += new GetValueTableEventHandler(textBox_location_GetValueTable);
@@ -3546,6 +3558,9 @@ out string strNewOrderPrice);
 
                 this.textBox_price.TextBox.TextChanged -= new EventHandler(Price_TextChanged);
                 this.textBox_price.TextBox.Enter -= new EventHandler(control_Enter);
+                this.textBox_price.TextBox.KeyDown -= TextBox_price_KeyDown;
+
+
                 this.location.GetValueTable -= new GetValueTableEventHandler(textBox_location_GetValueTable);
                 this.location.Enter -= new EventHandler(control_Enter);
                 this.location.ContentChanged -= new ContentChangedEventHandler(location_ContentChanged);
@@ -3557,6 +3572,38 @@ out string strNewOrderPrice);
                 this.comboBox_class.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
                 this.label_sellerAddress.Click -= new EventHandler(control_Enter);
                 this.label_other.Click -= new EventHandler(control_Enter);
+            }
+        }
+
+        private void TextBox_price_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                // MessageBox.Show(this.Container, "Ctrl+A");
+
+                // 自动计算出验收价
+                if (string.IsNullOrEmpty(this.FixedPrice) == false)
+                {
+                    // return:
+                    //      -1  计算过程出现错误
+                    //      0   strFixedPrice 为空，无法计算
+                    //      1   计算成功
+                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.FixedPrice,
+                this.Discount,
+                out string strWishOrderPrice,
+                out string strError);
+                    if (nRet == -1)
+                    {
+                        strError = "根据码洋 '" + this.FixedPrice + "' 和折扣 '" + this.Discount + "' 自动计算单机时出错: " + strError;
+                        MessageBox.Show(this.Container, strError);
+                        goto END;
+                    }
+                    if (nRet == 1)
+                        this.Price = strWishOrderPrice;
+                }
+
+                END:
+                e.Handled = true;
             }
         }
 
@@ -3788,7 +3835,6 @@ out string strNewOrderPrice);
 
             this.Container.Changed = true;
         }
-
 
         void comboBox_seller_TextChanged(object sender, EventArgs e)
         {
@@ -4042,11 +4088,13 @@ out string strNewOrderPrice);
 
             if (combobox.Items.Count == 0)
             {
-                for (int i = 0; i < 10; i++)
+                combobox.Items.Add("1.00");
+                for (int i = 0; i < 9; i++)
                 {
-                    // combobox.Items.Add((i + 1).ToString());
                     // TODO: 从 .10 到 .90
+                    combobox.Items.Add("." + (i + 1).ToString() + "0");
                 }
+                combobox.Items.Add("1.00");
             }
         }
 
@@ -4054,6 +4102,7 @@ out string strNewOrderPrice);
         {
             if (string.IsNullOrEmpty(this.textBox_fixedPrice.OldText) == false)
             {
+#if NO
                 if (this.Container.ArriveMode == false)
                 {
                     // 重新计算出实洋
@@ -4077,6 +4126,16 @@ out string strNewOrderPrice);
                     if (nRet == 1)
                         this.textBox_price.Text = strWishOrderPrice;
                 }
+#endif
+                // 注意，无论是在订购模式还是在验收模式，实际上都是修改的 textbox.Text 而不是 OldText
+                int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.Text,
+this.comboBox_discount.Text,
+out string strWishOrderPrice,
+out string strError);
+                if (nRet == 1)
+                    this.textBox_price.Text = strWishOrderPrice;
+                else
+                    Console.Beep();
             }
         }
 

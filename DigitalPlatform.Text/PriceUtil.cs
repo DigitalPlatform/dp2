@@ -1534,6 +1534,20 @@ namespace DigitalPlatform.Text
             return true;
         }
 
+        public static bool IsEqual(string strPrice1, string strPrice2, string strDefaultPrefix)
+        {
+            try
+            {
+                CurrencyItem item1 = CurrencyItem.Parse(strPrice1);
+                CurrencyItem item2 = CurrencyItem.Parse(strPrice2);
+                return item1.IsEqual(item2, strDefaultPrefix);
+            }
+            catch
+            {
+                return strPrice1 == strPrice2;
+            }
+        }
+
         // 给空的 Prefix 设置默认值
         public void EnsurePrefix(string strPrefix)
         {
