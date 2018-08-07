@@ -5523,422 +5523,426 @@ out strError);
         int FillMergedList(out string strError)
         {
             strError = "";
-            int nRet = 0;
-            List<int> null_acceptprice_lineindexs = new List<int>();
 
-            DateTime now = DateTime.Now;
-            // int nOrderIdSeed = 1;
-
-            this.listView_merged.Items.Clear();
-            // 2008/11/22
-            this.SortColumns_merged.Clear();
-            SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
-
-            // 先将原始数据列表按照 bibliorecpath/seller/price 列排序
-            SortOriginListForMerge();
-
-
-            // 只提取一套一册的，和一套的第一册
-            List<ListViewItem> items = new List<ListViewItem>();
-            for (int i = 0; i < this.listView_origin.Items.Count; i++)
+            try
             {
-                ListViewItem source = this.listView_origin.Items[i];
 
-                string strSubCopy = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ACCEPTSUBCOPY);
-                if (String.IsNullOrEmpty(strSubCopy) == false)
+                int nRet = 0;
+                List<int> null_acceptprice_lineindexs = new List<int>();
+
+                DateTime now = DateTime.Now;
+                // int nOrderIdSeed = 1;
+
+                this.listView_merged.Items.Clear();
+                // 2008/11/22
+                this.SortColumns_merged.Clear();
+                SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
+
+                // 先将原始数据列表按照 bibliorecpath/seller/price 列排序
+                SortOriginListForMerge();
+
+
+                // 只提取一套一册的，和一套的第一册
+                List<ListViewItem> items = new List<ListViewItem>();
+                for (int i = 0; i < this.listView_origin.Items.Count; i++)
                 {
-                    string strNo = "";
-                    string strIndex = "";
-                    string strCopy = "";
-                    nRet = ParseSubCopy(strSubCopy,
-            out strNo,
-            out strIndex,
-            out strCopy,
-            out strError);
-                    if (nRet == -1)
+                    ListViewItem source = this.listView_origin.Items[i];
+
+                    string strSubCopy = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_ACCEPTSUBCOPY);
+                    if (String.IsNullOrEmpty(strSubCopy) == false)
                     {
-                        strError = "事项 " + (i + 1).ToString() + " 的套内详情格式错误: '" + strError + "'，请先排除问题...";
+                        string strNo = "";
+                        string strIndex = "";
+                        string strCopy = "";
+                        nRet = ParseSubCopy(strSubCopy,
+                out strNo,
+                out strIndex,
+                out strCopy,
+                out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "事项 " + (i + 1).ToString() + " 的套内详情格式错误: '" + strError + "'，请先排除问题...";
+                            return -1;
+                        }
+
+                        // 不是各套的第一册，就跳过
+                        if (strIndex != "1")
+                            continue;
+                    }
+
+                    items.Add(source);
+                }
+
+                // 循环
+                for (int i = 0; i < items.Count; i++)
+                {
+                    int nCopy = 0;
+
+                    ListViewItem source = items[i];
+
+                    if (source.ImageIndex == TYPE_ERROR)
+                    {
+                        strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的状态为错误，请先排除问题...";
                         return -1;
                     }
 
-                    // 不是各套的第一册，就跳过
-                    if (strIndex != "1")
-                        continue;
-                }
-
-                items.Add(source);
-            }
-
-            // 循环
-            for (int i = 0; i < items.Count; i++)
-            {
-                int nCopy = 0;
-
-                ListViewItem source = items[i];
-
-                if (source.ImageIndex == TYPE_ERROR)
-                {
-                    strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的状态为错误，请先排除问题...";
-                    return -1;
-                }
-
-                string strSubCopyDetail = ListViewUtil.GetItemText(source,
-    ORIGIN_COLUMN_ACCEPTSUBCOPY);
-                string strSubCopy = "";
-                if (String.IsNullOrEmpty(strSubCopyDetail) == false)
-                {
-                    string strNo = "";
-                    string strIndex = "";
-                    nRet = ParseSubCopy(strSubCopyDetail,
-            out strNo,
-            out strIndex,
-            out strSubCopy,
-            out strError);
-                    if (nRet == -1)
+                    string strSubCopyDetail = ListViewUtil.GetItemText(source,
+        ORIGIN_COLUMN_ACCEPTSUBCOPY);
+                    string strSubCopy = "";
+                    if (String.IsNullOrEmpty(strSubCopyDetail) == false)
                     {
-                        strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的套内详情格式错误: '" + strError + "'，请先排除问题...";
-                        return -1;
-                    }
+                        string strNo = "";
+                        string strIndex = "";
+                        nRet = ParseSubCopy(strSubCopyDetail,
+                out strNo,
+                out strIndex,
+                out strSubCopy,
+                out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "事项 " + (OriginIndex(source) + 1).ToString() + " 的套内详情格式错误: '" + strError + "'，请先排除问题...";
+                            return -1;
+                        }
 
-                    Debug.Assert(strIndex == "1", "");
-                }
-
-                // 渠道
-                string strSeller = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_SELLER);
-
-                // 渠道地址
-                string strSellerAddress = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_SELLERADDRESS);
-
-                // 2013/5/31
-                // 单价，实体价
-                string strItemPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ITEMPRICE);
-
-                // 订购码洋
-                string strOrderFixedPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ORDER_FIXEDPRICE);
-
-                // 订购折扣
-                string strOrderDiscount = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ORDER_DISCOUNT);
-
-                // 2013/5/31
-                // 单价，订购价
-                string strOrderPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ORDER_PRICE);
-
-                // 验收码洋
-                string strAcceptFixedPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
-
-                // 验收折扣
-                string strAcceptDiscount = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ACCEPT_DISCOUNT);
-
-                // 单价，到书价
-                string strAcceptPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_ACCEPT_PRICE);  // 2009/11/23 changed
-
-                string strPublishTime = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_PUBLISHTIME);
-
-                string strVolume = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_VOLUME);
-
-                /*
-                // price取其中的验收价部分
-                {
-                    string strOldPrice = "";
-                    string strNewPrice = "";
-
-                    // 分离 "old[new]" 内的两个值
-                    OrderDesignControl.ParseOldNewValue(strPrice,
-                        out strOldPrice,
-                        out strNewPrice);
-
-                    strPrice = strNewPrice;
-                }*/
-
-                // 书目记录路径
-                string strBiblioRecPath = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_BIBLIORECPATH);
-
-                // 书目号
-                string strCatalogNo = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_CATALOGNO);
-
-                string strMergeComment = "";    // 合并注释
-
-                List<string> total_orderprices = new List<string>();  // 累积的订购价格字符串
-                List<string> total_orderfixedprices = new List<string>();  // 累积的订购码洋价格字符串
-
-                List<string> total_acceptprices = new List<string>();  // 累积的验收价格字符串
-                List<string> total_acceptfixedprices = new List<string>();  // 累积的验收码洋价格字符串
-
-                List<ListViewItem> origin_items = new List<ListViewItem>();
-
-                string strComments = "";    // 原始注释(积累)
-                string strDistributes = ""; // 合并的馆藏分配字符串
-
-                // 发现biblioRecPath、price和seller均相同的区段
-                int nStart = i; // 区段开始位置
-                int nLength = 0;    // 区段内事项个数
-
-                for (int j = i; j < items.Count; j++)
-                {
-                    ListViewItem current_source = items[j];
-
-                    if (current_source.ImageIndex == TYPE_ERROR)
-                    {
-                        strError = "事项 " + (OriginIndex(current_source) + 1).ToString() + " 的状态为错误，请先排除问题...";
-                        return -1;
+                        Debug.Assert(strIndex == "1", "");
                     }
 
                     // 渠道
-                    string strCurrentSeller = ListViewUtil.GetItemText(current_source,
+                    string strSeller = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_SELLER);
 
                     // 渠道地址
-                    string strCurrentSellerAddress = ListViewUtil.GetItemText(current_source,
+                    string strSellerAddress = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_SELLERADDRESS);
 
-                    string strCurrentItemPrice = ListViewUtil.GetItemText(current_source,
+                    // 2013/5/31
+                    // 单价，实体价
+                    string strItemPrice = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_ITEMPRICE);
 
-                    string strCurrentOrderFixedPrice = ListViewUtil.GetItemText(current_source,
-    ORIGIN_COLUMN_ORDER_FIXEDPRICE);
-                    string strCurrentOrderDiscount = ListViewUtil.GetItemText(current_source,
-     ORIGIN_COLUMN_ORDER_DISCOUNT);
-                    string strCurrentOrderPrice = ListViewUtil.GetItemText(current_source,
+                    // 订购码洋
+                    string strOrderFixedPrice = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_ORDER_FIXEDPRICE);
+
+                    // 订购折扣
+                    string strOrderDiscount = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_ORDER_DISCOUNT);
+
+                    // 2013/5/31
+                    // 单价，订购价
+                    string strOrderPrice = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_ORDER_PRICE);
 
-                    string strCurrentAcceptFixedPrice = ListViewUtil.GetItemText(current_source,
-    ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
-                    string strCurrentAcceptDiscount = ListViewUtil.GetItemText(current_source,
+                    // 验收码洋
+                    string strAcceptFixedPrice = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
+
+                    // 验收折扣
+                    string strAcceptDiscount = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_ACCEPT_DISCOUNT);
 
-                    // 验收单价
-                    string strCurrentAcceptPrice = ListViewUtil.GetItemText(current_source,
-                        ORIGIN_COLUMN_ACCEPT_PRICE); // 2009/11/23 changed
+                    // 单价，到书价
+                    string strAcceptPrice = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_ACCEPT_PRICE);  // 2009/11/23 changed
 
-                    string strCurrentPublishTime = ListViewUtil.GetItemText(current_source,
+                    string strPublishTime = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_PUBLISHTIME);
 
-                    string strCurrentVolume = ListViewUtil.GetItemText(current_source,
-                       ORIGIN_COLUMN_VOLUME);
+                    string strVolume = ListViewUtil.GetItemText(source,
+                        ORIGIN_COLUMN_VOLUME);
+
                     /*
                     // price取其中的验收价部分
                     {
-                        string strCurrentOldPrice = "";
-                        string strCurrentNewPrice = "";
+                        string strOldPrice = "";
+                        string strNewPrice = "";
 
                         // 分离 "old[new]" 内的两个值
-                        OrderDesignControl.ParseOldNewValue(strCurrentPrice,
-                            out strCurrentOldPrice,
-                            out strCurrentNewPrice);
+                        OrderDesignControl.ParseOldNewValue(strPrice,
+                            out strOldPrice,
+                            out strNewPrice);
 
-                        strCurrentPrice = strCurrentNewPrice;
+                        strPrice = strNewPrice;
                     }*/
 
                     // 书目记录路径
-                    string strCurrentBiblioRecPath = ListViewUtil.GetItemText(current_source,
+                    string strBiblioRecPath = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_BIBLIORECPATH);
 
                     // 书目号
-                    string strCurrentCatalogNo = ListViewUtil.GetItemText(current_source,
+                    string strCatalogNo = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_CATALOGNO);
 
-                    if (this.comboBox_load_type.Text == "图书")
+                    string strMergeComment = "";    // 合并注释
+
+                    List<string> total_orderprices = new List<string>();  // 累积的订购价格字符串
+                    List<string> total_orderfixedprices = new List<string>();  // 累积的订购码洋价格字符串
+
+                    List<string> total_acceptprices = new List<string>();  // 累积的验收价格字符串
+                    List<string> total_acceptfixedprices = new List<string>();  // 累积的验收码洋价格字符串
+
+                    List<ListViewItem> origin_items = new List<ListViewItem>();
+
+                    string strComments = "";    // 原始注释(积累)
+                    string strDistributes = ""; // 合并的馆藏分配字符串
+
+                    // 发现biblioRecPath、price和seller均相同的区段
+                    int nStart = i; // 区段开始位置
+                    int nLength = 0;    // 区段内事项个数
+
+                    for (int j = i; j < items.Count; j++)
                     {
-                        // 十一元组判断
-                        if (strBiblioRecPath != strCurrentBiblioRecPath
-                            || strSeller != strCurrentSeller
-                            || strItemPrice != strCurrentItemPrice
+                        ListViewItem current_source = items[j];
 
-                            || strOrderFixedPrice != strCurrentOrderFixedPrice
-                            || strOrderDiscount != strCurrentOrderDiscount
-
-                            || strOrderPrice != strCurrentOrderPrice
-
-                            || strAcceptFixedPrice != strCurrentAcceptFixedPrice
-                            || strAcceptDiscount != strCurrentAcceptDiscount
-
-                            || strAcceptPrice != strCurrentAcceptPrice
-                            || strCatalogNo != strCurrentCatalogNo
-                            || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                        if (current_source.ImageIndex == TYPE_ERROR)
                         {
-                            if (j == i)
-                                throw new Exception("j == i (j=" + j + ") 十一元组比较不应该出现不相等的结果");
-                            break;
+                            strError = "事项 " + (OriginIndex(current_source) + 1).ToString() + " 的状态为错误，请先排除问题...";
+                            return -1;
                         }
-                    }
-                    else
-                    {
-                        Debug.Assert(this.comboBox_load_type.Text == "连续出版物", "");
-                        // 十三元组判断
-                        if (strBiblioRecPath != strCurrentBiblioRecPath
-                            || strSeller != strCurrentSeller
-                            || strItemPrice != strCurrentItemPrice
 
-                            || strOrderFixedPrice != strCurrentOrderFixedPrice
-                            || strOrderDiscount != strCurrentOrderDiscount
+                        // 渠道
+                        string strCurrentSeller = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_SELLER);
 
-                            || strOrderPrice != strCurrentOrderPrice
+                        // 渠道地址
+                        string strCurrentSellerAddress = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_SELLERADDRESS);
 
-                            || strAcceptFixedPrice != strCurrentAcceptFixedPrice
-                            || strAcceptDiscount != strCurrentAcceptDiscount
+                        string strCurrentItemPrice = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_ITEMPRICE);
 
-                            || strAcceptPrice != strCurrentAcceptPrice
-                            || strCatalogNo != strCurrentCatalogNo
-                            || strPublishTime != strCurrentPublishTime
-                            || strVolume != strCurrentVolume
-                            || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                        string strCurrentOrderFixedPrice = ListViewUtil.GetItemText(current_source,
+        ORIGIN_COLUMN_ORDER_FIXEDPRICE);
+                        string strCurrentOrderDiscount = ListViewUtil.GetItemText(current_source,
+         ORIGIN_COLUMN_ORDER_DISCOUNT);
+                        string strCurrentOrderPrice = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_ORDER_PRICE);
+
+                        string strCurrentAcceptFixedPrice = ListViewUtil.GetItemText(current_source,
+        ORIGIN_COLUMN_ACCEPT_FIXEDPRICE);
+                        string strCurrentAcceptDiscount = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_ACCEPT_DISCOUNT);
+
+                        // 验收单价
+                        string strCurrentAcceptPrice = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_ACCEPT_PRICE); // 2009/11/23 changed
+
+                        string strCurrentPublishTime = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_PUBLISHTIME);
+
+                        string strCurrentVolume = ListViewUtil.GetItemText(current_source,
+                           ORIGIN_COLUMN_VOLUME);
+                        /*
+                        // price取其中的验收价部分
                         {
-                            if (j == i)
-                                throw new Exception("j == i (j=" + j + ") 十三元组比较不应该出现不相等的结果");
-                            break;
+                            string strCurrentOldPrice = "";
+                            string strCurrentNewPrice = "";
+
+                            // 分离 "old[new]" 内的两个值
+                            OrderDesignControl.ParseOldNewValue(strCurrentPrice,
+                                out strCurrentOldPrice,
+                                out strCurrentNewPrice);
+
+                            strCurrentPrice = strCurrentNewPrice;
+                        }*/
+
+                        // 书目记录路径
+                        string strCurrentBiblioRecPath = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_BIBLIORECPATH);
+
+                        // 书目号
+                        string strCurrentCatalogNo = ListViewUtil.GetItemText(current_source,
+                            ORIGIN_COLUMN_CATALOGNO);
+
+                        if (this.comboBox_load_type.Text == "图书")
+                        {
+                            // 十一元组判断
+                            if (strBiblioRecPath != strCurrentBiblioRecPath
+                                || strSeller != strCurrentSeller
+                                || strItemPrice != strCurrentItemPrice
+
+                                || CurrencyItem.IsEqual(strOrderFixedPrice, strCurrentOrderFixedPrice, "CNY") == false
+                                || strOrderDiscount != strCurrentOrderDiscount
+
+                                || strOrderPrice != strCurrentOrderPrice
+
+                                || CurrencyItem.IsEqual(strAcceptFixedPrice, strCurrentAcceptFixedPrice, "CNY") == false
+                                || strAcceptDiscount != strCurrentAcceptDiscount
+
+                                || strAcceptPrice != strCurrentAcceptPrice
+                                || strCatalogNo != strCurrentCatalogNo
+                                || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                            {
+                                if (j == i)
+                                    throw new Exception("j == i (j=" + j + ") 十一元组比较不应该出现不相等的结果");
+                                break;
+                            }
                         }
-                    }
-
-                    int nCurCopy = 1;
-
-                    // 汇总复本数
-                    nCopy += nCurCopy;
-
-                    // 汇总合并注释
-                    string strSource = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_SOURCE);
-                    string strRecPath = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_RECPATH);
-                    if (String.IsNullOrEmpty(strMergeComment) == false)
-                        strMergeComment += "; ";
-                    strMergeComment += strSource + ", " + nCurCopy.ToString() + "册 (" + strRecPath + ")";
-
-                    if (String.IsNullOrEmpty(strCurrentAcceptPrice) == true)
-                    {
-                        // 记载具有空到书价的行号
-                        null_acceptprice_lineindexs.Add(j);
-                    }
-                    else
-                    {
-                        // 汇总价格
-                        total_acceptprices.Add(strCurrentAcceptPrice);
-                    }
-
-                    if (String.IsNullOrEmpty(strCurrentAcceptFixedPrice) == false)
-                        total_acceptfixedprices.Add(strCurrentAcceptFixedPrice);
-
-                    if (String.IsNullOrEmpty(strCurrentOrderFixedPrice) == false)
-                        total_orderfixedprices.Add(strCurrentOrderFixedPrice);
-                    if (String.IsNullOrEmpty(strCurrentOrderPrice) == false)
-                        total_orderprices.Add(strCurrentOrderPrice);
-
-                    // 汇总注释
-                    string strComment = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_COMMENT);
-                    if (String.IsNullOrEmpty(strComment) == false)
-                    {
-                        if (String.IsNullOrEmpty(strComments) == false)
-                            strComments += "; ";
-                        strComments += strComment + " @" + strRecPath;
-                    }
-
-                    // 汇总馆藏分配字符串
-                    string strCurDistribute = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_LOCATION) + ":1";
-                    if (String.IsNullOrEmpty(strCurDistribute) == false)
-                    {
-                        if (String.IsNullOrEmpty(strDistributes) == true)
-                            strDistributes = strCurDistribute;
                         else
                         {
-                            string strLocationString = "";
-                            nRet = LocationCollection.MergeTwoLocationString(strDistributes,
-                                strCurDistribute,
-                                false,
-                                out strLocationString,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            strDistributes = strLocationString;
+                            Debug.Assert(this.comboBox_load_type.Text == "连续出版物", "");
+                            // 十三元组判断
+                            if (strBiblioRecPath != strCurrentBiblioRecPath
+                                || strSeller != strCurrentSeller
+                                || strItemPrice != strCurrentItemPrice
+
+                                || strOrderFixedPrice != strCurrentOrderFixedPrice
+                                || strOrderDiscount != strCurrentOrderDiscount
+
+                                || strOrderPrice != strCurrentOrderPrice
+
+                                || strAcceptFixedPrice != strCurrentAcceptFixedPrice
+                                || strAcceptDiscount != strCurrentAcceptDiscount
+
+                                || strAcceptPrice != strCurrentAcceptPrice
+                                || strCatalogNo != strCurrentCatalogNo
+                                || strPublishTime != strCurrentPublishTime
+                                || strVolume != strCurrentVolume
+                                || PrintOrderForm.CompareAddress(strSellerAddress, strCurrentSellerAddress) != 0)
+                            {
+                                if (j == i)
+                                    throw new Exception("j == i (j=" + j + ") 十三元组比较不应该出现不相等的结果");
+                                break;
+                            }
                         }
+
+                        int nCurCopy = 1;
+
+                        // 汇总复本数
+                        nCopy += nCurCopy;
+
+                        // 汇总合并注释
+                        string strSource = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_SOURCE);
+                        string strRecPath = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_RECPATH);
+                        if (String.IsNullOrEmpty(strMergeComment) == false)
+                            strMergeComment += "; ";
+                        strMergeComment += strSource + ", " + nCurCopy.ToString() + "册 (" + strRecPath + ")";
+
+                        if (String.IsNullOrEmpty(strCurrentAcceptPrice) == true)
+                        {
+                            // 记载具有空到书价的行号
+                            null_acceptprice_lineindexs.Add(j);
+                        }
+                        else
+                        {
+                            // 汇总价格
+                            total_acceptprices.Add(strCurrentAcceptPrice);
+                        }
+
+                        if (String.IsNullOrEmpty(strCurrentAcceptFixedPrice) == false)
+                            total_acceptfixedprices.Add(strCurrentAcceptFixedPrice);
+
+                        if (String.IsNullOrEmpty(strCurrentOrderFixedPrice) == false)
+                            total_orderfixedprices.Add(strCurrentOrderFixedPrice);
+                        if (String.IsNullOrEmpty(strCurrentOrderPrice) == false)
+                            total_orderprices.Add(strCurrentOrderPrice);
+
+                        // 汇总注释
+                        string strComment = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_COMMENT);
+                        if (String.IsNullOrEmpty(strComment) == false)
+                        {
+                            if (String.IsNullOrEmpty(strComments) == false)
+                                strComments += "; ";
+                            strComments += strComment + " @" + strRecPath;
+                        }
+
+                        // 汇总馆藏分配字符串
+                        string strCurDistribute = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_LOCATION) + ":1";
+                        if (String.IsNullOrEmpty(strCurDistribute) == false)
+                        {
+                            if (String.IsNullOrEmpty(strDistributes) == true)
+                                strDistributes = strCurDistribute;
+                            else
+                            {
+                                string strLocationString = "";
+                                nRet = LocationCollection.MergeTwoLocationString(strDistributes,
+                                    strCurDistribute,
+                                    false,
+                                    out strLocationString,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                strDistributes = strLocationString;
+                            }
+                        }
+
+                        // 汇总原始事项
+                        origin_items.Add(current_source);
+
+                        nLength++;
                     }
 
-                    // 汇总原始事项
-                    origin_items.Add(current_source);
+                    ListViewItem target = new ListViewItem();
 
-                    nLength++;
-                }
+                    if (source.ImageIndex == TYPE_ERROR)
+                        target.ImageIndex = TYPE_ERROR;
+                    else
+                        target.ImageIndex = TYPE_NORMAL;  // 
 
-                ListViewItem target = new ListViewItem();
+                    // seller
+                    target.Text = strSeller;
 
-                if (source.ImageIndex == TYPE_ERROR)
-                    target.ImageIndex = TYPE_ERROR;
-                else
-                    target.ImageIndex = TYPE_NORMAL;  // 
+                    // catalog no 
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_CATALOGNO,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_CATALOGNO));
 
-                // seller
-                target.Text = strSeller;
+                    // summary
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SUMMARY,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_SUMMARY));
 
-                // catalog no 
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_CATALOGNO,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_CATALOGNO));
+                    // isbn issn
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ISBNISSN,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ISBNISSN));
 
-                // summary
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SUMMARY,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_SUMMARY));
+                    // publish time
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_PUBLISHTIME,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_PUBLISHTIME));
 
-                // isbn issn
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ISBNISSN,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ISBNISSN));
-
-                // publish time
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_PUBLISHTIME,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_PUBLISHTIME));
-
-                // volume
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_VOLUME,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_VOLUME));
+                    // volume
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_VOLUME,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_VOLUME));
 
 
-                // merge comment
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_MERGECOMMENT,
-                    strMergeComment);
+                    // merge comment
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_MERGECOMMENT,
+                        strMergeComment);
 
-                // copy
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_COPY,
-                    nCopy.ToString());
+                    // copy
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_COPY,
+                        nCopy.ToString());
 
-                // subcopy
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SUBCOPY,
-                    strSubCopy);
+                    // subcopy
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SUBCOPY,
+                        strSubCopy);
 
-                // item price
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ITEMPRICE,
-                    strItemPrice);
+                    // item price
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ITEMPRICE,
+                        strItemPrice);
 
-                // 订购码洋
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_FIXEDPRICE,
-                    strOrderFixedPrice);
+                    // 订购码洋
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_FIXEDPRICE,
+                        strOrderFixedPrice);
 
-                // 订购折扣
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_DISCOUNT,
-                    strOrderDiscount);
+                    // 订购折扣
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_DISCOUNT,
+                        strOrderDiscount);
 
-                // 订购单价
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_PRICE,
-                    strOrderPrice);
+                    // 订购单价
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_PRICE,
+                        strOrderPrice);
 
-                // 验收码洋
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_FIXEDPRICE,
-                    strAcceptFixedPrice);
+                    // 验收码洋
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_FIXEDPRICE,
+                        strAcceptFixedPrice);
 
-                // 验收折扣
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_DISCOUNT,
-                    strAcceptDiscount);
+                    // 验收折扣
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_DISCOUNT,
+                        strAcceptDiscount);
 
-                // 验收单价
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_PRICE,
-                    strAcceptPrice);
+                    // 验收单价
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_PRICE,
+                        strAcceptPrice);
 
 #if NO
                 List<string> sum_prices = null;
@@ -5961,103 +5965,114 @@ out strError);
                     strSumPrice = PriceUtil.JoinPriceString(sum_prices);    // 2017/2/23
                 }
 #endif
-                {
-                    string strSumPrice = GetTotalPrice(total_acceptprices,
-                        "累计验收单价字符串 '" + StringUtil.MakePathList(total_acceptprices) + "' 时");
-                    // 验收总价
-                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALPRICE,
-                        strSumPrice);
+                    {
+                        string strSumPrice = GetTotalPrice(total_acceptprices,
+                            "累计验收单价字符串 '" + StringUtil.MakePathList(total_acceptprices) + "' 时");
+                        // 验收总价
+                        ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALPRICE,
+                            strSumPrice);
+                    }
+
+                    {
+                        string strSumPrice = GetTotalPrice(total_acceptfixedprices,
+                            "累计验收码洋字符串 '" + StringUtil.MakePathList(total_acceptfixedprices) + "' 时");
+                        // 验收总码洋
+                        ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE,
+                            strSumPrice);
+                    }
+
+                    {
+                        string strSumPrice = GetTotalPrice(total_orderprices,
+                            "累计订购单价字符串 '" + StringUtil.MakePathList(total_orderprices) + "' 时");
+                        // 订购总价
+                        ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALPRICE,
+                            strSumPrice);
+                    }
+
+                    {
+                        string strSumPrice = GetTotalPrice(total_orderfixedprices,
+                            "累计订购码洋字符串 '" + StringUtil.MakePathList(total_orderfixedprices) + "' 时");
+                        // 订购总码洋
+                        ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE,
+                            strSumPrice);
+                    }
+
+                    /* 打印验收单时间
+                    // order time
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERTIME,
+                        now.ToShortDateString());   // TODO: 注意这个时间要返回到原始数据中
+                     * */
+
+                    // order time 需要归并汇总
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERTIME,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERTIME));
+
+
+                    // order id 需要归并汇总
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERID,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERID));
+
+
+                    // distribute
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_DISTRIBUTE,
+                        strDistributes);
+
+                    // class 需要归并汇总
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_CLASS,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERCLASS));
+
+                    // comment
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_COMMENT,
+                        strComments);
+
+                    // sellerAddress
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SELLERADDRESS,
+                        strSellerAddress);
+
+                    // biblio record path
+                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_BIBLIORECPATH,
+                        ListViewUtil.GetItemText(source, ORIGIN_COLUMN_BIBLIORECPATH));
+
+                    // 每个合并后事项的Tag都保留了其来源ListViewItem的列表
+                    target.Tag = origin_items;
+
+                    this.listView_merged.Items.Add(target);
+
+                    i = nStart + nLength - 1;
                 }
 
+                // 刷新Origin的深浅间隔色
+                if (this.SortColumns_origin.Count > 0)
                 {
-                    string strSumPrice = GetTotalPrice(total_acceptfixedprices,
-                        "累计验收码洋字符串 '" + StringUtil.MakePathList(total_acceptfixedprices) + "' 时");
-                    // 验收总码洋
-                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ACCEPT_TOTALFIXEDPRICE,
-                        strSumPrice);
+                    SetGroupBackcolor(
+                        this.listView_origin,
+                        this.SortColumns_origin[0].No);
                 }
 
+                if (null_acceptprice_lineindexs.Count > 0)
                 {
-                    string strSumPrice = GetTotalPrice(total_orderprices,
-                        "累计订购单价字符串 '" + StringUtil.MakePathList(total_orderprices) + "' 时");
-                    // 订购总价
-                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALPRICE,
-                        strSumPrice);
+                    ListViewUtil.ClearSelection(this.listView_origin);
+                    for (int i = 0; i < null_acceptprice_lineindexs.Count; i++)
+                    {
+                        this.listView_origin.Items[null_acceptprice_lineindexs[i]].Selected = true;
+                    }
+                    MessageBox.Show(this, "原始数据列表中共有 " + null_acceptprice_lineindexs.Count.ToString() + "  行的到书价为空，已被选定，请注意检查");
                 }
 
-                {
-                    string strSumPrice = GetTotalPrice(total_orderfixedprices,
-                        "累计订购码洋字符串 '" + StringUtil.MakePathList(total_orderfixedprices) + "' 时");
-                    // 订购总码洋
-                    ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE,
-                        strSumPrice);
-                }
-
-                /* 打印验收单时间
-                // order time
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERTIME,
-                    now.ToShortDateString());   // TODO: 注意这个时间要返回到原始数据中
-                 * */
-
-                // order time 需要归并汇总
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERTIME,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERTIME));
-
-
-                // order id 需要归并汇总
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDERID,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERID));
-
-
-                // distribute
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_DISTRIBUTE,
-                    strDistributes);
-
-                // class 需要归并汇总
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_CLASS,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERCLASS));
-
-                // comment
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_COMMENT,
-                    strComments);
-
-                // sellerAddress
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_SELLERADDRESS,
-                    strSellerAddress);
-
-                // biblio record path
-                ListViewUtil.ChangeItemText(target, MERGED_COLUMN_BIBLIORECPATH,
-                    ListViewUtil.GetItemText(source, ORIGIN_COLUMN_BIBLIORECPATH));
-
-                // 每个合并后事项的Tag都保留了其来源ListViewItem的列表
-                target.Tag = origin_items;
-
-                this.listView_merged.Items.Add(target);
-
-                i = nStart + nLength - 1;
+                return 0;
             }
-
-            // 刷新Origin的深浅间隔色
-            if (this.SortColumns_origin.Count > 0)
+            catch (PositionException ex)
             {
-                SetGroupBackcolor(
-                    this.listView_origin,
-                    this.SortColumns_origin[0].No);
+                strError = "合并原始数据时出错: " + ex.Message;
+                // TODO: 是否要进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
+                return -1;
             }
-
-            if (null_acceptprice_lineindexs.Count > 0)
+            catch (Exception ex)
             {
-                ListViewUtil.ClearSelection(this.listView_origin);
-                for (int i = 0; i < null_acceptprice_lineindexs.Count; i++)
-                {
-                    this.listView_origin.Items[null_acceptprice_lineindexs[i]].Selected = true;
-                }
-                MessageBox.Show(this, "原始数据列表中共有 " + null_acceptprice_lineindexs.Count.ToString() + "  行的到书价为空，已被选定，请注意检查");
+                strError = "FillMergedList() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
             }
-
-            return 0;
         }
-
 
         // 设置listview item的changed状态
         static void SetItemChanged(ListViewItem item,

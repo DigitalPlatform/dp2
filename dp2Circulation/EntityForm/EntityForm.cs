@@ -14,6 +14,7 @@ using System.Threading;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -24,16 +25,12 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
-using DigitalPlatform.GcatClient;
-using DigitalPlatform.GcatClient.gcat_new_ws;
-
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
-using System.Web;
 
 namespace dp2Circulation
 {
@@ -13904,6 +13901,8 @@ Program.MainForm.DefaultFont);
 
         private void TabControl_itemAndIssue_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
+            if (e.Button == MouseButtons.Left)
+                return;
             this.contextMenuStrip_itemArea.Show(this.tabControl_itemAndIssue.PointToScreen(
                 e.Location));
         }

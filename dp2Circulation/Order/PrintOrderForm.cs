@@ -84,7 +84,7 @@ namespace dp2Circulation
         /// <summary>
         /// 原始数据列号: 错误信息
         /// </summary>
-        public static int ORIGIN_COLUMN_ERRORINFO = 1;  // 错误信息
+        public static int ORIGIN_COLUMN_ERRORINFO = 1;  // 错误信息 和摘要实际上是同一列
         /// <summary>
         /// 原始数据列号: ISBN/ISSN
         /// </summary>
@@ -147,7 +147,7 @@ namespace dp2Circulation
         /// <summary>
         /// 原始数据列号: 馆藏分配
         /// </summary>
-        public static int ORIGIN_COLUMN_DISTRIBUTE = 15;       // 馆藏分配
+        public static int ORIGIN_COLUMN_DISTRIBUTE = 16;       // 馆藏分配
         /// <summary>
         /// 原始数据列号: 类别
         /// </summary>
@@ -1466,7 +1466,6 @@ namespace dp2Circulation
 
             List<int> textchanged_columns = new List<int>();
 
-
             int nIssueCount = 1;
             if (strPubType == "连续出版物")
             {
@@ -1673,11 +1672,8 @@ namespace dp2Circulation
                     new System.Drawing.Font(item.SubItems[index].Font, FontStyle.Bold);
             }
 
-
-
             if (item.ImageIndex == TYPE_NORMAL)
                 SetItemColor(item, TYPE_NORMAL);
-
         }
 
         // 设置 原始数据listview 的栏目标题
@@ -7296,13 +7292,16 @@ MessageBoxDefaultButton.Button2);
             public OldNewCopy Copy { get; set; }
 
             // 对一些值进行填充和调整
-            public void Adjust()
+            // 返回 LineInfo 类型是为了便于链式调用
+            public LineInfo Adjust()
             {
                 // 如果原始数据中的码洋为空，则用单价来填充
                 if (string.IsNullOrEmpty(FixedPrice.OldValue) && string.IsNullOrEmpty(Price.OldValue) == false)
                     FixedPrice.OldValue = "{" + Price.OldValue + "}";
                 if (string.IsNullOrEmpty(FixedPrice.NewValue) && string.IsNullOrEmpty(Price.NewValue) == false)
                     FixedPrice.NewValue = "{" + Price.NewValue + "}";
+
+                return this;
             }
 
             public static LineInfo Build(ListViewItem source, string strPosition)
@@ -7341,11 +7340,11 @@ MessageBoxDefaultButton.Button2);
                 // 书目号
                 string strCatalogNo = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_CATALOGNO);
-                string strOrderTime = ListViewUtil.GetItemText(source,
-ORIGIN_COLUMN_ORDERTIME);   // 已经是本地时间格式
+                string strOrderTime = RemoveChangedChar(ListViewUtil.GetItemText(source,
+ORIGIN_COLUMN_ORDERTIME));   // 已经是本地时间格式
 
-                string strTotalPrice = ListViewUtil.GetItemText(source,
-    ORIGIN_COLUMN_TOTALPRICE);
+                string strTotalPrice = RemoveChangedChar(ListViewUtil.GetItemText(source,
+    ORIGIN_COLUMN_TOTALPRICE));
                 string strComment = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_COMMENT);
                 string strDistribute = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_DISTRIBUTE);
                 string strSummary = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_SUMMARY);
@@ -7390,9 +7389,9 @@ ORIGIN_COLUMN_COPY);
             }
         }
 
-        static void CopyField(ListViewItem source, 
+        static void CopyField(ListViewItem source,
             int nSourceColumn,
-            ListViewItem target, 
+            ListViewItem target,
             int nTargetColumn)
         {
             ListViewUtil.ChangeItemText(target, nTargetColumn,
@@ -8277,7 +8276,7 @@ ORIGIN_COLUMN_COPY);
                     acceptCopy = CopyAndSubCopy.Build(strNewCopy, strPosition);
                 }
 #endif
-                    LineInfo source_line = LineInfo.Build(source, strPosition);
+                    LineInfo source_line = LineInfo.Build(source, strPosition).Adjust();
 
                     string strMergeComment = "";    // 合并注释
                     List<string> totalprices = new List<string>();  // 累积的价格字符串
@@ -8384,14 +8383,27 @@ ORIGIN_COLUMN_COPY);
                         current_acceptCopy = CopyAndSubCopy.Build(strNewCopy, strCurrentPosition);
                     }
 #endif
-                        LineInfo current_line = LineInfo.Build(current, strCurrentPosition);
+                        LineInfo current_line = null;
 
+                        if (i == j)
+                            current_line = source_line; // 优化，提高速度
+                        else
+                            current_line = LineInfo.Build(current, strCurrentPosition).Adjust();
 
                         if (this.comboBox_load_type.Text == "图书")
                         {
-                            // 七元组判断 // 五元组判断 // 四元组判断
+                            // 十一元 // 七元组判断 // 五元组判断 // 四元组判断
                             if (source_line.BiblioRecPath != current_line.BiblioRecPath
                                 || source_line.Seller != current_line.Seller
+
+                                || CurrencyItem.IsEqual(source_line.FixedPrice.OldValue, current_line.FixedPrice.OldValue, "CNY") == false
+                                || CurrencyItem.IsEqual(source_line.FixedPrice.NewValue, current_line.FixedPrice.NewValue, "CNY") == false
+
+                                || dp2StringUtil.CanonicalizeDiscount(source_line.Discount.OldValue, strPosition)
+                                != dp2StringUtil.CanonicalizeDiscount(current_line.Discount.OldValue, strCurrentPosition)
+                                || dp2StringUtil.CanonicalizeDiscount(source_line.Discount.NewValue, strPosition)
+                                != dp2StringUtil.CanonicalizeDiscount(current_line.Discount.NewValue, strCurrentPosition)
+
                                 || source_line.Price.OldValue != current_line.Price.OldValue
                                 || source_line.Price.NewValue != current_line.Price.NewValue
                                 || source_line.CatalogNo != current_line.CatalogNo
@@ -8399,15 +8411,25 @@ ORIGIN_COLUMN_COPY);
                                 || CompareAddress(source_line.SellerAddress, current_line.SellerAddress) != 0)
                             {
                                 if (j == i)
-                                    throw new Exception("j == i (j=" + j + ") 七元组比较不应该出现不相等的结果");
+                                    throw new Exception("j == i (j=" + j + ") 十一元组比较不应该出现不相等的结果");
                                 break;
                             }
                         }
                         else
                         {
-                            // 九元组判断 // 七元组判断 // 六元组判断
+                            // 十三元 // 九元组判断 // 七元组判断 // 六元组判断
                             if (source_line.BiblioRecPath != current_line.BiblioRecPath
                                 || source_line.Seller != current_line.Seller
+
+                                || CurrencyItem.IsEqual(source_line.FixedPrice.OldValue, current_line.FixedPrice.OldValue, "CNY") == false
+                                || CurrencyItem.IsEqual(source_line.FixedPrice.NewValue, current_line.FixedPrice.NewValue, "CNY") == false
+
+                                || dp2StringUtil.CanonicalizeDiscount(source_line.Discount.OldValue, strPosition)
+                                != dp2StringUtil.CanonicalizeDiscount(current_line.Discount.OldValue, strCurrentPosition)
+                                || dp2StringUtil.CanonicalizeDiscount(source_line.Discount.NewValue, strPosition)
+                                != dp2StringUtil.CanonicalizeDiscount(current_line.Discount.NewValue, strCurrentPosition)
+
+
                                 || source_line.Price.OldValue != current_line.Price.OldValue
                                 || source_line.Price.NewValue != current_line.Price.NewValue
                                 || source_line.CatalogNo != current_line.CatalogNo
@@ -8417,7 +8439,7 @@ ORIGIN_COLUMN_COPY);
                                 || CompareAddress(source_line.SellerAddress, current_line.SellerAddress) != 0)
                             {
                                 if (j == i)
-                                    throw new Exception("j == i (j=" + j + ") 九元组比较不应该出现不相等的结果");
+                                    throw new Exception("j == i (j=" + j + ")十三元组比较不应该出现不相等的结果");
                                 break;
                             }
                         }
@@ -8496,8 +8518,10 @@ ORIGIN_COLUMN_COPY);
                         }
                         else
                         {
-                            strError = strCurrentPosition + " 验收价 不应为空";
-                            return -1;
+                            //strError = strCurrentPosition + " 验收价 不应为空";
+                            //return -1;
+
+                            // 注：打印订单阶段，验收价可能为空，这是正常情况
                         }
 
                         accepttotalprices.Add(strAcceptTotalPrice);
@@ -8512,8 +8536,10 @@ ORIGIN_COLUMN_COPY);
                         }
                         else
                         {
-                            strError = strCurrentPosition + " 到书码洋 不应为空";
-                            return -1;
+                            //strError = strCurrentPosition + " 到书码洋 不应为空";
+                            //return -1;
+
+                            // 注：打印订单阶段，到书码洋价可能为空，这是正常情况
                         }
 
                         accepttotalfixedprices.Add(strAcceptTotalFixedPrice);
@@ -8771,20 +8797,20 @@ ORIGIN_COLUMN_COPY);
 
                 return 0;
             }
-            catch(PositionException ex)
+            catch (PositionException ex)
             {
                 strError = "合并原始数据时出错: " + ex.Message;
                 // TODO: 是否要进一步把 merged listview 全部行清空，以防止用户打印输出错误的或者不足的合并数据？
                 return -1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "FillMergedList() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }
 
-        void UpdateOriginItems(List<ListViewItem> origin_items, 
+        void UpdateOriginItems(List<ListViewItem> origin_items,
             DateTime now,
             string strOrderID)
         {
@@ -8795,11 +8821,12 @@ ORIGIN_COLUMN_COPY);
                     ListViewItem origin_item = origin_items[k];
 
                     bool bChanged = false;
-                    string strOldOrderTime = ListViewUtil.GetItemText(origin_item, ORIGIN_COLUMN_ORDERTIME);
+                    // 注意去掉开头的星号
+                    string strOldOrderTime = RemoveChangedChar(ListViewUtil.GetItemText(origin_item, ORIGIN_COLUMN_ORDERTIME));
                     if (strOldOrderTime != now.ToShortDateString())
                     {
                         ListViewUtil.ChangeItemText(origin_item, ORIGIN_COLUMN_ORDERTIME,
-                            now.ToShortDateString());
+                            "*" + now.ToShortDateString());
                         bChanged = true;
 
                         origin_item.SubItems[ORIGIN_COLUMN_ORDERTIME].BackColor = System.Drawing.Color.Red;
@@ -8809,11 +8836,11 @@ ORIGIN_COLUMN_COPY);
                             new System.Drawing.Font(origin_item.SubItems[ORIGIN_COLUMN_ORDERTIME].Font, FontStyle.Bold);
                     }
 
-                    string strOldOrderID = ListViewUtil.GetItemText(origin_item, ORIGIN_COLUMN_ORDERID);
+                    string strOldOrderID = RemoveChangedChar(ListViewUtil.GetItemText(origin_item, ORIGIN_COLUMN_ORDERID));
                     if (strOrderID != strOldOrderID)
                     {
                         ListViewUtil.ChangeItemText(origin_item, ORIGIN_COLUMN_ORDERID,
-                            strOrderID);
+                            "*" + strOrderID);
                         bChanged = true;
 
                         // 加粗字体
@@ -8861,13 +8888,16 @@ ORIGIN_COLUMN_COPY);
 
                 int nCurCopy = 0;
                 string strLeftCopy = dp2StringUtil.GetCopyFromCopyString(strCopyString);
-                try
+                if (string.IsNullOrEmpty(strLeftCopy) == false)
                 {
-                    nCurCopy = Convert.ToInt32(strLeftCopy);
-                }
-                catch (Exception ex)
-                {
-                    throw new PositionException("复本字符串 '" + strCopyString + "'内 表示套数的部分(星号左侧) '" + strLeftCopy + "' 格式不正确: " + ex.Message, strPosition);
+                    try
+                    {
+                        nCurCopy = Convert.ToInt32(strLeftCopy);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new PositionException("复本字符串 '" + strCopyString + "' 内 表示套数的部分(星号左侧) '" + strLeftCopy + "' 格式不正确: " + ex.Message, strPosition);
+                    }
                 }
 
                 int nCurSubCopy = 1;
@@ -8880,7 +8910,7 @@ ORIGIN_COLUMN_COPY);
                     }
                     catch (Exception ex)
                     {
-                        throw new PositionException("复本字符串 '" + strCopyString + "'内 表示每套册数的部分(星号右侧) '" + strRightCopy + "' 格式不正确: " + ex.Message, strPosition);
+                        throw new PositionException("复本字符串 '" + strCopyString + "' 内 表示每套册数的部分(星号右侧) '" + strRightCopy + "' 格式不正确: " + ex.Message, strPosition);
                     }
                 }
 
@@ -9651,7 +9681,8 @@ MessageBoxDefaultButton.Button2);
 
                     case "state":
                     case "状态":
-                        return item.SubItems[ORIGIN_COLUMN_STATE].Text;
+                        // 注意去掉前面的星号
+                        return RemoveChangedChar(item.SubItems[ORIGIN_COLUMN_STATE].Text);
 
                     case "catalogNo":
                     case "书目号":
@@ -9684,15 +9715,16 @@ MessageBoxDefaultButton.Button2);
 
                     case "totalPrice":
                     case "总价格":
-                        return item.SubItems[ORIGIN_COLUMN_TOTALPRICE].Text;
+                        return RemoveChangedChar(item.SubItems[ORIGIN_COLUMN_TOTALPRICE].Text);
 
                     case "orderTime":
                     case "订购时间":
-                        return item.SubItems[ORIGIN_COLUMN_ORDERTIME].Text;
+                        // 注意去掉前面的星号
+                        return RemoveChangedChar(item.SubItems[ORIGIN_COLUMN_ORDERTIME].Text);
 
                     case "orderID":
                     case "订单号":
-                        return item.SubItems[ORIGIN_COLUMN_ORDERID].Text;
+                        return RemoveChangedChar(item.SubItems[ORIGIN_COLUMN_ORDERID].Text);
 
                     case "distribute":
                     case "馆藏分配":
@@ -9953,7 +9985,7 @@ MessageBoxDefaultButton.Button2);
 
                 try
                 {
-                    strPrice = item.SubItems[ORIGIN_COLUMN_TOTALPRICE].Text;
+                    strPrice = RemoveChangedChar(item.SubItems[ORIGIN_COLUMN_TOTALPRICE].Text);
                 }
                 catch
                 {
@@ -9964,7 +9996,7 @@ MessageBoxDefaultButton.Button2);
                     continue;
 
                 // 提取出纯数字
-                string strPurePrice = PriceUtil.GetPurePrice(strPrice);
+                string strPurePrice = RemoveChangedChar(PriceUtil.GetPurePrice(strPrice));
 
                 if (String.IsNullOrEmpty(strPurePrice) == true)
                     continue;
@@ -10100,7 +10132,7 @@ MessageBoxDefaultButton.Button2);
                         RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_TOTALPRICE)));
                     RemoveChangedChar(item, ORIGIN_COLUMN_TOTALPRICE);
 
-                    string strOrderTime = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERTIME);
+                    string strOrderTime = RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERTIME));
                     if (string.IsNullOrEmpty(strOrderTime) == false)
                     {
                         DateTime order_time;
@@ -10118,11 +10150,13 @@ MessageBoxDefaultButton.Button2);
                             "orderTime",
                             // DateTimeUtil.Rfc1123DateTimeString(order_time.ToUniversalTime()));
                             DateTimeUtil.Rfc1123DateTimeStringEx(order_time));
+                        RemoveChangedChar(item, ORIGIN_COLUMN_ORDERTIME);
                     }
 
                     DomUtil.SetElementText(dom.DocumentElement,
                         "orderID",
-                        ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERID));
+                        RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ORDERID)));
+                    RemoveChangedChar(item, ORIGIN_COLUMN_ORDERID);
 
                     EntityInfo info = new EntityInfo();
 
