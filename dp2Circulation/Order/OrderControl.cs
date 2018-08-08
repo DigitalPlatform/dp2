@@ -17,7 +17,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -302,7 +301,6 @@ namespace dp2Circulation
 
                 Debug.Assert(entities != null, "");
 
-
                 for (int i = 0; i < entities.Length; i++)
                 {
                     if (entities[i].ErrorCode != ErrorCodeValue.NoError)
@@ -326,7 +324,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -462,62 +460,56 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             OrderDesignForm dlg = new OrderDesignForm();
-            // dlg.MainForm = Program.MainForm;
-            dlg.SeriesMode = this.SeriesMode;   // 2008/12/24
-            dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
-            dlg.CheckDupItem = true;
 
-            // TODO: 从缺省工作单中获得批次号? 只能直接在缺省工作单中修改?
-            // dlg.Text = "订购 -- 批次号:" + this.OrderBatchNo;
-            dlg.ClearAllItems();
-
-            // bool bCleared = false;  // 是否清除过对话框里面的参与事项?
-
-            // 将已有的订购信息反映到对话框中。
-            // 已经发出的订单事项，不能修改。而其他事项都可以修改
-            foreach (OrderItem item in this.Items)
+            this.ParentShowMessage("正在准备数据 ...", "green", false);
+            try
             {
-                // OrderItem item = this.OrderItems[i];
+                dlg.SeriesMode = this.SeriesMode;   // 2008/12/24
+                dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
+                dlg.CheckDupItem = true;
 
-                if (item.ItemDisplayState == ItemDisplayState.Deleted)
+                // TODO: 从缺省工作单中获得批次号? 只能直接在缺省工作单中修改?
+                // dlg.Text = "订购 -- 批次号:" + this.OrderBatchNo;
+                dlg.ClearAllItems();
+
+                // 将已有的订购信息反映到对话框中。
+                // 已经发出的订单事项，不能修改。而其他事项都可以修改
+                foreach (OrderItem item in this.Items)
                 {
-                    strError = "当前存在标记删除的订购事项，必须先提交保存后，才能使用订购规划功能";
-                    goto ERROR1;
+                    if (item.ItemDisplayState == ItemDisplayState.Deleted)
+                    {
+                        strError = "当前存在标记删除的订购事项，必须先提交保存后，才能使用订购规划功能";
+                        goto ERROR1;
+                    }
+
+                    nRet = item.BuildRecord(
+                        true,   // 要检查 Parent 成员
+                        out string strOrderXml,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    DigitalPlatform.CommonControl.Item design_item =
+                        dlg.AppendNewItem(strOrderXml, out strError);
+                    if (design_item == null)
+                        goto ERROR1;
+
+                    design_item.Tag = (object)item; // 建立连接关系
                 }
 
+                dlg.Changed = false;
 
-                string strOrderXml = "";
-                nRet = item.BuildRecord(
-                    true,   // 要检查 Parent 成员
-                    out strOrderXml,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                /*
-                if (bCleared == false)
-                {
-                    dlg.ClearAllItems();
-                    bCleared = true;
-                }
-                 * */
-
-                DigitalPlatform.CommonControl.Item design_item =
-                    dlg.AppendNewItem(strOrderXml, out strError);
-                if (design_item == null)
-                    goto ERROR1;
-
-                design_item.Tag = (object)item; // 建立连接关系
+                dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
+                dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+                dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+                dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
             }
-
-            dlg.Changed = false;
-
-            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
-            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
-            dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-            dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
-            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+            finally
+            {
+                this.ParentShowMessage("", "", false);
+            }
 
             Program.MainForm.AppInfo.LinkFormState(dlg,
                 "order_design_form_state");
@@ -530,7 +522,6 @@ namespace dp2Circulation
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
-
 
             bool bOldChanged = this.Items.Changed;
 
@@ -643,6 +634,19 @@ namespace dp2Circulation
                     orderitem.Copy = design_item.CopyString;    // 只取最新值
                     bChanged = true;
                 }
+
+                if (orderitem.FixedPrice != design_item.FixedPrice)
+                {
+                    orderitem.FixedPrice = design_item.FixedPrice;   // 只取最新值
+                    bChanged = true;
+                }
+
+                if (orderitem.Discount != design_item.Discount)
+                {
+                    orderitem.Discount = design_item.Discount;   // 只取最新值
+                    bChanged = true;
+                }
+
                 if (orderitem.Price != design_item.Price)
                 {
                     orderitem.Price = design_item.Price;   // 只取最新值
@@ -746,7 +750,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -803,13 +807,12 @@ namespace dp2Circulation
             DomUtil.SetElementText(dom.DocumentElement,
                 "state", "");
 
-
             strNewDefault = dom.OuterXml;
 
             e.Xml = strNewDefault;
 
             return;
-        ERROR1:
+            ERROR1:
             throw new Exception(strError);
         }
 
@@ -1120,14 +1123,20 @@ namespace dp2Circulation
                 orderitem.CatalogNo = design_item.CatalogNo;    // 2008/8/31
                 orderitem.Seller = design_item.Seller;
 
-                orderitem.Source = OrderDesignControl.LinkOldNewValue(design_item.OldSource, design_item.Source);
+                orderitem.Source = dp2StringUtil.LinkOldNewValue(design_item.OldSource, design_item.Source);
 
                 orderitem.Range = design_item.RangeString;  // 2008/12/17
                 orderitem.IssueCount = design_item.IssueCountString;    // 2008/12/17
 
-                orderitem.Copy = OrderDesignControl.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
+                orderitem.Copy = dp2StringUtil.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
 
-                orderitem.Price = OrderDesignControl.LinkOldNewValue(design_item.OldPrice, design_item.Price);
+                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValue(design_item.OldFixedPrice, design_item.FixedPrice);
+                orderitem.Discount = dp2StringUtil.LinkOldNewValue(design_item.OldDiscount, design_item.Discount);
+
+                orderitem.Price = dp2StringUtil.LinkOldNewValue(design_item.OldPrice, design_item.Price);
+
+                // 2018/8/2
+                orderitem.TotalPrice = design_item.TotalPrice;
 
                 orderitem.Distribute = design_item.Distribute;
                 orderitem.Class = design_item.Class;    // 2008/8/31
@@ -1248,7 +1257,7 @@ namespace dp2Circulation
             TriggerContentChanged(bOldChanged, true);
             return;
 
-        ERROR1:
+            ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -1336,7 +1345,7 @@ namespace dp2Circulation
                 // 2010/12/1 add
                 string strOldCopyValue = "";
                 string strNewCopyValue = "";
-                OrderDesignControl.ParseOldNewValue(order_item.Copy,
+                dp2StringUtil.ParseOldNewValue(order_item.Copy,
                     out strOldCopyValue,
                     out strNewCopyValue);
                 string strCopyString = strNewCopyValue;
@@ -1345,7 +1354,7 @@ namespace dp2Circulation
 
                 // 2010/12/1 add
                 int nRightCopy = 1;  // 套内册数
-                string strRightCopy = OrderDesignControl.GetRightFromCopyString(strCopyString);
+                string strRightCopy = dp2StringUtil.GetRightFromCopyString(strCopyString);
                 if (String.IsNullOrEmpty(strRightCopy) == false)
                 {
                     try
@@ -1418,20 +1427,17 @@ namespace dp2Circulation
 
                             // source内采用新值
                             // 分离 "old[new]" 内的两个值
-                            OrderDesignControl.ParseOldNewValue(order_item.Source,
+                            dp2StringUtil.ParseOldNewValue(order_item.Source,
                                 out strOldValue,
                                 out strNewValue);
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "source", strNewValue);
                         }
 
-                        string strOrderPrice = "";
-                        string strArrivePrice = "";
-
                         // 分离两个价格
-                        OrderDesignControl.ParseOldNewValue(order_item.Price,
-                            out strOrderPrice,
-                            out strArrivePrice);
+                        dp2StringUtil.ParseOldNewValue(order_item.Price,
+                            out string strOrderPrice,
+                            out string strArrivePrice);
                         string strPriceValue = "";
                         if (this.PriceDefault == "订购价")
                             strPriceValue = strOrderPrice;
@@ -1764,7 +1770,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
         }
@@ -2125,75 +2131,84 @@ namespace dp2Circulation
 
         void ModifyOrder(OrderItem orderitem)
         {
+            int nRet = 0;
+            string strError = "";
             Debug.Assert(orderitem != null, "");
 
             bool bOldChanged = this.Items.Changed;
 
             string strOldIndex = orderitem.Index;
 
-            OrderEditForm edit = new OrderEditForm();
-
-            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            // edit.MainForm = Program.MainForm;
-            edit.ItemControl = this;
-            string strError = "";
-            int nRet = edit.InitialForEdit(orderitem,
-                this.Items,
-                out strError);
-            if (nRet == -1)
+            using (OrderEditForm edit = new OrderEditForm())
             {
-                MessageBox.Show(ForegroundWindow.Instance, strError);
-                return;
-            }
-            edit.StartItem = null;  // 清除原始对象标记
-
-        REDO:
-            Program.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
-            edit.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(edit);
-
-            if (edit.DialogResult != DialogResult.OK)
-                return;
-
-            TriggerContentChanged(bOldChanged, true);
-
-            LibraryChannel channel = Program.MainForm.GetChannel();
-            this.EnableControls(false);
-            try
-            {
-                if (strOldIndex != orderitem.Index) // 编号改变了的情况下才查重
+                this.ParentShowMessage("正在准备数据 ...", "green", false);
+                try
                 {
-                    // 需要排除掉自己: orderitem。
-                    List<OrderItem> excludeItems = new List<OrderItem>();
-                    excludeItems.Add(orderitem);
-
-
-                    // 对当前窗口内进行编号查重
-                    OrderItem dupitem = this.Items.GetItemByIndex(
-                        orderitem.Index,
-                        excludeItems);
-                    if (dupitem != null)
+                    edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
+                                                                                // edit.MainForm = Program.MainForm;
+                    edit.ItemControl = this;
+                    nRet = edit.InitialForEdit(orderitem,
+                        this.Items,
+                        out strError);
+                    if (nRet == -1)
                     {
-                        string strText = "";
-                        if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
-                            strText = "编号 '" + orderitem.Index + "' 和本种中未提交之一删除编号相重。按“确定”按钮重新输入，或退出对话框后先行提交已有之修改。";
-                        else
-                            strText = "编号 '" + orderitem.Index + "' 在本种中已经存在。按“确定”按钮重新输入。";
-
-                        MessageBox.Show(ForegroundWindow.Instance, strText);
-                        goto REDO;
+                        MessageBox.Show(ForegroundWindow.Instance, strError);
+                        return;
                     }
+                    edit.StartItem = null;  // 清除原始对象标记
+                }
+                finally
+                {
+                    this.ParentShowMessage("", "", false);
+                }
 
-                    // 对(本种)所有订购记录进行编号查重
-                    if (edit.AutoSearchDup == true
+                REDO:
+                Program.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
+                edit.ShowDialog(this);
+                Program.MainForm.AppInfo.UnlinkFormState(edit);
+
+                if (edit.DialogResult != DialogResult.OK)
+                    return;
+
+                TriggerContentChanged(bOldChanged, true);
+
+                LibraryChannel channel = Program.MainForm.GetChannel();
+                this.EnableControls(false);
+                try
+                {
+                    if (strOldIndex != orderitem.Index) // 编号改变了的情况下才查重
+                    {
+                        // 需要排除掉自己: orderitem。
+                        List<OrderItem> excludeItems = new List<OrderItem>();
+                        excludeItems.Add(orderitem);
+
+
+                        // 对当前窗口内进行编号查重
+                        OrderItem dupitem = this.Items.GetItemByIndex(
+                            orderitem.Index,
+                            excludeItems);
+                        if (dupitem != null)
+                        {
+                            string strText = "";
+                            if (dupitem.ItemDisplayState == ItemDisplayState.Deleted)
+                                strText = "编号 '" + orderitem.Index + "' 和本种中未提交之一删除编号相重。按“确定”按钮重新输入，或退出对话框后先行提交已有之修改。";
+                            else
+                                strText = "编号 '" + orderitem.Index + "' 在本种中已经存在。按“确定”按钮重新输入。";
+
+                            MessageBox.Show(ForegroundWindow.Instance, strText);
+                            goto REDO;
+                        }
+
+                        // 对(本种)所有订购记录进行编号查重
+                        if (edit.AutoSearchDup == true
 #if NEW_DUP_API
  && string.IsNullOrEmpty(orderitem.RefID) == false
 #endif
 )
-                    {
-                        // Debug.Assert(false, "");
+                        {
+                            // Debug.Assert(false, "");
 
-                        string[] paths = null;
+                            string[] paths = null;
 
 #if !NEW_DUP_API
                         // 编号查重。
@@ -2221,46 +2236,47 @@ namespace dp2Circulation
                             goto REDO;
                         }
 #else
-                        // 参考ID查重。
-                        // parameters:
-                        //      strOriginRecPath    出发记录的路径。
-                        //      paths   所有命中的路径
-                        // return:
-                        //      -1  error
-                        //      0   not dup
-                        //      1   dup
-                        nRet = SearchOrderRefIdDup(
-                            channel,
-                            orderitem.RefID,
-                            // this.BiblioRecPath,
-                            orderitem.RecPath,
-                            out paths,
-                            out strError);
-                        if (nRet == -1)
-                            MessageBox.Show(ForegroundWindow.Instance, "对参考ID '" + orderitem.RefID + "' 进行查重的过程中发生错误: " + strError);
-                        else if (nRet == 1) // 发生重复
-                        {
-                            string pathlist = String.Join(",", paths);
+                            // 参考ID查重。
+                            // parameters:
+                            //      strOriginRecPath    出发记录的路径。
+                            //      paths   所有命中的路径
+                            // return:
+                            //      -1  error
+                            //      0   not dup
+                            //      1   dup
+                            nRet = SearchOrderRefIdDup(
+                                channel,
+                                orderitem.RefID,
+                                // this.BiblioRecPath,
+                                orderitem.RecPath,
+                                out paths,
+                                out strError);
+                            if (nRet == -1)
+                                MessageBox.Show(ForegroundWindow.Instance, "对参考ID '" + orderitem.RefID + "' 进行查重的过程中发生错误: " + strError);
+                            else if (nRet == 1) // 发生重复
+                            {
+                                string pathlist = String.Join(",", paths);
 
-                            string strText = "参考ID '" + orderitem.RefID + "' 在数据库中发现已经被(属于其他种的)下列订购记录所使用。\r\n" + pathlist + "\r\n\r\n按“确定”按钮重新编辑订购信息，或者根据提示的订购记录路径，去修改其他订购记录信息。";
-                            MessageBox.Show(ForegroundWindow.Instance, strText);
+                                string strText = "参考ID '" + orderitem.RefID + "' 在数据库中发现已经被(属于其他种的)下列订购记录所使用。\r\n" + pathlist + "\r\n\r\n按“确定”按钮重新编辑订购信息，或者根据提示的订购记录路径，去修改其他订购记录信息。";
+                                MessageBox.Show(ForegroundWindow.Instance, strText);
 
-                            goto REDO;
-                        }
+                                goto REDO;
+                            }
 #endif
+                        }
+                    }
+
+                    // 2017/3/2
+                    if (string.IsNullOrEmpty(orderitem.RefID))
+                    {
+                        orderitem.RefID = Guid.NewGuid().ToString();
                     }
                 }
-
-                // 2017/3/2
-                if (string.IsNullOrEmpty(orderitem.RefID))
+                finally
                 {
-                    orderitem.RefID = Guid.NewGuid().ToString();
+                    this.EnableControls(true);
+                    Program.MainForm.ReturnChannel(channel);
                 }
-            }
-            finally
-            {
-                this.EnableControls(true);
-                Program.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -2982,8 +2998,6 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-
-
             menuItem = new MenuItem("订购(&O)");
             menuItem.Click += new System.EventHandler(this.menu_design_Click);
             if (bHasBillioLoaded == false)
@@ -2993,7 +3007,6 @@ namespace dp2Circulation
             // -----
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
-
 
             menuItem = new MenuItem("验收(&A)");
             menuItem.Click += new System.EventHandler(this.menu_arrive_Click);

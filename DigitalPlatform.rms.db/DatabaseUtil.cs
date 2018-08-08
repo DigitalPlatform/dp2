@@ -540,6 +540,48 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        public static int ChangeMetadata(string strOldMetadata,
+    long lLength,
+    string strMime,
+    string strLocalPath,
+    out string strResult,
+    out string strError)
+        {
+            strResult = "";
+            strError = "";
+
+            XmlDocument oldDom = new XmlDocument();
+            oldDom.PreserveWhitespace = true; //设PreserveWhitespace为true
+            if (string.IsNullOrEmpty(strOldMetadata) == true)
+            {
+                // strOldMetadata = "<file/>";
+                XmlNode root = oldDom.CreateElement("file");
+                oldDom.AppendChild(root);
+            }
+            else
+            {
+                try
+                {
+                    oldDom.LoadXml(strOldMetadata);
+                }
+                catch (Exception ex)
+                {
+                    strError = "库中的元数据不合法\r\n" + ex.Message;
+                    return -1;
+                }
+            }
+
+            XmlElement oldRoot = oldDom.DocumentElement;
+
+            oldRoot.SetAttribute("size", Convert.ToString(lLength));
+            if (strMime != null)
+                oldRoot.SetAttribute("mimetype", strMime);
+            if (strLocalPath != null)
+                oldRoot.SetAttribute("localpath", strLocalPath);
+
+            strResult = oldRoot.OuterXml;
+            return 0;
+        }
 
 #if NOOOOOOOOOOOOOOOO
         // 检索范围是否合法,并返回真正能够取的长度

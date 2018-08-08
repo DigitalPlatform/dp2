@@ -4,28 +4,30 @@
   <![CDATA[
 
 
-// CNMARC格式期刊 html 格式构造
+// CNMARC格式期刊 OPAC 书目详细格式构造
 // (C)Copyright 2006-2011 数字平台(北京)软件有限责任公司
 // 编写人：谢涛
-// 最后修改时间: 2011/8/27
 
+// 修改历史：
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
-
+// 2017/12/20 
+// 2018/7/26 1) 将几个分类法根查检索锚点修改为具体的分类法检索途径。不过刚安装好的时候没有科图法和人大法的检索点，如果需要请专门去配置；2)  改用带有模板功能的 ScriptUtil.BuildObjectHtmlTable()，包含 "unimarc" 参数。
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Xml;
 
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.OPAC.Server;
+using DigitalPlatform.Script;
 
 ]]></using>
     <ref>system.dll</ref>
     <ref>system.web.dll</ref>
-    <ref>system.windows.forms.dll</ref>
-    <ref>system.web.dll</ref>
+    <ref>system.xml.dll</ref>
     <def>
      <![CDATA[
 
@@ -64,13 +66,22 @@ using DigitalPlatform.OPAC.Server;
    int urlNum = 0;
    int serials = 0;   // 是否为期刊 ==1 :头标7位为S   
 
-  
+	// 从一个纯路径(不含url部分)中截取库名部分
+	public static string GetDbName(string strLongPath)
+	{
+		int nRet = strLongPath.IndexOf("/");
+		if (nRet == -1)
+			return strLongPath;
+		else
+			return strLongPath.Substring(0, nRet);
+	}
 		]]></def>
     <record>
         <def><![CDATA[
 		]]></def>
         <begin><![CDATA[
 			// MessageBox.Show("record data:" + this.Data);
+		Root.dbname = GetDbName(Host.RecPath);
 		]]></begin>
         <!-- 010 ISBN号 -->
         <field name="010">
@@ -845,7 +856,7 @@ using DigitalPlatform.OPAC.Server;
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("中图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -868,11 +879,11 @@ using DigitalPlatform.OPAC.Server;
 				else
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
-				// 增加科图分类法的根查询锚点
+				// 增加科图法分类法的根查询锚点
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("科图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -895,11 +906,11 @@ using DigitalPlatform.OPAC.Server;
 				else
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
-				// 增加人大分类法的根查询锚点
+				// 增加人大法分类法的根查询锚点
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("人大法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -1110,55 +1121,7 @@ using DigitalPlatform.OPAC.Server;
         }
       </end>
         </field>
-        <!-- 显示多媒体信息 -->
-        <field name="856">
-            <def>
-        string urlTemp;
-      </def>
-            <subfield name="*"><![CDATA[
-        // 提示信息
-        if (this.Parent.DupCount > 1)
-        Root.s856 += "<br/>";
-        Root.s856 += this.Content;
-        Root.s856 += " ";
-        ]]></subfield>
-            <subfield name="u"><![CDATA[
-        // 多媒体文件的URL
-        if (this.DupCount > 1)
-        {	
-        string s0 = "";
-        
-        Root.urlNum = Root.urlNum + 1;	// 通过全局变量url856的递增来用特殊字符给出URL的序号
-        s0 = Convert.ToString(Root.urlNum);
 
-	string u = this.Content;
-	string uri = "";
-	if (String.IsNullOrEmpty(u) == false)
-	{
-		if (u[0] == '@')	// 抽象语法
-			uri = HttpUtility.UrlEncode(Host.RecPath) + "/object/" + u.Substring(1);
-		else
-			uri = u;
-	}
-
-        Parent.urlTemp += "<a href='"+Host.App.LibraryServerUrl+"/getobject.aspx?uri="+uri+"'>";        
-        Parent.urlTemp += "锚点";        
-        Parent.urlTemp += s0;
-        Parent.urlTemp += "</a>";        
-        Parent.urlTemp += " ";
-        }
-        else
-        {
-        Parent.urlTemp += "<a href='"+this.Content+"'>";        
-        Parent.urlTemp += "锚点";        
-        Parent.urlTemp += "</a>";        
-        Parent.urlTemp += " ";        
-        }
-        ]]></subfield>
-            <end>
-        Root.s856 += urlTemp;
-      </end>
-        </field>
         <!-- 905 馆藏信息 -->
         <field name="905">
             <subfield name="b">
@@ -1224,6 +1187,8 @@ using DigitalPlatform.OPAC.Server;
       </subfield>
         </field>
         <end><![CDATA[
+		XmlElement container = Host.App.WebUiDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
+		Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container, "unimarc");
 		]]></end>
     </record>
     <end>
@@ -1397,7 +1362,7 @@ using DigitalPlatform.OPAC.Server;
       if (s856.Length > 0)
       {
           Host.ResultString += "<tr class='content'>";
-			    Host.ResultString += "<td class='name' width='10%' nowrap>多媒体</td>";
+			    Host.ResultString += "<td class='name' width='10%' nowrap>电子资源</td>";
 			    Host.ResultString += "<td class='value' width='90%'>"+s856+"</td>";
 			    Host.ResultString += "</tr>";
       }                         

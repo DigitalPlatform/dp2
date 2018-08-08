@@ -190,6 +190,34 @@ namespace dp2Circulation
             }
         }
 
+        // 2018/7/31
+        // 码洋
+        public string FixedPrice
+        {
+            get
+            {
+                return this.textBox_fixedPrice.Text;
+            }
+            set
+            {
+                this.textBox_fixedPrice.Text = value;
+            }
+        }
+
+        // 2018/7/31
+        // 折扣
+        public string Discount
+        {
+            get
+            {
+                return this.textBox_discount.Text;
+            }
+            set
+            {
+                this.textBox_discount.Text = value;
+            }
+        }
+
         public string OrderTime
         {
             get
@@ -370,132 +398,6 @@ namespace dp2Circulation
             tableLayoutPanel_main.Size = this.Size;
         }
 
-#if NO
-        /// <summary>
-        /// 内容是否发生过修改
-        /// </summary>
-        public bool Changed
-        {
-            get
-            {
-                return this.m_bChanged;
-            }
-            set
-            {
-                bool bOldValue = this.m_bChanged;
-
-                this.m_bChanged = value;
-                if (this.m_bChanged == false)
-                    this.ResetColor();
-
-                // 触发事件
-                if (bOldValue != value && this.ContentChanged != null)
-                {
-                    ContentChangedEventArgs e = new ContentChangedEventArgs();
-                    e.OldChanged = bOldValue;
-                    e.CurrentChanged = value;
-                    ContentChanged(this, e);
-                }
-            }
-        }
-
-        public bool Initializing
-        {
-            get
-            {
-                return this.m_bInInitial;
-            }
-            set
-            {
-                this.m_bInInitial = value;
-            }
-        }
-
-        /// <summary>
-        /// 设置数据
-        /// </summary>
-        /// <param name="strXml">订购记录 XML</param>
-        /// <param name="strRecPath">订购记录路径</param>
-        /// <param name="timestamp">时间戳</param>
-        /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; 0: 成功</returns>
-        public int SetData(string strXml,
-            string strRecPath,
-            byte[] timestamp,
-            out string strError)
-        {
-            strError = "";
-
-            this.OldRecord = strXml;
-            this.Timestamp = timestamp;
-
-            this.RecordDom = new XmlDocument();
-
-            try
-            {
-                this.RecordDom.LoadXml(strXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML数据装载到DOM时出错" + ex.Message;
-                return -1;
-            }
-
-            this.Initializing = true;
-
-            this.Index = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "index");
-            this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "state");
-            this.CatalogNo = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "catalogNo");
-            this.Seller = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "seller");
-            this.Source = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "source");
-            this.Range = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "range");
-            this.IssueCount = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "issueCount");
-            this.Copy = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "copy");
-            this.Price = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "price");
-            this.TotalPrice = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "totalPrice");
-            this.OrderTime = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "orderTime");
-            this.OrderID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "orderID");
-            this.Distribute = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "distribute");
-            this.Class = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "class");
-            this.SellerAddress = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement,
-                "sellerAddress");
-
-            this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "comment");
-            this.BatchNo = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "batchNo");
-
-            this.ParentId = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                "parent");
-
-            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement, 
-                "refID");
-            this.Operations = DomUtil.GetElementInnerXml(this.RecordDom.DocumentElement,
-                "operations");
-
-            this.RecPath = strRecPath;
-
-            this.Initializing = false;
-
-            this.Changed = false;
-
-            return 0;
-        }
-#endif
         internal override void DomToMember(string strRecPath)
         {
             this.Index = DomUtil.GetElementText(this._dataDom.DocumentElement,
@@ -518,6 +420,10 @@ namespace dp2Circulation
                 "price");
             this.TotalPrice = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "totalPrice");
+            this.FixedPrice = DomUtil.GetElementText(this._dataDom.DocumentElement,
+    "fixedPrice");
+            this.Discount = DomUtil.GetElementText(this._dataDom.DocumentElement,
+    "discount");
             this.OrderTime = DomUtil.GetElementText(this._dataDom.DocumentElement,
                 "orderTime");
             this.OrderID = DomUtil.GetElementText(this._dataDom.DocumentElement,
@@ -560,6 +466,8 @@ namespace dp2Circulation
             this.Copy = "";
             this.Price = "";
             this.TotalPrice = "";
+            this.FixedPrice = "";
+            this.Discount = "";
             this.OrderTime = "";
             this.OrderID = "";
             this.Distribute = "";
@@ -622,6 +530,10 @@ namespace dp2Circulation
                 "price", this.Price);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "totalPrice", this.TotalPrice);
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
+    "fixedPrice", this.FixedPrice);
+            DomUtil.SetElementText(this._dataDom.DocumentElement,
+    "discount", this.Discount);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
                 "orderTime", this.OrderTime);
             DomUtil.SetElementText(this._dataDom.DocumentElement,
@@ -865,6 +777,8 @@ namespace dp2Circulation
                 this.textBox_copy.ReadOnly = true;
                 this.textBox_price.ReadOnly = true;
                 this.textBox_totalPrice.ReadOnly = true;
+                this.textBox_fixedPrice.ReadOnly = true;
+                this.textBox_discount.ReadOnly = true;
                 this.dateTimePicker_orderTime.Enabled = !true;
                 this.textBox_orderID.ReadOnly = true;
                 this.textBox_distribute.ReadOnly = true;
@@ -894,6 +808,8 @@ namespace dp2Circulation
             this.textBox_copy.ReadOnly = false;
             this.textBox_price.ReadOnly = false;
             this.textBox_totalPrice.ReadOnly = false;
+            this.textBox_fixedPrice.ReadOnly = false;
+            this.textBox_discount.ReadOnly = false;
             this.dateTimePicker_orderTime.Enabled = !false;
             this.textBox_orderID.ReadOnly = false;
             this.textBox_distribute.ReadOnly = false;
@@ -1022,6 +938,12 @@ namespace dp2Circulation
             if (this.TotalPrice != refControl.TotalPrice)
                 this.label_totalPrice_color.BackColor = this.ColorDifference;
 
+            if (this.FixedPrice != refControl.FixedPrice)
+                this.label_fixedPrice_color.BackColor = this.ColorDifference;
+
+            if (this.Discount != refControl.Discount)
+                this.label_discount_color.BackColor = this.ColorDifference;
+
             if (this.OrderTime != refControl.OrderTime)
                 this.label_orderTime_color.BackColor = this.ColorDifference;
 
@@ -1079,6 +1001,10 @@ namespace dp2Circulation
                     e1.Name = "Price";
                 else if (sender == (object)this.textBox_totalPrice)
                     e1.Name = "TotalPrice";
+                else if (sender == (object)this.textBox_fixedPrice)
+                    e1.Name = "FixedPrice";
+                else if (sender == (object)this.textBox_discount)
+                    e1.Name = "Discount";
                 else if (sender == (object)this.dateTimePicker_orderTime)
                     e1.Name = "OrderTime";
                 else if (sender == (object)this.textBox_orderID)
@@ -1137,6 +1063,10 @@ namespace dp2Circulation
                     e1.Name = "Price";
                 else if (sender == (object)this.textBox_totalPrice)
                     e1.Name = "TotalPrice";
+                else if (sender == (object)this.textBox_fixedPrice)
+                    e1.Name = "FixedPrice";
+                else if (sender == (object)this.textBox_discount)
+                    e1.Name = "Discount";
                 else if (sender == (object)this.dateTimePicker_orderTime)
                     e1.Name = "OrderTime";
                 else if (sender == (object)this.textBox_orderID)
@@ -1375,6 +1305,8 @@ namespace dp2Circulation
                     controls.Add(this.comboBox_source);
                     controls.Add(this.textBox_copy);
                     controls.Add(this.textBox_price);
+                    controls.Add(this.textBox_fixedPrice);
+                    controls.Add(this.textBox_discount);
                     controls.Add(this.textBox_distribute);
                     controls.Add(this.comboBox_class);
                     controls.Add(this.textBox_batchNo);

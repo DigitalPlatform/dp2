@@ -65,7 +65,6 @@ namespace dp2Circulation
                 return -1;
             }
 
-
             XmlNodeList nodes = _cfgDom.DocumentElement.SelectNodes("columns/column");
 
             if (nodes.Count > 0)

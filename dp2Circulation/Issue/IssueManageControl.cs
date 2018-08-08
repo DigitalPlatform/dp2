@@ -2121,7 +2121,7 @@ namespace dp2Circulation
 
                     string strNewCopy = "";
                     string strOldCopy = "";
-                    OrderDesignControl.ParseOldNewValue(strCopy,
+                    dp2StringUtil.ParseOldNewValue(strCopy,
                         out strOldCopy,
                         out strNewCopy);
 

@@ -1915,11 +1915,11 @@ ref bChanged);
         public static int CompareOrderPrice(string s1, string s2)
         {
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(s1,
+            dp2StringUtil.ParseOldNewValue(s1,
                 out string strOldPrice1,
                 out string strNewPrice1);
 
-            OrderDesignControl.ParseOldNewValue(s2,
+            dp2StringUtil.ParseOldNewValue(s2,
     out string strOldPrice2,
     out string strNewPrice2);
 

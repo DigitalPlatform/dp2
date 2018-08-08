@@ -5902,20 +5902,22 @@ out strError);
             if (this.IsbnSplitter != null)
                 return 0;
 
+            string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
+
             REDO:
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(this.DataDir + "\\rangemessage.xml");  // "\\isbn.xml"
+                this.IsbnSplitter = new IsbnSplitter(strFileName);  // "\\isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
-                strError = "装载本地 isbn 规则文件 rangemessage.xml 发生错误 :" + ex.Message;
+                strError = "装载本地 isbn 规则文件 "+strFileName+" 发生错误 :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
                     string strError1 = "";
-                    int nRet = this.DownloadDataFile("rangemessage.xml",    // "isbn.xml"
+                    int nRet = this.DownloadDataFile(Path.GetFileName(strFileName),    // "isbn.xml"
                         out strError1);
                     if (nRet == -1)
                     {
@@ -9162,7 +9164,7 @@ out strError);
         static string ChangeCopyStringCopyPart(string strText, string strCopy)
         {
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strText,
+            dp2StringUtil.ParseOldNewValue(strText,
                 out string strOldCopy,
                 out string strNewCopy);
 
@@ -9172,9 +9174,9 @@ out strError);
             // string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
 #endif
 
-            strOldCopy = OrderDesignControl.ModifyCopy(strOldCopy, strCopy);
+            strOldCopy = dp2StringUtil.ModifyCopy(strOldCopy, strCopy);
 
-            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
+            return dp2StringUtil.LinkOldNewValue(strOldCopy, strNewCopy);
         }
 
         // 修改复本字符串中，订购复本数部分的每套册数
@@ -9184,13 +9186,13 @@ out strError);
         static string ChangeCopyStringItemsPart(string strText, string strItems)
         {
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strText,
+            dp2StringUtil.ParseOldNewValue(strText,
                 out string strOldCopy,
                 out string strNewCopy);
 
-            strOldCopy = OrderDesignControl.ModifyRightCopy(strOldCopy, strItems);
+            strOldCopy = dp2StringUtil.ModifyRightCopy(strOldCopy, strItems);
 
-            return OrderDesignControl.LinkOldNewValue(strOldCopy, strNewCopy);
+            return dp2StringUtil.LinkOldNewValue(strOldCopy, strNewCopy);
         }
 
         // TODO: 移入通道函数库

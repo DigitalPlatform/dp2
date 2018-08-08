@@ -29,6 +29,7 @@ namespace DigitalPlatform.rms
             if (connection.SqlServerType != SqlServerType.MsSqlServer)
                 throw new ArgumentException("SqlImageStream 只能用于 MS SQL Server 类型");
 
+            this._connection = connection;
             this.m_lLength = lTotalLength;
             this.m_strSqlDbName = strSqlDbName;
             this.m_strDataFieldName = strDataFieldName;
@@ -105,6 +106,13 @@ namespace DigitalPlatform.rms
             if (m_lCurrent >= m_lLength)
                 return 0;
 
+            // 修正本次读取尺寸
+            if (m_lCurrent + count > m_lLength)
+                count = (int)(m_lLength - m_lCurrent);
+
+            if (count <= 0)
+                return 0;
+
             // READTEXT命令:
             // text_ptr: 有效文本指针。text_ptr 必须是 binary(16)。
             // offset:   开始读取image数据之前跳过的字节数（使用 text 或 image 数据类型时）或字符数（使用 ntext 数据类型时）。
@@ -146,6 +154,7 @@ namespace DigitalPlatform.rms
                 try
                 {
                     dr.Read();
+                    m_lCurrent += count;
                     return (int)dr.GetBytes(0,
                         0,
                         buffer,
@@ -157,7 +166,6 @@ namespace DigitalPlatform.rms
                     dr.Close();
                 }
             } // end of using command
-
         }
 
         public override long Seek(

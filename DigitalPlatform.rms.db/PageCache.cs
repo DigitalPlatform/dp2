@@ -24,7 +24,7 @@ namespace DigitalPlatform.rms
 
         public int TotalPage { get; set; }  // 总页数
 
-        string _state = "";   // OK 表示物理文件已经准备好
+        string _state = "";   // Lock 表示正在创建物理文件; OK 表示物理文件已经准备好; Freely 表示为自由对象，不被集合管理
         public string State
         {
             get
@@ -87,9 +87,17 @@ namespace DigitalPlatform.rms
     /// </summary>
     public class PageCache
     {
+        int MAX_ITEMS = 1000;
+
         internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         Dictionary<string, PageItem> _pageTable = new Dictionary<string, PageItem>();
+
+        public PageCache(int nMaxItems = -1)
+        {
+            if (nMaxItems != -1)
+                MAX_ITEMS = nMaxItems;
+        }
 
         public delegate Tuple<string, int> Delegate_prepareFile();
 
@@ -99,11 +107,13 @@ namespace DigitalPlatform.rms
             int page_no,
             int dpi,
             string format,
-            Delegate_prepareFile procPrepareFile)
+            Delegate_prepareFile procPrepareFile,
+            Delegate_deleteFile procDeleteFile)
         {
             string key = PageItem.MakeKey(object_recpath, page_no, dpi, format);
             PageItem item = null;
-            bool bNew = false;
+            bool bNew = false;  // 是否新创建了 PageItem 对象
+            bool bFreely = false;   // 是否为独立的 Page Item 对象。独立的 PageItem 对象不被集合管理
             _lock.EnterWriteLock();
             try
             {
@@ -113,6 +123,12 @@ namespace DigitalPlatform.rms
 
                 if (item == null)
                 {
+                    if (_pageTable.Count >= MAX_ITEMS)
+                    {
+                        // 紧急清理一次
+                        Clean(false, TimeSpan.FromMilliseconds(0), procDeleteFile);
+                    }
+
                     item = new PageItem
                     {
                         RecordPath = object_recpath,
@@ -121,7 +137,11 @@ namespace DigitalPlatform.rms
                         Format = format,
                         State = "Lock"
                     };
-                    _pageTable.Add(key, item);
+
+                    if (this._pageTable.Count < MAX_ITEMS)
+                        _pageTable.Add(key, item);
+                    else
+                        bFreely = true;
                     bNew = true;
                 }
                 else
@@ -137,12 +157,32 @@ namespace DigitalPlatform.rms
 
             if (bNew == true)
             {
-                // 创建物理文件
-                var ret = procPrepareFile();
-                item.FilePath = ret.Item1;
-                item.TotalPage = ret.Item2;
-                item.State = "OK";
-                // Thread.Sleep(10000);
+                try
+                {
+                    // 创建物理文件
+                    var ret = procPrepareFile();
+                    item.FilePath = ret.Item1;
+                    item.TotalPage = ret.Item2;
+                    if (bFreely)
+                        item.State = "Freely";
+                    else
+                        item.State = "OK";
+                    // Thread.Sleep(10000);
+                }
+                catch
+                {
+                    _lock.EnterWriteLock();
+                    try
+                    {
+                        _pageTable.Remove(key);
+                    }
+                    finally
+                    {
+                        _lock.ExitWriteLock();
+                    }
+
+                    throw;
+                }
             }
             else
             {
@@ -162,46 +202,26 @@ namespace DigitalPlatform.rms
             return item;
         }
 
-        public delegate void Delegate_deleteFile(string strFileName);
-
-        // 清除已经失效的 PageItem
-        public void Clean(Delegate_deleteFile procDeleteFile)
+#if NO
+        void Shrink(Delegate_deleteFile procDeleteFile)
         {
             List<string> keys = new List<string>();
             List<PageItem> items = new List<PageItem>();
-            _lock.EnterReadLock();
-            try
+
+            foreach (string key in _pageTable.Keys)
             {
-                DateTime now = DateTime.Now;
-                foreach (string key in _pageTable.Keys)
+                PageItem item = _pageTable[key];
+                if (item.State == "OK")
                 {
-                    PageItem item = _pageTable[key];
-                    if (item.State == "OK"
-                        && now - item.LastUse > TimeSpan.FromMinutes(2))
-                    {
-                        keys.Add(key);
-                        items.Add(item);
-                    }
+                    keys.Add(key);
                 }
-            }
-            finally
-            {
-                _lock.ExitReadLock();
             }
 
             if (keys.Count > 0)
             {
-                _lock.EnterWriteLock();
-                try
+                foreach (string key in keys)
                 {
-                    foreach (string key in keys)
-                    {
-                        _pageTable.Remove(key);
-                    }
-                }
-                finally
-                {
-                    _lock.ExitWriteLock();
+                    _pageTable.Remove(key);
                 }
 
                 foreach (PageItem item in items)
@@ -213,5 +233,139 @@ namespace DigitalPlatform.rms
                 }
             }
         }
+#endif
+        public delegate void Delegate_deleteFile(string strFileName);
+
+        // 清除已经失效的 PageItem
+        // parameters:
+        //      delta   闲置多少时间以上才清理
+        public void Clean(bool bLock,
+            TimeSpan delta,
+            Delegate_deleteFile procDeleteFile)
+        {
+            List<string> keys = new List<string>();
+            List<PageItem> items = new List<PageItem>();
+            if (bLock)
+                _lock.EnterReadLock();
+            try
+            {
+                DateTime now = DateTime.Now;
+                foreach (string key in _pageTable.Keys)
+                {
+                    PageItem item = _pageTable[key];
+                    if (item.State == "OK"
+                        && now - item.LastUse > delta)
+                    {
+                        keys.Add(key);
+                        items.Add(item);
+                    }
+                }
+            }
+            finally
+            {
+                if (bLock)
+                    _lock.ExitReadLock();
+            }
+
+            if (keys.Count > 0)
+            {
+                if (bLock)
+                    _lock.EnterWriteLock();
+                try
+                {
+                    foreach (string key in keys)
+                    {
+                        _pageTable.Remove(key);
+                    }
+                }
+                finally
+                {
+                    if (bLock)
+                        _lock.ExitWriteLock();
+                }
+
+                foreach (PageItem item in items)
+                {
+                    if (procDeleteFile != null)
+                        procDeleteFile(item.FilePath);
+                    else
+                        item.Delete();
+                }
+            }
+        }
+
+        // 清除所有 PageItem 元素。包括删除 PageItem 元素的物理文件
+        public void ClearAll()
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                foreach (var pair in this._pageTable)
+                {
+                    try
+                    {
+                        pair.Value.Delete();
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        // 清除和指定路径相关的 PageItem 元素
+        public void ClearByRecPath(string strRecPath,
+            Delegate_deleteFile procDeleteFile)
+        {
+            var pairs = new List<KeyValuePair<string, PageItem>>();
+            _lock.EnterReadLock();
+            try
+            {
+                DateTime now = DateTime.Now;
+                foreach (var pair in _pageTable)
+                {
+                    PageItem item = pair.Value;
+                    if (item.RecordPath == strRecPath
+                        || item.RecordPath.StartsWith(strRecPath+ "_"))
+                    {
+                        pairs.Add(pair);
+                    }
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+
+            if (pairs.Count > 0)
+            {
+                _lock.EnterWriteLock();
+                try
+                {
+                    foreach (var pair in pairs)
+                    {
+                        _pageTable.Remove(pair.Key);
+                    }
+                }
+                finally
+                {
+                    _lock.ExitWriteLock();
+                }
+
+                foreach (var pair in pairs)
+                {
+                    if (procDeleteFile != null)
+                        procDeleteFile(pair.Value.FilePath);
+                    else
+                        pair.Value.Delete();
+                }
+            }
+        }
+
     }
 }

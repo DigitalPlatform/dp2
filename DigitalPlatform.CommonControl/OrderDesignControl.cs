@@ -332,64 +332,6 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // 修改复本字符串中的套数部分
-        // parameters:
-        //      strText     待修改的整个复本字符串
-        //      strCopy     要改成的套数部分
-        // return:
-        //      返回修改后的整个复本字符串
-        public static string ModifyCopy(string strText, string strCopy)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return strCopy;
-
-            return strCopy + "*" + strText.Substring(nRet + 1).Trim();
-        }
-
-        // 修改复本字符串中的套内册数部分
-        // parameters:
-        //      strText     待修改的整个复本字符串
-        //      strRightCopy     要改成的套内册数部分
-        // return:
-        //      返回修改后的整个复本字符串
-        public static string ModifyRightCopy(string strText, string strRightCopy)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-            {
-                if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
-                    return strText;
-                return strText + "*" + strRightCopy;
-            }
-
-            if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
-                return strText.Substring(0, nRet).Trim();
-
-            return strText.Substring(0, nRet).Trim() + "*" + strRightCopy;
-        }
-
-        // 从复本数字符串中得到套数部分
-        // 也就是 "3*5"返回"3"部分。如果只有一个数字，就取它
-        public static string GetCopyFromCopyString(string strText)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return strText;
-
-            return strText.Substring(0, nRet).Trim();
-        }
-
-        // 从复本数字符串中得到套内册数部分
-        // 也就是 "3*5"返回"5"部分。如果只有一个数字，就返回""
-        public static string GetRightFromCopyString(string strText)
-        {
-            int nRet = strText.IndexOf("*");
-            if (nRet == -1)
-                return "";
-
-            return strText.Substring(nRet + 1).Trim();
-        }
 
         // return:
         //      -1  error
@@ -493,7 +435,9 @@ namespace DigitalPlatform.CommonControl
 
                 if (String.IsNullOrEmpty(strTotalPrice) == true)
                 {
-                    if (String.IsNullOrEmpty(item.Price) == true)
+                    // 总价为空的时候，必须输入订购价
+                    if (String.IsNullOrEmpty(item.Price) == true
+                        && string.IsNullOrEmpty(item.FixedPrice) == true)
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入价格";
                         return 1;
@@ -517,6 +461,57 @@ namespace DigitalPlatform.CommonControl
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入复本数";
                         return 1;
                     }
+
+                    // 自动计算出订购价
+                    if (string.IsNullOrEmpty(item.OldFixedPrice) == false
+                        && string.IsNullOrEmpty(item.OldPrice) == true
+                        && string.IsNullOrEmpty(item.TotalPrice) == true)
+                    {
+                        // return:
+                        //      -1  计算过程出现错误
+                        //      0   strFixedPrice 为空，无法计算
+                        //      1   计算成功
+                        nRet = ComputeOrderPriceByFixedPrice(item.OldFixedPrice,
+                    item.OldDiscount,
+                    out string strWishOrderPrice,
+                    out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "第 " + (i + 1).ToString() + " 行: 根据订购码洋 '" + item.OldFixedPrice + "' 和订购折扣 '" + item.OldDiscount + "' 自动计算订购价时出错: " + strError;
+                            return -1;
+                        }
+                        if (nRet == 1)
+                        {
+                            item.OldPrice = strWishOrderPrice;
+                            item.Price = strWishOrderPrice;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(item.OldPrice) == false)
+                    {
+                        // 2018/8/1
+                        // 检查码洋、折扣、订购价之间的关系
+                        // return:
+                        //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                        //      -1  校验过程出错
+                        //      0   校验发现三者关系不正确
+                        //      1   校验三者关系正确
+                        nRet = VerifyOrderPriceByFixedPrice(item.OldFixedPrice,
+                            item.OldDiscount,
+                            item.OldPrice,
+                            out string strWishOldPrice,
+                            out strError);
+                        if (nRet != 1)
+                        {
+                            if (nRet == -1)
+                            {
+                                strError = "第 " + (i + 1).ToString() + " 行: 验证订购码洋 '" + item.OldFixedPrice + "' 和订购折扣 '" + item.OldDiscount + "' 和订购价 '" + item.OldPrice + "' 关系时出错: " + strError;
+                                return 1;
+                            }
+                            strError = "第 " + (i + 1).ToString() + " 行: 订购码洋 '" + item.OldFixedPrice + "' 和订购折扣 '" + item.OldDiscount + "' 计算出的结果 '" + strWishOldPrice + "' 和订购价 '" + item.OldPrice + "' 不符";
+                            return 1;
+                        }
+                    }
                 }
                 else
                 {
@@ -526,10 +521,58 @@ namespace DigitalPlatform.CommonControl
 
                     // TODO: 是否检查一下至少有一行验收了？不太好检查。
 
+                    // 自动计算出验收价
+                    if (string.IsNullOrEmpty(item.FixedPrice) == false
+                        && string.IsNullOrEmpty(item.Price) == true)
+                    {
+                        // return:
+                        //      -1  计算过程出现错误
+                        //      0   strFixedPrice 为空，无法计算
+                        //      1   计算成功
+                        nRet = ComputeOrderPriceByFixedPrice(item.FixedPrice,
+                    item.Discount,
+                    out string strWishOrderPrice,
+                    out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "第 " + (i + 1).ToString() + " 行: 根据验收码洋 '" + item.FixedPrice + "' 和验收折扣 '" + item.Discount + "' 自动计算验收价时出错: " + strError;
+                            return -1;
+                        }
+                        if (nRet == 1)
+                            item.Price = strWishOrderPrice;
+                    }
+
+                    if (string.IsNullOrEmpty(item.Price) == false)
+                    {
+                        // 2018/8/1
+                        // 检查码洋、折扣、订购价之间的关系
+                        // return:
+                        //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                        //      -1  校验过程出错
+                        //      0   校验发现三者关系不正确
+                        //      1   校验三者关系正确
+                        nRet = VerifyOrderPriceByFixedPrice(item.FixedPrice,
+                            item.Discount,
+                            item.Price,
+                            out string strWishPrice,
+                            out strError);
+                        if (nRet != 1)
+                        {
+                            if (nRet == -1)
+                            {
+                                strError = "第 " + (i + 1).ToString() + " 行: 验证验收码洋 '" + item.FixedPrice + "' 和验收折扣 '" + item.Discount + "' 和验收价 '" + item.Price + "' 关系时出错: " + strError;
+                                return 1;
+                            }
+                            strError = "第 " + (i + 1).ToString() + " 行: 验收码洋 '" + item.FixedPrice + "' 和验收折扣 '" + item.Discount + "' 计算出的结果 '" + strWishPrice + "' 和验收价 '" + item.Price + "' 不符";
+                            return 1;
+                        }
+                    }
                 }
 
                 if (this.SeriesMode == true)
                 {
+                    // 期刊
+
                     if (String.IsNullOrEmpty(item.RangeString) == true)
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入时间范围";
@@ -557,6 +600,17 @@ namespace DigitalPlatform.CommonControl
                     {
                         strError = "第 " + (i + 1).ToString() + " 行: 尚未输入期数";
                         return 1;
+                    }
+                }
+                else
+                {
+                    // 图书
+
+                    if (item.IssueCountValue != 1)
+                    {
+                        item.IssueCountValue = 1;
+                        //strError = "第 " + (i + 1).ToString() + " 行: 图书订购只允许期数为 1";
+                        //return 1;
                     }
                 }
 
@@ -1308,50 +1362,8 @@ namespace DigitalPlatform.CommonControl
             return item;
         }
 
-        // TODO: 代码移动到OrderDesignControl中
-        public static string LinkOldNewValue(string strOldValue,
-            string strNewValue)
-        {
-            if (String.IsNullOrEmpty(strNewValue) == true)
-                return strOldValue;
-
-            if (strOldValue == strNewValue)
-            {
-                if (String.IsNullOrEmpty(strOldValue) == true)  // 新旧均为空
-                    return "";
-
-                return strOldValue + "[=]";
-            }
-
-            return strOldValue + "[" + strNewValue + "]";
-        }
 
 
-        // 分离 "old[new]" 内的两个值
-        public static void ParseOldNewValue(string strValue,
-            out string strOldValue,
-            out string strNewValue)
-        {
-            strOldValue = "";
-            strNewValue = "";
-            int nRet = strValue.IndexOf("[");
-            if (nRet == -1)
-            {
-                strOldValue = strValue;
-                strNewValue = "";
-                return;
-            }
-
-            strOldValue = strValue.Substring(0, nRet).Trim();
-            strNewValue = strValue.Substring(nRet + 1).Trim();
-
-            // 去掉末尾的']'
-            if (strNewValue.Length > 0 && strNewValue[strNewValue.Length - 1] == ']')
-                strNewValue = strNewValue.Substring(0, strNewValue.Length - 1);
-
-            if (strNewValue == "=")
-                strNewValue = strOldValue;
-        }
 
         // 根据缺省XML订购记录填充必要的字段
         int SetDefaultRecord(Item item,
@@ -1405,7 +1417,7 @@ namespace DigitalPlatform.CommonControl
 
             string strNewSource = "";
             string strOldSource = "";
-            ParseOldNewValue(strSource,
+            dp2StringUtil.ParseOldNewValue(strSource,
                 out strOldSource,
                 out strNewSource);
 
@@ -1423,42 +1435,44 @@ namespace DigitalPlatform.CommonControl
 
             item.Distribute = strDistribute;
 
-            // copy
-            // 注：copy值是按照XML记录来设置的。一般设置为可能的最大值
-            string strCopy = DomUtil.GetElementText(dom.DocumentElement,
-                    "copy");
-
-            string strNewCopy = "";
-            string strOldCopy = "";
-            ParseOldNewValue(strCopy,
-                out strOldCopy,
-                out strNewCopy);
-
-            /*
-            if (String.IsNullOrEmpty(strNewCopy) == true) // 没有新值的时候用旧值作为初始值
-                item.CopyString = strOldCopy;
-            else
-                item.CopyString = strNewCopy;
-
-            item.OldCopyString = strOldCopy;
-             * */
-
-            // 2008/11/3 changed
-            if (this.ArriveMode == false)
             {
-                // 订购时，用旧价格
-                item.CopyString = strOldCopy;
-                item.OldCopyString = strOldCopy;
-            }
-            else
-            {
-                // 2008/10/19 changed
-                // 验收时，新旧价格都分明
-                if (String.IsNullOrEmpty(strNewCopy) == false)
+                // copy
+                // 注：copy值是按照XML记录来设置的。一般设置为可能的最大值
+                string strCopy = DomUtil.GetElementText(dom.DocumentElement,
+                        "copy");
+
+                string strNewCopy = "";
+                string strOldCopy = "";
+                dp2StringUtil.ParseOldNewValue(strCopy,
+                    out strOldCopy,
+                    out strNewCopy);
+
+                /*
+                if (String.IsNullOrEmpty(strNewCopy) == true) // 没有新值的时候用旧值作为初始值
+                    item.CopyString = strOldCopy;
+                else
                     item.CopyString = strNewCopy;
 
-                if (String.IsNullOrEmpty(strOldCopy) == false)
+                item.OldCopyString = strOldCopy;
+                 * */
+
+                // 2008/11/3 changed
+                if (this.ArriveMode == false)
+                {
+                    // 订购时，用旧价格
+                    item.CopyString = strOldCopy;
                     item.OldCopyString = strOldCopy;
+                }
+                else
+                {
+                    // 2008/10/19 changed
+                    // 验收时，新旧价格都分明
+                    if (String.IsNullOrEmpty(strNewCopy) == false)
+                        item.CopyString = strNewCopy;
+
+                    if (String.IsNullOrEmpty(strOldCopy) == false)
+                        item.OldCopyString = strOldCopy;
+                }
             }
 
             // 限制馆藏地点事项的个数
@@ -1481,23 +1495,74 @@ namespace DigitalPlatform.CommonControl
                 return -1;
             }*/
 
+            {
+                // fixedPrice
+                string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
+                    "fixedPrice");
 
-            // price
-            string strPrice = DomUtil.GetElementText(dom.DocumentElement,
-                "price");
+                dp2StringUtil.ParseOldNewValue(strFixedPrice,
+                    out string strOldPrice,
+                    out string strNewPrice);
 
-            string strNewPrice = "";
-            string strOldPrice = "";
-            ParseOldNewValue(strPrice,
-                out strOldPrice,
-                out strNewPrice);
+                if (String.IsNullOrEmpty(strNewPrice) == true) // 没有新值的时候用旧值作为初始值
+                    item.FixedPrice = strOldPrice;
+                else
+                    item.FixedPrice = strNewPrice;
 
-            if (String.IsNullOrEmpty(strNewPrice) == true) // 没有新值的时候用旧值作为初始值
-                item.Price = strOldPrice;
-            else
-                item.Price = strNewPrice;
+                item.OldFixedPrice = strOldPrice;
+            }
 
-            item.OldPrice = strOldPrice;
+            {
+                // discount
+                string strDiscount = DomUtil.GetElementText(dom.DocumentElement,
+                        "discount");
+
+                dp2StringUtil.ParseOldNewValue(strDiscount,
+                    out string strOldValue,
+                    out string strNewValue);
+
+                if (this.ArriveMode == false)
+                {
+                    // 订购时，用旧折扣
+                    item.Discount = strOldValue;
+                    item.OldDiscount = strOldValue;
+                }
+                else
+                {
+                    // 没有新值的时候用旧值作为初始值。这样可以避免无谓的输入
+                    if (String.IsNullOrEmpty(strNewValue) == true)
+                        item.Discount = strOldValue;
+                    else
+                        item.Discount = strNewValue;
+
+#if NO
+                    // 验收时，新旧折扣都分明
+                    if (String.IsNullOrEmpty(strNewValue) == false)
+                        item.Discount = strNewValue;
+#endif
+
+                    if (String.IsNullOrEmpty(strOldValue) == false)
+                        item.OldDiscount = strOldValue;
+                }
+            }
+
+
+            {
+                // price
+                string strPrice = DomUtil.GetElementText(dom.DocumentElement,
+                    "price");
+
+                dp2StringUtil.ParseOldNewValue(strPrice,
+                    out string strOldPrice,
+                    out string strNewPrice);
+
+                if (String.IsNullOrEmpty(strNewPrice) == true) // 没有新值的时候用旧值作为初始值
+                    item.Price = strOldPrice;
+                else
+                    item.Price = strNewPrice;
+
+                item.OldPrice = strOldPrice;
+            }
 
             // class
             item.Class = DomUtil.GetElementText(dom.DocumentElement,
@@ -2047,7 +2112,7 @@ namespace DigitalPlatform.CommonControl
             if (this.DisableNewlyArriveTextChanged > 0)
                 return;
 
-            if (this.textBox_newlyArriveTotalCopy.Text == "")
+            if (string.IsNullOrEmpty(this.textBox_newlyArriveTotalCopy.Text))
                 return;
 
             /*
@@ -2208,11 +2273,17 @@ namespace DigitalPlatform.CommonControl
         // 把剩下的余额全部验收
         private void button_fullyAccept_Click(object sender, EventArgs e)
         {
+            // 获得可新验收的最大总份数。包含了本函数操作前已经新验收的份数。
             int nValue = GetNewlyArrivingTotalCopy();
             if (nValue == 0)
             {
-                string strMessage = "";
-                int nRet = NotOrdering(out strMessage);
+                // 检测是否有事项尚未订购(状态为空，表示刚刚输入了采购数据)
+                // return:
+                //      -1  error
+                //      0   没有处于未订购状态的事项
+                //      1   有部分处于未订购状态的事项
+                //      2   全部事项都是未订购状态
+                int nRet = NotOrdering(out string strMessage);
                 if (nRet == 2)
                     MessageBox.Show(ForegroundWindow.Instance, "事项尚未经过打印订单环节，无法进行验收");
                 else
@@ -2348,7 +2419,208 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        // 比较新旧值对
+        // parameters:
+        //      strVerifyStyle 比较风格。old/new/both 只比较旧/只比较新/新旧都比较
+        // return:
+        //      -2  码洋和订购价货币单位不同，无法进行校验。
+        //      0   校验发现三者关系不正确
+        //      1   校验三者关系正确
+        public static int VerifyOrderPriceByFixedPricePair(
+            string strFixedPrice,
+    string strDiscount,
+    string strOrderPrice,
+    string strVerifyStyle,
+    out string strError)
+        {
+            strError = "";
 
+            dp2StringUtil.ParseOldNewValue(strFixedPrice,
+    out string strOldFixedPrice,
+    out string strNewFixedPrice);
+
+            dp2StringUtil.ParseOldNewValue(strDiscount,
+out string strOldDiscount,
+out string strNewDiscount);
+
+            dp2StringUtil.ParseOldNewValue(strOrderPrice,
+out string strOldOrderPrice,
+out string strNewOrderPrice);
+
+            if (string.IsNullOrEmpty(strOldFixedPrice) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(strOldFixedPrice,
+        strOldDiscount,
+        strOldOrderPrice,
+        out string strWishOldFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            if (string.IsNullOrEmpty(strNewFixedPrice) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(strNewFixedPrice,
+        strNewDiscount,
+        strNewOrderPrice,
+        out string strWishNewFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            return 1;
+        }
+
+        // 根据码洋和折扣值校验订购价的正确性
+        // 注意码洋、折扣、订购价字符串里面都必须是单个金额字符串，不支持带有方括号的(新旧)复合形式
+        // parameters:
+        //      strFixedPrice   码洋
+        //      strDiscount     折扣
+        //      strOrderPrice   订购价
+        // return:
+        //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+        //      -1  校验过程出错
+        //      0   校验发现三者关系不正确
+        //      1   校验三者关系正确
+        public static int VerifyOrderPriceByFixedPrice(string strFixedPrice,
+            string strDiscount,
+            string strOrderPrice,
+            out string strWishOrderPrice,
+            out string strError)
+        {
+            strError = "";
+
+            // return:
+            //      -1  计算过程出现错误
+            //      0   strFixedPrice 为空，无法计算
+            //      1   计算成功
+            int nRet = ComputeOrderPriceByFixedPrice(strFixedPrice,
+        strDiscount,
+        out strWishOrderPrice,
+        out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 1;
+
+            try
+            {
+                CurrencyItem price = CurrencyItem.Parse(strOrderPrice);
+                CurrencyItem wish = CurrencyItem.Parse(strWishOrderPrice);
+
+                price.EnsurePrefix("CNY");
+                wish.EnsurePrefix("CNY");
+
+                if (string.IsNullOrEmpty(price.Postfix) == true
+                    && string.IsNullOrEmpty(wish.Postfix) == true
+                    && price.Prefix != wish.Prefix)
+                {
+                    strError = "码洋 '" + price.ToString() + "' 和订购价 '" + wish.ToString() + "' 货币单位不同，无法进行比较";
+                    return -2;
+                }
+
+                if (price.IsEqual(wish, "CNY") == true)
+                    return 1;
+
+                strError = "码洋 '" + strFixedPrice + "' 和折扣 '" + strDiscount + "' 计算出的结果 '" + strWishOrderPrice + "' 和订购价 '" + strOrderPrice + "' 不符";
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
+        // 根据码洋和折扣计算订购价
+        // 注意最后 strOrderPrice 中返回的金额字符串，和 strFixedPrice 的货币类型一样。有可能缺省货币类型。
+        // (缺乏货币类型的金额字符串在互相比较的时候需要添加上默认货币类型以后再比较)
+        // return:
+        //      -1  计算过程出现错误
+        //      0   strFixedPrice 为空，无法计算
+        //      1   计算成功
+        public static int ComputeOrderPriceByFixedPrice(string strFixedPrice,
+    string strDiscount,
+    out string strOrderPrice,
+    out string strError)
+        {
+            strError = "";
+            strOrderPrice = "";
+
+            if (string.IsNullOrEmpty(strFixedPrice))
+            {
+                strError = "码洋为空，无法计算订购价";
+                return 0;
+            }
+
+            // 折扣为空，默认 '1.0'
+            if (string.IsNullOrEmpty(strDiscount))
+                strDiscount = "1.0";
+
+            if (decimal.TryParse(strDiscount, out decimal discount) == false)
+            {
+                strError = "折扣值 '" + strDiscount + "' 格式错误。应为 '1.0' '0.90' 这样的形态";
+                return -1;
+            }
+
+            try
+            {
+                CurrencyItem item = CurrencyItem.Parse(strFixedPrice);
+                item.Value = item.Value * discount;
+                strOrderPrice = item.ToString();    // 注意，变换为字符串时候，decimal 值没有做四舍五入
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
+        // 价格乘以一个倍率
+        // 注：可以处理 "{CNY10.00}" 这样的字符串。结果字符串依然保留 {} 形态
+        public static string MultiplePrice(string price,
+            int count,
+            string position)
+        {
+            string changed_price = StringUtil.Unquote(price, "{}");
+
+            int nRet = PriceUtil.MultiPrice(changed_price, count, out string result, out string strError);
+            if (nRet == -1)
+                throw new PositionException(strError, position);
+            if (string.IsNullOrEmpty(price) == false && price[0] == '{')
+                return "{" + result + "}";
+            return result;
+        }
+
+        // 累加价格字符串
+        // 注：可以处理 "{CNY10.00}" 这样的字符串。但结果字符串不带有 {}
+        public static string GetTotalPrice(List<string> prices,
+            string strPosition)
+        {
+            List<string> changed_prices = new List<string>();
+            foreach (string price in prices)
+            {
+                changed_prices.Add(StringUtil.Unquote(price, "{}"));
+            }
+            int nRet = PriceUtil.TotalPrice(changed_prices,
+    out string strResult,
+    out string strError);
+            if (nRet == -1)
+                throw new PositionException(strError, strPosition);
+            return strResult;
+        }
     }
 
     [Flags]
@@ -2394,6 +2666,14 @@ namespace DigitalPlatform.CommonControl
         // 单价
         public DoubleTextBox textBox_price = null;
 
+        // 2018/7/31
+        // 码洋
+        public DoubleTextBox textBox_fixedPrice = null;
+
+        // 2018/7/31
+        // 折扣
+        public DoubleComboBox comboBox_discount = null;
+
         // 去向
         // public TextBox textBox_location = null;
         public LocationEditControl location = null;
@@ -2421,6 +2701,8 @@ namespace DigitalPlatform.CommonControl
             comboBox_issueCount.Dispose();
             comboBox_copy.Dispose();
             textBox_price.Dispose();
+            textBox_fixedPrice.Dispose();
+            comboBox_discount.Dispose();
             location.Dispose();
             comboBox_class.Dispose();
             label_sellerAddress.Dispose();
@@ -2483,6 +2765,7 @@ namespace DigitalPlatform.CommonControl
             this.Container = container;
             int nTopBlank = (int)this.Container.Font.GetHeight() + 2;
 
+            // 色块
             label_color = new Label();
             label_color.Dock = DockStyle.Fill;
             label_color.Size = new Size(6, 28);
@@ -2533,7 +2816,6 @@ namespace DigitalPlatform.CommonControl
             comboBox_source.Size = new Size(80, 28 * 2);
             comboBox_source.MinimumSize = new Size(50, 28);
 
-
             // 范围
             dateRange_range = new DateRangeControl();
 
@@ -2546,24 +2828,11 @@ namespace DigitalPlatform.CommonControl
             dateRange_range.BorderStyle = BorderStyle.None;
 
             dateRange_range.Dock = DockStyle.Fill;
-            /*
-            dateRange_range.MaximumSize = new Size(150, 28 * 2);
-            dateRange_range.Size = new Size(150, 28 * 2);
-            dateRange_range.MinimumSize = new Size(130, 28 * 2);
-             * */
             dateRange_range.Margin = new Padding(1, nTopBlank, // + 3,
                 1, 0);
             // this.dateRange_range.Visible = false;
 
             // 期数
-            /*
-            textBox_issueCount = new TextBox();
-            textBox_issueCount.BorderStyle = BorderStyle.None;
-            textBox_issueCount.Dock = DockStyle.Fill;
-            textBox_issueCount.MinimumSize = new Size(100, 28);
-            textBox_issueCount.Margin = new Padding(6, 3, 6, 0);
-            textBox_issueCount.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
-            */
             comboBox_issueCount = new ComboBox();
 
             if (container != null && container.SeriesMode == false)
@@ -2589,19 +2858,6 @@ namespace DigitalPlatform.CommonControl
             // this.comboBox_issueCount.Visible = false;
 
             // 复本数
-            /*
-            comboBox_copy = new ComboBox();
-            comboBox_copy.DropDownStyle = ComboBoxStyle.DropDown;
-            comboBox_copy.FlatStyle = FlatStyle.Flat;
-            comboBox_copy.DropDownHeight = 300;
-            comboBox_copy.DropDownWidth = 250;
-            comboBox_copy.Dock = DockStyle.Fill;
-            comboBox_copy.MaximumSize = new Size(100, 28);
-            comboBox_copy.Size = new Size(70, 28);
-            comboBox_copy.MinimumSize = new Size(50, 28);
-
-            comboBox_copy.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
-             * */
             comboBox_copy = new DoubleComboBox();
             comboBox_copy.ComboBox.DropDownStyle = ComboBoxStyle.DropDown;
             comboBox_copy.ComboBox.FlatStyle = FlatStyle.Flat;
@@ -2621,6 +2877,41 @@ namespace DigitalPlatform.CommonControl
             comboBox_copy.MinimumSize = new Size(30, 28 * 2);
             // this.comboBox_copy.Visible = false;
 
+            // 码洋
+            textBox_fixedPrice = new DoubleTextBox();
+            textBox_fixedPrice.TextBox.BorderStyle = BorderStyle.None;
+            textBox_fixedPrice.TextBox.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
+
+            textBox_fixedPrice.SecondTextBox.ReadOnly = true;
+            textBox_fixedPrice.SecondTextBox.BorderStyle = BorderStyle.None;
+            textBox_fixedPrice.SecondTextBox.ForeColor = SystemColors.GrayText;
+
+            textBox_fixedPrice.Dock = DockStyle.Fill;
+            textBox_fixedPrice.MaximumSize = new Size(90, 28 * 2);
+            textBox_fixedPrice.Size = new Size(70, 28 * 2);
+            textBox_fixedPrice.MinimumSize = new Size(50, 28 * 2);
+            textBox_fixedPrice.Margin = new Padding(6, nTopBlank + 1,
+                6, 0);
+
+            // 折扣
+            comboBox_discount = new DoubleComboBox();
+            comboBox_discount.ComboBox.DropDownStyle = ComboBoxStyle.DropDown;
+            comboBox_discount.ComboBox.FlatStyle = FlatStyle.Flat;
+            comboBox_discount.ComboBox.DropDownHeight = 300;
+            comboBox_discount.ComboBox.DropDownWidth = 250;
+            comboBox_discount.ComboBox.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
+            comboBox_discount.Margin = new Padding(6, nTopBlank, // + 3,
+                6, 0);
+
+            comboBox_discount.TextBox.ReadOnly = true;
+            comboBox_discount.TextBox.BorderStyle = BorderStyle.None;
+            comboBox_discount.TextBox.ForeColor = SystemColors.GrayText;
+
+            comboBox_discount.Dock = DockStyle.Fill;
+            comboBox_discount.MaximumSize = new Size(60, 28 * 2);
+            comboBox_discount.Size = new Size(50, 28 * 2);
+            comboBox_discount.MinimumSize = new Size(40, 28 * 2);
+
             // 单价
             textBox_price = new DoubleTextBox();
             textBox_price.TextBox.BorderStyle = BorderStyle.None;
@@ -2636,8 +2927,6 @@ namespace DigitalPlatform.CommonControl
             textBox_price.MinimumSize = new Size(50, 28 * 2);
             textBox_price.Margin = new Padding(6, nTopBlank + 1,
                 6, 0);
-            // textBox_price.BorderStyle = BorderStyle.FixedSingle;
-            // this.textBox_price.Visible = false;
 
             // 去向
             location = new LocationEditControl();
@@ -2756,6 +3045,12 @@ namespace DigitalPlatform.CommonControl
 
                     // 复本数
                     this.comboBox_copy.Enabled = !value;
+
+                    // 码洋
+                    this.textBox_fixedPrice.ReadOnly = value;
+
+                    // 折扣
+                    this.comboBox_discount.Enabled = !value;
 
                     // 单价
                     this.textBox_price.ReadOnly = value;
@@ -2879,20 +3174,23 @@ namespace DigitalPlatform.CommonControl
         internal void AddToTable(TableLayoutPanel table,
             int nRow)
         {
-            table.Controls.Add(this.label_color, 0, nRow);
-            table.Controls.Add(this.textBox_catalogNo, 1, nRow);
-            table.Controls.Add(this.comboBox_seller, 2, nRow);
-            table.Controls.Add(this.comboBox_source, 3, nRow);
+            int i = 0;
+            table.Controls.Add(this.label_color, i++, nRow);
+            table.Controls.Add(this.textBox_catalogNo, i++, nRow);
+            table.Controls.Add(this.comboBox_seller, i++, nRow);
+            table.Controls.Add(this.comboBox_source, i++, nRow);
 
-            table.Controls.Add(this.dateRange_range, 4, nRow);
-            table.Controls.Add(this.comboBox_issueCount, 5, nRow);
+            table.Controls.Add(this.dateRange_range, i++, nRow);
+            table.Controls.Add(this.comboBox_issueCount, i++, nRow);
 
-            table.Controls.Add(this.comboBox_copy, 6, nRow);
-            table.Controls.Add(this.textBox_price, 7, nRow);
-            table.Controls.Add(this.location, 8, nRow);
-            table.Controls.Add(this.comboBox_class, 9, nRow);
-            table.Controls.Add(this.label_sellerAddress, 10, nRow);
-            table.Controls.Add(this.label_other, 11, nRow);
+            table.Controls.Add(this.comboBox_copy, i++, nRow);
+            table.Controls.Add(this.textBox_fixedPrice, i++, nRow);
+            table.Controls.Add(this.comboBox_discount, i++, nRow);
+            table.Controls.Add(this.textBox_price, i++, nRow);
+            table.Controls.Add(this.location, i++, nRow);
+            table.Controls.Add(this.comboBox_class, i++, nRow);
+            table.Controls.Add(this.label_sellerAddress, i++, nRow);
+            table.Controls.Add(this.label_other, i++, nRow);
 
             AddEvents(true);
         }
@@ -2917,6 +3215,10 @@ namespace DigitalPlatform.CommonControl
                 table.Controls.Remove(this.comboBox_issueCount);
 
                 table.Controls.Remove(this.comboBox_copy);
+
+                table.Controls.Remove(this.textBox_fixedPrice);
+                table.Controls.Remove(this.comboBox_discount);
+
                 table.Controls.Remove(this.textBox_price);
                 table.Controls.Remove(this.location);
                 table.Controls.Remove(this.comboBox_class);
@@ -2930,65 +3232,77 @@ namespace DigitalPlatform.CommonControl
                 {
                     Item line = this.Container.Items[i];
 
+                    int index = 0;
+
                     // color
                     Label label = line.label_color;
                     table.Controls.Remove(label);
-                    table.Controls.Add(label, 0, i - 1 + 1);
+                    table.Controls.Add(label, index++, i - 1 + 1);
 
                     // catalog no
                     TextBox catalogNo = line.textBox_catalogNo;
                     table.Controls.Remove(catalogNo);
-                    table.Controls.Add(catalogNo, 1, i - 1 + 1);
+                    table.Controls.Add(catalogNo, index++, i - 1 + 1);
 
                     // seller
                     ComboBox seller = line.comboBox_seller;
                     table.Controls.Remove(seller);
-                    table.Controls.Add(seller, 2, i - 1 + 1);
+                    table.Controls.Add(seller, index++, i - 1 + 1);
 
                     // source
                     DoubleComboBox source = line.comboBox_source;
                     table.Controls.Remove(source);
-                    table.Controls.Add(source, 3, i - 1 + 1);
+                    table.Controls.Add(source, index++, i - 1 + 1);
 
                     // time range
                     DateRangeControl range = line.dateRange_range;
                     table.Controls.Remove(range);
-                    table.Controls.Add(range, 4, i - 1 + 1);
+                    table.Controls.Add(range, index++, i - 1 + 1);
 
                     // issue count
                     ComboBox issueCount = line.comboBox_issueCount;
                     table.Controls.Remove(issueCount);
-                    table.Controls.Add(issueCount, 5, i - 1 + 1);
+                    table.Controls.Add(issueCount, index++, i - 1 + 1);
 
                     // copy
                     DoubleComboBox copy = line.comboBox_copy;
                     table.Controls.Remove(copy);
-                    table.Controls.Add(copy, 6, i - 1 + 1);
+                    table.Controls.Add(copy, index++, i - 1 + 1);
+
+                    // fixedPrice
+                    DoubleTextBox fixedPrice = line.textBox_fixedPrice;
+                    table.Controls.Remove(fixedPrice);
+                    table.Controls.Add(fixedPrice, index++, i - 1 + 1);
+
+                    // discount
+                    DoubleComboBox discount = line.comboBox_discount;
+                    table.Controls.Remove(comboBox_discount);
+                    table.Controls.Add(comboBox_discount, index++, i - 1 + 1);
 
                     // price
                     DoubleTextBox price = line.textBox_price;
                     table.Controls.Remove(price);
-                    table.Controls.Add(price, 7, i - 1 + 1);
+                    table.Controls.Add(price, index++, i - 1 + 1);
 
                     // location
                     LocationEditControl location = line.location;
                     table.Controls.Remove(location);
-                    table.Controls.Add(location, 8, i - 1 + 1);
+                    table.Controls.Add(location, index++, i - 1 + 1);
 
                     // class
                     ComboBox orderClass = line.comboBox_class;
                     table.Controls.Remove(orderClass);
-                    table.Controls.Add(orderClass, 9, i - 1 + 1);
+                    table.Controls.Add(orderClass, index++, i - 1 + 1);
 
                     // seller address
                     Label sellerAddress = line.label_sellerAddress;
                     table.Controls.Remove(sellerAddress);
-                    table.Controls.Add(sellerAddress, 10, i - 1 + 1);
+                    table.Controls.Add(sellerAddress, index++, i - 1 + 1);
 
                     // other
                     Label other = line.label_other;
                     table.Controls.Remove(other);
-                    table.Controls.Add(other, 11, i - 1 + 1);
+                    table.Controls.Add(other, index++, i - 1 + 1);
                 }
 
                 table.RowCount--;
@@ -3020,80 +3334,98 @@ namespace DigitalPlatform.CommonControl
                 {
                     Item line = this.Container.Items[i];
 
+                    int index = 0;
                     // color
                     Label label = line.label_color;
                     table.Controls.Remove(label);
-                    table.Controls.Add(label, 0, i + 1 + 1);
+                    table.Controls.Add(label, index++, i + 1 + 1);
 
                     // catalog no
                     TextBox catalogNo = line.textBox_catalogNo;
                     table.Controls.Remove(catalogNo);
-                    table.Controls.Add(catalogNo, 1, i + 1 + 1);
+                    table.Controls.Add(catalogNo, index++, i + 1 + 1);
 
 
                     // seller
                     ComboBox seller = line.comboBox_seller;
                     table.Controls.Remove(seller);
-                    table.Controls.Add(seller, 2, i + 1 + 1);
+                    table.Controls.Add(seller, index++, i + 1 + 1);
 
 
                     // source
                     DoubleComboBox source = line.comboBox_source;
                     table.Controls.Remove(source);
-                    table.Controls.Add(source, 3, i + 1 + 1);
+                    table.Controls.Add(source, index++, i + 1 + 1);
 
                     // time range
                     DateRangeControl range = line.dateRange_range;
                     table.Controls.Remove(range);
-                    table.Controls.Add(range, 4, i + 1 + 1);
+                    table.Controls.Add(range, index++, i + 1 + 1);
 
                     // issue count
                     ComboBox issueCount = line.comboBox_issueCount;
                     table.Controls.Remove(issueCount);
-                    table.Controls.Add(issueCount, 5, i + 1 + 1);
+                    table.Controls.Add(issueCount, index++, i + 1 + 1);
 
                     // copy
                     DoubleComboBox copy = line.comboBox_copy;
                     table.Controls.Remove(copy);
-                    table.Controls.Add(copy, 6, i + 1 + 1);
+                    table.Controls.Add(copy, index++, i + 1 + 1);
+
+                    // fixedPrice
+                    DoubleTextBox fixedPrice = line.textBox_fixedPrice;
+                    table.Controls.Remove(fixedPrice);
+                    table.Controls.Add(fixedPrice, index++, i + 1 + 1);
+
+                    // discount
+                    DoubleComboBox discount = line.comboBox_discount;
+                    table.Controls.Remove(discount);
+                    table.Controls.Add(discount, index++, i + 1 + 1);
 
                     // price
                     DoubleTextBox price = line.textBox_price;
                     table.Controls.Remove(price);
-                    table.Controls.Add(price, 7, i + 1 + 1);
+                    table.Controls.Add(price, index++, i + 1 + 1);
 
                     // location
                     table.Controls.Remove(line.location);
-                    table.Controls.Add(line.location, 8, i + 1 + 1);
+                    table.Controls.Add(line.location, index++, i + 1 + 1);
 
                     // class
                     ComboBox orderClass = line.comboBox_class;
                     table.Controls.Remove(orderClass);
-                    table.Controls.Add(orderClass, 9, i + 1 + 1);
+                    table.Controls.Add(orderClass, index++, i + 1 + 1);
 
                     // seller address
                     table.Controls.Remove(line.label_sellerAddress);
-                    table.Controls.Add(line.label_sellerAddress, 10, i + 1 + 1);
+                    table.Controls.Add(line.label_sellerAddress, index++, i + 1 + 1);
 
                     // other
                     table.Controls.Remove(line.label_other);
-                    table.Controls.Add(line.label_other, 11, i + 1 + 1);
+                    table.Controls.Add(line.label_other, index++, i + 1 + 1);
                 }
 
-                table.Controls.Add(this.label_color, 0, nRow + 1);
-                table.Controls.Add(this.textBox_catalogNo, 1, nRow + 1);
-                table.Controls.Add(this.comboBox_seller, 2, nRow + 1);
-                table.Controls.Add(this.comboBox_source, 3, nRow + 1);
+                {
+                    int index = 0;
+                    table.Controls.Add(this.label_color, index++, nRow + 1);
+                    table.Controls.Add(this.textBox_catalogNo, index++, nRow + 1);
+                    table.Controls.Add(this.comboBox_seller, index++, nRow + 1);
+                    table.Controls.Add(this.comboBox_source, index++, nRow + 1);
 
-                table.Controls.Add(this.dateRange_range, 4, nRow + 1);
-                table.Controls.Add(this.comboBox_issueCount, 5, nRow + 1);
+                    table.Controls.Add(this.dateRange_range, index++, nRow + 1);
+                    table.Controls.Add(this.comboBox_issueCount, index++, nRow + 1);
 
-                table.Controls.Add(this.comboBox_copy, 6, nRow + 1);
-                table.Controls.Add(this.textBox_price, 7, nRow + 1);
-                table.Controls.Add(this.location, 8, nRow + 1);
-                table.Controls.Add(this.comboBox_class, 9, nRow + 1);
-                table.Controls.Add(this.label_sellerAddress, 10, nRow + 1);
-                table.Controls.Add(this.label_other, 11, nRow + 1);
+                    table.Controls.Add(this.comboBox_copy, index++, nRow + 1);
+
+                    table.Controls.Add(this.textBox_fixedPrice, index++, nRow + 1);
+                    table.Controls.Add(this.comboBox_discount, index++, nRow + 1);
+
+                    table.Controls.Add(this.textBox_price, index++, nRow + 1);
+                    table.Controls.Add(this.location, index++, nRow + 1);
+                    table.Controls.Add(this.comboBox_class, index++, nRow + 1);
+                    table.Controls.Add(this.label_sellerAddress, index++, nRow + 1);
+                    table.Controls.Add(this.label_other, index++, nRow + 1);
+                }
             }
             finally
             {
@@ -3149,15 +3481,22 @@ namespace DigitalPlatform.CommonControl
 
                 // copy
                 this.comboBox_copy.ComboBox.DropDown += new EventHandler(comboBox_copy_DropDown);
-
                 this.comboBox_copy.Enter += new EventHandler(control_Enter);
-
                 this.comboBox_copy.ComboBox.TextChanged += new EventHandler(comboBox_copy_TextChanged);
+
+                // fixedPrice
+                this.textBox_fixedPrice.TextBox.TextChanged += new EventHandler(FixedPrice_TextChanged);
+                this.textBox_fixedPrice.TextBox.Enter += new EventHandler(control_Enter);
+
+                // discount
+                this.comboBox_discount.ComboBox.DropDown += new EventHandler(comboBox_discount_DropDown);
+                this.comboBox_discount.Enter += new EventHandler(control_Enter);
+                this.comboBox_discount.ComboBox.TextChanged += new EventHandler(comboBox_discount_TextChanged);
 
                 // price
                 this.textBox_price.TextBox.TextChanged += new EventHandler(Price_TextChanged);
-
                 this.textBox_price.TextBox.Enter += new EventHandler(control_Enter);
+                this.textBox_price.TextBox.KeyDown += TextBox_price_KeyDown;
 
                 // location
                 this.location.GetValueTable += new GetValueTableEventHandler(textBox_location_GetValueTable);
@@ -3206,8 +3545,22 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_copy.ComboBox.DropDown -= new EventHandler(comboBox_copy_DropDown);
                 this.comboBox_copy.Enter -= new EventHandler(control_Enter);
                 this.comboBox_copy.ComboBox.TextChanged -= new EventHandler(comboBox_copy_TextChanged);
+
+
+                // fixedPrice
+                this.textBox_fixedPrice.TextBox.TextChanged -= new EventHandler(FixedPrice_TextChanged);
+                this.textBox_fixedPrice.TextBox.Enter -= new EventHandler(control_Enter);
+
+                // discount
+                this.comboBox_discount.ComboBox.DropDown -= new EventHandler(comboBox_discount_DropDown);
+                this.comboBox_discount.Enter -= new EventHandler(control_Enter);
+                this.comboBox_discount.ComboBox.TextChanged -= new EventHandler(comboBox_copy_TextChanged);
+
                 this.textBox_price.TextBox.TextChanged -= new EventHandler(Price_TextChanged);
                 this.textBox_price.TextBox.Enter -= new EventHandler(control_Enter);
+                this.textBox_price.TextBox.KeyDown -= TextBox_price_KeyDown;
+
+
                 this.location.GetValueTable -= new GetValueTableEventHandler(textBox_location_GetValueTable);
                 this.location.Enter -= new EventHandler(control_Enter);
                 this.location.ContentChanged -= new ContentChangedEventHandler(location_ContentChanged);
@@ -3219,6 +3572,38 @@ namespace DigitalPlatform.CommonControl
                 this.comboBox_class.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
                 this.label_sellerAddress.Click -= new EventHandler(control_Enter);
                 this.label_other.Click -= new EventHandler(control_Enter);
+            }
+        }
+
+        private void TextBox_price_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                // MessageBox.Show(this.Container, "Ctrl+A");
+
+                // 自动计算出验收价
+                if (string.IsNullOrEmpty(this.FixedPrice) == false)
+                {
+                    // return:
+                    //      -1  计算过程出现错误
+                    //      0   strFixedPrice 为空，无法计算
+                    //      1   计算成功
+                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.FixedPrice,
+                this.Discount,
+                out string strWishOrderPrice,
+                out string strError);
+                    if (nRet == -1)
+                    {
+                        strError = "根据码洋 '" + this.FixedPrice + "' 和折扣 '" + this.Discount + "' 自动计算单机时出错: " + strError;
+                        MessageBox.Show(this.Container, strError);
+                        goto END;
+                    }
+                    if (nRet == 1)
+                        this.Price = strWishOrderPrice;
+                }
+
+                END:
+                e.Handled = true;
             }
         }
 
@@ -3335,7 +3720,6 @@ namespace DigitalPlatform.CommonControl
 
                 this.Container.textBox_arrivedTotalCopy.Text = this.Container.GetArrivedTotalCopy().ToString();
             }
-
         }
 
         void location_ArrivedChanged(object sender, EventArgs e)
@@ -3353,24 +3737,23 @@ namespace DigitalPlatform.CommonControl
             string strCount = this.location.ArrivedCount.ToString();
 
             // 2010/12/1
-            string strCopy = OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text);
+            string strCopy = dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text);
 
             if (strCopy != strCount)
             {
                 // 如果到书copy字符串为空，则需要从订购copy字符串中寻找可能的套内册数
                 if (String.IsNullOrEmpty(this.comboBox_copy.Text) == true)
                 {
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(this.comboBox_copy.OldText);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(this.comboBox_copy.OldText);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                     {
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
                         return;
                     }
                 }
 
-
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
             }
 
 
@@ -3409,16 +3792,43 @@ namespace DigitalPlatform.CommonControl
                 if (String.IsNullOrEmpty(this.comboBox_source.Text) == false)
                     this.comboBox_seller.Text = "";
             }
-
         }
 
+        // price
         void Price_TextChanged(object sender, EventArgs e)
         {
             if (this.Container.ArriveMode == false)
             {
                 // 在订购状态下，新旧值保持统一，以便显示单行
                 this.textBox_price.OldText = this.textBox_price.Text;
+#if NO
+                // 2018/7/31
+                DoubleTextBox control = (sender as Control).Parent as DoubleTextBox;
+                Debug.Assert(control == this.textBox_price || control == this.textBox_fixedPrice, "");
+                control.OldText = control.Text;
+#endif
             }
+
+            // TODO: 重新计算出实洋
+
+
+            if ((this.State & ItemState.New) == 0)
+                this.State |= ItemState.Changed;
+
+            this.Container.Changed = true;
+        }
+
+        // fixePrice
+        void FixedPrice_TextChanged(object sender, EventArgs e)
+        {
+            if (this.Container.ArriveMode == false)
+            {
+                // 在订购状态下，新旧值保持统一，以便显示单行
+                this.textBox_fixedPrice.OldText = this.textBox_fixedPrice.Text;
+            }
+
+            // 重新计算出实洋
+            RecomputPrice();
 
             if ((this.State & ItemState.New) == 0)
                 this.State |= ItemState.Changed;
@@ -3446,8 +3856,6 @@ namespace DigitalPlatform.CommonControl
 
             this.Container.Changed = true;
         }
-
-
 
         void textBox_catalogNo_TextChanged(object sender, EventArgs e)
         {
@@ -3507,7 +3915,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // location控件联动
                 // 2010/12/1 changed
-                int nCopy = Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                int nCopy = Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
 
                 // 如果当前为订购模式
                 if (this.Container.ArriveMode == false)
@@ -3546,7 +3954,7 @@ namespace DigitalPlatform.CommonControl
                         {
                             // 2010/12/1 changed
                             // this.comboBox_copy.Text = this.location.ArrivedCount.ToString();    // 恢复原来的值或者最近可用的值
-                            this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                            this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                                 this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                             return;
                         }
@@ -3567,7 +3975,7 @@ namespace DigitalPlatform.CommonControl
                         // this.comboBox_copy.Text = this.location.ArrivedCount.ToString(); 
                         // 恢复原来的值或者最近可用的值
                         // 2010/12/1 changed
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                             this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                         return;
                     }
@@ -3674,7 +4082,80 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void comboBox_discount_DropDown(object sender, EventArgs e)
+        {
+            ComboBox combobox = (ComboBox)sender;
 
+            if (combobox.Items.Count == 0)
+            {
+                combobox.Items.Add("1.00");
+                for (int i = 0; i < 9; i++)
+                {
+                    // TODO: 从 .10 到 .90
+                    combobox.Items.Add("." + (i + 1).ToString() + "0");
+                }
+                combobox.Items.Add("1.00");
+            }
+        }
+
+        void RecomputPrice()
+        {
+            if (string.IsNullOrEmpty(this.textBox_fixedPrice.OldText) == false)
+            {
+#if NO
+                if (this.Container.ArriveMode == false)
+                {
+                    // 重新计算出实洋
+                    // return:
+                    //      -1  计算过程出现错误
+                    //      0   strFixedPrice 为空，无法计算
+                    //      1   计算成功
+                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.OldText,
+            this.comboBox_discount.OldText,
+            out string strWishOrderPrice,
+            out string strError);
+                    if (nRet == 1)
+                        this.textBox_price.OldText = strWishOrderPrice;
+                }
+                else
+                {
+                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.Text,
+    this.comboBox_discount.Text,
+    out string strWishOrderPrice,
+    out string strError);
+                    if (nRet == 1)
+                        this.textBox_price.Text = strWishOrderPrice;
+                }
+#endif
+                // 注意，无论是在订购模式还是在验收模式，实际上都是修改的 textbox.Text 而不是 OldText
+                int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.Text,
+this.comboBox_discount.Text,
+out string strWishOrderPrice,
+out string strError);
+                if (nRet == 1)
+                    this.textBox_price.Text = strWishOrderPrice;
+                else
+                    Console.Beep();
+            }
+        }
+
+        // 折扣 文字改变
+        void comboBox_discount_TextChanged(object sender, EventArgs e)
+        {
+            if (this.Container.ArriveMode == false)
+            {
+                // 在订购状态下，新旧值保持统一，以便显示单行
+                this.comboBox_discount.OldText = this.comboBox_discount.Text;
+            }
+
+            // 重新计算出实洋
+            RecomputPrice();
+
+            if ((this.State & ItemState.New) == 0)
+                this.State |= ItemState.Changed;
+
+            this.Container.Changed = true;
+        }
 
         void label_color_MouseUp(object sender, MouseEventArgs e)
         {
@@ -3730,7 +4211,6 @@ namespace DigitalPlatform.CommonControl
             menuItem = new MenuItem("总价(&T)");
             menuItem.Click += new System.EventHandler(this.menu_totalPrice_Click);
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");
@@ -4014,8 +4494,15 @@ namespace DigitalPlatform.CommonControl
             item.RangeString = this.RangeString;
             item.IssueCountString = this.IssueCountString;
             item.CopyString = this.CopyString;
+
+            item.OldFixedPrice = this.OldFixedPrice;
+            item.FixedPrice = this.FixedPrice;
+
+            item.Discount = this.Discount;
+
             item.OldPrice = this.OldPrice;
             item.Price = this.Price;
+
             item.Distribute = this.Distribute;
             item.SellerAddressXml = this.SellerAddressXml;
             item.Class = this.Class;
@@ -4175,7 +4662,7 @@ namespace DigitalPlatform.CommonControl
         static void EnsureListValue(ComboBox combobox, string strValue)
         {
             List<string> values = new List<string>();
-            foreach(string s in combobox.Items)
+            foreach (string s in combobox.Items)
             {
                 if (s == strValue)
                     return;
@@ -4184,12 +4671,13 @@ namespace DigitalPlatform.CommonControl
 
             values.Add(strValue);
 
-            values.Sort((x,y)=>{
-                return StringUtil.RightAlignCompare(x,y);
+            values.Sort((x, y) =>
+            {
+                return StringUtil.RightAlignCompare(x, y);
             });
 
             combobox.Items.Clear();
-            foreach(string s in values)
+            foreach (string s in values)
             {
                 combobox.Items.Add(s);
             }
@@ -4203,7 +4691,7 @@ namespace DigitalPlatform.CommonControl
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
                 }
                 catch
                 {
@@ -4214,7 +4702,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.Text = value.ToString();
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, value.ToString());
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, value.ToString());
             }
         }
 
@@ -4240,7 +4728,7 @@ namespace DigitalPlatform.CommonControl
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.OldText));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.OldText));
                 }
                 catch
                 {
@@ -4251,7 +4739,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.OldText = value.ToString();
-                this.comboBox_copy.OldText = OrderDesignControl.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
+                this.comboBox_copy.OldText = dp2StringUtil.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
             }
         }
 
@@ -4265,6 +4753,79 @@ namespace DigitalPlatform.CommonControl
             set
             {
                 this.comboBox_copy.OldText = value;
+            }
+        }
+
+        // 码洋
+        public string FixedPrice
+        {
+            get
+            {
+                return this.textBox_fixedPrice.Text;
+            }
+            set
+            {
+                this.textBox_fixedPrice.Text = value;
+            }
+        }
+
+
+        // 原有的 码洋
+        public string OldFixedPrice
+        {
+            get
+            {
+                return this.textBox_fixedPrice.OldText;
+            }
+            set
+            {
+                this.textBox_fixedPrice.OldText = value;
+            }
+        }
+
+        // 折扣字符串
+        public string Discount
+        {
+            get
+            {
+                return this.comboBox_discount.Text;
+            }
+            set
+            {
+                this.comboBox_discount.Text = value;
+            }
+        }
+
+        // 原有的 折扣字符串
+        public string OldDiscount
+        {
+            get
+            {
+                return this.comboBox_discount.OldText;
+            }
+            set
+            {
+                this.comboBox_discount.OldText = value;
+            }
+        }
+
+        // 原有的 折扣小数
+        public decimal OldDiscountValue
+        {
+            get
+            {
+                try
+                {
+                    return Convert.ToDecimal(dp2StringUtil.GetCopyFromCopyString(this.comboBox_discount.OldText));
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                this.comboBox_discount.OldText = dp2StringUtil.ModifyCopy(this.comboBox_discount.OldText, value.ToString());
             }
         }
 
@@ -4600,7 +5161,7 @@ namespace DigitalPlatform.CommonControl
 
             this.label_other.Text = "编号: \t" + strIndex + "\r\n"
             + "状态: \t" + strState + "\r\n"
-                // + "时间范围:\t" + strRange + "\r\n"
+            // + "时间范围:\t" + strRange + "\r\n"
             + "订购时间: \t" + strOrderTime + "\r\n"
             + "订单号: \t" + strOrderID + "\r\n"
             + "总价格: \t" + strTotalPrice + "\r\n"
@@ -4754,15 +5315,21 @@ namespace DigitalPlatform.CommonControl
             DomUtil.SetElementText(dom.DocumentElement,
                 "seller", this.Seller);
             DomUtil.SetElementText(dom.DocumentElement,
-                "source", OrderDesignControl.LinkOldNewValue(this.OldSource, this.Source));
+                "source", dp2StringUtil.LinkOldNewValue(this.OldSource, this.Source));
             DomUtil.SetElementText(dom.DocumentElement,
                 "range", this.RangeString);
             DomUtil.SetElementText(dom.DocumentElement,
                 "issueCount", this.IssueCountString);
             DomUtil.SetElementText(dom.DocumentElement,
-                "copy", OrderDesignControl.LinkOldNewValue(this.OldCopyString, this.CopyString));
+                "copy", dp2StringUtil.LinkOldNewValue(this.OldCopyString, this.CopyString));
             DomUtil.SetElementText(dom.DocumentElement,
-                "price", OrderDesignControl.LinkOldNewValue(this.OldPrice, this.Price));
+    "fixedPrice", dp2StringUtil.LinkOldNewValue(this.OldFixedPrice, this.FixedPrice));
+            DomUtil.SetElementText(dom.DocumentElement,
+    "discount", dp2StringUtil.LinkOldNewValue(this.OldDiscount, this.Discount));
+
+
+            DomUtil.SetElementText(dom.DocumentElement,
+                "price", dp2StringUtil.LinkOldNewValue(this.OldPrice, this.Price));
             DomUtil.SetElementText(dom.DocumentElement,
                 "distribute", this.Distribute);
             DomUtil.SetElementText(dom.DocumentElement,
@@ -4810,7 +5377,6 @@ namespace DigitalPlatform.CommonControl
 
                 return this.location.ArrivedCount - this.location.ReadOnlyArrivedCount;
             }
-
         }
 
         #endregion
@@ -4878,4 +5444,6 @@ VerifyLibraryCodeEventArgs e);
         /// </summary>
         public string ErrorInfo = "";   // [out]检查结果。非空表示检查发现了问题
     }
+
+
 }

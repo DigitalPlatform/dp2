@@ -15,6 +15,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -27,6 +28,8 @@ namespace dp2Circulation
         where T : BookItemBase, new()
         where TC : BookItemCollectionBase, new()
     {
+        public event ShowMessageEventHandler ShowMessage = null;
+
         /// <summary>
         /// 界面许可 / 禁止状态发生改变
         /// </summary>
@@ -2506,6 +2509,21 @@ size.Height);
                     format);
             }
         }
+
+        public void ParentShowMessage(string strMessage, string strColor, bool bClickClose)
+        {
+            if (this.ShowMessage != null)
+            {
+                ShowMessageEventArgs e = new ShowMessageEventArgs();
+                e.Message = strMessage;
+                e.Color = strColor;
+                e.ClickClose = bClickClose;
+                this.ShowMessage(this, e);
+                if (string.IsNullOrEmpty(strMessage) == false)
+                    Application.DoEvents();
+            }
+        }
+
     }
 
     /// <summary>
