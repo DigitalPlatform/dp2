@@ -1074,6 +1074,7 @@ MessageBoxDefaultButton.Button2);
                     this.stop,
                     this.textBox_serverFilePath.Text,
                     this.textBox_clientFilePath.Text,
+                    // "metadata",
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                     out strMetaData,
                     out baOutputTimeStamp,

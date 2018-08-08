@@ -14,6 +14,7 @@ using System.Threading;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -2971,24 +2972,24 @@ namespace DigitalPlatform.CommonControl
             string strCount = this.location.ArrivedCount.ToString();
 
             // 2010/12/1
-            string strCopy = OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text);
+            string strCopy = dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text);
 
             if (strCopy != strCount)
             {
                 // 如果到书copy字符串为空，则需要从订购copy字符串中寻找可能的套内册数
                 if (String.IsNullOrEmpty(this.comboBox_copy.Text) == true)
                 {
-                    string strRightCopy = OrderDesignControl.GetRightFromCopyString(this.comboBox_copy.OldText);
+                    string strRightCopy = dp2StringUtil.GetRightFromCopyString(this.comboBox_copy.OldText);
                     if (String.IsNullOrEmpty(strRightCopy) == false)
                     {
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyRightCopy(this.comboBox_copy.Text, strRightCopy);
                         return;
                     }
                 }
 
 
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, strCount);
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, strCount);
             }
 
 
@@ -3126,7 +3127,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // location控件联动
                 // 2010/12/1 changed
-                int nCopy = Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                int nCopy = Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
 
                 // 如果当前为订购模式
                 if (this.Container.ArriveMode == false)
@@ -3165,7 +3166,7 @@ namespace DigitalPlatform.CommonControl
                         {
                             // 2010/12/1 changed
                             // this.comboBox_copy.Text = this.location.ArrivedCount.ToString();    // 恢复原来的值或者最近可用的值
-                            this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                            this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                                 this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                             return;
                         }
@@ -3186,7 +3187,7 @@ namespace DigitalPlatform.CommonControl
                         // this.comboBox_copy.Text = this.location.ArrivedCount.ToString(); 
                         // 恢复原来的值或者最近可用的值
                         // 2010/12/1 changed
-                        this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(
+                        this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(
                             this.comboBox_copy.Text, this.location.ArrivedCount.ToString());    // 恢复原来的值或者最近可用的值
                         return;
                     }
@@ -3650,7 +3651,7 @@ namespace DigitalPlatform.CommonControl
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.Text));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.Text));
                 }
                 catch
                 {
@@ -3661,7 +3662,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.Text = value.ToString();
-                this.comboBox_copy.Text = OrderDesignControl.ModifyCopy(this.comboBox_copy.Text, value.ToString());
+                this.comboBox_copy.Text = dp2StringUtil.ModifyCopy(this.comboBox_copy.Text, value.ToString());
             }
         }
 
@@ -3687,7 +3688,7 @@ namespace DigitalPlatform.CommonControl
                 try
                 {
                     // 2010/12/1 changed
-                    return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(this.comboBox_copy.OldText));
+                    return Convert.ToInt32(dp2StringUtil.GetCopyFromCopyString(this.comboBox_copy.OldText));
                 }
                 catch
                 {
@@ -3698,7 +3699,7 @@ namespace DigitalPlatform.CommonControl
             {
                 // 2010/12/1 changed
                 // this.comboBox_copy.OldText = value.ToString();
-                this.comboBox_copy.OldText = OrderDesignControl.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
+                this.comboBox_copy.OldText = dp2StringUtil.ModifyCopy(this.comboBox_copy.OldText, value.ToString());
             }
         }
 
@@ -4082,15 +4083,15 @@ namespace DigitalPlatform.CommonControl
             DomUtil.SetElementText(dom.DocumentElement,
                 "seller", this.Seller);
             DomUtil.SetElementText(dom.DocumentElement,
-                "source", OrderDesignControl.LinkOldNewValue(this.OldSource, this.Source));
+                "source", dp2StringUtil.LinkOldNewValue(this.OldSource, this.Source));
             DomUtil.SetElementText(dom.DocumentElement,
                 "range", this.RangeString);
             DomUtil.SetElementText(dom.DocumentElement,
                 "issueCount", this.IssueCountString);
             DomUtil.SetElementText(dom.DocumentElement,
-                "copy", OrderDesignControl.LinkOldNewValue(this.OldCopyString, this.CopyString));
+                "copy", dp2StringUtil.LinkOldNewValue(this.OldCopyString, this.CopyString));
             DomUtil.SetElementText(dom.DocumentElement,
-                "price", OrderDesignControl.LinkOldNewValue(this.OldPrice, this.Price));
+                "price", dp2StringUtil.LinkOldNewValue(this.OldPrice, this.Price));
             DomUtil.SetElementText(dom.DocumentElement,
                 "distribute", this.Distribute);
             DomUtil.SetElementText(dom.DocumentElement,

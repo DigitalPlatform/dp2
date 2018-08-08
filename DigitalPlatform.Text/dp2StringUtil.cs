@@ -9,6 +9,322 @@ namespace DigitalPlatform.Text
     /// </summary>
     public static class dp2StringUtil
     {
+        #region 处理订购复本字符串
+
+        // 检查订购复本字段内容是否合法
+        // return:
+        //      -1  校验过程出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public static int VerifyOrderCopyField(string strValue, out string strError)
+        {
+            strError = "";
+            OldNewValue value = OldNewValue.Parse(strValue);
+            if (string.IsNullOrEmpty(value.OldValue) == false)
+            {
+                string strPosition = "复本字符串 '" + strValue + "' 的左边部分 '" + value.OldValue + "'";
+                if (string.IsNullOrEmpty(value.NewValue))
+                    strPosition = "复本字符串 '" + strValue + "' 中";
+
+                // return:
+                //      -1  校验过程出错
+                //      0   校验正确
+                //      1   校验发现错误
+                int nRet = VerifyOrderCopy(value.OldValue, out strError);
+                if (nRet == -1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return -1;
+                }
+                if (nRet == 1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return 1;
+                }
+            }
+            if (string.IsNullOrEmpty(value.NewValue) == false)
+            {
+                string strPosition = "复本字符串 '" + strValue + "' 的右边部分 '" + value.NewValue + "'";
+                if (string.IsNullOrEmpty(value.OldValue))
+                    strPosition = "复本字符串 '" + strValue + "' 中";
+
+                // return:
+                //      -1  校验过程出错
+                //      0   校验正确
+                //      1   校验发现错误
+                int nRet = VerifyOrderCopy(value.NewValue, out strError);
+                if (nRet == -1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return -1;
+                }
+                if (nRet == 1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // 检查订购复本是否合法。注意，这是检查一个单个的复本字符串，即，内容中不允许包含 [] 符号
+        // return:
+        //      -1  校验过程出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public static int VerifyOrderCopy(string strCopy, out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(strCopy))
+                return 1;
+            if (strCopy.IndexOfAny(new char[] { '[', ']' }) != -1)
+            {
+                strError = "校验复本字符串 '" + strCopy + "' 时出错：不应包含 [] 字符";
+                return -1;
+            }
+
+            string strLeft = GetCopyFromCopyString(strCopy);
+            if (string.IsNullOrEmpty(strLeft) == false
+                && Int32.TryParse(strLeft, out int value) == false)
+            {
+                strError = "复本字符串 '" + strCopy + "' 不合法：'" + strLeft + "' 部分应为正整数";
+                return 1;
+            }
+            string strRight = GetRightFromCopyString(strCopy);
+            if (string.IsNullOrEmpty(strRight) == false
+                && Int32.TryParse(strRight, out value) == false)
+            {
+                strError = "复本字符串 '" + strCopy + "' 不合法：'" + strRight + "' 部分应为正整数";
+                return 1;
+            }
+            return 0;
+        }
+
+        // 修改复本字符串中的套数部分
+        // exception:
+        //      可能会抛出 ArgumentException 异常
+        // parameters:
+        //      strText     待修改的整个复本字符串
+        //      strCopy     要改成的套数部分
+        // return:
+        //      返回修改后的整个复本字符串
+        public static string ModifyCopy(string strText, string strCopy)
+        {
+            if (string.IsNullOrEmpty(strText) == false
+                && strText.IndexOfAny(new char[] { '[', ']' }) != -1)
+                throw new ArgumentException("参数 strText 中不应包含符号 []");
+
+            int nRet = strText.IndexOf("*");
+            if (nRet == -1)
+                return strCopy;
+
+            return strCopy + "*" + strText.Substring(nRet + 1).Trim();
+        }
+
+        // 修改复本字符串中的套内册数部分
+        // exception:
+        //      可能会抛出 ArgumentException 异常
+        // parameters:
+        //      strText     待修改的整个复本字符串
+        //      strRightCopy     要改成的套内册数部分
+        // return:
+        //      返回修改后的整个复本字符串
+        public static string ModifyRightCopy(string strText, string strRightCopy)
+        {
+            if (string.IsNullOrEmpty(strText) == false
+    && strText.IndexOfAny(new char[] { '[', ']' }) != -1)
+                throw new ArgumentException("参数 strText 中不应包含符号 []");
+
+            int nRet = strText.IndexOf("*");
+            if (nRet == -1)
+            {
+                if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
+                    return strText;
+                return strText + "*" + strRightCopy;
+            }
+
+            if (string.IsNullOrEmpty(strRightCopy) || strRightCopy == "1")
+                return strText.Substring(0, nRet).Trim();
+
+            return strText.Substring(0, nRet).Trim() + "*" + strRightCopy;
+        }
+
+        // 从复本数字符串中得到套数部分
+        // 也就是 "3*5"返回"3"部分。如果只有一个数字，就取它
+        // exception:
+        //      可能会抛出 ArgumentException 异常
+        public static string GetCopyFromCopyString(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == false
+    && strText.IndexOfAny(new char[] { '[', ']' }) != -1)
+                throw new ArgumentException("参数 strText 中不应包含符号 []");
+
+            int nRet = strText.IndexOf("*");
+            if (nRet == -1)
+                return strText;
+
+            return strText.Substring(0, nRet).Trim();
+        }
+
+        // 从复本数字符串中得到套内册数部分
+        // 也就是 "3*5"返回"5"部分。如果只有一个数字，就返回""
+        // exception:
+        //      可能会抛出 ArgumentException 异常
+        public static string GetRightFromCopyString(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == false
+    && strText.IndexOfAny(new char[] { '[', ']' }) != -1)
+                throw new ArgumentException("参数 strText 中不应包含符号 []");
+
+            int nRet = strText.IndexOf("*");
+            if (nRet == -1)
+                return "";
+
+            return strText.Substring(nRet + 1).Trim();
+        }
+
+        #endregion
+
+        // 检查订购价字段内容是否合法
+        // return:
+        //      -1  校验过程出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public static int VerifyOrderPriceField(string strValue, out string strError)
+        {
+            strError = "";
+            OldNewValue value = OldNewValue.Parse(strValue);
+            if (string.IsNullOrEmpty(value.OldValue) == false)
+            {
+                string strPosition = "价格字符串 '" + strValue + "' 的左边部分 '" + value.OldValue + "'";
+                if (string.IsNullOrEmpty(value.NewValue))
+                    strPosition = "价格字符串 '" + strValue + "' 中";
+
+                // return:
+                //      -1  校验过程出错
+                //      0   校验正确
+                //      1   校验发现错误
+                int nRet = VerifyOrderPrice(value.OldValue, out strError);
+                if (nRet == -1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return -1;
+                }
+                if (nRet == 1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return 1;
+                }
+            }
+            if (string.IsNullOrEmpty(value.NewValue) == false)
+            {
+                string strPosition = "价格字符串 '" + strValue + "' 的右边部分 '" + value.NewValue + "'";
+                if (string.IsNullOrEmpty(value.OldValue))
+                    strPosition = "价格字符串 '" + strValue + "' 中";
+
+                // return:
+                //      -1  校验过程出错
+                //      0   校验正确
+                //      1   校验发现错误
+                int nRet = VerifyOrderPrice(value.NewValue, out strError);
+                if (nRet == -1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return -1;
+                }
+                if (nRet == 1)
+                {
+                    strError = strPosition + ": " + strError;
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // 检查订购价是否合法。注意，这是检查一个单个的订购价，即，内容中不允许包含 [] 符号
+        // return:
+        //      -1  校验过程出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public static int VerifyOrderPrice(string strPrice, out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(strPrice))
+                return 1;
+            if (strPrice.IndexOfAny(new char[] { '[', ']' }) != -1)
+            {
+                strError = "校验价格字符串 '" + strPrice + "' 时出错：不应包含 [] 字符";
+                return -1;
+            }
+
+            try
+            {
+                CurrencyItem item = CurrencyItem.Parse(strPrice);
+            }
+            catch (Exception ex)
+            {
+                strError = "价格字符串 '" + strPrice + "' 不合法：" + ex.Message;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        public static string CanonicalizeDiscount(string strDiscount, string strPosition)
+        {
+            if (string.IsNullOrEmpty(strDiscount))
+                return "1.00";
+            // TODO: 规整小数点后面的位数。两位小数以内，末尾不足的补充 0；多出来的去掉多余的末尾连续 0
+            if (decimal.TryParse(strDiscount, out decimal discount) == false)
+                throw new PositionException("折扣值 '' 不合法。应为一个小数", strPosition);
+            return discount.ToString(CurrencyItem.fmt);
+        }
+
+        // 把新旧两个值连接起来
+        // old new --> old[new]
+        public static string LinkOldNewValue(string strOldValue,
+            string strNewValue)
+        {
+            if (String.IsNullOrEmpty(strNewValue) == true)
+                return strOldValue;
+
+            if (strOldValue == strNewValue)
+            {
+                if (String.IsNullOrEmpty(strOldValue) == true)  // 新旧均为空
+                    return "";
+
+                return strOldValue + "[=]";
+            }
+
+            return strOldValue + "[" + strNewValue + "]";
+        }
+
+        // 分离 "old[new]" 内的两个值
+        public static void ParseOldNewValue(string strValue,
+            out string strOldValue,
+            out string strNewValue)
+        {
+            strOldValue = "";
+            strNewValue = "";
+            int nRet = strValue.IndexOf("[");
+            if (nRet == -1)
+            {
+                strOldValue = strValue;
+                strNewValue = "";
+                return;
+            }
+
+            strOldValue = strValue.Substring(0, nRet).Trim();
+            strNewValue = strValue.Substring(nRet + 1).Trim();
+
+            // 去掉末尾的']'
+            if (strNewValue.Length > 0 && strNewValue[strNewValue.Length - 1] == ']')
+                strNewValue = strNewValue.Substring(0, strNewValue.Length - 1);
+
+            if (strNewValue == "=")
+                strNewValue = strOldValue;
+        }
+
         public static List<string> FilterLocationList(List<string> location_list,
     string strLibraryCodeList)
         {
@@ -339,6 +655,47 @@ out string strPureName);
         {
             this.Volume = volume;
             this.Query = query;
+        }
+    }
+
+    public class OldNewValue
+    {
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
+
+        public static OldNewValue Parse(string strValue)
+        {
+            dp2StringUtil.ParseOldNewValue(strValue,
+out string strOldValue,
+out string strNewValue);
+            return new OldNewValue { OldValue = strOldValue, NewValue = strNewValue };
+        }
+    }
+
+    /// <summary>
+    /// 带有位置信息的异常类
+    /// </summary>
+    public class PositionException : Exception
+    {
+        /// <summary>
+        /// 位置信息
+        /// </summary>
+        public string Position { get; set; }
+
+        /// <summary>
+        /// 原始错误信息
+        /// </summary>
+        public string OriginMessage { get; set; }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="position"></param>
+        public PositionException(string message, string position) : base(position + ": " + message)
+        {
+            this.Position = position;
+            this.OriginMessage = message;
         }
     }
 

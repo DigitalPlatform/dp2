@@ -177,7 +177,7 @@ MessageBoxDefaultButton.Button2);
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -212,7 +212,7 @@ MessageBoxDefaultButton.Button2);
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-        REDO:
+            REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -288,7 +288,7 @@ MessageBoxDefaultButton.Button2);
                 this.DebugInfo += "\r\n\r\n";
             this.DebugInfo += new_instance_dlg.DebugInfo;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -472,7 +472,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1140,9 +1140,9 @@ out strError);
                 strConnectionString = @"Persist Security Info=False;"
         + "User ID=" + info.DatabaseLoginName + ";"    //帐户和密码
         + "Password=" + info.DatabaseLoginPassword + ";"
-                    //+ "Integrated Security=SSPI; "      //信任连接
+        //+ "Integrated Security=SSPI; "      //信任连接
         + "Data Source=" + info.SqlServerName + ";"
-                    // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
+        // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
         + "Connect Timeout=" + nTimeout.ToString() + ";";
                 return 0;
             }
@@ -1153,9 +1153,10 @@ out strError);
     + "User ID=" + info.DatabaseLoginName + ";"    //帐户和密码
     + "Password=" + info.DatabaseLoginPassword + ";"
     + "Data Source=" + info.SqlServerName + ";"
-                    // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
+    // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
     + "Connect Timeout=" + nTimeout.ToString() + ";"
-    + "charset=utf8;";
+                + "SslMode=none;"  // 2018/7/24
+                + "charset=utf8;";
                 return 0;
             }
 
@@ -1178,9 +1179,9 @@ out strError);
                 strConnectionString = @"Persist Security Info=False;"
 + "User ID=" + info.DatabaseLoginName + ";"    //帐户和密码
 + "Password=" + info.DatabaseLoginPassword + ";"
-                    //+ "Integrated Security=SSPI; "      //信任连接
+//+ "Integrated Security=SSPI; "      //信任连接
 + "Data Source=" + info.SqlServerName + ";"
-                    // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
+// http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
 + "Connect Timeout=" + nTimeout.ToString() + ";";
                 return 0;
             }
@@ -1307,7 +1308,7 @@ out strError);
                 this.Enabled = true;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -1319,7 +1320,7 @@ out strError);
             out string strError)
         {
             strError = "";
-        REDO_DELETE_DATADIR:
+            REDO_DELETE_DATADIR:
             try
             {
                 MessageBar bar = new MessageBar();
@@ -1806,7 +1807,7 @@ MessageBoxDefaultButton.Button1);
             {
                 PathUtil.TryCreateDir(strDataDir);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2018/1/27
                 strError = ex.Message;
@@ -2153,7 +2154,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (string.IsNullOrEmpty(strDataDir) == false)
                 {
-                REDO_DELETE_DATADIR:
+                    REDO_DELETE_DATADIR:
                     // 删除数据目录
                     try
                     {

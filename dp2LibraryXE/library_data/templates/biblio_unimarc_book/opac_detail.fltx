@@ -840,7 +840,7 @@ using DigitalPlatform.LibraryServer;
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("中图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";

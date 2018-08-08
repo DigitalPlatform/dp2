@@ -19,6 +19,20 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class Field856Dialog : Form
     {
+        string _marcSyntax = "unimarc";
+        public string MarcSyntax
+        {
+            get
+            {
+                return this._marcSyntax;
+            }
+            set
+            {
+                this._marcSyntax = value;
+                this.SetMarcSyntax(this._marcSyntax);
+            }
+        }
+
         // $8内容有初始值，要求follow填充其它几个相关子字段内容，则需要在打开对话框前设置该成员为true
         public bool AutoFollowIdSet = false;
 
@@ -39,6 +53,61 @@ namespace DigitalPlatform.CommonControl
             this.tabComboBox_type.Items.Add("封面图像.小");
             this.tabComboBox_type.Items.Add("封面图像.中");
             this.tabComboBox_type.Items.Add("封面图像.大");
+        }
+
+        // 根据 MARC 格式，改变面板显示
+        void SetMarcSyntax(string strMarcSyntax)
+        {
+            if (strMarcSyntax == "usmarc")
+            {
+                this.label_indi_2.Text = "指示符2 -- 关系";
+                this.label_y.Text = "$y -- 链接文本";
+                this.label_y.Font = new Font(this.Font, FontStyle.Bold);
+
+                this.label_2.Text = "$2 -- 访问方式";
+                this.label_2.Font = new Font(this.Font, FontStyle.Regular);
+
+                this.label_3.Visible = true;
+                this.label_3_color.Visible = true;
+                this.textBox_3.Visible = true;
+
+                this.label_8.Visible = true;
+                this.label_8_color.Visible = true;
+                this.textBox_8.Visible = true;
+
+            }
+            else if (strMarcSyntax == "unimarc")
+            {
+                this.label_indi_2.Text = "指示符2 -- 未定义";
+                this.label_y.Text = "$y -- 访问方式";
+                this.label_y.Font = new Font(this.Font, FontStyle.Regular);
+
+                this.label_2.Text = "$2 -- 链接文本";
+                this.label_2.Font = new Font(this.Font, FontStyle.Bold);
+
+
+                this.label_3.Visible = false;
+                this.label_3_color.Visible = false;
+                this.textBox_3.Visible = false;
+
+                this.label_8.Visible = false;
+                this.label_8_color.Visible = false;
+                this.textBox_8.Visible = false;
+            }
+        }
+
+        public string GetAccessMethodSubfieldName()
+        {
+            if (this._marcSyntax == "unimarc")
+                return "y";
+            return "2";
+        }
+
+        public string GetLinkTextSubfieldName()
+        {
+            if (this._marcSyntax == "unimarc")
+                return "2";
+            return "y";
         }
 
         // 通过汉字名称获得正规的英文的 type 属性值
@@ -148,6 +217,8 @@ namespace DigitalPlatform.CommonControl
             {
                 comboBox_u_SelectedIndexChanged(null, null);
             }
+
+            this.SetMarcSyntax(this._marcSyntax);
 
             this.MessageText = this.MessageText;
 

@@ -1,22 +1,13 @@
 ﻿#define CHANNEL_POOL
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Threading;
-using System.Xml;
-using System.Globalization;
-using System.IO;
 using System.Drawing;
 
-using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
+using System.Collections.Generic;
 
 public partial class GetObject : MyWebPage
 {
@@ -179,11 +170,23 @@ ref sessioninfo) == false)
                 bSaveAs,
                 strStyle,
                 out strError);
+#if NO
+            // testing
+            {
+                nRet = -1;
+                List<string> lines = new List<string>();
+                for (int i = 0; i < 200; i++)
+                {
+                    lines.Add("line " + (i + 1).ToString());
+                }
+                strError = StringUtil.MakePathList(lines, "\r\n");
+            }
+#endif
             if (nRet == -1)
             {
                 // Response.Write(strError);
                 OpacApplication.OutputImage(Page,
-    Color.FromArgb(200, Color.DarkRed),
+    Color.FromArgb(255, Color.DarkRed),
     strError);
             }
 

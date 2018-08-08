@@ -248,6 +248,18 @@ namespace DigitalPlatform.Script
                 style);
         }
 
+        public static string BuildObjectHtmlTable(string strMARC,
+    string strRecPath,
+    XmlElement maps_container,
+    string strMarcSyntax)
+        {
+            return BuildObjectHtmlTable(strMARC,
+    strRecPath,
+    maps_container,
+    BuildObjectHtmlTableStyle.HttpUrlHitCount | BuildObjectHtmlTableStyle.Template,
+    strMarcSyntax);
+        }
+
         // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
         // 前导语 $3
         // 链接文字 $y $f
@@ -259,7 +271,8 @@ namespace DigitalPlatform.Script
         public static string BuildObjectHtmlTable(string strMARC,
             string strRecPath,
             XmlElement maps_container,
-            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount | BuildObjectHtmlTableStyle.Template)
+            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount | BuildObjectHtmlTableStyle.Template,
+            string strMarcSyntax = "unimarc")
         {
             // Debug.Assert(false, "");
 
@@ -273,7 +286,7 @@ namespace DigitalPlatform.Script
 
             text.Append("<table class='object_table'>");
             text.Append("<tr class='column_title'>");
-            text.Append("<td class='type' style='word-break:keep-all;'>名称</td>");
+            text.Append("<td class='type' style='word-break:keep-all;'>材料</td>");
             text.Append("<td class='hitcount'></td>");
             text.Append("<td class='link' style='word-break:keep-all;'>链接</td>");
             text.Append("<td class='mime' style='word-break:keep-all;'>媒体类型</td>");
@@ -331,13 +344,17 @@ namespace DigitalPlatform.Script
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
                 string strPdfUrl = "";
+                string strThumbnailUrl = "";
                 if (StringUtil.IsHttpUrl(strUri) == false)
                 {
                     // 内部对象
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
                     strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
                     if (s_q == "application/pdf")
+                    {
                         strPdfUrl = "./viewpdf.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                        strThumbnailUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri + "/page:1,format=jpeg,dpi:24");
+                    }
                 }
                 else
                 {
@@ -349,12 +366,18 @@ namespace DigitalPlatform.Script
                     }
                 }
 
-                string y = field.select("subfield[@name='y']").FirstContent;
+                string linkText = "";
+
+                if (strMarcSyntax == "unimarc")
+                    linkText = field.select("subfield[@name='2']").FirstContent;
+                else
+                    linkText = field.select("subfield[@name='y']").FirstContent;
+
                 string f = field.select("subfield[@name='f']").FirstContent;
 
                 string urlLabel = "";
-                if (string.IsNullOrEmpty(y) == false)
-                    urlLabel = y;
+                if (string.IsNullOrEmpty(linkText) == false)
+                    urlLabel = linkText;
                 else
                     urlLabel = f;
                 if (string.IsNullOrEmpty(urlLabel) == true)
@@ -374,6 +397,10 @@ namespace DigitalPlatform.Script
 
                 if (strUri.StartsWith("!error:"))
                     urlLabel += strUri;
+
+                if (string.IsNullOrEmpty(strPdfUrl) == false && string.IsNullOrEmpty(urlLabel) == false)
+                    strPdfUrl += "&title=" + HttpUtility.UrlEncode(urlLabel);
+
                 string urlTemp = "";
                 if (String.IsNullOrEmpty(strObjectUrl) == false)
                 {
@@ -382,20 +409,30 @@ namespace DigitalPlatform.Script
                     {
                         strParameters += HttpUtility.HtmlAttributeEncode(name) + "='" + HttpUtility.HtmlAttributeEncode(parameters[name] as string) + "' "; // 注意，内容里面是否有单引号？
                     }
-                    urlTemp += "<a href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
-                    urlTemp += urlLabel;
+                    urlTemp += "<a class='link' href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
+                    urlTemp += HttpUtility.HtmlEncode("下载 " + urlLabel);
                     urlTemp += "</a>";
 
                     if (string.IsNullOrEmpty(strPdfUrl) == false)
                     {
-                        urlTemp += "<a href='" + strPdfUrl + "' >";
-                        urlTemp += "在线阅读";
+#if NO
+                        // 预览 按钮
+                        urlTemp += "<br/><a href='" + strPdfUrl + "' target='_blank'>";
+                        urlTemp += HttpUtility.HtmlEncode("预览 " + urlLabel);
+                        urlTemp += "</a>";
+#endif
+
+                        // 缩略图 点按和预览按钮效果相同
+                        urlTemp += "<br/><a class='thumbnail' href='" + strPdfUrl + "' target='_blank' alt='" + HttpUtility.HtmlEncode("在线阅读 " + urlLabel) + "'>";
+                        urlTemp += "<img src='" + strThumbnailUrl + "' alt='" + HttpUtility.HtmlEncode("在线阅读 " + urlLabel) + "'></img>";
                         urlTemp += "</a>";
                     }
                 }
                 else
                     urlTemp = urlLabel;
 
+                // Different parts of the item are electronic, using subfield $3 to indicate the part (e.g., table of contents accessible in one file and an abstract in another)
+                // 意思就是，如果有多种部分是电子资源，用 $3 指明当前 856 针对的哪个部分。这时候有多个 856，每个 856 中的 $3 各不相同
                 string s_3 = field.select("subfield[@name='3']").FirstContent;
                 string s_s = field.select("subfield[@name='s']").FirstContent;
 

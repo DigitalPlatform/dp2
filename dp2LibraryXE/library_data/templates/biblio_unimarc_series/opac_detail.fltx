@@ -840,7 +840,7 @@ using DigitalPlatform.LibraryServer;
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("中图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -863,7 +863,7 @@ using DigitalPlatform.LibraryServer;
 				else
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
-				// 增加科图分类法的根查询锚点
+				// 增加科图法分类法的根查询锚点
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";

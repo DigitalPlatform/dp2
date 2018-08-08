@@ -14,6 +14,7 @@ using System.Threading;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -24,16 +25,12 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
-using DigitalPlatform.GcatClient;
-using DigitalPlatform.GcatClient.gcat_new_ws;
-
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
-using System.Web;
 
 namespace dp2Circulation
 {
@@ -654,6 +651,9 @@ namespace dp2Circulation
 
             this.orderControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
             this.orderControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderControl1_VerifyLibraryCode);
+
+            this.orderControl1.ShowMessage -= entityControl1_ShowMessage;
+            this.orderControl1.ShowMessage += entityControl1_ShowMessage;
 
             this.orderControl1.Stop = this.Progress;
             // this.orderControl1.MainForm = Program.MainForm;
@@ -13316,9 +13316,17 @@ strMARC);
                         else
                             field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
 
+#if NO
                         field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
                             + (string.IsNullOrEmpty(type.ProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(type.ProcessCommand, ";:"))
                             + "$2dp2res").Replace('$', (char)31);
+#endif
+                        field_856.IndicatorAndValue = Build856IndiAndValue(
+this.MarcSyntax,
+strID,
+strType,
+strSize,
+type.ProcessCommand);
                     }
                 }
             }
@@ -13461,7 +13469,13 @@ strMARC);
                 else
                     field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
 
-                field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                // field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                field_856.IndicatorAndValue = Build856IndiAndValue(
+    this.MarcSyntax,
+    strID,
+    strType,
+    strSize,
+    "");
             }
 
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
@@ -13473,6 +13487,39 @@ strMARC);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+#if NO
+        static string Build856IndiAndValue(
+            string strMarcSyntax,
+            string strID,
+            string strType,
+            string strSize)
+        {
+            string strAccessMethodSubfieldName = "2";
+            if (strMarcSyntax == "unimarc")
+                strAccessMethodSubfieldName = "y";
+            return ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$"+strAccessMethodSubfieldName+"dp2res").Replace('$', (char)31);
+        }
+#endif
+
+        static string Build856IndiAndValue(
+    string strMarcSyntax,
+    string strID,
+    string strType,
+    string strSize,
+    string strProcessCommand)
+        {
+            string strAccessMethodSubfieldName = "2";
+            if (strMarcSyntax == "unimarc")
+                strAccessMethodSubfieldName = "y";
+
+            string strIndicators = "72";
+            if (strMarcSyntax == "unimarc")
+                strIndicators = "7 ";
+            return (strIndicators + "$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
+                + (string.IsNullOrEmpty(strProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(strProcessCommand, ";:"))
+                + "$" + strAccessMethodSubfieldName + "dp2res").Replace('$', (char)31);
         }
 
         private void checkedComboBox_dbName_DropDown(object sender, EventArgs e)
@@ -13851,6 +13898,14 @@ Program.MainForm.DefaultFont);
                 true);
         }
 
+
+        private void TabControl_itemAndIssue_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+                return;
+            this.contextMenuStrip_itemArea.Show(this.tabControl_itemAndIssue.PointToScreen(
+                e.Location));
+        }
 
         private void contextMenuStrip_itemArea_Opening(object sender, CancelEventArgs e)
         {

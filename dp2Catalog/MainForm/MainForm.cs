@@ -302,7 +302,7 @@ namespace dp2Catalog
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
-            if (IsFirstRun == true 
+            if (IsFirstRun == true
                 && bDp2catalogXmlExist == false
                 // && this.Servers.Count == 0
                 )
@@ -953,7 +953,7 @@ string strError)
             }
         }
 
-#region 按钮事件
+        #region 按钮事件
 
         // 检索
         private void toolButton_search_Click(object sender, EventArgs e)
@@ -1347,7 +1347,7 @@ string strError)
 
         }
 
-#endregion
+        #endregion
 
 
         // 当前顶层的SearchForm
@@ -1501,7 +1501,7 @@ string strError)
             return null;
         }
 
-#region 菜单事件
+        #region 菜单事件
 
         // 打开Z39.50检索窗
         private void MenuItem_openZSearchForm_Click(object sender, EventArgs e)
@@ -2063,7 +2063,7 @@ string strError)
             OpenWindow<TestForm>();
         }
 
-#endregion
+        #endregion
 
 
         public ToolStripProgressBar ToolStripProgressBar
@@ -2324,20 +2324,22 @@ out string strError)
             if (this.IsbnSplitter != null)
                 return 0;
 
+            string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
+
             REDO:
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(Path.Combine(this.DataDir, "rangemessage.xml"));  // "\\isbn.xml"
+                this.IsbnSplitter = new IsbnSplitter(strFileName);  // "\\isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
-                strError = "装载本地 isbn 规则文件 rangemessage.xml 发生错误 :" + ex.Message;
+                strError = "装载本地 isbn 规则文件 " + strFileName + " 发生错误 :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
                     string strError1 = "";
-                    int nRet = this.DownloadDataFile("rangemessage.xml",    // "isbn.xml"
+                    int nRet = this.DownloadDataFile(Path.GetFileName(strFileName),    // "isbn.xml"
                         out strError1);
                     if (nRet == -1)
                     {
@@ -4293,7 +4295,7 @@ out string strError)
             return -1;
         }
 
-#region 序列号机制
+        #region 序列号机制
 
 #if SN
         internal void WriteSerialNumberStatusFile()
@@ -4666,7 +4668,7 @@ out string strError)
 
 #endif
 
-#endregion
+        #endregion
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
@@ -4865,7 +4867,7 @@ out string strError)
             }
         }
 
-#region dp2library 通道
+        #region dp2library 通道
 
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
@@ -5127,7 +5129,7 @@ out string strError)
             }
         }
 
-#endregion
+        #endregion
 
         private void MenuItem_editMarcoTable_Click(object sender, EventArgs e)
         {

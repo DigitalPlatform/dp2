@@ -61,24 +61,26 @@ namespace dp2rms
         {
             strError = "";
 
+            string strFileName = Path.Combine(this.DataDir, "rangemessage.xml");
+
             // 优化
             if (this.IsbnSplitter != null)
                 return 0;
 
-        REDO:
+            REDO:
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(this.DataDir + "\\isbn.xml");
+                this.IsbnSplitter = new IsbnSplitter(strFileName); // "isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
-                strError = "装载本地isbn规则文件发生错误 :" + ex.Message;
+                strError = "装载本地isbn规则文件 " + strFileName + " 时发生错误 :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
                     string strError1 = "";
-                    int nRet = this.DownloadDataFile("isbn.xml",
+                    int nRet = this.DownloadDataFile(Path.GetFileName(strFileName),
                         out strError1);
                     if (nRet == -1)
                     {
@@ -124,7 +126,7 @@ namespace dp2rms
                 if (bAutoDownload == true)
                 {
                     string strError1 = "";
-                    int nRet = this.DownloadDataFile("pinyin.xml", 
+                    int nRet = this.DownloadDataFile("pinyin.xml",
                         out strError1);
                     if (nRet == -1)
                     {
@@ -278,7 +280,7 @@ namespace dp2rms
 
         void Servers_ServerChanged(object sender, ServerChangedEventArgs e)
         {
-            foreach( Form child in this.MdiChildren )
+            foreach (Form child in this.MdiChildren)
             {
                 if (child is SearchForm)
                 {
@@ -662,7 +664,7 @@ namespace dp2rms
         }
 
         // 回调函数，保存使用过的Url
-        private void class2subjectdlg_Closed(object sender, 
+        private void class2subjectdlg_Closed(object sender,
             EventArgs e)
         {
             Class2SubjectDlg dlg = (Class2SubjectDlg)sender;
@@ -850,12 +852,12 @@ namespace dp2rms
                 }
 
                 goto CONTINUE;
-            FOUND:
+                FOUND:
 
                 if (child.GetType().Equals(type) == true)
                     return child;
 
-            CONTINUE:
+                CONTINUE:
                 hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
             }
 
@@ -1088,7 +1090,7 @@ namespace dp2rms
         private void MenuItem_downloadIsbnXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
-            DownloadDataFile("isbn.xml", out strError);
+            DownloadDataFile("rangemessage.xml", out strError);   // "isbn.xml"
             MessageBox.Show(this, strError);
 
         }
@@ -1104,10 +1106,10 @@ namespace dp2rms
 
         private void ToolStripMenuItem_searchKeyID_Click(object sender, EventArgs e)
         {
-                if (this.ActiveMdiChild is SearchForm)
-                {
-                    ((SearchForm)this.ActiveMdiChild).DoSearch(true);
-                }
+            if (this.ActiveMdiChild is SearchForm)
+            {
+                ((SearchForm)this.ActiveMdiChild).DoSearch(true);
+            }
         }
 
 

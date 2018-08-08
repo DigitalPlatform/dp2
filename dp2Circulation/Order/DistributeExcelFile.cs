@@ -436,7 +436,7 @@ procGetOrderRecord
         static string GetCopyNumber(string strCopyString)
         {
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strCopyString,
+            dp2StringUtil.ParseOldNewValue(strCopyString,
                 out string strOldCopy,
                 out string strNewCopy);
 
@@ -444,7 +444,7 @@ procGetOrderRecord
                 strOldCopy = "0";
 
             // 对 strOldCopy 进一步分解
-            return OrderDesignControl.GetCopyFromCopyString(strOldCopy);
+            return dp2StringUtil.GetCopyFromCopyString(strOldCopy);
         }
 
         static string GetState(string strXml)
@@ -473,7 +473,7 @@ procGetOrderRecord
             string strCopyString = DomUtil.GetElementText(dom.DocumentElement, "copy");
 
             // 分离 "old[new]" 内的两个值
-            OrderDesignControl.ParseOldNewValue(strCopyString,
+            dp2StringUtil.ParseOldNewValue(strCopyString,
                 out string strOldCopy,
                 out string strNewCopy);
 
@@ -481,8 +481,8 @@ procGetOrderRecord
                 strOldCopy = "0";
 
             // 对 strOldCopy 进一步分解
-            string strLeft = OrderDesignControl.GetCopyFromCopyString(strOldCopy);
-            string strRight = OrderDesignControl.GetRightFromCopyString(strOldCopy);
+            string strLeft = dp2StringUtil.GetCopyFromCopyString(strOldCopy);
+            string strRight = dp2StringUtil.GetRightFromCopyString(strOldCopy);
             if (string.IsNullOrEmpty(strRight))
                 strRight = "1"; // 默认 1
 

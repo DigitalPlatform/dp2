@@ -3,10 +3,10 @@
     <using>
   <![CDATA[
 
-// CNMARC格式图书 html 格式构造
+// CNMARC格式图书 OPAC 书目详细格式构造
 // (C)Copyright 2006-2015 数字平台(北京)软件有限责任公司
-// 最后修改时间: 2015/12/14
 
+// 修改历史:
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
 // 2014/11/5 封面图片
 // 2015/7/17 数字资源对象表格显示，采用 ScriptUtil.BuildObjectHtmlTable() 构造
@@ -14,6 +14,7 @@
 // 2015/12/14 Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
 // 2016/12/27 StringUtil.IsHttpUrl()
 // 2017/12/20 改用带有模板功能的 ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container)
+// 2018/7/26 1) 将几个分类法根查检索锚点修改为具体的分类法检索途径。不过刚安装好的时候没有科图法和人大法的检索点，如果需要请专门去配置；2)  ScriptUtil.BuildObjectHtmlTable() 增加 "unimarc" 参数。
 
 using System;
 using System.Collections.Generic;
@@ -30,8 +31,6 @@ using DigitalPlatform.Text;
 
 ]]></using>
     <ref>system.dll</ref>
-    <ref>system.web.dll</ref>
-    <ref>system.windows.forms.dll</ref>
     <ref>system.web.dll</ref>
     <ref>system.xml.dll</ref>
     <def>
@@ -928,7 +927,7 @@ using DigitalPlatform.Text;
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("中图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -952,11 +951,11 @@ using DigitalPlatform.Text;
 				else
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
-				// 增加科图分类法的根查询锚点
+				// 增加科图法分类法的根查询锚点
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("科图法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -984,7 +983,7 @@ using DigitalPlatform.Text;
         Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
-        Parent.stemp += HttpUtility.UrlEncode("分类号");
+        Parent.stemp += HttpUtility.UrlEncode("人大法分类号");
         Parent.stemp += "&matchstyle=left&word=";
         Parent.stemp += HttpUtility.UrlEncode(this.Content);
         Parent.stemp += "'>";
@@ -1214,136 +1213,7 @@ using DigitalPlatform.Text;
         }
       </end>
         </field>
-      <!-- 显示多媒体信息 -->
-      <!--
-      <field name="856">
-        <![CDATA[
-        if (this.DupCount > 1)
-        {	
-        string s0 = "";        
-        Root.urlNum = Root.urlNum + 1;	// 通过全局变量url856的递增来用特殊字符给出URL的序号
-        s0 = Convert.ToString(Root.urlNum);
 
-	Root.s856 += "<br/>" + s0 + ". ";
-        }
-        else
-        {
-      		Root.s856 += "1. ";
-        }
-
-	    ]]>
-        <def>
-          string subfield_3 = "";
-          string subfield_u = "";
-
-          string url_3;
-          string url_u;
-          string url_y;
-          string url_f;
-          string url_q;
-          string url_8;
-          string url_s;
-          string url_z;
-          string urlLabel;
-          string urlTemp;
-        </def>
-        <subfield name="3">
-          <![CDATA[
-              Parent.subfield_3 = this.Content;
-
-        // 前导语
-	if (this.Content != "")
-		Parent.url_3 += this.Content + ": ";
-    
-        ]]>
-        </subfield>
-        <subfield name="y">
-          <![CDATA[
-        // 链接文字
-	if (this.Content != "")
-		Parent.url_y += this.Content;
-        ]]>
-        </subfield>
-        <subfield name="f">
-          <![CDATA[
-        // 链接文字
-	if (this.Content != "")
-		Parent.url_f += this.Content;
-        ]]>
-        </subfield>
-        <subfield name="u">
-          <![CDATA[
-  
-      Parent.subfield_u = this.Content;
-
-        // 链接
-	if (this.Content != "")
-		Parent.url_u += this.Content;
-        ]]>
-        </subfield>
-        <subfield name="q">
-          <![CDATA[
-        // 格式类型
-	if (this.Content != "")
-		Parent.url_q += ", " + this.Content;
-        ]]>
-        </subfield>
-        <subfield name="8">
-          <![CDATA[
-        // 对象ID
-	if (this.Content != "")
-		Parent.url_8 += this.Content;
-        ]]>
-        </subfield>
-        <subfield name="s">
-          <![CDATA[
-        // 对象尺寸
-	if (this.Content != "")
-		Parent.url_s += ", " + this.Content;
-        ]]>
-        </subfield>
-        <subfield name="z">
-          <![CDATA[
-        // 公开注释
-	if (this.Content != "")
-		Parent.url_z += " (" + this.Content + ") ";
-        ]]>
-        </subfield>
-        <end>
-          <![CDATA[
-          
-              string strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(OpacApplication.MakeObjectUrl(Host.RecPath, subfield_u));
-
-              if (subfield_3.Replace(" ", "").ToLower() == "coverimage")
-              {
-                  if (string.IsNullOrEmpty(Root.coverimage_url) == true && string.IsNullOrEmpty(subfield_u) == false)
-                    Root.coverimage_url = subfield_u;
-              }
-            
-	if (url_y != "")
-		urlLabel = url_y;
-	else
-		urlLabel = url_f;
-    
-    if (string.IsNullOrEmpty(urlLabel) == true)
-      urlLabel = strObjectUrl;
-
-	if (String.IsNullOrEmpty(strObjectUrl) == false)
-	{
-        	urlTemp += "<a href='" + strObjectUrl + "'>";
-        	urlTemp += urlLabel;
-        	urlTemp += "</a>";
-	}
-
-        Root.s856 += url_3;
-        Root.s856 += urlTemp;
-        Root.s856 += url_q;
-        Root.s856 += url_s;
-        Root.s856 += url_z;
-        ]]>
-        </end>
-      </field>
-      -->
         <!-- 905 馆藏信息 -->
         <field name="905">
             <subfield name="b">
@@ -1415,7 +1285,7 @@ using DigitalPlatform.Text;
 		// Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath);
 
 		XmlElement container = Host.App.WebUiDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
-		Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container);
+		Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath, container, "unimarc");
 
 		]]></end>
     </record>
