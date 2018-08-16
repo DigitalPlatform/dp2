@@ -816,10 +816,80 @@ namespace dp2Circulation
             throw new Exception(strError);
         }
 
+        public override int DoSaveItems(LibraryChannel channel)
+        {
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.4") < 0)
+            {
+                // 检查订购记录里面是否含有 fixedPrice 和 discount 元素，dp2library 是否在 3.4 版以上
+                if (ExistingFixedPrice(out string strError) != 0)
+                {
+                    MessageBox.Show(this, "保存操作无法进行。订购记录中含有码洋或折扣字段信息，必须在 dp2library 服务器 3.4 版以上才能无损保存。请系统管理员尽快升级 dp2library 到最新版本");
+                    return -1;
+                }
+            }
+            return base.DoSaveItems(channel);
+        }
+
+        // 检查即将保存的订购记录里面是否有 fixedPrice 和 discount 元素
+        // return:
+        //      -1  检查过程出错
+        //      0   不存在
+        //      1   存在
+        int ExistingFixedPrice(
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            Debug.Assert(this.Items != null, "");
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            foreach (OrderItem bookitem in this.Items)
+            {
+                if (bookitem.ItemDisplayState == ItemDisplayState.Normal)
+                    continue;
+
+                if (bookitem.ItemDisplayState == ItemDisplayState.Deleted)
+                    continue;
+
+                nRet = bookitem.BuildRecord(
+                true,   // 要检查 Parent 成员
+                out string strXml,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strXml);
+                }
+                catch(Exception ex)
+                {
+                    strError = "订购记录装入 XMLDOM 失败: " + ex.Message;
+                    return -1;
+                }
+
+                string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement, "fixedPrice");
+                string strDiscount = DomUtil.GetElementText(dom.DocumentElement, "discount");
+
+                if (string.IsNullOrEmpty(strFixedPrice) == false
+                    || string.IsNullOrEmpty(strDiscount) == false)
+                {
+                    strError = "订购记录中存在 fixedPrice(码洋) 或者 discount(折扣) 元素";
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+
         // 根据XML记录恢复一些不重要的其他字段值
         int RestoreOtherFields(string strXml,
-            OrderItem item,
-            out string strError)
+        OrderItem item,
+        out string strError)
         {
             strError = "";
 
