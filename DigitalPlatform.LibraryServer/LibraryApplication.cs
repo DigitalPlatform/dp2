@@ -167,7 +167,8 @@ namespace DigitalPlatform.LibraryServer
         //      3.1 (2018/7/1) GetSearchResult() API 在返回 -1 的时候，ErrorCode 的错误码不再是 CommonError，而是具体的错误码值。比如 NotFound 表示结果集不存在
         //      3.2 (2018/7/17) GetSystemParameter() API 增加了 system/expire 获取 dp2library 失效日期的功能
         //      3.3 (2018/7/28) SetBiblioInfo() API 增加了格式 marc(或 marcquery)，机内格式 MARC 字符串
-        public static string Version = "3.3";
+        //      3.4 (2018/8/7) SetOrders() API 所保存的订购记录里面增加了 fixedPrice 和 discount 元素。早先版本如果保存时候提交这两个元素，会被 dp2library 过滤掉
+        public static string Version = "3.4";
 
         internal static DateTime _expire = new DateTime(2018, 9, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
