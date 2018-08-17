@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -117,7 +118,11 @@ namespace GcatLite
 
             _channel.ServerUrl = this.textBox_url.Text;
 
+#if DYNAMIC
+            dynamic questions = null;
+#else
             List<Question> questions = new List<Question>();
+#endif
 
             EnableControls(false);
             try
@@ -132,7 +137,7 @@ namespace GcatLite
                 //      -2  strID验证失败
                 //      -1  出错
                 //      0   成功
-                LibraryServerResult result = _channel.GetAuthorNumber(
+                var result = _channel.GetAuthorNumber(
     this.textBox_author.Text,
     this.checkBox_selectPinyin.Checked,
     this.checkBox_selectEntry.Checked,
@@ -142,7 +147,13 @@ namespace GcatLite
     out string debugInfo);
                 if (result.Value == -1)
                 {
-                    if (result.ErrorCode == ErrorCode.NotLogin)
+                    if (result.ErrorCode ==
+#if DYNAMIC
+                        6
+#else
+                        ErrorCode.NotLogin
+#endif
+                        )
                     {
                         // 调用 登录 API
                         // 目前用 public 登录即可
@@ -169,7 +180,9 @@ namespace GcatLite
 
                     string strTitle = strError;
 
+#if !DYNAMIC
                     Debug.Assert(questions.Count > 0, "");
+#endif
 
                     string strQuestion = questions[questions.Count - 1].Text;
 

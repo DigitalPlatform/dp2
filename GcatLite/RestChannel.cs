@@ -3,7 +3,17 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
+
+// dynamic deserialize JSONG method:
+// https://stackoverflow.com/questions/3142495/deserialize-json-into-c-sharp-dynamic-object
+/***
+Another way using Newtonsoft.Json:
+dynamic stuff = Newtonsoft.Json.JsonConvert.DeserializeObject("{ color: 'red', value: 5 }");
+string color = stuff.color;
+int value = stuff.value;
+***/
 
 namespace GcatLite
 {
@@ -16,7 +26,7 @@ namespace GcatLite
 
         const string ContentTypeValue = "application/json; charset=utf-8";
 
-        public RestChannel(string url) : base ()
+        public RestChannel(string url) : base()
         {
             this.ServerUrl = url;
         }
@@ -27,7 +37,13 @@ namespace GcatLite
                 this.BeginLogout();
         }
 
-        public LibraryServerResult Login(string userName,
+        public
+#if DYNAMIC
+            dynamic
+#else
+            LibraryServerResult
+#endif
+            Login(string userName,
 string password,
 string parameters)
         {
@@ -47,7 +63,11 @@ string parameters)
                 "POST",
                 baData);
             string strResult = Encoding.UTF8.GetString(result);
+#if DYNAMIC
+            dynamic response = JsonConvert.DeserializeObject(strResult);
+#else
             var response = JsonConvert.DeserializeObject<LoginResponse>(strResult);
+#endif
             return response.LoginResult;
         }
 
@@ -58,12 +78,22 @@ string parameters)
         //      -2  strID验证失败
         //      -1  出错
         //      0   成功
-        public LibraryServerResult GetAuthorNumber(
+        public
+#if DYNAMIC
+            dynamic
+#else
+            LibraryServerResult
+#endif
+            GetAuthorNumber(
             string author,
             bool selectPinyin,
             bool selectEntry,
             bool outputDebugInfo,
+#if DYNAMIC
+            ref dynamic questions_param,
+#else
             ref List<Question> questions_param,
+#endif
             out string number,
             out string debugInfo)
         {
@@ -90,8 +120,11 @@ string parameters)
                 baData);
 
             string strResult = Encoding.UTF8.GetString(result);
-            // var response = Deserialize<GetAuthorNumberResponse>(strResult);
+#if DYNAMIC
+            dynamic response = JsonConvert.DeserializeObject(strResult);
+#else
             var response = JsonConvert.DeserializeObject<GetAuthorNumberResponse>(strResult);
+#endif
             number = response.strNumber;
             debugInfo = response.strDebugInfo;
             questions_param = response.questions;
@@ -111,7 +144,7 @@ string parameters)
             };
             byte[] baData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
 
-            Task<byte []> task = this.UploadDataTaskAsync(GetRestfulApiUrl(this.ServerUrl, "Logout"),
+            Task<byte[]> task = this.UploadDataTaskAsync(GetRestfulApiUrl(this.ServerUrl, "Logout"),
                 "POST",
                 baData);
 #if NO
@@ -122,7 +155,13 @@ string parameters)
         }
 
         // 登出
-        public LibraryServerResult Logout()
+        public
+#if DYNAMIC
+            dynamic
+#else
+            LibraryServerResult
+#endif
+            Logout()
         {
             if (string.IsNullOrEmpty(this.ServerUrl))
                 throw new ArgumentException("ServerUrl 尚未设置");
@@ -137,7 +176,11 @@ string parameters)
                 "POST",
                 baData);
             string strResult = Encoding.UTF8.GetString(result);
+#if DYNAMIC
+            dynamic response = JsonConvert.DeserializeObject(strResult);
+#else
             var response = JsonConvert.DeserializeObject<LogoutResponse>(strResult);
+#endif
             return response.LogoutResult;
         }
 
@@ -183,8 +226,9 @@ string parameters)
         }
     }
 
-#region 数据结构
+    #region 数据结构
 
+#if !DYNAMIC
     // API GetAuthorNumber() 的响应包结构
     public class GetAuthorNumberResponse
     {
@@ -269,6 +313,7 @@ string parameters)
         RequestTimeOut = 112,
         TimestampMismatch = 113,
     }
+#endif
 
 #endregion
 }
