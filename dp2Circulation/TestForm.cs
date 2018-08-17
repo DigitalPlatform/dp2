@@ -550,6 +550,7 @@ namespace dp2Circulation
 
         private void button_gcatClient_getNumber_Click(object sender, EventArgs e)
         {
+#if OLD_CODE
             string strError = "";
             string strDebugInfo = "";
             string strNumber = "";
@@ -578,6 +579,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, strNumber);
 
             this.textBox_gcatClient_debugInfo.Text = strDebugInfo;
+#endif
         }
 
         private void button_font_htmlInputDialog_Click(object sender, EventArgs e)
@@ -709,6 +711,7 @@ namespace dp2Circulation
 
         private void button_gcatClient_getPinyin_Click(object sender, EventArgs e)
         {
+#if OLD_CODE
             string strError = "";
             string strPinyinXml = "";
 
@@ -729,6 +732,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, strError);
             else
                 MessageBox.Show(this, strPinyinXml);
+#endif
         }
 
         private void button_xml_getXmlFilename_Click(object sender, EventArgs e)
@@ -1149,7 +1153,7 @@ ref bHideMessageBox);
             spreadsheetDocument.Close();
         }
 
-        #region text excel
+#region text excel
 
         public static bool UpdateValue(
             WorkbookPart wbPart,
@@ -1330,7 +1334,7 @@ ref bHideMessageBox);
             }
             return result;
         }
-        #endregion
+#endregion
 
         private void button_encoding_detectEncoding_Click(object sender, EventArgs e)
         {

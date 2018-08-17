@@ -212,10 +212,12 @@ namespace dp2Circulation
         /// </summary>
         public EntityForm DetailForm = null;
 
+#if OLD_CODE
         /// <summary>
         /// GCAT 通讯通道
         /// </summary>
         DigitalPlatform.GcatClient.Channel GcatChannel = null;
+#endif
 
         /// <summary>
         /// 构造函数
@@ -229,8 +231,10 @@ namespace dp2Circulation
 
         public void Dispose()
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+#endif
 
             // 2017/4/23
             if (this.DetailForm != null)
@@ -1030,8 +1034,10 @@ namespace dp2Circulation
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Abort();
+#endif
         }
 
         bool bMarcEditorFocued = false;
@@ -1321,6 +1327,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
                 strGcatWebServiceUrl = "http://dp2003.com/dp2library/";  // "http://dp2003.com/gcatserver/"    //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
+#if OLD_CODE
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
 
@@ -1437,7 +1444,9 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
-            else // dp2library 服务器
+            else 
+#endif
+            // dp2library 服务器
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -1985,7 +1994,7 @@ namespace dp2Circulation
             }
         }
 #if NO
-        #region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
+#region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
 
         // 获得种次号以外的其他区分号，主要是著者号
         // return:
@@ -2229,7 +2238,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -3032,7 +3041,7 @@ namespace dp2Circulation
 
 #if SHITOUTANG
 
-        #region 石头汤著者号
+#region 石头汤著者号
 
         static string FirstContent(MarcNodeList nodes)
         {
@@ -3427,7 +3436,7 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-        #endregion
+#endregion
 
 #endif
 

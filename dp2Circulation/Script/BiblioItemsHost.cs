@@ -202,14 +202,15 @@ namespace dp2Circulation
         }
 #endif
 
-        #endregion
+#endregion
 
 
-
+#if OLD_CODE
         /// <summary>
         /// GCAT 通讯通道
         /// </summary>
         DigitalPlatform.GcatClient.Channel GcatChannel = null;
+#endif
 
         /// <summary>
         /// 构造函数
@@ -221,8 +222,10 @@ namespace dp2Circulation
 
         public void Dispose()
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+#endif
         }
 
         /// <summary>
@@ -1479,7 +1482,7 @@ namespace dp2Circulation
 
 #if SHITOUTANG
 
-        #region 石头汤著者号
+#region 石头汤著者号
 
         static string FirstContent(MarcNodeList nodes)
         {
@@ -1821,16 +1824,18 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-        #endregion
+#endregion
 
 #endif
 
-        #region GCAT
+#region GCAT
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Abort();
+#endif
         }
 
         /// <summary>
@@ -1887,6 +1892,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
                 strGcatWebServiceUrl = "http://dp2003.com/gcatserver/";  //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
+#if OLD_CODE
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
                 if (this.GcatChannel == null)
@@ -2005,7 +2011,9 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
-            else // dp2library 服务器
+            else 
+#endif
+            // dp2library 服务器
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -2195,7 +2203,7 @@ namespace dp2Circulation
             Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得字叫号码著者号。本函数可以被脚本重载
