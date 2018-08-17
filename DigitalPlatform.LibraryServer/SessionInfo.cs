@@ -1185,9 +1185,12 @@ SetStartEventArgs e);
         // 特殊的，需要放开通道数限制到 150 个的那些 IP 地址
         public List<string> SpecialIpList { get; set; }
 
+        // parameters:
+        //      bAutoCreate 是否自动创建 SessionInfo 对象? true 表示自动创建; false 表示不自动创建(只返回已存在的 SessionInfo 对象)
         public SessionInfo PrepareSession(LibraryApplication app,
             string strSessionID,
-            List<RemoteAddress> address_list
+            List<RemoteAddress> address_list,
+            bool bAutoCreate = true
             /*string strIP,
             string strVia*/)
         {
@@ -1221,6 +1224,12 @@ SetStartEventArgs e);
                     sessioninfo.SessionID = strSessionID;
                 }
                 return sessioninfo;
+            }
+
+            if (bAutoCreate == false)
+            {
+                // Debug.WriteLine("session '" + strSessionID + "' not found");
+                return null;
             }
 
             if (this.Count > _nMaxCount)

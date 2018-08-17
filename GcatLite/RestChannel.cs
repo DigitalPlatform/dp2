@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
-
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace GcatLite
@@ -10,20 +10,31 @@ namespace GcatLite
     /// <summary>
     /// Restful 通讯的通道。在通讯过程中需要保持使用同一个对象，它自然能持久化 CookiesContainer，保证有状态通讯
     /// </summary>
-    public class RestChannel : CookieAwareWebClient
+    public class RestChannel : CookieAwareWebClient// , IDisposable
     {
         public string ServerUrl { get; set; }
+
+        const string ContentTypeValue = "application/json; charset=utf-8";
 
         public RestChannel(string url) : base ()
         {
             this.ServerUrl = url;
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (string.IsNullOrEmpty(this.ServerUrl) == false)
+                this.BeginLogout();
+        }
+
         public LibraryServerResult Login(string userName,
 string password,
 string parameters)
         {
-            this.Headers["Content-type"] = "application/json; charset=utf-8";
+            if (string.IsNullOrEmpty(this.ServerUrl))
+                throw new ArgumentException("ServerUrl 尚未设置");
+
+            this.Headers["Content-type"] = ContentTypeValue;
             var request = new
             {
                 strUserName = userName,
@@ -59,7 +70,10 @@ string parameters)
             number = "";
             debugInfo = "";
 
-            this.Headers["Content-type"] = "application/json; charset=utf-8";
+            if (string.IsNullOrEmpty(this.ServerUrl))
+                throw new ArgumentException("ServerUrl 尚未设置");
+
+            this.Headers["Content-type"] = ContentTypeValue;
             var request = new
             {
                 strAuthor = author,
@@ -85,8 +99,53 @@ string parameters)
             return response.GetAuthorNumberResult;
         }
 
+        // 登出。不等待返回值
+        public void BeginLogout()
+        {
+            if (string.IsNullOrEmpty(this.ServerUrl))
+                throw new ArgumentException("ServerUrl 尚未设置");
+
+            this.Headers["Content-type"] = ContentTypeValue;
+            var request = new
+            {
+            };
+            byte[] baData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
+
+            Task<byte []> task = this.UploadDataTaskAsync(GetRestfulApiUrl(this.ServerUrl, "Logout"),
+                "POST",
+                baData);
+#if NO
+            string strResult = Encoding.UTF8.GetString(result);
+            var response = JsonConvert.DeserializeObject<LogoutResponse>(strResult);
+            return response.LogoutResult;
+#endif
+        }
+
+        // 登出
+        public LibraryServerResult Logout()
+        {
+            if (string.IsNullOrEmpty(this.ServerUrl))
+                throw new ArgumentException("ServerUrl 尚未设置");
+
+            this.Headers["Content-type"] = ContentTypeValue;
+            var request = new
+            {
+            };
+            byte[] baData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(request));
+
+            byte[] result = this.UploadData(GetRestfulApiUrl(this.ServerUrl, "Logout"),
+                "POST",
+                baData);
+            string strResult = Encoding.UTF8.GetString(result);
+            var response = JsonConvert.DeserializeObject<LogoutResponse>(strResult);
+            return response.LogoutResult;
+        }
+
         static string GetRestfulApiUrl(string url, string strMethod)
         {
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentException("url 不应为 null");
+
             if (string.IsNullOrEmpty(url) == true)
                 return strMethod;
 
@@ -124,7 +183,7 @@ string parameters)
         }
     }
 
-    #region 数据结构
+#region 数据结构
 
     // API GetAuthorNumber() 的响应包结构
     public class GetAuthorNumberResponse
@@ -143,6 +202,12 @@ string parameters)
         public string strRights { get; set; }
 
         public string strLibraryCode { get; set; }
+    }
+
+    // API Logout() 的响应包结构
+    public class LogoutResponse
+    {
+        public LibraryServerResult LogoutResult { get; set; }
     }
 
     // 需要前端回答的问题
@@ -205,5 +270,5 @@ string parameters)
         TimestampMismatch = 113,
     }
 
-    #endregion
+#endregion
 }
