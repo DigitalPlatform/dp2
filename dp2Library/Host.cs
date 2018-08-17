@@ -2,10 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
@@ -22,6 +19,7 @@ using System.IdentityModel.Selectors;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters;
 
 using Microsoft.Win32;
 
@@ -29,7 +27,6 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Runtime.Serialization.Formatters;
 
 namespace dp2Library
 {

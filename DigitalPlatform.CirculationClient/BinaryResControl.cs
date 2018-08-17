@@ -1018,12 +1018,11 @@ bool bChanged)
 
             foreach (string filename in expanded_filenames)
             {
-                ListViewItem item = null;
                 int nRet = this.AppendNewItem(
     filename,
     strUsage,
     "",
-    out item,
+    out ListViewItem item,
     out strError);
                 if (nRet == -1)
                     return -1;

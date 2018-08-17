@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -14,13 +12,10 @@ using System.Resources;
 using System.Globalization;
 
 using DigitalPlatform.Xml;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.OPAC.Server;
-//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 
@@ -319,7 +314,7 @@ namespace DigitalPlatform.OPAC.Web
 
             // this.Page.Response.Redirect(this.Page.Request.RawUrl, true);
             return;
-        ERROR1:
+            ERROR1:
             this.SetDebugInfo("errorinfo", strError);
         }
 
@@ -364,7 +359,7 @@ namespace DigitalPlatform.OPAC.Web
                         channel.GetCommentInfo(
     null,
     "@path:" + strCommentRecPath,
-                        // null,
+    // null,
     "xml", // strResultType
     out strOldXml,
     out strOutputPath,
@@ -436,7 +431,7 @@ namespace DigitalPlatform.OPAC.Web
                 sessioninfo.ReturnChannel(channel);
             }
 
-        END1:
+            END1:
             // 修改评注记录后，更新栏目存储结构
             // parameters:
             //      strAction   动作。change/delete/new
@@ -455,7 +450,7 @@ namespace DigitalPlatform.OPAC.Web
                 goto ERROR1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -559,7 +554,6 @@ namespace DigitalPlatform.OPAC.Web
                 this.WantFocus(this, e1);
             }
         }
-
 
         void CreateInfoLine(PlaceHolder line)
         {
@@ -732,11 +726,9 @@ string strText)
             edit_holder.ID = "edit_holder";
             line.Controls.Add(edit_holder);
 
-
             edit_holder.Controls.Add(new LiteralControl("<table class='edit'>"));
 
             string strAnchor = "<a name='newreview'></a>";
-
 
             // 编辑区域中上部的容器。上部，不包含状态部分和下面的信息、按钮
             PlaceHolder edit_up_holder = new PlaceHolder();
@@ -960,8 +952,6 @@ string strText)
 
             edit_holder.Controls.Add(new LiteralControl("</td></tr>"));
 
-
-
             edit_holder.Controls.Add(new LiteralControl("</table>"));
 
             line.Controls.Add(new LiteralControl("</div>"));
@@ -1149,7 +1139,7 @@ string strText)
                     channel.GetCommentInfo(
     null,
     "@path:" + strCommentRecPath,
-                    // null,
+    // null,
     "xml", // strResultType
     out strOldXml,
     out strOutputPath,
@@ -1283,7 +1273,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1326,7 +1316,7 @@ out strError);
                 this.Page.Response.Redirect("./book.aspx?commentrecpath=" + HttpUtility.UrlEncode(this.RecPath) + "#active", true);
             }
             return;
-        ERROR1:
+            ERROR1:
             this.SetDebugInfo("errorinfo", strError);
         }
 
@@ -1474,7 +1464,7 @@ out strError);
                         channel.GetCommentInfo(
     null,
     "@path:" + strCommentRecPath,
-                        // null,
+    // null,
     "xml", // strResultType
     out strOldXml,
     out strOutputPath,
@@ -1764,7 +1754,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2909,7 +2899,7 @@ string strWrapperClass)
                 if (((string.IsNullOrEmpty(sessioninfo.UserID) == false
                     && strOriginCreator == sessioninfo.UserID)    // 创建者本人
                     || bManager == true)    // 管理者
-                    /*&& this.Active == true*/)
+                                            /*&& this.Active == true*/)
                     bChangable = true;
                 else
                     bChangable = false;
@@ -3029,7 +3019,7 @@ string strWrapperClass)
                     channel.GetCommentInfo(
     null,
     "@path:" + strRecPath,
-                    // null,
+    // null,
     "xml", // strResultType
     out strXml,
     out strOutputPath,
@@ -3144,7 +3134,7 @@ string strWrapperClass)
 
             base.Render(writer);
             return;
-        ERROR1:
+            ERROR1:
             this.SetDebugInfo("errorinfo", strError);
             base.Render(writer);
         }

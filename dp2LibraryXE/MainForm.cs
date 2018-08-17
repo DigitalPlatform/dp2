@@ -1840,9 +1840,8 @@ http://github.com/digitalplatform/dp2"
                 string strErrorText = "";
                 Task task = Task.Factory.StartNew(() =>
                 {
-                    string strError1 = "";
                     // 创建默认的几个数据库
-                    nRet = CreateDefaultDatabases(out strError1);
+                    nRet = CreateDefaultDatabases(out string strError1);
                     if (nRet == -1)
                     {
                         strErrorText = "创建数据库时出错: " + strError1;
@@ -1863,7 +1862,6 @@ TaskScheduler.Default);
                     return -1;
                 }
             }
-
 
             return 1;
         }

@@ -4102,6 +4102,14 @@ out strError);
 
             List<string> errors = new List<string>();
 
+            // 2018/8/16
+            string strPublishTime = DomUtil.GetElementText(dom.DocumentElement, "publishTime");
+            if (string.IsNullOrEmpty(strPublishTime))
+            {
+                strError = "出版日期字段为空";
+                errors.Add(strError);
+            }
+
             List<string> refids = new List<string>();   // 内嵌订购记录的 refid
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
@@ -4217,6 +4225,7 @@ out strError);
                 strError = StringUtil.MakePathList(errors, "; ");
                 return -1;
             }
+
             return 0;
         }
 

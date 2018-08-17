@@ -2540,6 +2540,22 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             // int nRet = 0;
 
+            List<string> errors = new List<string>();
+
+            // 2018/8/16
+            string strPublishTime = DomUtil.GetElementText(itemdom.DocumentElement, "publishTime");
+            if (string.IsNullOrEmpty(strPublishTime))
+            {
+                strError = "出版日期字段为空";
+                errors.Add(strError);
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
+
             return 0;
         }
 

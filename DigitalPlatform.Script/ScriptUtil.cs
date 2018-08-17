@@ -410,7 +410,9 @@ namespace DigitalPlatform.Script
                         strParameters += HttpUtility.HtmlAttributeEncode(name) + "='" + HttpUtility.HtmlAttributeEncode(parameters[name] as string) + "' "; // 注意，内容里面是否有单引号？
                     }
                     urlTemp += "<a class='link' href='" + strObjectUrl + "' " + strParameters.Trim() + " >";
-                    urlTemp += HttpUtility.HtmlEncode("下载 " + urlLabel);
+                    urlTemp += HttpUtility.HtmlEncode(
+                        (string.IsNullOrEmpty(strSaveAs) == false ? "下载 " : "")
+                        + urlLabel);
                     urlTemp += "</a>";
 
                     if (string.IsNullOrEmpty(strPdfUrl) == false)

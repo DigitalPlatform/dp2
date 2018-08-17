@@ -4568,7 +4568,7 @@ namespace dp2Library
                     if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息(GetItemInfo()被拒绝。不具备 getcommentinfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11865,8 +11865,6 @@ Stack:
                 if (string.IsNullOrEmpty(strResPath) == false
     && strResPath[0] == '!')
                 {
-                    string strFilePath = "";
-                    string strLibraryCode = "";
 
                     // 检查用户使用 GetRes API 的权限
                     // return:
@@ -11878,8 +11876,8 @@ Stack:
                         sessioninfo.LibraryCodeList,
                         sessioninfo.RightsOrigin,
                         strResPath,
-                        out strLibraryCode,
-                        out strFilePath,
+                        out string strLibraryCode,
+                        out string strFilePath,
                         out strError);
                     if (nRet == 0)
                     {
@@ -12785,7 +12783,8 @@ Stack:
                 if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                    // result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                    result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14260,6 +14259,7 @@ out strError);
         //		strNumber	返回号码
         //		strError	出错信息
         // return:
+        // result.Value:
         //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
         //		-3	需要回答问题
         //      -2  strID验证失败
