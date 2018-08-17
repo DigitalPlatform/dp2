@@ -22,7 +22,8 @@ namespace DigitalPlatform.GcatClient
 		public bool Cancel = false;
 	}
 
-	public class Channel : IDisposable
+#if OLD_CODE
+    public class Channel : IDisposable
 	{
 		public string Url = "";
 
@@ -562,4 +563,6 @@ namespace DigitalPlatform.GcatClient
         }
 
 	}
+
+#endif
 }

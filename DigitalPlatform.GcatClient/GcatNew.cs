@@ -13,6 +13,7 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.GcatClient
 {
+#if OLD_CODE
     public class GcatNew
     {
         public static GcatServiceClient CreateChannel(string strUrl)
@@ -518,4 +519,6 @@ out string strError)
         }
 
     }
+
+#endif
 }
