@@ -11,15 +11,14 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Catalog
 {
@@ -729,6 +728,7 @@ namespace dp2Catalog
             return 1;
         }
 
+#if OLD_CODE
         // GCAT通道登录 旧的方式
         public void gcat_channel_BeforeLogin(object sender,
             DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
@@ -782,6 +782,7 @@ namespace dp2Catalog
             this.DetailForm.MainForm.ParamTable["author_number_account_username"] = strUserName;
             this.DetailForm.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
         void DoGcatStop(object sender, StopEventArgs e)
         {

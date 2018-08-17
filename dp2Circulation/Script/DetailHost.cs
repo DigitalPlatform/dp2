@@ -18,7 +18,6 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
@@ -4378,6 +4377,7 @@ chi	中文	如果是中文，则为空。
             }
         }
 
+#if OLD_CODE
         // GCAT通道登录
         internal void gcat_channel_BeforeLogin(object sender,
             DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
@@ -4431,6 +4431,7 @@ chi	中文	如果是中文，则为空。
             Program.MainForm.ParamTable["author_number_account_username"] = strUserName;
             Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
         /// <summary>
         /// 通过资源 ID 找到对应的 856 字段

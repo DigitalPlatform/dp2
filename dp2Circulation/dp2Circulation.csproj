@@ -21,7 +21,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -2939,10 +2939,6 @@
     <ProjectReference Include="..\DigitalPlatform.EasyMarc\DigitalPlatform.EasyMarc.csproj">
       <Project>{0413F979-C770-4AB0-886E-4B2BE2FB4F8C}</Project>
       <Name>DigitalPlatform.EasyMarc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
-      <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
-      <Name>DigitalPlatform.GcatClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
       <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>

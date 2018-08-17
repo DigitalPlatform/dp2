@@ -21,8 +21,9 @@ using System.Web;
 using System.Reflection;
 using System.Drawing.Text;
 using System.Speech.Synthesis;
-using System.Security.Permissions;
 using System.Threading.Tasks;
+
+using log4net;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -33,15 +34,11 @@ using DigitalPlatform.Script;
 using DigitalPlatform.IO;   // DateTimeUtil
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.GcatClient.gcat_new_ws;
-using DigitalPlatform.GcatClient;
-using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using log4net;
 
 namespace dp2Circulation
 {
