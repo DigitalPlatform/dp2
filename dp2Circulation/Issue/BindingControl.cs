@@ -1661,11 +1661,19 @@ namespace dp2Circulation
 
                 this.Issues.Add(issue);
 
-                nRet = issue.InitialLoadItems(issue.PublishTime,
-                    out strError);
-                if (nRet == -1)
+                if (string.IsNullOrEmpty(issue.PublishTime) == false)
                 {
-                    strError = "CreateIssues() InitialLoadItems() error: " + strError;
+                    nRet = issue.InitialLoadItems(issue.PublishTime,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "CreateIssues() InitialLoadItems() error: " + strError;
+                        return -1;
+                    }
+                }
+                else
+                {
+                    strError = "数据错误。期记录 (参考ID 为 '" + issue.RefID + "') 中出版日期字段不应为空";
                     return -1;
                 }
             }
@@ -15946,7 +15954,7 @@ Color.FromArgb(100, color)
             }
         }
 
-#endregion
+        #endregion
 
         protected override void OnPaint(PaintEventArgs pe)
         {

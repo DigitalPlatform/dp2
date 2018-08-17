@@ -5877,6 +5877,12 @@ rectFrame);
 
             Debug.Assert(this.Container != null, "");
 
+            if (string.IsNullOrEmpty(strPublishTime))
+            {
+                strError = "InitialLoadItems() 调用参数。strPublishTime 不应为空";
+                return -1;
+            }
+
             Debug.Assert(String.IsNullOrEmpty(strPublishTime) == false, "");
 
             // 2010/9/21 add

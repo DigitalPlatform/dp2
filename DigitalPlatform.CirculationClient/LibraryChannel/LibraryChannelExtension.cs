@@ -134,7 +134,7 @@ namespace DigitalPlatform.CirculationClient
 stop,
 strResPath,
 null, // strClientFilePath,
-0,
+-1, // 0, // 0 是 bug，会导致清除原有对象内容 2018/8/13
 strMetadata,
 "",
 timestamp,

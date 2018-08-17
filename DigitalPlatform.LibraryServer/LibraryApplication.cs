@@ -5252,7 +5252,7 @@ namespace DigitalPlatform.LibraryServer
             XmlElement node = root.SelectSingleNode("account[@name='" + strUserID + "']") as XmlElement;
             if (node == null)
             {
-                strError = "用户 '" + strUserID + "' 不存在";
+                strError = "用户 '" + strUserID + "' 不存在 (5)";
                 return 0;
             }
 
@@ -14703,10 +14703,14 @@ strLibraryCode);    // 读者所在的馆代码
                     if (strObject == "object")
                     {
                         string strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+
+                        string strPartCmd = "";
+                        if (string.IsNullOrEmpty(strPath) == false)
+                            strPartCmd = strPath;
+
                         // 根据 ID 得到权限定义进行判断
                         string strXmlRecordPath = strDbName + "/" + strRecordID;
 
-                        string strObjectRights = "";
                         // 获得对象的 rights 属性
                         // 需要先获得元数据 XML，然后从中得到 file 元素的 rights 属性
                         // return:
@@ -14717,26 +14721,49 @@ strLibraryCode);    // 读者所在的馆代码
             sessioninfo,
             strXmlRecordPath,
             strObjectID,
-            out strObjectRights,
+            out string strObjectRights,
             out strError);
                         if (nRet == -1)
                             return -1;
                         if (nRet == 0)
-                            return 1;   // TODO: 此时是否允许访问?
+                            goto ALLOW_ACCESS;   // TODO: 此时是否允许访问?
+
+#if NO
+                        // 2018/8/12
+                        if (StringUtil.IsInList("objectRights", this.Function) == false)
+                            goto ALLOW_ACCESS;   // 如果 dp2library 没有许可 objectRights 功能，是允许任何访问者来获取的。即便，不限制任何下载权限
+#endif
+
                         if (string.IsNullOrEmpty(strObjectRights) == true)
-                            return 1;   // 没有定义 rights 的对象是允许任何访问者来获取的
+                            goto ALLOW_ACCESS;   // 没有定义 rights 的对象是允许任何访问者来获取的
 
                         if (CanGet(strRights, strObjectRights) == true)
-                            return 1;
+                            goto ALLOW_ACCESS;
 
                         strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
                         return 0;
+                        ALLOW_ACCESS:
+                        // 2018/8/12
+                        // 判断 dp2library 序列号是否许可进行下载
+                        if (string.IsNullOrEmpty(strPartCmd) == false)
+                        {
+                            // 没有许可 pdfPreiew 功能时，允许前面若干页，不允许后面的页。要解析 strCmd
+                            if (StringUtil.IsInList("pdfPreview", this.Function) == false
+                                && PageInRange(strPartCmd) == false)
+                            {
+                                strError = "PDF 预览功能需要设置序列号并许可此功能，才允许查看后面的页";
+                                return 0;
+                            }
+                        }
+                        return 1;
                     }
                 }
 
                 strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
                 return 0;
+
             }
+
 
 #if NO
             // 读者库
@@ -14816,6 +14843,19 @@ strLibraryCode);    // 读者所在的馆代码
             strError = "获取资源 " + strResPath + " 被拒绝。不具备特定的权限";
             return 0;
 #endif
+        }
+
+        static bool PageInRange(string strPartCmd)
+        {
+            // page:1
+            Hashtable parameters = StringUtil.ParseParameters(strPartCmd, ',', ':', "");
+            string strPage = (string)parameters["page"];
+
+            if (Int32.TryParse(strPage, out int nPageNo) == false)
+                return true;
+            if (nPageNo >= 1 && nPageNo <= 10)
+                return true;
+            return false;
         }
 
         // 对象是否允许被获取?
@@ -14903,15 +14943,11 @@ strLibraryCode);    // 读者所在的馆代码
                 return -1;
             }
 
-            string strXml = "";
-            string strMetaData = "";
-            byte[] timestamp = null;
-            string strTempOutputPath = "";
             long lRet = channel.GetRes(strXmlRecordPath,
-                out strXml,
-                out strMetaData,
-                out timestamp,
-                out strTempOutputPath,
+                out string strXml,
+                out string strMetaData,
+                out byte[] timestamp,
+                out string strTempOutputPath,
                 out strError);
             if (lRet == -1)
             {
@@ -14933,9 +14969,8 @@ strLibraryCode);    // 读者所在的馆代码
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            var node = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strObjectID + "']",
-                nsmgr) as XmlElement;
-            if (node == null)
+            if (!(dom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strObjectID + "']",
+                nsmgr) is XmlElement node))
                 return 0;
             strRights = node.GetAttribute("rights");
             return 1;
@@ -15223,7 +15258,7 @@ strLibraryCode);    // 读者所在的馆代码
         public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
         public bool ReaderDomChanged = false;
 
-        #region 手机短信验证码
+#region 手机短信验证码
 
         // 竖线间隔的手机号码列表
         // return:
@@ -15356,7 +15391,7 @@ strLibraryCode);    // 读者所在的馆代码
             return true;
         }
 
-        #endregion
+#endregion
 
         public Account()
         {

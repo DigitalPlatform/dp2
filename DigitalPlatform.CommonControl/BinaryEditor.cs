@@ -419,7 +419,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 设置数据
-        public void SetData(byte [] baData)
+        public void SetData(byte[] baData)
         {
 
             // 内部需要一个临时文件，将所管辖的内容复制过来。
@@ -453,11 +453,11 @@ namespace DigitalPlatform.CommonControl
                 return null;
 
             this.m_stream.Seek(0, SeekOrigin.Begin);
-            byte [] result = new byte[this.m_stream.Length];
+            byte[] result = new byte[this.m_stream.Length];
             this.m_stream.Read(result, 0, result.Length);
             return result;
         }
-        
+
         // 设置数据
         public void SetData(Stream stream,
             long start,
@@ -482,7 +482,7 @@ namespace DigitalPlatform.CommonControl
 
             stream.Seek(start, SeekOrigin.Begin);
             // 复制内容
-            byte [] buffer = new byte[4096];
+            byte[] buffer = new byte[4096];
             long lWrited = 0;
             for (; ; )
             {
@@ -717,7 +717,7 @@ namespace DigitalPlatform.CommonControl
 
             if (member == ScrollBarMember.Both
                || member == ScrollBarMember.Vert)
-                this.m_lContentHeight = this.m_nLineHeight * this.LineCount; 
+                this.m_lContentHeight = this.m_nLineHeight * this.LineCount;
 
             SetScrollBars(member);
         }

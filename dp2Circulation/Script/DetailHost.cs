@@ -3707,6 +3707,13 @@ chi	中文	如果是中文，则为空。
             return 1;
         }
 #endif
+        // 去掉索取号中的回车换行和其他禁止出现的特殊字符
+        public static string RemoveSpecialChars(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return strText;
+            return strText.Replace("\r", "").Replace("\n", "");
+        }
 
         // 创建一个索取号
         // return:
@@ -4070,8 +4077,9 @@ chi	中文	如果是中文，则为空。
                 Debug.Assert(nRet == 1, "");
 
                 // 先设置已经获得的索取类号部分
-                func_setText((strHeadLine != null ? strHeadLine + "/" : "")
-                        + strClass);
+                func_setText(RemoveSpecialChars(
+                    (strHeadLine != null ? strHeadLine + "/" : "") + strClass)
+                    );
 
 #if NO
                 // 先设置已经获得的索取类号部分
@@ -4194,10 +4202,12 @@ chi	中文	如果是中文，则为空。
                 }
 
                 // 最后设置完整的索取类号
-                func_setText((strHeadLine != null ? strHeadLine + "/" : "")
+                func_setText(RemoveSpecialChars(
+                    ((strHeadLine != null ? strHeadLine + "/" : "")
                         + strClass +
                         (string.IsNullOrEmpty(strQufenhao) == false ?
-                        "/" + strQufenhao : ""));
+                        "/" + strQufenhao : "")
+                        )));
 
 #if NO
                 // 最后设置完整的索取类号

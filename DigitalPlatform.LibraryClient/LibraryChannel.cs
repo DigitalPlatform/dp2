@@ -7380,6 +7380,8 @@ out strError);
         }
 
         // 写入资源
+        // parameters:
+        //      lTotalLength    对象总尺寸。如果为 -1，表示不上传任何对象内容，而是只修改 metadata 部分
         public long WriteRes(
             DigitalPlatform.Stop stop,
             string strResPath,
@@ -7591,7 +7593,9 @@ out strError);
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
         //      file    文件 Stream。注意：本函数调用中，文件指针会被自然改变
-        //      length  要保存部分的长度。如果为 -1，在函数内会用 file.Length 代替
+        //      length  要保存部分的长度。
+        //              如果为 -1，并且 file 不为 null，在函数内会用 file.Length 代替。
+        //              如果未 -1，并且 file 为 null，表示不保存任何文件内容，是只修改 metadata 部分
         public long SaveResObject(
             DigitalPlatform.Stop stop,
             string strPath,
@@ -7612,7 +7616,7 @@ out strError);
             output_timestamp = null;
             long lRet = 0;
 
-            if (length == -1)
+            if (length == -1 && file != null)
                 length = file.Length;
 
             byte[] baTotal = null;

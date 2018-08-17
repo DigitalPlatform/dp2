@@ -152,6 +152,8 @@ namespace DigitalPlatform
 
                     strLogText = "前端 用户名 '"+strUserName+"' IP地址 '" + strClientIP + "' 从 "+info.AttackStart.ToString()+" 开始试探登录失败达 "+info.AttackCount+" 次，被暂时禁用登录功能，直到 " + info.RetryTime.ToString();
                 }
+
+                // 这一句，是为了让前端延缓下一次请求的速度。防范攻击的一种措施
                 Thread.Sleep(ShortPauseTicks);
             }
 
