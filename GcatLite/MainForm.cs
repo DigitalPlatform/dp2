@@ -289,9 +289,7 @@ namespace GcatLite
             //System.Diagnostics.Process.Start("iexplore",
             //    "http://dp2003.com/dp2bbs/article.aspx?board=%e4%ba%a7%e5%93%81%e4%b8%8e%e6%9c%8d%e5%8a%a1&id=59");
             System.Diagnostics.Process.Start(// "iexplore",
-    "https://github.com/DigitalPlatform/dp2");
-
-
+    "https://github.com/DigitalPlatform/dp2/tree/master/GcatLite");
         }
 
         private void toolStripButton_copyright_Click_1(object sender, EventArgs e)

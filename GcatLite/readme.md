@@ -1,15 +1,13 @@
-﻿# GcatLite (通用著者号码表取号前端)使用说明
+﻿# GcatLite (通用著者号码表取号前端)使用和代码分析
 
-版本: 3.0
-
-作者: 谢涛
+这是一个 Windows Form 的通过汉语著者号表取号的小前端程序，它通过 Restful API 访问 dp2003.com 这台服务器上的著者号服务器
 
 ## 界面用法
 
 1) Gcat Restful Server URL:
 
 在这里输入著者号码表 Restful Server 的 URL，一般为
-http://dp2003.com/dp2library/rest
+`http://dp2003.com/dp2library/rest`
 
 表示直接使用数字平台公司服务器(dp2003.com)上的本项服务。
 
@@ -61,17 +59,27 @@ http://dp2003.com/dp2library/rest
 
 ## 代码剖析
 
-这是一个 Windows Form 的通过汉语著者号表取号的小前端程序，它通过 Restful API 访问 dp2003.com 这台服务器上的著者号服务器
+这个 Project 示范了如何用 C# 调用取号所需的两个 Restful API (Login() 和 GetAuthorNumber())，实现
+通用汉语著者号码表(刘湘生主编) 的取号功能。
 
-这个 Project 示范了如何用 C# 调用取号所需的两个 API (Login() 和 GetAuthorNumber())，尽量把代码写到这个 Project 里面，没有用专用的通讯 DLL Project。这样方便第三方使用这些代码
+它没有采用其他通讯 DLL Project，而是直接把调用 Restful API 的代码写在了本 Project 中。这样方便第三方借鉴使用这些代码
 
-它实现了一个 RestChannel 类，这个类本身包含 CookiesContainer，只要持续使用这个类的同一个对象，就不用操心专门设置 CookiesContainer 的事情。这是为了保证 HTTP 的 Session 状态持续
+它实现了一个 RestChannel 类，这个类本身包含 CookiesContainer，只要在一轮完整的通讯过程中持续使用这个类的同一个对象，
+就可以维持服务器方所要求的 Session 状态持续
 
-当这个 GetAuthorNumber() API 的 result.Value 返回 -3 的时候，是需要前端回答一些问题然后重新调用 GetAuthorNumber() API。代码中
-提供了一个对话框，它会显示出最后一个问题，让操作者输入答案，放入 List<Question> 结构的最后一个元素 Answer 属性，然后把这个 List<Question> 再次交给 GetAuthorNumber() API 进行重试
+所谓“完整的通讯过程”，一般由一次 Login() API 调用，若干次 GetAuthorNumber() API 调用构成。要多次调用 GetAuthorNumber() API
+是因为有时候服务器在取号过程中，需要前端回答一些问题，才能继续取号。服务器此时会通过 result.Value 返回一个整数值 -3，然后前端
+要弹出一个对话框，和操作者交互，操作者输入答案，程序将之放入 List<Question> 结构的最后一个元素 Answer 属性，然后程序继续重新调用 GetAuthorNumber() API。
 
-为了让概念简单，这个 API 的 questions 参数(也就是 List<Question> 类型)故意写成 ref 方式。这样调用者就能意识到，一直要保持这个对象，对象会用于反复调用 API
+为了让概念简单，GetAuthorNumber() API 的 questions 参数(也就是 List<Question> 类型)专门写成 ref 方式。这样调用者就能意识到，一直要保持这个对象，对象会用于反复调用同一 API
 
+===
+
+email: 
+        xietao@dp2003.com
+QQ群:
+        源代码和开发 -- 开源dp2系统开发 163251536
+        产品使用咨询 -- 数字平台产品 487513826
 
 ===
 最后修改日期: 2018/8/17
