@@ -75,6 +75,12 @@
 
 为了让概念简单，GetAuthorNumber() API 的 questions 参数(也就是 List<Question> 类型)专门写成 ref 方式。这样调用者就能意识到，一直要保持这个对象，对象会用于反复调用同一 API
 
+### dynamic 反序列化 JSON 的方法
+
+代码中还示范了两种不同的 JSON Serialize/Deserialize 方法。一种是需要定义响应数据结构类的方法(而请求已经用了匿名类创建对象)；另外一种是利用 dynamic 类型的方法，不需要定义各种数据接口类。用条件编符号 DYNAMIC 来控制编译。当 DYNAMIC 符号被定义时，是使用的 dynamic 类型的方法。在 VS 中 Project 属性的“生成”页面定义。
+
+第三方开发者只需要选择自己喜欢的一种方法加以模仿即可。
+
 ---
 
 email: 
