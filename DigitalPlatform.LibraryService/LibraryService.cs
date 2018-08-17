@@ -347,7 +347,20 @@ namespace dp2Library
                     {
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
-                            address_list);
+                            address_list,
+                            strApiName == "Logout" ? false : true);
+                        // 2008/8/17
+                        if (this.sessioninfo == null && strApiName == "Logout")
+                        {
+                            // Logout 时发现 session 并不存在
+                            this._ip = "";
+                            this.sessioninfo = null;
+                            OperationContext.Current.InstanceContext.ReleaseServiceInstance();
+                            result.Value = -1;
+                            result.ErrorInfo = "通道先前已经被释放，本次 Logout 操作失败";
+                            result.ErrorCode = ErrorCode.ChannelReleased;
+                            return result;
+                        }
                     }
 #if NO
                     catch (OutofSessionException ex)
