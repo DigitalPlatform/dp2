@@ -4,14 +4,13 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-
-
-namespace DigitalPlatform.GcatClient
+namespace DigitalPlatform.CommonDialog
 {
-	/// <summary>
-	/// Summary description for QuestionDlg.
-	/// </summary>
-	public class QuestionDlg : System.Windows.Forms.Form
+
+    /// <summary>
+    /// Summary description for QuestionDlg.
+    /// </summary>
+    public class QuestionDlg : System.Windows.Forms.Form
 	{
 		public System.Windows.Forms.Label label_messageTitle;
 		public System.Windows.Forms.TextBox textBox_question;
@@ -176,7 +175,5 @@ namespace DigitalPlatform.GcatClient
 			this.AcceptButton = this.button_OK;
 			this.textBox_result.Focus();
 		}
-
-
 	}
 }

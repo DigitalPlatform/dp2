@@ -10,9 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>GcatLite</RootNamespace>
     <AssemblyName>GcatLite</AssemblyName>
-    <ManifestCertificateThumbprint>8A1C08984FFA4EF021EEFB542C34DB2E57F673FB</ManifestCertificateThumbprint>
-    <ManifestKeyFile>digitalplatform.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
+    <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
+    <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -21,7 +21,7 @@
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation />
     <TargetFrameworkProfile />
-    <PublishUrl>http://localhost/GcatLite/V3/</PublishUrl>
+    <PublishUrl>c:\publish\gcatlite\v3\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -32,14 +32,14 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>http://dp2003.com/GcatLite/V3/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/GcatLite/V2/</UpdateUrl>
+    <UpdateUrl>http://dp2003.com/GcatLite/V3/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
-    <ProductName>GcatLite通用汉语著者号码表前端</ProductName>
+    <ProductName>GcatLite 通用汉语著者号码表前端 V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
-    <SuiteName>dp2 V2</SuiteName>
+    <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -71,6 +71,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -123,6 +126,7 @@
       <DependentUpon>QuestionDlg.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="dp2003.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -142,9 +146,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 和 x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -28,9 +28,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.GcatClient;
-using DigitalPlatform.GcatClient.gcat_new_ws;
-using System.Threading;
+//using DigitalPlatform.GcatClient;
+//using DigitalPlatform.GcatClient.gcat_new_ws;
 
 namespace dp2Catalog
 {

@@ -15,6 +15,7 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
+using System.ServiceProcess;
 
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml;
@@ -23,19 +24,15 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Interfaces;
-using DigitalPlatform.EasyMarc;
 using DigitalPlatform.AmazonInterface;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
-using System.ServiceProcess;
 
 namespace dp2Circulation
 {

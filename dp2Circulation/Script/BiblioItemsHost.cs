@@ -14,10 +14,10 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Circulation
 {
@@ -202,7 +202,7 @@ namespace dp2Circulation
         }
 #endif
 
-#endregion
+        #endregion
 
 
 #if OLD_CODE
@@ -301,7 +301,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
             return;
-        ERROR1:
+            ERROR1:
             e.ErrorInfo = strError;
             if (e.ShowErrorBox == true)
                 MessageBox.Show(this.Form, strError);
@@ -496,7 +496,7 @@ namespace dp2Circulation
                 (string.IsNullOrEmpty(strQufenhao) == false ?
                 "/" + strQufenhao : "");
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -913,7 +913,7 @@ namespace dp2Circulation
                 string type = one.Type;
                 string strAuthor = one.Author;
                 Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
-            REDO:
+                REDO:
 
                 if (type == "GCAT")
                 {
@@ -1046,8 +1046,8 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
             }
-        //return 0;
-        ERROR1:
+            //return 0;
+            ERROR1:
             return -1;
         }
 
@@ -1134,7 +1134,7 @@ namespace dp2Circulation
 
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1232,7 +1232,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     fLevel = 0;
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1327,7 +1327,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
                     fLevel = 0;
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1482,7 +1482,7 @@ namespace dp2Circulation
 
 #if SHITOUTANG
 
-#region 石头汤著者号
+        #region 石头汤著者号
 
         static string FirstContent(MarcNodeList nodes)
         {
@@ -1824,11 +1824,11 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-#endregion
+        #endregion
 
 #endif
 
-#region GCAT
+        #region GCAT
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
@@ -2150,6 +2150,7 @@ namespace dp2Circulation
             return 1;
         }
 
+#if OLD_CODE
         internal void gcat_channel_BeforeLogin(object sender,
     DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
         {
@@ -2202,8 +2203,9 @@ namespace dp2Circulation
             Program.MainForm.ParamTable["author_number_account_username"] = strUserName;
             Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得字叫号码著者号。本函数可以被脚本重载
