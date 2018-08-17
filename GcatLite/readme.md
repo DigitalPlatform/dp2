@@ -2,7 +2,7 @@
 
 这是一个 Windows Form 的通过汉语著者号表取号的小前端程序，它通过 Restful API 访问 dp2003.com 这台服务器上的著者号服务器
 
-直接安装运行 GcatLite：[[http://dp2003.com/gcatlite/v3/publish.htm]]
+直接安装运行 GcatLite：http://dp2003.com/gcatlite/v3/publish.htm
 
 ## 界面用法
 
