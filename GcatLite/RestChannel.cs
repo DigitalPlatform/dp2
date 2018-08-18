@@ -187,7 +187,7 @@ string parameters)
         static string GetRestfulApiUrl(string url, string strMethod)
         {
             if (string.IsNullOrEmpty(url))
-                throw new ArgumentException("url 不应为 null");
+                throw new ArgumentException("url 不应为空");
 
             if (string.IsNullOrEmpty(url) == true)
                 return strMethod;

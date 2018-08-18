@@ -1021,7 +1021,7 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",

@@ -1123,6 +1123,9 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            if (dlg.Changed == false)
+                return;
+
             bool bOldChanged = this.Items.Changed;
 
             // 保存集合内的所有元素

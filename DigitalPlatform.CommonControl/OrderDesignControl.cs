@@ -326,8 +326,12 @@ namespace DigitalPlatform.CommonControl
                 {
                     this.m_bChanged = value;
 
+                    bool bOldChanged = this.m_bChanged;
                     if (value == false)
                         ResetLineState();
+                    // 因为 ResetLineState 过程会导致 Changed 被修改为 true
+                    this.m_bChanged = bOldChanged;
+                    Debug.Assert(bOldChanged == this.m_bChanged, "");
                 }
             }
         }

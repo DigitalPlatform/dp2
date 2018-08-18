@@ -796,7 +796,7 @@ namespace DigitalPlatform.Script
                     }
                 }
 
-            REDO_CHECKDUP:
+                REDO_CHECKDUP:
 
                 // 查重
                 string strExistLocate;
@@ -1225,6 +1225,11 @@ namespace DigitalPlatform.Script
                             text.Append("using DigitalPlatform.LibraryClient.localhost; // 为兼容而作的自动修改\r\n");
                             continue;
                         }
+
+                        // 2018/8/18
+                        if (line == "using DigitalPlatform.GcatClient;")
+                            continue;
+
                         text.Append(line + "\r\n");
                     }
                     text.Append(sr.ReadToEnd());
@@ -1912,7 +1917,7 @@ namespace DigitalPlatform.Script
         }
 
 
-        #region 和Assembly有关的几个函数
+#region 和Assembly有关的几个函数
 
         /*
 		 *
@@ -2406,7 +2411,7 @@ namespace DigitalPlatform.Script
 
         }
 
-        #endregion
+#endregion
 
 
         // *** 算法可以改进一下:如果发现原来的名字最后部分是数字,就先累加这个数字部分
