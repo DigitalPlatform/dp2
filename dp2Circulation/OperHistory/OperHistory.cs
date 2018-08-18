@@ -1669,7 +1669,7 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
 								};
 
@@ -1768,7 +1768,7 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
+									//Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",   // 2016/10/24
 									Environment.CurrentDirectory + "\\dp2circulation.exe"
             };
