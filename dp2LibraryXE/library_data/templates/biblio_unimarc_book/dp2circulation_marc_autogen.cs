@@ -33,9 +33,9 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;	// Field856Dialog
 using DigitalPlatform.AmazonInterface;
@@ -44,8 +44,6 @@ using dp2Circulation;
 
 public class MyHost : DetailHost
 {
-    // DigitalPlatform.GcatClient.Channel GcatChannel = null;
-
     /*
     string[] cfgFields = new string[] {
 		"200(a-9)",

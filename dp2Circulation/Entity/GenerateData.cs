@@ -171,23 +171,21 @@ namespace dp2Circulation
                 m_strAutogenDataCfgFilename = strAutogenDataCfgFilename;
 
                 this.m_autogenDataAssembly = Assembly.GetAssembly(this.GetType());  // 充数
-
                 return 1;
             }
 
-            Encoding encoding;
-                    // 能自动识别文件内容的编码方式的读入文本文件内容模块
-        // parameters:
-        //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
-        // return:
-        //      -1  出错 strError中有返回值
-        //      0   文件不存在 strError中有返回值
-        //      1   文件存在
-        //      2   读入的内容不是全部
+            // 能自动识别文件内容的编码方式的读入文本文件内容模块
+            // parameters:
+            //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
+            // return:
+            //      -1  出错 strError中有返回值
+            //      0   文件不存在 strError中有返回值
+            //      1   文件存在
+            //      2   读入的内容不是全部
             int nRet = FileUtil.ReadTextFileContent(strAutogenDataCfgFilename,
                 -1,
             out strCode,
-            out encoding,
+            out Encoding encoding,
             out strError);
             if (nRet != 1)
                 return -1;
@@ -206,7 +204,6 @@ namespace dp2Circulation
 
             return 0;
         }
-
 
         // 从服务器获得两个配置文件的内容
         // return:
@@ -391,11 +388,10 @@ out strError);
                     try
                     {
                         // 准备Assembly
-                        Assembly assembly = null;
                         nRet = GetCsScriptAssembly(
                             strCode,
                             strRef,
-                            out assembly,
+                            out Assembly assembly,
                             out strError);
                         if (nRet == -1)
                         {
@@ -989,6 +985,11 @@ out strError);
         {
             strError = "";
             assembly = null;
+
+            // 2018/8/18
+            // 为了兼容以前代码，对 using 部分进行修改
+            strCode = ScriptManager.ModifyCode(strCode);
+
 
             string[] saRef = null;
             int nRet;

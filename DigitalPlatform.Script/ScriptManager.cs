@@ -1181,6 +1181,10 @@ namespace DigitalPlatform.Script
         {
             if (string.IsNullOrEmpty(line) == true)
                 return true;
+            line = line.Trim();
+            if (string.IsNullOrEmpty(line) == true)
+                return true;
+
             if (line.StartsWith("using ") == true)
                 return true;
             if (line.StartsWith("//") == true)
@@ -1189,6 +1193,81 @@ namespace DigitalPlatform.Script
             return false;
         }
 
+        static bool IsEqual(string strText1, string strText2)
+        {
+            return string.Compare(strText1.Trim(), strText2.Trim(), true) == 0;
+        }
+
+        // 为了兼容以前代码，对 using 部分进行修改
+        public static string ModifyCode(string strCode)
+        {
+            StringBuilder text = new StringBuilder();
+            List<string> lines = StringUtil.SplitList(strCode, "\r\n");
+
+            bool bHasCirculationClientUsing = false;
+            bool bHasLibraryClientUsing = false;
+
+            bool in_using = true;
+            foreach (string line in lines)
+            {
+                if (IsUsing(line) == false)
+                    in_using = false;
+
+                if (in_using == false)
+                    goto CONTINUE;
+
+                if (IsEqual(line, "using DigitalPlatform.CirculationClient;"))
+                    bHasCirculationClientUsing = true;
+                if (IsEqual(line, "using DigitalPlatform.LibraryClient;"))
+                    bHasLibraryClientUsing = true;
+                if (IsEqual(line, "using DigitalPlatform.CirculationClient.localhost;"))
+                {
+                    text.Append("using DigitalPlatform.LibraryClient.localhost; // 为兼容而作的自动修改\r\n");
+                    goto CONTINUE;
+                }
+
+                // 2018/8/18
+                if (IsEqual(line, "using DigitalPlatform.GcatClient;"))
+                    continue;
+                CONTINUE:
+                text.Append(line + "\r\n");
+            }
+
+            if (bHasCirculationClientUsing == true && bHasLibraryClientUsing == false)
+            {
+                return "using DigitalPlatform.LibraryClient; // 为兼容而作的自动修改\r\n\r\n"
+                    + text.ToString();
+            }
+            else
+                return text.ToString();
+        }
+
+        public static int LoadCode(string strCodeFileName,
+    out string strCode,
+    out string strError)
+        {
+            strCode = "";
+            strError = "";
+
+            try
+            {
+                StringBuilder text = new StringBuilder();
+                using (StreamReader sr = new StreamReader(strCodeFileName, true))
+                {
+                    text.Append(sr.ReadToEnd());
+                }
+
+                strCode = ModifyCode(text.ToString());
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+        }
+#if NO
         public static int LoadCode(string strCodeFileName,
             out string strCode,
             out string strError)
@@ -1248,8 +1327,10 @@ namespace DigitalPlatform.Script
             }
             else
                 strCode = text.ToString();
+
             return 0;
         }
+#endif
 
         // 从xml字符串中得到refs字符串数组
         // return:
@@ -1917,7 +1998,7 @@ namespace DigitalPlatform.Script
         }
 
 
-#region 和Assembly有关的几个函数
+        #region 和Assembly有关的几个函数
 
         /*
 		 *
@@ -2411,7 +2492,7 @@ namespace DigitalPlatform.Script
 
         }
 
-#endregion
+        #endregion
 
 
         // *** 算法可以改进一下:如果发现原来的名字最后部分是数字,就先累加这个数字部分

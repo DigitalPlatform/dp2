@@ -23,7 +23,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
@@ -31,8 +30,6 @@ using dp2Catalog;
 
 public class MyHost : MarcDetailHost
 {
-    // DigitalPlatform.GcatClient.Channel GcatChannel = null;
-
     // 新的加拼音字段配置。$9
     string PinyinCfgXml = "<root>"
     + "<item name='200' from='a' to='9' />"

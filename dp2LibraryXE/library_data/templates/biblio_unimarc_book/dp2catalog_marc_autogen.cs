@@ -22,7 +22,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
@@ -30,8 +29,6 @@ using dp2Catalog;
 
 public class MyHost : MarcDetailHost
 {
-	// DigitalPlatform.GcatClient.Channel GcatChannel = null;
-
     // 新的加拼音字段配置。$9
     string PinyinCfgXml = "<root>"
     + "<item name='200' from='a' to='9' />"
@@ -65,7 +62,6 @@ public class MyHost : MarcDetailHost
         + "<item name='721' from='a' to='A' />"
         + "<item name='722' from='a' to='A' />"
         + "</root>";
-
 
     public void CreateMenu(object sender, GenerateDataEventArgs e)
     {
@@ -117,7 +113,7 @@ public class MyHost : MarcDetailHost
 
             // 加入四角号码著者号
             actions.NewItem("加入四角号码著者号", "根据701/711/702/712$a内容, 创建905$e", "AddSjhmAuthorNumber", false);
-            
+
             // 加入种次号
             actions.NewItem("加入种次号", "根据905$d内容, 创建905$e", "AddZhongcihao", false);
 
@@ -445,72 +441,72 @@ public class MyHost : MarcDetailHost
     }
 
 
-	void Copy200fTo7x1a()
-	{
-		Copy200gfTo7xxa("f", "701");
-	}
+    void Copy200fTo7x1a()
+    {
+        Copy200gfTo7xxa("f", "701");
+    }
 
-	void Copy200gTo7x2a()
-	{
-		Copy200gfTo7xxa("g", "702");
-	}
+    void Copy200gTo7x2a()
+    {
+        Copy200gfTo7xxa("g", "702");
+    }
 
-	void Copy200gfTo7xxa(string strFromSubfield, string strToField)
-	{
-		Field field_200 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("200",0);
+    void Copy200gfTo7xxa(string strFromSubfield, string strToField)
+    {
+        Field field_200 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("200", 0);
         if (field_200 == null)
         {
             MessageBox.Show(this.DetailForm, "200字段不存在");
             return;
-        } 
-        
+        }
+
         SubfieldCollection subfields_200 = field_200.Subfields;
 
-		Subfield subfield_f = subfields_200[strFromSubfield];
+        Subfield subfield_f = subfields_200[strFromSubfield];
 
-		if (subfield_f == null)
-		{
-			MessageBox.Show(this.DetailForm, "200$"+strFromSubfield+"不存在");
-			return;
-		}
+        if (subfield_f == null)
+        {
+            MessageBox.Show(this.DetailForm, "200$" + strFromSubfield + "不存在");
+            return;
+        }
 
-		string strContent = subfield_f.Value;
-		
-		// 看看当前活动字段是不是701
-		Field field_701 = null;
+        string strContent = subfield_f.Value;
 
-		field_701 = this.DetailForm.MarcEditor.FocusedField;
-		if (field_701 != null)
-		{
-			if (field_701.Name != strToField)
-				field_701 = null;
-		}
-		
+        // 看看当前活动字段是不是701
+        Field field_701 = null;
 
-		if (field_701 == null)
-		{
-			field_701 = this.DetailForm.MarcEditor.Record.Fields.GetOneField(strToField, 0);
+        field_701 = this.DetailForm.MarcEditor.FocusedField;
+        if (field_701 != null)
+        {
+            if (field_701.Name != strToField)
+                field_701 = null;
+        }
 
-			if (field_701 == null)
-			{
-				field_701 = this.DetailForm.MarcEditor.Record.Fields.Add(strToField, "  ", "", true);
-			}
-		}
 
-		if (field_701 == null)
-			throw(new Exception("error ..."));
+        if (field_701 == null)
+        {
+            field_701 = this.DetailForm.MarcEditor.Record.Fields.GetOneField(strToField, 0);
 
-		Subfield subfield_701a = field_701.Subfields["a"];
-		if (subfield_701a == null)
-		{
-			subfield_701a = new Subfield();
-			subfield_701a.Name = "a";
-		}
+            if (field_701 == null)
+            {
+                field_701 = this.DetailForm.MarcEditor.Record.Fields.Add(strToField, "  ", "", true);
+            }
+        }
 
-		subfield_701a.Value = strContent;
-		field_701.Subfields["a"] = subfield_701a;
+        if (field_701 == null)
+            throw (new Exception("error ..."));
 
-	}
+        Subfield subfield_701a = field_701.Subfields["a"];
+        if (subfield_701a == null)
+        {
+            subfield_701a = new Subfield();
+            subfield_701a.Name = "a";
+        }
+
+        subfield_701a.Value = strContent;
+        field_701.Subfields["a"] = subfield_701a;
+
+    }
 
     void AddGcatAuthorNumber()
     {
@@ -592,11 +588,11 @@ public class MyHost : MarcDetailHost
 
         strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
         goto ERROR1;
-    FOUND:
+        FOUND:
         Debug.Assert(results.Count > 0, "");
         strAuthor = results[0];
 
-    // BEGIN:
+        // BEGIN:
         string strGcatWebServiceUrl = this.DetailForm.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
 
         string strNumber = "";
@@ -615,7 +611,7 @@ public class MyHost : MarcDetailHost
 
         this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("905", "e", strNumber);
         return;
-    ERROR1:
+        ERROR1:
         MessageBox.Show(this.DetailForm, strError);
     }
 
@@ -676,7 +672,7 @@ public class MyHost : MarcDetailHost
 
         strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
         goto ERROR1;
-    FOUND:
+        FOUND:
         Debug.Assert(results.Count > 0, "");
         strAuthor = results[0];
 
@@ -696,7 +692,7 @@ public class MyHost : MarcDetailHost
 
         this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("905", "e", strNumber);
         return;
-    ERROR1:
+        ERROR1:
         MessageBox.Show(this.DetailForm, strError);
     }
 
@@ -755,7 +751,7 @@ public class MyHost : MarcDetailHost
             dlg.Close();
         }
 
-    ERROR1:
+        ERROR1:
         MessageBox.Show(this.DetailForm, strError);
     }
 
@@ -781,310 +777,310 @@ public class MyHost : MarcDetailHost
         dlg.Show();
     }
 
-	// 加入出版地、出版者
-	void AddPublisher()
-	{
-		string strError = "";
-		string strISBN = "";
+    // 加入出版地、出版者
+    void AddPublisher()
+    {
+        string strError = "";
+        string strISBN = "";
 
-		int nRet = 0;
+        int nRet = 0;
 
-		strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
-
-		if (strISBN.Trim() == "")
-		{
-			strError = "记录中不存在010$a子字段,因此无法加出版社子字段";
-			goto ERROR1;
-		}
+        strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+
+        if (strISBN.Trim() == "")
+        {
+            strError = "记录中不存在010$a子字段,因此无法加出版社子字段";
+            goto ERROR1;
+        }
 
 
 
-		// 切割出 出版社 代码部分
-		string strPublisherNumber = "";
-		nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
-			out strPublisherNumber,
-			out strError);
-		if (nRet == -1)
-		{
-			goto ERROR1;
-		}
-
-		string strValue = "";
-
-		nRet = this.DetailForm.GetPublisherInfo(strPublisherNumber,
-			out strValue,
-			out strError);
-		if (nRet == -1)
-			goto ERROR1;
-
-		if (nRet == 0 || strValue == "")
-		{
-			// 创建新条目
-			strValue = InputDlg.GetInput(
-				this.DetailForm,
-				null,
-				"请输入ISBN出版社号 '" +strPublisherNumber+ "' 对应的出版社名称(格式 出版地:出版社名):",
-				"出版地:出版社名");
-			if (strValue == null)
-				return;	// 放弃整个操作
+        // 切割出 出版社 代码部分
+        string strPublisherNumber = "";
+        nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+            out strPublisherNumber,
+            out strError);
+        if (nRet == -1)
+        {
+            goto ERROR1;
+        }
+
+        string strValue = "";
+
+        nRet = this.DetailForm.GetPublisherInfo(strPublisherNumber,
+            out strValue,
+            out strError);
+        if (nRet == -1)
+            goto ERROR1;
+
+        if (nRet == 0 || strValue == "")
+        {
+            // 创建新条目
+            strValue = InputDlg.GetInput(
+                this.DetailForm,
+                null,
+                "请输入ISBN出版社号 '" + strPublisherNumber + "' 对应的出版社名称(格式 出版地:出版社名):",
+                "出版地:出版社名");
+            if (strValue == null)
+                return; // 放弃整个操作
 
-			nRet = this.DetailForm.SetPublisherInfo(strPublisherNumber,
-				strValue,
-				out strError);
-			if (nRet == -1)
-				goto ERROR1;
+            nRet = this.DetailForm.SetPublisherInfo(strPublisherNumber,
+                strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
-		}
+        }
 
-		// MessageBox.Show(this.DetailForm, strValue);
+        // MessageBox.Show(this.DetailForm, strValue);
 
-		// 把全角冒号替换为半角的形态
-		strValue = strValue.Replace("：",":");
-
-		string strName = "";
-		string strCity = "";
-		nRet = strValue.IndexOf(":");
-		if (nRet == -1)
-		{
-			strName = strValue;
-		}
-		else 
-		{
-			strCity = strValue.Substring(0, nRet);
-			strName = strValue.Substring(nRet + 1);
-		}
-
-		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "a", strCity);
-		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "c", strName);
-
-
-		return;
-
-	ERROR1:
-		MessageBox.Show(this.DetailForm, strError);
-
-
-	}
-
-	void HyphenISBN_13()
-	{
-		HyphenISBN(true);
-	}
-
-
-	void HyphenISBN_10()
-	{
-		HyphenISBN(false);
-	}
-
-
-	void HyphenISBN(bool bForce13)
-	{
-		string strError = "";
-		string strISBN = "";
-		int nRet = 0;
-
-		strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
-
-		if (strISBN.Trim() == "")
-		{
-			MessageBox.Show( this.DetailForm, "记录中不存在010$a子字段,因此无法进行规整");
-			return;
-		}
-
-       		nRet = this.DetailForm.MainForm.LoadIsbnSplitter(true, out strError);
-	        if (nRet == -1)
-        	    goto ERROR1;
-
-		string strResult = "";
-
-		nRet = this.DetailForm.MainForm.IsbnSplitter.IsbnInsertHyphen(strISBN,
-			bForce13 == true ? "force13,strict" : "force10,strict",
-                	out strResult,
-	                out strError);
-        	if (nRet == -1)
-                	goto ERROR1;
-
-		if (nRet == 1) 
-		{
-			DialogResult result = MessageBox.Show(this.DetailForm,
-			    "原ISBN '"+strISBN+"'加工成 '"+strResult+"' 后发现校验位有变化。\r\n\r\n是否接受修改?",
-			    "规整ISBN",
-			    MessageBoxButtons.YesNo,
-			    MessageBoxIcon.Question,
-			    MessageBoxDefaultButton.Button2);
-			if (result != DialogResult.Yes)
-				return;
-
-		}
-
-		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("010", "a", strResult);
-
-		return;
-
-	ERROR1:
-		MessageBox.Show(this.DetailForm, strError);
-
-	}
-
-	void Add102()
-	{
-		string strError = "";
-		string strISBN = "";
-		int nRet = 0;
-
-		strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
-
-		if (strISBN.Trim() == "")
-		{
-			strError = "记录中不存在010$a子字段,因此无法加102$a$b";
-			goto ERROR1;
-		}
-
-		// 切割出 出版社 代码部分
-		string strPublisherNumber = "";
-		nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
-			out strPublisherNumber,
-			out strError);
-		if (nRet == -1)
-		{
-			goto ERROR1;
-		}
-
-		string strValue = "";
-
-		nRet = this.DetailForm.Get102Info(strPublisherNumber,
-			out strValue,
-			out strError);
-		if (nRet == -1)
-			goto ERROR1;
-
-		if (nRet == 0 || strValue == "")
-		{
-			// 创建新条目
-			strValue = InputDlg.GetInput(
-				this.DetailForm,
-				null,
-				"请输入ISBN出版社号码 '" +strISBN+ "' 对应的UNIMARC 102$a$b参数(格式 国家代码[2位]:城市代码[6位]):",
-				"国家代码[2位]:城市代码[6位]");
-			if (strValue == null)
-				return;	// 放弃整个操作
-
-			nRet = this.DetailForm.Set102Info(strPublisherNumber,
-				strValue,
-				out strError);
-			if (nRet == -1)
-				goto ERROR1;
-
-		}
-
-		// MessageBox.Show(this.DetailForm, strValue);
-
-		// 把全角冒号替换为半角的形态
-		strValue = strValue.Replace("：",":");
-
-		string strCountryCode = "";
-		string strCityCode = "";
-		nRet = strValue.IndexOf(":");
-		if (nRet == -1)
-		{
-			strCountryCode = strValue;
-
-			if (strCountryCode.Length != 2)
-			{
-				strError = "国家代码 '"+strCountryCode+"' 应当为2字符";
-				goto ERROR1;
-			}
-		}
-		else 
-		{
-			strCountryCode = strValue.Substring(0, nRet);
-			strCityCode = strValue.Substring(nRet + 1);
-			if (strCountryCode.Length != 2)
-			{
-				strError = "冒号前面的国家代码部分 '"+strCountryCode+"' 应当为2字符";
-				goto ERROR1;
-			}
-			if (strCityCode.Length != 6)
-			{
-				strError = "冒号后面的城市代码部分 '"+strCityCode+"' 应当为6字符";
-				goto ERROR1;
-			}
-		}
-
-		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "a", strCountryCode);
-		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "b", strCityCode);
-
-
-		return;
-
-	ERROR1:
-		MessageBox.Show(this.DetailForm, strError);
-	}
-
-	void Copy225To410()
-	{
-		Field field_225 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("225",0);
-
-		if (field_225 == null)
-		{
-			MessageBox.Show(this.DetailForm, "225字段不存在");
-			return;
-		}
-
-		SubfieldCollection subfields_225 = field_225.Subfields;
-
-		Subfield subfield_a = subfields_225["a"];
-
-		if (subfield_a == null)
-		{
-			MessageBox.Show(this.DetailForm, "225$"+"a"+"不存在");
-			return;
-		}
-
-		string strContent = subfield_a.Value;
-		
-		// 看看当前活动字段是不是410
-		Field field_410 = null;
-
-		field_410 = this.DetailForm.MarcEditor.FocusedField;
-		if (field_410 != null)
-		{
-			if (field_410.Name != "410")
-				field_410 = null;
-		}
-		
-		bool bInitial410Value = false;	// 410字段的值是否初始化过
-
-		if (field_410 == null)
-		{
-			field_410 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("410", 0);
-
-			if (field_410 == null)
-			{
-				field_410 = this.DetailForm.MarcEditor.Record.Fields.Add("410", "  ", new string((char)31, 1) + "1200  "+new string((char)31,1)+"a", true);
-				bInitial410Value = true;
-			}
-		}
-
-		if (bInitial410Value == false)
-		{
-			field_410.Value = new string((char)31, 1) + "1200  "+new string((char)31,1)+"a" + field_410.Value;
-		}		
-
-		if (field_410 == null)
-			throw(new Exception("error ..."));
-
-		Subfield subfield_410a = field_410.Subfields["a"];
-		if (subfield_410a == null)
-		{
-			subfield_410a = new Subfield();
-			subfield_410a.Name = "a";
-		}
-
-		subfield_410a.Value = strContent;
-		field_410.Subfields["a"] = subfield_410a;
-	}
+        // 把全角冒号替换为半角的形态
+        strValue = strValue.Replace("：", ":");
+
+        string strName = "";
+        string strCity = "";
+        nRet = strValue.IndexOf(":");
+        if (nRet == -1)
+        {
+            strName = strValue;
+        }
+        else
+        {
+            strCity = strValue.Substring(0, nRet);
+            strName = strValue.Substring(nRet + 1);
+        }
+
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "a", strCity);
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("210", "c", strName);
+
+
+        return;
+
+        ERROR1:
+        MessageBox.Show(this.DetailForm, strError);
+
+
+    }
+
+    void HyphenISBN_13()
+    {
+        HyphenISBN(true);
+    }
+
+
+    void HyphenISBN_10()
+    {
+        HyphenISBN(false);
+    }
+
+
+    void HyphenISBN(bool bForce13)
+    {
+        string strError = "";
+        string strISBN = "";
+        int nRet = 0;
+
+        strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+
+        if (strISBN.Trim() == "")
+        {
+            MessageBox.Show(this.DetailForm, "记录中不存在010$a子字段,因此无法进行规整");
+            return;
+        }
+
+        nRet = this.DetailForm.MainForm.LoadIsbnSplitter(true, out strError);
+        if (nRet == -1)
+            goto ERROR1;
+
+        string strResult = "";
+
+        nRet = this.DetailForm.MainForm.IsbnSplitter.IsbnInsertHyphen(strISBN,
+            bForce13 == true ? "force13,strict" : "force10,strict",
+                    out strResult,
+                    out strError);
+        if (nRet == -1)
+            goto ERROR1;
+
+        if (nRet == 1)
+        {
+            DialogResult result = MessageBox.Show(this.DetailForm,
+                "原ISBN '" + strISBN + "'加工成 '" + strResult + "' 后发现校验位有变化。\r\n\r\n是否接受修改?",
+                "规整ISBN",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+        }
+
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("010", "a", strResult);
+
+        return;
+
+        ERROR1:
+        MessageBox.Show(this.DetailForm, strError);
+
+    }
+
+    void Add102()
+    {
+        string strError = "";
+        string strISBN = "";
+        int nRet = 0;
+
+        strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+
+        if (strISBN.Trim() == "")
+        {
+            strError = "记录中不存在010$a子字段,因此无法加102$a$b";
+            goto ERROR1;
+        }
+
+        // 切割出 出版社 代码部分
+        string strPublisherNumber = "";
+        nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
+            out strPublisherNumber,
+            out strError);
+        if (nRet == -1)
+        {
+            goto ERROR1;
+        }
+
+        string strValue = "";
+
+        nRet = this.DetailForm.Get102Info(strPublisherNumber,
+            out strValue,
+            out strError);
+        if (nRet == -1)
+            goto ERROR1;
+
+        if (nRet == 0 || strValue == "")
+        {
+            // 创建新条目
+            strValue = InputDlg.GetInput(
+                this.DetailForm,
+                null,
+                "请输入ISBN出版社号码 '" + strISBN + "' 对应的UNIMARC 102$a$b参数(格式 国家代码[2位]:城市代码[6位]):",
+                "国家代码[2位]:城市代码[6位]");
+            if (strValue == null)
+                return; // 放弃整个操作
+
+            nRet = this.DetailForm.Set102Info(strPublisherNumber,
+                strValue,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+        }
+
+        // MessageBox.Show(this.DetailForm, strValue);
+
+        // 把全角冒号替换为半角的形态
+        strValue = strValue.Replace("：", ":");
+
+        string strCountryCode = "";
+        string strCityCode = "";
+        nRet = strValue.IndexOf(":");
+        if (nRet == -1)
+        {
+            strCountryCode = strValue;
+
+            if (strCountryCode.Length != 2)
+            {
+                strError = "国家代码 '" + strCountryCode + "' 应当为2字符";
+                goto ERROR1;
+            }
+        }
+        else
+        {
+            strCountryCode = strValue.Substring(0, nRet);
+            strCityCode = strValue.Substring(nRet + 1);
+            if (strCountryCode.Length != 2)
+            {
+                strError = "冒号前面的国家代码部分 '" + strCountryCode + "' 应当为2字符";
+                goto ERROR1;
+            }
+            if (strCityCode.Length != 6)
+            {
+                strError = "冒号后面的城市代码部分 '" + strCityCode + "' 应当为6字符";
+                goto ERROR1;
+            }
+        }
+
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "a", strCountryCode);
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("102", "b", strCityCode);
+
+
+        return;
+
+        ERROR1:
+        MessageBox.Show(this.DetailForm, strError);
+    }
+
+    void Copy225To410()
+    {
+        Field field_225 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("225", 0);
+
+        if (field_225 == null)
+        {
+            MessageBox.Show(this.DetailForm, "225字段不存在");
+            return;
+        }
+
+        SubfieldCollection subfields_225 = field_225.Subfields;
+
+        Subfield subfield_a = subfields_225["a"];
+
+        if (subfield_a == null)
+        {
+            MessageBox.Show(this.DetailForm, "225$" + "a" + "不存在");
+            return;
+        }
+
+        string strContent = subfield_a.Value;
+
+        // 看看当前活动字段是不是410
+        Field field_410 = null;
+
+        field_410 = this.DetailForm.MarcEditor.FocusedField;
+        if (field_410 != null)
+        {
+            if (field_410.Name != "410")
+                field_410 = null;
+        }
+
+        bool bInitial410Value = false;  // 410字段的值是否初始化过
+
+        if (field_410 == null)
+        {
+            field_410 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("410", 0);
+
+            if (field_410 == null)
+            {
+                field_410 = this.DetailForm.MarcEditor.Record.Fields.Add("410", "  ", new string((char)31, 1) + "1200  " + new string((char)31, 1) + "a", true);
+                bInitial410Value = true;
+            }
+        }
+
+        if (bInitial410Value == false)
+        {
+            field_410.Value = new string((char)31, 1) + "1200  " + new string((char)31, 1) + "a" + field_410.Value;
+        }
+
+        if (field_410 == null)
+            throw (new Exception("error ..."));
+
+        Subfield subfield_410a = field_410.Subfields["a"];
+        if (subfield_410a == null)
+        {
+            subfield_410a = new Subfield();
+            subfield_410a.Name = "a";
+        }
+
+        subfield_410a.Value = strContent;
+        field_410.Subfields["a"] = subfield_410a;
+    }
 
     // 维护210对照关系
     // 2008/10/17 new add
@@ -1168,14 +1164,14 @@ public class MyHost : MarcDetailHost
 
         strValue = strCity + ":" + strName;
 
-    DOSAVE:
+        DOSAVE:
         nRet = this.DetailForm.SetPublisherInfo(strPublisherNumber,
             strValue,
             out strError);
         if (nRet == -1)
             goto ERROR1;
         return;
-    ERROR1:
+        ERROR1:
         MessageBox.Show(this.DetailForm, strError);
     }
 
@@ -1272,14 +1268,14 @@ public class MyHost : MarcDetailHost
 
         strValue = strCountryCode + ":" + strCityCode;
 
-    DOSAVE:
+        DOSAVE:
         nRet = this.DetailForm.Set102Info(strPublisherNumber,
             strValue,
             out strError);
         if (nRet == -1)
             goto ERROR1;
         return;
-    ERROR1:
+        ERROR1:
         MessageBox.Show(this.DetailForm, strError);
     }
 
@@ -1295,8 +1291,8 @@ public class MyHost : MarcDetailHost
         {
             MessageBox.Show(this.DetailForm, "690字段不存在");
             return;
-        } 
-        
+        }
+
         SubfieldCollection subfields_690 = field_690.Subfields;
 
         Subfield subfield_a = subfields_690[strFromSubfield];

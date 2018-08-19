@@ -14,9 +14,9 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;	// Field856Dialog
 
