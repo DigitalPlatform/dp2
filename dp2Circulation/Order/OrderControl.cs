@@ -2,16 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
@@ -113,125 +109,6 @@ namespace dp2Circulation
             this.ItemType = "order";
             this.ItemTypeName = "订购";
         }
-
-#if NO
-        public int OrderCount
-        {
-            get
-            {
-                if (this.Items != null)
-                    return this.Items.Count;
-
-                return 0;
-            }
-        }
-
-        // 将listview中的订购事项修改为new状态
-        public void ChangeAllItemToNewState()
-        {
-            foreach (OrderItem orderitem in this.Items)
-            {
-                // OrderItem orderitem = this.OrderItems[i];
-
-                if (orderitem.ItemDisplayState == ItemDisplayState.Normal
-                    || orderitem.ItemDisplayState == ItemDisplayState.Changed
-                    || orderitem.ItemDisplayState == ItemDisplayState.Deleted)   // 注意未提交的deleted也变为new了
-                {
-                    orderitem.ItemDisplayState = ItemDisplayState.New;
-                    orderitem.RefreshListView();
-                    orderitem.Changed = true;    // 这一句决定了使能后如果立即关闭窗口，是否会警告(实体修改)内容丢失
-                }
-            }
-        }
-
-        public string BiblioRecPath
-        {
-            get
-            {
-                return this.m_strBiblioRecPath;
-            }
-            set
-            {
-                this.m_strBiblioRecPath = value;
-
-                if (this.Items != null)
-                {
-                    string strID = Global.GetRecordID(value);
-                    this.Items.SetParentID(strID);
-                }
-
-            }
-        }
-
-        /// <summary>
-        /// 内容是否发生过修改
-        /// </summary>
-        public bool Changed
-        {
-            get
-            {
-                if (this.Items == null)
-                    return false;
-
-                return this.Items.Changed;
-            }
-            set
-            {
-                if (this.Items != null)
-                    this.Items.Changed = value;
-            }
-        }
-
-        // 清除listview中的全部事项
-        public void Clear()
-        {
-            this.ListView.Items.Clear();
-
-            // 2009/2/10
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.ListView.Columns);
-
-            // 2012/7/24
-            this.TargetRecPath = "";
-        }
-
-        // 清除订购有关信息
-        public void ClearOrders()
-        {
-            this.Clear();
-            this.Items = new OrderItemCollection();
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-
-        public int CountOfVisibleOrderItems()
-        {
-            return this.ListView.Items.Count;
-        }
-
-        public int IndexOfVisibleOrderItems(OrderItem orderitem)
-        {
-            for (int i = 0; i < this.ListView.Items.Count; i++)
-            {
-                OrderItem cur = (OrderItem)this.ListView.Items[i].Tag;
-
-                if (cur == orderitem)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        public OrderItem GetAtVisibleOrderItems(int nIndex)
-        {
-            return (OrderItem)this.ListView.Items[nIndex].Tag;
-        }
-
-#endif
 
         // 
         // return:
@@ -447,11 +324,49 @@ namespace dp2Circulation
             e.values = values;
         }
 
+        // 从一般订购默认记录中 获得订购批次号
+        string GetOrderingBatchNo()
+        {
+            bool bDontDisplayDialog = GetBoolParam("ordercontrol_dontdisplay_order_batchno_dialog");
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+                bDontDisplayDialog = false;
+
+            string strDefault = EntityFormOptionDlg.GetFieldValue("order_normalRegister_default",
+    "batchNo");
+            bool bOldValue = bDontDisplayDialog;
+            string strResult = bDontDisplayDialog ?
+                strDefault :
+                InputDlg.GetInput(this, "请指定订购批次号",
+                "订购批次号:",
+                strDefault,
+                "下次不再出现此对话框",
+                ref bDontDisplayDialog,
+                this.Font);
+            if (strResult == null)
+                return "";
+
+            // 记忆
+            SetBoolParam("ordercontrol_dontdisplay_order_batchno_dialog", bDontDisplayDialog);
+            if (bDontDisplayDialog == true && bOldValue == false)
+                MessageBox.Show(this, "您已选择“下次不再出现此对话框”。\r\n\r\n提示：如果希望重新出现此对话框，可在使用本功能前，先按住键盘 Ctrl 键并且不要放开，然后启动本功能");
+
+            if (strResult != strDefault)
+            {
+                EntityFormOptionDlg.SetFieldValue("order_normalRegister_default",
+    "batchNo",
+    strResult);
+            }
+
+            return strResult;
+        }
+
         // 规划多个订购事项
         void DoDesignOrder()
         {
             string strError = "";
             int nRet = 0;
+
+            GetOrderingBatchNo();
 
             // 
             if (this.Items == null)
@@ -865,7 +780,7 @@ namespace dp2Circulation
                 {
                     dom.LoadXml(strXml);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "订购记录装入 XMLDOM 失败: " + ex.Message;
                     return -1;
@@ -1009,6 +924,53 @@ namespace dp2Circulation
             return 1;
         }
 
+        static bool GetBoolParam(string name)
+        {
+            return Program.MainForm.ParamTable.ContainsKey(name) ?
+                (bool)Program.MainForm.ParamTable[name] : false;
+        }
+
+        static void SetBoolParam(string name, bool value)
+        {
+            Program.MainForm.ParamTable[name] = value;
+        }
+
+        // 从快速册登记默认记录中 获得装订批次号
+        string GetAcceptingBatchNo()
+        {
+            bool bDontDisplayDialog = GetBoolParam("ordercontrol_dontdisplay_accept_batchno_dialog");
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+                bDontDisplayDialog = false;
+
+            string strDefault = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+    "batchNo");
+            bool bOldValue = bDontDisplayDialog;
+            string strResult = bDontDisplayDialog ?
+                strDefault :
+                InputDlg.GetInput(this, "请指定验收批次号",
+                "验收批次号:",
+                strDefault,
+                "下次不再出现此对话框",
+                ref bDontDisplayDialog,
+                this.Font);
+            if (strResult == null)
+                return "";
+
+            // 记忆
+            SetBoolParam("ordercontrol_dontdisplay_accept_batchno_dialog", bDontDisplayDialog);
+            if (bDontDisplayDialog == true && bOldValue == false)
+                MessageBox.Show(this, "您已选择“下次不再出现此对话框”。\r\n\r\n提示：如果希望重新出现此对话框，可在使用本功能前，先按住键盘 Ctrl 键并且不要放开，然后启动本功能");
+
+            if (strResult != strDefault)
+            {
+                EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+    "batchNo",
+    strResult);
+            }
+
+            return strResult;
+        }
+
         // 进行验收
         // TODO: 中途不让关闭 EntityForm
         void DoAccept()
@@ -1057,7 +1019,14 @@ namespace dp2Circulation
                 }
             }
             else
+            {
                 this.TargetRecPath = "";    // 2017/7/6
+
+                // 2018/8/19
+                // 从快速册登记默认记录中取得批次号字段内容。并允许修改
+                // TODO: 增加“下次不再出现此对话框”checkbox。按住 Ctrl 可重新让对话框出现
+                this.AcceptBatchNo = GetAcceptingBatchNo();
+            }
 
             // 
             if (this.Items == null)
@@ -1275,13 +1244,12 @@ namespace dp2Circulation
 
             if (this.GenerateEntity != null)
             {
-                string strTargetRecPath = "";
                 // 根据验收数据，自动创建实体数据
                 nRet = GenerateEntities(
                     strBiblioSourceRecord,
                     strBiblioSourceSyntax,
                     changed_orderitems,
-                    out strTargetRecPath,
+                    out string strTargetRecPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -1543,6 +1511,8 @@ namespace dp2Circulation
                         // location
                         DomUtil.SetElementText(dom.DocumentElement,
                             "location", location.Name);
+
+                        // TODO: 非流程验收时，如何询问验收批次号？为空则询问？还是无条件询问
 
                         // 批次号
                         DomUtil.SetElementText(dom.DocumentElement,

@@ -170,6 +170,12 @@
     <Compile Include="CreateCoverImageDialog.Designer.cs">
       <DependentUpon>CreateCoverImageDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="InputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputDialog.Designer.cs">
+      <DependentUpon>InputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="PropertyDlg.cs">
       <SubType>Form</SubType>
     </Compile>

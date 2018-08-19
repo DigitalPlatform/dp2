@@ -8,7 +8,7 @@ namespace DigitalPlatform.CommonDialog
 {
 
     /// <summary>
-    /// Summary description for QuestionDlg.
+    /// 提问/回答 对话框。用于 GCAT 前端回答 API 返回的问题
     /// </summary>
     public class QuestionDlg : System.Windows.Forms.Form
 	{
@@ -25,14 +25,7 @@ namespace DigitalPlatform.CommonDialog
 
 		public QuestionDlg()
 		{
-			//
-			// Required for Windows Form Designer support
-			//
 			InitializeComponent();
-
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
 		}
 
 		/// <summary>
