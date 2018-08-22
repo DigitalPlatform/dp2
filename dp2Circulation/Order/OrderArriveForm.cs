@@ -40,6 +40,8 @@ namespace dp2Circulation
         public OrderArriveForm()
         {
             InitializeComponent();
+
+            this.orderDesignControl1.ToolTip = this.toolTip1;
         }
 
         private void OrderArriveForm_Load(object sender, EventArgs e)
@@ -99,7 +101,7 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -146,6 +148,42 @@ namespace dp2Circulation
             set
             {
                 this.orderDesignControl1.BiblioDbName = value;
+            }
+        }
+
+        public string SellerFilter
+        {
+            get
+            {
+                return this.orderDesignControl1.SellerFilter;
+            }
+            set
+            {
+                this.orderDesignControl1.SellerFilter = value;
+            }
+        }
+
+        Control _currentToolTipControl = null;
+
+        private void OrderArriveForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            // https://stackoverflow.com/questions/1732140/displaying-tooltip-over-a-disabled-control
+            Control control = GetChildAtPoint(e.Location);
+            if (control != null)
+            {
+                if (!control.Enabled && _currentToolTipControl == null)
+                {
+                    string toolTipString = toolTip1.GetToolTip(control);
+                    // trigger the tooltip with no delay and some basic positioning just to give you an idea
+                    toolTip1.Show(toolTipString, control, control.Width / 2, control.Height / 2);
+                    _currentToolTipControl = control;
+                }
+            }
+            else
+            {
+                if (_currentToolTipControl != null)
+                    toolTip1.Hide(_currentToolTipControl);
+                _currentToolTipControl = null;
             }
         }
     }

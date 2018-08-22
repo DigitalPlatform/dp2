@@ -1223,7 +1223,7 @@ namespace DigitalPlatform.Script
                 if (IsEqual(line, "using DigitalPlatform.CirculationClient.localhost;"))
                 {
                     text.Append("using DigitalPlatform.LibraryClient.localhost; // 为兼容而作的自动修改\r\n");
-                    goto CONTINUE;
+                    continue;
                 }
 
                 // 2018/8/18

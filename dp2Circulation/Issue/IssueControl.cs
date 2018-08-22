@@ -2565,6 +2565,7 @@ namespace dp2Circulation
                 DoBinding("记到", "auto");    // 
         }
 
+#if NO
         void DoIssueManage()
         {
             string strError = "";
@@ -2603,7 +2604,6 @@ namespace dp2Circulation
                         return;
                 }
             }
-
 
             // 
             if (this.Items == null)
@@ -2856,7 +2856,7 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
+#endif
         void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
         {
             string strError = "";

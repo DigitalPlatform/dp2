@@ -66,6 +66,12 @@ namespace dp2Circulation
         /// </summary>
         public string PriceDefault = "验收价";  // 为册记录中的价格字段设置何种价格值。书目价/订购价/验收价/空白
 
+        // 2018/8/19
+        /// <summary>
+        /// 书商过滤器
+        /// </summary>
+        public string SellerFilter { get; set; }
+        
         // 
         /// <summary>
         /// 打开验收目标记录(以便输入条码等)
@@ -365,8 +371,6 @@ namespace dp2Circulation
         {
             string strError = "";
             int nRet = 0;
-
-            GetOrderingBatchNo();
 
             // 
             if (this.Items == null)
@@ -676,10 +680,13 @@ namespace dp2Circulation
                 this.VerifyLibraryCode(sender, e);
         }
 
-        // 获得缺省记录
+        // 订购设计对话框，获得缺省记录
         void dlg_GetDefaultRecord(object sender, DigitalPlatform.CommonControl.GetDefaultRecordEventArgs e)
         {
             string strError = "";
+
+            // 给一个机会，设定订购批次号
+            GetOrderingBatchNo();
 
             string strNewDefault = Program.MainForm.AppInfo.GetString(
                 "entityform_optiondlg",
@@ -978,6 +985,12 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
+            if (this.listView.Items.Count == 0)
+            {
+                strError = "当前不存在订购记录，无法进行验收。需先订购和打印订单，才能进行验收操作";
+                goto ERROR1;
+            }
+
             // this.AcceptedBookItems.Clear();
             string strBiblioSourceRecord = "";
             string strBiblioSourceSyntax = "";
@@ -1000,6 +1013,7 @@ namespace dp2Circulation
                 this.InputItemsBarcode = e.InputItemsBarcode;
                 this.SetProcessingState = e.SetProcessingState;
                 this.CreateCallNumber = e.CreateCallNumber;
+                this.SellerFilter = e.SellerFilter;
 
                 this.PriceDefault = e.PriceDefault;
 
@@ -1024,8 +1038,8 @@ namespace dp2Circulation
 
                 // 2018/8/19
                 // 从快速册登记默认记录中取得批次号字段内容。并允许修改
-                // TODO: 增加“下次不再出现此对话框”checkbox。按住 Ctrl 可重新让对话框出现
-                this.AcceptBatchNo = GetAcceptingBatchNo();
+                // this.AcceptBatchNo = GetAcceptingBatchNo();
+                // 改为延迟到真正创建册记录时候询问
             }
 
             // 
@@ -1040,7 +1054,7 @@ namespace dp2Circulation
             dlg.Text = "验收 -- 批次号:" + this.AcceptBatchNo + " -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
             dlg.TargetRecPath = this.TargetRecPath;
             dlg.ClearAllItems();
-
+            dlg.SellerFilter = this.SellerFilter;
             // bool bCleared = false;  // 是否清除过对话框里面的参与事项?
 
             // 将已有的订购信息反映到对话框中。
@@ -1361,6 +1375,8 @@ namespace dp2Circulation
                 return -1;
             }
 
+            bool bAsked = false;    // 是否询问过验收批次号了
+
             GenerateEntityEventArgs data_container = new GenerateEntityEventArgs();
             data_container.InputItemBarcode = this.InputItemsBarcode;
             data_container.SetProcessingState = this.SetProcessingState;
@@ -1512,7 +1528,14 @@ namespace dp2Circulation
                         DomUtil.SetElementText(dom.DocumentElement,
                             "location", location.Name);
 
-                        // TODO: 非流程验收时，如何询问验收批次号？为空则询问？还是无条件询问
+                        // 非流程验收时，询问验收批次号
+                        if (this.PrepareAccept == null && bAsked == false)
+                        {
+                            // 2018/8/19
+                            // 从快速册登记默认记录中取得批次号字段内容。并允许修改
+                            this.AcceptBatchNo = GetAcceptingBatchNo();
+                            bAsked = true;
+                        }
 
                         // 批次号
                         DomUtil.SetElementText(dom.DocumentElement,
@@ -4109,7 +4132,11 @@ namespace dp2Circulation
         /// </summary>
         public string PriceDefault = "验收价";  // 为册记录中的价格字段设置何种价格值。书目价/订购价/验收价/空白
 
-        // 
+        /// <summary>
+        /// [out] 书商过滤器
+        /// </summary>
+        public string SellerFilter { get; set; }
+
         /// <summary>
         /// [out] 警告信息。可以对操作者提出警告，如果操作者执意要继续执行，也可以。这里主要警告源和目标title不符合的情况
         /// </summary>
