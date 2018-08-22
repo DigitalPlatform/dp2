@@ -1441,9 +1441,18 @@ namespace dp2Circulation
             string strIssueCount = DomUtil.GetElementText(dom.DocumentElement,
                 "issueCount");
 
+            if (string.IsNullOrEmpty(strIssueCount))
+                strIssueCount = "1";
+            if (Int32.TryParse(strIssueCount, out int nIssueCount) == false)
+            {
+                throw new Exception("订购记录 '" + strRecPath + "' 中 issueCount 元素格式错误: 应为纯数字");
+            }
+
             // TODO: 是否只将订购复本字符串放入复本列?
             string strCopy = DomUtil.GetElementText(dom.DocumentElement,
                 "copy");
+
+            OldNewCopy copy = OldNewCopy.Parse(strCopy, "订购记录 '" + strRecPath + "' 中复本数字段");
 
             string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
     "fixedPrice");
@@ -1466,7 +1475,7 @@ namespace dp2Circulation
 
             List<int> textchanged_columns = new List<int>();
 
-            int nIssueCount = 1;
+            // int nIssueCount = 1;
             if (strPubType == "连续出版物")
             {
                 try
@@ -1486,6 +1495,7 @@ namespace dp2Circulation
             }
 
             {
+#if NO
                 // 分离 "old[new]" 内的两个值
                 dp2StringUtil.ParseOldNewValue(strCopy,
                     out string strOldCopy,
@@ -1503,6 +1513,31 @@ namespace dp2Circulation
                     SetItemColor(item,
                             TYPE_ERROR);
                 }
+#endif
+
+                OldNewValue price = OldNewValue.Parse(strPrice);
+
+                // 如果单价为空，而总价不为空，这时需要从总价算出单价。公式为 单价 = 总价/(复本套数*期数)
+                if (string.IsNullOrEmpty(price.OldValue) && string.IsNullOrEmpty(strTotalPrice) == false)
+                {
+                    int nCount = (copy.OldCopy.Copy * nIssueCount);
+                    if (nCount == 1)
+                        price.OldValue = strTotalPrice;
+                    else
+                        price.OldValue = strTotalPrice + "/" + nCount;
+
+                    strPrice = "*" + price.ToString();
+
+                    {
+                        data.Changed = true;
+                        SetItemColor(item,
+                            TYPE_CHANGED);
+
+                        textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
+                    }
+                }
+
+#if NO
 
                 // 分离 "old[new]" 内的两个值
                 dp2StringUtil.ParseOldNewValue(strPrice,
@@ -1510,7 +1545,7 @@ namespace dp2Circulation
                     out string strCurrentNewPrice);
 
                 string strCurrentPrice = strCurrentOldPrice;
-
+#endif
 
                 // 汇总价格
                 string strCurTotalPrice = "";
@@ -1520,13 +1555,16 @@ namespace dp2Circulation
                 // 只有原始数据中总价格为空时，才有必要汇总价格
                 if (String.IsNullOrEmpty(strTotalPrice) == true)
                 {
-                    nRet = PriceUtil.MultiPrice(strCurrentPrice,
-                        nCopy,
+                    nRet = PriceUtil.MultiPrice(price.OldValue, // strCurrentPrice,
+                        copy.OldCopy.Copy,   // nCopy,
                         out strCurTotalPrice,
                         out strError);
                     if (nRet == -1)
                     {
-                        strBiblioSummary = "价格字符串 '" + strCurrentPrice + "' 格式不正确: " + strError;
+                        strBiblioSummary = "价格字符串 '"
+                            // + strCurrentPrice 
+                            + price.OldValue
+                            + "' 格式不正确: " + strError;
                         SetItemColor(item,
                                 TYPE_ERROR);
                     }
@@ -3315,7 +3353,7 @@ namespace dp2Circulation
 
             // 栏目标题行
             {
-                #region 输出 HTML
+#region 输出 HTML
 
                 strTableContent += "<tr class='column'>";
                 strTableContent += "<td class='class'>" + strStatisTypeName + "</td>";
@@ -3333,9 +3371,9 @@ namespace dp2Circulation
                     strTableContent += "<td class='accept_fixedprice'>已到码洋</td>";
                 }
 
-                #endregion
+#endregion
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3389,7 +3427,7 @@ title_last,
 XLColor.LightGray);
                 }
 
-                #endregion
+#endregion
             }
 
             string strSumPrice = "";
@@ -3460,7 +3498,7 @@ out strError);
                 else
                     strNoSumClass = " sum";
 
-                #region 输出 HTML
+#region 输出 HTML
 
                 strTableContent += "<tr class='content" + HttpUtility.HtmlEncode(strNoSumClass) + "'>";
                 strTableContent += "<td class='class'>" + HttpUtility.HtmlEncode(line.Class) + "</td>";
@@ -3478,9 +3516,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptCurrentFixedPrices) + "</td>";
                 }
 
-                #endregion
+#endregion
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3582,7 +3620,7 @@ strAcceptCurrentFixedPrices);
                     nExcelLineIndex++;
                 }
 
-                #endregion
+#endregion
 
                 if (secondary_lines != null
                     && line.InnerLines != null) // 2013/9/11
@@ -3620,7 +3658,7 @@ strCurrentFixedPrices);
             }
 
             // 汇总行
-            #region 输出 HTML
+#region 输出 HTML
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
         out string strOutputPrice,
@@ -3662,9 +3700,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptOutputFixedPrice) + "</td>";
                 }
             }
-            #endregion
+#endregion
 
-            #region 输出 Excel
+#region 输出 Excel
             if (doc != null)
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
@@ -3767,7 +3805,7 @@ strAcceptOutputFixedPrice);
                     "");    // 没有竖线
             }
 
-            #endregion
+#endregion
 
             strTableContent += "</tr>";
             strTableContent += "</table>";
@@ -3919,7 +3957,7 @@ strAcceptOutputFixedPrice);
             }
 
 
-            #region 输出 Excel
+#region 输出 Excel
 
             if (sheet != null)
             {
@@ -3995,7 +4033,7 @@ title_last,
 "",
 XLColor.LightGray);
             }
-            #endregion
+#endregion
 
             List<StatisLine> sum_items = new List<StatisLine>();
 
@@ -4014,7 +4052,7 @@ XLColor.LightGray);
                 strTableContent.Append("<tr class='content" + HttpUtility.HtmlAttributeEncode(strNoSumClass) + "'>");
                 strTableContent.Append("<td class='class'>" + HttpUtility.HtmlEncode(inner_line.Key) + "</td>");
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4032,7 +4070,7 @@ inner_line.Key/*,
 true*/);
                 }
 
-                #endregion
+#endregion
 
                 int i = 0;
                 foreach (StatisLine line in inner_line.lines)
@@ -4040,7 +4078,7 @@ true*/);
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
 
-                    #region 输出 Excel
+#region 输出 Excel
 
                     if (sheet != null)
                     {
@@ -4060,7 +4098,7 @@ true*/);
     XLAlignmentHorizontalValues.Right);
                     }
 
-                    #endregion
+#endregion
 
                     // 汇总
                     if (inner_line.AllowSum == true)
@@ -4091,7 +4129,7 @@ true*/);
                 strTableContent.Append("<tr class='totalize'>");
                 strTableContent.Append("<td class='class'>合计</td>");
 
-                #region 输出 Excel
+#region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4106,13 +4144,13 @@ true*/);
 
                 }
 
-                #endregion
+#endregion
 
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
-                    #region 输出 Excel
+#region 输出 Excel
                     if (sheet != null)
                     {
                         IXLCell first = WriteExcelCell(
@@ -4134,7 +4172,7 @@ true*/);
                         // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
 
                     }
-                    #endregion
+#endregion
                 }
                 strTableContent.Append("</tr>");
             }
@@ -5073,7 +5111,7 @@ XLColor.DarkGreen); // 订单
             return 0;
         }
 
-        #region Excel 实用函数
+#region Excel 实用函数
 
         // 合计页的边沿
         static int SUM_TOP_BLANK_LINES = 2;
@@ -5237,7 +5275,7 @@ long value,
         }
 #endif
 
-        #endregion
+#endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -7355,8 +7393,8 @@ ORIGIN_COLUMN_ORDERTIME));   // 已经是本地时间格式
                     ORIGIN_COLUMN_DISCOUNT);
 
                 // *** 单价
-                string strPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_PRICE);
+                string strPrice = RemoveChangedChar(ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_PRICE));
                 // *** 码洋
                 string strFixedPrice = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_FIXEDPRICE);
@@ -8504,9 +8542,18 @@ ORIGIN_COLUMN_COPY);
                         {
                             strError = strCurrentPosition + " 码洋 不应为空";
                             return -1;
+#if NO
+                            // 总价已经具备的情况下，码洋可以为空。此时单价可以从总价反过来计算出
+                            if (string.IsNullOrEmpty(strTotalPrice) == true)
+                            {
+                                strError = strCurrentPosition + " 码洋 不应为空";
+                                return -1;
+                            }
+#endif
                         }
 
-                        totalfixedprices.Add(strTotalFixedPrice);
+                        if (string.IsNullOrEmpty(strTotalFixedPrice) == false)
+                            totalfixedprices.Add(strTotalFixedPrice);
 
                         // 汇总到书价格
                         string strAcceptTotalPrice = "";
@@ -9103,7 +9150,7 @@ MessageBoxDefaultButton.Button2);
                 MERGED_COLUMN_SELLER);
         }
 
-        #region 原始数据
+#region 原始数据
 
         // 打印原始数据
         private void button_print_printOriginList_Click(object sender, EventArgs e)
@@ -10008,7 +10055,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #endregion
+#endregion
 
         // 保存对原始数据的修改
         private void button_saveChange_saveChange_Click(object sender, EventArgs e)
@@ -10126,6 +10173,12 @@ MessageBoxDefaultButton.Button2);
                         "state",
                         RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_STATE)));
                     RemoveChangedChar(item, ORIGIN_COLUMN_STATE);
+
+                    // 2018/8/22
+                    DomUtil.SetElementText(dom.DocumentElement,
+    "price",
+    RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_PRICE)));
+                    RemoveChangedChar(item, ORIGIN_COLUMN_PRICE);
 
                     DomUtil.SetElementText(dom.DocumentElement,
                         "totalPrice",
@@ -11271,7 +11324,7 @@ MessageBoxDefaultButton.Button2);
             LoadOrderToEntityForm(this.listView_origin);
         }
 
-        #region 到书率分时间片统计
+#region 到书率分时间片统计
 
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
@@ -12287,7 +12340,7 @@ string strFileName)
             return 0;
         }
 
-        #endregion
+#endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)
