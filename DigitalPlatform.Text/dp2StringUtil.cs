@@ -670,6 +670,11 @@ out string strOldValue,
 out string strNewValue);
             return new OldNewValue { OldValue = strOldValue, NewValue = strNewValue };
         }
+
+        public override string ToString()
+        {
+            return dp2StringUtil.LinkOldNewValue(this.OldValue, this.NewValue);
+        }
     }
 
     /// <summary>
