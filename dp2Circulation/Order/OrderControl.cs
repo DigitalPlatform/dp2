@@ -1124,7 +1124,8 @@ namespace dp2Circulation
             {
                 DigitalPlatform.CommonControl.Item design_item = dlg.Items[i];
 
-                if ((design_item.State & ItemState.ReadOnly) != 0)
+                if ((design_item.State & ItemState.ReadOnly) != 0
+                    || (design_item.State & ItemState.Changed) == 0)    // 2018/8/22
                 {
                     // 复原
                     OrderItem order_item = (OrderItem)design_item.Tag;

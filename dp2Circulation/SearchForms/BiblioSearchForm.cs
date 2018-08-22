@@ -2893,7 +2893,6 @@ out strError);
             return strMacroName;
         }
 
-
         // 导出订购去向分配表 Excel 文件
         void menu_exportDistributeExcelFile_Click(object sender, EventArgs e)
         {
@@ -2947,13 +2946,10 @@ out strError);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
-            // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
-
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
-            // int nRowIndex = 2;  // 跟踪行号            
-            bool bDone = false; // 是否成功走完全部流程
+                                    // int nRowIndex = 2;  // 跟踪行号            
+                                    // bool bDone = false; // 是否成功走完全部流程
 
             int nBiblioCount = 0;   // 导出书目计数
             int nOrderCount = 0;    // 导出订购记录计数
@@ -2964,6 +2960,9 @@ out strError);
 + " 开始导出订购去向 Excel 文件</div>");
             try
             {
+                IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
+                // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
+
                 // 准备书目列标题
                 Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
                     "");
@@ -3180,7 +3179,13 @@ out strError);
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 
-                bDone = true;
+                // bDone = true;
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.OutputFileName);
+                    doc.Dispose();
+                }
             }
             catch (InterruptException ex)
             {
@@ -3199,29 +3204,20 @@ out strError);
 
                 this.ClearMessage();
 
-                if (bDone == true)
-                {
-                    if (doc != null)
-                    {
-                        doc.SaveAs(dlg.OutputFileName);
-                        doc.Dispose();
-                    }
-
-                    if (bLaunchExcel)
-                    {
-                        try
-                        {
-                            System.Diagnostics.Process.Start(dlg.OutputFileName);
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 结束导出订购去向 Excel 文件</div>");
+            }
+
+            if (bLaunchExcel)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(dlg.OutputFileName);
+                }
+                catch
+                {
+
+                }
             }
 
             // 提示完成和统计信息
