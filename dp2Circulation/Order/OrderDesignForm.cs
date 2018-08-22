@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform;
@@ -194,7 +190,7 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -252,6 +248,18 @@ namespace dp2Circulation
             set
             {
                 this.orderDesignControl1.CheckDupItem = value;
+            }
+        }
+
+        public string SellerFilter
+        {
+            get
+            {
+                return this.orderDesignControl1.SellerFilter;
+            }
+            set
+            {
+                this.orderDesignControl1.SellerFilter = value;
             }
         }
     }

@@ -2779,6 +2779,11 @@ namespace dp2Circulation
             // parent_item --> member_items
             memberitems_table = new Hashtable();
 
+            // dup_table
+            // 用于检查一个册事项被重复用于多个合订册的 hashtable
+            // memberitem --> parent_item
+            Hashtable dup_table = new Hashtable();
+
             // 遍历合订册对象数组，建立成员对象数组
             for (int i = 0; i < parent_items.Count; i++)
             {
@@ -2815,7 +2820,6 @@ namespace dp2Circulation
                         i--;
                         continue;
                     }
-
 
                     bool bFailed = false;
                     string strFailMessage = "";
@@ -2981,6 +2985,19 @@ namespace dp2Circulation
                         {
                             // 没有publishtime，也无法安放
                         }
+                    }
+                    else
+                    {
+                        // 2018/8/22
+                        // 检查 refid 是否被不同的合订册重复使用
+                        if (dup_table.ContainsKey(sub_item))
+                        {
+                            ItemBindingItem parent = dup_table[sub_item] as ItemBindingItem;
+                            // TODO: 需要增加一个获得事项描述名称的函数
+                            strError = "数据错误：成员册事项 '" + sub_item.RefID + "' 被重复用于合订册 '" + parent.RefID + "' 和 '" + parent_item.RefID + "'";
+                            return -1;
+                        }
+                        dup_table[sub_item] = parent_item;
                     }
 
                     // sub_item.Binded = true; // 注：place阶段会设置的
@@ -11654,7 +11671,6 @@ MessageBoxDefaultButton.Button2);
             Cell cell = members[0];
             return cell.Container.Cells.IndexOf(cell);
         }
-
 
         // 将若干单册加入一个合订册
         // return:

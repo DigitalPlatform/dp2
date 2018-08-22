@@ -1070,9 +1070,6 @@ int MAX_CHARS = 50)
             return results;
         }
 
-
-
-
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
             bool bRemovePrefix = true)
         {

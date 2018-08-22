@@ -19,6 +19,8 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class OrderDesignControl : UserControl
     {
+        public ToolTip ToolTip { get; set; }
+
         public bool CheckDupItem = true;    // 是否在结束的时候检查三元组、四元组
 
         internal bool m_bFocused = false;
@@ -30,6 +32,20 @@ namespace DigitalPlatform.CommonControl
         internal int DisableNewlyArriveTextChanged = 0;
 
         public Item LastClickItem = null;   // 最近一次click选择过的Item对象
+
+        string _sellerFilter = "";
+        // 书商名称过滤。"<不过滤>"或者空，表示不过滤
+        public string SellerFilter
+        {
+            get
+            {
+                return _sellerFilter;
+            }
+            set
+            {
+                _sellerFilter = value;
+            }
+        }
 
         // 获取值列表时作为线索的数据库名
         string m_strBiblioDbName = "";
@@ -1366,8 +1382,11 @@ namespace DigitalPlatform.CommonControl
             return item;
         }
 
-
-
+        // 匹配书商名称
+        static bool MatchSeller(string seller, string seller_filter)
+        {
+            return (StringUtil.IsInList(seller, seller_filter));
+        }
 
         // 根据缺省XML订购记录填充必要的字段
         int SetDefaultRecord(Item item,
@@ -1576,6 +1595,8 @@ namespace DigitalPlatform.CommonControl
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
 
+            item.StateComment = "";
+
             if (this.ArriveMode == false)
             {
                 // 订购态
@@ -1588,25 +1609,42 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                // 验收态
-                if (strState == "已订购" || strState == "已验收")
+                // 检查书商
+                bool seller_matched = true;
+                if (string.IsNullOrEmpty(this._sellerFilter) == false && this._sellerFilter != "<不过滤>")
                 {
-                    // 注：状态为“已验收”时，不一定全部复本都已验收，所以这时应当允许再次验收。
-                    // 即便所有复本都已验收，还可以追加、多验收复本，所以这样的事项不能readonly
+                    if (MatchSeller(item.Seller, this._sellerFilter) == false)
+                        seller_matched = false;
+                }
 
-                    // item.State -= ItemState.ReadOnly;
-
-                    // 将location item中已经勾选的事项设置为readonly态，表示是已经验收的(馆藏地点、册)事项
-                    item.location.SetAlreadyCheckedToReadOnly(false);
-
+                if (seller_matched == false)
+                {
+                    item.State |= ItemState.ReadOnly;
+                    // TODO: tips 提示只读状态的原因
+                    item.StateComment = "渠道 '" + item.Seller + "' 不符合渠道过滤器 '" + this._sellerFilter + "'";
                 }
                 else
                 {
-                    // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
+                    // 验收态
+                    if (strState == "已订购" || strState == "已验收")
+                    {
+                        // 注：状态为“已验收”时，不一定全部复本都已验收，所以这时应当允许再次验收。
+                        // 即便所有复本都已验收，还可以追加、多验收复本，所以这样的事项不能readonly
 
-                    item.State |= ItemState.ReadOnly;
+                        // item.State -= ItemState.ReadOnly;
+
+                        // 将location item中已经勾选的事项设置为readonly态，表示是已经验收的(馆藏地点、册)事项
+                        item.location.SetAlreadyCheckedToReadOnly(false);
+
+                    }
+                    else
+                    {
+                        // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
+
+                        item.State |= ItemState.ReadOnly;
+                        item.StateComment = "状态 '" + strState + "' 不允许进行验收操作";
+                    }
                 }
-
             }
 
             // 2009/2/13
@@ -2714,6 +2752,8 @@ out string strNewOrderPrice);
             Container = null;
         }
 
+        string _stateComment = "";
+
         ItemState m_state = ItemState.Normal;
 
         // 主动修改location控件的ArrivedCount，需要避免递归处理由此引起的事件
@@ -3070,6 +3110,20 @@ out string strNewOrderPrice);
                     // 其他
                     // this.label_other
                 }
+            }
+        }
+
+        // 状态注释，用于 tips 显示
+        public string StateComment
+        {
+            get
+            {
+                return this._stateComment;
+            }
+            set
+            {
+                this._stateComment = value;
+                this.Container?.ToolTip?.SetToolTip(this.label_color, value);
             }
         }
 
