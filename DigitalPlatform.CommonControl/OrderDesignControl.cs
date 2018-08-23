@@ -2511,8 +2511,84 @@ namespace DigitalPlatform.CommonControl
         //      strVerifyStyle 比较风格。old/new/both 只比较旧/只比较新/新旧都比较
         // return:
         //      -2  码洋和订购价货币单位不同，无法进行校验。
+        //      -1  校验过程出错
         //      0   校验发现三者关系不正确
         //      1   校验三者关系正确
+        public static int VerifyOrderPriceByFixedPricePair(
+            string strFixedPrice,
+    string strDiscount,
+    string strOrderPrice,
+    string strVerifyStyle,
+    out string strError)
+        {
+            strError = "";
+
+            OldNewValue fixedPrice = OldNewValue.Parse(strFixedPrice);
+            OldNewValue orderPrice = OldNewValue.Parse(strOrderPrice);
+
+            if (orderPrice.IsVirtual)
+            {
+                strError = "单价字符串 '" + strOrderPrice + "' 中不应该包含花括号";
+                return -1;
+            }
+
+            OldNewValue discount = OldNewValue.Parse(strDiscount);
+
+            if (discount.IsVirtual)
+            {
+                strError = "折扣字符串 '" + strDiscount + "' 中不应该包含花括号";
+                return -1;
+            }
+#if NO
+            dp2StringUtil.ParseOldNewValue(strFixedPrice,
+    out string strOldFixedPrice,
+    out string strNewFixedPrice);
+
+            dp2StringUtil.ParseOldNewValue(strDiscount,
+out string strOldDiscount,
+out string strNewDiscount);
+
+            dp2StringUtil.ParseOldNewValue(strOrderPrice,
+out string strOldOrderPrice,
+out string strNewOrderPrice);
+#endif
+
+            if (string.IsNullOrEmpty(fixedPrice.OldValue) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(fixedPrice.OldValue,
+        discount.OldValue,
+        orderPrice.OldValue,
+        out string strWishOldFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            if (string.IsNullOrEmpty(fixedPrice.NewValue) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(fixedPrice.NewValue,
+        discount.NewValue,
+        orderPrice.NewValue,
+        out string strWishNewFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            return 1;
+        }
+
+#if NO
         public static int VerifyOrderPriceByFixedPricePair(
             string strFixedPrice,
     string strDiscount,
@@ -2568,6 +2644,8 @@ out string strNewOrderPrice);
 
             return 1;
         }
+#endif
+
 
         // 根据码洋和折扣值校验订购价的正确性
         // 注意码洋、折扣、订购价字符串里面都必须是单个金额字符串，不支持带有方括号的(新旧)复合形式

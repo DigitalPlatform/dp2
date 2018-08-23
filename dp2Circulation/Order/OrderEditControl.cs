@@ -1238,6 +1238,30 @@ namespace dp2Circulation
                 }
             }
 
+            if (this.FixedPrice.StartsWith("@") == false
+                && this.Price.StartsWith("@") == false
+                && string.IsNullOrEmpty(this.FixedPrice) == false
+                && string.IsNullOrEmpty(this.Price) == false)
+            {
+                // 检查码洋、折扣和单价之间的关系
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                nRet = OrderDesignControl.VerifyOrderPriceByFixedPricePair(
+                    this.FixedPrice,
+                    this.Discount,
+                    this.Price,
+                    "both",
+                    out strError);
+                if (nRet != 1 && nRet != -2)
+                {
+                    strError = "校验码洋、折扣和单价三者之间关系时出现错误: " + strError;
+                    return -1;
+                }
+            }
+
             return 0;
         }
 

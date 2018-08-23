@@ -66,6 +66,7 @@ namespace dp2Circulation.Order
                 strError = "输出文件名 '" + strOutputFileName + "' 不合法: " + strError;
                 goto ERROR1;
             }
+            this.textBox_outputFileName.Text = strOutputFileName;
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
