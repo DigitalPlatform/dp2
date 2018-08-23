@@ -2893,6 +2893,38 @@ out strError);
             return strMacroName;
         }
 
+        // return:
+        //      -2  码洋和订购价货币单位不同，无法进行校验。
+        //      -1  校验过程出错
+        //      0   校验发现三者关系不正确
+        //      1   校验三者关系正确
+        static int VerifyThreeFields(XmlDocument order_dom, out string strError)
+        {
+            strError = "";
+
+            string strFixedPrice = DomUtil.GetElementText(order_dom.DocumentElement, "fixedPrice");
+            string strPrice = DomUtil.GetElementText(order_dom.DocumentElement, "price");
+            string strDiscount = DomUtil.GetElementText(order_dom.DocumentElement, "discount");
+
+            if (string.IsNullOrEmpty(strFixedPrice)
+                || string.IsNullOrEmpty(strPrice))
+                return 1;
+
+            // 检查码洋、折扣和单价之间的关系
+            // return:
+            //      -2  码洋和订购价货币单位不同，无法进行校验。
+            //      -1  校验过程出错
+            //      0   校验发现三者关系不正确
+            //      1   校验三者关系正确
+            int nRet = OrderDesignControl.VerifyOrderPriceByFixedPricePair(
+                strFixedPrice,
+                strDiscount,
+                strPrice,
+                "both",
+                out strError);
+            return nRet;
+        }
+
         // 导出订购去向分配表 Excel 文件
         void menu_exportDistributeExcelFile_Click(object sender, EventArgs e)
         {
@@ -3046,6 +3078,7 @@ out strError);
                                 "",
                                 (biblio_recpath, order_recpath) =>
                                 {
+                                    REDO_0:
                                     if (string.IsNullOrEmpty(strDefaultOrderXml))
                                     {
                                         REDO:
@@ -3098,6 +3131,9 @@ out strError);
                                         }
 
                                         // TODO: 验证一下书商名称是否在合法值范围内?
+
+  
+
                                     }
 
                                     // 兑现模板记录中的宏
@@ -3122,6 +3158,22 @@ out strError);
                                         strResultXml = MacroXml(strDefaultOrderXml,
         strMARC,
         strMarcSyntax);
+                                        XmlDocument temp_dom = new XmlDocument();
+                                        temp_dom.LoadXml(strResultXml);
+                                        // 验证三个字段之间的关系
+                                        // return:
+                                        //      -2  码洋和订购价货币单位不同，无法进行校验。
+                                        //      -1  校验过程出错
+                                        //      0   校验发现三者关系不正确
+                                        //      1   校验三者关系正确
+                                        nRet = VerifyThreeFields(temp_dom, out strError);
+                                        if (nRet == 0 || nRet == -1)
+                                        {
+                                            strError = "校验三个字段关系时发现问题: " + strError + "\r\n\r\n请重新输入。特别注意关注码洋、折扣和单价之间的计算关系";
+                                            MessageBox.Show(this, strError);
+                                            strDefaultOrderXml = "";
+                                            goto REDO_0;
+                                        }
                                     }
 
                                     EntityInfo order = new EntityInfo
