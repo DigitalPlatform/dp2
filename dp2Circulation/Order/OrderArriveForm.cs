@@ -37,6 +37,16 @@ namespace dp2Circulation
             }
         }
 
+        public void BeginInitial()
+        {
+            this.orderDesignControl1.InInitial = true;
+        }
+
+        public void EndInitial()
+        {
+            this.orderDesignControl1.InInitial = false;
+        }
+
         public OrderArriveForm()
         {
             InitializeComponent();

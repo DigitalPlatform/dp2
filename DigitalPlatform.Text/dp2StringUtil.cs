@@ -280,6 +280,43 @@ namespace DigitalPlatform.Text
             return discount.ToString(CurrencyItem.fmt);
         }
 
+        // 能处理 {} 的版本
+        public static string LinkOldNewValueVirtual(string strOldValue,
+    string strNewValue)
+        {
+            if (String.IsNullOrEmpty(strNewValue) == true)
+                return strOldValue;
+
+            bool new_virtual = false;
+            if (strNewValue.StartsWith("{"))
+            {
+                strNewValue = StringUtil.Unquote(strNewValue, "{}");
+                new_virtual = true;
+            }
+
+            bool old_virtual = false;
+            if (string.IsNullOrEmpty(strOldValue) == false
+                && strOldValue.StartsWith("{"))
+            {
+                strOldValue = StringUtil.Unquote(strOldValue, "{}");
+                old_virtual = true;
+            }
+
+            if (strOldValue == strNewValue)
+            {
+                if (String.IsNullOrEmpty(strOldValue) == true)  // 新旧均为空
+                    return "";
+                if (new_virtual || old_virtual)
+                    return "{" + strOldValue + "[=]}";
+                return strOldValue + "[=]";
+            }
+
+            if (new_virtual || old_virtual)
+                return "{" + strOldValue + "[" + strNewValue + "]}";
+
+            return strOldValue + "[" + strNewValue + "]";
+        }
+
         // 把新旧两个值连接起来
         // old new --> old[new]
         public static string LinkOldNewValue(string strOldValue,
@@ -662,18 +699,25 @@ out string strPureName);
     {
         public string OldValue { get; set; }
         public string NewValue { get; set; }
+        public bool IsVirtual { get; set; } // 是否为虚拟值形态。所谓虚拟值就是最外面被 {} 括住
 
         public static OldNewValue Parse(string strValue)
         {
+            bool bVirtual = strValue.StartsWith("{");
+            if (bVirtual == true)
+                strValue = StringUtil.Unquote(strValue, "{}");
             dp2StringUtil.ParseOldNewValue(strValue,
 out string strOldValue,
 out string strNewValue);
-            return new OldNewValue { OldValue = strOldValue, NewValue = strNewValue };
+            return new OldNewValue { OldValue = strOldValue, NewValue = strNewValue, IsVirtual = bVirtual };
         }
 
         public override string ToString()
         {
-            return dp2StringUtil.LinkOldNewValue(this.OldValue, this.NewValue);
+            string value = dp2StringUtil.LinkOldNewValue(this.OldValue, this.NewValue);
+            if (this.IsVirtual)
+                return "{" + value + "}";
+            return value;
         }
     }
 

@@ -213,6 +213,15 @@ namespace dp2Circulation
             this.orderDesignControl1.Clear();
         }
 
+        public void BeginInitial()
+        {
+            this.orderDesignControl1.InInitial = true;
+        }
+
+        public void EndInitial()
+        {
+            this.orderDesignControl1.InInitial = false;
+        }
 
         public bool SeriesMode
         {
