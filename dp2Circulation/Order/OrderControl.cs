@@ -391,6 +391,7 @@ namespace dp2Circulation
                 // dlg.Text = "订购 -- 批次号:" + this.OrderBatchNo;
                 dlg.ClearAllItems();
 
+                dlg.BeginInitial();
                 // 将已有的订购信息反映到对话框中。
                 // 已经发出的订单事项，不能修改。而其他事项都可以修改
                 foreach (OrderItem item in this.Items)
@@ -417,6 +418,7 @@ namespace dp2Circulation
                 }
 
                 dlg.Changed = false;
+                dlg.EndInitial();
 
                 dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
                 dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
@@ -1057,6 +1059,8 @@ namespace dp2Circulation
             dlg.SellerFilter = this.SellerFilter;
             // bool bCleared = false;  // 是否清除过对话框里面的参与事项?
 
+            dlg.BeginInitial();
+
             // 将已有的订购信息反映到对话框中。
             foreach (OrderItem item in this.Items)
             {
@@ -1092,6 +1096,7 @@ namespace dp2Circulation
             }
 
             dlg.Changed = false;
+            dlg.EndInitial();
 
             dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
@@ -1187,7 +1192,7 @@ namespace dp2Circulation
 
                 orderitem.Copy = dp2StringUtil.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
 
-                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValue(design_item.OldFixedPrice, design_item.FixedPrice);
+                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValueVirtual(design_item.OldFixedPrice, design_item.FixedPrice);
                 orderitem.Discount = dp2StringUtil.LinkOldNewValue(design_item.OldDiscount, design_item.Discount);
 
                 orderitem.Price = dp2StringUtil.LinkOldNewValue(design_item.OldPrice, design_item.Price);
