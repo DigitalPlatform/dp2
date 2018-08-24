@@ -1517,31 +1517,61 @@ namespace dp2Circulation
                 }
 #endif
 
+                // *** 处理单价
                 OldNewValue price = OldNewValue.Parse(strPrice);
+                OldNewValue fixedPrice = OldNewValue.Parse(strFixedPrice);
+                OldNewValue discount = OldNewValue.Parse(strDiscount);
 
                 // 如果单价为空，而总价不为空，这时需要从总价算出单价。公式为 单价 = 总价/(复本套数*期数)
-                if (string.IsNullOrEmpty(price.OldValue) && string.IsNullOrEmpty(strTotalPrice) == false)
+                if (string.IsNullOrEmpty(price.OldValue))
                 {
-                    int nCount = (copy.OldCopy.Copy * nIssueCount);
-                    if (nCount == 1)
-                        price.OldValue = strTotalPrice;
-                    else
-                        price.OldValue = strTotalPrice + "/" + nCount;
-
-                    strPrice = "*" + price.ToString();
-
+                    if (string.IsNullOrEmpty(strTotalPrice) == false)
                     {
-                        data.Changed = true;
-                        SetItemColor(item,
-                            TYPE_CHANGED);
+                        int nCount = (copy.OldCopy.Copy * nIssueCount);
+                        if (nCount == 1)
+                            price.OldValue = strTotalPrice;
+                        else
+                            price.OldValue = strTotalPrice + "/" + nCount;
 
-                        textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
-                        // 单价被改变了
+                        strPrice = "*" + price.ToString();
+
+                        {
+                            data.Changed = true;
+                            SetItemColor(item,
+                                TYPE_CHANGED);
+
+                            textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
+                            // 单价被改变了
+                        }
+                    }
+                    else
+                    {
+                        // 2018/9/44
+                        // 总价为空。尝试从码洋、折扣里面计算单价
+                        // return:
+                        //      -1  计算过程出现错误
+                        //      0   strFixedPrice 为空，无法计算
+                        //      1   计算成功
+                        nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(fixedPrice.OldValue,
+                            discount.OldValue, 
+                            out string strResultPrice,
+                            out strError);
+                        if (nRet == 1)
+                        {
+                            price.OldValue = strResultPrice;
+                            strPrice = "*" + price.ToString();
+
+                            data.Changed = true;
+                            SetItemColor(item,
+                                TYPE_CHANGED);
+
+                            textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
+                            // 单价被改变了
+                        }
                     }
                 }
 
                 // *** 这一段决定了是否主动在订购记录里面补充 {} 形态的码洋字符串
-                OldNewValue fixedPrice = OldNewValue.Parse(strFixedPrice);
 
                 // 如果码洋为空，而折扣和单价不为空，这时需要从单价反向计算出码洋。
                 if (string.IsNullOrEmpty(fixedPrice.OldValue) == true
@@ -1550,7 +1580,7 @@ namespace dp2Circulation
                 {
                     nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(
                         price.OldValue,
-strDiscount,
+discount.OldValue,
 out string strResultPrice,
 out strError);
                     if (nRet == -1)
@@ -1719,7 +1749,7 @@ out strError);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_COPY, strCopy);
 
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_FIXEDPRICE, strFixedPrice);  // 
-            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_DISCOUNT, strDiscount);
+            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_DISCOUNT, strDiscount.ToString());
 
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_PRICE, strPrice);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_TOTALPRICE, strTotalPrice);
