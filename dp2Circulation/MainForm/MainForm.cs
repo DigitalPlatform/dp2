@@ -9029,7 +9029,6 @@ Keys keyData)
                             return;
                         }
 
-
                         foreach (string key in order_content_table.Keys)
                         {
                             if (key == "recpath" || key == "state")
@@ -9098,6 +9097,15 @@ Keys keyData)
                             Order.DistributeExcelFile.Warning("订购记录没有发生实质性修改，忽略导入");
                             goto CONTINUE;
                         }
+
+                        // return:
+                        //      -2  码洋和订购价货币单位不同，无法进行校验。
+                        //      -1  校验过程出错
+                        //      0   校验发现三者关系不正确
+                        //      1   校验三者关系正确
+                        nRet = BiblioSearchForm.VerifyThreeFields(dom, out strError);
+                        if (nRet == 0 || nRet == -1)
+                            throw new Exception("(订购记录 '"+ strOrderRecPath + "') " + strError);
 
                         nRet = SaveItemRecord(channel,
         strBiblioRecPath,

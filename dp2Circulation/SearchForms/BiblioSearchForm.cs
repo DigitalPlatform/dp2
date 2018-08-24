@@ -2898,7 +2898,7 @@ out strError);
         //      -1  校验过程出错
         //      0   校验发现三者关系不正确
         //      1   校验三者关系正确
-        static int VerifyThreeFields(XmlDocument order_dom, out string strError)
+        public static int VerifyThreeFields(XmlDocument order_dom, out string strError)
         {
             strError = "";
 
