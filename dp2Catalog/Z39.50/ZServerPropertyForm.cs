@@ -1,12 +1,7 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
-
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
@@ -16,11 +11,11 @@ using DigitalPlatform.GUI;    // GetDp2ResDlg
 namespace dp2Catalog
 {
     /// <summary>
-    /// Z39.50·şÎñÆ÷ÊôĞÔ¶Ô»°¿ò
+    /// Z39.50æœåŠ¡å™¨å±æ€§å¯¹è¯æ¡†
     /// </summary>
     public partial class ZServerPropertyForm : Form
     {
-        public XmlNode XmlNode = null;  // ·şÎñÆ÷XML½Úµã
+        public XmlNode XmlNode = null;  // æœåŠ¡å™¨XMLèŠ‚ç‚¹
         public string InitialResultInfo = "";
 
         public MainForm MainForm = null; // 2007/12/16
@@ -106,7 +101,7 @@ namespace dp2Catalog
 DomUtil.GetAttr(this.XmlNode,
 "ignorereferenceid"));
 
-            // ¶ÔISBNµÄÔ¤´¦Àí
+            // å¯¹ISBNçš„é¢„å¤„ç†
             this.m_nDisableCheckIsbnParameters++;
             try
             {
@@ -132,10 +127,16 @@ DomUtil.GetAttr(this.XmlNode,
                 this.m_nDisableCheckIsbnParameters--;
             }
 
+            // 2018/8/25
+            string strValue = DomUtil.GetAttr(this.XmlNode, "issn_force8");
+            if (string.IsNullOrEmpty(strValue))
+                strValue = "1"; // ç¼ºçœå€¼ä¸º 1
+            this.checkBox_forceIssn8.Checked = GetBool(strValue);
+
             this.textBox_presentPerCount.Text = DomUtil.GetAttr(this.XmlNode,
                 "recsperbatch");
 
-            // Êı¾İ¿âÃû
+            // æ•°æ®åº“å
             XmlNodeList nodes = this.XmlNode.SelectNodes("database");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -146,7 +147,7 @@ DomUtil.GetAttr(this.XmlNode,
 
                 this.textBox_databaseNames.Text += strDatabaseName;
 
-                // È«Ñ¡Ê±ºòÒªÅÅ³ıµÄÊı¾İ¿âÃû
+                // å…¨é€‰æ—¶å€™è¦æ’é™¤çš„æ•°æ®åº“å
                 bool bValue = false;
                 string strError = "";
                 DomUtil.GetBooleanParam(nodes[i],
@@ -168,12 +169,12 @@ DomUtil.GetAttr(this.XmlNode,
             this.comboBox_defaultEncoding.Text = DomUtil.GetAttr(this.XmlNode,
                 "defaultEncoding");
             /*
-            // ²¹³äMARC-8
+            // è¡¥å……MARC-8
             this.comboBox_defaultEncoding.Items.Add("MARC-8");
              * */
 
             Global.FillEncodingList(this.comboBox_queryTermEncoding,
-                false); // ¼ìË÷´ÊÔİÊ±²»ÈÃÓÃMARC-8±àÂë·½Ê½
+                false); // æ£€ç´¢è¯æš‚æ—¶ä¸è®©ç”¨MARC-8ç¼–ç æ–¹å¼
             this.comboBox_queryTermEncoding.Text = DomUtil.GetAttr(this.XmlNode,
                 "queryTermEncoding");
 
@@ -190,7 +191,7 @@ DomUtil.GetAttr(this.XmlNode,
             SetBinding(strBindingDef);
 
 
-            // ×Ö·û¼¯Ğ­ÉÌ
+            // å­—ç¬¦é›†åå•†
             this.checkBox_charNegoUTF8.Checked = GetBool(DomUtil.GetAttr(this.XmlNode,
                 "charNegoUtf8"));
             this.checkBox_charNegoRecordsInSelectedCharSets.Checked = GetBool(DomUtil.GetAttr(this.XmlNode,
@@ -208,7 +209,7 @@ DomUtil.GetAttr(this.XmlNode,
             // set initial button state
             textBox_homepage_TextChanged(this, null);
 
-            // ÁªºÏ±àÄ¿
+            // è”åˆç¼–ç›®
             this.textBox_unionCatalog_bindingDp2ServerName.Text = DomUtil.GetAttr(
                 this.XmlNode, "unionCatalog_bindingDp2ServerName");
 
@@ -218,7 +219,7 @@ DomUtil.GetAttr(this.XmlNode,
         }
 
         /*
-        // ½«°ó¶¨¶¨Òå×Ö·û´®ÉèÖÃµ½listviewÖĞ
+        // å°†ç»‘å®šå®šä¹‰å­—ç¬¦ä¸²è®¾ç½®åˆ°listviewä¸­
         void SetBinding(string strBindingString)
         {
             this.listView_recordSyntaxAndEncodingBinding.Items.Clear();
@@ -252,7 +253,7 @@ DomUtil.GetAttr(this.XmlNode,
             }
         }*/
 
-                // ½«°ó¶¨¶¨Òå×Ö·û´®ÉèÖÃµ½listviewÖĞ
+                // å°†ç»‘å®šå®šä¹‰å­—ç¬¦ä¸²è®¾ç½®åˆ°listviewä¸­
         void SetBinding(string strBindingString)
         {
             this.listView_recordSyntaxAndEncodingBinding.Items.Clear();
@@ -274,7 +275,7 @@ DomUtil.GetAttr(this.XmlNode,
         }
         
 
-        // »ñµÃ°ó¶¨×Ö·û´®
+        // è·å¾—ç»‘å®šå­—ç¬¦ä¸²
         string GetBindingString()
         {
             string strResult = "";
@@ -287,7 +288,6 @@ DomUtil.GetAttr(this.XmlNode,
 
             return strResult;
         }
-
 
         public static bool GetBool(string strText)
         {
@@ -310,7 +310,7 @@ DomUtil.GetAttr(this.XmlNode,
 
         }
 
-        // ÌáĞÑÇĞ¶ÏZ-association
+        // æé†’åˆ‡æ–­Z-association
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -318,48 +318,48 @@ DomUtil.GetAttr(this.XmlNode,
             if (this.textBox_serverName.Text == "")
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 goto ERROR1;
             }
             if (this.textBox_serverAddr.Text == "")
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷µØÖ·";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨åœ°å€";
                 goto ERROR1;
             }
 
             if (this.textBox_serverPort.Text == "")
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷¶Ë¿ÚºÅ";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨ç«¯å£å·";
                 goto ERROR1;
             }
 
             if (StringUtil.IsNumber(this.textBox_serverPort.Text) == false)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
-                strError = "·şÎñÆ÷¶Ë¿ÚºÅ±ØĞëÎª´¿Êı×Ö";
+                strError = "æœåŠ¡å™¨ç«¯å£å·å¿…é¡»ä¸ºçº¯æ•°å­—";
                 goto ERROR1;
             }
 
             if (this.textBox_presentPerCount.Text == "")
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
-                strError = "ÉĞÎ´Ö¸¶¨Ã¿Åú¼ÇÂ¼ÌõÊı";
+                strError = "å°šæœªæŒ‡å®šæ¯æ‰¹è®°å½•æ¡æ•°";
                 goto ERROR1;
             }
 
             if (StringUtil.IsNumber(this.textBox_presentPerCount.Text) == false)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
-                strError = "Ã¿Åú¼ÇÂ¼ÌõÊı±ØĞëÎª´¿Êı×Ö";
+                strError = "æ¯æ‰¹è®°å½•æ¡æ•°å¿…é¡»ä¸ºçº¯æ•°å­—";
                 goto ERROR1;
             }
 
             if (this.textBox_databaseNames.Text == "")
             {
                 this.tabControl_main.SelectedTab = this.tabPage_database;
-                strError = "ÉĞÎ´Ö¸¶¨Êı¾İ¿âÃû";
+                strError = "å°šæœªæŒ‡å®šæ•°æ®åº“å";
                 goto ERROR1;
             }
 
@@ -367,7 +367,7 @@ DomUtil.GetAttr(this.XmlNode,
                 && this.checkBox_isbn_removeHyphen.Checked == true)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
-                strError = "ISBN ¼ÓÈëºá¸Ü ºÍ È¥³ıºá¸Ü ²»ÄÜÍ¬Ê±Îª true";
+                strError = "ISBN åŠ å…¥æ¨ªæ  å’Œ å»é™¤æ¨ªæ  ä¸èƒ½åŒæ—¶ä¸º true";
                 goto ERROR1;
             }
 
@@ -375,20 +375,20 @@ DomUtil.GetAttr(this.XmlNode,
     && this.checkBox_isbn_forceIsbn13.Checked == true)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
-                strError = "ISBN ¹æÕûÎª13Î» ºÍ ¹æÕûÎª10Î» ²»ÄÜÍ¬Ê±Îª true";
+                strError = "ISBN è§„æ•´ä¸º13ä½ å’Œ è§„æ•´ä¸º10ä½ ä¸èƒ½åŒæ—¶ä¸º true";
                 goto ERROR1;
             }
 
             /*
             if (this.comboBox_defaultEncoding.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨È±Ê¡±àÂë·½Ê½";
+                strError = "å°šæœªæŒ‡å®šç¼ºçœç¼–ç æ–¹å¼";
                 goto ERROR1;
             }
 
             if (this.comboBox_queryTermEncoding.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨¼ìË÷´Ê±àÂë·½Ê½";
+                strError = "å°šæœªæŒ‡å®šæ£€ç´¢è¯ç¼–ç æ–¹å¼";
                 goto ERROR1;
             }*/
             
@@ -455,7 +455,7 @@ DomUtil.GetAttr(this.XmlNode,
                 DomUtil.SetAttr(this.XmlNode,
 "ignorereferenceid", "0");
 
-            // ¶ÔISBNµÄÔ¤´¦Àí
+            // å¯¹ISBNçš„é¢„å¤„ç†
             DomUtil.SetAttr(this.XmlNode,
             "isbn_force13",
             this.checkBox_isbn_forceIsbn13.Checked == true ? "1" : "0");
@@ -476,6 +476,10 @@ DomUtil.GetAttr(this.XmlNode,
 "isbn_wild",
 this.checkBox_isbn_wild.Checked == true ? "1" : "0");
 
+            // 2018/8/25
+            DomUtil.SetAttr(this.XmlNode,
+"issn_force8",
+this.checkBox_forceIssn8.Checked == true ? "1" : "0");
 
             DomUtil.SetAttr(this.XmlNode,
                 "recsperbatch", this.textBox_presentPerCount.Text);
@@ -498,7 +502,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
     this.comboBox_defaultElementSetName.Text);
 
 
-            // ÏÈÉ¾³ıÔ­ÓĞµÄÏÂ¼¶Êı¾İ¿â
+            // å…ˆåˆ é™¤åŸæœ‰çš„ä¸‹çº§æ•°æ®åº“
             XmlNodeList nodes = this.XmlNode.SelectNodes("database");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -514,7 +518,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
                     continue;
                 exclude_dbnames.Add(strName);
             }
-            // Êı¾İ¿âÃû
+            // æ•°æ®åº“å
             for (int i = 0; i < this.textBox_databaseNames.Lines.Length; i++)
             {
                 string strName = this.textBox_databaseNames.Lines[i].Trim();
@@ -535,7 +539,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
                     "recordSyntaxAndEncodingBinding",
                     strBindingDef);
 
-            // ×Ö·û¼¯Ğ­ÉÌ
+            // å­—ç¬¦é›†åå•†
             if (this.checkBox_charNegoUTF8.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                     "charNegoUtf8", "1");
@@ -550,7 +554,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
                 DomUtil.SetAttr(this.XmlNode,
                     "charNego_recordsInSeletedCharsets", "0");
 
-            // ÁªºÏ±àÄ¿
+            // è”åˆç¼–ç›®
             DomUtil.SetAttr(this.XmlNode,
                 "unionCatalog_bindingDp2ServerName",
                 this.textBox_unionCatalog_bindingDp2ServerName.Text);
@@ -603,7 +607,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
         {
             if (this.listView_recordSyntaxAndEncodingBinding.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„äº‹é¡¹");
                 return;
             }
 
@@ -631,14 +635,14 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
             RecordSyntaxAndEncodingBindingItemDlg dlg = new RecordSyntaxAndEncodingBindingItemDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Encoding = this.comboBox_defaultEncoding.Text;  // ÒıÈëÈ±Ê¡±àÂë·½Ê½Öµ
+            dlg.Encoding = this.comboBox_defaultEncoding.Text;  // å¼•å…¥ç¼ºçœç¼–ç æ–¹å¼å€¼
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // ²éÖØ
+            // æŸ¥é‡
             string strNewSyntax = ZTargetControl.GetLeftValue(dlg.RecordSyntax);
             for (int i = 0; i < this.listView_recordSyntaxAndEncodingBinding.Items.Count; i++)
             {
@@ -647,7 +651,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
 
                 if (strNewSyntax == strExistSyntax)
                 {
-                    MessageBox.Show(this, "Êı¾İ¸ñÊ½ '" + strNewSyntax + "' ÒÑ¾­´æÔÚ(µÚ "+(i+1).ToString()+" ĞĞ)£¬²»ÄÜÖØ¸´¼ÓÈë");
+                    MessageBox.Show(this, "æ•°æ®æ ¼å¼ '" + strNewSyntax + "' å·²ç»å­˜åœ¨(ç¬¬ "+(i+1).ToString()+" è¡Œ)ï¼Œä¸èƒ½é‡å¤åŠ å…¥");
                     return;
                 }
             }
@@ -663,7 +667,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
         {
             if (this.listView_recordSyntaxAndEncodingBinding.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦åˆ é™¤çš„äº‹é¡¹");
                 return;
             }
 
@@ -718,7 +722,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
             GetDp2ResDlg dlg = new GetDp2ResDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Text = "ÇëÖ¸¶¨Òª°ó¶¨µÄ dp2library ·şÎñÆ÷Ãû";
+            dlg.Text = "è¯·æŒ‡å®šè¦ç»‘å®šçš„ dp2library æœåŠ¡å™¨å";
 #if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
 #endif
@@ -805,6 +809,13 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
             }
         }
 
+        private void textBox_serverName_TextChanged(object sender, EventArgs e)
+        {
+            string strName = this.textBox_serverName.Text;
+            this.Text = "Z39.50æœåŠ¡å™¨å±æ€§" 
+                + (string.IsNullOrEmpty(strName) == false ? " -- " + strName : "");
+        }
+
         /*
         dp2SearchForm GetDp2SearchForm()
         {
@@ -815,7 +826,7 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
 
                 if (dp2_searchform == null)
                 {
-                    // ĞÂ¿ªÒ»¸ödp2¼ìË÷´°
+                    // æ–°å¼€ä¸€ä¸ªdp2æ£€ç´¢çª—
                     dp2_searchform = new dp2SearchForm();
                     dp2_searchform.MainForm = this.MainForm;
                     dp2_searchform.MdiParent = this.MainForm;
@@ -827,6 +838,6 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
             return dp2_searchform;
         }*/
 
- 
+
     }
 }

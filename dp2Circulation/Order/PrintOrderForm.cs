@@ -8639,16 +8639,12 @@ ORIGIN_COLUMN_COPY);
                         }
                         else
                         {
+                            // 2018/8/24
+                            // 码洋可能为空。比如折扣为空，试图从单价返回来计算码洋也不会进行
+                            /*
                             strError = strCurrentPosition + " 码洋 不应为空";
                             return -1;
-#if NO
-                            // 总价已经具备的情况下，码洋可以为空。此时单价可以从总价反过来计算出
-                            if (string.IsNullOrEmpty(strTotalPrice) == true)
-                            {
-                                strError = strCurrentPosition + " 码洋 不应为空";
-                                return -1;
-                            }
-#endif
+                            */
                         }
 
                         if (string.IsNullOrEmpty(strTotalFixedPrice) == false)

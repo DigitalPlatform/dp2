@@ -3,28 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.Windows.Forms;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Xml;
-using System.Threading;
-using System.IO;
-using System.Text;
 
-using DigitalPlatform;
+using Newtonsoft.Json;
+
 using DigitalPlatform.GUI;
-using DigitalPlatform.IO;
-using DigitalPlatform.Drawing;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.Marc
 {
-
-
     /// <summary>
     /// MARC 编辑器控件
     /// </summary>
@@ -511,7 +504,7 @@ namespace DigitalPlatform.Marc
 
                 this.m_domMarcDef = e.XmlDocument;
                 return this.m_domMarcDef;
-            ERROR1:
+                ERROR1:
                 m_strMarcDomError = strError;
                 return null;
             }
@@ -1005,24 +998,24 @@ namespace DigitalPlatform.Marc
                         }
                     }
                     break;
-                /*
-            case API.WM_LBUTTONDBLCLK:
-                {
-                    API.SendMessage(this.curEdit.Handle,
-                        m.Msg,
-                        m.WParam, 
-                        m.LParam);
-                    return;
-                }
-                break;
-                 */
-                /*
-                // 2008/11/26
-            case API.WM_GETDLGCODE:
-                {
-                    m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
-                    return;
-                }*/
+                    /*
+                case API.WM_LBUTTONDBLCLK:
+                    {
+                        API.SendMessage(this.curEdit.Handle,
+                            m.Msg,
+                            m.WParam, 
+                            m.LParam);
+                        return;
+                    }
+                    break;
+                     */
+                    /*
+                    // 2008/11/26
+                case API.WM_GETDLGCODE:
+                    {
+                        m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
+                        return;
+                    }*/
 
             }
             base.DefWndProc(ref m);
@@ -1402,7 +1395,7 @@ namespace DigitalPlatform.Marc
             if (Record.IsFirstHeaderFieldName(this.FocusedField.Name) == true
                 && (this.m_nFocusCol == 1 || this.m_nFocusCol == 2))
             {
-                    Debug.Assert(false, "第一个头标区的列不能为 1 或 2");
+                Debug.Assert(false, "第一个头标区的列不能为 1 或 2");
             }
             else if (Record.IsControlFieldName(this.FocusedField.Name) == true
                 && this.m_nFocusCol == 2)
@@ -1820,7 +1813,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     // return;
                 }
             }
-        END1:
+            END1:
             base.OnMouseDown(e);
         }
 
@@ -2361,7 +2354,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2406,7 +2399,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2429,7 +2422,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (nRet == 1)
                 this.Marc = strMARC;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2463,7 +2456,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
             MarcEditor.TextToClipboard(strText);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4388,7 +4381,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 if (this.AppInfo == null)
                     dlg.InsertBefore = this.m_bInsertBefore;
                 else
-                    dlg.InsertBefore = this.AppInfo.GetBoolean("marceditor", "newfielddlg_insertbefore", false);
+                    dlg.InsertBefore = this.AppInfo.GetBoolean("marceditor",
+                        "newfielddlg_insertbefore",
+                        false);
             }
             else
                 dlg.InsertBefore = (nInsertBofore == 1 ? true : false);
@@ -4399,7 +4394,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 if (this.AppInfo == null)
                     dlg.AutoComplete = this.m_bAutoComplete;
                 else
-                    dlg.AutoComplete = this.AppInfo.GetBoolean("marceditor", "newfielddlg_autocomplete", false);
+                    dlg.AutoComplete = this.AppInfo.GetBoolean("marceditor", 
+                        "newfielddlg_autocomplete", 
+                        false);
             }
             else
                 dlg.AutoComplete = (nAutoComplete == 1 ? true : false);
@@ -4429,7 +4426,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 if (this.AppInfo == null)
                     this.m_bAutoComplete = dlg.AutoComplete;
                 else
-                    this.AppInfo.SetBoolean("marceditor", "newfielddlg_autocomplete", dlg.AutoComplete);
+                    this.AppInfo.SetBoolean("marceditor", 
+                        "newfielddlg_autocomplete",
+                        dlg.AutoComplete);
             }
 
             if (nInsertBofore == -1)
@@ -4437,7 +4436,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 if (this.AppInfo == null)
                     this.m_bInsertBefore = dlg.InsertBefore;
                 else
-                    this.AppInfo.SetBoolean("marceditor", "newfielddlg_insertbefore", dlg.InsertBefore);
+                    this.AppInfo.SetBoolean("marceditor", 
+                        "newfielddlg_insertbefore",
+                        dlg.InsertBefore);
             }
 
             bool bControlField = Record.IsControlFieldName(dlg.FieldName);
@@ -5233,7 +5234,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
 
             return results;
-        ERROR1:
+            ERROR1:
             if (bSimulate == true)
             {
                 results.Add("出错: " + strError);
@@ -5633,7 +5634,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             {
                 nodeDef = nodes[0];
             }
-        FOUND:
+            FOUND:
             FixedTemplateDlg dlg = new FixedTemplateDlg();
             // GuiUtil.AutoSetDefaultFont(dlg);
             if (string.IsNullOrEmpty(strTitle) == false)
@@ -5803,7 +5804,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     dlg.AppInfo = this.AppInfo; // 为了能够保持列宽度
 
                     if (this.AppInfo != null)
-                        this.AppInfo.LinkFormState(dlg, "marceditor_valuelistdialog_state");
+                        this.AppInfo.LinkFormState(dlg, 
+                            "marceditor_valuelistdialog_state");
                     dlg.ShowDialog(this);
                     if (this.AppInfo != null)
                         this.AppInfo.UnlinkFormState(dlg);
@@ -6214,6 +6216,31 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
         }
 
+        class MarcEditorState
+        {
+            // 字段名区域像素宽度
+            public int FieldNameCaptionWidth { get; set; }
+        }
+
+        public string UiState
+        {
+            get
+            {
+                MarcEditorState state = new MarcEditorState
+                {
+                    FieldNameCaptionWidth = this.FieldNameCaptionWidth,
+                };
+                return JsonConvert.SerializeObject(state);
+            }
+            set
+            {
+                MarcEditorState state = JsonConvert.DeserializeObject<MarcEditorState>(value);
+                if (state != null)
+                {
+                    this.FieldNameCaptionWidth = state.FieldNameCaptionWidth;
+                }
+            }
+        }
     }
 
     internal class InvalidateRect

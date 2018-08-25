@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -32,8 +32,8 @@ namespace dp2Catalog
             tableLayoutPanel_main.Size = this.Size;
         }
 
-        // ĞÂÔö¼ÓÒ»ĞĞ
-        public void AddLine(string [] fromlist)
+        // æ–°å¢åŠ ä¸€è¡Œ
+        public void AddLine(string[] fromlist)
         {
             int nLastRow = this.tableLayoutPanel_main.RowCount;
 
@@ -48,7 +48,7 @@ namespace dp2Catalog
         }
 
 #if NOOOOOOOOOOOOOOOOOOOO
-        // »ñµÃ¼ìË÷Ê½
+        // è·å¾—æ£€ç´¢å¼
         public int GetQueryString(
             FromCollection Froms,
             out string strQueryString,
@@ -78,7 +78,7 @@ namespace dp2Catalog
                 string strValue = Froms.GetValue(strFrom);
                 if (strValue == null)
                 {
-                    strError = "Ãû³Æ '" +strFrom+ "' ÔÚuse±íÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄ±àºÅ";
+                    strError = "åç§° '" +strFrom+ "' åœ¨useè¡¨ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç¼–å·";
                     return -1;
                 }
 
@@ -103,7 +103,7 @@ namespace dp2Catalog
             return strText.Trim();
         }
 
-        // ½« XML ¼ìË÷Ê½±ä»¯Îª¼òÃ÷¸ñÊ½¼ìË÷Ê½
+        // å°† XML æ£€ç´¢å¼å˜åŒ–ä¸ºç®€æ˜æ ¼å¼æ£€ç´¢å¼
         public static int GetQueryString(
             FromCollection Froms,
             string strQueryXml,
@@ -124,7 +124,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "strQueryXml×°ÈëXMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "strQueryXmlè£…å…¥XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -152,38 +152,38 @@ namespace dp2Catalog
                 string strValue = Froms.GetValue(strFrom);
                 if (strValue == null)
                 {
-                    strError = "Ãû³Æ '" + strFrom + "' ÔÚuse±íÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄ±àºÅ";
+                    strError = "åç§° '" + strFrom + "' åœ¨useè¡¨ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç¼–å·";
                     return -1;
                 }
 
-                // ¶ÔISBN¼ìË÷´Ê½øĞĞÔ¤´¦Àí
-                if (strFrom == "ISBN"
+                // å¯¹ISBNæ£€ç´¢è¯è¿›è¡Œé¢„å¤„ç†
+                if ((strFrom == "ISBN" || strFrom == "ISSN")
                     && isbnconvertinfo != null)
                 {
                     /*
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞ±ØÒª×ª»»
-                    //      1   ÒÑ¾­×ª»»
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰å¿…è¦è½¬æ¢
+                    //      1   å·²ç»è½¬æ¢
                     nRet = isbnconvertinfo.ConvertISBN(ref strWord,
                 out strError);
                     if (nRet == -1)
                     {
-                        strError = "ÔÚ´¦ÀíISBN×Ö·û´® '" + strWord + "' ¹ı³ÌÖĞ³ö´í: " + strError;
+                        strError = "åœ¨å¤„ç†ISBNå­—ç¬¦ä¸² '" + strWord + "' è¿‡ç¨‹ä¸­å‡ºé”™: " + strError;
                         return -1;
                     }
                      * */
                     List<string> isbns = null;
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞ±ØÒª×ª»»
-                    //      1   ÒÑ¾­×ª»»
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰å¿…è¦è½¬æ¢
+                    //      1   å·²ç»è½¬æ¢
                     nRet = isbnconvertinfo.ConvertISBN(strWord,
                         out isbns,
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "ÔÚ´¦ÀíISBN×Ö·û´® '" + strWord + "' ¹ı³ÌÖĞ³ö´í: " + strError;
+                        strError = "åœ¨å¤„ç†" + strFrom + "å­—ç¬¦ä¸² '" + strWord + "' è¿‡ç¨‹ä¸­å‡ºé”™: " + strError;
                         return -1;
                     }
 
@@ -192,8 +192,8 @@ namespace dp2Catalog
                     {
                         if (j > 0)
                             strQueryString += " OR ";
-                        // string strIsbn = isbn.Replace("\"", "\\\"");    // ×Ö·û " Ìæ»»Îª \"
-                        string strIsbn = StringUtil.EscapeString(isbn, "\"/=");    // eacape ÌØÊâ×Ö·û
+                        // string strIsbn = isbn.Replace("\"", "\\\"");    // å­—ç¬¦ " æ›¿æ¢ä¸º \"
+                        string strIsbn = StringUtil.EscapeString(isbn, "\"/=");    // eacape ç‰¹æ®Šå­—ç¬¦
                         strQueryString += "\""
                             + strIsbn + "\"" + "/1="
                             + strValue;
@@ -202,8 +202,8 @@ namespace dp2Catalog
                     continue;
                 }
 
-                // strWord = strWord.Replace("\"", "\\\""); // ×Ö·û " Ìæ»»Îª \"
-                strWord = StringUtil.EscapeString(strWord, "\"/=");    // eacape ÌØÊâ×Ö·û
+                // strWord = strWord.Replace("\"", "\\\""); // å­—ç¬¦ " æ›¿æ¢ä¸º \"
+                strWord = StringUtil.EscapeString(strWord, "\"/=");    // eacape ç‰¹æ®Šå­—ç¬¦
                 strQueryString += "\""
                     + strWord + "\"" + "/1="
                     + strValue;
@@ -212,12 +212,12 @@ namespace dp2Catalog
             return 1;
         }
 
-        // »ñµÃ XML ¼ìË÷Ê½
+        // è·å¾— XML æ£€ç´¢å¼
         // paramers:
-        //      bOptimize   ÊÇ·ñÓÅ»¯£¿
+        //      bOptimize   æ˜¯å¦ä¼˜åŒ–ï¼Ÿ
         public string GetContent(bool bOptimize)
         {
-            bool bAllEmpty = true;  // ÊÇ·ñÃ¿ĞĞ¼ìË÷´Ê¶¼Îª¿Õ?
+            bool bAllEmpty = true;  // æ˜¯å¦æ¯è¡Œæ£€ç´¢è¯éƒ½ä¸ºç©º?
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
@@ -255,7 +255,7 @@ namespace dp2Catalog
 
                 line.textBox_word.Text = "";
 
-                // TODO: ĞèÒª°ÑÂß¼­ÔËËã·ûºÍfrom»Ö¸´µ½È±Ê¡×´Ì¬
+                // TODO: éœ€è¦æŠŠé€»è¾‘è¿ç®—ç¬¦å’Œfromæ¢å¤åˆ°ç¼ºçœçŠ¶æ€
                 // line.comboBox_from.Text = DomUtil.GetAttr(node, "from");
                 // line.comboBox_logicOperator.Text = DomUtil.GetAttr(node, "logic");
             }
@@ -276,7 +276,7 @@ namespace dp2Catalog
         static void SelectComboBoxValue(ComboBox combobox, string strValue)
         {
             strValue = strValue.ToLower();
-            foreach(string s in combobox.Items)
+            foreach (string s in combobox.Items)
             {
                 string strLeft;
                 string strRight;
@@ -291,8 +291,8 @@ namespace dp2Catalog
             }
         }
 
-        // ½« XML ¼ìË÷Ê½ÉèÖÃµ½¿Ø¼şÖĞ
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å°† XML æ£€ç´¢å¼è®¾ç½®åˆ°æ§ä»¶ä¸­
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public void SetContent(string strContentXml)
         {
             this.Clear();
@@ -349,9 +349,9 @@ namespace dp2Catalog
         public TextBox textBox_word = null;
         public ComboBox comboBox_from = null;
 
-        public Line(string [] fromlist)
+        public Line(string[] fromlist)
         {
-            comboBox_logicOperator  = new ComboBox();
+            comboBox_logicOperator = new ComboBox();
             comboBox_logicOperator.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_logicOperator.FlatStyle = FlatStyle.Flat;
             comboBox_logicOperator.Dock = DockStyle.Fill;
@@ -359,11 +359,11 @@ namespace dp2Catalog
             comboBox_logicOperator.Size = new Size(80, 28);
             comboBox_logicOperator.MinimumSize = new Size(50, 28);
             comboBox_logicOperator.Items.AddRange(new object[] {
-                "AND Óë",
-                "OR  »ò",
-                "NOT ·Ç",
+                "AND ä¸",
+                "OR  æˆ–",
+                "NOT é",
             });
-            comboBox_logicOperator.Text = "AND Óë";
+            comboBox_logicOperator.Text = "AND ä¸";
 
             textBox_word = new TextBox();
             textBox_word.BorderStyle = BorderStyle.FixedSingle;
@@ -388,7 +388,7 @@ namespace dp2Catalog
 
         }
 
-        public void AddToTable(TableLayoutPanel table, 
+        public void AddToTable(TableLayoutPanel table,
             int nRow)
         {
             table.Controls.Add(this.comboBox_logicOperator, 0, nRow);
@@ -411,9 +411,9 @@ namespace dp2Catalog
 
 #if NO
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª×ª»»
-        //      1   ÒÑ¾­×ª»»
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦è½¬æ¢
+        //      1   å·²ç»è½¬æ¢
         public int ConvertISBN(ref string strISBN,
             out string strError)
         {
@@ -439,7 +439,7 @@ namespace dp2Catalog
                     strStyle += ",force10";
                 else
                 {
-                    strError = "force10ºÍforce13²»Ó¦Í¬Ê±¾ß±¸";
+                    strError = "force10å’Œforce13ä¸åº”åŒæ—¶å…·å¤‡";
                     return -1;
                 }
 
@@ -468,7 +468,7 @@ namespace dp2Catalog
                     strStyle += ",force10";
                 else
                 {
-                    strError = "force10ºÍforce13²»Ó¦Í¬Ê±¾ß±¸";
+                    strError = "force10å’Œforce13ä¸åº”åŒæ—¶å…·å¤‡";
                     return -1;
                 }
 
@@ -487,10 +487,11 @@ namespace dp2Catalog
             return 0;
         }
 #endif
+
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª×ª»»
-        //      1   ÒÑ¾­×ª»»
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦è½¬æ¢
+        //      1   å·²ç»è½¬æ¢
         public int ConvertISBN(string strISBN,
             out List<string> isbns,
             out string strError)
@@ -510,7 +511,27 @@ namespace dp2Catalog
             bool bRemoveHyphen = StringUtil.IsInList("removehyphen", this.ConvertStyle);
             bool bWildMatch = StringUtil.IsInList("wild", this.ConvertStyle);
 
+            // ISSNï¼Œå¼ºåˆ¶è½¬æ¢ä¸º 8 æ•°å­—å½¢æ€ xxxx-xxxx
+            bool bForce8 = StringUtil.IsInList("force8", this.ConvertStyle);
+
             int nRet = 0;
+
+            if (bForce8)
+            {
+                // return:
+                //      -1:å‡ºé”™; 
+                //      0:æœªä¿®æ”¹æ ¡éªŒä½;
+                //      1:ä¿®æ”¹äº†æ ¡éªŒä½
+                nRet = IsbnSplitter.IssnInsertHyphen(
+                    strISBN,
+                    "force8",
+                    out string strTarget,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                isbns.Add(strTarget);
+                return nRet;
+            }
 
             if (bWildMatch == true)
             {
@@ -531,7 +552,7 @@ namespace dp2Catalog
                         continue;
                     isbns.Add(strTarget);
                 }
-                isbns.Add(strISBN); // ×îÔ­Ê¼µÄ
+                isbns.Add(strISBN); // æœ€åŸå§‹çš„
 
                 styles = new List<string>();
                 styles.Add("remainverifychar,force13");
@@ -549,9 +570,9 @@ namespace dp2Catalog
                         continue;
                     isbns.Add(strTarget.Replace("-", ""));
                 }
-                isbns.Add(strISBN.Replace("-", ""));    // ×îÔ­Ê¼µÄÈ¥µôºáÏßµÄ
+                isbns.Add(strISBN.Replace("-", ""));    // æœ€åŸå§‹çš„å»æ‰æ¨ªçº¿çš„
 
-                // TODO: ÊÇ·ñÒªÔö¼Ó10Î»13Î»È¥µôĞ£ÑéÎ»µÄ£¬È»ºóÖ¸Ã÷Ç°·½Ò»ÖÂµÄ?
+                // TODO: æ˜¯å¦è¦å¢åŠ 10ä½13ä½å»æ‰æ ¡éªŒä½çš„ï¼Œç„¶åæŒ‡æ˜å‰æ–¹ä¸€è‡´çš„?
 
                 StringUtil.RemoveDupNoSort(ref isbns);
                 return 1;
@@ -559,7 +580,7 @@ namespace dp2Catalog
 
             string strStyle = "remainverifychar";
 
-            // Èç¹û bAddHyphen ºÍ bRemoveHyphen ¶¼Ã»ÓĞ¹´Ñ¡£¬ÄÇÃ´ĞèÒª¿´×Ö·û´®ÀïÃæ±¾À´ÊÇ·ñÓĞºá¸Ü£¬ÓĞ¾Í±£Áô£¬Ã»ÓĞÒ²²»Òª¼ÓÈë
+            // å¦‚æœ bAddHyphen å’Œ bRemoveHyphen éƒ½æ²¡æœ‰å‹¾é€‰ï¼Œé‚£ä¹ˆéœ€è¦çœ‹å­—ç¬¦ä¸²é‡Œé¢æœ¬æ¥æ˜¯å¦æœ‰æ¨ªæ ï¼Œæœ‰å°±ä¿ç•™ï¼Œæ²¡æœ‰ä¹Ÿä¸è¦åŠ å…¥
             if (bAddHyphen == false && bRemoveHyphen == false
                 && (bForce13 == true || bForce10 == true))
             {
@@ -579,7 +600,7 @@ namespace dp2Catalog
                     strStyle += ",force10";
                 else
                 {
-                    strError = "force10ºÍforce13²»Ó¦Í¬Ê±¾ß±¸";
+                    strError = "force10å’Œforce13ä¸åº”åŒæ—¶å…·å¤‡";
                     return -1;
                 }
 
@@ -608,7 +629,7 @@ namespace dp2Catalog
                     strStyle += ",force10";
                 else
                 {
-                    strError = "force10ºÍforce13²»Ó¦Í¬Ê±¾ß±¸";
+                    strError = "force10å’Œforce13ä¸åº”åŒæ—¶å…·å¤‡";
                     return -1;
                 }
 
@@ -626,5 +647,6 @@ namespace dp2Catalog
 
             return 0;
         }
+
     }
 }

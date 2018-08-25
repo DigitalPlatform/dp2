@@ -6001,7 +6001,6 @@ MessageBoxDefaultButton.Button2);
             strError = "";
             host = null;
 
-
             string strContent = "";
             Encoding encoding;
             // 能自动识别文件内容的编码方式的读入文本文件内容模块

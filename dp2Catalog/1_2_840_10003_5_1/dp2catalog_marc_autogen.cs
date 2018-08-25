@@ -1,14 +1,14 @@
-// dp2catalog MARC ÖĞÎÄÍ¼Êé ±àÄ¿×Ô¶¯´´½¨Êı¾İC#½Å±¾³ÌĞò
-// ×îºóĞŞ¸ÄÊ±¼ä 2013/9/17
+ï»¿// dp2catalog MARC ä¸­æ–‡å›¾ä¹¦ ç¼–ç›®è‡ªåŠ¨åˆ›å»ºæ•°æ®C#è„šæœ¬ç¨‹åº
+// æœ€åä¿®æ”¹æ—¶é—´ 2013/9/17
 
-// 1) 2011/8/21 public override void Main(object sender, HostEventArgs e)ĞŞ¸ÄÎªGenerateDataEventArgs e
-// 2) 2011/8/21 ĞŞ¸ÄAddAuthorNumber()º¯Êı£¬µ÷ÓÃ»ùÀàµÄGetGcatAuthorNumber()º¯Êı
-// 3) 2011/8/22 ĞŞ¸ÄAddAuthorNumber()º¯Êı£¬Ê¹Ö®¾ßÓĞºöÂÔµÚÒ»Ö¸Ê¾·ûÎª'A'µÄ7XX×Ö¶Î$a×Ó×Ö¶ÎµÄÄÜÁ¦£¬²¢»áÌø¹ı²»°üº¬ºº×Ö×Ö·ûµÄÖøÕß×Ö·û´®¼ÌĞøÏòºóÕÒ
-// 4) 2011/8/23 ½«º¯ÊıÃûAddAuthorNumber()ĞŞ¸ÄÎªAddGcatAuthorNumber()
-// 5) 2011/8/24 Ôö¼ÓAddSjhmAuthorNumber()¡£ÕâÖ»ÊÇÊÊÓÃÓÚÔÚ905$eÖĞ¼ÓÈëÖøÕßºÅ
-// 6) 2011/8/29 Copy200gfTo7xxa()ºÍCopy690aTo905d()º¯ÊıĞŞ¸Ä£¬Ôö¼ÓÁË¶Ô×Ö¶Î²»´æÔÚÊ±µÄÅĞ¶ÏºÍ¾¯¸æ
-// 7) 2012/1/18 AddZhongcihao()ÖĞÔö¼ÓÉèÖÃ·şÎñÆ÷ÃûµÄÓï¾ä
-// 8) 2013/9/17 ¼ÓÆ´ÒôÄÜ¸ù¾İ MainForm µÄ AutoSelPinyin ²ÎÊı±ä»¯Ğ§¹û
+// 1) 2011/8/21 public override void Main(object sender, HostEventArgs e)ä¿®æ”¹ä¸ºGenerateDataEventArgs e
+// 2) 2011/8/21 ä¿®æ”¹AddAuthorNumber()å‡½æ•°ï¼Œè°ƒç”¨åŸºç±»çš„GetGcatAuthorNumber()å‡½æ•°
+// 3) 2011/8/22 ä¿®æ”¹AddAuthorNumber()å‡½æ•°ï¼Œä½¿ä¹‹å…·æœ‰å¿½ç•¥ç¬¬ä¸€æŒ‡ç¤ºç¬¦ä¸º'A'çš„7XXå­—æ®µ$aå­å­—æ®µçš„èƒ½åŠ›ï¼Œå¹¶ä¼šè·³è¿‡ä¸åŒ…å«æ±‰å­—å­—ç¬¦çš„è‘—è€…å­—ç¬¦ä¸²ç»§ç»­å‘åæ‰¾
+// 4) 2011/8/23 å°†å‡½æ•°åAddAuthorNumber()ä¿®æ”¹ä¸ºAddGcatAuthorNumber()
+// 5) 2011/8/24 å¢åŠ AddSjhmAuthorNumber()ã€‚è¿™åªæ˜¯é€‚ç”¨äºåœ¨905$eä¸­åŠ å…¥è‘—è€…å·
+// 6) 2011/8/29 Copy200gfTo7xxa()å’ŒCopy690aTo905d()å‡½æ•°ä¿®æ”¹ï¼Œå¢åŠ äº†å¯¹å­—æ®µä¸å­˜åœ¨æ—¶çš„åˆ¤æ–­å’Œè­¦å‘Š
+// 7) 2012/1/18 AddZhongcihao()ä¸­å¢åŠ è®¾ç½®æœåŠ¡å™¨åçš„è¯­å¥
+// 8) 2013/9/17 åŠ æ‹¼éŸ³èƒ½æ ¹æ® MainForm çš„ AutoSelPinyin å‚æ•°å˜åŒ–æ•ˆæœ
 
 
 using System;
@@ -23,7 +23,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
@@ -33,7 +32,7 @@ public class MyHost : MarcDetailHost
 {
     // DigitalPlatform.GcatClient.Channel GcatChannel = null;
 
-    // ĞÂµÄ¼ÓÆ´Òô×Ö¶ÎÅäÖÃ¡£$9
+    // æ–°çš„åŠ æ‹¼éŸ³å­—æ®µé…ç½®ã€‚$9
     string PinyinCfgXml = "<root>"
     + "<item name='200' from='a' to='9' />"
     + "<item name='701' indicator='@[^A].' from='a' to='9' />"
@@ -42,7 +41,7 @@ public class MyHost : MarcDetailHost
     + "<item name='712' from='a' to='9' />"
     + "</root>";
 
-    // ÀÏµÄ¼ÓÆ´ÒôÅäÖÃ¡£$AµÈ
+    // è€çš„åŠ æ‹¼éŸ³é…ç½®ã€‚$Aç­‰
     string OldPinyinCfgXml = "<root>"
         + "<item name='200' from='aefhi' to='AEFHI' />"
         + "<item name='510' from='aei' to='AEI' />"
@@ -74,70 +73,70 @@ public class MyHost : MarcDetailHost
 
         if (sender is MarcEditor || sender == null)
         {
-            // ¼ÓÆ´Òô
-            actions.NewItem("¼ÓÆ´Òô", "¸øÈ«²¿¶¨ÒåµÄ×Ó×Ö¶Î¼ÓÆ´Òô", "AddPinyin", false, 'P');
+            // åŠ æ‹¼éŸ³
+            actions.NewItem("åŠ æ‹¼éŸ³", "ç»™å…¨éƒ¨å®šä¹‰çš„å­å­—æ®µåŠ æ‹¼éŸ³", "AddPinyin", false, 'P');
 
-            // É¾³ıÆ´Òô
-            actions.NewItem("É¾³ıÆ´Òô", "É¾³ıÈ«²¿Æ´Òô×Ó×Ö¶Î", "RemovePinyin", false);
+            // åˆ é™¤æ‹¼éŸ³
+            actions.NewItem("åˆ é™¤æ‹¼éŸ³", "åˆ é™¤å…¨éƒ¨æ‹¼éŸ³å­å­—æ®µ", "RemovePinyin", false);
 
-            // Çå³ıÆ´Òô»º´æ
-            actions.NewItem("Çå³ıÆ´Òô»º´æ", "Çå³ı´æ´¢µÄÒÔÇ°Ñ¡Ôñ¹ıµÄºº×ÖºÍÆ´Òô¶ÔÕÕ¹ØÏµ", "ClearPinyinCache", false);
+            // æ¸…é™¤æ‹¼éŸ³ç¼“å­˜
+            actions.NewItem("æ¸…é™¤æ‹¼éŸ³ç¼“å­˜", "æ¸…é™¤å­˜å‚¨çš„ä»¥å‰é€‰æ‹©è¿‡çš„æ±‰å­—å’Œæ‹¼éŸ³å¯¹ç…§å…³ç³»", "ClearPinyinCache", false);
 
-            // ·Ö¸îĞĞ
+            // åˆ†å‰²è¡Œ
             actions.NewSeperator();
 
-            // ¹æÕûISBNÎª13
-            actions.NewItem("¹æÕûÎªISBN-13", "¶Ô010$aÖĞISBN½øĞĞ¹æÕû", "HyphenISBN_13", false);
+            // è§„æ•´ISBNä¸º13
+            actions.NewItem("è§„æ•´ä¸ºISBN-13", "å¯¹010$aä¸­ISBNè¿›è¡Œè§„æ•´", "HyphenISBN_13", false);
 
-            // ¹æÕûISBNÎª10
-            actions.NewItem("¹æÕûÎªISBN-10", "¶Ô010$aÖĞISBN½øĞĞ¹æÕû", "HyphenISBN_10", false);
+            // è§„æ•´ISBNä¸º10
+            actions.NewItem("è§„æ•´ä¸ºISBN-10", "å¯¹010$aä¸­ISBNè¿›è¡Œè§„æ•´", "HyphenISBN_10", false);
 
-            // ·Ö¸îĞĞ
+            // åˆ†å‰²è¡Œ
             actions.NewSeperator();
 
 
-            // 102¹ú¼Ò´úÂë µØÇø´úÂë
-            actions.NewItem("102$a$b <-- 010$a", "¸ù¾İ010$aÖĞISBN³ö°æÉç´úÂë, ×Ô¶¯´´½¨102×Ö¶Î$a¹ú¼Ò´úÂë$bµØÇø´úÂë", "Add102", false);
+            // 102å›½å®¶ä»£ç  åœ°åŒºä»£ç 
+            actions.NewItem("102$a$b <-- 010$a", "æ ¹æ®010$aä¸­ISBNå‡ºç‰ˆç¤¾ä»£ç , è‡ªåŠ¨åˆ›å»º102å­—æ®µ$aå›½å®¶ä»£ç $båœ°åŒºä»£ç ", "Add102", false);
 
             // 410 <-- 225
-            actions.NewItem("410 <-- 225", "½«225$aÄÚÈİ¼ÓÈë410  $1200  $a", "Copy225To410", false);
+            actions.NewItem("410 <-- 225", "å°†225$aå†…å®¹åŠ å…¥410  $1200  $a", "Copy225To410", false);
 
             // 7*1$a <-- 200$f
-            actions.NewItem("7*1$a <-- 200$f", "½«200$fÄÚÈİ¼ÓÈë701/711×Ö¶Î$a", "Copy200fTo7x1a", false);
+            actions.NewItem("7*1$a <-- 200$f", "å°†200$få†…å®¹åŠ å…¥701/711å­—æ®µ$a", "Copy200fTo7x1a", false);
 
             // 7*2$a <-- 200$g
-            actions.NewItem("7*2$a <-- 200$g", "½«200$gÄÚÈİ¼ÓÈë702/712×Ö¶Î$a", "Copy200gTo7x2a", false);
+            actions.NewItem("7*2$a <-- 200$g", "å°†200$gå†…å®¹åŠ å…¥702/712å­—æ®µ$a", "Copy200gTo7x2a", false);
 
 
             // 905$d <-- 690$a
-            actions.NewItem("905$d <-- 690$a", "½«690$aÄÚÈİ¼ÓÈë905×Ö¶Î$d", "Copy690aTo905d", false);
+            actions.NewItem("905$d <-- 690$a", "å°†690$aå†…å®¹åŠ å…¥905å­—æ®µ$d", "Copy690aTo905d", false);
 
 
-            // ¼ÓÈëGCAÖøÕßºÅ
-            actions.NewItem("¼ÓÈëGCATÖøÕßºÅ", "¸ù¾İ701/711/702/712$aÄÚÈİ, ´´½¨905$e", "AddGcatAuthorNumber", false);
+            // åŠ å…¥GCAè‘—è€…å·
+            actions.NewItem("åŠ å…¥GCATè‘—è€…å·", "æ ¹æ®701/711/702/712$aå†…å®¹, åˆ›å»º905$e", "AddGcatAuthorNumber", false);
 
-            // ¼ÓÈëËÄ½ÇºÅÂëÖøÕßºÅ
-            actions.NewItem("¼ÓÈëËÄ½ÇºÅÂëÖøÕßºÅ", "¸ù¾İ701/711/702/712$aÄÚÈİ, ´´½¨905$e", "AddSjhmAuthorNumber", false);
+            // åŠ å…¥å››è§’å·ç è‘—è€…å·
+            actions.NewItem("åŠ å…¥å››è§’å·ç è‘—è€…å·", "æ ¹æ®701/711/702/712$aå†…å®¹, åˆ›å»º905$e", "AddSjhmAuthorNumber", false);
 
-            // ¼ÓÈëÖÖ´ÎºÅ
-            actions.NewItem("¼ÓÈëÖÖ´ÎºÅ", "¸ù¾İ905$dÄÚÈİ, ´´½¨905$e", "AddZhongcihao", false);
+            // åŠ å…¥ç§æ¬¡å·
+            actions.NewItem("åŠ å…¥ç§æ¬¡å·", "æ ¹æ®905$då†…å®¹, åˆ›å»º905$e", "AddZhongcihao", false);
 
-            //  Î¬»¤ÖÖ´ÎºÅ
-            actions.NewItem("Î¬»¤ÖÖ´ÎºÅ", "¸ù¾İ905$dÄÚÈİÖĞµÄÀàºÅ, ³öÏÖÎ¬»¤ÖÖ´ÎºÅµÄ½çÃæ", "ManageZhongcihao", false);
+            //  ç»´æŠ¤ç§æ¬¡å·
+            actions.NewItem("ç»´æŠ¤ç§æ¬¡å·", "æ ¹æ®905$då†…å®¹ä¸­çš„ç±»å·, å‡ºç°ç»´æŠ¤ç§æ¬¡å·çš„ç•Œé¢", "ManageZhongcihao", false);
 
-            // ³ö°æµØ
-            actions.NewItem("210$a$c <-- 010$a", "¸ù¾İ010$aÖĞISBN³ö°æÉç´úÂë, ×Ô¶¯´´½¨³ö°æÉç×Ó×Ö¶Î210$a$c", "AddPublisher", false);
+            // å‡ºç‰ˆåœ°
+            actions.NewItem("210$a$c <-- 010$a", "æ ¹æ®010$aä¸­ISBNå‡ºç‰ˆç¤¾ä»£ç , è‡ªåŠ¨åˆ›å»ºå‡ºç‰ˆç¤¾å­å­—æ®µ210$a$c", "AddPublisher", false);
 
-            // ·Ö¸îĞĞ
+            // åˆ†å‰²è¡Œ
             actions.NewSeperator();
 
-            // Î¬»¤ 102 ¹ú¼Ò´úÂë µØÇø´úÂë
-            actions.NewItem("Î¬»¤102¶ÔÕÕ±í", "ISBN³ö°æÉç´úÂë ºÍ 102×Ö¶Î$a¹ú¼Ò´úÂë$bµØÇø´úÂë µÄ¶ÔÕÕ±í", "Manage102", false);
+            // ç»´æŠ¤ 102 å›½å®¶ä»£ç  åœ°åŒºä»£ç 
+            actions.NewItem("ç»´æŠ¤102å¯¹ç…§è¡¨", "ISBNå‡ºç‰ˆç¤¾ä»£ç  å’Œ 102å­—æ®µ$aå›½å®¶ä»£ç $båœ°åŒºä»£ç  çš„å¯¹ç…§è¡¨", "Manage102", false);
 
-            // Î¬»¤ 210 ³ö°æµØ ³ö°æÉç
-            actions.NewItem("Î¬»¤210¶ÔÕÕ±í", "ISBN³ö°æÉç´úÂë ºÍ 210×Ö¶Î$a³ö°æµØ$c³ö°æÉçÃû µÄ¶ÔÕÕ±í", "Manage210", false);
+            // ç»´æŠ¤ 210 å‡ºç‰ˆåœ° å‡ºç‰ˆç¤¾
+            actions.NewItem("ç»´æŠ¤210å¯¹ç…§è¡¨", "ISBNå‡ºç‰ˆç¤¾ä»£ç  å’Œ 210å­—æ®µ$aå‡ºç‰ˆåœ°$cå‡ºç‰ˆç¤¾å çš„å¯¹ç…§è¡¨", "Manage210", false);
 
-            // ·Ö¸îĞĞ
+            // åˆ†å‰²è¡Œ
             actions.NewSeperator();
 
         }
@@ -145,9 +144,9 @@ public class MyHost : MarcDetailHost
         this.ScriptActions = actions;
     }
 
-    #region ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬
+    #region è®¾ç½®èœå•åŠ äº®çŠ¶æ€
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ¹æÕûISBNÎª13
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- è§„æ•´ISBNä¸º13
     void HyphenISBN_13_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -179,7 +178,7 @@ public class MyHost : MarcDetailHost
         e.Action.Active = true;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ¹æÕûISBNÎª10
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- è§„æ•´ISBNä¸º10
     void HyphenISBN_10_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -211,7 +210,7 @@ public class MyHost : MarcDetailHost
         e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- 102¹ú¼Ò´úÂë µØÇø´úÂë
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- 102å›½å®¶ä»£ç  åœ°åŒºä»£ç 
     void Add102_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -221,7 +220,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- 410 <-- 225
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- 410 <-- 225
     void Copy225To410_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -233,7 +232,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- 7*1$a <-- 200$f
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- 7*1$a <-- 200$f
     void Copy200fTo7x1a_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -245,7 +244,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- 7*2$a <-- 200$g
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- 7*2$a <-- 200$g
     void Copy200gTo7x2a_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -257,7 +256,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- 905$d <-- 690$a
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- 905$d <-- 690$a
     void Copy690aTo905d_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -268,7 +267,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ¼ÓÈëGCATÖøÕßºÅ
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- åŠ å…¥GCATè‘—è€…å·
     void AddGcatAuthorNumber_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -278,7 +277,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ¼ÓÈëËÄ½ÇºÅÂëÖøÕßºÅ
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- åŠ å…¥å››è§’å·ç è‘—è€…å·
     void AddSjhmAuthorNumber_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -288,7 +287,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ¼ÓÈëÖÖ´ÎºÅ
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- åŠ å…¥ç§æ¬¡å·
     void AddZhongcihao_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -299,7 +298,7 @@ public class MyHost : MarcDetailHost
             e.Action.Active = false;
     }
 
-    // ÉèÖÃ²Ëµ¥¼ÓÁÁ×´Ì¬ -- ³ö°æµØ
+    // è®¾ç½®èœå•åŠ äº®çŠ¶æ€ -- å‡ºç‰ˆåœ°
     void AddPublisher_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -311,7 +310,7 @@ public class MyHost : MarcDetailHost
 
     #endregion
 
-#if OLD // ·ÏÖ¹
+#if OLD // åºŸæ­¢
     public override void Main(object sender, HostEventArgs e)
 	{
 		Field curfield = this.DetailForm.MarcEditor.FocusedField;
@@ -321,8 +320,8 @@ public class MyHost : MarcDetailHost
 		bool bActive = false;
 
 
-		// ¼ÓÆ´Òô
-		actions.NewItem("¼ÓÆ´Òô", "¸ø.....¼ÓÆ´Òô", "AddPinyin", false);
+		// åŠ æ‹¼éŸ³
+		actions.NewItem("åŠ æ‹¼éŸ³", "ç»™.....åŠ æ‹¼éŸ³", "AddPinyin", false);
 
 		// 7*1$a <-- 200$f
 		if (curfield != null &&
@@ -332,7 +331,7 @@ public class MyHost : MarcDetailHost
 		else
 			bActive = false;
 			
-		actions.NewItem("7*1$a <-- 200$f", "½«200$fÄÚÈİ¼ÓÈë701/711×Ö¶Î$a", "Copy200fTo7x1a", bActive);
+		actions.NewItem("7*1$a <-- 200$f", "å°†200$få†…å®¹åŠ å…¥701/711å­—æ®µ$a", "Copy200fTo7x1a", bActive);
 
 		// 7*2$a <-- 200$g
 		if (curfield != null &&
@@ -341,7 +340,7 @@ public class MyHost : MarcDetailHost
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("7*2$a <-- 200$g", "½«200$gÄÚÈİ¼ÓÈë702/712×Ö¶Î$a", "Copy200gTo7x2a", bActive);
+		actions.NewItem("7*2$a <-- 200$g", "å°†200$gå†…å®¹åŠ å…¥702/712å­—æ®µ$a", "Copy200gTo7x2a", bActive);
 
 		// 410 <-- 225
 		if (curfield != null &&
@@ -350,56 +349,56 @@ public class MyHost : MarcDetailHost
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("410 <-- 225", "½«225$aÄÚÈİ¼ÓÈë410  $1200  $a", "Copy225To410", bActive);
+		actions.NewItem("410 <-- 225", "å°†225$aå†…å®¹åŠ å…¥410  $1200  $a", "Copy225To410", bActive);
 
 
 
-		// ¼ÓÈëÖøÕßºÅ
+		// åŠ å…¥è‘—è€…å·
 		if (curfield != null && curfield.Name == "905")
 			bActive = true;
 		else
 			bActive = false;
 
-		actions.NewItem("¼ÓÈëÖøÕßºÅ", "¸ù¾İ701/711/702/712$aÄÚÈİ, ´´½¨905$e", "AddAuthorNumber", bActive);
+		actions.NewItem("åŠ å…¥è‘—è€…å·", "æ ¹æ®701/711/702/712$aå†…å®¹, åˆ›å»º905$e", "AddAuthorNumber", bActive);
 
-		// ¼ÓÈëÖÖ´ÎºÅ
+		// åŠ å…¥ç§æ¬¡å·
 		if (curfield != null && curfield.Name == "905" && this.DetailForm.MarcEditor.FocusedSubfieldName == 'd')
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("¼ÓÈëÖÖ´ÎºÅ", "¸ù¾İ905$dÄÚÈİ, ´´½¨905$e", "AddZhongcihao", bActive);
+		actions.NewItem("åŠ å…¥ç§æ¬¡å·", "æ ¹æ®905$då†…å®¹, åˆ›å»º905$e", "AddZhongcihao", bActive);
 
-		//  Î¬»¤ÖÖ´ÎºÅ
-		actions.NewItem("Î¬»¤ÖÖ´ÎºÅ", "¸ù¾İ905$dÄÚÈİÖĞµÄÀàºÅ, ³öÏÖÎ¬»¤ÖÖ´ÎºÅµÄ½çÃæ", "ManageZhongcihao", false);
+		//  ç»´æŠ¤ç§æ¬¡å·
+		actions.NewItem("ç»´æŠ¤ç§æ¬¡å·", "æ ¹æ®905$då†…å®¹ä¸­çš„ç±»å·, å‡ºç°ç»´æŠ¤ç§æ¬¡å·çš„ç•Œé¢", "ManageZhongcihao", false);
 
-		// ³ö°æµØ
+		// å‡ºç‰ˆåœ°
 		if (curfield != null && curfield.Name == "210")
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("210$a$c <-- 010$a", "¸ù¾İ010$aÖĞISBN³ö°æÉç´úÂë, ×Ô¶¯´´½¨³ö°æÉç×Ó×Ö¶Î210$a$c", "AddPublisher", bActive);
+		actions.NewItem("210$a$c <-- 010$a", "æ ¹æ®010$aä¸­ISBNå‡ºç‰ˆç¤¾ä»£ç , è‡ªåŠ¨åˆ›å»ºå‡ºç‰ˆç¤¾å­å­—æ®µ210$a$c", "AddPublisher", bActive);
 
 
-		// ¹æÕûISBNÎª13
+		// è§„æ•´ISBNä¸º13
 		if (curfield != null && curfield.Name == "010")
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("¹æÕûISBN-13", "¶Ô010$aÖĞISBN½øĞĞ¹æÕû", "HyphenISBN_13", bActive);
+		actions.NewItem("è§„æ•´ISBN-13", "å¯¹010$aä¸­ISBNè¿›è¡Œè§„æ•´", "HyphenISBN_13", bActive);
 
-		// ¹æÕûISBNÎª10
+		// è§„æ•´ISBNä¸º10
 		if (curfield != null && curfield.Name == "010")
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("¹æÕûISBN-10", "¶Ô010$aÖĞISBN½øĞĞ¹æÕû", "HyphenISBN_10", bActive);
+		actions.NewItem("è§„æ•´ISBN-10", "å¯¹010$aä¸­ISBNè¿›è¡Œè§„æ•´", "HyphenISBN_10", bActive);
 
-		// 102¹ú¼Ò´úÂë µØÇø´úÂë
+		// 102å›½å®¶ä»£ç  åœ°åŒºä»£ç 
 		if (curfield != null && curfield.Name == "102")
 			bActive = true;
 		else
 			bActive = false;
-		actions.NewItem("102$a$b <-- 010$a", "¸ù¾İ010$aÖĞISBN³ö°æÉç´úÂë, ×Ô¶¯´´½¨102×Ö¶Î$a¹ú¼Ò´úÂë$bµØÇø´úÂë", "Add102", bActive);
+		actions.NewItem("102$a$b <-- 010$a", "æ ¹æ®010$aä¸­ISBNå‡ºç‰ˆç¤¾ä»£ç , è‡ªåŠ¨åˆ›å»º102å­—æ®µ$aå›½å®¶ä»£ç $båœ°åŒºä»£ç ", "Add102", bActive);
 
 
 		ScriptActionMenuDlg dlg = new ScriptActionMenuDlg();
@@ -461,7 +460,7 @@ public class MyHost : MarcDetailHost
         Field field_200 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("200", 0);
         if (field_200 == null)
         {
-            MessageBox.Show(this.DetailForm, "200×Ö¶Î²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "200å­—æ®µä¸å­˜åœ¨");
             return;
         }
 
@@ -471,13 +470,13 @@ public class MyHost : MarcDetailHost
 
         if (subfield_f == null)
         {
-            MessageBox.Show(this.DetailForm, "200$" + strFromSubfield + "²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "200$" + strFromSubfield + "ä¸å­˜åœ¨");
             return;
         }
 
         string strContent = subfield_f.Value;
 
-        // ¿´¿´µ±Ç°»î¶¯×Ö¶ÎÊÇ²»ÊÇ701
+        // çœ‹çœ‹å½“å‰æ´»åŠ¨å­—æ®µæ˜¯ä¸æ˜¯701
         Field field_701 = null;
 
         field_701 = this.DetailForm.MarcEditor.FocusedField;
@@ -534,14 +533,14 @@ public class MyHost : MarcDetailHost
         strAuthor = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("712", "a");
         if (strAuthor == "")
         {
-            MessageBox.Show(this.DetailForm, "701/711/702/712ÖĞ¾ùÎ´·¢ÏÖ&a,ÎŞ·¨´¦Àí");
+            MessageBox.Show(this.DetailForm, "701/711/702/712ä¸­å‡æœªå‘ç°&a,æ— æ³•å¤„ç†");
             return;
         }
 #endif
         string strError = "";
         List<string> results = null;
-        // 700¡¢710¡¢720
-        results = GetSubfields("700", "a", "@[^A].");    // Ö¸Ê¾·û
+        // 700ã€710ã€720
+        results = GetSubfields("700", "a", "@[^A].");    // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -561,7 +560,7 @@ public class MyHost : MarcDetailHost
         }
 
         // 701/711/702/712
-        results = GetSubfields("701", "a", "@[^A].");   // Ö¸Ê¾·û
+        results = GetSubfields("701", "a", "@[^A].");   // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -575,7 +574,7 @@ public class MyHost : MarcDetailHost
             goto FOUND;
         }
 
-        results = GetSubfields("702", "a", "@[^A].");   // Ö¸Ê¾·û
+        results = GetSubfields("702", "a", "@[^A].");   // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -589,7 +588,7 @@ public class MyHost : MarcDetailHost
             goto FOUND;
         }
 
-        strError = "MARC¼ÇÂ¼ÖĞ 700/710/720/701/711/702/712ÖĞ¾ùÎ´·¢ÏÖ°üº¬ºº×ÖµÄ $a ×Ó×Ö¶ÎÄÚÈİ£¬ÎŞ·¨»ñµÃÖøÕß×Ö·û´®";
+        strError = "MARCè®°å½•ä¸­ 700/710/720/701/711/702/712ä¸­å‡æœªå‘ç°åŒ…å«æ±‰å­—çš„ $a å­å­—æ®µå†…å®¹ï¼Œæ— æ³•è·å¾—è‘—è€…å­—ç¬¦ä¸²";
         goto ERROR1;
     FOUND:
         Debug.Assert(results.Count > 0, "");
@@ -600,7 +599,7 @@ public class MyHost : MarcDetailHost
 
         string strNumber = "";
 
-        // »ñµÃÖøÕßºÅ
+        // è·å¾—è‘—è€…å·
         // return:
         //      -1  error
         //      0   canceled
@@ -624,8 +623,8 @@ public class MyHost : MarcDetailHost
 
         string strAuthor = "";
         List<string> results = null;
-        // 700¡¢710¡¢720
-        results = GetSubfields("700", "a", "@[^A].");    // Ö¸Ê¾·û
+        // 700ã€710ã€720
+        results = GetSubfields("700", "a", "@[^A].");    // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -645,7 +644,7 @@ public class MyHost : MarcDetailHost
         }
 
         // 701/711/702/712
-        results = GetSubfields("701", "a", "@[^A].");   // Ö¸Ê¾·û
+        results = GetSubfields("701", "a", "@[^A].");   // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -659,7 +658,7 @@ public class MyHost : MarcDetailHost
             goto FOUND;
         }
 
-        results = GetSubfields("702", "a", "@[^A].");   // Ö¸Ê¾·û
+        results = GetSubfields("702", "a", "@[^A].");   // æŒ‡ç¤ºç¬¦
         results = ContainHanzi(results);
         if (results.Count > 0)
         {
@@ -673,7 +672,7 @@ public class MyHost : MarcDetailHost
             goto FOUND;
         }
 
-        strError = "MARC¼ÇÂ¼ÖĞ 700/710/720/701/711/702/712ÖĞ¾ùÎ´·¢ÏÖ°üº¬ºº×ÖµÄ $a ×Ó×Ö¶ÎÄÚÈİ£¬ÎŞ·¨»ñµÃÖøÕß×Ö·û´®";
+        strError = "MARCè®°å½•ä¸­ 700/710/720/701/711/702/712ä¸­å‡æœªå‘ç°åŒ…å«æ±‰å­—çš„ $a å­å­—æ®µå†…å®¹ï¼Œæ— æ³•è·å¾—è‘—è€…å­—ç¬¦ä¸²";
         goto ERROR1;
     FOUND:
         Debug.Assert(results.Count > 0, "");
@@ -681,7 +680,7 @@ public class MyHost : MarcDetailHost
 
         string strNumber = "";
 
-        // »ñµÃËÄ½ÇºÅÂëÖøÕßºÅ
+        // è·å¾—å››è§’å·ç è‘—è€…å·
         // return:
         //      -1  error
         //      0   canceled
@@ -715,7 +714,7 @@ public class MyHost : MarcDetailHost
 
             if (strClass == "")
             {
-                MessageBox.Show(this.DetailForm, "¼ÇÂ¼ÖĞ²»´æÔÚ905$d×Ó×Ö¶Î,Òò´ËÎŞ·¨¼ÓÖÖ´ÎºÅ");
+                MessageBox.Show(this.DetailForm, "è®°å½•ä¸­ä¸å­˜åœ¨905$då­å­—æ®µ,å› æ­¤æ— æ³•åŠ ç§æ¬¡å·");
                 return;
             }
 
@@ -759,7 +758,7 @@ public class MyHost : MarcDetailHost
         MessageBox.Show(this.DetailForm, strError);
     }
 
-    // Î¬»¤ÖÖ´ÎºÅ
+    // ç»´æŠ¤ç§æ¬¡å·
     void ManageZhongcihao()
     {
         string strError = "";
@@ -781,7 +780,7 @@ public class MyHost : MarcDetailHost
         dlg.Show();
     }
 
-    // ¼ÓÈë³ö°æµØ¡¢³ö°æÕß
+    // åŠ å…¥å‡ºç‰ˆåœ°ã€å‡ºç‰ˆè€…
     void AddPublisher()
     {
         string strError = "";
@@ -793,13 +792,13 @@ public class MyHost : MarcDetailHost
 
         if (strISBN.Trim() == "")
         {
-            strError = "¼ÇÂ¼ÖĞ²»´æÔÚ010$a×Ó×Ö¶Î,Òò´ËÎŞ·¨¼Ó³ö°æÉç×Ó×Ö¶Î";
+            strError = "è®°å½•ä¸­ä¸å­˜åœ¨010$aå­å­—æ®µ,å› æ­¤æ— æ³•åŠ å‡ºç‰ˆç¤¾å­å­—æ®µ";
             goto ERROR1;
         }
 
 
 
-        // ÇĞ¸î³ö ³ö°æÉç ´úÂë²¿·Ö
+        // åˆ‡å‰²å‡º å‡ºç‰ˆç¤¾ ä»£ç éƒ¨åˆ†
         string strPublisherNumber = "";
         nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
             out strPublisherNumber,
@@ -819,14 +818,14 @@ public class MyHost : MarcDetailHost
 
         if (nRet == 0 || strValue == "")
         {
-            // ´´½¨ĞÂÌõÄ¿
+            // åˆ›å»ºæ–°æ¡ç›®
             strValue = InputDlg.GetInput(
                 this.DetailForm,
                 null,
-                "ÇëÊäÈëISBN³ö°æÉçºÅ '" + strPublisherNumber + "' ¶ÔÓ¦µÄ³ö°æÉçÃû³Æ(¸ñÊ½ ³ö°æµØ:³ö°æÉçÃû):",
-                "³ö°æµØ:³ö°æÉçÃû");
+                "è¯·è¾“å…¥ISBNå‡ºç‰ˆç¤¾å· '" + strPublisherNumber + "' å¯¹åº”çš„å‡ºç‰ˆç¤¾åç§°(æ ¼å¼ å‡ºç‰ˆåœ°:å‡ºç‰ˆç¤¾å):",
+                "å‡ºç‰ˆåœ°:å‡ºç‰ˆç¤¾å");
             if (strValue == null)
-                return;	// ·ÅÆúÕû¸ö²Ù×÷
+                return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
             nRet = this.DetailForm.SetPublisherInfo(strPublisherNumber,
                 strValue,
@@ -838,8 +837,8 @@ public class MyHost : MarcDetailHost
 
         // MessageBox.Show(this.DetailForm, strValue);
 
-        // °ÑÈ«½ÇÃ°ºÅÌæ»»Îª°ë½ÇµÄĞÎÌ¬
-        strValue = strValue.Replace("£º", ":");
+        // æŠŠå…¨è§’å†’å·æ›¿æ¢ä¸ºåŠè§’çš„å½¢æ€
+        strValue = strValue.Replace("ï¼š", ":");
 
         string strName = "";
         string strCity = "";
@@ -888,7 +887,7 @@ public class MyHost : MarcDetailHost
 
         if (strISBN.Trim() == "")
         {
-            MessageBox.Show(this.DetailForm, "¼ÇÂ¼ÖĞ²»´æÔÚ010$a×Ó×Ö¶Î,Òò´ËÎŞ·¨½øĞĞ¹æÕû");
+            MessageBox.Show(this.DetailForm, "è®°å½•ä¸­ä¸å­˜åœ¨010$aå­å­—æ®µ,å› æ­¤æ— æ³•è¿›è¡Œè§„æ•´");
             return;
         }
 
@@ -908,8 +907,8 @@ public class MyHost : MarcDetailHost
         if (nRet == 1)
         {
             DialogResult result = MessageBox.Show(this.DetailForm,
-                "Ô­ISBN '" + strISBN + "'¼Ó¹¤³É '" + strResult + "' ºó·¢ÏÖĞ£ÑéÎ»ÓĞ±ä»¯¡£\r\n\r\nÊÇ·ñ½ÓÊÜĞŞ¸Ä?",
-                "¹æÕûISBN",
+                "åŸISBN '" + strISBN + "'åŠ å·¥æˆ '" + strResult + "' åå‘ç°æ ¡éªŒä½æœ‰å˜åŒ–ã€‚\r\n\r\næ˜¯å¦æ¥å—ä¿®æ”¹?",
+                "è§„æ•´ISBN",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
@@ -937,11 +936,11 @@ public class MyHost : MarcDetailHost
 
         if (strISBN.Trim() == "")
         {
-            strError = "¼ÇÂ¼ÖĞ²»´æÔÚ010$a×Ó×Ö¶Î,Òò´ËÎŞ·¨¼Ó102$a$b";
+            strError = "è®°å½•ä¸­ä¸å­˜åœ¨010$aå­å­—æ®µ,å› æ­¤æ— æ³•åŠ 102$a$b";
             goto ERROR1;
         }
 
-        // ÇĞ¸î³ö ³ö°æÉç ´úÂë²¿·Ö
+        // åˆ‡å‰²å‡º å‡ºç‰ˆç¤¾ ä»£ç éƒ¨åˆ†
         string strPublisherNumber = "";
         nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
             out strPublisherNumber,
@@ -961,14 +960,14 @@ public class MyHost : MarcDetailHost
 
         if (nRet == 0 || strValue == "")
         {
-            // ´´½¨ĞÂÌõÄ¿
+            // åˆ›å»ºæ–°æ¡ç›®
             strValue = InputDlg.GetInput(
                 this.DetailForm,
                 null,
-                "ÇëÊäÈëISBN³ö°æÉçºÅÂë '" + strISBN + "' ¶ÔÓ¦µÄUNIMARC 102$a$b²ÎÊı(¸ñÊ½ ¹ú¼Ò´úÂë[2Î»]:³ÇÊĞ´úÂë[6Î»]):",
-                "¹ú¼Ò´úÂë[2Î»]:³ÇÊĞ´úÂë[6Î»]");
+                "è¯·è¾“å…¥ISBNå‡ºç‰ˆç¤¾å·ç  '" + strISBN + "' å¯¹åº”çš„UNIMARC 102$a$bå‚æ•°(æ ¼å¼ å›½å®¶ä»£ç [2ä½]:åŸå¸‚ä»£ç [6ä½]):",
+                "å›½å®¶ä»£ç [2ä½]:åŸå¸‚ä»£ç [6ä½]");
             if (strValue == null)
-                return;	// ·ÅÆúÕû¸ö²Ù×÷
+                return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
             nRet = this.DetailForm.Set102Info(strPublisherNumber,
                 strValue,
@@ -980,8 +979,8 @@ public class MyHost : MarcDetailHost
 
         // MessageBox.Show(this.DetailForm, strValue);
 
-        // °ÑÈ«½ÇÃ°ºÅÌæ»»Îª°ë½ÇµÄĞÎÌ¬
-        strValue = strValue.Replace("£º", ":");
+        // æŠŠå…¨è§’å†’å·æ›¿æ¢ä¸ºåŠè§’çš„å½¢æ€
+        strValue = strValue.Replace("ï¼š", ":");
 
         string strCountryCode = "";
         string strCityCode = "";
@@ -992,7 +991,7 @@ public class MyHost : MarcDetailHost
 
             if (strCountryCode.Length != 2)
             {
-                strError = "¹ú¼Ò´úÂë '" + strCountryCode + "' Ó¦µ±Îª2×Ö·û";
+                strError = "å›½å®¶ä»£ç  '" + strCountryCode + "' åº”å½“ä¸º2å­—ç¬¦";
                 goto ERROR1;
             }
         }
@@ -1002,12 +1001,12 @@ public class MyHost : MarcDetailHost
             strCityCode = strValue.Substring(nRet + 1);
             if (strCountryCode.Length != 2)
             {
-                strError = "Ã°ºÅÇ°ÃæµÄ¹ú¼Ò´úÂë²¿·Ö '" + strCountryCode + "' Ó¦µ±Îª2×Ö·û";
+                strError = "å†’å·å‰é¢çš„å›½å®¶ä»£ç éƒ¨åˆ† '" + strCountryCode + "' åº”å½“ä¸º2å­—ç¬¦";
                 goto ERROR1;
             }
             if (strCityCode.Length != 6)
             {
-                strError = "Ã°ºÅºóÃæµÄ³ÇÊĞ´úÂë²¿·Ö '" + strCityCode + "' Ó¦µ±Îª6×Ö·û";
+                strError = "å†’å·åé¢çš„åŸå¸‚ä»£ç éƒ¨åˆ† '" + strCityCode + "' åº”å½“ä¸º6å­—ç¬¦";
                 goto ERROR1;
             }
         }
@@ -1030,7 +1029,7 @@ public class MyHost : MarcDetailHost
 
         if (field_225 == null)
         {
-            MessageBox.Show(this.DetailForm, "225×Ö¶Î²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "225å­—æ®µä¸å­˜åœ¨");
             return;
         }
 
@@ -1042,13 +1041,13 @@ public class MyHost : MarcDetailHost
 
         if (subfield_a == null)
         {
-            MessageBox.Show(this.DetailForm, "225$" + "a" + "²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "225$" + "a" + "ä¸å­˜åœ¨");
             return;
         }
 
         string strContent = subfield_a.Value;
 
-        // ¿´¿´µ±Ç°»î¶¯×Ö¶ÎÊÇ²»ÊÇ410
+        // çœ‹çœ‹å½“å‰æ´»åŠ¨å­—æ®µæ˜¯ä¸æ˜¯410
         Field field_410 = null;
 
         field_410 = this.DetailForm.MarcEditor.FocusedField;
@@ -1058,7 +1057,7 @@ public class MyHost : MarcDetailHost
                 field_410 = null;
         }
 
-        bool bInitial410Value = false;	// 410×Ö¶ÎµÄÖµÊÇ·ñ³õÊ¼»¯¹ı
+        bool bInitial410Value = false;	// 410å­—æ®µçš„å€¼æ˜¯å¦åˆå§‹åŒ–è¿‡
 
         if (field_410 == null)
         {
@@ -1094,7 +1093,7 @@ public class MyHost : MarcDetailHost
         field_410.Subfields["a"] = subfield_410a;
     }
 
-    // Î¬»¤210¶ÔÕÕ¹ØÏµ
+    // ç»´æŠ¤210å¯¹ç…§å…³ç³»
     // 2008/10/17
     void Manage210()
     {
@@ -1108,7 +1107,7 @@ public class MyHost : MarcDetailHost
 
         if (String.IsNullOrEmpty(strISBN) == false)
         {
-            // ÇĞ¸î³ö ³ö°æÉç ´úÂë²¿·Ö
+            // åˆ‡å‰²å‡º å‡ºç‰ˆç¤¾ ä»£ç éƒ¨åˆ†
             nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
                 out strPublisherNumber,
                 out strError);
@@ -1123,11 +1122,11 @@ public class MyHost : MarcDetailHost
 
         strPublisherNumber = InputDlg.GetInput(
                 this.DetailForm,
-                "Î¬»¤210¶ÔÕÕ±í -- µÚ1²½",
-                "ÇëÊäÈëISBNÖĞ³ö°æÉçºÅÂë²¿·Ö:",
+                "ç»´æŠ¤210å¯¹ç…§è¡¨ -- ç¬¬1æ­¥",
+                "è¯·è¾“å…¥ISBNä¸­å‡ºç‰ˆç¤¾å·ç éƒ¨åˆ†:",
                 strPublisherNumber);
         if (strPublisherNumber == null)
-            return;	// ·ÅÆúÕû¸ö²Ù×÷
+            return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
         string strValue = "";
 
@@ -1139,32 +1138,32 @@ public class MyHost : MarcDetailHost
 
         if (nRet == 0 || strValue == "")
         {
-            strValue = "³ö°æµØ:³ö°æÉçÃû";
+            strValue = "å‡ºç‰ˆåœ°:å‡ºç‰ˆç¤¾å";
         }
 
-        // ´´½¨ĞÂÌõÄ¿
+        // åˆ›å»ºæ–°æ¡ç›®
         strValue = InputDlg.GetInput(
             this.DetailForm,
-            "Î¬»¤210¶ÔÕÕ±í -- µÚ2²½",
-            "ÇëÊäÈëISBN³ö°æÉçºÅÂë '" + strPublisherNumber + "' ¶ÔÓ¦µÄUNIMARC 210$a$c²ÎÊı(¸ñÊ½ ³ö°æµØ:³ö°æÉçÃû):",
+            "ç»´æŠ¤210å¯¹ç…§è¡¨ -- ç¬¬2æ­¥",
+            "è¯·è¾“å…¥ISBNå‡ºç‰ˆç¤¾å·ç  '" + strPublisherNumber + "' å¯¹åº”çš„UNIMARC 210$a$cå‚æ•°(æ ¼å¼ å‡ºç‰ˆåœ°:å‡ºç‰ˆç¤¾å):",
             strValue);
         if (strValue == null)
-            return;	// ·ÅÆúÕû¸ö²Ù×÷
+            return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
         if (strValue == "")
             goto DOSAVE;
 
         // MessageBox.Show(this.DetailForm, strValue);
 
-        // °ÑÈ«½ÇÃ°ºÅÌæ»»Îª°ë½ÇµÄĞÎÌ¬
-        strValue = strValue.Replace("£º", ":");
+        // æŠŠå…¨è§’å†’å·æ›¿æ¢ä¸ºåŠè§’çš„å½¢æ€
+        strValue = strValue.Replace("ï¼š", ":");
 
         string strName = "";
         string strCity = "";
         nRet = strValue.IndexOf(":");
         if (nRet == -1)
         {
-            strError = "ÊäÈëµÄÄÚÈİÖĞÈ±ÉÙÃ°ºÅ";
+            strError = "è¾“å…¥çš„å†…å®¹ä¸­ç¼ºå°‘å†’å·";
             goto ERROR1;
             // strName = strValue;
         }
@@ -1187,7 +1186,7 @@ public class MyHost : MarcDetailHost
         MessageBox.Show(this.DetailForm, strError);
     }
 
-    // Î¬»¤102¶ÔÕÕ¹ØÏµ
+    // ç»´æŠ¤102å¯¹ç…§å…³ç³»
     void Manage102()
     {
         string strError = "";
@@ -1200,7 +1199,7 @@ public class MyHost : MarcDetailHost
 
         if (String.IsNullOrEmpty(strISBN) == false)
         {
-            // ÇĞ¸î³ö ³ö°æÉç ´úÂë²¿·Ö
+            // åˆ‡å‰²å‡º å‡ºç‰ˆç¤¾ ä»£ç éƒ¨åˆ†
             nRet = this.DetailForm.MainForm.GetPublisherNumber(strISBN,
                 out strPublisherNumber,
                 out strError);
@@ -1213,11 +1212,11 @@ public class MyHost : MarcDetailHost
 
         strPublisherNumber = InputDlg.GetInput(
                 this.DetailForm,
-                "Î¬»¤102¶ÔÕÕ±í -- µÚ1²½",
-                "ÇëÊäÈëISBNÖĞ³ö°æÉçºÅÂë²¿·Ö:",
+                "ç»´æŠ¤102å¯¹ç…§è¡¨ -- ç¬¬1æ­¥",
+                "è¯·è¾“å…¥ISBNä¸­å‡ºç‰ˆç¤¾å·ç éƒ¨åˆ†:",
                 strPublisherNumber);
         if (strPublisherNumber == null)
-            return;	// ·ÅÆúÕû¸ö²Ù×÷
+            return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
         string strValue = "";
 
@@ -1229,25 +1228,25 @@ public class MyHost : MarcDetailHost
 
         if (nRet == 0 || strValue == "")
         {
-            strValue = "¹ú¼Ò´úÂë[2Î»]:³ÇÊĞ´úÂë[6Î»]";
+            strValue = "å›½å®¶ä»£ç [2ä½]:åŸå¸‚ä»£ç [6ä½]";
         }
 
-        // ´´½¨ĞÂÌõÄ¿
+        // åˆ›å»ºæ–°æ¡ç›®
         strValue = InputDlg.GetInput(
             this.DetailForm,
-            "Î¬»¤102¶ÔÕÕ±í -- µÚ2²½",
-            "ÇëÊäÈëISBN³ö°æÉçºÅÂë '" + strPublisherNumber + "' ¶ÔÓ¦µÄUNIMARC 102$a$b²ÎÊı(¸ñÊ½¹ú¼Ò´úÂë[2Î»]:³ÇÊĞ´úÂë[6Î»]):",
+            "ç»´æŠ¤102å¯¹ç…§è¡¨ -- ç¬¬2æ­¥",
+            "è¯·è¾“å…¥ISBNå‡ºç‰ˆç¤¾å·ç  '" + strPublisherNumber + "' å¯¹åº”çš„UNIMARC 102$a$bå‚æ•°(æ ¼å¼å›½å®¶ä»£ç [2ä½]:åŸå¸‚ä»£ç [6ä½]):",
             strValue);
         if (strValue == null)
-            return;	// ·ÅÆúÕû¸ö²Ù×÷
+            return;	// æ”¾å¼ƒæ•´ä¸ªæ“ä½œ
 
         if (strValue == "")
             goto DOSAVE;
 
         // MessageBox.Show(this.DetailForm, strValue);
 
-        // °ÑÈ«½ÇÃ°ºÅÌæ»»Îª°ë½ÇµÄĞÎÌ¬
-        strValue = strValue.Replace("£º", ":");
+        // æŠŠå…¨è§’å†’å·æ›¿æ¢ä¸ºåŠè§’çš„å½¢æ€
+        strValue = strValue.Replace("ï¼š", ":");
 
         string strCountryCode = "";
         string strCityCode = "";
@@ -1258,7 +1257,7 @@ public class MyHost : MarcDetailHost
 
             if (strCountryCode.Length != 2)
             {
-                strError = "¹ú¼Ò´úÂë '" + strCountryCode + "' Ó¦µ±Îª2×Ö·û";
+                strError = "å›½å®¶ä»£ç  '" + strCountryCode + "' åº”å½“ä¸º2å­—ç¬¦";
                 goto ERROR1;
             }
         }
@@ -1268,12 +1267,12 @@ public class MyHost : MarcDetailHost
             strCityCode = strValue.Substring(nRet + 1);
             if (strCountryCode.Length != 2)
             {
-                strError = "Ã°ºÅÇ°ÃæµÄ¹ú¼Ò´úÂë²¿·Ö '" + strCountryCode + "' Ó¦µ±Îª2×Ö·û";
+                strError = "å†’å·å‰é¢çš„å›½å®¶ä»£ç éƒ¨åˆ† '" + strCountryCode + "' åº”å½“ä¸º2å­—ç¬¦";
                 goto ERROR1;
             }
             if (strCityCode.Length != 6)
             {
-                strError = "Ã°ºÅºóÃæµÄ³ÇÊĞ´úÂë²¿·Ö '" + strCityCode + "' Ó¦µ±Îª6×Ö·û";
+                strError = "å†’å·åé¢çš„åŸå¸‚ä»£ç éƒ¨åˆ† '" + strCityCode + "' åº”å½“ä¸º6å­—ç¬¦";
                 goto ERROR1;
             }
         }
@@ -1301,7 +1300,7 @@ public class MyHost : MarcDetailHost
         Field field_690 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("690", 0);
         if (field_690 == null)
         {
-            MessageBox.Show(this.DetailForm, "690×Ö¶Î²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "690å­—æ®µä¸å­˜åœ¨");
             return;
         }
 
@@ -1311,13 +1310,13 @@ public class MyHost : MarcDetailHost
 
         if (subfield_a == null)
         {
-            MessageBox.Show(this.DetailForm, "690$" + strFromSubfield + "²»´æÔÚ");
+            MessageBox.Show(this.DetailForm, "690$" + strFromSubfield + "ä¸å­˜åœ¨");
             return;
         }
 
         string strContent = subfield_a.Value;
 
-        // ¿´¿´µ±Ç°»î¶¯×Ö¶ÎÊÇ²»ÊÇ905
+        // çœ‹çœ‹å½“å‰æ´»åŠ¨å­—æ®µæ˜¯ä¸æ˜¯905
         Field field_905 = null;
 
         field_905 = this.DetailForm.MarcEditor.FocusedField;
