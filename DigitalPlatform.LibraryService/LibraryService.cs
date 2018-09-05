@@ -12351,6 +12351,14 @@ Stack:
          * */
 
         // 写入资源
+        // 注：写入 backup 或 cfgs 目录要求具备 backup 或者 managedatabase 权限；
+        //      写入 upload 目录需要 upload 或者 managedatabase 权限
+        //      写入 library.xml 需要 managedatabase 权限
+        //      写入 cfgs/template 文件需要 writetemplate 权限
+        //      写入数据库记录，需要 writerecord 权限
+        //      写入数据库记录下的对象，需要 writeobject 权限
+        //      写入其他(比如 库名/cfgs/配置文件名 )资源，需要 writeres 权限
+        //      writeres 权限
         public LibraryServerResult WriteRes(
             string strResPath,
             string strRanges,

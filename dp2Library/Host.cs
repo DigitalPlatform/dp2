@@ -27,6 +27,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.Threading.Tasks;
 
 namespace dp2Library
 {
@@ -225,6 +226,7 @@ namespace dp2Library
             return null;
         }
 
+#if NO
         void CloseHosts()
         {
             foreach (ServiceHost host in this.m_hosts)
@@ -240,6 +242,36 @@ namespace dp2Library
             }
 
             this.m_hosts.Clear();
+        }
+#endif
+
+        void CloseHosts()
+        {
+            List<HostInfo> infos = new List<HostInfo>();
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info != null)
+                {
+                    infos.Add(info);
+                    host.Extensions.Remove(info);
+                }
+
+                host.Close();
+            }
+
+            this.m_hosts.Clear();
+
+            // 用多线程集中 Dispose()
+            if (infos.Count > 0)
+            {
+                List<Task> tasks = new List<Task>();
+                foreach (HostInfo info in infos)
+                {
+                    Task.Run(() => info.Dispose());
+                }
+                Task.WaitAll(tasks.ToArray());
+            }
         }
 
         // 关闭一个指定的 host

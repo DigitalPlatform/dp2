@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections;   // Hashtable
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
@@ -12,7 +10,6 @@ using System.IO;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
@@ -2204,6 +2201,12 @@ out strError);
                             channel.Timeout = old_timeout;
                         }
                         timestamp = output_timestamp;
+
+                        // 2018/8/29
+                        if (timestamp != null)
+                            ListViewUtil.ChangeItemText(item,
+                            COLUMN_TIMESTAMP,
+                            ByteArray.GetHexTimeStampString(timestamp));
 
                         if (lRet == -1)
                             goto ERROR1;

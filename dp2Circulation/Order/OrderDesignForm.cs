@@ -34,6 +34,7 @@ namespace dp2Circulation
         /// 获得缺省记录
         /// </summary>
         public event GetDefaultRecordEventHandler GetDefaultRecord = null;
+
         // 2012/10/4
         /// <summary>
         /// 检查馆代码是否在管辖范围内
@@ -52,14 +53,7 @@ namespace dp2Circulation
         public OrderDesignForm()
         {
             InitializeComponent();
-        }
 
-        private void OrderDesignForm_Load(object sender, EventArgs e)
-        {
-            if (Program.MainForm != null)
-            {
-                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
-            }
             this.orderDesignControl1.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
             this.orderDesignControl1.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
 
@@ -68,6 +62,14 @@ namespace dp2Circulation
 
             this.orderDesignControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
             this.orderDesignControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
+        }
+
+        private void OrderDesignForm_Load(object sender, EventArgs e)
+        {
+            if (Program.MainForm != null)
+            {
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
+            }
 
             // 如果窗口打开的时候，发现一个事项也没有，就需要加入一个空白事项，以便用户在此基础上进行编辑
             if (this.orderDesignControl1.Items.Count == 0)

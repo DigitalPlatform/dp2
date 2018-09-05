@@ -84,6 +84,8 @@ namespace dp2Catalog
         {
             InitializeComponent();
 
+            this.dp2ResTree1.OnSetMenu += Dp2ResTree1_OnSetMenu;
+
             ListViewProperty prop = new ListViewProperty();
             this.listView_browse.Tag = prop;
             // 第一列特殊，记录路径
@@ -92,6 +94,25 @@ namespace dp2Catalog
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.ParsePath -= new ParsePathEventHandler(prop_ParsePath);
             prop.ParsePath += new ParsePathEventHandler(prop_ParsePath);
+        }
+
+        private void Dp2ResTree1_OnSetMenu(object sender, GuiAppendMenuEventArgs e)
+        {
+            ContextMenuStrip contextMenu = e.ContextMenuStrip;
+            ToolStripMenuItem menuItem = null;
+
+            // --
+            contextMenu.Items.Add(new ToolStripSeparator());
+
+            // Z39.50初始化
+            menuItem = new ToolStripMenuItem("配置 dp2 服务器(&S)");
+            menuItem.Click += new EventHandler(menuItem_configDp2Server_Click);
+            contextMenu.Items.Add(menuItem);
+        }
+
+        void menuItem_configDp2Server_Click(object sender, EventArgs e)
+        {
+            Program.MainForm.ManageServers(false);
         }
 
         void prop_ParsePath(object sender, ParsePathEventArgs e)

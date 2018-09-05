@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 
@@ -8,23 +7,23 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CirculationClient
 {
-	/// <summary>
-	/// Summary description for ServersDlg.
-	/// </summary>
-	public class ServersDlg : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// Summary description for ServersDlg.
+    /// </summary>
+    public class ServersDlg : System.Windows.Forms.Form
+    {
         public bool FirstRun = false;
 
-		public dp2ServerCollection Servers = null;	// 引用
+        public dp2ServerCollection Servers = null;  // 引用
 
-		bool m_bChanged = false;
+        bool m_bChanged = false;
 
         private DigitalPlatform.GUI.ListViewNF listView1;
-		private System.Windows.Forms.ColumnHeader columnHeader_url;
-		private System.Windows.Forms.ColumnHeader columnHeader_userName;
-		private System.Windows.Forms.ColumnHeader columnHeader_savePassword;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.ColumnHeader columnHeader_url;
+        private System.Windows.Forms.ColumnHeader columnHeader_userName;
+        private System.Windows.Forms.ColumnHeader columnHeader_savePassword;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
         private Button button_newServer;
         private ColumnHeader columnHeader_name;
         private IContainer components;
@@ -32,40 +31,40 @@ namespace DigitalPlatform.CirculationClient
         private MessageBalloon m_firstUseBalloon = null;
 
 
-		public ServersDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public ServersDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.listView1 = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_url = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -164,156 +163,155 @@ namespace DigitalPlatform.CirculationClient
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ServersDlg_Closing);
             this.Load += new System.EventHandler(this.ServersDlg_Load);
             this.ResumeLayout(false);
+        }
+        #endregion
 
-		}
-		#endregion
-
-		private void ServersDlg_Load(object sender, System.EventArgs e)
-		{
-			FillList();
+        private void ServersDlg_Load(object sender, System.EventArgs e)
+        {
+            FillList();
 
             if (this.FirstRun == true)
             {
                 // this.toolTip_firstUse.Show("请按此按钮创建一个新的服务器目标", this.button_newServer);
                 ShowMessageTip();
             }
-		}
+        }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			// OK和Cancel退出本对话框,其实 Servers中的内容已经修改。
-			// 为了让Cancel退出有放弃整体修改的效果，请调主在初始化Servers
-			// 属性的时候用一个克隆的ServerCollection对象。
-		
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            // OK和Cancel退出本对话框,其实 Servers中的内容已经修改。
+            // 为了让Cancel退出有放弃整体修改的效果，请调主在初始化Servers
+            // 属性的时候用一个克隆的ServerCollection对象。
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		void FillList()
-		{
-			listView1.Items.Clear();
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-			if (Servers == null)
-				return;
+        void FillList()
+        {
+            listView1.Items.Clear();
 
-			for(int i = 0;i<Servers.Count; i++)
-			{
+            if (Servers == null)
+                return;
+
+            for (int i = 0; i < Servers.Count; i++)
+            {
                 dp2Server server = (dp2Server)Servers[i];
 
-				ListViewItem item = new ListViewItem(server.Name, 0);
+                ListViewItem item = new ListViewItem(server.Name, 0);
 
-				listView1.Items.Add(item);
+                listView1.Items.Add(item);
 
                 item.SubItems.Add(server.Url);
-				item.SubItems.Add(server.DefaultUserName);
-				item.SubItems.Add(server.SavePassword == true ? "是" : "否");
+                item.SubItems.Add(server.DefaultUserName);
+                item.SubItems.Add(server.SavePassword == true ? "是" : "否");
 
-			}
-
-
-		}
-
-		private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
-
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
-
-			bool bSelected = listView1.SelectedItems.Count > 0;
-
-			//
-			menuItem = new MenuItem("修改(&M)");
-			menuItem.Click += new System.EventHandler(this.menu_modifyServer);
-			if (bSelected == false) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
+            }
 
 
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+        }
+
+        private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            bool bSelected = listView1.SelectedItems.Count > 0;
+
+            //
+            menuItem = new MenuItem("修改(&M)");
+            menuItem.Click += new System.EventHandler(this.menu_modifyServer);
+            if (bSelected == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("删除(&D)");
-			menuItem.Click += new System.EventHandler(this.menu_deleteServer);
-			if (bSelected == false)
-				menuItem.Enabled = false;
-			contextMenu.MenuItems.Add(menuItem);
-
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			//
-			menuItem = new MenuItem("新增(&N)");
-			menuItem.Click += new System.EventHandler(this.menu_newServer);
-			contextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("删除(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteServer);
+            if (bSelected == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
-	
-			contextMenu.Show(listView1, new Point(e.X, e.Y) );		
-		}
-
-		void menu_deleteServer(object sender, System.EventArgs e)
-		{
-			if (listView1.SelectedIndices.Count == 0)
-			{
-				MessageBox.Show(this, "尚未选择要删除的事项 ...");
-				return;
-			}
-
-			DialogResult msgResult = MessageBox.Show(this,
-				"确实要删除所选择的事项",
-				"ServersDlg",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2);
-
-			if (msgResult != DialogResult.Yes) 
-			{
-				return;
-			}
-
-			for(int i=listView1.SelectedIndices.Count-1;i>=0;i--)
-			{
-				Servers.RemoveAt(listView1.SelectedIndices[i]);
-			}
-
-			Servers.Changed = true;
-
-			FillList();
-
-			m_bChanged = true;
-		}
-		
-
-		void menu_modifyServer(object sender, System.EventArgs e)
-		{
-			if (listView1.SelectedIndices.Count == 0)
-			{
-				MessageBox.Show(this, "尚未选择要修改的事项 ...");
-				return;
-			}
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
 
-			int nActiveLine = listView1.SelectedIndices[0];
-			// ListViewItem item = listView1.Items[nActiveLine];
+            //
+            menuItem = new MenuItem("新增(&N)");
+            menuItem.Click += new System.EventHandler(this.menu_newServer);
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(listView1, new Point(e.X, e.Y));
+        }
+
+        void menu_deleteServer(object sender, System.EventArgs e)
+        {
+            if (listView1.SelectedIndices.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选择要删除的事项 ...");
+                return;
+            }
+
+            DialogResult msgResult = MessageBox.Show(this,
+                "确实要删除所选择的事项",
+                "ServersDlg",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+            if (msgResult != DialogResult.Yes)
+            {
+                return;
+            }
+
+            for (int i = listView1.SelectedIndices.Count - 1; i >= 0; i--)
+            {
+                Servers.RemoveAt(listView1.SelectedIndices[i]);
+            }
+
+            Servers.Changed = true;
+
+            FillList();
+
+            m_bChanged = true;
+        }
+
+
+        void menu_modifyServer(object sender, System.EventArgs e)
+        {
+            if (listView1.SelectedIndices.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选择要修改的事项 ...");
+                return;
+            }
+
+
+            int nActiveLine = listView1.SelectedIndices[0];
+            // ListViewItem item = listView1.Items[nActiveLine];
 
             ServerDlg dlg = new ServerDlg();
             // GuiUtil.AutoSetDefaultFont(dlg); 
             GuiUtil.SetControlFont(dlg, this.Font);
 
-			dlg.Text = "修改缺省帐户参数";
+            dlg.Text = "修改缺省帐户参数";
 
             dlg.ServerName = ((dp2Server)Servers[nActiveLine]).Name;
             dlg.Password = ((dp2Server)Servers[nActiveLine]).DefaultPassword;
@@ -321,10 +319,10 @@ namespace DigitalPlatform.CirculationClient
             dlg.UserName = ((dp2Server)Servers[nActiveLine]).DefaultUserName;
             dlg.SavePassword = ((dp2Server)Servers[nActiveLine]).SavePassword;
 
-			dlg.ShowDialog(this);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
             ((dp2Server)Servers[nActiveLine]).Name = dlg.ServerName;
             ((dp2Server)Servers[nActiveLine]).DefaultPassword = dlg.Password;
@@ -332,108 +330,113 @@ namespace DigitalPlatform.CirculationClient
             ((dp2Server)Servers[nActiveLine]).DefaultUserName = dlg.UserName;
             ((dp2Server)Servers[nActiveLine]).SavePassword = dlg.SavePassword;
 
-			Servers.Changed = true;
+            Servers.Changed = true;
 
-			FillList();
+            FillList();
 
-		// 选择一行
-		// parameters:
-		//		nIndex	要设置选择标记的行。如果==-1，表示清除全部选择标记但不选择。
-		//		bMoveFocus	是否同时移动focus标志到所选择行
-			ListViewUtil.SelectLine(listView1, 
-				nActiveLine,
-				true);
+            // 选择一行
+            // parameters:
+            //		nIndex	要设置选择标记的行。如果==-1，表示清除全部选择标记但不选择。
+            //		bMoveFocus	是否同时移动focus标志到所选择行
+            ListViewUtil.SelectLine(listView1,
+                nActiveLine,
+                true);
 
-			m_bChanged = true;
+            m_bChanged = true;
 
-		}
+        }
 
 
-		void menu_newServer(object sender, System.EventArgs e)
-		{
-			int nActiveLine = -1;
-			if (listView1.SelectedIndices.Count != 0)
-			{
-				nActiveLine = listView1.SelectedIndices[0];
-			}
+        void menu_newServer(object sender, System.EventArgs e)
+        {
+            int nActiveLine = -1;
+            if (listView1.SelectedIndices.Count != 0)
+            {
+                nActiveLine = listView1.SelectedIndices[0];
+            }
 
-			ServerDlg dlg = new ServerDlg();
+            ServerDlg dlg = new ServerDlg();
             // GuiUtil.AutoSetDefaultFont(dlg); 
             GuiUtil.SetControlFont(dlg, this.Font);
 
-			dlg.Text = "新增服务器地址和缺省帐户";
+            dlg.Text = "新增服务器地址和缺省帐户";
 
             if (nActiveLine == -1)
-            {   
+            {
                 // 无参考事项情形的新增
+#if NO
                 dlg.ServerName = "社科院联合编目中心";
                 dlg.ServerUrl = "http://ssucs.org/dp2library";
                 dlg.UserName = "test";
+#endif
+                dlg.ServerName = "单机版服务器";
+                dlg.ServerUrl = "net.pipe://localhost/dp2library/xe";
+                dlg.UserName = "supervisor";
             }
             else
-			{
+            {
                 dlg.ServerName = ((dp2Server)Servers[nActiveLine]).Name;
                 dlg.Password = ((dp2Server)Servers[nActiveLine]).DefaultPassword;
                 dlg.ServerUrl = ((dp2Server)Servers[nActiveLine]).Url;
                 dlg.UserName = ((dp2Server)Servers[nActiveLine]).DefaultUserName;
                 dlg.SavePassword = ((dp2Server)Servers[nActiveLine]).SavePassword;
-			}
+            }
 
-			dlg.ShowDialog(this);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
             dp2Server server = Servers.NewServer(nActiveLine);
             server.Name = dlg.ServerName;
-			server.DefaultPassword = dlg.Password;
-			server.Url = dlg.ServerUrl;
-			server.DefaultUserName = dlg.UserName;
-			server.SavePassword = dlg.SavePassword;
+            server.DefaultPassword = dlg.Password;
+            server.Url = dlg.ServerUrl;
+            server.DefaultUserName = dlg.UserName;
+            server.SavePassword = dlg.SavePassword;
 
-			Servers.Changed = true;
+            Servers.Changed = true;
 
-			FillList();
+            FillList();
 
-			// 选择一行
-			// parameters:
-			//		nIndex	要设置选择标记的行。如果==-1，表示清除全部选择标记但不选择。
-			//		bMoveFocus	是否同时移动focus标志到所选择行
-			ListViewUtil.SelectLine(listView1, 
-				Servers.Count - 1,
-				true);
+            // 选择一行
+            // parameters:
+            //		nIndex	要设置选择标记的行。如果==-1，表示清除全部选择标记但不选择。
+            //		bMoveFocus	是否同时移动focus标志到所选择行
+            ListViewUtil.SelectLine(listView1,
+                Servers.Count - 1,
+                true);
 
-			m_bChanged = true;
+            m_bChanged = true;
 
-		}
+        }
 
 
-		private void listView1_DoubleClick(object sender, System.EventArgs e)
-		{
-			menu_modifyServer(null, null);
-		}
+        private void listView1_DoubleClick(object sender, System.EventArgs e)
+        {
+            menu_modifyServer(null, null);
+        }
 
-		private void ServersDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (this.DialogResult != DialogResult.OK)
-			{
-				if (m_bChanged == true)
-				{
-					DialogResult msgResult = MessageBox.Show(this,
-						"要放弃在对话框中所做的全部修改么?",
-						"ServersDlg",
-						MessageBoxButtons.YesNo,
-						MessageBoxIcon.Question,
-						MessageBoxDefaultButton.Button2);
-					if (msgResult == DialogResult.No) 
-					{
-						e.Cancel = true;
-						return;
-					}
-				}
-			}
+        private void ServersDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (this.DialogResult != DialogResult.OK)
+            {
+                if (m_bChanged == true)
+                {
+                    DialogResult msgResult = MessageBox.Show(this,
+                        "要放弃在对话框中所做的全部修改么?",
+                        "ServersDlg",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (msgResult == DialogResult.No)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            }
 
-		}
+        }
 
         private void button_newServer_Click(object sender, EventArgs e)
         {
@@ -464,5 +467,5 @@ namespace DigitalPlatform.CirculationClient
             m_firstUseBalloon.Dispose();
             m_firstUseBalloon = null;
         }
-	}
+    }
 }

@@ -2081,12 +2081,10 @@ namespace DigitalPlatform.LibraryServer
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocationString(strLocation);
-            string strLibraryCode = "";
-            string strRoom = "";
             // 解析
             LibraryApplication.ParseCalendarName(strLocation,
-        out strLibraryCode,
-        out strRoom);
+        out string strLibraryCode,
+        out string strRoom);
 
             // 检查来自 location 元素中的馆代码部分
             {

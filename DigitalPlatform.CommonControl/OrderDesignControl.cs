@@ -1644,7 +1644,7 @@ namespace DigitalPlatform.CommonControl
 
             if (this.ArriveMode == false)
             {
-                // 订购态
+                // *** 订购态
 
                 // 注：只有未订购的、草稿状态的事项才允许修改订购
                 // 已订购(必然是全部发出，不可能局部发出)，或者已验收(有可能是局部验收，或者(虽然已验收完但是)潜在可以追加)，这样的事项都不能再进行任何订购操作，所以为readonly
@@ -1654,6 +1654,17 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
+                // *** 验收态
+
+                List<string> comments = new List<string>();
+
+                string strControlled = IsDistributeControlled(item.Distribute);
+                if (string.IsNullOrEmpty(strControlled) == false)
+                {
+                    item.State |= ItemState.ReadOnly;
+                    comments.Add(strControlled);
+                }
+
                 // 检查书商
                 bool seller_matched = true;
                 if (string.IsNullOrEmpty(this._sellerFilter) == false && this._sellerFilter != "<不过滤>")
@@ -1666,7 +1677,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     item.State |= ItemState.ReadOnly;
                     // TODO: tips 提示只读状态的原因
-                    item.StateComment = "渠道 '" + item.Seller + "' 不符合渠道过滤器 '" + this._sellerFilter + "'";
+                    comments.Add("渠道 '" + item.Seller + "' 不符合渠道过滤器 '" + this._sellerFilter + "'");
                 }
                 else
                 {
@@ -1680,16 +1691,18 @@ namespace DigitalPlatform.CommonControl
 
                         // 将location item中已经勾选的事项设置为readonly态，表示是已经验收的(馆藏地点、册)事项
                         item.location.SetAlreadyCheckedToReadOnly(false);
-
                     }
                     else
                     {
                         // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
 
                         item.State |= ItemState.ReadOnly;
-                        item.StateComment = "状态 '" + strState + "' 不允许进行验收操作";
+                        comments.Add( "状态 '" + strState + "' 不允许进行验收操作");
                     }
                 }
+
+                if (comments.Count > 0)
+                    item.StateComment = StringUtil.MakePathList(comments, "; ");
             }
 
             // 2009/2/13
@@ -1720,6 +1733,50 @@ namespace DigitalPlatform.CommonControl
             }
 
             return 0;
+        }
+
+        // 检查馆代码是否在管辖范围内
+        string IsDistributeControlled(string strDistribute)
+        {
+            LocationCollection locations = new LocationCollection();
+            int nRet = locations.Build(strDistribute, out string strError);
+            if (nRet == -1)
+            {
+                return "馆藏分配字符串 '" + strDistribute + "' 格式不正确: " + strError;
+            }
+
+            List<string> codes = new List<string>();
+            foreach (Location location in locations)
+            {
+                // 空的馆藏地点被视为不在分馆用户管辖范围内
+                if (string.IsNullOrEmpty(location.Name) == true)
+                {
+                    codes.Add("");
+                    continue;
+                }
+
+
+                // 解析
+                dp2StringUtil.ParseCalendarName(location.Name,
+            out string strLibraryCode,
+            out string strPureName);
+
+                codes.Add(strLibraryCode);
+            }
+
+            StringUtil.RemoveDup(ref codes);
+
+            // 检查馆代码是否在管辖范围内
+            if (this.VerifyLibraryCode != null)
+            {
+                VerifyLibraryCodeEventArgs e = new VerifyLibraryCodeEventArgs();
+                e.LibraryCode = StringUtil.MakePathList(codes);
+                this.VerifyLibraryCode(this, e);
+                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                    return "馆藏分配去向不在当前用户完全管辖范围内: " + e.ErrorInfo;
+            }
+
+            return null;
         }
 
         // 整理一下，在已经有0份以外事项的前提下，清除多余的份数为0的事项
