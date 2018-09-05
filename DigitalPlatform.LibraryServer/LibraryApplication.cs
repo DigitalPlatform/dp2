@@ -170,7 +170,7 @@ namespace DigitalPlatform.LibraryServer
         //      3.4 (2018/8/7) SetOrders() API 所保存的订购记录里面增加了 fixedPrice 和 discount 元素。早先版本如果保存时候提交这两个元素，会被 dp2library 过滤掉
         public static string Version = "3.4";
 
-        internal static DateTime _expire = new DateTime(2018, 9, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2018, 11, 15); // 上一个版本是 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -1698,7 +1698,7 @@ namespace DigitalPlatform.LibraryServer
                             }
                             catch (Exception ex)
                             {
-                                app.WriteErrorLog("启动批处理任务PatronReplication时出错：" + ex.Message);
+                                app.WriteErrorLog("启动批处理任务 PatronReplication 时出错：" + ex.Message);
                                 goto ERROR1;
                             }
                         }
@@ -3503,7 +3503,7 @@ namespace DigitalPlatform.LibraryServer
                             "//traceDTLP",
                             "//zhengyuan",
                             "//dkyw",
-                            "//patronReplication",
+                            "patronReplication",  // "//patronReplication", 2018/9/5
                             "//clientFineInterface",
                             "//yczb",
                             "script",
@@ -3522,6 +3522,7 @@ namespace DigitalPlatform.LibraryServer
                             "channel",
                             "cataloging",
                             "serverReplication",
+                            "authdbgroup",  // 2018/9/2
                         };
 
                         RestoreElements(writer, elements);
@@ -3821,6 +3822,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#if OLD_CODE
         public void StopAll()
         {
             // 停止所有长操作
@@ -3898,6 +3900,7 @@ namespace DigitalPlatform.LibraryServer
                 return stop;
             }
         }
+#endif
 
         internal CancellationTokenSource _app_down = new CancellationTokenSource();
 
@@ -3915,8 +3918,10 @@ namespace DigitalPlatform.LibraryServer
             DateTime start = DateTime.Now;
             try
             {
+#if OLD_CODE
                 // 停止所有长操作
                 this.StopAll();
+#endif
 
                 // 2014/12/3
                 this.Flush();
@@ -3953,7 +3958,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("LibraryApplication Close()俘获异常: " + ExceptionUtil.GetDebugText(ex));
+                this.WriteErrorLog("LibraryApplication Close() 捕获异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
             TimeSpan delta = DateTime.Now - start;
@@ -4419,6 +4424,40 @@ namespace DigitalPlatform.LibraryServer
         public bool IsBiblioDbName(string strBiblioDbName)
         {
             if (GetCfgBiblioDbName(strBiblioDbName) == null)
+                return false;
+            return true;
+        }
+
+        // (通过其他语言的书目库名)获得配置文件中所使用的那个规范库名
+        public string GetCfgAuthorityDbName(string strAuthorityDbName)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + strAuthorityDbName + "']");
+
+            if (node != null)
+                return strAuthorityDbName;
+
+            // 然后关注别名
+            if (this.kdbs == null)
+                return null;
+
+            KernelDbInfo db = this.kdbs.FindDb(strAuthorityDbName);
+            if (db != null)
+            {
+                foreach (Caption caption in db.Captions)
+                {
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + caption.Value + "']");
+                    if (node != null)
+                        return caption.Value;
+                }
+            }
+
+            return null;
+        }
+
+        // 判断一个数据库名是不是合法的规范库名
+        public bool IsAuthorityDbName(string strAuthorityDbName)
+        {
+            if (GetCfgAuthorityDbName(strAuthorityDbName) == null)
                 return false;
             return true;
         }
@@ -5775,7 +5814,7 @@ namespace DigitalPlatform.LibraryServer
             strXml = records[0].Xml;
             timestamp = records[0].baTimestamp;
             strOutputPath = records[0].Path;
-#else 
+#else
 
             List<string> aPath = null;
             lRet = channel.DoGetSearchResult(
@@ -11481,7 +11520,7 @@ out strError);
             return 0;
         }
 
-        #region 实用功能
+#region 实用功能
 
         // 通过册条码号得知从属的种记录路径
         // parameters:
@@ -11996,7 +12035,7 @@ out strError);
             return 1;
         }
 
-        #endregion
+#endregion
 
         // 包装版本
         // 检查路径中的库名，是不是实体库名
@@ -12073,7 +12112,7 @@ out strError);
             return 0;
         }
 
-        #region APIs
+#region APIs
 
 
 
@@ -12627,7 +12666,7 @@ strLibraryCode);    // 读者所在的馆代码
             return -1;
         }
 
-        #endregion
+#endregion
 
         // 展开权限字符串为原始权限定义形态
         public static string ExpandRightString(string strOriginRight)
@@ -14581,7 +14620,6 @@ strLibraryCode);    // 读者所在的馆代码
                             return 0;
                         }
                         return 1;   // 如果有了writerecord权限，就不再需要writeres权限
-
                     }
 
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);

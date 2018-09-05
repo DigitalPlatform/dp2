@@ -883,7 +883,6 @@ DomUtil.GetAttr(xmlServerNode,
                 contextMenu.Items.Add(menuItem);
             }
 
-
             if (OnSetMenu != null)
             {
                 GuiAppendMenuEventArgs newargs = new GuiAppendMenuEventArgs();
@@ -892,7 +891,6 @@ DomUtil.GetAttr(xmlServerNode,
                 if (newargs.ContextMenuStrip != contextMenu)
                     contextMenu = newargs.ContextMenuStrip;
             }		
-
 
             contextMenu.Show(this, e.Location);
         }

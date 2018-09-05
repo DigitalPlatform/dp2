@@ -15,7 +15,7 @@ string color = stuff.color;
 int value = stuff.value;
 ***/
 
-namespace GcatLite
+namespace DigitalPlatform.LibraryClient.Rest
 {
     /// <summary>
     /// Restful 通讯的通道。在通讯过程中需要保持使用同一个对象，它自然能持久化 CookiesContainer，保证有状态通讯
@@ -416,5 +416,6 @@ string parameters)
     }
 #endif
 
-#endregion
-    }
+    #endregion
+}
+

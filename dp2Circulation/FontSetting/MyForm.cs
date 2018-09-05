@@ -799,7 +799,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
             if (Program.MainForm != null && Program.MainForm.AppInfo != null
-    && Floating == false )
+    && Floating == false)
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state",
@@ -1058,7 +1058,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1142,7 +1142,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1203,7 +1203,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1248,7 +1248,7 @@ out string strError)
             Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
 
             LibraryChannel channel = this.GetChannel();
-            string strOldMessage = Progress.Initial(strAction == "protect"?"正在请求保护尾号 ...":"正在请求释放保护尾号 ...");
+            string strOldMessage = Progress.Initial(strAction == "protect" ? "正在请求保护尾号 ..." : "正在请求释放保护尾号 ...");
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 1, 0);
 
@@ -1380,7 +1380,7 @@ out string strError)
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1435,14 +1435,14 @@ out string strError)
             string strBinDir = Environment.CurrentDirectory;
 
             string[] saAddRef1 = {
-										 strBinDir + "\\digitalplatform.marcdom.dll",
+                                         strBinDir + "\\digitalplatform.marcdom.dll",
 										 // this.BinDir + "\\digitalplatform.marckernel.dll",
 										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
 										 strBinDir + "\\digitalplatform.dll",
-										 strBinDir + "\\digitalplatform.Text.dll",
-										 strBinDir + "\\digitalplatform.IO.dll",
-										 strBinDir + "\\digitalplatform.Xml.dll",
-										 strBinDir + "\\dp2circulation.exe" };
+                                         strBinDir + "\\digitalplatform.Text.dll",
+                                         strBinDir + "\\digitalplatform.IO.dll",
+                                         strBinDir + "\\digitalplatform.Xml.dll",
+                                         strBinDir + "\\dp2circulation.exe" };
 
             Assembly assembly = null;
             string strWarning = "";
@@ -1476,7 +1476,7 @@ out string strError)
             filter.Assembly = assembly;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1692,21 +1692,24 @@ out string strError)
 
             e.Canceled = true;  // 不能解释处理
             return;
-        ERROR1:
+            ERROR1:
             e.Canceled = true;
             e.ErrorInfo = strError;
         }
 
         public void ShowMessageBox(string strText)
         {
-            try
+            this.Invoke((Action)(() =>
             {
-                MessageBox.Show(this, strText);
-            }
-            catch(ObjectDisposedException)
-            {
+                try
+                {
+                    MessageBox.Show(this, strText);
+                }
+                catch (ObjectDisposedException)
+                {
 
-            }
+                }
+            }));
         }
 
         #region 指纹有关功能

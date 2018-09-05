@@ -9314,7 +9314,6 @@ out string strError)
             return nTotalCount;
         }
 
-
         public long SetMessage(string strAction,
             string strStyle,
             MessageData[] messages,

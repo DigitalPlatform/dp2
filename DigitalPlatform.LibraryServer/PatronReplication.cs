@@ -151,6 +151,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
+#if NO
             if (DateTime.Now > new DateTime(2015, 12, 31) // 2016/1/1 以后可删除此语句
                 && StringUtil.IsInList("patronReplication", this.App.Function) == false)
             {
@@ -159,6 +160,7 @@ namespace DigitalPlatform.LibraryServer
                 // this.App.WriteErrorLog(strErrorText);
                 return;
             }
+#endif
 
             string strError = "";
             int nRet = 0;
@@ -737,7 +739,7 @@ patronDbName="读者库"
 idElementName="barcode"
 />
 */
-            XmlNode node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("//patronReplication");
+            XmlNode node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("patronReplication");  // "//patronReplication" 2018/9/5 修改 bug
             if (node == null)
             {
                 strError = "尚未配置<patronReplication>参数";

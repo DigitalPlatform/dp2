@@ -200,7 +200,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strStartTimeDef = "";
 
-            XmlNode node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("//monitors/" + strMonitorName);
+            XmlNode node = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("monitors/" + strMonitorName);
             if (node == null)
             {
                 bRet = false;

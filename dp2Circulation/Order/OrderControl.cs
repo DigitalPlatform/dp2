@@ -380,6 +380,13 @@ namespace dp2Circulation
 
             OrderDesignForm dlg = new OrderDesignForm();
 
+            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+            dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+            dlg.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+
             this.ParentShowMessage("正在准备数据 ...", "green", false);
             try
             {
@@ -420,12 +427,6 @@ namespace dp2Circulation
                 dlg.Changed = false;
                 dlg.EndInitial();
 
-                dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
-                dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
-                dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-                dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
-                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
             }
             finally
             {
@@ -1051,6 +1052,13 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             OrderArriveForm dlg = new OrderArriveForm();
+
+            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+
+            dlg.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+
             // dlg.MainForm = Program.MainForm;
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.Text = "验收 -- 批次号:" + this.AcceptBatchNo + " -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
@@ -1097,9 +1105,6 @@ namespace dp2Circulation
 
             dlg.Changed = false;
             dlg.EndInitial();
-
-            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
-            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
 
             Program.MainForm.AppInfo.LinkFormState(dlg,
                 "order_accept_design_form_state");
@@ -1328,34 +1333,59 @@ namespace dp2Circulation
             string strBiblioPrice,
             int nRightCopy)
         {
-            string strResult = "";
+            // string strResult = "";
+            List<string> results = new List<string>();
 
             if (String.IsNullOrEmpty(strOrderPrice) == false)
             {
-                strResult += "订购价:" + strOrderPrice;
+                string strPrice = strOrderPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("订购价:" + strPrice);
             }
 
             if (String.IsNullOrEmpty(strAcceptPrice) == false)
             {
-                if (String.IsNullOrEmpty(strResult) == false)
-                    strResult += ";";
-                strResult += "验收价:" + strAcceptPrice;
+                string strPrice = strAcceptPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("验收价:" + strPrice);
             }
 
             if (String.IsNullOrEmpty(strBiblioPrice) == false)
             {
-                if (String.IsNullOrEmpty(strResult) == false)
-                    strResult += ";";
-                strResult += "书目价:" + strBiblioPrice;
+                string strPrice = strBiblioPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("书目价:" + strPrice); 
             }
 
-            return strResult;
+            return StringUtil.MakePathList(results, ";");
+        }
+
+        // 正规化金额字符串。把 "CNY100.00/3/5" 变换为 "CNY100.00/3*5"
+        static string CanonicalizePrice(string strPrice)
+        {
+            if (string.IsNullOrEmpty(strPrice))
+                return strPrice;
+            List<string> parts = StringUtil.SplitList(strPrice, "/");
+            if (parts.Count != 3)
+                return strPrice;
+            if (Int64.TryParse(parts[1], out Int64 v1) == false)
+                return strPrice;
+            if (Int64.TryParse(parts[2], out Int64 v2) == false)
+                return strPrice;
+
+            return parts[0] + "/" + (v1 * v2);
         }
 
         // 根据验收数据，自动创建实体数据
@@ -1509,7 +1539,7 @@ namespace dp2Circulation
                         else if (this.PriceDefault == "书目价")
                             strPriceValue = strBiblioPrice;
 
-
+                        // 注：strPriceValue 中可能是 "CNY100/2" 这样的形态。如果再追加 "/3" 之类，就需要规整为 "CNY100/6"
                         if (nRightCopy == 1)
                         {
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -1520,7 +1550,7 @@ namespace dp2Circulation
                             if (String.IsNullOrEmpty(strArrivePrice) == false)
                             {
                                 DomUtil.SetElementText(dom.DocumentElement,
-                                    "price", strPriceValue + "/" + nRightCopy.ToString());
+                                    "price", CanonicalizePrice(strPriceValue + "/" + nRightCopy.ToString()));
                             }
                         }
 

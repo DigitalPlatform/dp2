@@ -115,7 +115,14 @@ namespace dp2Circulation
                 deployment.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
 
                 _updateState = UpdateState.CheckForUpdate;
-                deployment.CheckForUpdateAsync();
+                try
+                {
+                    deployment.CheckForUpdateAsync();
+                }
+                catch(Exception ex)
+                {
+                    this.DisplayBackgroundText("更新操作 (CheckForUpdate) 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                }
             }
         }
 
@@ -193,7 +200,15 @@ namespace dp2Circulation
             deployment.UpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
 
             _updateState = UpdateState.Update;
-            deployment.UpdateAsync();
+
+            try
+            {
+                deployment.UpdateAsync();
+            }
+            catch(Exception ex)
+            {
+                this.DisplayBackgroundText("更新操作 (Update) 出现异常: " + ExceptionUtil.GetAutoText(ex));
+            }
         }
 
         void ad_UpdateProgressChanged(object sender, DeploymentProgressChangedEventArgs e)
