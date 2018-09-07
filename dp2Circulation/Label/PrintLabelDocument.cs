@@ -53,6 +53,7 @@ namespace dp2Circulation
             this.Close();
             _sr = reader;
             this.m_nPageNo = 0;
+            _copyCache.Clear();
             return 0;
         }
 
@@ -73,6 +74,7 @@ namespace dp2Circulation
             }
 
             this.m_nPageNo = 0;
+            _copyCache.Clear();
 
             /*
             this.BeginPrint -= new PrintEventHandler(PrintLabelDocument_BeginPrint);
@@ -91,6 +93,7 @@ namespace dp2Circulation
                 this._sr.BaseStream.Seek(0, SeekOrigin.Begin);
             }
             this.m_nPageNo = 0;
+            _copyCache.Clear();
         }
 
         void PrintLabelDocument_BeginPrint(object sender,
@@ -108,11 +111,70 @@ namespace dp2Circulation
             }
         }
 
+        // 复制品集合
+        List<List<string>> _copyCache = new List<List<string>>();
+
+        // parameters:
+        //      nCopyOffset 第一次调用前要设置为 0
         // return:
         //      -1  error
         //      0   normal
         //      1   reach file end
-        public int GetLabelLines(out List<string> lines,
+        public int GetLabelLines(
+            int nCopies,
+            ref int nCopyOffset,
+            out List<string> lines,
+            out string strError)
+        {
+            lines = new List<string>();
+            strError = "";
+
+            bool bFirst = _sr.BaseStream.Position == 0;
+
+            Debug.Assert(nCopies >= 1, "");
+            Debug.Assert(nCopyOffset >= 0, "");
+
+            if (_copyCache.Count == 0
+                || nCopyOffset >= _copyCache.Count)
+            {
+
+                REDO:
+                // 重新获得 cache
+                // return:
+                //      -1  error
+                //      0   normal
+                //      1   reach file end
+                int nRet = _getLabelLines(
+                    out lines,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (bFirst && lines.Count == 0)
+                    goto REDO;
+
+                // 加入 _copyCache
+                _copyCache.Clear();
+                for (int i = 0; i < nCopies; i++)
+                {
+                    _copyCache.Add(lines);
+                }
+
+                nCopyOffset = 1;
+                return nRet;
+            }
+
+            lines = _copyCache[nCopyOffset];
+            nCopyOffset++;
+            return 0;
+        }
+
+        // return:
+        //      -1  error
+        //      0   normal
+        //      1   reach file end
+        public int _getLabelLines(
+            out List<string> lines,
             out string strError)
         {
             strError = "";
@@ -351,6 +413,10 @@ namespace dp2Circulation
             if (e.Cancel == true)
                 return;
 
+            int nCopies = (int)e.PageSettings?.PrinterSettings?.Copies;
+            if (nCopies == 0)
+                nCopies = 1;
+
             bool bTestingGrid = false;
             if (StringUtil.IsInList("TestingGrid", strStyle) == true)
                 bTestingGrid = true;
@@ -392,6 +458,9 @@ namespace dp2Circulation
                 / (double)label_param.LabelWidth
                 );
 
+            int current_offset = 0;
+            _copyCache.Clear();
+
             int from = 0;
             int to = 0;
             bool bOutput = true;
@@ -426,7 +495,10 @@ namespace dp2Circulation
                             for (int j = 0; j < nXCount; j++)
                             {
                                 List<string> lines = null;
-                                nRet = this.GetLabelLines(out lines,
+                                nRet = this.GetLabelLines(
+                                    nCopies,
+                                    ref current_offset,
+                                    out lines,
                                     out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
@@ -450,7 +522,7 @@ namespace dp2Circulation
                                 }
                             }
                         }
-                    NEXT_PAGE_0:
+                        NEXT_PAGE_0:
                         nTempPageNo++;
                     }
 #if NO
@@ -710,7 +782,10 @@ namespace dp2Circulation
                     for (int j = 0; j < nXCount; j++)
                     {
                         List<string> lines = null;
-                        nRet = this.GetLabelLines(out lines,
+                        nRet = this.GetLabelLines(
+                            nCopies,
+                            ref current_offset,
+                            out lines,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -817,7 +892,7 @@ namespace dp2Circulation
                     y += (float)label_param.LabelHeight;
                 }
 
-            NEXT_PAGE:
+                NEXT_PAGE:
 
                 // If more lines exist, print another page.
                 if (bEOF == false)
@@ -850,7 +925,7 @@ namespace dp2Circulation
             this.m_nPageNo++;
             e.HasMorePages = true;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(owner, strError);
         }
 
