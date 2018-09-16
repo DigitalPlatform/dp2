@@ -7,25 +7,18 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Collections;
-using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
-using System.Web;
-using System.Drawing;
 using System.Runtime.Serialization;
 using System.Messaging;
 using System.Security.Principal;
 
 using MongoDB.Driver;
 
-using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
 using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
@@ -274,6 +267,22 @@ namespace DigitalPlatform.LibraryServer
         {
             get;
             set;
+        }
+
+        static string GetFunctionDescription(string strFunction)
+        {
+            List<string> results = new List<string>();
+            if (StringUtil.IsInList("objectRights", strFunction) == true)
+                results.Add("+下载权限");
+            else
+                results.Add("-下载权限");
+
+            if (StringUtil.IsInList("pdfPreview", strFunction) == true)
+                results.Add("+PDF预览");
+            else
+                results.Add("-PDF预览");
+
+            return StringUtil.MakePathList(results, ", ");
         }
 
         public string LibraryName
@@ -679,7 +688,6 @@ namespace DigitalPlatform.LibraryServer
                     app.CfgMapDir = strCfgMapDir;
                     PathUtil.TryCreateDir(app.CfgMapDir);	// 确保目录创建
 
-
                     // log
                     app.LogDir = strLogDir;	// 日志存储目录
                     PathUtil.TryCreateDir(app.LogDir);	// 确保目录创建
@@ -757,6 +765,8 @@ namespace DigitalPlatform.LibraryServer
                             app.WriteErrorLog("*** 发现 LibraryService 先前曾被意外终止 ***");
                         }
                     }
+
+                    this.WriteErrorLog("序列号许可的功能: '" + this.Function + "' (" + GetFunctionDescription(this.Function) + ")");
 
                     this.WriteErrorLog("*********");
 
@@ -2819,7 +2829,7 @@ namespace DigitalPlatform.LibraryServer
             // this.WriteErrorLog("file1='"+this.m_strFileName+"' file2='" + e.FullPath + "'");
             if (PathUtil.IsEqual(this.m_strFileName, e.FullPath) == true)
             {
-                string strError = "";
+                // string strError = "";
 
                 // 稍微延时一下，避免很快地重装、正好和 尚在改写library.xml文件的的进程发生冲突
                 Thread.Sleep(500);
@@ -2828,7 +2838,7 @@ namespace DigitalPlatform.LibraryServer
                     true,
                     this.DataDir,
                     this.HostDir,
-                    out strError);
+                    out string strError);
                 if (nRet == -1)
                 {
                     strError = "reload " + this.m_strFileName + " error: " + strError;
@@ -2846,26 +2856,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.Filters.ClearFilter(e.FullPath);
             }
-
-#if NO
-            // 监视webui.xml
-            if (PathUtil.IsEqual(this.m_strWebuiFileName, e.FullPath) == true)
-            {
-                string strError = "";
-                nRet = this.LoadWebuiCfgDom(out strError);
-                if (nRet == -1)
-                {
-                    strError = "reload " + this.m_strWebuiFileName + " error: " + strError;
-                    this.WriteErrorLog(strError);
-                    this.GlobalErrorInfo = strError;
-                }
-                else
-                {
-                    this.GlobalErrorInfo = "";
-                }
-            }
-#endif
-
         }
 
         // 读入<readerdbgroup>相关配置
@@ -2888,13 +2878,11 @@ namespace DigitalPlatform.LibraryServer
 
                 item.DbName = DomUtil.GetAttr(node, "name");
 
-                bool bValue = true;
-                string strError = "";
                 int nRet = DomUtil.GetBooleanParam(node,
                     "inCirculation",
                     true,
-                    out bValue,
-                    out strError);
+                    out bool bValue,
+                    out string strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog("元素<//readerdbgroup/database>属性inCirculation读入时发生错误: " + strError);
@@ -3284,7 +3272,6 @@ namespace DigitalPlatform.LibraryServer
 
                     return;
                 }
-
 
                 // 关闭文件跟踪
                 bool bOldState = false;
@@ -14766,11 +14753,9 @@ strLibraryCode);    // 读者所在的馆代码
                         if (nRet == 0)
                             goto ALLOW_ACCESS;   // TODO: 此时是否允许访问?
 
-#if NO
-                        // 2018/8/12
+                        // 2018/9/15
                         if (StringUtil.IsInList("objectRights", this.Function) == false)
-                            goto ALLOW_ACCESS;   // 如果 dp2library 没有许可 objectRights 功能，是允许任何访问者来获取的。即便，不限制任何下载权限
-#endif
+                            goto ALLOW_ACCESS;   // 如果 dp2library 没有许可 objectRights 功能，是允许任何访问者来获取的。即，不限制任何下载权限
 
                         if (string.IsNullOrEmpty(strObjectRights) == true)
                             goto ALLOW_ACCESS;   // 没有定义 rights 的对象是允许任何访问者来获取的

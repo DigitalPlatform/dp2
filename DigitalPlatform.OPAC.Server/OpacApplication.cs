@@ -4272,8 +4272,8 @@ Value data: HEX 0x1
              * */
 
             // 设置媒体类型
-            if (strMime == "text/plain")
-                strMime = "text";
+            //if (strMime == "text/plain")
+            //    strMime = "text";
             Page.Response.ContentType = strMime;
 
             string strSize = (string)values["size"];

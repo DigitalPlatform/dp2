@@ -538,12 +538,14 @@ namespace DigitalPlatform.LibraryServer
                         )
                     {
                         // 根据字段权限定义过滤出允许的内容
+                        // parameters:
+                        //      strUserRights   用户权限。如果为 null，表示不启用过滤 856 字段功能
                         // return:
                         //      -1  出错
                         //      0   成功
                         //      1   有部分字段被修改或滤除
                         nRet = FilterBiblioByFieldNameList(
-                            sessioninfo.Rights,
+                            StringUtil.IsInList("objectRights", this.Function) == true ? sessioninfo.Rights : null,
                             strAccessParameters,
                             ref strBiblioXml,
                             out strError);
@@ -2659,6 +2661,7 @@ out strError);
 
         // 根据字段权限定义过滤出允许的内容
         // parameters:
+        //      strUserRights   用户权限。如果为 null，表示不启用过滤 856 字段功能
         //      strFieldNameList    字段过滤列表。如果为空，则表示不(利用它)对字段进行过滤
         // return:
         //      -1  出错
@@ -2701,18 +2704,21 @@ out strError);
 
             bool bChanged = false;
 
-            // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
-            // return:
-            //      -1  出错
-            //      其他  滤除的 856 字段个数
-            nRet = RemoveCantGet856(
+            if (strUserRights != null)
+            {
+                // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
+                // return:
+                //      -1  出错
+                //      其他  滤除的 856 字段个数
+                nRet = RemoveCantGet856(
                 strUserRights,
                 ref strMarc,
                 out strError);
-            if (nRet == -1)
-                return -1;
-            if (nRet > 0)
-                bChanged = true;
+                if (nRet == -1)
+                    return -1;
+                if (nRet > 0)
+                    bChanged = true;
+            }
 
             if (string.IsNullOrEmpty(strFieldNameList) == false)
             {
@@ -4551,7 +4557,7 @@ nsmgr);
             string strFormat = "";
             Encoding encoding = Encoding.UTF8;
 
-            if (strBiblioType == "xml" 
+            if (strBiblioType == "xml"
                 || (strBiblioType == "marcquery" || strBiblioType == "marc"))
                 strFormat = strBiblioType;
             else if (IsResultType(strBiblioType, "iso2709") == true)

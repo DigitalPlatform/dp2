@@ -1450,27 +1450,34 @@ Stack:
 
             string strOldMessageUserName = this.MessageUserName;
             string strOldMessagePassword = this.MessagePassword;
+            bool bOldPrintLabelMode = this.PrintLabelMode;
 
             CfgDlg dlg = new CfgDlg();
 
             dlg.ParamChanged += new ParamChangedEventHandler(CfgDlg_ParamChanged);
-            dlg.ap = this.AppInfo;
-            // dlg.MainForm = this;
+            try
+            {
+                dlg.ap = this.AppInfo;
+                // dlg.MainForm = this;
 
-            dlg.UiState = this.AppInfo.GetString(
-                    "main_form",
-                    "cfgdlg_uiState",
-                    "");
-            this.AppInfo.LinkFormState(dlg,
-                "cfgdlg_state");
-            dlg.ShowDialog(this);
-            // this.AppInfo.UnlinkFormState(dlg);
-            this.AppInfo.SetString(
-                    "main_form",
-                    "cfgdlg_uiState",
-                    dlg.UiState);
+                dlg.UiState = this.AppInfo.GetString(
+                        "main_form",
+                        "cfgdlg_uiState",
+                        "");
+                this.AppInfo.LinkFormState(dlg,
+                    "cfgdlg_state");
+                dlg.ShowDialog(this);
+                // this.AppInfo.UnlinkFormState(dlg);
+                this.AppInfo.SetString(
+                        "main_form",
+                        "cfgdlg_uiState",
+                        dlg.UiState);
 
-            dlg.ParamChanged -= new ParamChangedEventHandler(CfgDlg_ParamChanged);
+            }
+            finally
+            {
+                dlg.ParamChanged -= new ParamChangedEventHandler(CfgDlg_ParamChanged);
+            }
 
             // 缺省字体发生了变化
             if (strOldDefaultFontString != this.DefaultFontString)
@@ -1514,6 +1521,18 @@ Stack:
                     this.MessageHub.Login();    // 重新登录
 #endif
             }
+
+            SetPrintLabelMode();
+            if (bOldPrintLabelMode != this.PrintLabelMode)
+            {
+                if (this.PrintLabelMode == false)
+                    MessageBox.Show(this, "请稍后重新启动内务，以便恢复普通状态(非标签打印模式)的外观");
+                else
+                {
+                    MessageBox.Show(this, "已进入标签打印模式");
+                    EnsureChildForm<LabelPrintForm>();
+                }
+            }
         }
 
         void CfgDlg_ParamChanged(object sender, ParamChangedEventArgs e)
@@ -1531,7 +1550,70 @@ Stack:
                     chargingform.ChangeLayout((bool)e.Value);
                 }
             }
+        }
 
+        public bool PrintLabelMode
+        {
+            get
+            {
+                return this.AppInfo.GetBoolean(
+"MainForm",
+"print_label_mode",
+false);
+            }
+        }
+
+        // 设置标签打印模式
+        void SetPrintLabelMode()
+        {
+            bool bEnabled = PrintLabelMode;
+            if (bEnabled == true)
+            {
+                this.MainMenuStrip.Items.Clear();
+
+                ToolStripMenuItem new_menu = new ToolStripMenuItem();
+                new_menu.Text = "文件(&F)";
+
+                {
+                    ToolStripMenuItem menu_item = new ToolStripMenuItem();
+                    menu_item.Text = "标签打印窗(&L)";
+                    menu_item.Click += new System.EventHandler(this.MenuItem_openLabelPrintForm_Click);
+                    new_menu.DropDownItems.Add(menu_item);
+                }
+
+                {
+                    ToolStripMenuItem menu_item = new ToolStripMenuItem();
+                    menu_item.Text = "参数配置(&C)";
+                    menu_item.Click += new System.EventHandler(this.MenuItem_configuration_Click);
+                    new_menu.DropDownItems.Add(menu_item);
+                }
+
+                {
+                    ToolStripMenuItem menu_item = new ToolStripMenuItem();
+                    menu_item.Text = "退出(&X)";
+                    menu_item.Click += new System.EventHandler(this.MenuItem_exit_Click);
+                    new_menu.DropDownItems.Add(menu_item);
+                }
+
+                this.MainMenuStrip.Items.Add(new_menu);
+
+                // 删除工具条
+                this.Controls.Remove(this.toolStrip_main);
+                // this.Controls.Remove(this.panel_fixed);
+                {
+                    // 删除“操作历史”以外的其他属性页
+                    List<TabPage> pages = new List<TabPage>();
+                    foreach (TabPage page in this.tabControl_panelFixed.TabPages)
+                    {
+                        if (page != this.tabPage_history)
+                            pages.Add(page);
+                    }
+                    foreach (TabPage page in pages)
+                    {
+                        this.tabControl_panelFixed.TabPages.Remove(page);
+                    }
+                }
+            }
         }
 
         // 退出
@@ -1539,6 +1621,46 @@ Stack:
         {
             this.Close();
         }
+
+        // 获得当前正在编辑、已经修改尚未保存的记录路径集合
+        public List<RecordForm> GetChangedRecords(string strStyle)
+        {
+            List<RecordForm> results = new List<RecordForm>();
+            // 遍历所有 MDI 子窗口
+            foreach (Form child in this.MdiChildren)
+            {
+                dynamic window = child;
+
+                try
+                {
+                    List<RecordForm> temp = window.GetChangedRecords(strStyle);
+                    results.AddRange(temp);
+                }
+                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+                {
+                    continue;
+                }
+            }
+
+            return results;
+        }
+
+#if NO
+        public void AskRecords(AskRecordsEventArgs e)
+        {
+            // 遍历所有 MDI 子窗口
+            foreach (Form child in this.MdiChildren)
+            {
+                dynamic window = child;
+
+                window.AskRecords(e);
+                if (e.Canceled)
+                    return;
+                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                    return;
+            }
+        }
+#endif
 
         // 新开修改密码窗
         private void MenuItem_openChangePasswordForm_Click(object sender, EventArgs e)
@@ -5909,7 +6031,7 @@ out strError);
             }
             catch (FileNotFoundException ex)
             {
-                strError = "装载本地 isbn 规则文件 "+strFileName+" 发生错误 :" + ex.Message;
+                strError = "装载本地 isbn 规则文件 " + strFileName + " 发生错误 :" + ex.Message;
 
                 if (bAutoDownload == true)
                 {
@@ -9105,7 +9227,7 @@ Keys keyData)
                         //      1   校验三者关系正确
                         nRet = BiblioSearchForm.VerifyThreeFields(dom, out strError);
                         if (nRet == 0 || nRet == -1)
-                            throw new Exception("(订购记录 '"+ strOrderRecPath + "') " + strError);
+                            throw new Exception("(订购记录 '" + strOrderRecPath + "') " + strError);
 
                         nRet = SaveItemRecord(channel,
         strBiblioRecPath,
@@ -9589,5 +9711,50 @@ out strError);
     [System.Runtime.CompilerServices.CompilerGenerated]
     class NamespaceDoc
     {
+    }
+
+#if NO
+    /// <summary>
+    /// 询问记录的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AskRecordsEventHandle(object sender,
+    AskRecordsEventArgs e);
+
+    /// <summary>
+    /// 询问记录的参数
+    /// </summary>
+    public class AskRecordsEventArgs : EventArgs
+    {
+        // [in]
+        // recpath --> condition --> action
+        public List<RecordAction> Actions { get; set; }
+
+        // [out]
+        public bool Canceled { get; set; }
+        // [out]
+        public string ErrorInfo { get; set; }
+    }
+
+    public class RecordAction
+    {
+        public string RecPath { get; set; }
+        public string Condition { get; set; }   // editing/changed
+        public string Action { get; set; }      // close
+    }
+
+#endif
+
+    public class RecordForm
+    {
+        public string RecPath { get; set; }
+        public Form Form { get; set; }
+
+        public RecordForm(string recpath, Form form)
+        {
+            RecPath = recpath;
+            Form = form;
+        }
     }
 }

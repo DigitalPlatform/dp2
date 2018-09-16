@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
@@ -372,6 +369,12 @@ false);
     "Global",
     "default_font",
     "");
+
+            // 标签打印模式
+            this.checkBox_ui_printLabelMode.Checked = ap.GetBoolean(
+                "MainForm",
+                "print_label_mode",
+                false);
 
             // *** 入馆登记
             // passgate
@@ -988,6 +991,12 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "default_font",
                 this.textBox_ui_defaultFont.Text);
 
+            // 标签打印模式
+            ap.SetBoolean(
+                "MainForm",
+                "print_label_mode",
+                this.checkBox_ui_printLabelMode.Checked);
+
             // passgate
             // 入馆登记
             ap.SetInt(
@@ -1526,7 +1535,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
             MessageBox.Show(this, "日志文件本地缓存目录 " + strCacheDir + " 已经被清空");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1575,7 +1584,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
