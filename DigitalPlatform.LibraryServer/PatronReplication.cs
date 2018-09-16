@@ -162,7 +162,6 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            string strError = "";
             int nRet = 0;
 
             BatchTaskStartInfo startinfo = this.StartInfo;
@@ -174,7 +173,7 @@ namespace DigitalPlatform.LibraryServer
             //      -1  出错
             //      0   尚未配置<patronReplication>参数
             //      1   成功
-            nRet = GetConfigParameters(out strError);
+            nRet = GetConfigParameters(out string strError);
             if (nRet == -1)
             {
                 string strErrorText = "获取配置参数时出错: " + strError;

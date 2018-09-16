@@ -550,7 +550,6 @@ namespace DigitalPlatform.rms
 
 
             this.WriteErrorLog("kernel application 成功降落。");
-
             this.Dbs = null;
         }
 

@@ -332,7 +332,7 @@ namespace DigitalPlatform.Script
 
                 string strSaveAs = "";
                 if (string.IsNullOrEmpty(s_q) == true
-                    || StringUtil.MatchMIME(s_q, "text") == true
+                    // || StringUtil.MatchMIME(s_q, "text") == true
                     || StringUtil.MatchMIME(s_q, "image") == true)
                 {
 

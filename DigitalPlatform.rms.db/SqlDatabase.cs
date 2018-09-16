@@ -986,6 +986,7 @@ namespace DigitalPlatform.rms
                         using (MySqlCommand command = new MySqlCommand(strCommand,
                             connection))
                         {
+                            // TODO: 设置 command.CommandTimeout
                             IDbTransaction trans = null;
 
                             // trans = connection.BeginTransaction();  // 2017/9/3
@@ -1000,6 +1001,7 @@ namespace DigitalPlatform.rms
                                 {
                                     strError = "建库出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
                                     return -1;

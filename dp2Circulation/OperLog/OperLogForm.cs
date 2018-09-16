@@ -4834,7 +4834,6 @@ FileShare.ReadWrite))
                 return -1;
             }
 
-            /*
             if (lMetaDataLength > 0)
             {
                 byte[] metadatabody = new byte[(int)lMetaDataLength];
@@ -4846,9 +4845,9 @@ FileShare.ReadWrite))
                     return -1;
                 }
 
-                strMetaData = Encoding.UTF8.GetString(metadatabody);
+                string strMetaData = Encoding.UTF8.GetString(metadatabody);
             }
-             * */
+
             if (lMetaDataLength > stream.Length - stream.Position)
             {
                 strError = "XML记录体metadata部分长度(" + lMetaDataLength.ToString() + ")超过文件剩余部分尺寸";
@@ -4879,7 +4878,13 @@ FileShare.ReadWrite))
                 return -1;
             }
 
-            /*
+
+            if (lBodyLength > stream.Length - stream.Position)
+            {
+                strError = "XML记录体body部分长度(" + lBodyLength.ToString() + ")超过文件剩余部分尺寸";
+                return -1;
+            }
+
             if (lBodyLength > 0)
             {
                 byte[] xmlbody = new byte[(int)lBodyLength];
@@ -4891,15 +4896,20 @@ FileShare.ReadWrite))
                     return -1;
                 }
 
-                strBody = Encoding.UTF8.GetString(xmlbody);
+                string strBody = Encoding.UTF8.GetString(xmlbody);
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strBody);
+                }
+                catch(Exception ex)
+                {
+                    strError = "XML 内容不合法: " + ex.Message;
+                    return -1;
+                }
             }
-             * */
-            if (lBodyLength > stream.Length - stream.Position)
-            {
-                strError = "XML记录体body部分长度(" + lBodyLength.ToString() + ")超过文件剩余部分尺寸";
-                return -1;
-            }
-            stream.Seek(lBodyLength, SeekOrigin.Current);
+
+            // stream.Seek(lBodyLength, SeekOrigin.Current);
 
             // 文件指针此时自然在末尾
             if (stream.Position - lStart != lEntryLength + 8)
@@ -6988,7 +6998,7 @@ Keys keyData)
         }
 
 
-        #region 改进后的批处理功能
+#region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -8217,7 +8227,7 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             return -1;
         }
-        #endregion
+#endregion
 
         public string UiState
         {

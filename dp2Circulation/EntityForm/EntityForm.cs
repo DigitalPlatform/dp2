@@ -13916,6 +13916,39 @@ Program.MainForm.DefaultFont);
             this.splitContainer_recordAndItems.SplitterDistance = this.splitContainer_recordAndItems.Height / 2;
         }
 
+        // 获得当前正在编辑、已经修改尚未保存的记录路径集合
+        public List<RecordForm> GetChangedRecords(string strStyle)
+        {
+            if (string.IsNullOrEmpty(strStyle) || strStyle == "all")
+                strStyle = "biblio,entity,order,issue,comment";
+
+            List<RecordForm> results = new List<RecordForm>();
+
+            if (StringUtil.IsInList("biblio", strStyle))
+            {
+                if (this.BiblioChanged)
+                    results.Add(new RecordForm(this.BiblioRecPath, this));
+            }
+
+            List<string> recpaths = new List<string>();
+
+            if (StringUtil.IsInList("entity", strStyle))
+                recpaths.AddRange(this.entityControl1.GetChangedRecPath());
+            if (StringUtil.IsInList("order", strStyle))
+                recpaths.AddRange(this.orderControl1.GetChangedRecPath());
+            if (StringUtil.IsInList("issue", strStyle))
+                recpaths.AddRange(this.issueControl1.GetChangedRecPath());
+            if (StringUtil.IsInList("comment", strStyle))
+                recpaths.AddRange(this.commentControl1.GetChangedRecPath());
+
+            foreach (string recpath in recpaths)
+            {
+                results.Add(new RecordForm(recpath, this));
+            }
+
+            return results;
+        }
+
 #if NO
         void TryStartDrag(Point start)
         {
@@ -13962,12 +13995,12 @@ Program.MainForm.DefaultFont);
                 -1);
         }
 #endif
-    }
+        }
 
-    /// <summary>
-    /// 册登记按钮的动作类型
-    /// </summary>
-    public enum RegisterType
+        /// <summary>
+        /// 册登记按钮的动作类型
+        /// </summary>
+        public enum RegisterType
     {
         /// <summary>
         /// 只检索

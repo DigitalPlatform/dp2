@@ -546,6 +546,10 @@ http://github.com/digitalplatform/dp2"
             + "\r\n\r\n";
 
             AppendString(strContent);
+
+            if (string.IsNullOrEmpty(this.Function) == false)
+                this.AppendString("---\r\n序列号中许可的功能: " + this.Function + "\r\n");
+
         }
 #if SN
         int _maxClients = 5;
@@ -646,6 +650,8 @@ http://github.com/digitalplatform/dp2"
             string strLocalString = GetEnvironmentString(this.IsServer, "");
             Hashtable table = StringUtil.ParseParameters(strLocalString);
             this.Function = (string)table["function"];
+
+            SetTitle(); // function 变化可能导致标题和背景文字变化
         }
 
         // 获得 xxx|||xxxx 的左边部分

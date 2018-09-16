@@ -24,6 +24,20 @@ namespace dp2Circulation
 {
     internal class PrintLabelDocument : PrintDocument
     {
+        // 打印份数。这是让每个标签重复的次数，不是打印设定里面的份数
+        int _copies = 1;
+        public int Copies
+        {
+            get
+            {
+                return _copies;
+            }
+            set
+            {
+                _copies = value;
+            }
+        }
+
         StreamReader _sr = null;
 
         public string DataDir { get; set; }
@@ -413,7 +427,8 @@ namespace dp2Circulation
             if (e.Cancel == true)
                 return;
 
-            int nCopies = (int)e.PageSettings?.PrinterSettings?.Copies;
+            // int nCopies = (int)e.PageSettings?.PrinterSettings?.Copies;
+            int nCopies = this.Copies;
             if (nCopies == 0)
                 nCopies = 1;
 

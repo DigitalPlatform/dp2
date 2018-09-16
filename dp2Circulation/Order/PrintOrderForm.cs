@@ -712,6 +712,8 @@ namespace dp2Circulation
             return nRedCount;
         }
 
+        List<RecordForm> _changed_recpaths = new List<RecordForm>();
+
         // parameters:
         //      bAutoSetSeriesType  是否根据文件第一行中的路径中的数据库名来自东设置Combobox_type
         // return:
@@ -783,6 +785,8 @@ namespace dp2Circulation
                         SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
                     }
+
+                    _changed_recpaths = Program.MainForm.GetChangedRecords("order");
 
                     // 逐行读入文件内容
                     // 测算文件行数
@@ -898,6 +902,8 @@ namespace dp2Circulation
                             strOrderRecPath,
                             this.listView_origin,
                             out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                         if (nRet == -2)
                             nDupCount++;
                     }
@@ -951,6 +957,7 @@ namespace dp2Circulation
 
             return 1;
             ERROR1:
+            this.ShowMessage(strError, "red", true);
             return -1;
         }
 
@@ -1135,25 +1142,32 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strItemXml = "";
-            string strBiblioText = "";
+            // 检查订购记录是否在其他窗口内处于被修改状态
+            RecordForm record = _changed_recpaths.Find((o) =>
+            {
+                if (o.RecPath == strRecPath)
+                    return true;
+                return false;
+            });
 
-            string strOutputOrderRecPath = "";
-            string strOutputBiblioRecPath = "";
-
-            byte[] item_timestamp = null;
+            if (record != null)
+            {
+                record.Form.Activate();
+                strError = "订购记录 '" + strRecPath + "' 正在编辑状态。为避免和打印订单操作发生冲突，请先保存修改";
+                return -1;
+            }
 
             long lRet = channel.GetOrderInfo(
                 stop,
                 "@path:" + strRecPath,
                 // "",
                 "xml",
-                out strItemXml,
-                out strOutputOrderRecPath,
-                out item_timestamp,
+                out string strItemXml,
+                out string strOutputOrderRecPath,
+                out byte[] item_timestamp,
                 "recpath",
-                out strBiblioText,
-                out strOutputBiblioRecPath,
+                out string strBiblioText,
+                out string strOutputBiblioRecPath,
                 out strError);
             if (lRet == -1 || lRet == 0)
             {
@@ -1553,7 +1567,7 @@ namespace dp2Circulation
                         //      0   strFixedPrice 为空，无法计算
                         //      1   计算成功
                         nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(fixedPrice.OldValue,
-                            discount.OldValue, 
+                            discount.OldValue,
                             out string strResultPrice,
                             out strError);
                         if (nRet == 1)
@@ -3421,7 +3435,7 @@ out strError);
 
             // 栏目标题行
             {
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='column'>";
                 strTableContent += "<td class='class'>" + strStatisTypeName + "</td>";
@@ -3439,9 +3453,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>已到码洋</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3495,7 +3509,7 @@ title_last,
 XLColor.LightGray);
                 }
 
-#endregion
+                #endregion
             }
 
             string strSumPrice = "";
@@ -3566,7 +3580,7 @@ out strError);
                 else
                     strNoSumClass = " sum";
 
-#region 输出 HTML
+                #region 输出 HTML
 
                 strTableContent += "<tr class='content" + HttpUtility.HtmlEncode(strNoSumClass) + "'>";
                 strTableContent += "<td class='class'>" + HttpUtility.HtmlEncode(line.Class) + "</td>";
@@ -3584,9 +3598,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptCurrentFixedPrices) + "</td>";
                 }
 
-#endregion
+                #endregion
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 if (doc != null)
                 {
@@ -3688,7 +3702,7 @@ strAcceptCurrentFixedPrices);
                     nExcelLineIndex++;
                 }
 
-#endregion
+                #endregion
 
                 if (secondary_lines != null
                     && line.InnerLines != null) // 2013/9/11
@@ -3726,7 +3740,7 @@ strCurrentFixedPrices);
             }
 
             // 汇总行
-#region 输出 HTML
+            #region 输出 HTML
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
         out string strOutputPrice,
@@ -3768,9 +3782,9 @@ out strError);
                     strTableContent += "<td class='accept_fixedprice'>" + HttpUtility.HtmlEncode(strAcceptOutputFixedPrice) + "</td>";
                 }
             }
-#endregion
+            #endregion
 
-#region 输出 Excel
+            #region 输出 Excel
             if (doc != null)
             {
                 nRet = PriceUtil.SumPrices(strSumPrice,
@@ -3873,7 +3887,7 @@ strAcceptOutputFixedPrice);
                     "");    // 没有竖线
             }
 
-#endregion
+            #endregion
 
             strTableContent += "</tr>";
             strTableContent += "</table>";
@@ -4025,7 +4039,7 @@ strAcceptOutputFixedPrice);
             }
 
 
-#region 输出 Excel
+            #region 输出 Excel
 
             if (sheet != null)
             {
@@ -4101,7 +4115,7 @@ title_last,
 "",
 XLColor.LightGray);
             }
-#endregion
+            #endregion
 
             List<StatisLine> sum_items = new List<StatisLine>();
 
@@ -4120,7 +4134,7 @@ XLColor.LightGray);
                 strTableContent.Append("<tr class='content" + HttpUtility.HtmlAttributeEncode(strNoSumClass) + "'>");
                 strTableContent.Append("<td class='class'>" + HttpUtility.HtmlEncode(inner_line.Key) + "</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4138,7 +4152,7 @@ inner_line.Key/*,
 true*/);
                 }
 
-#endregion
+                #endregion
 
                 int i = 0;
                 foreach (StatisLine line in inner_line.lines)
@@ -4146,7 +4160,7 @@ true*/);
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
 
-#region 输出 Excel
+                    #region 输出 Excel
 
                     if (sheet != null)
                     {
@@ -4166,7 +4180,7 @@ true*/);
     XLAlignmentHorizontalValues.Right);
                     }
 
-#endregion
+                    #endregion
 
                     // 汇总
                     if (inner_line.AllowSum == true)
@@ -4197,7 +4211,7 @@ true*/);
                 strTableContent.Append("<tr class='totalize'>");
                 strTableContent.Append("<td class='class'>合计</td>");
 
-#region 输出 Excel
+                #region 输出 Excel
 
                 int nColIndex = 0;
                 if (sheet != null)
@@ -4212,13 +4226,13 @@ true*/);
 
                 }
 
-#endregion
+                #endregion
 
                 foreach (StatisLine line in sum_items)
                 {
                     strTableContent.Append("<td class='bibliocount'>" + GetTdValueString(line.BiblioCount) + "</td>");
                     strTableContent.Append("<td class='itemcount'>" + GetTdValueString(line.ItemCount) + "</td>");
-#region 输出 Excel
+                    #region 输出 Excel
                     if (sheet != null)
                     {
                         IXLCell first = WriteExcelCell(
@@ -4240,7 +4254,7 @@ true*/);
                         // second.Style.Border.TopBorder = XLBorderStyleValues.Thin;
 
                     }
-#endregion
+                    #endregion
                 }
                 strTableContent.Append("</tr>");
             }
@@ -5179,7 +5193,7 @@ XLColor.DarkGreen); // 订单
             return 0;
         }
 
-#region Excel 实用函数
+        #region Excel 实用函数
 
         // 合计页的边沿
         static int SUM_TOP_BLANK_LINES = 2;
@@ -5343,7 +5357,7 @@ long value,
         }
 #endif
 
-#endregion
+        #endregion
 
         int BuildMergedPageTop(PrintOption option,
             Hashtable macro_table,
@@ -6522,6 +6536,8 @@ strContent);
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
             }
 
+            _changed_recpaths = Program.MainForm.GetChangedRecords("order");
+
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -6637,6 +6653,8 @@ strContent);
                             strRecPath,
                             this.listView_origin,
                             out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                         if (nRet == -2)
                             nDupCount++;
 
@@ -6672,6 +6690,7 @@ strContent);
 
             return;
             ERROR1:
+            this.ShowMessage(strError, "red", true);
             MessageBox.Show(this, strError);
         }
 
@@ -9247,7 +9266,7 @@ MessageBoxDefaultButton.Button2);
                 MERGED_COLUMN_SELLER);
         }
 
-#region 原始数据
+        #region 原始数据
 
         // 打印原始数据
         private void button_print_printOriginList_Click(object sender, EventArgs e)
@@ -10152,7 +10171,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-#endregion
+        #endregion
 
         // 保存对原始数据的修改
         private void button_saveChange_saveChange_Click(object sender, EventArgs e)
@@ -10199,6 +10218,35 @@ MessageBoxDefaultButton.Button2);
         {
             ListViewUtil.ChangeItemText(item, nCol,
                 RemoveChangedChar(ListViewUtil.GetItemText(item, nCol)));
+        }
+
+        public List<RecordForm> GetChangedRecords(string strStyle)
+        {
+            if (string.IsNullOrEmpty(strStyle) || strStyle == "all")
+                strStyle = "biblio,entity,order,issue,comment";
+
+            List<RecordForm> results = new List<RecordForm>();
+            if (StringUtil.IsInList("order", strStyle) == false)
+                return results;
+
+            foreach (ListViewItem item in this.listView_origin.Items)
+            {
+                if (item.ImageIndex == TYPE_ERROR)
+                    continue;
+
+                OriginItemData data = (OriginItemData)item.Tag;
+                if (data == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+                if (data.Changed == false)
+                    continue;
+
+                string strOrderRecPath = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_RECPATH);
+                results.Add(new RecordForm(strOrderRecPath, this));
+            }
+            return results;
         }
 
         // 保存对原始订购记录的修改
@@ -11428,7 +11476,7 @@ MessageBoxDefaultButton.Button2);
             LoadOrderToEntityForm(this.listView_origin);
         }
 
-#region 到书率分时间片统计
+        #region 到书率分时间片统计
 
         // 到货率统计
         private void button_print_arriveRatioStatis_Click(object sender, EventArgs e)
@@ -12444,7 +12492,7 @@ string strFileName)
             return 0;
         }
 
-#endregion
+        #endregion
 
         // 打印订单 -- 输出 Excel 文件
         private void toolStripMenuItem_outputExcel_Click(object sender, EventArgs e)

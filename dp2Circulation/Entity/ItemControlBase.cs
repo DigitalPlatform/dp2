@@ -815,6 +815,19 @@ namespace dp2Circulation
             }
         }
 
+        // 获得所有修改过的事项的记录路径
+        public List<string> GetChangedRecPath()
+        {
+            List<string> results = new List<string>();
+            foreach (T bookitem in this.Items)
+            {
+                if (bookitem.Changed)
+                    results.Add(bookitem.RecPath);
+            }
+
+            return results;
+        }
+
         // 构造用于修改实体归属的实体信息数组
         // 如果strNewBiblioPath中的书目库名发生变化，那实体记录都要在实体库之间移动，因为实体库和编目库有一定的捆绑关系。
         internal int BuildChangeParentRequestEntities(
