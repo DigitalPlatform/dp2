@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>34</ApplicationRevision>
+    <ApplicationRevision>38</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -74,7 +74,7 @@
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -255,6 +255,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryService\DigitalPlatform.LibraryService.csproj">
       <Project>{FCB6E864-6415-4E58-B519-C0F099A396AF}</Project>
       <Name>DigitalPlatform.LibraryService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms.db\DigitalPlatform.rms.db.csproj">
+      <Project>{985702E3-5CE7-40F1-A588-A58A7A50C57A}</Project>
+      <Name>DigitalPlatform.rms.db</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.rms.Install\DigitalPlatform.rms.Install.csproj">
       <Project>{35346cce-2815-419b-a277-def065bb42c5}</Project>

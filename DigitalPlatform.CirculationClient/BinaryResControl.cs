@@ -1809,21 +1809,18 @@ bool bChanged)
 
             try
             {
-                byte[] baOutputTimeStamp = null;
 
                 // EnableControlsInLoading(true);
 
-                string strMetaData;
-                string strOutputPath = "";
 
                 long lRet = channel.GetRes(
                     Stop,
                     strResPath,
                     dlg.FileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
-                    out strMetaData,
-                    out baOutputTimeStamp,
-                    out strOutputPath,
+                    out string strMetaData,
+                    out byte[] baOutputTimeStamp,
+                    out string strOutputPath,
                     out strError);
                 // EnableControlsInLoading(false);
                 if (lRet == -1)

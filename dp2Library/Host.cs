@@ -352,9 +352,16 @@ namespace dp2Library
         {
             string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
             Hashtable table = StringUtil.ParseParameters(strExtParams);
-            return (string)table["function"];
+            return CanonicalizeFunction((string)table["function"]);
         }
 
+        // 将 function 参数值中的竖线替换为逗号
+        static string CanonicalizeFunction(string text)
+        {
+            if (text == null)
+                return "";
+            return text.Replace("|", ",");
+        }
         // 检查序列号中是否具备某个功能
         static bool CheckFunction(string strSerialCode, string strFunction)
         {

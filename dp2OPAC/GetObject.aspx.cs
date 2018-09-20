@@ -7,7 +7,6 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
-using System.Collections.Generic;
 
 public partial class GetObject : MyWebPage
 {

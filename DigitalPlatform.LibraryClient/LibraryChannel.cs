@@ -7361,7 +7361,7 @@ out strError);
 
             try
             {
-                return GetRes(
+                long lRet = GetRes(
                     stop,
                     strPath,
                     fileTarget,
@@ -7371,6 +7371,19 @@ out strError);
                     out baOutputTimeStamp,
                     out strOutputPath,
                     out strError);
+                if (lRet == -1)
+                {
+                    // 2018/9/20
+                    // 出错的情况下，删除 0 byte 的文件
+                    if (fileTarget != null)
+                    {
+                        fileTarget.Close();
+                        fileTarget = null;
+                        File.Delete(strOutputFileName);
+                    }
+                }
+
+                return lRet;
             }
             finally
             {
