@@ -124,6 +124,8 @@ namespace dp2LibraryXE
             this._eventClosed.Set();
         }
 
+        public static string ListenUrl = "net.pipe://localhost/dp2kernel/xe";
+
         int Start(string strDataDir,
             out string strError)
         {
@@ -132,7 +134,7 @@ namespace dp2LibraryXE
             CloseHosts();
 
             string strInstanceName = "";
-            string strUrl = "net.pipe://localhost/dp2kernel/xe";
+            // string strUrl = "net.pipe://localhost/dp2kernel/xe";
 
             _host = new ServiceHost(typeof(KernelService));
 
@@ -146,11 +148,11 @@ namespace dp2LibraryXE
                 Uri uri = null;
                 try
                 {
-                    uri = new Uri(strUrl);
+                    uri = new Uri(ListenUrl);
                 }
                 catch (Exception ex)
                 {
-                    strError = "dp2Kernel OnStart() 警告：发现不正确的协议URL '" + strUrl + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
+                    strError = "dp2Kernel OnStart() 警告：发现不正确的协议URL '" + ListenUrl + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
                     return -1;
                 }
 
@@ -158,12 +160,12 @@ namespace dp2LibraryXE
                 {
                     _host.AddServiceEndpoint(typeof(IKernelService),
             CreateNamedpipeBinding0(),
-            strUrl);
+            ListenUrl);
                 }
                 else
                 {
                     // 警告不能支持的协议
-                    strError = "dp2Kernel OnStart() 警告：发现不能支持的协议类型 '" + strUrl + "'";
+                    strError = "dp2Kernel OnStart() 警告：发现不能支持的协议类型 '" + ListenUrl + "'";
                     return -1;
                 }
             }

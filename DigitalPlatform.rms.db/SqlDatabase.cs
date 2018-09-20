@@ -31,6 +31,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using System.Data.Common;
 
 namespace DigitalPlatform.rms
 {
@@ -691,6 +692,16 @@ namespace DigitalPlatform.rms
 #endif
         }
 #endif
+        static string GetExceptionString(DbCommand command,
+            string strText,
+            Exception ex)
+        {
+            return strText + "\r\n"
+    + ex.Message + "\r\n"
+    + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
+    + "SQL命令:\r\n"
+    + command.CommandText;
+        }
 
         // 初始化数据库，注意虚函数不能为private
         // parameter:
@@ -830,6 +841,7 @@ namespace DigitalPlatform.rms
                             {
                                 strError = "建索引出错。\r\n"
                                     + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
                                 return -1;
@@ -909,6 +921,7 @@ namespace DigitalPlatform.rms
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
                             connection))
                         {
+                            // command.CommandTimeout = 120;   // 默认 30
                             IDbTransaction trans = null;
 
                             trans = connection.BeginTransaction();  // 2017/9/3
@@ -920,10 +933,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建表出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建表出错。",
+ex);
+
                                     return -1;
                                 }
 
@@ -939,14 +958,22 @@ namespace DigitalPlatform.rms
                                 command.CommandText = strCommand;
                                 try
                                 {
+                                    // testing 
+                                    // throw new Exception("模拟抛出异常");
                                     command.ExecuteNonQuery();
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建索引出错。",
+ex);
                                     return -1;
                                 }
 
@@ -986,7 +1013,10 @@ namespace DigitalPlatform.rms
                         using (MySqlCommand command = new MySqlCommand(strCommand,
                             connection))
                         {
-                            // TODO: 设置 command.CommandTimeout
+                            // 2018/9/17
+                            // 设置 command.CommandTimeout
+                            command.CommandTimeout = 120;   // 默认 30。由于 MySQL 创建一个数据库较慢，所以这里专门设置为 120 秒
+
                             IDbTransaction trans = null;
 
                             // trans = connection.BeginTransaction();  // 2017/9/3
@@ -999,11 +1029,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建库出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+                                        "建库出错。",
+                                        ex);
                                     return -1;
                                 }
 
@@ -1021,10 +1056,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建表出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+    "建表出错。",
+    ex);
+
                                     return -1;
                                 }
 
@@ -1044,10 +1085,17 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建索引出错。",
+ex);
+
                                     return -1;
                                 }
                                 if (trans != null)
@@ -1180,6 +1228,7 @@ namespace DigitalPlatform.rms
                                 {
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
                                     return -1;
@@ -1473,7 +1522,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    #region MS SQL Server
+#region MS SQL Server
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
                     {
                         using (SqlCommand command = new SqlCommand(strCommand,
@@ -1509,9 +1558,9 @@ namespace DigitalPlatform.rms
                             }
                         } // end of using command
                     }
-                    #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-                    #region SQLite
+#region SQLite
                     else if (connection.SqlServerType == SqlServerType.SQLite)
                     {
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
@@ -1533,9 +1582,9 @@ namespace DigitalPlatform.rms
                             }
                         } // end of using command
                     }
-                    #endregion // SQLite
+#endregion // SQLite
 
-                    #region MySql
+#region MySql
                     else if (connection.SqlServerType == SqlServerType.MySql)
                     {
 
@@ -1569,9 +1618,9 @@ namespace DigitalPlatform.rms
                             }
                         } // end of using command
                     }
-                    #endregion // MySql
+#endregion // MySql
 
-                    #region Oracle
+#region Oracle
                     else if (connection.SqlServerType == SqlServerType.Oracle)
                     {
                         using (OracleCommand command = new OracleCommand("",
@@ -1612,7 +1661,7 @@ namespace DigitalPlatform.rms
                             }
                         } // end of using command
                     }
-                    #endregion // Oracle
+#endregion // Oracle
                 }
                 finally
                 {
@@ -1928,7 +1977,7 @@ namespace DigitalPlatform.rms
             strCommand = "";
             strError = "";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 // 创建records表
@@ -1987,9 +2036,9 @@ namespace DigitalPlatform.rms
                 strCommand += " use master " + "\n";
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 // 创建records表
@@ -2039,9 +2088,9 @@ namespace DigitalPlatform.rms
 
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
                 string strCharset = " CHARACTER SET utf8 "; // COLLATE utf8_bin ";
@@ -2093,9 +2142,9 @@ namespace DigitalPlatform.rms
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 // 创建records表
@@ -2164,7 +2213,7 @@ namespace DigitalPlatform.rms
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -2476,7 +2525,7 @@ namespace DigitalPlatform.rms
             if (string.IsNullOrEmpty(strAction) == true)
                 strAction = "create";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 strCommand = "use " + this.m_strSqlDbName + "\n";
@@ -2559,9 +2608,9 @@ namespace DigitalPlatform.rms
 
                 strCommand += " use master " + "\n";
             }
-            #endregion MS SQL Server
+#endregion MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
@@ -2600,16 +2649,19 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
+                // https://stackoverflow.com/questions/28329134/drop-index-query-is-slow
+                string strAlgorithm = "";   // " ALGORITHM=INPLACE ";
+
                 strCommand = "use " + this.m_strSqlDbName + " ;\n";
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
                 {
                     strCommand += " CREATE INDEX records_id_index " + "\n"
-    + " ON records (id) ;\n";
+    + " ON records (id) "+ strAlgorithm + ";\n";
                 }
 
                 if (StringUtil.IsInList("keys", strIndexTypeList) == true)
@@ -2633,18 +2685,19 @@ namespace DigitalPlatform.rms
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " ;\n";
+                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " ;\n";
+                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
+                                + " ON " + tableInfo.SqlTableName + " (idstring) " + strAlgorithm + ";\n";
                         }
                     }
                 }
-            }
-            #endregion // MySql
 
-            #region Oracle
+            }
+#endregion // MySql
+
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 /*
@@ -2695,7 +2748,7 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -2718,7 +2771,7 @@ namespace DigitalPlatform.rms
             if (string.IsNullOrEmpty(strAction) == true)
                 strAction = "delete";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 strCommand = "use " + this.m_strSqlDbName + "\n";
@@ -2779,9 +2832,9 @@ namespace DigitalPlatform.rms
 
                 strCommand += " use master " + "\n";
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 strCommand = "";
@@ -2810,9 +2863,9 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
                 strCommand = "use " + this.m_strSqlDbName + " ;\n";
@@ -2844,9 +2897,9 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 strCommand = "";
@@ -2886,7 +2939,7 @@ namespace DigitalPlatform.rms
                     }
                 }
             }
-            #endregion
+#endregion
 
             return 0;
         }
@@ -9986,7 +10039,7 @@ out strError);
             // 是否要直接利用输入的时间戳
             bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 int nParameters = 0;
@@ -10262,9 +10315,9 @@ SqlDbType.NVarChar);
                     }
                 } // end of using command
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 bool bFastMode = false;
@@ -10445,9 +10498,9 @@ DbType.String);
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 int nParameters = 0;
@@ -10664,9 +10717,9 @@ MySqlDbType.String);
                     }
                 } // end of using command
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -10849,7 +10902,7 @@ OracleDbType.NVarchar2);
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -11009,7 +11062,7 @@ FileShare.ReadWrite))
             if (nRet == -1)
                 return -1;
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 // TODO: 可否限定超过一定尺寸的数据库就不要返回? 
@@ -11124,9 +11177,9 @@ FileShare.ReadWrite))
 
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = " SELECT "
@@ -11197,9 +11250,9 @@ out strError);
 
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 // 注： MySql 这里和 SQLite 基本一样
@@ -11270,9 +11323,9 @@ out strError);
 
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 string strCommand = " SELECT "
@@ -11344,7 +11397,7 @@ out strError);
 
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -11448,7 +11501,7 @@ out strError);
                 connection.TryOpen();
                 try
                 {
-                    #region MS SQL Server
+#region MS SQL Server
                     if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                     {
                         Stopwatch watch = new Stopwatch();
@@ -11478,9 +11531,9 @@ out strError);
                         watch.Stop();
                         this.container.KernelApplication.WriteErrorLog("MS SQL Server BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
-                    #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-                    #region Oracle
+#region Oracle
                     //strError = "暂不支持";
                     //return -1;
                     if (this.container.SqlServerType == SqlServerType.Oracle)
@@ -11513,9 +11566,9 @@ out strError);
                         watch.Stop();
                         this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
-                    #endregion // Oracle
+#endregion // Oracle
 
-                    #region MySql
+#region MySql
                     if (this.container.SqlServerType == SqlServerType.MySql)
                     {
                         Stopwatch watch = new Stopwatch();
@@ -11544,10 +11597,10 @@ out strError);
                         watch.Stop();
                         this.container.KernelApplication.WriteErrorLog("MySql BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
-                    #endregion // MySql
+#endregion // MySql
 
 
-                    #region SQLite
+#region SQLite
                     if (this.container.SqlServerType == SqlServerType.SQLite)
                     {
                         Stopwatch watch = new Stopwatch();
@@ -11578,7 +11631,7 @@ out strError);
                         watch.Stop();
                         this.container.KernelApplication.WriteErrorLog("SQLite BulkCopy 耗时 " + watch.Elapsed.ToString());
                     }
-                    #endregion // SQLite
+#endregion // SQLite
 
                 }
                 catch (SqlException sqlEx)
@@ -15395,7 +15448,7 @@ FileShare.ReadWrite))
             else if (keysDelete != null && keysDelete.Count > 0)
                 strRecordID = ((KeyItem)keysDelete[0]).RecordID;
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 using (SqlCommand command = new SqlCommand("",
@@ -15597,9 +15650,9 @@ FileShare.ReadWrite))
 
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 using (SQLiteCommand command = new SQLiteCommand("",
@@ -15756,9 +15809,9 @@ FileShare.ReadWrite))
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 List<string> lines = new List<string>();
@@ -15879,9 +15932,9 @@ FileShare.ReadWrite))
 
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
@@ -16038,7 +16091,7 @@ FileShare.ReadWrite))
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -16114,7 +16167,7 @@ FileShare.ReadWrite))
             List<string> filenames = new List<string>();    // 对象文件名数组 (短文件名)
             List<string> ids = new List<string>();  // 对象 ID 数组 (Length >= 10)
 
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 string strCommand = "";
@@ -16242,9 +16295,9 @@ FileShare.ReadWrite))
                     }
                 } // enf of using command
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 string strCommand = "";
@@ -16372,9 +16425,9 @@ FileShare.ReadWrite))
                     }
                 } // end of using command
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 string strCommand = "";
@@ -16506,9 +16559,9 @@ FileShare.ReadWrite))
                     }
                 } // end of using command
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 string strCommand = "";
@@ -16623,7 +16676,7 @@ FileShare.ReadWrite))
                     }
                 } // end of using command
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             DELETE_OBJECTFILE:
             // 删除对象文件
@@ -16680,7 +16733,7 @@ FileShare.ReadWrite))
                 strError = "connection为null";
                 return -1;
             }
-            #region MS SQL Server
+#region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
                 if (connection.SqlConnection == null)
@@ -16695,9 +16748,9 @@ FileShare.ReadWrite))
                 }
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             if (connection.SqlServerType == SqlServerType.SQLite)
             {
                 if (connection.SQLiteConnection == null)
@@ -16712,9 +16765,9 @@ FileShare.ReadWrite))
                 }
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             if (connection.SqlServerType == SqlServerType.MySql)
             {
                 if (connection.MySqlConnection == null)
@@ -16729,9 +16782,9 @@ FileShare.ReadWrite))
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 if (connection.OracleConnection == null)
@@ -16747,7 +16800,7 @@ FileShare.ReadWrite))
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }

@@ -11,6 +11,7 @@ using System.Collections;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -1138,7 +1139,8 @@ namespace dp2Circulation
             this.Close();
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            // MessageBox.Show(this, strError);
+            MessageDlg.Show(this, strError, "BiblioDatabaseDialog");
         }
 
         void CreateAuthorityDatabase()
