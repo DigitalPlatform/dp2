@@ -1155,11 +1155,10 @@ out strError);
     + "Data Source=" + info.SqlServerName + ";"
     // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
     + "Connect Timeout=" + nTimeout.ToString() + ";"
-                + "SslMode=none;"  // 2018/7/24
+                + (info.SSL ? "" : "SslMode=none;")  // 2018/9/22
                 + "charset=utf8;";
                 return 0;
             }
-
 
             if (info.SqlServerType == "Oracle")
             {
@@ -2596,6 +2595,10 @@ MessageBoxDefaultButton.Button1);
         // SQL Login Password
         public string DatabaseLoginPassword = "";
 
+        // 2018/9/22
+        // 是否为 SSL 模式
+        public bool SSL { get; set; }
+
         // *** root账户信息
         public string RootUserName = null;
         public string RootPassword = null;  // null表示不修改以前的密码
@@ -2678,7 +2681,6 @@ MessageBoxDefaultButton.Button1);
                 this.DatabaseLoginPassword = "";
             }
 
-
             XmlNode nodeDbs = dom.DocumentElement.SelectSingleNode("dbs");
             if (nodeDbs == null)
             {
@@ -2721,11 +2723,20 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            if (this.SqlServerType == "MS SQL Server"
-                && string.IsNullOrEmpty(this.DatabaseLoginName) == true)
-                DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");    // 2015/4/23
+            if (this.SqlServerType == "MySQL Server")
+            {
+                // 2018/9/22
+                if (this.SSL)
+                    DomUtil.SetAttr(nodeDatasource, "mode", "SSL");
+            }
             else
-                DomUtil.SetAttr(nodeDatasource, "mode", null);
+            {
+                if (this.SqlServerType == "MS SQL Server"
+                    && string.IsNullOrEmpty(this.DatabaseLoginName) == true)
+                    DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");    // 2015/4/23
+                else
+                    DomUtil.SetAttr(nodeDatasource, "mode", null);
+            }
 
             DomUtil.SetAttr(nodeDatasource,
                 "servertype",
@@ -2770,6 +2781,5 @@ MessageBoxDefaultButton.Button1);
             dom.Save(strFilename);
             return 0;
         }
-
     }
 }

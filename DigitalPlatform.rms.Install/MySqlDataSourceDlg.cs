@@ -1,20 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using MySql.Data;
 using MySql.Data.MySqlClient;
-
-using System.Diagnostics;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Install;
 
 namespace DigitalPlatform.rms
 {
@@ -86,6 +74,18 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public bool SSL
+        {
+            get
+            {
+                return this.checkBox_ssl.Checked;
+            }
+            set
+            {
+                this.checkBox_ssl.Checked = value;
+            }
+        }
+
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -154,6 +154,7 @@ namespace DigitalPlatform.rms
                     this.SqlServerName,
                     this.textBox_loginName.Text,
                     this.textBox_loginPassword.Text,
+                    this.checkBox_ssl.Checked,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -197,6 +198,7 @@ namespace DigitalPlatform.rms
     string strSqlServerName,
     string strSqlUserName,
     string strSqlUserPassword,
+    bool bSSL,
     bool bSSPI,
     out string strError)
         {
@@ -206,8 +208,8 @@ namespace DigitalPlatform.rms
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码
                 + "Password=" + strSqlUserPassword + ";"
                 + "Data Source=" + strSqlServerName + ";"
-                + "Connect Timeout=30;"
-                + "SslMode=none;";  // 2018/7/24
+                + (bSSL ? "" : "SslMode=none;") // 2018/9/22
+                + "Connect Timeout=30;";
             // "charset=utf8;";
 
 

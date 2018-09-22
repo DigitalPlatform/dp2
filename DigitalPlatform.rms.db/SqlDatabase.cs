@@ -495,6 +495,47 @@ namespace DigitalPlatform.rms
                         + "charset=utf8;";
 
                 }
+                else if (strMode == "SSL")
+                {
+                    string strUserID = "";
+                    string strPassword = "";
+
+                    strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
+                    if (strUserID == "")
+                    {
+                        strError = "服务器配置文件不合法，未给根元素下级的<datasource>定义'userid'属性，或'userid'属性值为空。";
+                        return -1;
+                    }
+
+                    strPassword = DomUtil.GetAttr(nodeDataSource, "password").Trim();
+                    if (strPassword == "")
+                    {
+                        strError = "服务器配置文件不合法，未给根元素下级的<datasource>定义'password'属性，或'password'属性值为空。";
+                        return -1;
+                    }
+                    // password可能为空
+                    try
+                    {
+                        strPassword = Cryptography.Decrypt(strPassword,
+                                "dp2003");
+                    }
+                    catch
+                    {
+                        strError = "服务器配置文件不合法，根元素下级的<datasource>定义'password'属性值不合法。";
+                        return -1;
+                    }
+
+                    strConnection = @"Persist Security Info=False;"
+                        + "User ID=" + strUserID + ";"    //帐户和密码
+                        + "Password=" + strPassword + ";"
+                        //+ "Integrated Security=SSPI; "      //信任连接
+                        + "Data Source=" + this.container.SqlServerName + ";"
+                        // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
+                        + "Connect Timeout=" + nTimeout.ToString() + ";"
+                        // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
+                        + ""    // 2018/9/22
+                        + "charset=utf8;";
+                }
                 else if (strMode == "SSPI") // 2006/3/22
                 {
                     strConnection = @"Persist Security Info=False;"
