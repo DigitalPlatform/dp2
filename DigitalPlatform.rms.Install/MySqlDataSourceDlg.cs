@@ -78,11 +78,16 @@ namespace DigitalPlatform.rms
         {
             get
             {
+                if (string.IsNullOrEmpty(comboBox_sslMode.Text))
+                    return "Preferred";
                 return this.comboBox_sslMode.Text;
             }
             set
             {
-                this.comboBox_sslMode.Text = value;
+                if (string.IsNullOrEmpty(value))
+                    this.comboBox_sslMode.Text = "Preferred";
+                else
+                    this.comboBox_sslMode.Text = value;
             }
         }
 
@@ -203,6 +208,9 @@ namespace DigitalPlatform.rms
     out string strError)
         {
             strError = "";
+
+            if (strSslMode == "Preferred")
+                strSslMode = "";
 
             string strConnection = @"Persist Security Info=False;"
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码

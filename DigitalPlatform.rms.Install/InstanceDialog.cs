@@ -2680,6 +2680,10 @@ MessageBoxDefaultButton.Button1);
                 this.DatabaseLoginPassword = "";
             }
 
+            // 2018/9/23
+            if (strMode != null && strMode.StartsWith("SslMode:"))
+                this.SslMode = strMode.Substring("SslMode:".Length);
+
             XmlNode nodeDbs = dom.DocumentElement.SelectSingleNode("dbs");
             if (nodeDbs == null)
             {

@@ -146,7 +146,7 @@
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(520, 544);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(112, 34);
             this.button_Cancel.TabIndex = 17;
@@ -158,7 +158,7 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(520, 501);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(112, 34);
             this.button_OK.TabIndex = 16;
@@ -171,7 +171,7 @@
             this.textBox_instanceName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_instanceName.Location = new System.Drawing.Point(184, 501);
-            this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_instanceName.Name = "textBox_instanceName";
             this.textBox_instanceName.Size = new System.Drawing.Size(242, 28);
             this.textBox_instanceName.TabIndex = 15;
@@ -192,7 +192,7 @@
             // 
             this.button_getSqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_getSqlServerName.Location = new System.Drawing.Point(328, 168);
-            this.button_getSqlServerName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_getSqlServerName.Margin = new System.Windows.Forms.Padding(4);
             this.button_getSqlServerName.Name = "button_getSqlServerName";
             this.button_getSqlServerName.Size = new System.Drawing.Size(303, 34);
             this.button_getSqlServerName.TabIndex = 12;
@@ -205,7 +205,7 @@
             this.textBox_sqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_sqlServerName.Location = new System.Drawing.Point(184, 129);
-            this.textBox_sqlServerName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_sqlServerName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_sqlServerName.Name = "textBox_sqlServerName";
             this.textBox_sqlServerName.Size = new System.Drawing.Size(448, 28);
             this.textBox_sqlServerName.TabIndex = 11;
@@ -265,7 +265,7 @@
             this.Controls.Add(this.button_getSqlServerName);
             this.Controls.Add(this.textBox_sqlServerName);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MySqlDataSourceDlg";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
