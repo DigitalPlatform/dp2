@@ -236,6 +236,7 @@ namespace DigitalPlatform.rms
                     try
                     {
                         connection.Open();
+                        MySqlConnection.ClearPool(connection);
                     }
                     catch (MySqlException sqlEx)
                     {
