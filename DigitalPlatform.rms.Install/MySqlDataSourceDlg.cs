@@ -74,15 +74,15 @@ namespace DigitalPlatform.rms
             }
         }
 
-        public bool SSL
+        public string MySqlSslMode
         {
             get
             {
-                return this.checkBox_ssl.Checked;
+                return this.comboBox_sslMode.Text;
             }
             set
             {
-                this.checkBox_ssl.Checked = value;
+                this.comboBox_sslMode.Text = value;
             }
         }
 
@@ -154,7 +154,7 @@ namespace DigitalPlatform.rms
                     this.SqlServerName,
                     this.textBox_loginName.Text,
                     this.textBox_loginPassword.Text,
-                    this.checkBox_ssl.Checked,
+                    this.comboBox_sslMode.Text,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -198,7 +198,7 @@ namespace DigitalPlatform.rms
     string strSqlServerName,
     string strSqlUserName,
     string strSqlUserPassword,
-    bool bSSL,
+    string strSslMode,
     bool bSSPI,
     out string strError)
         {
@@ -208,7 +208,7 @@ namespace DigitalPlatform.rms
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码
                 + "Password=" + strSqlUserPassword + ";"
                 + "Data Source=" + strSqlServerName + ";"
-                + (bSSL ? "" : "SslMode=none;") // 2018/9/22
+                + (string.IsNullOrEmpty(strSslMode) ? "" : "SslMode=" + strSslMode + ";") // 2018/9/22
                 + "Connect Timeout=30;";
             // "charset=utf8;";
 
@@ -221,33 +221,32 @@ namespace DigitalPlatform.rms
                     + "Connect Timeout=30"; // 30秒
             }
 
-            MySqlConnection connection = null;
             try
             {
-                connection = new MySqlConnection(strConnection);
+                using (MySqlConnection connection = new MySqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                    }
+                    catch (MySqlException sqlEx)
+                    {
+                        strError = "连接 SQL 数据库出错： " + sqlEx.Message + "。";
+                        int nError = sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
+                        return -1;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                 return -1;
             }
-
-            try
-            {
-                connection.Open();
-            }
-            catch (MySqlException sqlEx)
-            {
-                strError = "连接 SQL 数据库出错： " + sqlEx.Message + "。";
-                int nError = sqlEx.ErrorCode;
-                return -1;
-            }
-            catch (Exception ex)
-            {
-                strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
-                return -1;
-            }
-
             return 0;
         }
     }
