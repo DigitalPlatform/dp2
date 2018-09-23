@@ -529,7 +529,8 @@ namespace DigitalPlatform.rms
                 this.textBox_sqlDef.Text = "SQL Server Name = " + this.LineInfo.SqlServerName
                     + "; Database Prefix = " + this.LineInfo.DatabaseInstanceName
                     + "; SQL Login Name = " + this.LineInfo.DatabaseLoginName
-                    + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
+                    + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length)
+                    + "; SslMode = " + this.LineInfo.SslMode;
                 if (this.comboBox_sqlServerType.Text != "MySQL Server")
                 {
                     this.m_nDisableTextChange++;

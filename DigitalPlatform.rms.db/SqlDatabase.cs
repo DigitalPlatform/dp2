@@ -511,6 +511,8 @@ VerifyCA - Always use SSL. Validate the CA but tolerate name mismatch.
 VerifyFull - Always use SSL. Fail if the host name is not correct. 
 * */
                     string strSslMode = strMode.Substring("SslMode:".Length);
+                    if (strSslMode == "Preferred")
+                        strSslMode = "";
 
                     strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
                     if (strUserID == "")
@@ -545,7 +547,7 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";"
                         // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
-                        + "SslMode=" + strSslMode + ";"    // 2018/9/22
+                        + (string.IsNullOrEmpty(strSslMode) ? "" : "SslMode=" + strSslMode + ";")    // 2018/9/23
                         + "charset=utf8;";
                 }
                 else if (strMode == "SSPI") // 2006/3/22
