@@ -1155,7 +1155,7 @@ out strError);
     + "Data Source=" + info.SqlServerName + ";"
     // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
     + "Connect Timeout=" + nTimeout.ToString() + ";"
-                + (info.SSL ? "" : "SslMode=none;")  // 2018/9/22
+                + (string.IsNullOrEmpty(info.SslMode) ? "" : "SslMode=" + info.SslMode + ";")  // 2018/9/22
                 + "charset=utf8;";
                 return 0;
             }
@@ -2596,8 +2596,7 @@ MessageBoxDefaultButton.Button1);
         public string DatabaseLoginPassword = "";
 
         // 2018/9/22
-        // 是否为 SSL 模式
-        public bool SSL { get; set; }
+        public string SslMode { get; set; }
 
         // *** root账户信息
         public string RootUserName = null;
@@ -2726,8 +2725,8 @@ MessageBoxDefaultButton.Button1);
             if (this.SqlServerType == "MySQL Server")
             {
                 // 2018/9/22
-                if (this.SSL)
-                    DomUtil.SetAttr(nodeDatasource, "mode", "SSL");
+                if (string.IsNullOrEmpty(this.SslMode) == false)
+                    DomUtil.SetAttr(nodeDatasource, "mode", "SslMode:" + this.SslMode);
             }
             else
             {

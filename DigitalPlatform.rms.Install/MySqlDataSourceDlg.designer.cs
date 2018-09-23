@@ -43,7 +43,8 @@
             this.button_getSqlServerName = new System.Windows.Forms.Button();
             this.textBox_sqlServerName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBox_ssl = new System.Windows.Forms.CheckBox();
+            this.comboBox_sslMode = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupBox_login.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -97,7 +98,7 @@
             this.groupBox_login.Controls.Add(this.label2);
             this.groupBox_login.Controls.Add(this.textBox_loginName);
             this.groupBox_login.Controls.Add(this.label5);
-            this.groupBox_login.Location = new System.Drawing.Point(18, 260);
+            this.groupBox_login.Location = new System.Drawing.Point(18, 278);
             this.groupBox_login.Name = "groupBox_login";
             this.groupBox_login.Size = new System.Drawing.Size(616, 194);
             this.groupBox_login.TabIndex = 13;
@@ -137,14 +138,14 @@
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
             this.textBox_message.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_message.Size = new System.Drawing.Size(620, 119);
+            this.textBox_message.Size = new System.Drawing.Size(620, 107);
             this.textBox_message.TabIndex = 9;
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(520, 526);
+            this.button_Cancel.Location = new System.Drawing.Point(520, 544);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(112, 34);
@@ -156,7 +157,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(520, 483);
+            this.button_OK.Location = new System.Drawing.Point(520, 501);
             this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(112, 34);
@@ -169,7 +170,7 @@
             // 
             this.textBox_instanceName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_instanceName.Location = new System.Drawing.Point(184, 483);
+            this.textBox_instanceName.Location = new System.Drawing.Point(184, 501);
             this.textBox_instanceName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_instanceName.Name = "textBox_instanceName";
             this.textBox_instanceName.Size = new System.Drawing.Size(242, 28);
@@ -180,7 +181,7 @@
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(15, 488);
+            this.label4.Location = new System.Drawing.Point(15, 506);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(134, 18);
@@ -190,7 +191,7 @@
             // button_getSqlServerName
             // 
             this.button_getSqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getSqlServerName.Location = new System.Drawing.Point(328, 201);
+            this.button_getSqlServerName.Location = new System.Drawing.Point(328, 168);
             this.button_getSqlServerName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_getSqlServerName.Name = "button_getSqlServerName";
             this.button_getSqlServerName.Size = new System.Drawing.Size(303, 34);
@@ -203,7 +204,7 @@
             // 
             this.textBox_sqlServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_sqlServerName.Location = new System.Drawing.Point(184, 162);
+            this.textBox_sqlServerName.Location = new System.Drawing.Point(184, 129);
             this.textBox_sqlServerName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_sqlServerName.Name = "textBox_sqlServerName";
             this.textBox_sqlServerName.Size = new System.Drawing.Size(448, 28);
@@ -213,29 +214,48 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 165);
+            this.label1.Location = new System.Drawing.Point(12, 132);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(143, 18);
             this.label1.TabIndex = 10;
             this.label1.Text = "SQL服务器名(&S):";
             // 
-            // checkBox_ssl
+            // comboBox_sslMode
             // 
-            this.checkBox_ssl.AutoSize = true;
-            this.checkBox_ssl.Location = new System.Drawing.Point(18, 208);
-            this.checkBox_ssl.Name = "checkBox_ssl";
-            this.checkBox_ssl.Size = new System.Drawing.Size(61, 22);
-            this.checkBox_ssl.TabIndex = 18;
-            this.checkBox_ssl.Text = "SSL";
-            this.checkBox_ssl.UseVisualStyleBackColor = true;
+            this.comboBox_sslMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_sslMode.FormattingEnabled = true;
+            this.comboBox_sslMode.Items.AddRange(new object[] {
+            "Preferred",
+            "None",
+            "Required",
+            "VerifyCA",
+            "VerifyFull"});
+            this.comboBox_sslMode.Location = new System.Drawing.Point(184, 222);
+            this.comboBox_sslMode.Name = "comboBox_sslMode";
+            this.comboBox_sslMode.Size = new System.Drawing.Size(447, 26);
+            this.comboBox_sslMode.TabIndex = 18;
+            this.comboBox_sslMode.Text = "Preferred";
+            // 
+            // label6
+            // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(15, 225);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(116, 18);
+            this.label6.TabIndex = 19;
+            this.label6.Text = "SSL 模式(&M):";
             // 
             // MySqlDataSourceDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(648, 578);
-            this.Controls.Add(this.checkBox_ssl);
+            this.ClientSize = new System.Drawing.Size(648, 596);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.comboBox_sslMode);
             this.Controls.Add(this.groupBox_login);
             this.Controls.Add(this.textBox_message);
             this.Controls.Add(this.button_Cancel);
@@ -274,6 +294,7 @@
         private System.Windows.Forms.Button button_getSqlServerName;
         private System.Windows.Forms.TextBox textBox_sqlServerName;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox checkBox_ssl;
+        private System.Windows.Forms.ComboBox comboBox_sslMode;
+        private System.Windows.Forms.Label label6;
     }
 }

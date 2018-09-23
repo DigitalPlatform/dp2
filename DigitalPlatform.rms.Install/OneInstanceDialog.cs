@@ -362,7 +362,7 @@ namespace DigitalPlatform.rms
                     datasource_dlg.InstanceName = this.LineInfo.DatabaseInstanceName;
                     datasource_dlg.KernelLoginName = this.LineInfo.DatabaseLoginName;
                     datasource_dlg.KernelLoginPassword = this.LineInfo.DatabaseLoginPassword;
-                    datasource_dlg.SSL = this.LineInfo.SSL;
+                    datasource_dlg.MySqlSslMode = this.LineInfo.SslMode;
                 }
                 else
                 {
@@ -372,7 +372,7 @@ namespace DigitalPlatform.rms
                         + this.InstanceName;    // 应当没有空格和特殊字符
                     datasource_dlg.KernelLoginName = "root";
                     datasource_dlg.KernelLoginPassword = "";
-                    datasource_dlg.SSL = true;
+                    datasource_dlg.MySqlSslMode = "";
                 }
 
                 datasource_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -388,7 +388,7 @@ namespace DigitalPlatform.rms
                 this.LineInfo.DatabaseInstanceName = datasource_dlg.InstanceName;
                 this.LineInfo.DatabaseLoginName = datasource_dlg.KernelLoginName;
                 this.LineInfo.DatabaseLoginPassword = datasource_dlg.KernelLoginPassword;
-                this.LineInfo.SSL = datasource_dlg.SSL;
+                this.LineInfo.SslMode = datasource_dlg.MySqlSslMode;
                 RefreshSqlDef();
             }
             else if (this.comboBox_sqlServerType.Text == "Oracle")
