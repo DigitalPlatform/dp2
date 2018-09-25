@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
@@ -106,6 +101,12 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
+            if (this.comboBox_server_serverType.Text == "[暂时不使用任何服务器]")
+            {
+                this.textBox_server_dp2LibraryServerUrl.Text = "[None]";
+                goto END1;
+            }
+
             if (string.IsNullOrEmpty(this.textBox_server_dp2LibraryServerUrl.Text) == true)
             {
                 strError = "请输入 dp2library 服务器 URL 地址";
@@ -122,6 +123,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
+            END1:
             Program.MainForm.AppInfo.SetString("config",
     "circulation_server_url",
     this.textBox_server_dp2LibraryServerUrl.Text);
@@ -163,7 +165,7 @@ MessageBoxDefaultButton.Button1);
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -502,6 +504,10 @@ MessageBoxDefaultButton.Button1);
          * * */
         private void comboBox_server_serverType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.textBox_server_userName.Enabled = true;
+            this.textBox_server_password.Enabled = true;
+            this.textBox_server_dp2LibraryServerUrl.Enabled = true;
+
             if (this.comboBox_server_serverType.Text == "单机版 (dp2Library XE)")
             {
                 this.textBox_server_dp2LibraryServerUrl.Text = "net.pipe://localhost/dp2library/XE";
@@ -525,6 +531,16 @@ MessageBoxDefaultButton.Button1);
 
                 this.textBox_server_userName.Text = "";
                 this.textBox_server_password.Text = "";
+            }
+            else if (this.comboBox_server_serverType.Text == "[暂时不使用任何服务器]")
+            {
+                this.textBox_server_dp2LibraryServerUrl.Text = "[None]";
+                this.textBox_server_dp2LibraryServerUrl.Enabled = false;
+
+                this.textBox_server_userName.Text = "";
+                this.textBox_server_userName.Enabled = false;
+                this.textBox_server_password.Text = "";
+                this.textBox_server_password.Enabled = false;
             }
             else
             {

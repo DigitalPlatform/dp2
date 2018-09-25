@@ -2471,7 +2471,7 @@ AppInfo.GetString("config",
                     }
                 }
 
-                if (this.PrintLabelMode == false)
+                if (this.PrintLabelMode == false && this.LibraryServerUrl != "[None]")
                 {
                     try
                     {
