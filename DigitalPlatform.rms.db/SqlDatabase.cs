@@ -491,7 +491,7 @@ namespace DigitalPlatform.rms
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";"
                         // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
-                        // + "SslMode=none;"
+                        + "SslMode=none;"   // 2018/9/25 当 mode 属性为空的时候，表示需要兼容以前安装的效果，那就相当于 None (SSL)
                         + "charset=utf8;";
                 }
                 else if (strMode.StartsWith("SslMode:"))
@@ -511,6 +511,7 @@ VerifyCA - Always use SSL. Validate the CA but tolerate name mismatch.
 VerifyFull - Always use SSL. Fail if the host name is not correct. 
 * */
                     string strSslMode = strMode.Substring("SslMode:".Length);
+                    // 注意：mode 属性不为空，但 SslMode: 为空的情况，等同于 Preferred 情况，也就是连接字符串中不包含 SslMode=xxx; 参数的情况
                     if (strSslMode == "Preferred")
                         strSslMode = "";
 
