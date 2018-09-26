@@ -2021,7 +2021,6 @@ this.splitContainer_inAndOutof,
                         null,
                         out strError);
 #endif
-                    string strOutputItemRecPath = "";
                     // 根据册条码号，装入册记录
                     // return: 
                     //      -2  册条码号已经在list中存在了
@@ -2036,7 +2035,7 @@ this.splitContainer_inAndOutof,
                         null,   // info,
                         this.listView_outof,
                         null,
-                        out strOutputItemRecPath,
+                        out string strOutputItemRecPath,
                         ref item,
                         out strError);
                 }
@@ -6530,14 +6529,12 @@ MessageBoxDefaultButton.Button2);
             // 变换条码号
             if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
             {
-                string strError = "";
-
                 string strText = e.Barcode;
 
                 int nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
                     ref strText,
-                    out strError);
+                    out string strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, strError);
@@ -6565,6 +6562,7 @@ MessageBoxDefaultButton.Button2);
             ListViewItem item = new ListViewItem();
             ListViewUtil.ChangeItemText(item, COLUMN_BARCODE, e.Barcode);
             this.listView_in.Items.Add(item);
+            SetItemColor(item, TYPE_VERIFIED);  // 2018/9/26
             ListViewUtil.SelectLine(item, true);
             item.EnsureVisible();
 

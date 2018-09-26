@@ -3362,10 +3362,10 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchbiblio,order,searchauthority", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索书目信息被拒绝。不具备order或searchbiblio权限。";
+                    result.ErrorInfo = "检索书目或规范信息被拒绝。不具备order、searchbiblio或searchauthority权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -3554,6 +3554,7 @@ namespace dp2Library
             strMatchStyle,
             strLang,
             strSearchStyle,
+            out List<string> dbTypes,
             out strQueryXml,
                     out strError);
                 if (nRet == -1 || nRet == 0)
@@ -3564,6 +3565,31 @@ namespace dp2Library
                     result.ErrorInfo = strError;
                     result.ErrorCode = ErrorCode.FromNotFound;
                     return result;
+                }
+
+                // 再次检查权限。分为书目和规范两种细致检查
+                foreach (string type in dbTypes)
+                {
+                    if (type == "biblio")
+                    {
+                        if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "检索书目信息被拒绝。不具备 order 或 searchbiblio权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (type == "authority")
+                    {
+                        if (StringUtil.IsInList("searchauthority", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "检索规范信息被拒绝。不具备 searchauthority 权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
                 }
 
                 // strLocationFilter = "海淀分馆"; // testing
@@ -3639,7 +3665,7 @@ namespace dp2Library
         }
 
         // TODO: 需要增加返回保存后记录 XML 的参数。因为保存过程中，可能会略微修改前端提交的记录，比如增加一些字段
-        // 设置书目信息(目前只能xml一种格式)
+        // 设置书目信息或者规范信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
         //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。

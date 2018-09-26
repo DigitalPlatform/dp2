@@ -3084,6 +3084,22 @@ Culture=neutral, PublicKeyToken=null
 
                 this.BiblioDbFromInfos = infos;
 
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+                {
+                    lRet = channel.ListDbFroms(Stop,
+    "authority",
+    this.Lang,
+    out infos,
+    out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "针对服务器 " + channel.Url + " 列出规范库检索途径过程发生错误：" + strError;
+                        goto ERROR1;
+                    }
+
+                    this.AuthorityDbFromInfos = infos;
+                }
+
                 // 获得读者库的检索途径
                 infos = null;
                 lRet = channel.ListDbFroms(Stop,
@@ -4165,7 +4181,7 @@ Culture=neutral, PublicKeyToken=null
         //      0   成功
         //      1   出错，但希望继续后面的操作
         /// <summary>
-        /// 获得编目库属性列表
+        /// 获得书目和规范库属性列表
         /// </summary>
         /// <param name="bPrepareSearch">是否要准备通道</param>
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
@@ -4193,35 +4209,53 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 this.BiblioDbProperties = new List<BiblioDbProperty>();
+                this.AuthorityDbProperties = new List<BiblioDbProperty>();
+
                 if (this.AllDatabaseDom == null)
                     return 0;
 
-                XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database[@type='biblio']");
-                foreach (XmlNode node in nodes)
                 {
+                    XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database[@type='biblio']");
+                    foreach (XmlNode node in nodes)
+                    {
+                        string strName = DomUtil.GetAttr(node, "name");
+                        string strType = DomUtil.GetAttr(node, "type");
+                        // string strRole = DomUtil.GetAttr(node, "role");
+                        // string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
 
-                    string strName = DomUtil.GetAttr(node, "name");
-                    string strType = DomUtil.GetAttr(node, "type");
-                    // string strRole = DomUtil.GetAttr(node, "role");
-                    // string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                        BiblioDbProperty property = new BiblioDbProperty();
+                        this.BiblioDbProperties.Add(property);
+                        property.DbName = DomUtil.GetAttr(node, "name");
+                        property.ItemDbName = DomUtil.GetAttr(node, "entityDbName");
+                        property.Syntax = DomUtil.GetAttr(node, "syntax");
+                        property.IssueDbName = DomUtil.GetAttr(node, "issueDbName");
+                        property.OrderDbName = DomUtil.GetAttr(node, "orderDbName");
+                        property.CommentDbName = DomUtil.GetAttr(node, "commentDbName");
+                        property.Role = DomUtil.GetAttr(node, "role");
 
-                    BiblioDbProperty property = new BiblioDbProperty();
-                    this.BiblioDbProperties.Add(property);
-                    property.DbName = DomUtil.GetAttr(node, "name");
-                    property.ItemDbName = DomUtil.GetAttr(node, "entityDbName");
-                    property.Syntax = DomUtil.GetAttr(node, "syntax");
-                    property.IssueDbName = DomUtil.GetAttr(node, "issueDbName");
-                    property.OrderDbName = DomUtil.GetAttr(node, "orderDbName");
-                    property.CommentDbName = DomUtil.GetAttr(node, "commentDbName");
-                    property.Role = DomUtil.GetAttr(node, "role");
+                        bool bValue = true;
+                        nRet = DomUtil.GetBooleanParam(node,
+                            "inCirculation",
+                            true,
+                            out bValue,
+                            out strError);
+                        property.InCirculation = bValue;
+                    }
+                }
 
-                    bool bValue = true;
-                    nRet = DomUtil.GetBooleanParam(node,
-                        "inCirculation",
-                        true,
-                        out bValue,
-                        out strError);
-                    property.InCirculation = bValue;
+                {
+                    XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database[@type='authority']");
+                    foreach (XmlNode node in nodes)
+                    {
+                        string strName = DomUtil.GetAttr(node, "name");
+                        string strType = DomUtil.GetAttr(node, "type");
+
+                        BiblioDbProperty property = new BiblioDbProperty();
+                        this.AuthorityDbProperties.Add(property);
+                        property.DbName = DomUtil.GetAttr(node, "name");
+                        property.Syntax = DomUtil.GetAttr(node, "syntax");
+                        property.Usage = DomUtil.GetAttr(node, "usage");
+                    }
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);

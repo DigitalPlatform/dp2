@@ -4203,6 +4203,30 @@ namespace DigitalPlatform.LibraryServer
             return null;
         }
 
+        // 是否在配置的书目库名之列?
+        public ItemDbCfg GetAuthorityDbCfg(string strBiblioDbName)
+        {
+            if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                return null;
+
+            XmlElement database = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strBiblioDbName + "']") as XmlElement;
+            if (database == null)
+                return null;
+            return new ItemDbCfg { DbName = database.GetAttribute("name"),
+            BiblioDbSyntax = database.GetAttribute("syntax")};
+        }
+
+        public List<string> GetAuthorityDbNames()
+        {
+            List<string> results = new List<string>();
+            XmlNodeList databases = this.LibraryCfgDom.DocumentElement.SelectNodes("authdbgroup/database");
+            foreach(XmlElement database in databases)
+            {
+                results.Add(database.GetAttribute("name"));
+            }
+            return results;
+        }
+
         // 是否具有orderWork角色
         public bool IsOrderWorkBiblioDb(string strBiblioDbName)
         {
@@ -4324,7 +4348,7 @@ namespace DigitalPlatform.LibraryServer
         // (通过其他语言的书目库名)获得配置文件中所使用的那个规范库名
         public string GetCfgAuthorityDbName(string strAuthorityDbName)
         {
-            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + strAuthorityDbName + "']");
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strAuthorityDbName + "']");
 
             if (node != null)
                 return strAuthorityDbName;
@@ -4338,7 +4362,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 foreach (Caption caption in db.Captions)
                 {
-                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + caption.Value + "']");
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + caption.Value + "']");
                     if (node != null)
                         return caption.Value;
                 }
@@ -7816,6 +7840,11 @@ out strError);
                     if (String.IsNullOrEmpty(strBiblioDbName) == false)
                         dbnames.Add(strBiblioDbName);
                 }
+            }
+            else if (strDbType == "authority")
+            {
+                // 2018/9/26
+                dbnames = this.GetAuthorityDbNames();
             }
             else if (strDbType == "item")
             {
@@ -11413,7 +11442,7 @@ out strError);
             return 0;
         }
 
-#region 实用功能
+        #region 实用功能
 
         // 通过册条码号得知从属的种记录路径
         // parameters:
@@ -11928,7 +11957,7 @@ out strError);
             return 1;
         }
 
-#endregion
+        #endregion
 
         // 包装版本
         // 检查路径中的库名，是不是实体库名
@@ -12005,7 +12034,7 @@ out strError);
             return 0;
         }
 
-#region APIs
+        #region APIs
 
 
 
@@ -12558,7 +12587,7 @@ strLibraryCode);    // 读者所在的馆代码
             return -1;
         }
 
-#endregion
+        #endregion
 
         // 展开权限字符串为原始权限定义形态
         public static string ExpandRightString(string strOriginRight)
@@ -15186,7 +15215,7 @@ strLibraryCode);    // 读者所在的馆代码
         public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
         public bool ReaderDomChanged = false;
 
-#region 手机短信验证码
+        #region 手机短信验证码
 
         // 竖线间隔的手机号码列表
         // return:
@@ -15319,7 +15348,7 @@ strLibraryCode);    // 读者所在的馆代码
             return true;
         }
 
-#endregion
+        #endregion
 
         public Account()
         {

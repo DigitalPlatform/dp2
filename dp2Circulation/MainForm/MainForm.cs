@@ -220,6 +220,11 @@ namespace dp2Circulation
         public BiblioDbFromInfo[] ReaderDbFromInfos = null;   // 读者库检索路径信息 2012/2/8
 
         /// <summary>
+        /// 规范库检索路径信息集合
+        /// </summary>
+        public BiblioDbFromInfo[] AuthorityDbFromInfos = null;
+
+        /// <summary>
         /// 实体库检索路径信息集合
         /// </summary>
         public BiblioDbFromInfo[] ItemDbFromInfos = null;   // 实体库检索路径信息 2012/5/5
@@ -269,6 +274,12 @@ namespace dp2Circulation
         /// 读者库属性集合
         /// </summary>
         public List<ReaderDbProperty> ReaderDbProperties = null;
+
+        /// <summary>
+        /// 规范库属性集合
+        /// </summary>
+        public List<BiblioDbProperty> AuthorityDbProperties = null;
+
 
         /// <summary>
         /// 实用库属性集合
@@ -3703,74 +3714,6 @@ false);
             // 2014/5/20
             if (string.IsNullOrEmpty(strOldText) == false)
                 comboBox_from.Text = strOldText;
-        }
-
-        // TabComboBox版本
-        // 右边列出style名
-        /// <summary>
-        /// 填充书目库检索途径 TabComboBox 列表
-        /// 每一行左边是检索途径名，右边是 style 名
-        /// </summary>
-        /// <param name="comboBox_from">TabComboBox对象</param>
-        public void FillBiblioFromList(DigitalPlatform.CommonControl.TabComboBox comboBox_from)
-        {
-            comboBox_from.Items.Clear();
-
-            comboBox_from.Items.Add("<全部>");
-
-            if (this.BiblioDbFromInfos == null)
-                return;
-
-            Debug.Assert(this.BiblioDbFromInfos != null);
-
-            string strFirstItem = "";
-            // 装入检索途径
-            for (int i = 0; i < this.BiblioDbFromInfos.Length; i++)
-            {
-                BiblioDbFromInfo info = this.BiblioDbFromInfos[i];
-
-                comboBox_from.Items.Add(info.Caption + "\t" + GetDisplayStyle(info.Style));
-
-                if (i == 0)
-                    strFirstItem = info.Caption;
-            }
-
-            comboBox_from.Text = strFirstItem;
-        }
-
-        // 过滤掉 _ 开头的那些style子串
-        // parameters:
-        //      bRemove2    是否也要滤除 __ 前缀的
-        //                  当出现在检索途径列表里面的时候，为了避免误会，要出现 __ 前缀的；而发送检索请求到 dp2library 的时候，为了避免连带也引起匹配其他检索途径，要把 __ 前缀的 style 滤除
-        static string GetDisplayStyle(string strStyles,
-            bool bRemove2 = false)
-        {
-            string[] parts = strStyles.Split(new char[] { ',' });
-            List<string> results = new List<string>();
-            foreach (string part in parts)
-            {
-                string strText = part.Trim();
-                if (String.IsNullOrEmpty(strText) == true)
-                    continue;
-
-                if (bRemove2 == false)
-                {
-                    // 只滤除 _ 开头的
-                    if (StringUtil.HasHead(strText, "_") == true
-                        && StringUtil.HasHead(strText, "__") == false)
-                        continue;
-                }
-                else
-                {
-                    // 2013/12/30 _ 和 __ 开头的都被滤除
-                    if (StringUtil.HasHead(strText, "_") == true)
-                        continue;
-                }
-
-                results.Add(strText);
-            }
-
-            return StringUtil.MakePathList(results, ",");
         }
 
         // 过滤掉 _ 开头的那些style子串
@@ -9453,6 +9396,17 @@ out strError);
 
             return 0;
         }
+
+        // 从 MARC 文件导入
+        private void MenuItem_importFromMarc_Click(object sender, EventArgs e)
+        {
+            OpenWindow<ImportMarcForm>();
+        }
+
+        private void MenuItem_openAuthoritySearchForm_Click(object sender, EventArgs e)
+        {
+            OpenWindow<AuthoritySearchForm>();
+        }
     }
 
     /// <summary>
@@ -9544,6 +9498,12 @@ out strError);
         /// 是否参与流通
         /// </summary>
         public bool InCirculation = true;  // 是否参与流通 2009/10/23 
+
+        // 2018/9/25
+        /// <summary>
+        /// 用途
+        /// </summary>
+        public string Usage { get; set; }
     }
 
     // 
