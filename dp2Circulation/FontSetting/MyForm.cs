@@ -220,7 +220,7 @@ namespace dp2Circulation
             this.Channel.Idle += Channel_Idle;
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm?.stopManager, true);	// 和容器关联
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
@@ -462,7 +462,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             get
             {
-                return Program.MainForm._currentUserName;
+                return Program.MainForm?._currentUserName;
             }
         }
 
@@ -471,7 +471,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             get
             {
-                return Program.MainForm._currentLibraryCodeList;
+                return Program.MainForm?._currentLibraryCodeList;
             }
         }
 
@@ -479,7 +479,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         {
             get
             {
-                return Program.MainForm._currentUserRights;
+                return Program.MainForm?._currentUserRights;
             }
         }
 
@@ -499,12 +499,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <param name="e">事件参数</param>
         public virtual void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            Program.MainForm.Channel_BeforeLogin(sender, e); // 2015/11/4 原来是 this
+            Program.MainForm?.Channel_BeforeLogin(sender, e); // 2015/11/4 原来是 this
         }
 
         public virtual void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            Program.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
+            Program.MainForm?.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
         }
 
 #if NO
@@ -784,10 +784,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             if (Program.MainForm != null && Program.MainForm.AppInfo != null
                 && Floating == false)
             {
-                Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
+                Program.MainForm?.AppInfo?.LoadMdiChildFormStates(this,
                         "mdi_form_state",
                         this.SuppressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
-
             }
         }
 
@@ -801,7 +800,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             if (Program.MainForm != null && Program.MainForm.AppInfo != null
     && Floating == false)
             {
-                MainForm.AppInfo.SaveMdiChildFormStates(this,
+                Program.MainForm?.AppInfo?.SaveMdiChildFormStates(this,
                     "mdi_form_state",
                     this.SuppressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
             }
@@ -846,7 +845,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             if (Program.MainForm != null)
             {
                 // if (this.stop != null)
-                Program.MainForm.stopManager.Active(this.stop);
+                Program.MainForm?.stopManager?.Active(this.stop);
 
                 Program.MainForm.MenuItem_font.Enabled = true;
                 Program.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
@@ -927,7 +926,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <param name="strHtml">要输出的 HTML 字符串</param>
         public void OutputHtml(string strHtml)
         {
-            Program.MainForm.OperHistory.AppendHtml(strHtml);
+            Program.MainForm?.OperHistory?.AppendHtml(strHtml);
         }
 
         // parameters:
@@ -944,7 +943,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm?.OperHistory?.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
         /// <summary>
@@ -1025,7 +1024,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 string strStyle = "content,data,metadata,timestamp,outputpath,gzip";
 
                 long lRet = channel.GetRes(Progress,
-                    MainForm.cfgCache,
+                    Program.MainForm?.cfgCache,
                     strCfgFilePath,
                     strStyle,
                     null,
@@ -1109,7 +1108,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 string strStyle = "content,data,metadata,timestamp,outputpath";
 
                 long lRet = channel.GetResLocalFile(Progress,
-                    MainForm.cfgCache,
+                    Program.MainForm?.cfgCache,
                     strPath,
                     strStyle,
                     out strOutputFilename,
@@ -1516,7 +1515,7 @@ out string strError)
         public List<string> GetOwnerLibraryCodes()
         {
             if (Global.IsGlobalUser(this.CurrentLibraryCodeList) == true)
-                return Program.MainForm.GetAllLibraryCode();
+                return Program.MainForm?.GetAllLibraryCode();
 
             return StringUtil.SplitList(this.CurrentLibraryCodeList);
         }

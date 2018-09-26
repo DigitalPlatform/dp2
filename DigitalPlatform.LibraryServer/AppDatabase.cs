@@ -1279,10 +1279,10 @@ namespace DigitalPlatform.LibraryServer
                 if (this.IsAuthorityDbName(strName) == true)
                 {
                     // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + strName + "']");
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置 DOM 中名字为 '" + strName + "' 的规范库(dbName属性)相关<database>元素没有找到";
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的规范库(name属性)相关 authdbgroup/database 元素没有找到";
                         return 0;
                     }
 
@@ -1295,7 +1295,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 来自LibraryCfgDom
                     string strOldReaderDbName = DomUtil.GetAttr(nodeDatabase,
-                        "dbName");
+                        "name");
                     // 来自strDatabaseInfo
                     string strNewReaderDbName = DomUtil.GetAttr(request_node,
                         "name");
@@ -1322,7 +1322,7 @@ namespace DigitalPlatform.LibraryServer
                             strNewReaderDbName,
                                 () =>
                                 {
-                                    DomUtil.SetAttr(nodeDatabase, "dbName", strNewReaderDbName);
+                                    DomUtil.SetAttr(nodeDatabase, "name", strNewReaderDbName);
                                     bDbNameChanged = true;
                                     this.Changed = true;
                                 },
@@ -2716,6 +2716,55 @@ out strError);
             return 1;
         }
 
+        // 删除规范库。
+        // 也会自动修改 library.xml 的 authdbgroup 中相关元素
+        // parameters:
+        //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+        // return:
+        //      -1  出错
+        //      0   指定的数据库不存在
+        //      1   成功删除
+        int DeleteAuthorityDatabase(RmsChannel channel,
+            string strLibraryCodeList,
+            string strName,
+            string strLogFileName,
+            ref bool bDbNameChanged,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 获得相关配置小节
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']");
+            if (nodeDatabase == null)
+            {
+                strError = "配置 DOM 中名字为 '" + strName + "' 的规范库(name属性)相关 authdbgroup/database 元素没有找到";
+                return 0;
+            }
+
+            // 分馆用户只允许删除属于管辖分馆的读者库
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                strError = "删除规范库 '" + strName + "' 被拒绝。当前用户不是全局用户";
+                return -1;
+            }
+
+            // 删除规范库
+            nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "删除读者库 '" + strName + "' 时发生错误: " + strError;
+                return -1;
+            }
+
+            bDbNameChanged = true;
+
+            nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
+            this.Changed = true;
+            return 1;
+        }
+
         // 删除一个实用库。
         // 也会自动修改 library.xml 的相关元素
         // parameters:
@@ -3465,6 +3514,33 @@ out strError);
                 }
                 #endregion
 
+                #region authority
+                // 删除规范库
+                if (this.IsAuthorityDbName(strName) == true)
+                {
+
+                    // 删除读者库。
+                    // 也会自动修改 library.xml 的 readerdbgroup 中相关元素
+                    // parameters:
+                    //      bDbNameChanged  如果数据库发生了删除或者修改名字的情况，此参数会被设置为 true。否则其值不会发生改变
+                    // return:
+                    //      -1  出错
+                    //      0   指定的数据库不存在
+                    //      1   成功删除
+                    nRet = DeleteAuthorityDatabase(channel,
+                        strLibraryCodeList,
+                        strName,
+                        strLogFileName,
+                        ref bDbNameChanged,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                        return 0;
+                    goto CONTINUE;
+                }
+                #endregion
+
                 #region 各种单个数据库
                 // 删除预约到书库
                 // if (this.ArrivedDbName == strName)
@@ -3789,7 +3865,6 @@ out strError);
 
                 if (File.Exists(strLogFileName))
                 {
-
                     using (Stream stream = File.OpenRead(strLogFileName))
                     {
                         nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -3947,7 +4022,7 @@ out strError);
                 if (this.IsBiblioDbName(strName) == true)
                 {
                     // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
+                    XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']") as XmlElement;
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
@@ -3960,6 +4035,7 @@ out strError);
                         goto ERROR1;
                     }
 
+#if NO
                     string strSyntax = DomUtil.GetAttr(nodeDatabase, "syntax");
                     if (String.IsNullOrEmpty(strSyntax) == true)
                         strSyntax = "unimarc";
@@ -3970,9 +4046,14 @@ out strError);
                         strUsage = "book";
                     else
                         strUsage = "series";
+#endif
+
+                    // 2018/9/25 changed
+                    RequestBiblioDatabase info = RequestBiblioDatabase.FromBiblioCfgNode(nodeDatabase);
 
                     // 刷新书目库
-                    string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + strSyntax + "_" + strUsage;
+                    // string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + strSyntax + "_" + strUsage;
+                    string strTemplateDir = info.GetBiblioTemplateDir(this.DataDir);
 
                     nRet = RefreshDatabase(channel,
                         strTemplateDir,
@@ -3993,14 +4074,14 @@ out strError);
                     dbnames.Add(strName);
 
                     // 刷新实体库
-                    string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
-                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    // string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
+                    if (String.IsNullOrEmpty(info.EntityDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "item";
 
                         nRet = RefreshDatabase(channel,
                             strTemplateDir,
-                            strEntityDbName,
+                            info.EntityDbName,
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
@@ -4008,23 +4089,23 @@ out strError);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "刷新书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 定义时发生错误: " + strError;
+                            strError = "刷新书目库 '" + strName + "' 所从属的实体库 '" + info.EntityDbName + "' 定义时发生错误: " + strError;
                             goto ERROR1;
                         }
                         if (nRet == 1)
-                            keyschanged_dbnames.Add(strEntityDbName);
-                        dbnames.Add(strEntityDbName);
+                            keyschanged_dbnames.Add(info.EntityDbName);
+                        dbnames.Add(info.EntityDbName);
                     }
 
                     // 刷新订购库
-                    string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
-                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    // string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
+                    if (String.IsNullOrEmpty(info.OrderDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "order";
 
                         nRet = RefreshDatabase(channel,
                             strTemplateDir,
-                            strOrderDbName,
+                            info.OrderDbName,
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
@@ -4032,22 +4113,22 @@ out strError);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "刷新书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 定义时发生错误: " + strError;
+                            strError = "刷新书目库 '" + strName + "' 所从属的订购库 '" + info.OrderDbName + "' 定义时发生错误: " + strError;
                             goto ERROR1;
                         }
                         if (nRet == 1)
-                            keyschanged_dbnames.Add(strOrderDbName);
-                        dbnames.Add(strOrderDbName);
+                            keyschanged_dbnames.Add(info.OrderDbName);
+                        dbnames.Add(info.OrderDbName);
                     }
 
                     // 刷新期库
-                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    if (String.IsNullOrEmpty(info.IssueDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "issue";
 
                         nRet = RefreshDatabase(channel,
                             strTemplateDir,
-                            strIssueDbName,
+                            info.IssueDbName,
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
@@ -4055,23 +4136,23 @@ out strError);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "刷新书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 定义时发生错误: " + strError;
+                            strError = "刷新书目库 '" + strName + "' 所从属的期库 '" + info.IssueDbName + "' 定义时发生错误: " + strError;
                             goto ERROR1;
                         }
                         if (nRet == 1)
-                            keyschanged_dbnames.Add(strIssueDbName);
-                        dbnames.Add(strIssueDbName);
+                            keyschanged_dbnames.Add(info.IssueDbName);
+                        dbnames.Add(info.IssueDbName);
                     }
 
                     // 刷新评注库
-                    string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
-                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    // string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
+                    if (String.IsNullOrEmpty(info.CommentDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "comment";
 
                         nRet = RefreshDatabase(channel,
                             strTemplateDir,
-                            strCommentDbName,
+                            info.CommentDbName,
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
@@ -4079,12 +4160,12 @@ out strError);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "刷新书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 定义时发生错误: " + strError;
+                            strError = "刷新书目库 '" + strName + "' 所从属的评注库 '" + info.CommentDbName + "' 定义时发生错误: " + strError;
                             goto ERROR1;
                         }
                         if (nRet == 1)
-                            keyschanged_dbnames.Add(strCommentDbName);
-                        dbnames.Add(strCommentDbName);
+                            keyschanged_dbnames.Add(info.CommentDbName);
+                        dbnames.Add(info.CommentDbName);
                     }
 
                     continue;
@@ -4288,6 +4369,49 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "刷新读者库 '" + strName + "' 定义时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                    if (nRet == 1)
+                        keyschanged_dbnames.Add(strName);
+
+                    dbnames.Add(strName);
+                    continue;
+                }
+
+                // 刷新规范库
+                if (this.IsAuthorityDbName(strName) == true)
+                {
+                    // 获得相关配置小节
+                    XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']") as XmlElement;
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的读者库(name属性)相关 authdbgroup/database 元素没有找到";
+                        return 0;
+                    }
+
+                    // 分馆用户不允许刷新规范库
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "刷新规范库 '" + strName + "' 定义被拒绝。当前用户不是全局用户";
+                        goto ERROR1;
+                    }
+
+                    RequestBiblioDatabase info = RequestBiblioDatabase.FromAuthorityCfgNode(nodeDatabase);
+
+                    // 刷新规范库
+                    string strTemplateDir = info.GetAuthorityTemplateDir(this.DataDir);
+
+                    nRet = RefreshDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strInclude,
+                        strExclude,
+                        bRecoverModeKeys,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "刷新规范库 '" + strName + "' 定义时发生错误: " + strError;
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -5059,6 +5183,40 @@ out strError);
                     continue;
                 }
 
+                // 初始化规范库
+                if (this.IsAuthorityDbName(strName) == true)
+                {
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "library.xml 中名字为 '" + strName + "' 的读者库(name属性)相关 authdbgroup/database 元素没有找到";
+                        return 0;
+                    }
+
+                    // 分馆用户不允许初始化规范库
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "初始化规范库 '" + strName + "' 被拒绝。当前用户不是全局用户";
+                        return -1;
+                    }
+
+                    // 初始化规范库
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    {
+                        strError = "初始化规范库 '" + strName + "' 时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    dbnames.Add(strName);
+                    bDbNameChanged = true;
+                    continue;
+                }
+
                 // 初始化预约到书库
                 if (this.ArrivedDbName == strName)
                 {
@@ -5633,13 +5791,19 @@ out strError);
                 return info;
             }
 
+            public string GetBiblioTemplateDir(string strDataDir)
+            {
+                // this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
+                return Path.Combine(strDataDir, "templates\\" + "biblio_" + this.Syntax + "_" + this.Usage);
+            }
+
             // 从 library.xml XML 中构建
             public static RequestBiblioDatabase FromAuthorityCfgNode(XmlElement cfg_node)
             {
                 RequestBiblioDatabase info = new RequestBiblioDatabase();
 
                 info.Type = "authority";
-                info.Name = cfg_node.GetAttribute("dbName");
+                info.Name = cfg_node.GetAttribute("name");
 
                 info.Syntax = cfg_node.GetAttribute("syntax");
                 if (String.IsNullOrEmpty(info.Syntax) == true)
@@ -5653,6 +5817,11 @@ out strError);
                 // info.Role = DomUtil.GetAttr(cfg_node, "role");
 
                 return info;
+            }
+
+            public string GetAuthorityTemplateDir(string strDataDir)
+            {
+                return Path.Combine(strDataDir, "templates\\" + "authority_" + this.Syntax + "_" + this.Usage);
             }
 
             // 从 library.xml XML 中构建
@@ -5759,7 +5928,7 @@ out strError);
             // 在 library.xml 中为 authority 类型的 database 配置节点写入参数
             public void WriteAuthorityCfgNode(XmlElement nodeNewDatabase)
             {
-                DomUtil.SetAttr(nodeNewDatabase, "dbName", this.Name);
+                DomUtil.SetAttr(nodeNewDatabase, "name", this.Name);
                 DomUtil.SetAttr(nodeNewDatabase, "syntax", this.Syntax);
                 DomUtil.SetAttr(nodeNewDatabase, "usage", this.Usage);
 
@@ -5768,7 +5937,7 @@ out strError);
                 {
                     // 校验一下写入后的 authdbgroup/database/@biblioDbName 值不能重复
                     string strError = VerifyDatabaseNameDup(nodeNewDatabase.ParentNode as XmlElement,
-                        "dbName", false);
+                        "name", false);
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
                 }
@@ -6132,7 +6301,9 @@ out strError);
             // 开始创建
 
             // 创建书目库
-            string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
+            string strTemplateDir = info.GetBiblioTemplateDir(this.DataDir);
+
+            // this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
 
             // 根据预先的定义，创建一个数据库
             nRet = CreateDatabase(channel,
@@ -6354,10 +6525,10 @@ out strError);
             string strName = DomUtil.GetAttr(request_node, "name");
             string strInfo = request_node.GetAttribute("info");
 
-            XmlElement exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@dbName='" + strName + "']") as XmlElement;
+            XmlElement exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strName + "']") as XmlElement;
             if (bRecreate == true && exist_database_node == null)
             {
-                strError = "library.xml 中并不存在规范库 '" + strName + "' 的定义，无法进行重新创建";
+                strError = "library.xml 中并不存在规范库 '" + strName + "' 的定义(authdbgroup/database/@name)，无法进行重新创建";
                 return 0;
             }
 
@@ -6401,7 +6572,9 @@ out strError);
             // 开始创建
 
             // 创建书目库
-            string strTemplateDir = this.DataDir + "\\templates\\" + "authority_" + info.Syntax + "_" + info.Usage;
+            string strTemplateDir = info.GetAuthorityTemplateDir(this.DataDir);
+
+            // + "\\templates\\" + "authority_" + info.Syntax + "_" + info.Usage;
 
             // 根据预先的定义，创建一个数据库
             nRet = CreateDatabase(channel,
@@ -9314,7 +9487,7 @@ out strError);
                     XmlNodeList nodes = this.LibraryCfgDom?.DocumentElement?.SelectNodes("authdbgroup/database");
                     foreach (XmlElement database in nodes)
                     {
-                        string strDbName = database.GetAttribute("dbName");
+                        string strDbName = database.GetAttribute("name");
                         if (strName == strDbName)
                         {
                             XmlElement nodeDatabase = dom.CreateElement("database");
@@ -9562,7 +9735,7 @@ out strError);
                     XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("authdbgroup/database");
                     foreach (XmlElement database in nodes)
                     {
-                        string dbName = database.GetAttribute("dbName");
+                        string dbName = database.GetAttribute("name");
                         if (string.IsNullOrEmpty(dbName) == false)
                             dbnames.Add(dbName);
                     }

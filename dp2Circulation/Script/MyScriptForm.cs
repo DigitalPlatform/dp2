@@ -26,11 +26,14 @@ namespace dp2Circulation
         {
             get
             {
-                return MainForm.StatisAssemblyVersion;
+                if (Program.MainForm == null)
+                    return 0;
+                return Program.MainForm.StatisAssemblyVersion;
             }
             set
             {
-                MainForm.StatisAssemblyVersion = value;
+                if (Program.MainForm != null)
+                    Program.MainForm.StatisAssemblyVersion = value;
             }
         }
 
@@ -44,6 +47,10 @@ namespace dp2Circulation
             {
                 if (string.IsNullOrEmpty(this.m_strInstanceDir) == false)
                     return this.m_strInstanceDir;
+
+                // 2018/9/25
+                if (string.IsNullOrEmpty(Program.MainForm?.DataDir))
+                    return null;
 
                 this.m_strInstanceDir = PathUtil.MergePath(Program.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
                 PathUtil.TryCreateDir(this.m_strInstanceDir);
@@ -172,7 +179,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             throw new Exception(strError);
         }
 

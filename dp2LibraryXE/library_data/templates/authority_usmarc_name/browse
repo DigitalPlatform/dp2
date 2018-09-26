@@ -1,63 +1,97 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <nstable>
-    <item prefix="marc" url="http://dp2003.com/UNIMARC" />
-  </nstable>
-  <col title="书名" convert="join(%20)">
-    <title>
-      <caption lang='zh-CN'>书名</caption>
-      <caption lang='en'>Title</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='a' or @code='d' or @code='e' or @code='h' or @code='i']</xpath>
-  </col>
-  <col title="作者" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>作者</caption>
-      <caption lang='en'>Author</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or @code='g']</xpath>
-  </col>
-
-  <col title="出版者" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>出版者</caption>
-      <caption lang='en'>Publisher</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='210']/marc:subfield[@code='c']</xpath>
-  </col>
-  <col title="出版时间" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>出版时间</caption>
-      <caption lang='en'>Publish time</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='210']/marc:subfield[@code='d']</xpath>
-  </col>
-  <col title="中图法分类号" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>中图法分类号</caption>
-      <caption lang='en'>CLC classification</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='690']/marc:subfield[@code='a']</xpath>
-  </col>
-  <col title="主题词" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>主题词</caption>
-      <caption lang='en'>Subject</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='606']/marc:subfield[@code='a']</xpath>
-  </col>
-  <col title="关键词" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>关键词</caption>
-      <caption lang='en'>Keyword</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='610']/marc:subfield[@code='a']</xpath>
-  </col>
-  <col title="ISBN" convert="join(; )">
-    <title>
-      <caption lang='zh-CN'>ISBN</caption>
-      <caption lang='en'>ISBN</caption>
-    </title>
-    <xpath nstable="">//marc:record/marc:datafield[@tag='010']/marc:subfield[@code='a']</xpath>
-  </col>
-</root>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:marc="http://www.loc.gov/MARC21/slim" exclude-result-prefixes="xsi marc">
+    <xsl:template match="/marc:record">
+        <root>
+            <col>
+	<title>
+		<caption lang='zh-CN'>书名</caption>
+		<caption lang='en'>Title</caption>
+	</title>
+                <xsl:for-each select="marc:datafield[@tag='245']/marc:subfield[@code='a']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+                <xsl:for-each select="marc:datafield[@tag='245']/marc:subfield[@code='b']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </col>
+            <col>
+	<title>
+		<caption lang='zh-CN'>作者</caption>
+		<caption lang='en'>Author</caption>
+	</title>
+                <xsl:for-each select="marc:datafield[@tag='245']/marc:subfield[@code='c']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </col>
+            <col>
+	<title>
+		<caption lang='zh-CN'>出版地</caption>
+		<caption lang='en'>Publish place</caption>
+	</title>
+                <xsl:for-each select="marc:datafield[@tag='260']/marc:subfield[@code='a']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </col>
+            <col>
+	<title>
+		<caption lang='zh-CN'>出版者</caption>
+		<caption lang='en'>Publisher</caption>
+	</title>
+                <xsl:for-each select="marc:datafield[@tag='260']/marc:subfield[@code='b']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </col>
+            <col>
+	<title>
+		<caption lang='zh-CN'>出版时间</caption>
+		<caption lang='en'>Publish time</caption>
+	</title>
+                <xsl:for-each select="marc:datafield[@tag='260']/marc:subfield[@code='c']">
+                    <xsl:choose>
+                        <xsl:when test="position() = 1">
+                            <xsl:value-of select="." />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:value-of select="concat(';',.)" />
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:for-each>
+            </col>
+        </root>
+    </xsl:template>
+</xsl:stylesheet>

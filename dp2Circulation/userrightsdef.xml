@@ -84,6 +84,14 @@
     <comment lang='zh'>获得书目信息</comment>
     <comment lang='en'>get biblio info</comment>
   </property>
+  <property name='searchauthority'>
+    <comment lang='zh'>检索规范库</comment>
+    <comment lang='en'>search authority</comment>
+  </property>
+  <property name='getauthorityinfo'>
+    <comment lang='zh'>获得规范信息</comment>
+    <comment lang='en'>get authority info</comment>
+  </property>
   <property name='searchitem'>
     <comment lang='zh'>检索册</comment>
     <comment lang='en'>search item</comment>
@@ -233,6 +241,10 @@
   <property name='setbiblioinfo'>
     <comment lang='zh'>修改书目数据</comment>
     <comment lang='en'>set biblio info</comment>
+  </property>
+  <property name='setauthorityinfo'>
+    <comment lang='zh'>修改规范数据</comment>
+    <comment lang='en'>set authority info</comment>
   </property>
   <property name='hire'>
     <comment lang='zh'>创建租金交费请求</comment>

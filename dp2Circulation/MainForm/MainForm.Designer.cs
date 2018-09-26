@@ -159,6 +159,7 @@
             this.MenuItem_printAccountBook = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_printBindingList = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_inventory = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importFromMarc = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_importFromOrderDistributeExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
@@ -241,6 +242,7 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.MenuItem_openAuthoritySearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -335,6 +337,7 @@
             this.MenuItem_openReaderSearchForm,
             this.MenuItem_openItemSearchForm,
             this.MenuItem_openBiblioSearchForm,
+            this.MenuItem_openAuthoritySearchForm,
             this.toolStripSeparator19,
             this.MenuItem_openOrderSearchForm,
             this.MenuItem_openIssueSearchForm,
@@ -359,28 +362,28 @@
             // MenuItem_openQuickChargingForm
             // 
             this.MenuItem_openQuickChargingForm.Name = "MenuItem_openQuickChargingForm";
-            this.MenuItem_openQuickChargingForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openQuickChargingForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openQuickChargingForm.Text = "快捷出纳窗(&Q)";
             this.MenuItem_openQuickChargingForm.Click += new System.EventHandler(this.MenuItem_openQuickChargingForm_Click);
             // 
             // MenuItem_openChargingForm
             // 
             this.MenuItem_openChargingForm.Name = "MenuItem_openChargingForm";
-            this.MenuItem_openChargingForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openChargingForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openChargingForm.Text = "出纳窗(&C)";
             this.MenuItem_openChargingForm.Click += new System.EventHandler(this.MenuItem_openChargingForm_Click);
             // 
             // MenuItem_openEntityRegisterWizard
             // 
             this.MenuItem_openEntityRegisterWizard.Name = "MenuItem_openEntityRegisterWizard";
-            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openEntityRegisterWizard.Text = "册登记窗(&T)";
             this.MenuItem_openEntityRegisterWizard.Click += new System.EventHandler(this.MenuItem_openEntityRegisterWizard_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(240, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openReaderSearchForm
             // 
@@ -388,7 +391,7 @@
             this.MenuItem_openReaderSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openReaderSearchForm.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.MenuItem_openReaderSearchForm.Name = "MenuItem_openReaderSearchForm";
-            this.MenuItem_openReaderSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openReaderSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openReaderSearchForm.Text = "读者查询窗(&S)";
             this.MenuItem_openReaderSearchForm.Click += new System.EventHandler(this.MenuItem_openReaderSearchForm_Click);
             // 
@@ -397,7 +400,7 @@
             this.MenuItem_openItemSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openItemSearchForm.Image")));
             this.MenuItem_openItemSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openItemSearchForm.Name = "MenuItem_openItemSearchForm";
-            this.MenuItem_openItemSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openItemSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openItemSearchForm.Text = "实体查询窗(&E)";
             this.MenuItem_openItemSearchForm.Click += new System.EventHandler(this.MenuItem_openItemSearchForm_Click);
             // 
@@ -406,21 +409,21 @@
             this.MenuItem_openBiblioSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openBiblioSearchForm.Image")));
             this.MenuItem_openBiblioSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openBiblioSearchForm.Name = "MenuItem_openBiblioSearchForm";
-            this.MenuItem_openBiblioSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openBiblioSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openBiblioSearchForm.Text = "书目查询窗(&B)";
             this.MenuItem_openBiblioSearchForm.Click += new System.EventHandler(this.MenuItem_openBiblioSearchForm_Click);
             // 
             // toolStripSeparator19
             // 
             this.toolStripSeparator19.Name = "toolStripSeparator19";
-            this.toolStripSeparator19.Size = new System.Drawing.Size(240, 6);
+            this.toolStripSeparator19.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openOrderSearchForm
             // 
             this.MenuItem_openOrderSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openOrderSearchForm.Image")));
             this.MenuItem_openOrderSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openOrderSearchForm.Name = "MenuItem_openOrderSearchForm";
-            this.MenuItem_openOrderSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openOrderSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openOrderSearchForm.Text = "订购查询窗(&O)";
             this.MenuItem_openOrderSearchForm.Click += new System.EventHandler(this.MenuItem_openOrderSearchForm_Click);
             // 
@@ -429,7 +432,7 @@
             this.MenuItem_openIssueSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openIssueSearchForm.Image")));
             this.MenuItem_openIssueSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openIssueSearchForm.Name = "MenuItem_openIssueSearchForm";
-            this.MenuItem_openIssueSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openIssueSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openIssueSearchForm.Text = "期查询窗(&I)";
             this.MenuItem_openIssueSearchForm.Click += new System.EventHandler(this.MenuItem_openIssueSearchForm_Click);
             // 
@@ -438,7 +441,7 @@
             this.MenuItem_openCommentSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openCommentSearchForm.Image")));
             this.MenuItem_openCommentSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openCommentSearchForm.Name = "MenuItem_openCommentSearchForm";
-            this.MenuItem_openCommentSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openCommentSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openCommentSearchForm.Text = "评注查询窗(&C)";
             this.MenuItem_openCommentSearchForm.Click += new System.EventHandler(this.MenuItem_openCommentSearchForm_Click);
             // 
@@ -446,7 +449,7 @@
             // 
             this.MenuItem_openInvoiceSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openInvoiceSearchForm.Name = "MenuItem_openInvoiceSearchForm";
-            this.MenuItem_openInvoiceSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openInvoiceSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openInvoiceSearchForm.Text = "发票查询窗(&N)";
             this.MenuItem_openInvoiceSearchForm.Click += new System.EventHandler(this.MenuItem_openInvoiceSearchForm_Click);
             // 
@@ -455,21 +458,21 @@
             this.MenuItem_openArrivedSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openArrivedSearchForm.Image")));
             this.MenuItem_openArrivedSearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openArrivedSearchForm.Name = "MenuItem_openArrivedSearchForm";
-            this.MenuItem_openArrivedSearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openArrivedSearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openArrivedSearchForm.Text = "预约到书查询窗(&A)";
             this.MenuItem_openArrivedSearchForm.Click += new System.EventHandler(this.MenuItem_openArrivedSearchForm_Click);
             // 
             // MenuItem_openMarc856SearchForm
             // 
             this.MenuItem_openMarc856SearchForm.Name = "MenuItem_openMarc856SearchForm";
-            this.MenuItem_openMarc856SearchForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openMarc856SearchForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openMarc856SearchForm.Text = "856 字段查询窗(&8)";
             this.MenuItem_openMarc856SearchForm.Click += new System.EventHandler(this.MenuItem_openMarc856SearchForm_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(240, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openReaderInfoForm
             // 
@@ -477,7 +480,7 @@
             this.MenuItem_openReaderInfoForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openReaderInfoForm.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.MenuItem_openReaderInfoForm.Name = "MenuItem_openReaderInfoForm";
-            this.MenuItem_openReaderInfoForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openReaderInfoForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openReaderInfoForm.Text = "读者窗(&R)";
             this.MenuItem_openReaderInfoForm.Click += new System.EventHandler(this.MenuItem_openReaderInfoForm_Click);
             // 
@@ -486,7 +489,7 @@
             this.MenuItem_openItemInfoForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openItemInfoForm.Image")));
             this.MenuItem_openItemInfoForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openItemInfoForm.Name = "MenuItem_openItemInfoForm";
-            this.MenuItem_openItemInfoForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openItemInfoForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openItemInfoForm.Text = "册窗(&I)";
             this.MenuItem_openItemInfoForm.Click += new System.EventHandler(this.MenuItem_openItemInfoForm_Click);
             // 
@@ -495,19 +498,19 @@
             this.MenuItem_openEntityForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openEntityForm.Image")));
             this.MenuItem_openEntityForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openEntityForm.Name = "MenuItem_openEntityForm";
-            this.MenuItem_openEntityForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openEntityForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openEntityForm.Text = "种册窗(&E)";
             this.MenuItem_openEntityForm.Click += new System.EventHandler(this.MenuItem_openEntityForm_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(240, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openAmerceForm
             // 
             this.MenuItem_openAmerceForm.Name = "MenuItem_openAmerceForm";
-            this.MenuItem_openAmerceForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openAmerceForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openAmerceForm.Text = "交费窗(&A)";
             this.MenuItem_openAmerceForm.Click += new System.EventHandler(this.MenuItem_openAmerceForm_Click);
             // 
@@ -515,26 +518,26 @@
             // 
             this.MenuItem_openActivateForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.MenuItem_openActivateForm.Name = "MenuItem_openActivateForm";
-            this.MenuItem_openActivateForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openActivateForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openActivateForm.Text = "激活窗(&A)";
             this.MenuItem_openActivateForm.Click += new System.EventHandler(this.MenuItem_openActivateForm_Click);
             // 
             // MenuItem_openReaderManageForm
             // 
             this.MenuItem_openReaderManageForm.Name = "MenuItem_openReaderManageForm";
-            this.MenuItem_openReaderManageForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openReaderManageForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openReaderManageForm.Text = "停借窗(&M)";
             this.MenuItem_openReaderManageForm.Click += new System.EventHandler(this.MenuItem_openReaderManageForm_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(240, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_openChangePasswordForm
             // 
             this.MenuItem_openChangePasswordForm.Name = "MenuItem_openChangePasswordForm";
-            this.MenuItem_openChangePasswordForm.Size = new System.Drawing.Size(243, 30);
+            this.MenuItem_openChangePasswordForm.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openChangePasswordForm.Text = "修改密码窗(&P)";
             this.MenuItem_openChangePasswordForm.Click += new System.EventHandler(this.MenuItem_openChangePasswordForm_Click);
             // 
@@ -1002,6 +1005,7 @@
             this.MenuItem_printAccountBook,
             this.MenuItem_printBindingList,
             this.MenuItem_inventory,
+            this.MenuItem_importFromMarc,
             this.MenuItem_importExport,
             this.MenuItem_importFromOrderDistributeExcelFile,
             this.toolStripSeparator17,
@@ -1091,6 +1095,13 @@
             this.MenuItem_inventory.Size = new System.Drawing.Size(333, 30);
             this.MenuItem_inventory.Text = "盘点(&V)";
             this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
+            // 
+            // MenuItem_importFromMarc
+            // 
+            this.MenuItem_importFromMarc.Name = "MenuItem_importFromMarc";
+            this.MenuItem_importFromMarc.Size = new System.Drawing.Size(333, 30);
+            this.MenuItem_importFromMarc.Text = "从 MARC 文件导入(&M)";
+            this.MenuItem_importFromMarc.Click += new System.EventHandler(this.MenuItem_importFromMarc_Click);
             // 
             // MenuItem_importExport
             // 
@@ -1865,6 +1876,15 @@
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_openAuthoritySearchForm
+            // 
+            this.MenuItem_openAuthoritySearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openAuthoritySearchForm.Image")));
+            this.MenuItem_openAuthoritySearchForm.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.MenuItem_openAuthoritySearchForm.Name = "MenuItem_openAuthoritySearchForm";
+            this.MenuItem_openAuthoritySearchForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openAuthoritySearchForm.Text = "规范查询窗(&A)";
+            this.MenuItem_openAuthoritySearchForm.Click += new System.EventHandler(this.MenuItem_openAuthoritySearchForm_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
@@ -2101,6 +2121,8 @@
         private System.Windows.Forms.TabPage tabPage_browse;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_batchOrder;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importFromOrderDistributeExcelFile;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_importFromMarc;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openAuthoritySearchForm;
     }
 }
 

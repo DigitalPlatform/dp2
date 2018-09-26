@@ -183,6 +183,7 @@ namespace dp2Circulation
         // 
         // return:
         //      null    没有找到指定的书目库名
+        //      其他      MARC 格式语法名
         /// <summary>
         /// 根据书目库名获得 MARC 格式语法名
         /// </summary>
@@ -196,6 +197,23 @@ namespace dp2Circulation
                 {
                     if (this.BiblioDbProperties[i].DbName == strBiblioDbName)
                         return this.BiblioDbProperties[i].Syntax;
+                }
+            }
+
+            return null;
+        }
+
+        // return:
+        //      null    没有找到指定的规范库名
+        //      其他      MARC 格式语法名
+        public string GetAuthoritySyntax(string strBiblioDbName)
+        {
+            if (this.AuthorityDbProperties != null)
+            {
+                foreach (BiblioDbProperty prop in this.AuthorityDbProperties)
+                {
+                    if (prop.DbName == strBiblioDbName)
+                        return prop.Syntax;
                 }
             }
 

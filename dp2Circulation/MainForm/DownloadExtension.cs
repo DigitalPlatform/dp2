@@ -69,7 +69,7 @@ namespace dp2Circulation
             }
         }
 
-        class NormalResult
+        public class NormalResult
         {
             public int Value { get; set; }
             public string ErrorInfo { get; set; }
@@ -78,6 +78,11 @@ namespace dp2Circulation
             {
                 this.Value = value;
                 this.ErrorInfo = error;
+            }
+
+            public NormalResult()
+            {
+
             }
         }
 

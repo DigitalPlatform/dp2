@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.5.*")]
-[assembly: AssemblyFileVersion("3.5.0.0")]
+[assembly: AssemblyVersion("3.6.*")]
+[assembly: AssemblyFileVersion("3.6.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -153,3 +153,4 @@ using System.Runtime.InteropServices;
 //      3.3 (2018/7/28) SetBiblioInfo() API 增加了格式 marc(或 marcquery)，机内格式 MARC 字符串
 //      3.4 (2018/8/7) SetOrders() API 所保存的订购记录里面增加了 fixedPrice 和 discount 元素。早先版本如果保存时候提交这两个元素，会被 dp2library 过滤掉
 //      3.5 (2018/9/20) 这个版本要求 dp2kernel 3.1 配套
+//      3.6 (2018/9/26) ListDbFroms() API 的 strDbType 新增类型 "authority"

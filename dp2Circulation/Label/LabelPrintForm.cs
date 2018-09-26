@@ -3307,23 +3307,30 @@ MessageBoxDefaultButton.Button1);
 
         void BeginWatcher()
         {
-            EndWatcher();
+            try
+            {
+                EndWatcher();
 
-            if (this._wather == null)
-                this._wather = new FileSystemWatcher();
+                if (this._wather == null)
+                    this._wather = new FileSystemWatcher();
 
-            string filename = this.textBox_labelFile_labelFilename.Text;
+                string filename = this.textBox_labelFile_labelFilename.Text;
 
-            _wather.Path = Path.GetDirectoryName(filename);
+                _wather.Path = Path.GetDirectoryName(filename);
 
-            _wather.NotifyFilter = NotifyFilters.LastWrite; // | NotifyFilters.Size | NotifyFilters.Attributes;
+                _wather.NotifyFilter = NotifyFilters.LastWrite; // | NotifyFilters.Size | NotifyFilters.Attributes;
 
-            _wather.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
-            _wather.IncludeSubdirectories = false;
+                _wather.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
+                _wather.IncludeSubdirectories = false;
 
-            _wather.Changed += new FileSystemEventHandler(watcher_Changed);
+                _wather.Changed += new FileSystemEventHandler(watcher_Changed);
 
-            _wather.EnableRaisingEvents = true;
+                _wather.EnableRaisingEvents = true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, "BeginWatcher() exception: " + ExceptionUtil.GetAutoText(ex));
+            }
         }
 
         void EndWatcher()
