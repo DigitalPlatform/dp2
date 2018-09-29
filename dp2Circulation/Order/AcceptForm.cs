@@ -707,7 +707,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -4517,7 +4517,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     string strFromStyle = "";
                     string strFromCaption = "";
 
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
 
 
                     if (this.comboBox_prepare_type.Text == "图书")

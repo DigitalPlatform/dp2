@@ -253,6 +253,8 @@ namespace dp2Circulation
                 title = "规范";
             if (string.IsNullOrEmpty(text) == false)
                 this.Text = title + " " + text;
+            else
+                this.Text = title;
         }
 
         // 2009/2/3 
@@ -4941,7 +4943,7 @@ true);
 
                     try
                     {
-                        strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                        strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_from.Text);
                     }
                     catch (Exception ex)
                     {

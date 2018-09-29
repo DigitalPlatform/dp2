@@ -11,6 +11,8 @@ namespace dp2Circulation
         public AuthoritySearchForm() : base ()
         {
             this.DbType = "authority";
+
+            SetTitle("");
         }
     }
 }

@@ -62,7 +62,7 @@ namespace DigitalPlatform.rms
                 if (_table.ContainsKey(database) == false)
                 {
                     _table[database] = first_value;
-                    return first_value;
+                    // return first_value;
                 }
                 Int64 id = _table[database];
                 id++;

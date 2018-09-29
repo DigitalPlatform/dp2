@@ -11,6 +11,8 @@ using System.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.Marc;
+using Jint;
 
 namespace DigitalPlatform.rms
 {
@@ -74,6 +76,8 @@ namespace DigitalPlatform.rms
             public XPathExpression expr { get; set; }
             public List<string> convert_methods { get; set; }
             public string Use { get; set; }
+            // javascript 脚本
+            public string Script { get; set; }
         }
 
         // TODO: XPathExpression可以缓存起来，加快速度
@@ -113,7 +117,7 @@ namespace DigitalPlatform.rms
                 // XmlNodeList nodeListXpath = this._dom.SelectNodes(@"//xpath");
                 XmlNodeList nodeListCol = this._dom.DocumentElement.SelectNodes("col");
 
-            CREATE_CACHE:
+                CREATE_CACHE:
                 // 创建Cache
                 if (m_exprCache.Count == 0 && nodeListCol.Count > 0)
                 {
@@ -153,7 +157,6 @@ namespace DigitalPlatform.rms
                             cache_item.expr = expr;
                         }
 
-
                         // 把 convert 参数也缓存起来
                         // XmlNode nodeCol = nodeXpath.ParentNode;
                         string strConvert = DomUtil.GetAttr(nodeCol, "convert");
@@ -166,13 +169,22 @@ namespace DigitalPlatform.rms
                             cache_item.convert_methods = new List<string>();
 
                         // 把 use 元素 text 缓存起来
-                        XmlElement nodeUse = nodeCol.SelectSingleNode("use") as XmlElement;
-                        string strUse = "";
-                        if (nodeUse != null)
-                            strUse = nodeUse.InnerText.Trim();
-                        if (string.IsNullOrEmpty(strUse) == false)
                         {
-                            cache_item.Use = strUse;
+                            XmlElement nodeUse = nodeCol.SelectSingleNode("use") as XmlElement;
+                            string strUse = "";
+                            if (nodeUse != null)
+                                strUse = nodeUse.InnerText.Trim();
+                            if (string.IsNullOrEmpty(strUse) == false)
+                            {
+                                cache_item.Use = strUse;
+                            }
+                        }
+
+                        // 2018/9/29
+                        // 把 script 元素 text 缓存起来
+                        {
+                            XmlElement script = nodeCol.SelectSingleNode("script") as XmlElement;
+                            cache_item.Script = script?.InnerText.Trim();
                         }
                     }
                 }
@@ -184,6 +196,10 @@ namespace DigitalPlatform.rms
                     results = MarcBrowse.Build(domData,
                         this._useNames);
                 }
+
+                MarcRecord record = null;
+                string strMarcSyntax = null;
+                Engine engine = null;
 
                 foreach (XmlElement nodeCol in nodeListCol)
                 {
@@ -221,7 +237,6 @@ namespace DigitalPlatform.rms
                         }
 
                         Debug.Assert(expr != null, "");
-
 
                         if (expr.ReturnType == XPathResultType.Number)
                         {
@@ -269,7 +284,6 @@ namespace DigitalPlatform.rms
                             strError = "XPathExpression的ReturnType为'" + expr.ReturnType.ToString() + "'无效";
                             return -1;
                         }
-
                     }
 
                     if (string.IsNullOrEmpty(cache_item.Use) == false)
@@ -278,6 +292,38 @@ namespace DigitalPlatform.rms
                         results.TryGetValue(cache_item.Use, out column);
                         if (column != null && string.IsNullOrEmpty(column.Value) == false)
                             strText += column.Value;
+                    }
+
+                    if (string.IsNullOrEmpty(cache_item.Script) == false)
+                    {
+                        int nRet = GetMarcRecord(domData,
+    ref record,
+    ref strMarcSyntax,
+    out strError);
+                        if (nRet == -1)
+                            return -1;
+
+#if NO
+                        Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                        engine.EnableExposedClrTypes = true;
+                        engine.SetGlobalValue("syntax", strMarcSyntax);
+                        engine.SetGlobalValue("biblio", record);
+                        string result = engine.Evaluate(cache_item.Script).ToString();
+                        if (string.IsNullOrEmpty(result) == false)
+                            strText += result;
+#endif
+                        if (engine == null)
+                            engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly))
+        .SetValue("syntax", strMarcSyntax)
+        .SetValue("biblio", record);
+
+                        string result = engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                            + cache_item.Script) // execute a statement
+                            ?.GetCompletionValue() // get the latest statement completion value
+                            ?.ToObject()?.ToString() // converts the value to .NET
+                            ;
+                        if (string.IsNullOrEmpty(result) == false)
+                            strText += result;
                     }
 
                     // 空内容也要算作一列
@@ -368,6 +414,40 @@ namespace DigitalPlatform.rms
             col_array.CopyTo(cols, nStartCol);
             // cols = ConvertUtil.GetStringArray(nStartCol, col_array);
             return nResultLength;
+        }
+
+        int GetMarcRecord(XmlDocument domData,
+            ref MarcRecord record,
+            ref string strMarcSyntax,
+            out string strError)
+        {
+            strError = "";
+
+            if (record != null)
+                return 0;
+
+            string strOutMarcSyntax = "";
+            string strMarc = "";
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            int nRet = MarcUtil.Xml2Marc(domData,
+                true,
+                "",
+                out strOutMarcSyntax,
+                out strMarc,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML 转换到 MARC 时出错: " + strError;
+                return -1;
+            }
+
+            record = new MarcRecord(strMarc);
+            strMarcSyntax = strOutMarcSyntax;
+            return 0;
         }
 
 #if NO

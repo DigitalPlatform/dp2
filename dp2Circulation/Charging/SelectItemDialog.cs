@@ -207,7 +207,7 @@ namespace dp2Circulation
 
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_from.Text);
                 }
                 catch (Exception ex)
                 {

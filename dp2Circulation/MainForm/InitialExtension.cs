@@ -3086,6 +3086,7 @@ Culture=neutral, PublicKeyToken=null
 
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
                 {
+                    infos = null;
                     lRet = channel.ListDbFroms(Stop,
     "authority",
     this.Lang,

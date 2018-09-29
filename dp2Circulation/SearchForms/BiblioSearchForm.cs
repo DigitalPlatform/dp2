@@ -305,7 +305,7 @@ namespace dp2Circulation
 
             string strFirstItem = "";
             // 装入检索途径
-            foreach(BiblioDbFromInfo info in Program.MainForm.BiblioDbFromInfos)
+            foreach (BiblioDbFromInfo info in Program.MainForm.BiblioDbFromInfos)
             {
                 comboBox_from.Items.Add(info.Caption + "\t" + GetDisplayStyle(info.Style));
 
@@ -921,13 +921,15 @@ Keys keyData)
             MessageBox.Show(this, strError);
         }
 
-        void SetTitle(string text)
+        internal void SetTitle(string text)
         {
             string title = "书目查询";
             if (this._dbType == "authority")
                 title = "规范查询";
             if (string.IsNullOrEmpty(text) == false)
                 this.Text = title + " " + text;
+            else
+                this.Text = title;
         }
 
         List<ItemQueryParam> m_queries = new List<ItemQueryParam>();
@@ -1071,6 +1073,124 @@ Keys keyData)
 
         }
 
+        public static string GetBiblioFromStyle(string strCaptions)
+        {
+            return GetBiblioFromStyle("biblio", strCaptions);
+        }
+
+        public static string GetAuthorityFromStyle(string strCaptions)
+        {
+            return GetBiblioFromStyle("biblio", strCaptions);
+        }
+
+        // 
+        // Exception:
+        //     可能会抛出Exception异常
+        /// <summary>
+        /// 根据from名列表字符串得到from style列表字符串
+        /// </summary>
+        /// <param name="strDbType">数据库类型</param>
+        /// <param name="strCaptions">检索途径名</param>
+        /// <returns>style列表字符串</returns>
+        public static string GetBiblioFromStyle(string strDbType,
+            string strCaptions)
+        {
+            BiblioDbFromInfo[] infos = null;
+            if (strDbType == "biblio")
+            {
+                if (Program.MainForm.BiblioDbFromInfos == null)
+                    throw new Exception("Program.MainForm.DbFromInfos尚未初始化");
+
+                Debug.Assert(Program.MainForm.BiblioDbFromInfos != null, "Program.MainForm.BiblioDbFromInfos 尚未初始化");
+
+                infos = Program.MainForm.BiblioDbFromInfos;
+            }
+            if (strDbType == "authority")
+            {
+                if (Program.MainForm.AuthorityDbFromInfos == null)
+                    throw new Exception("Program.MainForm.AuthorityDbFromInfos");
+
+                Debug.Assert(Program.MainForm.AuthorityDbFromInfos != null, "Program.MainForm.AuthorityDbFromInfos 尚未初始化");
+
+                infos = Program.MainForm.AuthorityDbFromInfos;
+            }
+
+            string strResult = "";
+
+            string[] parts = strCaptions.Split(new char[] { ',' });
+            for (int k = 0; k < parts.Length; k++)
+            {
+                string strCaption = parts[k].Trim();
+
+                // 2009/9/23 
+                // TODO: 是否可以直接使用\t后面的部分呢？
+                // 规整一下caption字符串，切除后面可能有的\t部分
+                int nRet = strCaption.IndexOf("\t");
+                if (nRet != -1)
+                    strCaption = strCaption.Substring(0, nRet).Trim();
+
+                if (strCaption.ToLower() == "<all>"
+                    || strCaption == "<全部>"
+                    || String.IsNullOrEmpty(strCaption) == true)
+                    return "<all>";
+
+                foreach (BiblioDbFromInfo info in infos)
+                {
+                    if (strCaption == info.Caption)
+                    {
+                        if (string.IsNullOrEmpty(strResult) == false)
+                            strResult += ",";
+                        // strResult += GetDisplayStyle(info.Style, true);   // 注意，去掉 _ 和 __ 开头的那些，应该还剩下至少一个 style
+                        strResult += GetDisplayStyle(info.Style, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
+                    }
+                }
+            }
+
+            return strResult;
+        }
+
+        // 过滤掉 _ 开头的那些style子串
+        // parameters:
+        //      bRemove2    是否滤除 __ 前缀的
+        //      bRemove1    是否滤除 _ 前缀的
+        static string GetDisplayStyle(string strStyles,
+            bool bRemove2,
+            bool bRemove1)
+        {
+            string[] parts = strStyles.Split(new char[] { ',' });
+            List<string> results = new List<string>();
+            foreach (string part in parts)
+            {
+                string strText = part.Trim();
+                if (String.IsNullOrEmpty(strText) == true)
+                    continue;
+
+                if (strText[0] == '_')
+                {
+                    if (bRemove1 == true)
+                    {
+                        if (strText.Length >= 2 && /*strText[0] == '_' &&*/ strText[1] != '_')
+                            continue;
+#if NO
+                        if (strText[0] == '_')
+                            continue;
+#endif
+                        if (strText.Length == 1)
+                            continue;
+                    }
+
+                    if (bRemove2 == true && strText.Length >= 2)
+                    {
+                        if (/*strText[0] == '_' && */ strText[1] == '_')
+                            continue;
+                    }
+                }
+
+                results.Add(strText);
+            }
+
+            return StringUtil.MakePathList(results, ",");
+        }
 
         public void DoSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
@@ -1168,7 +1288,7 @@ Keys keyData)
 
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                    strFromStyle = GetBiblioFromStyle(this._dbType, this.comboBox_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -2285,7 +2405,11 @@ out strError);
 
             if (this._dbType == "biblio")
             {
-                this.checkedComboBox_biblioDbNames.Items.Add("<全部书目>");
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+                    this.checkedComboBox_biblioDbNames.Items.Add("<全部书目>");
+                else
+                    this.checkedComboBox_biblioDbNames.Items.Add("<全部>");
+
                 if (Program.MainForm.BiblioDbProperties != null)
                 {
                     foreach (BiblioDbProperty property in Program.MainForm.BiblioDbProperties)
@@ -2653,7 +2777,7 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("导出书目转储文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
+                subMenuItem = new MenuItem("导出书目转储(.bdf)文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToBiblioDumpFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
@@ -10191,7 +10315,7 @@ out strError);
 
         private void dp2QueryControl1_GetFromStyle(object sender, GetFromStyleArgs e)
         {
-            e.FromStyles = Program.MainForm.GetBiblioFromStyle(e.FromCaption);
+            e.FromStyles = GetBiblioFromStyle(this._dbType, e.FromCaption);
         }
 
         // return:
