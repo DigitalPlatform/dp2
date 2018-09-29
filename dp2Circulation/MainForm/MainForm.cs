@@ -3622,61 +3622,6 @@ false);
             return null;
         }
 
-        // 
-        // Exception:
-        //     可能会抛出Exception异常
-        /// <summary>
-        /// 根据from名列表字符串得到from style列表字符串
-        /// </summary>
-        /// <param name="strCaptions">检索途径名</param>
-        /// <returns>style列表字符串</returns>
-        public string GetBiblioFromStyle(string strCaptions)
-        {
-            if (this.BiblioDbFromInfos == null)
-            {
-                throw new Exception("this.DbFromInfos尚未初始化");
-                // return null;    // 2009/3/29 
-            }
-
-            Debug.Assert(this.BiblioDbFromInfos != null, "this.DbFromInfos尚未初始化");
-
-            string strResult = "";
-
-            string[] parts = strCaptions.Split(new char[] { ',' });
-            for (int k = 0; k < parts.Length; k++)
-            {
-                string strCaption = parts[k].Trim();
-
-                // 2009/9/23 
-                // TODO: 是否可以直接使用\t后面的部分呢？
-                // 规整一下caption字符串，切除后面可能有的\t部分
-                int nRet = strCaption.IndexOf("\t");
-                if (nRet != -1)
-                    strCaption = strCaption.Substring(0, nRet).Trim();
-
-                if (strCaption.ToLower() == "<all>"
-                    || strCaption == "<全部>"
-                    || String.IsNullOrEmpty(strCaption) == true)
-                    return "<all>";
-
-                for (int i = 0; i < this.BiblioDbFromInfos.Length; i++)
-                {
-                    BiblioDbFromInfo info = this.BiblioDbFromInfos[i];
-
-                    if (strCaption == info.Caption)
-                    {
-                        if (string.IsNullOrEmpty(strResult) == false)
-                            strResult += ",";
-                        // strResult += GetDisplayStyle(info.Style, true);   // 注意，去掉 _ 和 __ 开头的那些，应该还剩下至少一个 style
-                        strResult += GetDisplayStyle(info.Style, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
-                    }
-                }
-            }
-
-            return strResult;
-
-            // return null;
-        }
 
         // ComboBox版本
         /// <summary>
@@ -3716,49 +3661,6 @@ false);
                 comboBox_from.Text = strOldText;
         }
 
-        // 过滤掉 _ 开头的那些style子串
-        // parameters:
-        //      bRemove2    是否滤除 __ 前缀的
-        //      bRemove1    是否滤除 _ 前缀的
-        static string GetDisplayStyle(string strStyles,
-            bool bRemove2,
-            bool bRemove1)
-        {
-            string[] parts = strStyles.Split(new char[] { ',' });
-            List<string> results = new List<string>();
-            foreach (string part in parts)
-            {
-                string strText = part.Trim();
-                if (String.IsNullOrEmpty(strText) == true)
-                    continue;
-
-                if (strText[0] == '_')
-                {
-                    if (bRemove1 == true)
-                    {
-                        if (strText.Length >= 2 && /*strText[0] == '_' &&*/ strText[1] != '_')
-                            continue;
-#if NO
-                        if (strText[0] == '_')
-                            continue;
-#endif
-                        if (strText.Length == 1)
-                            continue;
-                    }
-
-                    if (bRemove2 == true && strText.Length >= 2)
-                    {
-                        if (/*strText[0] == '_' && */ strText[1] == '_')
-                            continue;
-                    }
-                }
-
-
-                results.Add(strText);
-            }
-
-            return StringUtil.MakePathList(results, ",");
-        }
 
         // 
         /// <summary>
@@ -9400,12 +9302,18 @@ out strError);
         // 从 MARC 文件导入
         private void MenuItem_importFromMarc_Click(object sender, EventArgs e)
         {
-            OpenWindow<ImportMarcForm>();
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+                OpenWindow<ImportMarcForm>();
+            else
+                MessageBox.Show(this, "本功能只能和 dp2library 3.6 及以上版本配套使用");
         }
 
         private void MenuItem_openAuthoritySearchForm_Click(object sender, EventArgs e)
         {
-            OpenWindow<AuthoritySearchForm>();
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+                OpenWindow<AuthoritySearchForm>();
+            else
+                MessageBox.Show(this, "本功能只能和 dp2library 3.6 及以上版本配套使用");
         }
     }
 

@@ -4,49 +4,39 @@
         <item prefix="marc" url="http://www.loc.gov/MARC21/slim" />
     </nstable>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='020']/marc:subfield[@code='a']</xpath>
-        <from>ISBN</from>
-        <table ref="ISBN" />
-    </key>
-    <table name="ISBN" id="1" type="isbn">
-        <convert>
-            <string style="#convertISBN,stopword" stopwordTable="title" />
-        </convert>
-        <convertquery>
-            <string style="#convertISBN,stopword" stopwordTable="title" />
-        </convertquery>
-        <caption lang="zh-CN">ISBN</caption>
-        <caption lang="en">ISBN</caption>
-    </table>
-    <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='245']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='100']/marc:subfield[@code='a']</xpath>
+        <from>personalname</from>
+        <table ref="personalname" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='240']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='400']/marc:subfield[@code='a']</xpath>
+        <from>personalname</from>
+        <table ref="personalname" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='246']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='500']/marc:subfield[@code='a']</xpath>
+        <from>personalname</from>
+        <table ref="personalname" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='130']/marc:subfield[@code='a']</xpath>
-        <from>title</from>
-        <table ref="title" />
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='663']/marc:subfield[@code='b']</xpath>
+        <from>personalname</from>
+        <table ref="personalname" />
     </key>
-    <table name="title" id="2" type="title">
+    <key>
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='664']/marc:subfield[@code='b']</xpath>
+        <from>personalname</from>
+        <table ref="personalname" />
+    </key>
+    <table name="personalname" id="29" type="personalname">
         <convert>
             <string style="upper,stopword,simplify" stopwordTable="title" />
         </convert>
         <convertquery>
             <string style="upper,stopword,simplify" stopwordTable="title" />
         </convertquery>
-        <caption lang="zh-CN">题名</caption>
-        <caption lang="en">Title</caption>
+        <caption lang="zh-CN">个人名称</caption>
+        <caption lang="en">Personal Names</caption>
     </table>
     <key>
         <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='600']/marc:subfield[@code='a']</xpath>
@@ -159,17 +149,17 @@
         <table ref="contributor" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='700']/marc:subfield[@code='a']</xpath>
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='400']/marc:subfield[@code='a']</xpath>
         <from>contributor</from>
         <table ref="contributor" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='710']/marc:subfield[@code='a']</xpath>
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='410']/marc:subfield[@code='a']</xpath>
         <from>contributor</from>
         <table ref="contributor" />
     </key>
     <key>
-        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='711']/marc:subfield[@code='a']</xpath>
+        <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='411']/marc:subfield[@code='a']</xpath>
         <from>contributor</from>
         <table ref="contributor" />
     </key>

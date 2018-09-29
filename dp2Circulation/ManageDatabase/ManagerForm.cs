@@ -909,6 +909,12 @@ out strError);
         // 创建规范库
         private void ToolStripMenuItem_createAuthorityDatabase_Click(object sender, EventArgs e)
         {
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") < 0)
+            {
+                MessageBox.Show(this, "本功能只能和 dp2library 3.6 及以上版本配套使用");
+                return;
+            }
+
             BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.DbType = "authority";
@@ -1675,6 +1681,12 @@ out strError);
             }
             else if (strType == "authority")
             {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") < 0)
+                {
+                    strError = "本功能只能和 dp2library 3.6 及以上版本配套使用";
+                    goto ERROR1;
+                }
+
                 BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -1899,9 +1911,12 @@ out strError);
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createReaderDatabase_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("创建规范库(&A)");
-            menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createAuthorityDatabase_Click);
-            contextMenu.MenuItems.Add(menuItem);
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+            {
+                menuItem = new MenuItem("创建规范库(&A)");
+                menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createAuthorityDatabase_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             menuItem = new MenuItem("创建违约金库(&A)");
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createAmerceDatabase_Click);

@@ -1107,7 +1107,7 @@
             // 
             this.MenuItem_importExport.Name = "MenuItem_importExport";
             this.MenuItem_importExport.Size = new System.Drawing.Size(333, 30);
-            this.MenuItem_importExport.Text = "从书目转储文件导入(&I)";
+            this.MenuItem_importExport.Text = "从书目转储(.bdf)文件导入(&I)";
             this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
             // 
             // MenuItem_importFromOrderDistributeExcelFile

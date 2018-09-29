@@ -334,7 +334,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.IsBiblioDbName(strDbName) == true)
                         nBiblio++;
-                    if (this.IsAuthorityDbName(strDbName) == true)
+                    else if (this.IsAuthorityDbName(strDbName) == true)
                         nAuthority++;
                     else
                     {
