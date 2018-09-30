@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.IO;
 using System.Xml;
 
 using DigitalPlatform.IO;
-using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -176,7 +169,7 @@ namespace dp2Circulation
 
             this.labelDefControl1.Changed = false;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

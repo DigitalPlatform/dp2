@@ -247,9 +247,8 @@ FormWindowState.Normal);
             // cfgcache
             _versionManager.Load(Path.Combine(this.UserDir, "file_version.xml"));
 
-            //Delegate_Initialize d = new Delegate_Initialize(Initialize);
-            //this.BeginInvoke(d);
-            this.BeginInvoke(new Action(Initialize));
+            // this.BeginInvoke(new Action(Initialize));
+            Task task = Initialize();
 
             AutoStartDp2circulation = AutoStartDp2circulation;
         }
@@ -257,8 +256,9 @@ FormWindowState.Normal);
         // delegate void Delegate_Initialize();
 
         // 启动后要执行的初始化操作
-        void Initialize()
+        async Task Initialize()
         {
+            NormalResult result = null;
             string strError = "";
             int nRet = 0;
 
@@ -283,6 +283,7 @@ FormWindowState.Normal);
 
             try
             {
+                // this.AppendString("CopyUserBinDirectory\r\n");
 
                 nRet = CopyUserBinDirectory(out strError);
                 if (nRet == -1)
@@ -292,26 +293,24 @@ FormWindowState.Normal);
 
                 // 首次运行自动安装数据目录
                 {
-                    nRet = SetupKernelDataDir(
-                        true,
-                        out strError);
-                    if (nRet == -1)
+                    result = await SetupKernelDataDir(
+                        true);
+                    if (result.Value == -1)
                     {
-                        WriteKernelEventLog("dp2Library XE 自动初始化数据目录出错: " + strError, EventLogEntryType.Error);
-                        MessageBox.Show(this, strError);
+                        WriteKernelEventLog("dp2Library XE 自动初始化数据目录出错: " + result.ErrorInfo, EventLogEntryType.Error);
+                        MessageBox.Show(this, result.ErrorInfo);
                     }
                     else
                     {
                         WriteKernelEventLog("dp2Library XE 自动初始化数据目录成功", EventLogEntryType.Information);
                     }
 
-                    nRet = SetupLibraryDataDir(
-                        true,
-                        out strError);
-                    if (nRet == -1)
+                    result = await SetupLibraryDataDir(
+                        true);
+                    if (result.Value == -1)
                     {
-                        WriteLibraryEventLog("dp2Library XE 自动初始化数据目录出错: " + strError, EventLogEntryType.Error);
-                        MessageBox.Show(this, strError);
+                        WriteLibraryEventLog("dp2Library XE 自动初始化数据目录出错: " + result.ErrorInfo, EventLogEntryType.Error);
+                        MessageBox.Show(this, result.ErrorInfo);
                     }
                     else
                     {
@@ -320,19 +319,24 @@ FormWindowState.Normal);
                 }
 
                 // 更新数据目录
+                this.AppendString("update cfgs...\r\n");
+
                 UpdateCfgs();
 
                 // 启动两个后台服务
-                nRet = dp2Kernel_start(true,
-                    out strError);
-                if (nRet == -1)
+                //this.AppendString("start dp2kernel...\r\n");
+
+                result = await dp2Kernel_start(true);
+                if (result.Value == -1)
                 {
                     WriteKernelEventLog("dp2Library XE 启动 dp2Kernel 时出错: " + strError, EventLogEntryType.Error);
                     MessageBox.Show(this, strError);
                 }
-                nRet = dp2Library_start(true,
-                    out strError);
-                if (nRet == -1)
+
+                //this.AppendString("start dp2library...\r\n");
+
+                result = await dp2Library_start(true);
+                if (result.Value == -1)
                 {
                     WriteLibraryEventLog("dp2Library XE 启动 dp2Library 时出错: " + strError, EventLogEntryType.Error);
                     MessageBox.Show(this, strError);
@@ -341,6 +345,8 @@ FormWindowState.Normal);
                 bool bInstalled = this.AppInfo.GetBoolean("OPAC", "installed", false);
                 if (bInstalled == true)
                 {
+                    this.AppendString("update dp2opac...\r\n");
+
                     nRet = dp2OPAC_UpdateAppDir(false, out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, "自动升级 dp2OPAC 程序目录过程出错: " + strError);
@@ -348,6 +354,8 @@ FormWindowState.Normal);
                     // 2015/7/17
                     // 自动升级 dp2OPAC 的数据目录中的 style 子目录
                     // 使用 opac_style.zip 来更新
+
+                    this.AppendString("update opac style...\r\n");
 
                     // 更新 dp2OPAC 数据目录中的 style 子目录
                     // parameters:
@@ -357,12 +365,17 @@ FormWindowState.Normal);
                     if (nRet == -1)
                         MessageBox.Show(this, "自动升级 dp2OPAC 数据目录的 style 子目录过程出错: " + strError);
 
-                    // 检查当前超级用户帐户是否为空密码
-                    // return:
-                    //      -1  检查中出错
-                    //      0   空密码
-                    //      1   已经设置了密码
-                    nRet = CheckNullPassword(out strError);
+                    this.AppendString("check null password...\r\n");
+
+                    await Task.Run(() =>
+                    {
+                        // 检查当前超级用户帐户是否为空密码
+                        // return:
+                        //      -1  检查中出错
+                        //      0   空密码
+                        //      1   已经设置了密码
+                        nRet = CheckNullPassword(out strError);
+                    });
                     if (nRet == -1)
                         MessageBox.Show(this, "检查超级用户密码的过程出错: " + strError);
 
@@ -382,11 +395,16 @@ FormWindowState.Normal);
                     }
                     else
                     {
-                        // return:
-                        //      -1  出错
-                        //      0   程序文件不存在
-                        //      1   成功启动
-                        nRet = StartIIsExpress("dp2Site", true, out strError);
+                        this.AppendString("start iis express...\r\n");
+
+                        await Task.Run(() =>
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   程序文件不存在
+                            //      1   成功启动
+                            nRet = StartIIsExpress("dp2Site", true, out strError);
+                        });
                         if (nRet != 1)
                             MessageBox.Show(this, strError);
                     }
@@ -529,7 +547,7 @@ dp2Library XE V3
 dp2 图书馆集成系统 图书馆应用服务器 "
                 + (this.IsServer == false ? "单机" : "小型服务器")
                 + (this.TestMode == false ? " [专业版]" : " [社区版]")
-                + "\r\n版本: " + Program.ClientVersion
+                + "\r\ndp2libraryxe 框架版本: " + Program.ClientVersion
                 +
 @"
 ---
@@ -546,6 +564,10 @@ http://github.com/digitalplatform/dp2"
             + "\r\n\r\n";
 
             AppendString(strContent);
+
+            if (string.IsNullOrEmpty(this.Function) == false)
+                this.AppendString("---\r\n序列号中许可的功能: " + this.Function + "\r\n");
+
         }
 #if SN
         int _maxClients = 5;
@@ -645,7 +667,17 @@ http://github.com/digitalplatform/dp2"
         {
             string strLocalString = GetEnvironmentString(this.IsServer, "");
             Hashtable table = StringUtil.ParseParameters(strLocalString);
-            this.Function = (string)table["function"];
+            this.Function = CanonicalizeFunction((string)table["function"]);
+
+            SetTitle(); // function 变化可能导致标题和背景文字变化
+        }
+
+        // 将 function 参数值中的竖线替换为逗号
+        static string CanonicalizeFunction(string text)
+        {
+            if (text == null)
+                return "";
+            return text.Replace("|", ",");
         }
 
         // 获得 xxx|||xxxx 的左边部分
@@ -1092,33 +1124,31 @@ http://github.com/digitalplatform/dp2"
             }
         }
 
-        private void button_setupKernelDataDir_Click(object sender, EventArgs e)
+        private async void button_setupKernelDataDir_Click(object sender, EventArgs e)
         {
-            string strError = "";
             // 安装 dp2kernel 的数据目录
             // parameters:
             //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-            int nRet = SetupKernelDataDir(
-                false,
-                out strError);
-            if (nRet == -1 || nRet == 0)
+            NormalResult result = await SetupKernelDataDir(
+                false);
+            if (result.Value == -1 || result.Value == 0)
                 goto ERROR1;
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            // TODO: Invoke
+            MessageBox.Show(this, result.ErrorInfo);
         }
 
         #region dp2Kernel
 
         KernelHost kernel_host = null;
 
-        int dp2Kernel_start(
-            bool bAutoStart,
-            out string strError)
+        async Task<NormalResult> dp2Kernel_start(
+            bool bAutoStart)
         {
-            strError = "";
+            string strError = "";
 
             Debug.Assert(string.IsNullOrEmpty(this.KernelDataDir) == false, "");
 
@@ -1126,24 +1156,37 @@ http://github.com/digitalplatform/dp2"
             if (File.Exists(strFilename) == false)
             {
                 strError = "dp2Kernel XE 尚未初始化";
-                return 0;
+                return new NormalResult { ErrorInfo = strError };
             }
 
             if (bAutoStart == true && kernel_host != null)
             {
                 strError = "dp2Kernel 先前已经启动了";
-                return 0;
+                return new NormalResult { ErrorInfo = strError };
             }
 
             dp2Kernel_stop();
 
+            this.AppendString("正在启动 kernel service。版本号 " + DigitalPlatform.rms.KernelApplication.FullVersion + ", 监听 URL '" + KernelHost.ListenUrl + "'\r\n");
+
             kernel_host = new KernelHost();
             kernel_host.DataDir = this.KernelDataDir;
-            int nRet = kernel_host.Start(out strError);
+            int nRet = 0;
+            string strError1 = "";
+            await Task.Run(() =>
+            {
+                nRet = kernel_host.Start(out strError1);
+            });
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError1, Value = -1 };
 
-            return 1;
+            return new NormalResult { ErrorInfo = strError, Value = 1 };
+        }
+
+        class NormalResult
+        {
+            public int Value { get; set; }
+            public string ErrorInfo { get; set; }
         }
 
         void dp2Kernel_stop()
@@ -1213,11 +1256,10 @@ http://github.com/digitalplatform/dp2"
         // 安装 dp2kernel 的数据目录
         // parameters:
         //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-        int SetupKernelDataDir(
-            bool bAutoSetup,
-            out string strError)
+        async Task<NormalResult> SetupKernelDataDir(
+            bool bAutoSetup)
         {
-            strError = "";
+            string strError = "";
             int nRet = 0;
 
             string strFilename = Path.Combine(this.KernelDataDir, "databases.xml");
@@ -1226,7 +1268,7 @@ http://github.com/digitalplatform/dp2"
                 if (bAutoSetup == true)
                 {
                     strError = "dp2Kernel 数据目录先前已经安装过，本次没有重新安装";
-                    return 0;
+                    return new NormalResult { ErrorInfo = strError };
                 }
 
                 DialogResult result = MessageBox.Show(this,
@@ -1238,11 +1280,9 @@ http://github.com/digitalplatform/dp2"
                 if (result == System.Windows.Forms.DialogResult.No)
                 {
                     strError = "放弃重新安装 dp2Kernel 数据目录";
-                    return 0;
+                    return new NormalResult { ErrorInfo = strError };
                 }
-
             }
-
 
             SelectSqlServerDialog dlg = new SelectSqlServerDialog();
             MainForm.SetControlFont(dlg, this.Font);
@@ -1252,7 +1292,7 @@ http://github.com/digitalplatform/dp2"
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
             {
                 strError = "放弃重新安装 dp2Kernel 数据目录";
-                return 0;
+                return new NormalResult { ErrorInfo = strError };
             }
 
             dp2Kernel_stop();
@@ -1262,7 +1302,7 @@ http://github.com/digitalplatform/dp2"
                 Path.GetDirectoryName(strFilename),
                 out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
 #if NO
             if (_messageBar != null)
@@ -1273,7 +1313,7 @@ http://github.com/digitalplatform/dp2"
 
             nRet = dp2Kernel_CreateNewDataDir(out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
             // 创建/修改 databases.xml 文件
             // return:
@@ -1284,7 +1324,7 @@ http://github.com/digitalplatform/dp2"
                 this.KernelDataDir,
                 out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
             // 修改root用户记录文件
             // parameters:
@@ -1297,14 +1337,13 @@ http://github.com/digitalplatform/dp2"
                 null,
                 out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
-            nRet = dp2Kernel_start(true,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            NormalResult result1 = await dp2Kernel_start(true);
+            if (result1.Value == -1)
+                return result1;
 
-            return 1;
+            return new NormalResult { ErrorInfo = strError, Value = 1 };
         }
 
 
@@ -1636,11 +1675,10 @@ http://github.com/digitalplatform/dp2"
 
         // parameters:
         //      bAutoStart  是否自动启动。如果为 false，表示会重新启动，假如以前启动过的话
-        int dp2Library_start(
-            bool bAutoStart,
-            out string strError)
+        async Task<NormalResult> dp2Library_start(
+            bool bAutoStart)
         {
-            strError = "";
+            string strError = "";
 
             Debug.Assert(string.IsNullOrEmpty(this.LibraryDataDir) == false, "");
 
@@ -1648,13 +1686,13 @@ http://github.com/digitalplatform/dp2"
             if (File.Exists(strFilename) == false)
             {
                 strError = "dp2Library XE 尚未初始化";
-                return 0;
+                return new NormalResult { ErrorInfo = strError };
             }
 
             if (bAutoStart == true && library_host != null)
             {
                 strError = "dp2Library 先前已经启动了";
-                return 0;
+                return new NormalResult { ErrorInfo = strError };
             }
 
             dp2Library_stop();
@@ -1698,7 +1736,7 @@ http://github.com/digitalplatform/dp2"
                 if (string.IsNullOrEmpty(this.LibraryServerUrlList) == true)
                 {
                     strError = "尚未正确配置监听URL， dp2library server 无法启动";
-                    return -1;
+                    return new NormalResult { ErrorInfo = strError, Value = -1 };
                 }
 
                 // TODO: 必须是 http net.tcp 协议之一
@@ -1708,6 +1746,8 @@ http://github.com/digitalplatform/dp2"
                 // 强制设置为固定值
                 this.LibraryServerUrlList = LibraryHost.default_single_url; //  "net.pipe://localhost/dp2library/xe";
             }
+
+            this.AppendString("正在启动 library service。版本号 " + LibraryApplication.FullVersion + ", 监听 URL '" + LibraryServerUrlList + "'\r\n");
 
 #if NO
             if (this.IsServer == true)
@@ -1719,9 +1759,16 @@ http://github.com/digitalplatform/dp2"
             library_host = new LibraryHost();
             library_host.DataDir = this.LibraryDataDir;
             library_host.HostUrl = this.LibraryServerUrlList;
-            int nRet = library_host.Start(out strError);
+
+            int nRet = 0;
+            string strError1 = "";
+            await Task.Run(() =>
+            {
+                nRet = library_host.Start(out strError1);
+            });
+
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError1, Value = -1 };
 
             if (this.library_host != null)
             {
@@ -1734,7 +1781,7 @@ http://github.com/digitalplatform/dp2"
                 this.library_host.SetFunction(this.Function);
             }
 
-            return 1;
+            return new NormalResult { ErrorInfo = strError, Value = 1 };
         }
 
         void dp2Library_stop()
@@ -1749,11 +1796,10 @@ http://github.com/digitalplatform/dp2"
         // 安装 dp2Library 的数据目录
         // parameters:
         //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-        int SetupLibraryDataDir(
-            bool bAutoSetup,
-            out string strError)
+        async Task<NormalResult> SetupLibraryDataDir(
+            bool bAutoSetup)
         {
-            strError = "";
+            string strError = "";
             int nRet = 0;
 
             // TODO: 是否改为探测目录是否存在?
@@ -1764,7 +1810,7 @@ http://github.com/digitalplatform/dp2"
                 if (bAutoSetup == true)
                 {
                     strError = "dp2Library 数据目录先前已经安装过，本次没有重新安装";
-                    return 0;
+                    return new NormalResult { ErrorInfo = strError };
                 }
 
                 DialogResult result = MessageBox.Show(this,
@@ -1776,7 +1822,7 @@ http://github.com/digitalplatform/dp2"
                 if (result == System.Windows.Forms.DialogResult.No)
                 {
                     strError = "放弃重新安装 dp2Library 数据目录";
-                    return 0;
+                    return new NormalResult { ErrorInfo = strError };
                 }
             }
 
@@ -1790,7 +1836,7 @@ http://github.com/digitalplatform/dp2"
                 Path.GetDirectoryName(strFilename),
                 out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
             // 清空残留的前端密码，避免后面登录时候的困惑
             AppInfo.SetString(
@@ -1803,7 +1849,7 @@ http://github.com/digitalplatform/dp2"
 
             nRet = dp2Library_CreateNewDataDir(out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
             // 创建/修改 library.xml 文件
             // return:
@@ -1816,19 +1862,16 @@ http://github.com/digitalplatform/dp2"
                 "本地图书馆",
                 out strError);
             if (nRet == -1)
-                return -1;
+                return new NormalResult { ErrorInfo = strError, Value = -1 };
 
             // TODO: 每次升级安装后，需要覆盖 templates 目录和 cfgs 目录
 
-            nRet = dp2Kernel_start(true,
-                out strError);
-            if (nRet == -1)
-                return -1;
-            nRet = dp2Library_start(true,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
+            NormalResult result1 = await dp2Kernel_start(true);
+            if (result1.Value == -1)
+                return result1;
+            result1 = await dp2Library_start(true);
+            if (result1.Value == -1)
+                return result1;
 #if NO
             if (_messageBar != null)
                 _messageBar.MessageText = "正在创建基本数据库，可能需要几分钟时间 ...";
@@ -1840,9 +1883,8 @@ http://github.com/digitalplatform/dp2"
                 string strErrorText = "";
                 Task task = Task.Factory.StartNew(() =>
                 {
-                    string strError1 = "";
                     // 创建默认的几个数据库
-                    nRet = CreateDefaultDatabases(out strError1);
+                    nRet = CreateDefaultDatabases(out string strError1);
                     if (nRet == -1)
                     {
                         strErrorText = "创建数据库时出错: " + strError1;
@@ -1860,12 +1902,11 @@ TaskScheduler.Default);
                 if (nRet == -1)
                 {
                     strError = strErrorText;
-                    return -1;
+                    return new NormalResult { ErrorInfo = strError, Value = -1 };
                 }
             }
 
-
-            return 1;
+            return new NormalResult { ErrorInfo = strError, Value = 1 };
         }
 
         // 创建缺省的几个数据库
@@ -2744,22 +2785,21 @@ TaskScheduler.Default);
 
         #endregion
 
-        private void button_setupLibraryDataDir_Click(object sender, EventArgs e)
+        private async void button_setupLibraryDataDir_Click(object sender, EventArgs e)
         {
-            string strError = "";
             // 安装 dp2Library 的数据目录
             // parameters:
             //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-            int nRet = SetupLibraryDataDir(
-                false,
-                out strError);
-            if (nRet == -1 || nRet == 0)
+            NormalResult result = await SetupLibraryDataDir(
+                false);
+            if (result.Value == -1 || result.Value == 0)
                 goto ERROR1;
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            // TODO: Invoke
+            MessageBox.Show(this, result.ErrorInfo);
         }
 
         private void MenuItem_exit_Click(object sender, EventArgs e)
@@ -2767,40 +2807,38 @@ TaskScheduler.Default);
             this.Close();
         }
 
-        private void MenuItem_setupKernelDataDir_Click(object sender, EventArgs e)
+        private async void MenuItem_setupKernelDataDir_Click(object sender, EventArgs e)
         {
-            string strError = "";
             // 安装 dp2kernel 的数据目录
             // parameters:
             //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-            int nRet = SetupKernelDataDir(
-                false,
-                out strError);
-            if (nRet == -1 || nRet == 0)
+            NormalResult result = await SetupKernelDataDir(
+                false);
+            if (result.Value == -1 || result.Value == 0)
                 goto ERROR1;
 
             MessageBox.Show(this, "dp2Kernel 数据目录安装成功");
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            // TODO: Invoke
+            MessageBox.Show(this, result.ErrorInfo);
         }
 
-        private void MenuItem_setupLibraryDataDir_Click(object sender, EventArgs e)
+        private async void MenuItem_setupLibraryDataDir_Click(object sender, EventArgs e)
         {
-            string strError = "";
             // 安装 dp2Library 的数据目录
             // parameters:
             //      bAutoSetup  是否自动安装。自动安装时，如果已经存在数据文件，则不会再次安装。否则会强行重新安装，但安装前会出现对话框警告
-            int nRet = SetupLibraryDataDir(
-                false,
-                out strError);
-            if (nRet == -1 || nRet == 0)
+            NormalResult result = await SetupLibraryDataDir(
+                false);
+            if (result.Value == -1 || result.Value == 0)
                 goto ERROR1;
 
             MessageBox.Show(this, "dp2Library 数据目录安装成功");
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            // TODO: Invoke
+            MessageBox.Show(this, result.ErrorInfo);
         }
 
         private void MenuItem_openLibraryWsdl_Click(object sender, EventArgs e)
@@ -2952,7 +2990,7 @@ miniServer	-- enterprise mini
             return strNewMode;
         }
 
-        private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
+        private async void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
 #if SN
             string strError = "";
@@ -3095,11 +3133,12 @@ miniServer	-- enterprise mini
                 GetLicenseType();
                 GetFunction();
                 // 重新启动
-                RestartDp2libraryIfNeed();
+                await RestartDp2libraryIfNeed();
             }
 
             return;
             ERROR1:
+            // TODO: Invoke
             MessageBox.Show(this, strError);
 #endif
         }
@@ -3216,7 +3255,7 @@ miniServer	-- enterprise mini
                 + "http://github.com/digitalplatform/dp2\r\n");
         }
 
-        private void MenuItem_setListeningUrl_Click(object sender, EventArgs e)
+        private async void MenuItem_setListeningUrl_Click(object sender, EventArgs e)
         {
             if (this.IsServer == true)
             {
@@ -3240,50 +3279,45 @@ this.Font);
                 this.LibraryServerUrlList = strNewUrl;
 
                 // 重新启动
-                RestartDp2libraryIfNeed();
+                await RestartDp2libraryIfNeed();
             }
             else
             {
                 MessageBox.Show(this, "单机版监听 URL 为 " + this.LibraryServerUrlList + "， 不可修改");
             }
-
         }
 
         // 如果必要，重新启动 dp2library
-        void RestartDp2libraryIfNeed()
+        async Task RestartDp2libraryIfNeed()
         {
             dp2Library_stop();
 
             // 重新启动
             if (library_host == null)
             {
-                string strError = "";
-                int nRet = dp2Library_start(
-                    false,
-                    out strError);
-                if (nRet == -1)
+                NormalResult result = await dp2Library_start(
+                    false);
+                if (result.Value == -1)
                 {
-                    MessageBox.Show(this, "重新启动 dp2Library 时出错：" + strError);
+                    MessageBox.Show(this, "重新启动 dp2Library 时出错：" + result.ErrorInfo);
                     return;
                 }
             }
         }
 
         // 如果必要，重新启动 dp2kernel
-        void RestartDp2kernelIfNeed()
+        async Task RestartDp2kernelIfNeed()
         {
             dp2Kernel_stop();
 
             // 重新启动
             if (kernel_host == null)
             {
-                string strError = "";
-                int nRet = dp2Kernel_start(
-                    false,
-                    out strError);
-                if (nRet == -1)
+                NormalResult result = await dp2Kernel_start(
+                    false);
+                if (result.Value == -1)
                 {
-                    MessageBox.Show(this, "重新启动 dp2Kernel 时出错：" + strError);
+                    MessageBox.Show(this, "重新启动 dp2Kernel 时出错：" + result.ErrorInfo);
                     return;
                 }
             }
@@ -4794,14 +4828,14 @@ Stack:
                 ".txt");
         }
 
-        private void MenuItem_restartDp2library_Click(object sender, EventArgs e)
+        private async void MenuItem_restartDp2library_Click(object sender, EventArgs e)
         {
-            RestartDp2libraryIfNeed();
+            await RestartDp2libraryIfNeed();
         }
 
-        private void MenuItem_restartDp2Kernel_Click(object sender, EventArgs e)
+        private async void MenuItem_restartDp2Kernel_Click(object sender, EventArgs e)
         {
-            RestartDp2kernelIfNeed();
+            await RestartDp2kernelIfNeed();
         }
 
         private void MenuItem_enableWindowsMsmq_Click(object sender, EventArgs e)

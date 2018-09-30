@@ -205,6 +205,21 @@ namespace DigitalPlatform.rms.Client
             if (lRet == -1)
             {
                 strError = "初始化数据库 " + strDatabaseName + " 时发生错误: " + strError;
+                // TODO: 初始化数据库失败，但数据库创建是成功的。需要在退出前尝试删除这个数据库
+                {
+                    // 如果发现同名数据库已经存在，先删除
+                    lRet = channel.DoDeleteDB(strDatabaseName, out string strError1);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode != ChannelErrorCode.NotFound)
+                        {
+                            strError += "\r\n尝试删除刚创建的此数据库时又遇到出错: " + strError1;
+                            return -1;
+                        }
+                    }
+                    else
+                        strError += "\r\n已经删除此数据库";
+                }
                 return -1;
             }
 

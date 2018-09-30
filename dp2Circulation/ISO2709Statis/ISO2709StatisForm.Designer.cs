@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class Iso2709StatisForm
     {
@@ -51,24 +51,22 @@ namespace dp2Circulation
             // button_projectManage
             // 
             this.button_projectManage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_projectManage.Location = new System.Drawing.Point(0, 230);
-            this.button_projectManage.Margin = new System.Windows.Forms.Padding(2);
+            this.button_projectManage.Location = new System.Drawing.Point(0, 345);
             this.button_projectManage.Name = "button_projectManage";
-            this.button_projectManage.Size = new System.Drawing.Size(94, 22);
+            this.button_projectManage.Size = new System.Drawing.Size(193, 33);
             this.button_projectManage.TabIndex = 8;
-            this.button_projectManage.Text = "∑Ω∞∏π‹¿Ì(&M)...";
+            this.button_projectManage.Text = "ÊñπÊ°àÁÆ°ÁêÜ(&M)...";
             this.button_projectManage.UseVisualStyleBackColor = true;
             this.button_projectManage.Click += new System.EventHandler(this.button_projectManage_Click);
             // 
             // button_next
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_next.Location = new System.Drawing.Point(290, 230);
-            this.button_next.Margin = new System.Windows.Forms.Padding(2);
+            this.button_next.Location = new System.Drawing.Point(435, 345);
             this.button_next.Name = "button_next";
-            this.button_next.Size = new System.Drawing.Size(76, 22);
+            this.button_next.Size = new System.Drawing.Size(114, 33);
             this.button_next.TabIndex = 7;
-            this.button_next.Text = "œ¬“ª≤Ω(&N)";
+            this.button_next.Text = "‰∏ã‰∏ÄÊ≠•(&N)";
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
@@ -81,22 +79,20 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_selectProject);
             this.tabControl_main.Controls.Add(this.tabPage_runStatis);
             this.tabControl_main.Controls.Add(this.tabPage_print);
-            this.tabControl_main.Location = new System.Drawing.Point(0, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 15);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(366, 215);
+            this.tabControl_main.Size = new System.Drawing.Size(549, 322);
             this.tabControl_main.TabIndex = 6;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
             // tabPage_source
             // 
-            this.tabPage_source.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_source.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_source.Location = new System.Drawing.Point(4, 28);
             this.tabPage_source.Name = "tabPage_source";
-            this.tabPage_source.Size = new System.Drawing.Size(358, 189);
+            this.tabPage_source.Size = new System.Drawing.Size(541, 290);
             this.tabPage_source.TabIndex = 4;
-            this.tabPage_source.Text = " ˝æ›¿¥‘¥";
+            this.tabPage_source.Text = "Êï∞ÊçÆÊù•Ê∫ê";
             this.tabPage_source.UseVisualStyleBackColor = true;
             // 
             // tabPage_selectProject
@@ -104,22 +100,20 @@ namespace dp2Circulation
             this.tabPage_selectProject.Controls.Add(this.button_getProjectName);
             this.tabPage_selectProject.Controls.Add(this.textBox_projectName);
             this.tabPage_selectProject.Controls.Add(this.label3);
-            this.tabPage_selectProject.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_selectProject.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_selectProject.Location = new System.Drawing.Point(4, 28);
             this.tabPage_selectProject.Name = "tabPage_selectProject";
-            this.tabPage_selectProject.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_selectProject.Size = new System.Drawing.Size(358, 189);
+            this.tabPage_selectProject.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_selectProject.Size = new System.Drawing.Size(541, 290);
             this.tabPage_selectProject.TabIndex = 1;
-            this.tabPage_selectProject.Text = " —°∂®∑Ω∞∏ ";
+            this.tabPage_selectProject.Text = " ÈÄâÂÆöÊñπÊ°à ";
             this.tabPage_selectProject.UseVisualStyleBackColor = true;
             // 
             // button_getProjectName
             // 
             this.button_getProjectName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getProjectName.Location = new System.Drawing.Point(322, 9);
-            this.button_getProjectName.Margin = new System.Windows.Forms.Padding(2);
+            this.button_getProjectName.Location = new System.Drawing.Point(483, 14);
             this.button_getProjectName.Name = "button_getProjectName";
-            this.button_getProjectName.Size = new System.Drawing.Size(32, 22);
+            this.button_getProjectName.Size = new System.Drawing.Size(48, 33);
             this.button_getProjectName.TabIndex = 2;
             this.button_getProjectName.Text = "...";
             this.button_getProjectName.UseVisualStyleBackColor = true;
@@ -129,42 +123,38 @@ namespace dp2Circulation
             // 
             this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_projectName.Location = new System.Drawing.Point(81, 9);
-            this.textBox_projectName.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_projectName.Location = new System.Drawing.Point(122, 14);
             this.textBox_projectName.Name = "textBox_projectName";
-            this.textBox_projectName.Size = new System.Drawing.Size(238, 21);
+            this.textBox_projectName.Size = new System.Drawing.Size(355, 28);
             this.textBox_projectName.TabIndex = 1;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 11);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(6, 16);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 12);
+            this.label3.Size = new System.Drawing.Size(98, 18);
             this.label3.TabIndex = 0;
-            this.label3.Text = "∑Ω∞∏√˚(&P):";
+            this.label3.Text = "ÊñπÊ°àÂêç(&P):";
             // 
             // tabPage_runStatis
             // 
             this.tabPage_runStatis.Controls.Add(this.progressBar_records);
             this.tabPage_runStatis.Controls.Add(this.webBrowser1_running);
-            this.tabPage_runStatis.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_runStatis.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_runStatis.Location = new System.Drawing.Point(4, 28);
             this.tabPage_runStatis.Name = "tabPage_runStatis";
-            this.tabPage_runStatis.Size = new System.Drawing.Size(358, 189);
+            this.tabPage_runStatis.Size = new System.Drawing.Size(541, 290);
             this.tabPage_runStatis.TabIndex = 3;
-            this.tabPage_runStatis.Text = " ÷¥––Õ≥º∆ ";
+            this.tabPage_runStatis.Text = " ÊâßË°åÁªüËÆ° ";
             this.tabPage_runStatis.UseVisualStyleBackColor = true;
             // 
             // progressBar_records
             // 
             this.progressBar_records.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar_records.Location = new System.Drawing.Point(0, 169);
-            this.progressBar_records.Margin = new System.Windows.Forms.Padding(2);
+            this.progressBar_records.Location = new System.Drawing.Point(0, 254);
             this.progressBar_records.Name = "progressBar_records";
-            this.progressBar_records.Size = new System.Drawing.Size(356, 11);
+            this.progressBar_records.Size = new System.Drawing.Size(534, 16);
             this.progressBar_records.TabIndex = 1;
             // 
             // webBrowser1_running
@@ -172,48 +162,44 @@ namespace dp2Circulation
             this.webBrowser1_running.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1_running.Location = new System.Drawing.Point(2, 13);
-            this.webBrowser1_running.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowser1_running.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowser1_running.Location = new System.Drawing.Point(3, 20);
+            this.webBrowser1_running.MinimumSize = new System.Drawing.Size(22, 24);
             this.webBrowser1_running.Name = "webBrowser1_running";
-            this.webBrowser1_running.Size = new System.Drawing.Size(356, 151);
+            this.webBrowser1_running.Size = new System.Drawing.Size(534, 226);
             this.webBrowser1_running.TabIndex = 0;
             // 
             // tabPage_print
             // 
             this.tabPage_print.Controls.Add(this.button_print);
-            this.tabPage_print.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_print.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_print.Location = new System.Drawing.Point(4, 28);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(358, 189);
+            this.tabPage_print.Size = new System.Drawing.Size(541, 290);
             this.tabPage_print.TabIndex = 2;
-            this.tabPage_print.Text = " ¥Ú”°Ω·π˚ ";
+            this.tabPage_print.Text = " ÊâìÂç∞ÁªìÊûú ";
             this.tabPage_print.UseVisualStyleBackColor = true;
             // 
             // button_print
             // 
-            this.button_print.Location = new System.Drawing.Point(3, 14);
-            this.button_print.Margin = new System.Windows.Forms.Padding(2);
+            this.button_print.Location = new System.Drawing.Point(4, 21);
             this.button_print.Name = "button_print";
-            this.button_print.Size = new System.Drawing.Size(160, 22);
+            this.button_print.Size = new System.Drawing.Size(240, 33);
             this.button_print.TabIndex = 0;
-            this.button_print.Text = "¥Ú”°Õ≥º∆Ω·π˚(&P)";
+            this.button_print.Text = "ÊâìÂç∞ÁªüËÆ°ÁªìÊûú(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             this.button_print.Click += new System.EventHandler(this.button_print_Click);
             // 
             // Iso2709StatisForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(366, 262);
+            this.ClientSize = new System.Drawing.Size(549, 393);
             this.Controls.Add(this.button_projectManage);
             this.Controls.Add(this.button_next);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Iso2709StatisForm";
             this.ShowInTaskbar = false;
-            this.Text = "ISO2709Õ≥º∆¥∞";
+            this.Text = "ISO2709ÁªüËÆ°Á™ó";
             this.Activated += new System.EventHandler(this.Iso2709StatisForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Iso2709StatisForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Iso2709StatisForm_FormClosed);

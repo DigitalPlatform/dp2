@@ -69,6 +69,7 @@ namespace DigitalPlatform.LibraryServer
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
             bool bControlled = true;
+            string strControlWarning = ""; // 不完全管辖的详情
             if (sessioninfo.GlobalUser == false)
             {
                 string strDistribute = DomUtil.GetElementText(domExist.DocumentElement, "distribute");
@@ -83,7 +84,10 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
                 if (nRet == 0)
+                {
                     bControlled = false;
+                    strControlWarning = strError;
+                }
 
                 if (bControlled == true)
                 {
@@ -100,7 +104,10 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
+                    {
                         bControlled = false;
+                        strControlWarning = strError;
+                    }
                 }
             }
 
@@ -126,7 +133,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
 
-                string strTempMergedXml = "";
                 // 将两个订购XML片断合并
                 // parameters:
                 //      strLibraryCodeList  当前用户管辖的分馆代码列表
@@ -138,7 +144,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = MergeOrderNode(domExist.DocumentElement,
         domNew.DocumentElement,
         sessioninfo.LibraryCodeList,
-        out strTempMergedXml,
+        out string strTempMergedXml,
         out strError);
                 if (nRet == -1)
                 {
@@ -147,7 +153,8 @@ namespace DigitalPlatform.LibraryServer
                 }
                 if (nRet == 1)
                 {
-                    strError = "当前用户对不完全管辖的订购数据修改超过权限范围: " + strError;
+                    // 2018/8/30 也报出不完全管辖的理由
+                    strError = "当前用户对不完全管辖(" + strControlWarning + ")的订购数据修改超过权限范围: " + strError;
                     return -1;
                 }
                 if (nRet == 2)
@@ -298,7 +305,8 @@ namespace DigitalPlatform.LibraryServer
                 }
                 if (strExistNewValue != strChangedNewValue)
                 {
-                    strError = "验收价(方括中的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
+                    //
+                    strError = "验收价(方括号中的部分)不允许修改。(原来='" + strExistPrice + "',新的='" + strChangedPrice + "')";
                     return 1;
                 }
             }
@@ -321,7 +329,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 if (strExistNewValue != strChangedNewValue)
                 {
-                    strError = "验收码洋(方括中的部分)不允许修改。(原来='" + strExistPrice + "', 新的='" + strChangedPrice + "')";
+                    strError = "验收码洋(方括号中的部分)不允许修改。(原来='" + strExistPrice + "', 新的='" + strChangedPrice + "')";
                     return 1;
                 }
             }

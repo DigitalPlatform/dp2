@@ -19,6 +19,11 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class OrderDesignControl : UserControl
     {
+        // 是否处在初始化过程中。如果是，则 item 不响应 textchanged 事件。避免引起连锁更新其他文字栏
+        public bool InInitial { get; set; }
+
+        public ToolTip ToolTip { get; set; }
+
         public bool CheckDupItem = true;    // 是否在结束的时候检查三元组、四元组
 
         internal bool m_bFocused = false;
@@ -30,6 +35,20 @@ namespace DigitalPlatform.CommonControl
         internal int DisableNewlyArriveTextChanged = 0;
 
         public Item LastClickItem = null;   // 最近一次click选择过的Item对象
+
+        string _sellerFilter = "";
+        // 书商名称过滤。"<不过滤>"或者空，表示不过滤
+        public string SellerFilter
+        {
+            get
+            {
+                return _sellerFilter;
+            }
+            set
+            {
+                _sellerFilter = value;
+            }
+        }
 
         // 获取值列表时作为线索的数据库名
         string m_strBiblioDbName = "";
@@ -326,8 +345,12 @@ namespace DigitalPlatform.CommonControl
                 {
                     this.m_bChanged = value;
 
+                    bool bOldChanged = this.m_bChanged;
                     if (value == false)
                         ResetLineState();
+                    // 因为 ResetLineState 过程会导致 Changed 被修改为 true
+                    this.m_bChanged = bOldChanged;
+                    Debug.Assert(bOldChanged == this.m_bChanged, "");
                 }
             }
         }
@@ -382,6 +405,16 @@ namespace DigitalPlatform.CommonControl
             }
 
             return 0;
+        }
+
+        // 是否为虚拟价格。就是说有 {} 包围的价格
+        public static bool IsVirtual(string strPrice)
+        {
+            if (string.IsNullOrEmpty(strPrice))
+                return false;
+            if (strPrice.StartsWith("{"))
+                return true;
+            return false;
         }
 
         // 进行检查
@@ -464,6 +497,7 @@ namespace DigitalPlatform.CommonControl
 
                     // 自动计算出订购价
                     if (string.IsNullOrEmpty(item.OldFixedPrice) == false
+                        && IsVirtual(item.OldFixedPrice) == false
                         && string.IsNullOrEmpty(item.OldPrice) == true
                         && string.IsNullOrEmpty(item.TotalPrice) == true)
                     {
@@ -487,6 +521,36 @@ namespace DigitalPlatform.CommonControl
                         }
                     }
 
+#if NO
+                    // 自动计算出码洋
+                    if (string.IsNullOrEmpty(item.OldFixedPrice) == true
+                        && string.IsNullOrEmpty(item.OldDiscount) == false
+                        && string.IsNullOrEmpty(item.OldPrice) == false)
+                    {
+                        // TODO: 注意订购价可能为 "CNY100/3" 形态
+                        // return:
+                        //      -1  计算过程出现错误
+                        //      0   strPrice 为空，无法计算
+                        //      1   计算成功
+                        nRet = ComputeFixedPriceByOrderPrice(item.OldPrice,
+                    item.OldDiscount,
+                    out string strResultPrice,
+                    out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "第 " + (i + 1).ToString() + " 行: 根据订购价 '" + item.OldPrice + "' 和订购折扣 '" + item.OldDiscount + "' 自动计算订码洋时出错: " + strError;
+                            return -1;
+                        }
+                        if (nRet == 1)
+                        {
+                            if (string.IsNullOrEmpty(strResultPrice) == false)
+                                strResultPrice = "{" + strResultPrice + "}";    // {} 表示这是计算出来的，不是原始值
+                            item.OldDiscount = strResultPrice;
+                            item.Discount = strResultPrice;
+                        }
+                    }
+#endif
+
                     if (string.IsNullOrEmpty(item.OldPrice) == false)
                     {
                         // 2018/8/1
@@ -496,7 +560,7 @@ namespace DigitalPlatform.CommonControl
                         //      -1  校验过程出错
                         //      0   校验发现三者关系不正确
                         //      1   校验三者关系正确
-                        nRet = VerifyOrderPriceByFixedPrice(item.OldFixedPrice,
+                        nRet = VerifyOrderPriceByFixedPrice(StringUtil.Unquote(item.OldFixedPrice, "{}"),
                             item.OldDiscount,
                             item.OldPrice,
                             out string strWishOldPrice,
@@ -523,6 +587,7 @@ namespace DigitalPlatform.CommonControl
 
                     // 自动计算出验收价
                     if (string.IsNullOrEmpty(item.FixedPrice) == false
+                        && IsVirtual(item.FixedPrice) == false
                         && string.IsNullOrEmpty(item.Price) == true)
                     {
                         // return:
@@ -551,7 +616,7 @@ namespace DigitalPlatform.CommonControl
                         //      -1  校验过程出错
                         //      0   校验发现三者关系不正确
                         //      1   校验三者关系正确
-                        nRet = VerifyOrderPriceByFixedPrice(item.FixedPrice,
+                        nRet = VerifyOrderPriceByFixedPrice(StringUtil.Unquote(item.FixedPrice, "{}"),
                             item.Discount,
                             item.Price,
                             out string strWishPrice,
@@ -1362,8 +1427,11 @@ namespace DigitalPlatform.CommonControl
             return item;
         }
 
-
-
+        // 匹配书商名称
+        static bool MatchSeller(string seller, string seller_filter)
+        {
+            return (StringUtil.IsInList(seller, seller_filter));
+        }
 
         // 根据缺省XML订购记录填充必要的字段
         int SetDefaultRecord(Item item,
@@ -1572,9 +1640,11 @@ namespace DigitalPlatform.CommonControl
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
 
+            item.StateComment = "";
+
             if (this.ArriveMode == false)
             {
-                // 订购态
+                // *** 订购态
 
                 // 注：只有未订购的、草稿状态的事项才允许修改订购
                 // 已订购(必然是全部发出，不可能局部发出)，或者已验收(有可能是局部验收，或者(虽然已验收完但是)潜在可以追加)，这样的事项都不能再进行任何订购操作，所以为readonly
@@ -1584,25 +1654,55 @@ namespace DigitalPlatform.CommonControl
             }
             else
             {
-                // 验收态
-                if (strState == "已订购" || strState == "已验收")
+                // *** 验收态
+
+                List<string> comments = new List<string>();
+
+                string strControlled = IsDistributeControlled(item.Distribute);
+                if (string.IsNullOrEmpty(strControlled) == false)
                 {
-                    // 注：状态为“已验收”时，不一定全部复本都已验收，所以这时应当允许再次验收。
-                    // 即便所有复本都已验收，还可以追加、多验收复本，所以这样的事项不能readonly
+                    item.State |= ItemState.ReadOnly;
+                    comments.Add(strControlled);
+                }
 
-                    // item.State -= ItemState.ReadOnly;
+                // 检查书商
+                bool seller_matched = true;
+                if (string.IsNullOrEmpty(this._sellerFilter) == false && this._sellerFilter != "<不过滤>")
+                {
+                    if (MatchSeller(item.Seller, this._sellerFilter) == false)
+                        seller_matched = false;
+                }
 
-                    // 将location item中已经勾选的事项设置为readonly态，表示是已经验收的(馆藏地点、册)事项
-                    item.location.SetAlreadyCheckedToReadOnly(false);
-
+                if (seller_matched == false)
+                {
+                    item.State |= ItemState.ReadOnly;
+                    // TODO: tips 提示只读状态的原因
+                    comments.Add("渠道 '" + item.Seller + "' 不符合渠道过滤器 '" + this._sellerFilter + "'");
                 }
                 else
                 {
-                    // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
+                    // 验收态
+                    if (strState == "已订购" || strState == "已验收")
+                    {
+                        // 注：状态为“已验收”时，不一定全部复本都已验收，所以这时应当允许再次验收。
+                        // 即便所有复本都已验收，还可以追加、多验收复本，所以这样的事项不能readonly
 
-                    item.State |= ItemState.ReadOnly;
+                        // item.State -= ItemState.ReadOnly;
+
+                        // 将location item中已经勾选的事项设置为readonly态，表示是已经验收的(馆藏地点、册)事项
+                        item.location.SetAlreadyCheckedToReadOnly(false);
+                    }
+                    else
+                    {
+                        // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
+
+                        item.State |= ItemState.ReadOnly;
+                        comments.Add( "状态 '" + strState + "' 不允许进行验收操作");
+                    }
                 }
 
+                if (comments.Count > 0)
+                    item.StateComment = StringUtil.MakePathList(comments, "; ");
             }
 
             // 2009/2/13
@@ -1633,6 +1733,50 @@ namespace DigitalPlatform.CommonControl
             }
 
             return 0;
+        }
+
+        // 检查馆代码是否在管辖范围内
+        string IsDistributeControlled(string strDistribute)
+        {
+            LocationCollection locations = new LocationCollection();
+            int nRet = locations.Build(strDistribute, out string strError);
+            if (nRet == -1)
+            {
+                return "馆藏分配字符串 '" + strDistribute + "' 格式不正确: " + strError;
+            }
+
+            List<string> codes = new List<string>();
+            foreach (Location location in locations)
+            {
+                // 空的馆藏地点被视为不在分馆用户管辖范围内
+                if (string.IsNullOrEmpty(location.Name) == true)
+                {
+                    codes.Add("");
+                    continue;
+                }
+
+
+                // 解析
+                dp2StringUtil.ParseCalendarName(location.Name,
+            out string strLibraryCode,
+            out string strPureName);
+
+                codes.Add(strLibraryCode);
+            }
+
+            StringUtil.RemoveDup(ref codes);
+
+            // 检查馆代码是否在管辖范围内
+            if (this.VerifyLibraryCode != null)
+            {
+                VerifyLibraryCodeEventArgs e = new VerifyLibraryCodeEventArgs();
+                e.LibraryCode = StringUtil.MakePathList(codes);
+                this.VerifyLibraryCode(this, e);
+                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                    return "馆藏分配去向不在当前用户完全管辖范围内: " + e.ErrorInfo;
+            }
+
+            return null;
         }
 
         // 整理一下，在已经有0份以外事项的前提下，清除多余的份数为0的事项
@@ -2424,8 +2568,84 @@ namespace DigitalPlatform.CommonControl
         //      strVerifyStyle 比较风格。old/new/both 只比较旧/只比较新/新旧都比较
         // return:
         //      -2  码洋和订购价货币单位不同，无法进行校验。
+        //      -1  校验过程出错
         //      0   校验发现三者关系不正确
         //      1   校验三者关系正确
+        public static int VerifyOrderPriceByFixedPricePair(
+            string strFixedPrice,
+    string strDiscount,
+    string strOrderPrice,
+    string strVerifyStyle,
+    out string strError)
+        {
+            strError = "";
+
+            OldNewValue fixedPrice = OldNewValue.Parse(strFixedPrice);
+            OldNewValue orderPrice = OldNewValue.Parse(strOrderPrice);
+
+            if (orderPrice.IsVirtual)
+            {
+                strError = "单价字符串 '" + strOrderPrice + "' 中不应该包含花括号";
+                return -1;
+            }
+
+            OldNewValue discount = OldNewValue.Parse(strDiscount);
+
+            if (discount.IsVirtual)
+            {
+                strError = "折扣字符串 '" + strDiscount + "' 中不应该包含花括号";
+                return -1;
+            }
+#if NO
+            dp2StringUtil.ParseOldNewValue(strFixedPrice,
+    out string strOldFixedPrice,
+    out string strNewFixedPrice);
+
+            dp2StringUtil.ParseOldNewValue(strDiscount,
+out string strOldDiscount,
+out string strNewDiscount);
+
+            dp2StringUtil.ParseOldNewValue(strOrderPrice,
+out string strOldOrderPrice,
+out string strNewOrderPrice);
+#endif
+
+            if (string.IsNullOrEmpty(fixedPrice.OldValue) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(fixedPrice.OldValue,
+        discount.OldValue,
+        orderPrice.OldValue,
+        out string strWishOldFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            if (string.IsNullOrEmpty(fixedPrice.NewValue) == false)
+            {
+                // return:
+                //      -2  码洋和订购价货币单位不同，无法进行校验。TODO: 今后可增加汇率表，让这种情况变得可以校验
+                //      -1  校验过程出错
+                //      0   校验发现三者关系不正确
+                //      1   校验三者关系正确
+                int nRet = VerifyOrderPriceByFixedPrice(fixedPrice.NewValue,
+        discount.NewValue,
+        orderPrice.NewValue,
+        out string strWishNewFixedPrice,
+        out strError);
+                if (nRet != 1)
+                    return nRet;
+            }
+
+            return 1;
+        }
+
+#if NO
         public static int VerifyOrderPriceByFixedPricePair(
             string strFixedPrice,
     string strDiscount,
@@ -2481,6 +2701,8 @@ out string strNewOrderPrice);
 
             return 1;
         }
+#endif
+
 
         // 根据码洋和折扣值校验订购价的正确性
         // 注意码洋、折扣、订购价字符串里面都必须是单个金额字符串，不支持带有方括号的(新旧)复合形式
@@ -2543,6 +2765,64 @@ out string strNewOrderPrice);
             }
         }
 
+        // 根据订购价和折扣倒着计算出码洋
+        // 注意最后 strFixedOrderPrice 中返回的金额字符串，和 strPrice 的货币类型一样。有可能缺省货币类型。
+        // (缺乏货币类型的金额字符串在互相比较的时候需要添加上默认货币类型以后再比较)
+        // return:
+        //      -1  计算过程出现错误
+        //      0   strPrice 为空，无法计算
+        //      1   计算成功
+        public static int ComputeFixedPriceByOrderPrice(string strPrice,
+    string strDiscount,
+    out string strFixedOrderPrice,
+    out string strError)
+        {
+            strError = "";
+            strFixedOrderPrice = "";
+
+            if (string.IsNullOrEmpty(strPrice))
+            {
+                strError = "单价为空，无法计算码洋";
+                return 0;
+            }
+
+            if (string.IsNullOrEmpty(strPrice) == false
+    && strPrice.StartsWith("{"))
+            {
+                strError = "ComputeFixedPriceByOrderPrice() 不应用于虚拟字符串";
+                return -1;
+            }
+
+            // 折扣为空，默认 '1.0'
+            if (string.IsNullOrEmpty(strDiscount))
+                strDiscount = "1.0";
+
+            if (decimal.TryParse(strDiscount, out decimal discount) == false)
+            {
+                strError = "折扣值 '" + strDiscount + "' 格式错误。应为 '1.0' '0.90' 这样的形态";
+                return -1;
+            }
+
+            if (discount == 0)
+            {
+                strError = "折扣值不应为 0";
+                return -1;
+            }
+
+            try
+            {
+                CurrencyItem item = CurrencyItem.Parse(strPrice);
+                item.Value = item.Value / discount;
+                strFixedOrderPrice = item.ToString();    // 注意，变换为字符串时候，decimal 值没有做四舍五入
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
         // 根据码洋和折扣计算订购价
         // 注意最后 strOrderPrice 中返回的金额字符串，和 strFixedPrice 的货币类型一样。有可能缺省货币类型。
         // (缺乏货币类型的金额字符串在互相比较的时候需要添加上默认货币类型以后再比较)
@@ -2562,6 +2842,13 @@ out string strNewOrderPrice);
             {
                 strError = "码洋为空，无法计算订购价";
                 return 0;
+            }
+
+            if (string.IsNullOrEmpty(strFixedPrice) == false
+    && strFixedPrice.StartsWith("{"))
+            {
+                strError = "ComputeOrderPriceByFixedPrice() 不应用于虚拟字符串";
+                return -1;
             }
 
             // 折扣为空，默认 '1.0'
@@ -2709,6 +2996,8 @@ out string strNewOrderPrice);
             label_other.Dispose();
             Container = null;
         }
+
+        string _stateComment = "";
 
         ItemState m_state = ItemState.Normal;
 
@@ -3066,6 +3355,20 @@ out string strNewOrderPrice);
                     // 其他
                     // this.label_other
                 }
+            }
+        }
+
+        // 状态注释，用于 tips 显示
+        public string StateComment
+        {
+            get
+            {
+                return this._stateComment;
+            }
+            set
+            {
+                this._stateComment = value;
+                this.Container?.ToolTip?.SetToolTip(this.label_color, value);
             }
         }
 
@@ -3487,6 +3790,7 @@ out string strNewOrderPrice);
                 // fixedPrice
                 this.textBox_fixedPrice.TextBox.TextChanged += new EventHandler(FixedPrice_TextChanged);
                 this.textBox_fixedPrice.TextBox.Enter += new EventHandler(control_Enter);
+                this.textBox_fixedPrice.TextBox.KeyDown += TextBox_fixedPrice_KeyDown;
 
                 // discount
                 this.comboBox_discount.ComboBox.DropDown += new EventHandler(comboBox_discount_DropDown);
@@ -3575,6 +3879,47 @@ out string strNewOrderPrice);
             }
         }
 
+        private void TextBox_fixedPrice_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                // 自动计算出码洋
+                // 注： 如果 FixedPrice 里面已经是实在价格，那么就不执行这个 Ctrl+A
+                if (string.IsNullOrEmpty(this.Price) == false
+                    && (OrderDesignControl.IsVirtual(this.FixedPrice) || string.IsNullOrEmpty(this.FixedPrice)))
+                {
+                    Debug.Assert(this.Price.StartsWith("{") == false, "");
+                    // return:
+                    //      -1  计算过程出现错误
+                    //      0   strPrice 为空，无法计算
+                    //      1   计算成功
+                    int nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(this.Price,
+                this.Discount,
+                out string strResultPrice,
+                out string strError);
+                    if (nRet == -1)
+                    {
+                        strError = "根据订购价 '" + this.Price + "' 和折扣 '" + this.Discount + "' 自动计算码洋时出错: " + strError;
+                        MessageBox.Show(this.Container, strError);
+                        goto END;
+                    }
+                    if (nRet == 1)
+                    {
+                        if (string.IsNullOrEmpty(strResultPrice) == false)
+                            strResultPrice = "{" + strResultPrice + "}";    // {} 表示这是计算出来的，不是原始值
+
+                        if (this.FixedPrice != strResultPrice)
+                            this.FixedPrice = strResultPrice;
+                    }
+                }
+                else
+                    Console.Beep();
+
+                END:
+                e.Handled = true;
+            }
+        }
+
         private void TextBox_price_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.A)
@@ -3582,7 +3927,8 @@ out string strNewOrderPrice);
                 // MessageBox.Show(this.Container, "Ctrl+A");
 
                 // 自动计算出验收价
-                if (string.IsNullOrEmpty(this.FixedPrice) == false)
+                if (string.IsNullOrEmpty(this.FixedPrice) == false
+                    && OrderDesignControl.IsVirtual(this.FixedPrice) == false)
                 {
                     // return:
                     //      -1  计算过程出现错误
@@ -3594,13 +3940,18 @@ out string strNewOrderPrice);
                 out string strError);
                     if (nRet == -1)
                     {
-                        strError = "根据码洋 '" + this.FixedPrice + "' 和折扣 '" + this.Discount + "' 自动计算单机时出错: " + strError;
+                        strError = "根据码洋 '" + this.FixedPrice + "' 和折扣 '" + this.Discount + "' 自动计算单价时出错: " + strError;
                         MessageBox.Show(this.Container, strError);
                         goto END;
                     }
                     if (nRet == 1)
-                        this.Price = strWishOrderPrice;
+                    {
+                        if (this.Price != strWishOrderPrice)
+                            this.Price = strWishOrderPrice;
+                    }
                 }
+                else
+                    Console.Beep();
 
                 END:
                 e.Handled = true;
@@ -3797,6 +4148,9 @@ out string strNewOrderPrice);
         // price
         void Price_TextChanged(object sender, EventArgs e)
         {
+            if (this.Container.InInitial == true)
+                return;
+
             if (this.Container.ArriveMode == false)
             {
                 // 在订购状态下，新旧值保持统一，以便显示单行
@@ -3809,8 +4163,10 @@ out string strNewOrderPrice);
 #endif
             }
 
-            // TODO: 重新计算出实洋
-
+            // 重新计算出码洋
+            // 注：码洋输入域为空的时候，不会自动计算。用户要先在里面 Ctrl+A，创建好一个值，从此以后，每当单价变化的时候才会自动计算码洋
+            if (string.IsNullOrEmpty(this.textBox_fixedPrice.Text) == false)
+                RecomputFixedPrice();
 
             if ((this.State & ItemState.New) == 0)
                 this.State |= ItemState.Changed;
@@ -3821,6 +4177,9 @@ out string strNewOrderPrice);
         // fixePrice
         void FixedPrice_TextChanged(object sender, EventArgs e)
         {
+            if (this.Container.InInitial == true)
+                return;
+
             if (this.Container.ArriveMode == false)
             {
                 // 在订购状态下，新旧值保持统一，以便显示单行
@@ -4098,42 +4457,50 @@ out string strNewOrderPrice);
             }
         }
 
+        // 正向计算
         void RecomputPrice()
         {
-            if (string.IsNullOrEmpty(this.textBox_fixedPrice.OldText) == false)
+            // 正向计算：码洋 --> 单价
+            if (string.IsNullOrEmpty(this.textBox_fixedPrice.Text) == false
+                && string.IsNullOrEmpty(this.textBox_fixedPrice.Text) == false
+                && OrderDesignControl.IsVirtual(this.textBox_fixedPrice.Text) == false)
             {
-#if NO
-                if (this.Container.ArriveMode == false)
-                {
-                    // 重新计算出实洋
-                    // return:
-                    //      -1  计算过程出现错误
-                    //      0   strFixedPrice 为空，无法计算
-                    //      1   计算成功
-                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.OldText,
-            this.comboBox_discount.OldText,
-            out string strWishOrderPrice,
-            out string strError);
-                    if (nRet == 1)
-                        this.textBox_price.OldText = strWishOrderPrice;
-                }
-                else
-                {
-                    int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.Text,
-    this.comboBox_discount.Text,
-    out string strWishOrderPrice,
-    out string strError);
-                    if (nRet == 1)
-                        this.textBox_price.Text = strWishOrderPrice;
-                }
-#endif
                 // 注意，无论是在订购模式还是在验收模式，实际上都是修改的 textbox.Text 而不是 OldText
                 int nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(this.textBox_fixedPrice.Text,
 this.comboBox_discount.Text,
 out string strWishOrderPrice,
 out string strError);
                 if (nRet == 1)
-                    this.textBox_price.Text = strWishOrderPrice;
+                {
+                    if (this.textBox_price.Text != strWishOrderPrice)
+                        this.textBox_price.Text = strWishOrderPrice;
+                }
+                else
+                    Console.Beep();
+            }
+        }
+
+
+        // 反向计算：单价 --> 码洋
+        void RecomputFixedPrice()
+        {
+            if (string.IsNullOrEmpty(this.textBox_price.Text) == false && OrderDesignControl.IsVirtual(this.textBox_price.Text) == false
+                && string.IsNullOrEmpty(this.comboBox_discount.Text) == false // 折扣不为空才计算
+                && (OrderDesignControl.IsVirtual(this.textBox_fixedPrice.Text) == true || string.IsNullOrEmpty(this.textBox_fixedPrice.Text))
+                )
+            {
+                // 注意，无论是在订购模式还是在验收模式，实际上都是修改的 textbox.Text 而不是 OldText
+                int nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(this.textBox_price.Text,
+this.comboBox_discount.Text,
+out string strResultPrice,
+out string strError);
+                if (nRet == 1)
+                {
+                    if (string.IsNullOrEmpty(strResultPrice) == false)
+                        strResultPrice = "{" + strResultPrice + "}";
+                    if (this.textBox_fixedPrice.Text != strResultPrice)
+                        this.textBox_fixedPrice.Text = strResultPrice;
+                }
                 else
                     Console.Beep();
             }
@@ -4142,14 +4509,18 @@ out string strError);
         // 折扣 文字改变
         void comboBox_discount_TextChanged(object sender, EventArgs e)
         {
+            if (this.Container.InInitial == true)
+                return;
             if (this.Container.ArriveMode == false)
             {
                 // 在订购状态下，新旧值保持统一，以便显示单行
                 this.comboBox_discount.OldText = this.comboBox_discount.Text;
             }
 
-            // 重新计算出实洋
-            RecomputPrice();
+            if (OrderDesignControl.IsVirtual(this.textBox_fixedPrice.Text) && string.IsNullOrEmpty(this.textBox_fixedPrice.Text) == false)
+                RecomputFixedPrice();
+            else
+                RecomputPrice();
 
             if ((this.State & ItemState.New) == 0)
                 this.State |= ItemState.Changed;

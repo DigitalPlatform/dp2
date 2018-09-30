@@ -291,7 +291,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(11);
+            channel.Timeout = TimeSpan.FromMinutes(12); // 考虑到 MySQL 创建数据库速度较慢，假设给创建一个数据库预留 3 分钟，那么四个数据库共需要 12 分钟
             try
             {
                 long lRet = channel.ManageDatabase(

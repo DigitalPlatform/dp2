@@ -14,10 +14,10 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Circulation
 {
@@ -205,11 +205,12 @@ namespace dp2Circulation
         #endregion
 
 
-
+#if OLD_CODE
         /// <summary>
         /// GCAT 通讯通道
         /// </summary>
         DigitalPlatform.GcatClient.Channel GcatChannel = null;
+#endif
 
         /// <summary>
         /// 构造函数
@@ -221,8 +222,10 @@ namespace dp2Circulation
 
         public void Dispose()
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+#endif
         }
 
         /// <summary>
@@ -298,7 +301,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
             return;
-        ERROR1:
+            ERROR1:
             e.ErrorInfo = strError;
             if (e.ShowErrorBox == true)
                 MessageBox.Show(this.Form, strError);
@@ -493,7 +496,7 @@ namespace dp2Circulation
                 (string.IsNullOrEmpty(strQufenhao) == false ?
                 "/" + strQufenhao : "");
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -910,7 +913,7 @@ namespace dp2Circulation
                 string type = one.Type;
                 string strAuthor = one.Author;
                 Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
-            REDO:
+                REDO:
 
                 if (type == "GCAT")
                 {
@@ -1043,8 +1046,8 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
             }
-        //return 0;
-        ERROR1:
+            //return 0;
+            ERROR1:
             return -1;
         }
 
@@ -1131,7 +1134,7 @@ namespace dp2Circulation
 
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1229,7 +1232,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     fLevel = 0;
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1324,7 +1327,7 @@ namespace dp2Circulation
                     strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
                     fLevel = 0;
                     return 0;
-                FOUND:
+                    FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
                 }
@@ -1829,8 +1832,10 @@ namespace dp2Circulation
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Abort();
+#endif
         }
 
         /// <summary>
@@ -1887,6 +1892,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
                 strGcatWebServiceUrl = "http://dp2003.com/gcatserver/";  //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
+#if OLD_CODE
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
                 if (this.GcatChannel == null)
@@ -2005,7 +2011,9 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
-            else // dp2library 服务器
+            else 
+#endif
+            // dp2library 服务器
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -2142,6 +2150,7 @@ namespace dp2Circulation
             return 1;
         }
 
+#if OLD_CODE
         internal void gcat_channel_BeforeLogin(object sender,
     DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
         {
@@ -2194,6 +2203,7 @@ namespace dp2Circulation
             Program.MainForm.ParamTable["author_number_account_username"] = strUserName;
             Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
         #endregion
 

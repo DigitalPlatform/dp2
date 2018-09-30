@@ -2,21 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
+using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Drawing.Drawing2D;
-using System.Text.RegularExpressions;
 using DigitalPlatform.GUI;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.EasyMarc
 {
@@ -2667,6 +2663,13 @@ namespace DigitalPlatform.EasyMarc
 
             this.textBox_content.KeyDown -= new KeyEventHandler(textBox_content_KeyDown);
             this.textBox_content.KeyDown += new KeyEventHandler(textBox_content_KeyDown);
+
+            this.textBox_content.MouseDown -= TextBox_content_MouseUp;
+            this.textBox_content.MouseDown += TextBox_content_MouseUp;
+        }
+
+        private void TextBox_content_MouseUp(object sender, MouseEventArgs e)
+        {
         }
 
         public override void SetLineColor(bool bSetAll = false)
@@ -2929,7 +2932,7 @@ namespace DigitalPlatform.EasyMarc
             return controls;
         }
 
-        #region 释放资源
+#region 释放资源
 
 #if NO
         // TODO: 容易造成 mem leak。建议用 Dispose() 改写
@@ -2972,7 +2975,7 @@ namespace DigitalPlatform.EasyMarc
             disposed = true;
         }
 
-        #endregion
+#endregion
 
         // 字段名或者子字段名
         string _name = "";
@@ -3254,6 +3257,7 @@ namespace DigitalPlatform.EasyMarc
                 this.textBox_content.KeyDown += textBox_content_KeyDown;
                 this.textBox_content.KeyPress += textBox_content_KeyPress;
                 this.textBox_content.MouseWheel += textBox_content_MouseWheel;
+                // this.textBox_content.MouseDown += TextBox_content_MouseDown;
 
                 // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
@@ -3279,10 +3283,135 @@ namespace DigitalPlatform.EasyMarc
                 this.textBox_content.KeyDown -= textBox_content_KeyDown;
                 this.textBox_content.KeyPress -= textBox_content_KeyPress;
                 this.textBox_content.MouseWheel -= textBox_content_MouseWheel;
+                // this.textBox_content.MouseDown -= TextBox_content_MouseDown;
+
                 this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
                 this.splitter.MouseUp -= new MouseEventHandler(splitter_MouseUp);
             }
         }
+
+#if NO
+        private void TextBox_content_MouseDown(object sender, MouseEventArgs e)
+        {
+            TextBox control = sender as TextBox;
+
+            if (e.Button == MouseButtons.Right)
+            {
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem menuItem;
+
+
+                // 剪切
+                menuItem = new MenuItem("剪切(&I)");
+                menuItem.Click += new System.EventHandler(this.Menu_Cut);
+                contextMenu.MenuItems.Add(menuItem);
+                if (control.SelectionLength > 0)
+                    menuItem.Enabled = true;
+                else
+                    menuItem.Enabled = false;
+
+                // 复制
+                menuItem = new MenuItem("复制(&C)");
+                menuItem.Click += new System.EventHandler(this.Menu_Copy);
+                contextMenu.MenuItems.Add(menuItem);
+                if (control.SelectionLength > 0)
+                    menuItem.Enabled = true;
+                else
+                    menuItem.Enabled = false;
+
+
+                // 粘贴
+                menuItem = new MenuItem("粘贴(&P)");
+                menuItem.Click += new System.EventHandler(this.Menu_Paste);
+                contextMenu.MenuItems.Add(menuItem);
+                if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
+                    menuItem.Enabled = true;
+                else
+                    menuItem.Enabled = false;
+
+                contextMenu.Show(control, new Point(e.X, e.Y));
+                return;
+            }
+        }
+
+#region textbox_content 菜单命令
+
+        private void Menu_Copy(System.Object sender, System.EventArgs e)
+        {
+            TextBox control = this.textBox_content;
+                control.Copy();
+        }
+
+        private void Menu_Cut(System.Object sender, System.EventArgs e)
+        {
+            TextBox control = this.textBox_content;
+                control.Cut();
+        }
+
+        internal static void TextToClipboard(string strText)
+        {
+#if BIDI_SUPPORT
+            strText = strText.Replace("\x200e", "");
+#endif
+            Clipboard.SetDataObject(strText);
+        }
+
+        internal static string ClipboardToText()
+        {
+            IDataObject ido = Clipboard.GetDataObject();
+            if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
+                return "";
+
+            return (string)ido.GetData(DataFormats.UnicodeText);
+        }
+
+
+        private void Menu_Paste(System.Object sender, System.EventArgs e)
+        {
+            TextBox control = this.textBox_content;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            // Determine if there is any text in the Clipboard to paste into the text box.
+            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
+            {
+                // 把子字段符号换一下
+                string strText = ClipboardToText();
+                if (strText == null)
+                    strText = "";
+
+                // 去掉回车换行符号
+                strText = strText.Replace("\r\n", "\r");
+                strText = strText.Replace("\r", "*");
+                strText = strText.Replace("\n", "*");
+                strText = strText.Replace("\t", "*");
+
+
+                // 粘贴内容
+                {
+                    string strThisText = strText;
+                    int nOldSelectionStart = control.SelectionStart;
+                    if (control.SelectedText == "")
+                    {
+                        control.Text = control.Text.Insert(control.SelectionStart, strThisText);
+                    }
+                    else
+                    {
+                        string strTempText = control.Text;
+                        strTempText = strTempText.Remove(nOldSelectionStart, control.SelectedText.Length);
+                        strTempText = strTempText.Insert(nOldSelectionStart, strThisText);
+
+                        control.Text = strTempText;
+                    }
+
+                    control.SelectionStart = nOldSelectionStart + strThisText.Length;
+                }
+            }
+        }
+
+#endregion
+
+#endif
 
         void textBox_content_MouseWheel(object sender, MouseEventArgs e)
         {
@@ -3395,6 +3524,13 @@ namespace DigitalPlatform.EasyMarc
         {
             if ((this.State & ItemState.New) == 0)
                 this.State |= ItemState.Changed;
+
+            // 防止回车换行直接进入 textbox
+            string strText = this.textBox_content.Text;
+            if (strText.IndexOfAny(new char[] { '\r','\n'}) != -1)
+            {
+                this.textBox_content.Text = strText.Replace("\r", "*").Replace("\n", "*");
+            }
 
             // this.Container.Changed = true;
             this.Container.FireTextChanged();

@@ -170,7 +170,16 @@
     <Compile Include="CreateCoverImageDialog.Designer.cs">
       <DependentUpon>CreateCoverImageDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="InputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InputDialog.Designer.cs">
+      <DependentUpon>InputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="PropertyDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuestionDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <EmbeddedResource Include="CalendarControl.resx">
@@ -187,6 +196,9 @@
     <EmbeddedResource Include="PropertyDlg.resx">
       <DependentUpon>PropertyDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuestionDlg.resx">
+      <DependentUpon>QuestionDlg.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

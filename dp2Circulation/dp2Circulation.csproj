@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>28</ApplicationRevision>
+    <ApplicationRevision>60</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -123,8 +123,7 @@
       <HintPath>..\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Jurassic, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Jurassic.dll</HintPath>
+      <HintPath>..\packages\Jurassic.2.2.2\lib\net35\Jurassic.dll</HintPath>
     </Reference>
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
@@ -249,6 +248,9 @@
     </Compile>
     <Compile Include="Dictionary\SelectDictionaryItemDialog.Designer.cs">
       <DependentUpon>SelectDictionaryItemDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\AuthorityForm.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="EntityForm\GetMergeStyleDialog.cs">
       <SubType>Form</SubType>
@@ -392,6 +394,12 @@
     </Compile>
     <Compile Include="IO\TwoStringDialog.Designer.cs">
       <DependentUpon>TwoStringDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISO2709Statis\ImportMarcForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ISO2709Statis\ImportMarcForm.Designer.cs">
+      <DependentUpon>ImportMarcForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
@@ -699,6 +707,9 @@
     <Compile Include="Script\StatisHostBase.cs" />
     <Compile Include="Script\StatisHostBase0.cs" />
     <Compile Include="SearchForms\ArriveSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\AuthoritySearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SearchForms\BiblioLoader.cs" />
@@ -1648,6 +1659,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="IO\TwoStringDialog.resx">
       <DependentUpon>TwoStringDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ISO2709Statis\ImportMarcForm.resx">
+      <DependentUpon>ImportMarcForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>
@@ -2939,10 +2953,6 @@
     <ProjectReference Include="..\DigitalPlatform.EasyMarc\DigitalPlatform.EasyMarc.csproj">
       <Project>{0413F979-C770-4AB0-886E-4B2BE2FB4F8C}</Project>
       <Name>DigitalPlatform.EasyMarc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
-      <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
-      <Name>DigitalPlatform.GcatClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
       <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>

@@ -1,5 +1,5 @@
-// dp2catalog USMARC Î÷ÎÄÍ¼Êé ±àÄ¿×Ô¶¯´´½¨Êı¾İC#½Å±¾³ÌĞò
-// ×îºóĞŞ¸ÄÊ±¼ä 2011/8/21
+ï»¿// dp2catalog USMARC è¥¿æ–‡å›¾ä¹¦ ç¼–ç›®è‡ªåŠ¨åˆ›å»ºæ•°æ®C#è„šæœ¬ç¨‹åº
+// æœ€åä¿®æ”¹æ—¶é—´ 2011/8/21
 
 using System;
 using System.Windows.Forms;
@@ -10,7 +10,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 
@@ -26,28 +25,28 @@ public class MyHost : MarcDetailHost
         this.ScriptActions = actions;
     }
 
-    // »ñµÃÄ£°å¶¨Òå
+    // è·å¾—æ¨¡æ¿å®šä¹‰
     void GetTemplateDef(object sender, GetTemplateDefEventArgs e)
     {
         if (e.FieldName == "008")
         {
             if (this.DetailForm.MarcEditor.MarcDefDom == null)
             {
-                e.ErrorInfo = "MarcEditorÖĞµÄMarcDefDomÉĞÎ´×¼±¸ºÃ...";
+                e.ErrorInfo = "MarcEditorä¸­çš„MarcDefDomå°šæœªå‡†å¤‡å¥½...";
                 return;
             }
 
             if (this.DetailForm.MarcEditor.Record.Fields.Count == 0)
             {
-                e.ErrorInfo = "MarcEditorÖĞÃ»ÓĞÍ·±êÇø";
+                e.ErrorInfo = "MarcEditorä¸­æ²¡æœ‰å¤´æ ‡åŒº";
                 return;
             }
 
-            // ¹Û²ìÍ·±êÇø
+            // è§‚å¯Ÿå¤´æ ‡åŒº
             Field header = this.DetailForm.MarcEditor.Record.Fields[0];
             if (header.Value.Length < 24)
             {
-                e.ErrorInfo = "MarcEditorÖĞÍ·±êÇø²»ÊÇ24×Ö·û";
+                e.ErrorInfo = "MarcEditorä¸­å¤´æ ‡åŒºä¸æ˜¯24å­—ç¬¦";
                 return;
             }
 
@@ -84,7 +83,7 @@ public class MyHost : MarcDetailHost
                 strType = "mixed_materials";
             else
             {
-                e.ErrorInfo = "ÎŞ·¨¸ù¾İµ±Ç°Í·±êÇø '" + header.Value.Replace(" ", "_") + "' ÄÚÈİ±æ±ğÎÄÏ×ÀàĞÍ£¬ËùÒÔÎŞ·¨»ñµÃÄ£°å¶¨Òå";
+                e.ErrorInfo = "æ— æ³•æ ¹æ®å½“å‰å¤´æ ‡åŒº '" + header.Value.Replace(" ", "_") + "' å†…å®¹è¾¨åˆ«æ–‡çŒ®ç±»å‹ï¼Œæ‰€ä»¥æ— æ³•è·å¾—æ¨¡æ¿å®šä¹‰";
                 return;
             }
 
@@ -92,7 +91,7 @@ public class MyHost : MarcDetailHost
             e.DefNode = this.DetailForm.MarcEditor.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + e.FieldName + "' and @type='" + strType + "']");
             if (e.DefNode == null)
             {
-                e.ErrorInfo = "×Ö¶ÎÃûÎª '" + e.FieldName + "' ÀàĞÍÎª='" + strType + "' µÄÄ£°å¶¨ÒåÎŞ·¨ÔÚMARC¶¨ÒåÎÄ¼şÖĞÕÒµ½";
+                e.ErrorInfo = "å­—æ®µåä¸º '" + e.FieldName + "' ç±»å‹ä¸º='" + strType + "' çš„æ¨¡æ¿å®šä¹‰æ— æ³•åœ¨MARCå®šä¹‰æ–‡ä»¶ä¸­æ‰¾åˆ°";
                 return;
             }
 
@@ -103,7 +102,7 @@ public class MyHost : MarcDetailHost
         {
             if (this.DetailForm.MarcEditor.MarcDefDom == null)
             {
-                e.ErrorInfo = "MarcEditorÖĞµÄMarcDefDomÉĞÎ´×¼±¸ºÃ...";
+                e.ErrorInfo = "MarcEditorä¸­çš„MarcDefDomå°šæœªå‡†å¤‡å¥½...";
                 return;
             }
 
@@ -111,7 +110,7 @@ public class MyHost : MarcDetailHost
 
             if (e.Value.Length < 1)
             {
-                // È¨ÇÒµ±×÷ 'a' ´¦Àí
+                // æƒä¸”å½“ä½œ 'a' å¤„ç†
                 strType = "map";
             }
             else
@@ -164,7 +163,7 @@ public class MyHost : MarcDetailHost
                     strType = "unspecified";
                 else
                 {
-                    e.ErrorInfo = "ÎŞ·¨¸ù¾İµ±Ç°007×Ö¶ÎµÚÒ»×Ö·ûÄÚÈİ '" + e.Value[0].ToString() + "' ´ÓMARC¶¨ÒåÎÄ¼şÖĞ»ñµÃÄ£°å¶¨Òå";
+                    e.ErrorInfo = "æ— æ³•æ ¹æ®å½“å‰007å­—æ®µç¬¬ä¸€å­—ç¬¦å†…å®¹ '" + e.Value[0].ToString() + "' ä»MARCå®šä¹‰æ–‡ä»¶ä¸­è·å¾—æ¨¡æ¿å®šä¹‰";
                     return;
                 }
             }
@@ -172,7 +171,7 @@ public class MyHost : MarcDetailHost
             e.DefNode = this.DetailForm.MarcEditor.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + e.FieldName + "' and @type='" + strType + "']");
             if (e.DefNode == null)
             {
-                e.ErrorInfo = "×Ö¶ÎÃûÎª '" + e.FieldName + "' ÀàĞÍÎª='" + strType + "' µÄÄ£°å¶¨ÒåÎŞ·¨ÔÚMARC¶¨ÒåÎÄ¼şÖĞÕÒµ½";
+                e.ErrorInfo = "å­—æ®µåä¸º '" + e.FieldName + "' ç±»å‹ä¸º='" + strType + "' çš„æ¨¡æ¿å®šä¹‰æ— æ³•åœ¨MARCå®šä¹‰æ–‡ä»¶ä¸­æ‰¾åˆ°";
                 return;
             }
 

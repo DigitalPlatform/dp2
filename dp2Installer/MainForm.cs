@@ -5570,6 +5570,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
+
         #region Service Control 功能
 
 #if NO
@@ -5617,5 +5618,10 @@ MessageBoxDefaultButton.Button2);
 #endif
 
         #endregion
+
+        private void ToolStripMenuItem_uninstallDp2zserver_Click(object sender, EventArgs e)
+        {
+            MenuItem_dp2ZServer_uninstall_Click(sender, e);
+        }
     }
 }

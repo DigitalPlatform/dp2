@@ -2019,6 +2019,8 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
+            DateTime start = DateTime.Now;
+
             this.Commit();
 
             //对库集合加读锁*********************************
@@ -2071,8 +2073,17 @@ namespace DigitalPlatform.rms
                 if (resultSet != null)
                     resultSet.m_strQuery = strQuery;
 
+                // testing
+                // Thread.Sleep(6000);
+
+                // 记载慢速的检索
+                TimeSpan length = DateTime.Now - start;
+                if (length >= slow_length)
+                    KernelApplication.WriteErrorLog("检索式 '" + strQuery + "' 耗时 " + length.ToString() + " (命中条数 " + nRet + ")，超过慢速阈值 " + slow_length.ToString());
+
                 if (nRet <= -1)
                     return nRet;
+                return 0;
             }
             finally
             {
@@ -2082,8 +2093,10 @@ namespace DigitalPlatform.rms
 				this.WriteDebugInfo("Search()，对库集合解读锁。");
 #endif
             }
-            return 0;
         }
+
+        // 慢速检索阈值
+        static TimeSpan slow_length = TimeSpan.FromSeconds(5);
 
         #region CopyRecord() 下级函数
 

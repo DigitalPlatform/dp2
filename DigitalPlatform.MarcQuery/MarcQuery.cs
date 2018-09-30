@@ -1241,6 +1241,46 @@ namespace DigitalPlatform.Marc
             return strValue;
         }
 
+        //
+        // 摘要:
+        //     从当前 System.String 对象移除数组中指定的一组字符的所有尾部匹配项。
+        //
+        // 参数:
+        //   trimChars:
+        //     要删除的 Unicode 字符的数组，或 null。
+        //
+        // 返回结果:
+        //     从当前字符串的开头移除所出现的所有 trimChars 参数中的字符后剩余的字符串。 如果 trimChars 为 null 或空数组，则改为删除 Unicode
+        //     空白字符。 如果从当前实例无法删除字符，此方法返回未更改的当前实例。
+        /// <summary>
+        /// 从 System.String 对象移除数组中指定的一组字符的所有尾部匹配项。
+        /// </summary>
+        /// <param name="text">要处理的字符串</param>
+        /// <param name="trimChars">要删除的 Unicode 字符的数组，或 null。</param>
+        /// <returns>返回结果:
+        /// 从当前字符串的尾部移除所出现的所有 trimChars 参数中的字符后剩余的字符串。
+        /// 如果 trimChars 为 null 或空数组，则改为删除 Unicode 空白字符。
+        /// 如果从当前实例无法删除字符，此方法返回未更改的当前实例。
+        /// </returns>
+        public static string TrimEnd(string text, string trimChars)
+        {
+            List<char> chars = new List<char>(trimChars); 
+            return text.TrimEnd(chars.ToArray());
+        }
+
+        /// <summary>
+        /// 从 System.String 对象移除数组中指定的一组字符的所有尾部匹配项。
+        /// </summary>
+        /// <param name="text">要处理的字符串</param>
+        /// <returns>返回结果:
+        /// 从当前字符串的尾部移除所出现的所有 Unicode 空白字符。
+        /// 如果从当前实例无法删除字符，此方法返回未更改的当前实例。
+        /// </returns>
+        public static string TrimEnd(string text)
+        {
+            return TrimEnd(text, "");
+        }
+
         // 子字段信息
         // 注：标点符号都是西文一个字符。每个标点符号使用时候前面需要加的空格，另行用规则解决，不包含在这里
         class SubfieldInfo

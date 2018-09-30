@@ -1104,7 +1104,7 @@ MessageBoxDefaultButton.Button1);
             {
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(strFrom);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(strFrom);
                 }
                 catch (Exception ex)
                 {
@@ -1450,7 +1450,7 @@ false);
             {
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(strFrom);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(strFrom);
                 }
                 catch (Exception ex)
                 {

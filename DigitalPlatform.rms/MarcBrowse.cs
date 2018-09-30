@@ -82,7 +82,6 @@ namespace DigitalPlatform.rms
             return results;
         }
 
-
         public static Dictionary<string, MarcColumn> BuildUnimarc(string strMarc,
             List<string> column_list_param = null)
         {

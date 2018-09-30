@@ -2081,12 +2081,10 @@ namespace DigitalPlatform.LibraryServer
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocationString(strLocation);
-            string strLibraryCode = "";
-            string strRoom = "";
             // 解析
             LibraryApplication.ParseCalendarName(strLocation,
-        out strLibraryCode,
-        out strRoom);
+        out string strLibraryCode,
+        out string strRoom);
 
             // 检查来自 location 元素中的馆代码部分
             {
@@ -2539,6 +2537,22 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
             // int nRet = 0;
+
+            List<string> errors = new List<string>();
+
+            // 2018/8/16
+            string strPublishTime = DomUtil.GetElementText(itemdom.DocumentElement, "publishTime");
+            if (string.IsNullOrEmpty(strPublishTime))
+            {
+                strError = "出版日期字段为空";
+                errors.Add(strError);
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
 
             return 0;
         }

@@ -1070,9 +1070,6 @@ int MAX_CHARS = 50)
             return results;
         }
 
-
-
-
         public static List<string> GetTypeList(List<ColumnProperty> property_list,
             bool bRemovePrefix = true)
         {
@@ -1239,6 +1236,11 @@ int MAX_CHARS = 50)
             string[] lines = new string[] {
             "order_recpath -- 订购记录路径",
             "order_seller -- 渠道(书商)",
+
+            // 2018/8/22
+            "order_fixedPrice -- 码洋",
+            "order_discount -- 折扣",
+
             "order_price -- 订购价",
             "order_source -- 经费来源",
             // "order_copy -- 复本数",

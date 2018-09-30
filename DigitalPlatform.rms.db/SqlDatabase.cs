@@ -31,6 +31,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using System.Data.Common;
 
 namespace DigitalPlatform.rms
 {
@@ -490,9 +491,65 @@ namespace DigitalPlatform.rms
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";"
                         // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
-                        + "SslMode=none;"
+                        + "SslMode=none;"   // 2018/9/25 当 mode 属性为空的时候，表示需要兼容以前安装的效果，那就相当于 None (SSL)
                         + "charset=utf8;";
+                }
+                else if (strMode.StartsWith("SslMode:"))
+                {
+                    string strUserID = "";
+                    string strPassword = "";
 
+                    // https://dev.mysql.com/doc/connector-net/en/connector-net-6-10-connection-options.html
+                    /*
+SslMode , SSL Mode , Ssl-Mode 
+Default: Preferred 
+This option was introduced in Connector/NET 6.2.1 and has the following values: 
+None - Do not use SSL. 
+Preferred - Use SSL if the server supports it, but allow connection in all cases. 
+Required - Always use SSL. Deny connection if server does not support SSL. 
+VerifyCA - Always use SSL. Validate the CA but tolerate name mismatch. 
+VerifyFull - Always use SSL. Fail if the host name is not correct. 
+* */
+                    string strSslMode = strMode.Substring("SslMode:".Length);
+                    // 注意：mode 属性不为空，但 SslMode: 为空的情况，等同于 Preferred 情况，也就是连接字符串中不包含 SslMode=xxx; 参数的情况
+                    if (strSslMode == "Preferred")
+                        strSslMode = "";
+
+                    strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
+                    if (strUserID == "")
+                    {
+                        strError = "服务器配置文件不合法，未给根元素下级的<datasource>定义'userid'属性，或'userid'属性值为空。";
+                        return -1;
+                    }
+
+                    strPassword = DomUtil.GetAttr(nodeDataSource, "password").Trim();
+                    if (strPassword == "")
+                    {
+                        strError = "服务器配置文件不合法，未给根元素下级的<datasource>定义'password'属性，或'password'属性值为空。";
+                        return -1;
+                    }
+                    // password可能为空
+                    try
+                    {
+                        strPassword = Cryptography.Decrypt(strPassword,
+                                "dp2003");
+                    }
+                    catch
+                    {
+                        strError = "服务器配置文件不合法，根元素下级的<datasource>定义'password'属性值不合法。";
+                        return -1;
+                    }
+
+                    strConnection = @"Persist Security Info=False;"
+                        + "User ID=" + strUserID + ";"    //帐户和密码
+                        + "Password=" + strPassword + ";"
+                        //+ "Integrated Security=SSPI; "      //信任连接
+                        + "Data Source=" + this.container.SqlServerName + ";"
+                        // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
+                        + "Connect Timeout=" + nTimeout.ToString() + ";"
+                        // https://stackoverflow.com/questions/45086283/mysql-data-mysqlclient-mysqlexception-the-host-localhost-does-not-support-ssl
+                        + (string.IsNullOrEmpty(strSslMode) ? "" : "SslMode=" + strSslMode + ";")    // 2018/9/23
+                        + "charset=utf8;";
                 }
                 else if (strMode == "SSPI") // 2006/3/22
                 {
@@ -691,6 +748,16 @@ namespace DigitalPlatform.rms
 #endif
         }
 #endif
+        static string GetExceptionString(DbCommand command,
+            string strText,
+            Exception ex)
+        {
+            return strText + "\r\n"
+    + ex.Message + "\r\n"
+    + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
+    + "SQL命令:\r\n"
+    + command.CommandText;
+        }
 
         // 初始化数据库，注意虚函数不能为private
         // parameter:
@@ -830,6 +897,7 @@ namespace DigitalPlatform.rms
                             {
                                 strError = "建索引出错。\r\n"
                                     + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
                                 return -1;
@@ -909,6 +977,7 @@ namespace DigitalPlatform.rms
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
                             connection))
                         {
+                            // command.CommandTimeout = 120;   // 默认 30
                             IDbTransaction trans = null;
 
                             trans = connection.BeginTransaction();  // 2017/9/3
@@ -920,10 +989,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建表出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建表出错。",
+ex);
+
                                     return -1;
                                 }
 
@@ -939,14 +1014,22 @@ namespace DigitalPlatform.rms
                                 command.CommandText = strCommand;
                                 try
                                 {
+                                    // testing 
+                                    // throw new Exception("模拟抛出异常");
                                     command.ExecuteNonQuery();
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建索引出错。",
+ex);
                                     return -1;
                                 }
 
@@ -986,6 +1069,10 @@ namespace DigitalPlatform.rms
                         using (MySqlCommand command = new MySqlCommand(strCommand,
                             connection))
                         {
+                            // 2018/9/17
+                            // 设置 command.CommandTimeout
+                            command.CommandTimeout = 120;   // 默认 30。由于 MySQL 创建一个数据库较慢，所以这里专门设置为 120 秒
+
                             IDbTransaction trans = null;
 
                             // trans = connection.BeginTransaction();  // 2017/9/3
@@ -998,10 +1085,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建库出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+                                        "建库出错。",
+                                        ex);
                                     return -1;
                                 }
 
@@ -1019,10 +1112,16 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建表出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+    "建表出错。",
+    ex);
+
                                     return -1;
                                 }
 
@@ -1042,10 +1141,17 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
+#if NO
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
+#endif
+                                    strError = GetExceptionString(command,
+"建索引出错。",
+ex);
+
                                     return -1;
                                 }
                                 if (trans != null)
@@ -1178,6 +1284,7 @@ namespace DigitalPlatform.rms
                                 {
                                     strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
+                                        + "command.CommandTimeout:" + command.CommandTimeout + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
                                     return -1;
@@ -2603,11 +2710,14 @@ namespace DigitalPlatform.rms
             #region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
+                // https://stackoverflow.com/questions/28329134/drop-index-query-is-slow
+                string strAlgorithm = "";   // " ALGORITHM=INPLACE ";
+
                 strCommand = "use " + this.m_strSqlDbName + " ;\n";
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
                 {
                     strCommand += " CREATE INDEX records_id_index " + "\n"
-    + " ON records (id) ;\n";
+    + " ON records (id) " + strAlgorithm + ";\n";
                 }
 
                 if (StringUtil.IsInList("keys", strIndexTypeList) == true)
@@ -2631,14 +2741,15 @@ namespace DigitalPlatform.rms
                             TableInfo tableInfo = (TableInfo)aTableInfo[i];
 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " ;\n";
+                                + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
-                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " ;\n";
+                                + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " " + strAlgorithm + ";\n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
-                                + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
+                                + " ON " + tableInfo.SqlTableName + " (idstring) " + strAlgorithm + ";\n";
                         }
                     }
                 }
+
             }
             #endregion // MySql
 

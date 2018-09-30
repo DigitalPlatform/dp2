@@ -712,6 +712,8 @@ namespace dp2Circulation
             return nRedCount;
         }
 
+        List<RecordForm> _changed_recpaths = new List<RecordForm>();
+
         // parameters:
         //      bAutoSetSeriesType  是否根据文件第一行中的路径中的数据库名来自东设置Combobox_type
         // return:
@@ -783,6 +785,8 @@ namespace dp2Circulation
                         SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
                     }
+
+                    _changed_recpaths = Program.MainForm.GetChangedRecords("order");
 
                     // 逐行读入文件内容
                     // 测算文件行数
@@ -898,6 +902,8 @@ namespace dp2Circulation
                             strOrderRecPath,
                             this.listView_origin,
                             out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                         if (nRet == -2)
                             nDupCount++;
                     }
@@ -951,6 +957,7 @@ namespace dp2Circulation
 
             return 1;
             ERROR1:
+            this.ShowMessage(strError, "red", true);
             return -1;
         }
 
@@ -1135,25 +1142,32 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strItemXml = "";
-            string strBiblioText = "";
+            // 检查订购记录是否在其他窗口内处于被修改状态
+            RecordForm record = _changed_recpaths.Find((o) =>
+            {
+                if (o.RecPath == strRecPath)
+                    return true;
+                return false;
+            });
 
-            string strOutputOrderRecPath = "";
-            string strOutputBiblioRecPath = "";
-
-            byte[] item_timestamp = null;
+            if (record != null)
+            {
+                record.Form.Activate();
+                strError = "订购记录 '" + strRecPath + "' 正在编辑状态。为避免和打印订单操作发生冲突，请先保存修改";
+                return -1;
+            }
 
             long lRet = channel.GetOrderInfo(
                 stop,
                 "@path:" + strRecPath,
                 // "",
                 "xml",
-                out strItemXml,
-                out strOutputOrderRecPath,
-                out item_timestamp,
+                out string strItemXml,
+                out string strOutputOrderRecPath,
+                out byte[] item_timestamp,
                 "recpath",
-                out strBiblioText,
-                out strOutputBiblioRecPath,
+                out string strBiblioText,
+                out string strOutputBiblioRecPath,
                 out strError);
             if (lRet == -1 || lRet == 0)
             {
@@ -1416,6 +1430,8 @@ namespace dp2Circulation
             ListViewItem item)
         {
             int nRet = 0;
+            string strError = "";
+
             OriginItemData data = null;
             data = (OriginItemData)item.Tag;
             if (data == null)
@@ -1441,12 +1457,21 @@ namespace dp2Circulation
             string strIssueCount = DomUtil.GetElementText(dom.DocumentElement,
                 "issueCount");
 
+            if (string.IsNullOrEmpty(strIssueCount))
+                strIssueCount = "1";
+            if (Int32.TryParse(strIssueCount, out int nIssueCount) == false)
+            {
+                throw new Exception("订购记录 '" + strRecPath + "' 中 issueCount 元素格式错误: 应为纯数字");
+            }
+
             // TODO: 是否只将订购复本字符串放入复本列?
             string strCopy = DomUtil.GetElementText(dom.DocumentElement,
                 "copy");
 
+            OldNewCopy copy = OldNewCopy.Parse(strCopy, "订购记录 '" + strRecPath + "' 中复本数字段");
+
             string strFixedPrice = DomUtil.GetElementText(dom.DocumentElement,
-    "fixedPrice");
+    "fixedPrice");  // 注意，可能为 {} 形态
             string strDiscount = DomUtil.GetElementText(dom.DocumentElement,
      "discount");
 
@@ -1466,7 +1491,7 @@ namespace dp2Circulation
 
             List<int> textchanged_columns = new List<int>();
 
-            int nIssueCount = 1;
+            // int nIssueCount = 1;
             if (strPubType == "连续出版物")
             {
                 try
@@ -1486,6 +1511,7 @@ namespace dp2Circulation
             }
 
             {
+#if NO
                 // 分离 "old[new]" 内的两个值
                 dp2StringUtil.ParseOldNewValue(strCopy,
                     out string strOldCopy,
@@ -1503,6 +1529,100 @@ namespace dp2Circulation
                     SetItemColor(item,
                             TYPE_ERROR);
                 }
+#endif
+
+                // *** 处理单价
+                OldNewValue price = OldNewValue.Parse(strPrice);
+                OldNewValue fixedPrice = OldNewValue.Parse(strFixedPrice);
+                OldNewValue discount = OldNewValue.Parse(strDiscount);
+
+                // 如果单价为空，而总价不为空，这时需要从总价算出单价。公式为 单价 = 总价/(复本套数*期数)
+                if (string.IsNullOrEmpty(price.OldValue))
+                {
+                    if (string.IsNullOrEmpty(strTotalPrice) == false)
+                    {
+                        int nCount = (copy.OldCopy.Copy * nIssueCount);
+                        if (nCount == 1)
+                            price.OldValue = strTotalPrice;
+                        else
+                            price.OldValue = strTotalPrice + "/" + nCount;
+
+                        strPrice = "*" + price.ToString();
+
+                        {
+                            data.Changed = true;
+                            SetItemColor(item,
+                                TYPE_CHANGED);
+
+                            textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
+                            // 单价被改变了
+                        }
+                    }
+                    else
+                    {
+                        // 2018/9/44
+                        // 总价为空。尝试从码洋、折扣里面计算单价
+                        // return:
+                        //      -1  计算过程出现错误
+                        //      0   strFixedPrice 为空，无法计算
+                        //      1   计算成功
+                        nRet = OrderDesignControl.ComputeOrderPriceByFixedPrice(fixedPrice.OldValue,
+                            discount.OldValue,
+                            out string strResultPrice,
+                            out strError);
+                        if (nRet == 1)
+                        {
+                            price.OldValue = strResultPrice;
+                            strPrice = "*" + price.ToString();
+
+                            data.Changed = true;
+                            SetItemColor(item,
+                                TYPE_CHANGED);
+
+                            textchanged_columns.Add(ORIGIN_COLUMN_PRICE);
+                            // 单价被改变了
+                        }
+                    }
+                }
+
+                // *** 这一段决定了是否主动在订购记录里面补充 {} 形态的码洋字符串
+
+                // 如果码洋为空，而折扣和单价不为空，这时需要从单价反向计算出码洋。
+                if (string.IsNullOrEmpty(fixedPrice.OldValue) == true
+                    && string.IsNullOrEmpty(price.OldValue) == false
+                    && string.IsNullOrEmpty(strDiscount) == false)
+                {
+                    nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(
+                        price.OldValue,
+discount.OldValue,
+out string strResultPrice,
+out strError);
+                    if (nRet == -1)
+                    {
+                        strBiblioSummary = "反向计算码洋时发生错误: " + strError;
+                        SetItemColor(item,
+                                TYPE_ERROR);
+                    }
+                    else if (nRet == 1)
+                    {
+                        fixedPrice.OldValue = strResultPrice;
+                        fixedPrice.IsVirtual = true;
+
+                        strFixedPrice = "*" + fixedPrice.ToString();
+
+                        data.Changed = true;
+                        SetItemColor(item,
+                            TYPE_CHANGED);
+
+                        textchanged_columns.Add(ORIGIN_COLUMN_FIXEDPRICE);
+                        // 码洋被改变了
+                    }
+
+                }
+
+
+
+#if NO
 
                 // 分离 "old[new]" 内的两个值
                 dp2StringUtil.ParseOldNewValue(strPrice,
@@ -1510,23 +1630,25 @@ namespace dp2Circulation
                     out string strCurrentNewPrice);
 
                 string strCurrentPrice = strCurrentOldPrice;
-
+#endif
 
                 // 汇总价格
                 string strCurTotalPrice = "";
-                string strError = "";
 
                 // 2009/11/9 changed
                 // 只有原始数据中总价格为空时，才有必要汇总价格
                 if (String.IsNullOrEmpty(strTotalPrice) == true)
                 {
-                    nRet = PriceUtil.MultiPrice(strCurrentPrice,
-                        nCopy,
+                    nRet = PriceUtil.MultiPrice(price.OldValue, // strCurrentPrice,
+                        copy.OldCopy.Copy,   // nCopy,
                         out strCurTotalPrice,
                         out strError);
                     if (nRet == -1)
                     {
-                        strBiblioSummary = "价格字符串 '" + strCurrentPrice + "' 格式不正确: " + strError;
+                        strBiblioSummary = "价格字符串 '"
+                            // + strCurrentPrice 
+                            + price.OldValue
+                            + "' 格式不正确: " + strError;
                         SetItemColor(item,
                                 TYPE_ERROR);
                     }
@@ -1568,8 +1690,6 @@ namespace dp2Circulation
                     }
 
                 }
-
-
             }
 
             // 检查和修改 状态
@@ -1642,8 +1762,8 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_ISSUECOUNT, strIssueCount);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_COPY, strCopy);
 
-            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_FIXEDPRICE, strFixedPrice);
-            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_DISCOUNT, strDiscount);
+            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_FIXEDPRICE, strFixedPrice);  // 
+            ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_DISCOUNT, strDiscount.ToString());
 
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_PRICE, strPrice);
             ListViewUtil.ChangeItemText(item, ORIGIN_COLUMN_TOTALPRICE, strTotalPrice);
@@ -6416,6 +6536,8 @@ strContent);
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
             }
 
+            _changed_recpaths = Program.MainForm.GetChangedRecords("order");
+
             EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
@@ -6531,6 +6653,8 @@ strContent);
                             strRecPath,
                             this.listView_origin,
                             out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                         if (nRet == -2)
                             nDupCount++;
 
@@ -6566,6 +6690,7 @@ strContent);
 
             return;
             ERROR1:
+            this.ShowMessage(strError, "red", true);
             MessageBox.Show(this, strError);
         }
 
@@ -7296,10 +7421,41 @@ MessageBoxDefaultButton.Button2);
             public LineInfo Adjust()
             {
                 // 如果原始数据中的码洋为空，则用单价来填充
-                if (string.IsNullOrEmpty(FixedPrice.OldValue) && string.IsNullOrEmpty(Price.OldValue) == false)
-                    FixedPrice.OldValue = "{" + Price.OldValue + "}";
-                if (string.IsNullOrEmpty(FixedPrice.NewValue) && string.IsNullOrEmpty(Price.NewValue) == false)
-                    FixedPrice.NewValue = "{" + Price.NewValue + "}";
+                if (string.IsNullOrEmpty(FixedPrice.OldValue)
+                    && string.IsNullOrEmpty(Price.OldValue) == false
+                    && string.IsNullOrEmpty(Discount.OldValue) == false)
+                {
+                    // return:
+                    //      -1  计算过程出现错误
+                    //      0   strPrice 为空，无法计算
+                    //      1   计算成功
+
+                    int nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(
+    Price.OldValue,
+Discount.OldValue,
+out string strResultPrice,
+out string strError);
+                    if (nRet == 1)
+                    {
+                        FixedPrice.OldValue = strResultPrice;
+                        FixedPrice.IsVirtual = true;
+                    }
+                }
+                if (string.IsNullOrEmpty(FixedPrice.NewValue)
+                    && string.IsNullOrEmpty(Price.NewValue) == false
+                    && string.IsNullOrEmpty(Discount.NewValue) == false)
+                {
+                    int nRet = OrderDesignControl.ComputeFixedPriceByOrderPrice(
+    Price.NewValue,
+Discount.NewValue,
+out string strResultPrice,
+out string strError);
+                    if (nRet == 1)
+                    {
+                        FixedPrice.NewValue = strResultPrice;
+                        FixedPrice.IsVirtual = true;
+                    }
+                }
 
                 return this;
             }
@@ -7355,11 +7511,11 @@ ORIGIN_COLUMN_ORDERTIME));   // 已经是本地时间格式
                     ORIGIN_COLUMN_DISCOUNT);
 
                 // *** 单价
-                string strPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_PRICE);
+                string strPrice = RemoveChangedChar(ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_PRICE));
                 // *** 码洋
-                string strFixedPrice = ListViewUtil.GetItemText(source,
-                    ORIGIN_COLUMN_FIXEDPRICE);
+                string strFixedPrice = RemoveChangedChar(ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_FIXEDPRICE));
                 string strTempCopy = ListViewUtil.GetItemText(source,
 ORIGIN_COLUMN_COPY);
 
@@ -8502,11 +8658,16 @@ ORIGIN_COLUMN_COPY);
                         }
                         else
                         {
+                            // 2018/8/24
+                            // 码洋可能为空。比如折扣为空，试图从单价返回来计算码洋也不会进行
+                            /*
                             strError = strCurrentPosition + " 码洋 不应为空";
                             return -1;
+                            */
                         }
 
-                        totalfixedprices.Add(strTotalFixedPrice);
+                        if (string.IsNullOrEmpty(strTotalFixedPrice) == false)
+                            totalfixedprices.Add(strTotalFixedPrice);
 
                         // 汇总到书价格
                         string strAcceptTotalPrice = "";
@@ -8622,7 +8783,9 @@ ORIGIN_COLUMN_COPY);
 
                     // fixedprice
                     ListViewUtil.ChangeItemText(target, MERGED_COLUMN_FIXEDPRICE,
-                        source_line.FixedPrice.OldValue);
+                        source_line.FixedPrice.IsVirtual ?
+                        "{" + source_line.FixedPrice.OldValue + "}"
+                        : source_line.FixedPrice.OldValue);
 
                     // discount
                     ListViewUtil.ChangeItemText(target, MERGED_COLUMN_DISCOUNT,
@@ -10015,6 +10178,7 @@ MessageBoxDefaultButton.Button2);
         {
             // 组织成批保存 SetOrders
             string strError = "";
+            // TODO: 保存修改后，最好重新合并一次？
             int nRet = SaveOrders(out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -10054,6 +10218,35 @@ MessageBoxDefaultButton.Button2);
         {
             ListViewUtil.ChangeItemText(item, nCol,
                 RemoveChangedChar(ListViewUtil.GetItemText(item, nCol)));
+        }
+
+        public List<RecordForm> GetChangedRecords(string strStyle)
+        {
+            if (string.IsNullOrEmpty(strStyle) || strStyle == "all")
+                strStyle = "biblio,entity,order,issue,comment";
+
+            List<RecordForm> results = new List<RecordForm>();
+            if (StringUtil.IsInList("order", strStyle) == false)
+                return results;
+
+            foreach (ListViewItem item in this.listView_origin.Items)
+            {
+                if (item.ImageIndex == TYPE_ERROR)
+                    continue;
+
+                OriginItemData data = (OriginItemData)item.Tag;
+                if (data == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+                if (data.Changed == false)
+                    continue;
+
+                string strOrderRecPath = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_RECPATH);
+                results.Add(new RecordForm(strOrderRecPath, this));
+            }
+            return results;
         }
 
         // 保存对原始订购记录的修改
@@ -10126,6 +10319,18 @@ MessageBoxDefaultButton.Button2);
                         "state",
                         RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_STATE)));
                     RemoveChangedChar(item, ORIGIN_COLUMN_STATE);
+
+                    // 2018/8/22
+                    DomUtil.SetElementText(dom.DocumentElement,
+    "price",
+    RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_PRICE)));
+                    RemoveChangedChar(item, ORIGIN_COLUMN_PRICE);
+
+                    // 2018/8/23
+                    DomUtil.SetElementText(dom.DocumentElement,
+    "fixedPrice",
+    RemoveChangedChar(ListViewUtil.GetItemText(item, ORIGIN_COLUMN_FIXEDPRICE)));
+                    RemoveChangedChar(item, ORIGIN_COLUMN_FIXEDPRICE);
 
                     DomUtil.SetElementText(dom.DocumentElement,
                         "totalPrice",

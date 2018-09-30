@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Text;
@@ -14,13 +11,11 @@ using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
-using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
-using DigitalPlatform.CommonControl;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -29,10 +24,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class LabelPrintForm : ItemSearchFormBase    // MyForm
     {
-        // bool m_bBiblioSummaryColumn = true; // 是否在浏览列表中 加入书目摘要列
-
-        // bool m_bFirstColumnIsKey = false; // 当前listview浏览列的第一列是否应为key
-
+        FileSystemWatcher _wather = null;
 
         PrinterInfo m_printerInfo = null;
 
@@ -94,6 +86,12 @@ namespace dp2Circulation
 
             prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn);
             prop.CompareColumn += new CompareEventHandler(prop_CompareColumn);
+
+            if (Program.MainForm.PrintLabelMode)
+            {
+                this.tabControl_main.TabPages.Remove(this.tabPage_itemRecords);
+                this.tabPage_itemRecords.Dispose();
+            }
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)
@@ -194,11 +192,16 @@ namespace dp2Circulation
 
             if (this.m_bTestingGridSetted == false)
             {
-                this.checkBox_testingGrid.Checked = Program.MainForm.AppInfo.GetBoolean(
+                this.toolStripButton_testingGrid.Checked = Program.MainForm.AppInfo.GetBoolean(
                     "label_print_form",
                     "print_testing_grid",
                     false);
             }
+
+            this.toolStripTextBox_copies.Text = Program.MainForm.AppInfo.GetString(
+                    "label_print_form",
+                    "copies",
+                    "1");
 
             string strWidths = Program.MainForm.AppInfo.GetString(
                 "label_print_form",
@@ -229,6 +232,7 @@ namespace dp2Circulation
             {
                 this.PrinterInfo = Program.MainForm.PreparePrinterInfo("缺省标签");
             }
+
             SetTitle();
         }
 
@@ -256,6 +260,8 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
+            EndWatcher();
+
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 Program.MainForm.AppInfo.SetString(
@@ -271,7 +277,12 @@ namespace dp2Circulation
                 Program.MainForm.AppInfo.SetBoolean(
                     "label_print_form",
                     "print_testing_grid",
-                    this.checkBox_testingGrid.Checked);
+                    this.toolStripButton_testingGrid.Checked);
+
+                Program.MainForm.AppInfo.SetString(
+    "label_print_form",
+    "copies",
+    this.toolStripTextBox_copies.Text);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
                 Program.MainForm.AppInfo.SetString(
@@ -327,6 +338,7 @@ namespace dp2Circulation
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
+            this.textBox_labelFile_labelFilename.Text = "";
             this.textBox_labelFile_labelFilename.Text = dlg.FileName;
         }
 
@@ -353,20 +365,20 @@ namespace dp2Circulation
                 return;
             }
 
-            string strError = "";
-            string strContent = "";
             // 能自动识别文件内容的编码方式的读入文本文件内容模块
             // return:
             //      -1  出错
             //      0   文件不存在
             //      1   文件存在
             int nRet = Global.ReadTextFileContent(this.textBox_labelFile_labelFilename.Text,
-                out strContent,
-                out strError);
+                out string strContent,
+                out string strError);
             if (nRet == 1)
                 this.textBox_labelFile_content.Text = strContent;
             else
                 this.textBox_labelFile_content.Text = "";
+
+            BeginWatcher();
         }
 
         private void button_printPreview_Click(object sender, EventArgs e)
@@ -728,7 +740,7 @@ namespace dp2Circulation
             {
                 this._processing--;
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1003,7 +1015,7 @@ namespace dp2Circulation
                         return 1;
                     }
 
-                END1:
+                    END1:
                     document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
                     document.DefaultPageSettings.Landscape = bLandscape;
                 }
@@ -1060,7 +1072,7 @@ namespace dp2Circulation
 
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2017/4/26
                 strError = ex.Message;
@@ -1145,7 +1157,7 @@ namespace dp2Circulation
                         // 按照存储的打印机名选定打印机
                         nRet = SelectPrinterByName(this.document,
                             this.PrinterInfo.PrinterName,
-                            out  strError);
+                            out strError);
                         if (nRet == 1)
                         {
                             MessageBox.Show(this, "打印机 " + this.PrinterInfo.PrinterName + " 当前不可用，请重新选定打印机");
@@ -1327,7 +1339,7 @@ namespace dp2Circulation
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1427,7 +1439,7 @@ namespace dp2Circulation
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1454,6 +1466,12 @@ namespace dp2Circulation
                 return -1;
             }
 
+            if (Int32.TryParse(this.toolStripTextBox_copies.Text, out int nCopies) == false)
+            {
+                strError = "打印份数 '" + this.toolStripTextBox_copies.Text + "' 格式错误，应该为纯数字";
+                return -1;
+            }
+
             LabelParam label_param = null;
 
             int nRet = LabelParam.Build(strDefFilename,
@@ -1476,10 +1494,11 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
+            this.document.Copies = nCopies;
             this.document.PrintPage -= new System.Drawing.Printing.PrintPageEventHandler(document_PrintPage);
             this.document.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(document_PrintPage);
 
-            if (this.checkBox_testingGrid.Checked == true)
+            if (this.toolStripButton_testingGrid.Checked == true)
                 this.m_strPrintStyle = "TestingGrid";
             else
                 this.m_strPrintStyle = "";
@@ -1527,8 +1546,7 @@ namespace dp2Circulation
             this.button_print.Enabled = bEnable;
             this.button_printPreview.Enabled = bEnable;
 
-            this.checkBox_testingGrid.Enabled = bEnable;
-
+            this.toolStrip1.Enabled = bEnable;
             this.Update();
         }
 
@@ -1559,7 +1577,7 @@ namespace dp2Circulation
             {
                 this._processing--;
             }
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1656,7 +1674,7 @@ namespace dp2Circulation
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -2105,7 +2123,7 @@ namespace dp2Circulation
             }
 
             //return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2506,7 +2524,7 @@ namespace dp2Circulation
 
                     FillLineByBarcode(
                         this.Channel,
-                        strBarcode, 
+                        strBarcode,
                         item);
 
                     items.Add(item);
@@ -2544,7 +2562,7 @@ namespace dp2Circulation
                     sr.Close();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2559,7 +2577,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2872,7 +2890,7 @@ namespace dp2Circulation
 
             Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(strError);
         }
 
@@ -2952,7 +2970,6 @@ namespace dp2Circulation
 
 
         }
-
 
         // 保存选择的行到文本文件
         void menu_exportTextFile_Click(object sender, EventArgs e)
@@ -3090,7 +3107,7 @@ namespace dp2Circulation
             item.EnsureVisible();
 
             return;
-        ERROR1:
+            ERROR1:
             Console.Beep();
         }
 
@@ -3121,11 +3138,11 @@ namespace dp2Circulation
         {
             get
             {
-                return this.checkBox_testingGrid.Checked;
+                return this.toolStripButton_testingGrid.Checked;
             }
             set
             {
-                this.checkBox_testingGrid.Checked = value;
+                this.toolStripButton_testingGrid.Checked = value;
                 this.m_bTestingGridSetted = true;
             }
         }
@@ -3259,7 +3276,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             return;
         }
 
@@ -3286,6 +3303,65 @@ MessageBoxDefaultButton.Button1);
             {
                 return false;
             }
+        }
+
+        void BeginWatcher()
+        {
+            try
+            {
+                EndWatcher();
+
+                if (this._wather == null)
+                    this._wather = new FileSystemWatcher();
+
+                string filename = this.textBox_labelFile_labelFilename.Text;
+
+                _wather.Path = Path.GetDirectoryName(filename);
+
+                _wather.NotifyFilter = NotifyFilters.LastWrite; // | NotifyFilters.Size | NotifyFilters.Attributes;
+
+                _wather.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
+                _wather.IncludeSubdirectories = false;
+
+                _wather.Changed += new FileSystemEventHandler(watcher_Changed);
+
+                _wather.EnableRaisingEvents = true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, "BeginWatcher() exception: " + ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        void EndWatcher()
+        {
+            if (this._wather != null)
+            {
+                _wather.EnableRaisingEvents = false;
+                _wather.Changed -= new FileSystemEventHandler(watcher_Changed);
+                this._wather.Dispose();
+                this._wather = null;
+            }
+        }
+
+        void watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if ((e.ChangeType & WatcherChangeTypes.Changed) != WatcherChangeTypes.Changed)
+                return;
+
+            string filename = this.textBox_labelFile_labelFilename.Text;
+
+            if (PathUtil.IsEqual(filename, e.FullPath) == true)
+            {
+                var task = LoadWithDelay();
+            }
+        }
+
+        async Task LoadWithDelay()
+        {
+            await Task.Delay(1000);
+            textBox_labelFile_labelFilename_TextChanged(this, new EventArgs());
+            this.ShowMessage("标签文件内容已自动重新加载 " + DateTime.Now.ToShortTimeString(), "green", true);
         }
     }
 }

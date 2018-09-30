@@ -1,4 +1,4 @@
-namespace dp2Catalog
+Ôªønamespace dp2Catalog
 {
     partial class ZServerPropertyForm
     {
@@ -59,7 +59,9 @@ namespace dp2Catalog
             this.radioButton_authenStyleIdpass = new System.Windows.Forms.RadioButton();
             this.radioButton_authenStyeOpen = new System.Windows.Forms.RadioButton();
             this.tabPage_search = new System.Windows.Forms.TabPage();
+            this.checkBox_forceIssn8 = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBox_isbn_wild = new System.Windows.Forms.CheckBox();
             this.checkBox_isbn_removeHyphen = new System.Windows.Forms.CheckBox();
             this.checkBox_isbn_addHyphen = new System.Windows.Forms.CheckBox();
             this.checkBox_isbn_forceIsbn10 = new System.Windows.Forms.CheckBox();
@@ -98,7 +100,6 @@ namespace dp2Catalog
             this.label17 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_isbn_wild = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_general.SuspendLayout();
             this.tabPage_database.SuspendLayout();
@@ -123,11 +124,10 @@ namespace dp2Catalog
             this.tabControl_main.Controls.Add(this.tabPage_charset);
             this.tabControl_main.Controls.Add(this.tabPage_MARC);
             this.tabControl_main.Controls.Add(this.tabPage_unionCatalog);
-            this.tabControl_main.Location = new System.Drawing.Point(10, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Location = new System.Drawing.Point(15, 15);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(382, 346);
+            this.tabControl_main.Size = new System.Drawing.Size(573, 519);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_general
@@ -143,23 +143,21 @@ namespace dp2Catalog
             this.tabPage_general.Controls.Add(this.label2);
             this.tabPage_general.Controls.Add(this.textBox_serverName);
             this.tabPage_general.Controls.Add(this.label1);
-            this.tabPage_general.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_general.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_general.Location = new System.Drawing.Point(4, 28);
             this.tabPage_general.Name = "tabPage_general";
-            this.tabPage_general.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_general.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_general.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_general.Size = new System.Drawing.Size(565, 487);
             this.tabPage_general.TabIndex = 0;
-            this.tabPage_general.Text = "“ª∞„ Ù–‘";
+            this.tabPage_general.Text = "‰∏ÄËà¨Â±ûÊÄß";
             this.tabPage_general.UseVisualStyleBackColor = true;
             // 
             // button_gotoHomepage
             // 
             this.button_gotoHomepage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_gotoHomepage.Image = ((System.Drawing.Image)(resources.GetObject("button_gotoHomepage.Image")));
-            this.button_gotoHomepage.Location = new System.Drawing.Point(350, 86);
-            this.button_gotoHomepage.Margin = new System.Windows.Forms.Padding(2);
+            this.button_gotoHomepage.Location = new System.Drawing.Point(525, 129);
             this.button_gotoHomepage.Name = "button_gotoHomepage";
-            this.button_gotoHomepage.Size = new System.Drawing.Size(22, 22);
+            this.button_gotoHomepage.Size = new System.Drawing.Size(33, 33);
             this.button_gotoHomepage.TabIndex = 10;
             this.button_gotoHomepage.UseVisualStyleBackColor = true;
             this.button_gotoHomepage.Click += new System.EventHandler(this.button_gotoHomepage_Click);
@@ -169,107 +167,98 @@ namespace dp2Catalog
             this.textBox_homepage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_homepage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_homepage.Location = new System.Drawing.Point(98, 86);
-            this.textBox_homepage.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_homepage.Location = new System.Drawing.Point(147, 129);
             this.textBox_homepage.Name = "textBox_homepage";
-            this.textBox_homepage.Size = new System.Drawing.Size(247, 21);
+            this.textBox_homepage.Size = new System.Drawing.Size(370, 28);
             this.textBox_homepage.TabIndex = 7;
             this.textBox_homepage.TextChanged += new System.EventHandler(this.textBox_homepage_TextChanged);
             // 
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(4, 90);
-            this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label16.Location = new System.Drawing.Point(6, 135);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(71, 12);
+            this.label16.Size = new System.Drawing.Size(107, 18);
             this.label16.TabIndex = 6;
-            this.label16.Text = "Web÷˜“≥(&H):";
+            this.label16.Text = "Web‰∏ªÈ°µ(&H):";
             // 
             // textBox_initializeInfomation
             // 
             this.textBox_initializeInfomation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_initializeInfomation.Location = new System.Drawing.Point(4, 133);
-            this.textBox_initializeInfomation.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_initializeInfomation.Location = new System.Drawing.Point(6, 200);
             this.textBox_initializeInfomation.Multiline = true;
             this.textBox_initializeInfomation.Name = "textBox_initializeInfomation";
             this.textBox_initializeInfomation.ReadOnly = true;
             this.textBox_initializeInfomation.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_initializeInfomation.Size = new System.Drawing.Size(368, 178);
+            this.textBox_initializeInfomation.Size = new System.Drawing.Size(550, 265);
             this.textBox_initializeInfomation.TabIndex = 9;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 118);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Location = new System.Drawing.Point(6, 177);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(89, 12);
+            this.label4.Size = new System.Drawing.Size(134, 18);
             this.label4.TabIndex = 8;
-            this.label4.Text = "≥ı ºªØ–≈œ¢(&I):";
+            this.label4.Text = "ÂàùÂßãÂåñ‰ø°ÊÅØ(&I):";
             // 
             // textBox_serverPort
             // 
             this.textBox_serverPort.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_serverPort.Location = new System.Drawing.Point(98, 62);
-            this.textBox_serverPort.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_serverPort.Location = new System.Drawing.Point(147, 93);
             this.textBox_serverPort.Name = "textBox_serverPort";
-            this.textBox_serverPort.Size = new System.Drawing.Size(96, 21);
+            this.textBox_serverPort.Size = new System.Drawing.Size(143, 28);
             this.textBox_serverPort.TabIndex = 5;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 66);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(6, 99);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 12);
+            this.label3.Size = new System.Drawing.Size(98, 18);
             this.label3.TabIndex = 4;
-            this.label3.Text = "∂Àø⁄∫≈(&P):";
+            this.label3.Text = "Á´ØÂè£Âè∑(&P):";
             // 
             // textBox_serverAddr
             // 
             this.textBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverAddr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_serverAddr.Location = new System.Drawing.Point(98, 36);
-            this.textBox_serverAddr.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_serverAddr.Location = new System.Drawing.Point(147, 54);
             this.textBox_serverAddr.Name = "textBox_serverAddr";
-            this.textBox_serverAddr.Size = new System.Drawing.Size(274, 21);
+            this.textBox_serverAddr.Size = new System.Drawing.Size(410, 28);
             this.textBox_serverAddr.TabIndex = 3;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 40);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(6, 60);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.Size = new System.Drawing.Size(80, 18);
             this.label2.TabIndex = 2;
-            this.label2.Text = "µÿ÷∑(&A):";
+            this.label2.Text = "Âú∞ÂùÄ(&A):";
             // 
             // textBox_serverName
             // 
             this.textBox_serverName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_serverName.Location = new System.Drawing.Point(98, 10);
-            this.textBox_serverName.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_serverName.Location = new System.Drawing.Point(147, 15);
             this.textBox_serverName.Name = "textBox_serverName";
-            this.textBox_serverName.Size = new System.Drawing.Size(274, 21);
+            this.textBox_serverName.Size = new System.Drawing.Size(410, 28);
             this.textBox_serverName.TabIndex = 1;
+            this.textBox_serverName.TextChanged += new System.EventHandler(this.textBox_serverName_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 14);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(6, 21);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 12);
+            this.label1.Size = new System.Drawing.Size(116, 18);
             this.label1.TabIndex = 0;
-            this.label1.Text = "∑˛ŒÒ∆˜√˚(&N):";
+            this.label1.Text = "ÊúçÂä°Âô®Âêç(&N):";
             // 
             // tabPage_database
             // 
@@ -278,36 +267,33 @@ namespace dp2Catalog
             this.tabPage_database.Controls.Add(this.label10);
             this.tabPage_database.Controls.Add(this.label9);
             this.tabPage_database.Controls.Add(this.textBox_databaseNames);
-            this.tabPage_database.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_database.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_database.Location = new System.Drawing.Point(4, 28);
             this.tabPage_database.Name = "tabPage_database";
-            this.tabPage_database.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_database.Size = new System.Drawing.Size(565, 487);
             this.tabPage_database.TabIndex = 3;
-            this.tabPage_database.Text = " ˝æ›ø‚";
+            this.tabPage_database.Text = "Êï∞ÊçÆÂ∫ì";
             this.tabPage_database.UseVisualStyleBackColor = true;
             // 
             // label19
             // 
             this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(3, 220);
-            this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label19.Location = new System.Drawing.Point(4, 330);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(185, 12);
+            this.label19.Size = new System.Drawing.Size(278, 18);
             this.label19.TabIndex = 4;
-            this.label19.Text = "»´—° ±≤ª≤Œ”ÎºÏÀ˜µƒ ˝æ›ø‚√˚(&X):";
+            this.label19.Text = "ÂÖ®ÈÄâÊó∂‰∏çÂèÇ‰∏éÊ£ÄÁ¥¢ÁöÑÊï∞ÊçÆÂ∫ìÂêç(&X):";
             // 
             // textBox_notInAllDatabaseNames
             // 
             this.textBox_notInAllDatabaseNames.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_notInAllDatabaseNames.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_notInAllDatabaseNames.Location = new System.Drawing.Point(3, 234);
-            this.textBox_notInAllDatabaseNames.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_notInAllDatabaseNames.Location = new System.Drawing.Point(4, 351);
             this.textBox_notInAllDatabaseNames.Multiline = true;
             this.textBox_notInAllDatabaseNames.Name = "textBox_notInAllDatabaseNames";
             this.textBox_notInAllDatabaseNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_notInAllDatabaseNames.Size = new System.Drawing.Size(372, 72);
+            this.textBox_notInAllDatabaseNames.Size = new System.Drawing.Size(557, 107);
             this.textBox_notInAllDatabaseNames.TabIndex = 3;
             // 
             // label10
@@ -315,22 +301,20 @@ namespace dp2Catalog
             this.label10.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(3, 188);
-            this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label10.Location = new System.Drawing.Point(4, 282);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(293, 12);
+            this.label10.Size = new System.Drawing.Size(440, 18);
             this.label10.TabIndex = 2;
-            this.label10.Text = "(◊¢£∫ø… ‰»Î∂‡∏ˆ ˝æ›ø‚√˚°£∏Ò ΩŒ™√ø––“ª∏ˆ ˝æ›ø‚√˚)";
+            this.label10.Text = "(Ê≥®ÔºöÂèØËæìÂÖ•Â§ö‰∏™Êï∞ÊçÆÂ∫ìÂêç„ÄÇÊ†ºÂºè‰∏∫ÊØèË°å‰∏Ä‰∏™Êï∞ÊçÆÂ∫ìÂêç)";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 17);
-            this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label9.Location = new System.Drawing.Point(4, 26);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(77, 12);
+            this.label9.Size = new System.Drawing.Size(116, 18);
             this.label9.TabIndex = 1;
-            this.label9.Text = " ˝æ›ø‚√˚(&N):";
+            this.label9.Text = "Êï∞ÊçÆÂ∫ìÂêç(&N):";
             // 
             // textBox_databaseNames
             // 
@@ -338,12 +322,11 @@ namespace dp2Catalog
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_databaseNames.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_databaseNames.Location = new System.Drawing.Point(3, 34);
-            this.textBox_databaseNames.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_databaseNames.Location = new System.Drawing.Point(4, 51);
             this.textBox_databaseNames.Multiline = true;
             this.textBox_databaseNames.Name = "textBox_databaseNames";
             this.textBox_databaseNames.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_databaseNames.Size = new System.Drawing.Size(372, 149);
+            this.textBox_databaseNames.Size = new System.Drawing.Size(557, 222);
             this.textBox_databaseNames.TabIndex = 0;
             // 
             // tabPage_accessControl
@@ -355,70 +338,63 @@ namespace dp2Catalog
             this.tabPage_accessControl.Controls.Add(this.textBox_groupID);
             this.tabPage_accessControl.Controls.Add(this.label5);
             this.tabPage_accessControl.Controls.Add(this.groupBox1);
-            this.tabPage_accessControl.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_accessControl.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_accessControl.Location = new System.Drawing.Point(4, 28);
             this.tabPage_accessControl.Name = "tabPage_accessControl";
-            this.tabPage_accessControl.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_accessControl.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_accessControl.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_accessControl.Size = new System.Drawing.Size(565, 487);
             this.tabPage_accessControl.TabIndex = 1;
-            this.tabPage_accessControl.Text = "»®œﬁ—È÷§";
+            this.tabPage_accessControl.Text = "ÊùÉÈôêÈ™åËØÅ";
             this.tabPage_accessControl.UseVisualStyleBackColor = true;
             // 
             // textBox_password
             // 
             this.textBox_password.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_password.Location = new System.Drawing.Point(82, 145);
-            this.textBox_password.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_password.Location = new System.Drawing.Point(123, 218);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
-            this.textBox_password.Size = new System.Drawing.Size(149, 21);
+            this.textBox_password.Size = new System.Drawing.Size(222, 28);
             this.textBox_password.TabIndex = 6;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 147);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label7.Location = new System.Drawing.Point(4, 220);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(53, 12);
+            this.label7.Size = new System.Drawing.Size(80, 18);
             this.label7.TabIndex = 5;
-            this.label7.Text = "√‹¬Î(&P):";
+            this.label7.Text = "ÂØÜÁ†Å(&P):";
             // 
             // textBox_userName
             // 
             this.textBox_userName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_userName.Location = new System.Drawing.Point(82, 120);
-            this.textBox_userName.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_userName.Location = new System.Drawing.Point(123, 180);
             this.textBox_userName.Name = "textBox_userName";
-            this.textBox_userName.Size = new System.Drawing.Size(149, 21);
+            this.textBox_userName.Size = new System.Drawing.Size(222, 28);
             this.textBox_userName.TabIndex = 4;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 122);
-            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label6.Location = new System.Drawing.Point(4, 183);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(65, 12);
+            this.label6.Size = new System.Drawing.Size(98, 18);
             this.label6.TabIndex = 3;
-            this.label6.Text = "”√ªß√˚(&U):";
+            this.label6.Text = "Áî®Êà∑Âêç(&U):";
             // 
             // textBox_groupID
             // 
             this.textBox_groupID.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_groupID.Location = new System.Drawing.Point(82, 95);
-            this.textBox_groupID.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_groupID.Location = new System.Drawing.Point(123, 142);
             this.textBox_groupID.Name = "textBox_groupID";
-            this.textBox_groupID.Size = new System.Drawing.Size(149, 21);
+            this.textBox_groupID.Size = new System.Drawing.Size(222, 28);
             this.textBox_groupID.TabIndex = 2;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 98);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(4, 147);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(59, 12);
+            this.label5.Size = new System.Drawing.Size(89, 18);
             this.label5.TabIndex = 1;
             this.label5.Text = "&Group ID:";
             // 
@@ -426,22 +402,19 @@ namespace dp2Catalog
             // 
             this.groupBox1.Controls.Add(this.radioButton_authenStyleIdpass);
             this.groupBox1.Controls.Add(this.radioButton_authenStyeOpen);
-            this.groupBox1.Location = new System.Drawing.Point(5, 6);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox1.Location = new System.Drawing.Point(8, 9);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(226, 77);
+            this.groupBox1.Size = new System.Drawing.Size(339, 116);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = " »®œﬁ—È÷§∑Ω Ω ";
+            this.groupBox1.Text = " ÊùÉÈôêÈ™åËØÅÊñπÂºè ";
             // 
             // radioButton_authenStyleIdpass
             // 
             this.radioButton_authenStyleIdpass.AutoSize = true;
-            this.radioButton_authenStyleIdpass.Location = new System.Drawing.Point(14, 41);
-            this.radioButton_authenStyleIdpass.Margin = new System.Windows.Forms.Padding(2);
+            this.radioButton_authenStyleIdpass.Location = new System.Drawing.Point(21, 62);
             this.radioButton_authenStyleIdpass.Name = "radioButton_authenStyleIdpass";
-            this.radioButton_authenStyleIdpass.Size = new System.Drawing.Size(65, 16);
+            this.radioButton_authenStyleIdpass.Size = new System.Drawing.Size(96, 22);
             this.radioButton_authenStyleIdpass.TabIndex = 1;
             this.radioButton_authenStyleIdpass.TabStop = true;
             this.radioButton_authenStyleIdpass.Text = "&ID/Pass";
@@ -451,10 +424,9 @@ namespace dp2Catalog
             // radioButton_authenStyeOpen
             // 
             this.radioButton_authenStyeOpen.AutoSize = true;
-            this.radioButton_authenStyeOpen.Location = new System.Drawing.Point(14, 21);
-            this.radioButton_authenStyeOpen.Margin = new System.Windows.Forms.Padding(2);
+            this.radioButton_authenStyeOpen.Location = new System.Drawing.Point(21, 32);
             this.radioButton_authenStyeOpen.Name = "radioButton_authenStyeOpen";
-            this.radioButton_authenStyeOpen.Size = new System.Drawing.Size(47, 16);
+            this.radioButton_authenStyeOpen.Size = new System.Drawing.Size(69, 22);
             this.radioButton_authenStyeOpen.TabIndex = 0;
             this.radioButton_authenStyeOpen.TabStop = true;
             this.radioButton_authenStyeOpen.Text = "&Open";
@@ -464,6 +436,7 @@ namespace dp2Catalog
             // tabPage_search
             // 
             this.tabPage_search.AutoScroll = true;
+            this.tabPage_search.Controls.Add(this.checkBox_forceIssn8);
             this.tabPage_search.Controls.Add(this.groupBox3);
             this.tabPage_search.Controls.Add(this.checkBox_ignoreRerenceID);
             this.tabPage_search.Controls.Add(this.comboBox_defaultElementSetName);
@@ -474,13 +447,23 @@ namespace dp2Catalog
             this.tabPage_search.Controls.Add(this.textBox_presentPerCount);
             this.tabPage_search.Controls.Add(this.label8);
             this.tabPage_search.Controls.Add(this.checkBox_alwaysUseFullElementSet);
-            this.tabPage_search.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_search.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_search.Location = new System.Drawing.Point(4, 28);
             this.tabPage_search.Name = "tabPage_search";
-            this.tabPage_search.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_search.Size = new System.Drawing.Size(565, 487);
             this.tabPage_search.TabIndex = 2;
-            this.tabPage_search.Text = "ºÏÀ˜/ªÒ»°";
+            this.tabPage_search.Text = "Ê£ÄÁ¥¢/Ëé∑Âèñ";
             this.tabPage_search.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_forceIssn8
+            // 
+            this.checkBox_forceIssn8.AutoSize = true;
+            this.checkBox_forceIssn8.Location = new System.Drawing.Point(296, 272);
+            this.checkBox_forceIssn8.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_forceIssn8.Name = "checkBox_forceIssn8";
+            this.checkBox_forceIssn8.Size = new System.Drawing.Size(250, 22);
+            this.checkBox_forceIssn8.TabIndex = 15;
+            this.checkBox_forceIssn8.Text = "ISSN Ëá™Âä®ËßÑÊï¥‰∏∫ 8 ‰ΩçÂΩ¢ÊÄÅ";
+            this.checkBox_forceIssn8.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
@@ -489,66 +472,82 @@ namespace dp2Catalog
             this.groupBox3.Controls.Add(this.checkBox_isbn_addHyphen);
             this.groupBox3.Controls.Add(this.checkBox_isbn_forceIsbn10);
             this.groupBox3.Controls.Add(this.checkBox_isbn_forceIsbn13);
-            this.groupBox3.Location = new System.Drawing.Point(5, 217);
+            this.groupBox3.Location = new System.Drawing.Point(8, 326);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(363, 88);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox3.Size = new System.Drawing.Size(544, 132);
             this.groupBox3.TabIndex = 14;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "ISBNºÏÀ˜«∞£¨∂‘ºÏÀ˜¥ ◊˜»Áœ¬‘§¥¶¿Ì";
+            this.groupBox3.Text = "ISBNÊ£ÄÁ¥¢ÂâçÔºåÂØπÊ£ÄÁ¥¢ËØç‰ΩúÂ¶Ç‰∏ãÈ¢ÑÂ§ÑÁêÜ";
+            // 
+            // checkBox_isbn_wild
+            // 
+            this.checkBox_isbn_wild.AutoSize = true;
+            this.checkBox_isbn_wild.Location = new System.Drawing.Point(28, 99);
+            this.checkBox_isbn_wild.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_isbn_wild.Name = "checkBox_isbn_wild";
+            this.checkBox_isbn_wild.Size = new System.Drawing.Size(133, 22);
+            this.checkBox_isbn_wild.TabIndex = 4;
+            this.checkBox_isbn_wild.Text = "ÈáéËõÆÂåπÈÖç(&W)";
+            this.checkBox_isbn_wild.UseVisualStyleBackColor = true;
             // 
             // checkBox_isbn_removeHyphen
             // 
             this.checkBox_isbn_removeHyphen.AutoSize = true;
-            this.checkBox_isbn_removeHyphen.Location = new System.Drawing.Point(192, 43);
+            this.checkBox_isbn_removeHyphen.Location = new System.Drawing.Point(288, 64);
+            this.checkBox_isbn_removeHyphen.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_isbn_removeHyphen.Name = "checkBox_isbn_removeHyphen";
-            this.checkBox_isbn_removeHyphen.Size = new System.Drawing.Size(90, 16);
+            this.checkBox_isbn_removeHyphen.Size = new System.Drawing.Size(133, 22);
             this.checkBox_isbn_removeHyphen.TabIndex = 3;
-            this.checkBox_isbn_removeHyphen.Text = "»•≥˝∫·∏‹(&D)";
+            this.checkBox_isbn_removeHyphen.Text = "ÂéªÈô§Ê®™Êù†(&D)";
             this.checkBox_isbn_removeHyphen.UseVisualStyleBackColor = true;
             this.checkBox_isbn_removeHyphen.CheckedChanged += new System.EventHandler(this.checkBox_isbn_removeHyphen_CheckedChanged);
             // 
             // checkBox_isbn_addHyphen
             // 
             this.checkBox_isbn_addHyphen.AutoSize = true;
-            this.checkBox_isbn_addHyphen.Location = new System.Drawing.Point(19, 43);
+            this.checkBox_isbn_addHyphen.Location = new System.Drawing.Point(28, 64);
+            this.checkBox_isbn_addHyphen.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_isbn_addHyphen.Name = "checkBox_isbn_addHyphen";
-            this.checkBox_isbn_addHyphen.Size = new System.Drawing.Size(90, 16);
+            this.checkBox_isbn_addHyphen.Size = new System.Drawing.Size(133, 22);
             this.checkBox_isbn_addHyphen.TabIndex = 2;
-            this.checkBox_isbn_addHyphen.Text = "º”»Î∫·∏‹(&H)";
+            this.checkBox_isbn_addHyphen.Text = "Âä†ÂÖ•Ê®™Êù†(&H)";
             this.checkBox_isbn_addHyphen.UseVisualStyleBackColor = true;
             this.checkBox_isbn_addHyphen.CheckedChanged += new System.EventHandler(this.checkBox_isbn_addHyphen_CheckedChanged);
             // 
             // checkBox_isbn_forceIsbn10
             // 
             this.checkBox_isbn_forceIsbn10.AutoSize = true;
-            this.checkBox_isbn_forceIsbn10.Location = new System.Drawing.Point(192, 21);
+            this.checkBox_isbn_forceIsbn10.Location = new System.Drawing.Point(288, 32);
+            this.checkBox_isbn_forceIsbn10.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_isbn_forceIsbn10.Name = "checkBox_isbn_forceIsbn10";
-            this.checkBox_isbn_forceIsbn10.Size = new System.Drawing.Size(120, 16);
+            this.checkBox_isbn_forceIsbn10.Size = new System.Drawing.Size(178, 22);
             this.checkBox_isbn_forceIsbn10.TabIndex = 1;
-            this.checkBox_isbn_forceIsbn10.Text = "πÊ’˚Œ™ 10 Œª–ŒÃ¨";
+            this.checkBox_isbn_forceIsbn10.Text = "ËßÑÊï¥‰∏∫ 10 ‰ΩçÂΩ¢ÊÄÅ";
             this.checkBox_isbn_forceIsbn10.UseVisualStyleBackColor = true;
             this.checkBox_isbn_forceIsbn10.CheckedChanged += new System.EventHandler(this.checkBox_isbn_forceIsbn10_CheckedChanged);
             // 
             // checkBox_isbn_forceIsbn13
             // 
             this.checkBox_isbn_forceIsbn13.AutoSize = true;
-            this.checkBox_isbn_forceIsbn13.Location = new System.Drawing.Point(19, 21);
+            this.checkBox_isbn_forceIsbn13.Location = new System.Drawing.Point(28, 32);
+            this.checkBox_isbn_forceIsbn13.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_isbn_forceIsbn13.Name = "checkBox_isbn_forceIsbn13";
-            this.checkBox_isbn_forceIsbn13.Size = new System.Drawing.Size(120, 16);
+            this.checkBox_isbn_forceIsbn13.Size = new System.Drawing.Size(178, 22);
             this.checkBox_isbn_forceIsbn13.TabIndex = 0;
-            this.checkBox_isbn_forceIsbn13.Text = "πÊ’˚Œ™ 13 Œª–ŒÃ¨";
+            this.checkBox_isbn_forceIsbn13.Text = "ËßÑÊï¥‰∏∫ 13 ‰ΩçÂΩ¢ÊÄÅ";
             this.checkBox_isbn_forceIsbn13.UseVisualStyleBackColor = true;
             this.checkBox_isbn_forceIsbn13.CheckedChanged += new System.EventHandler(this.checkBox_isbn_forceIsbn13_CheckedChanged);
             // 
             // checkBox_ignoreRerenceID
             // 
             this.checkBox_ignoreRerenceID.AutoSize = true;
-            this.checkBox_ignoreRerenceID.Location = new System.Drawing.Point(5, 181);
-            this.checkBox_ignoreRerenceID.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_ignoreRerenceID.Location = new System.Drawing.Point(8, 272);
             this.checkBox_ignoreRerenceID.Name = "checkBox_ignoreRerenceID";
-            this.checkBox_ignoreRerenceID.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_ignoreRerenceID.Size = new System.Drawing.Size(241, 22);
             this.checkBox_ignoreRerenceID.TabIndex = 13;
-            this.checkBox_ignoreRerenceID.Text = "≤ªºÏ≤È Reference ID (&R)";
+            this.checkBox_ignoreRerenceID.Text = "‰∏çÊ£ÄÊü• Reference ID (&R)";
             this.checkBox_ignoreRerenceID.UseVisualStyleBackColor = true;
             // 
             // comboBox_defaultElementSetName
@@ -566,22 +565,20 @@ namespace dp2Catalog
             "mods  -- MODS (XML records)",
             "marcxml -- MARCXML (XML records), default schema for XML",
             "opacxml -- MARCXML with holdings attached"});
-            this.comboBox_defaultElementSetName.Location = new System.Drawing.Point(134, 94);
-            this.comboBox_defaultElementSetName.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_defaultElementSetName.Location = new System.Drawing.Point(201, 141);
             this.comboBox_defaultElementSetName.Name = "comboBox_defaultElementSetName";
-            this.comboBox_defaultElementSetName.Size = new System.Drawing.Size(234, 20);
+            this.comboBox_defaultElementSetName.Size = new System.Drawing.Size(349, 26);
             this.comboBox_defaultElementSetName.TabIndex = 10;
             this.comboBox_defaultElementSetName.SizeChanged += new System.EventHandler(this.comboBox_defaultElementSetName_SizeChanged);
             // 
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(3, 96);
-            this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label14.Location = new System.Drawing.Point(4, 144);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(101, 12);
+            this.label14.Size = new System.Drawing.Size(152, 18);
             this.label14.TabIndex = 9;
-            this.label14.Text = "»± °‘™ÀÿºØ√˚(&E):";
+            this.label14.Text = "Áº∫ÁúÅÂÖÉÁ¥†ÈõÜÂêç(&E):";
             // 
             // comboBox_defaultMarcSyntaxOID
             // 
@@ -596,62 +593,56 @@ namespace dp2Catalog
             "1.2.840.10003.5.10 -- MARC21",
             "1.2.840.10003.5.101 -- SUTRS",
             "1.2.840.10003.5.109.10 -- XML"});
-            this.comboBox_defaultMarcSyntaxOID.Location = new System.Drawing.Point(134, 39);
-            this.comboBox_defaultMarcSyntaxOID.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_defaultMarcSyntaxOID.Location = new System.Drawing.Point(201, 58);
             this.comboBox_defaultMarcSyntaxOID.Name = "comboBox_defaultMarcSyntaxOID";
-            this.comboBox_defaultMarcSyntaxOID.Size = new System.Drawing.Size(234, 20);
+            this.comboBox_defaultMarcSyntaxOID.Size = new System.Drawing.Size(349, 26);
             this.comboBox_defaultMarcSyntaxOID.TabIndex = 3;
             this.comboBox_defaultMarcSyntaxOID.SizeChanged += new System.EventHandler(this.comboBox_defaultMarcSyntaxOID_SizeChanged);
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(3, 42);
-            this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label12.Location = new System.Drawing.Point(4, 63);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(119, 12);
+            this.label12.Size = new System.Drawing.Size(179, 18);
             this.label12.TabIndex = 2;
-            this.label12.Text = "»± ° ˝æ›∏Ò ΩOID(&S):";
+            this.label12.Text = "Áº∫ÁúÅÊï∞ÊçÆÊ†ºÂºèOID(&S):";
             // 
             // checkBox_autoDetectMarcSyntax
             // 
             this.checkBox_autoDetectMarcSyntax.AutoSize = true;
-            this.checkBox_autoDetectMarcSyntax.Location = new System.Drawing.Point(5, 146);
-            this.checkBox_autoDetectMarcSyntax.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_autoDetectMarcSyntax.Location = new System.Drawing.Point(8, 219);
             this.checkBox_autoDetectMarcSyntax.Name = "checkBox_autoDetectMarcSyntax";
-            this.checkBox_autoDetectMarcSyntax.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_autoDetectMarcSyntax.Size = new System.Drawing.Size(241, 22);
             this.checkBox_autoDetectMarcSyntax.TabIndex = 12;
-            this.checkBox_autoDetectMarcSyntax.Text = "◊‘∂ØÃΩ≤‚MARCº«¬º∏Ò Ω(&M)";
+            this.checkBox_autoDetectMarcSyntax.Text = "Ëá™Âä®Êé¢ÊµãMARCËÆ∞ÂΩïÊ†ºÂºè(&M)";
             this.checkBox_autoDetectMarcSyntax.UseVisualStyleBackColor = true;
             // 
             // textBox_presentPerCount
             // 
             this.textBox_presentPerCount.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_presentPerCount.Location = new System.Drawing.Point(134, 12);
-            this.textBox_presentPerCount.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_presentPerCount.Location = new System.Drawing.Point(201, 18);
             this.textBox_presentPerCount.Name = "textBox_presentPerCount";
-            this.textBox_presentPerCount.Size = new System.Drawing.Size(76, 21);
+            this.textBox_presentPerCount.Size = new System.Drawing.Size(113, 28);
             this.textBox_presentPerCount.TabIndex = 1;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 14);
-            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Location = new System.Drawing.Point(4, 21);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(125, 12);
+            this.label8.Size = new System.Drawing.Size(188, 18);
             this.label8.TabIndex = 0;
-            this.label8.Text = "ªÒ»°º«¬º√ø≈˙Ãı ˝(&C):";
+            this.label8.Text = "Ëé∑ÂèñËÆ∞ÂΩïÊØèÊâπÊù°Êï∞(&C):";
             // 
             // checkBox_alwaysUseFullElementSet
             // 
             this.checkBox_alwaysUseFullElementSet.AutoSize = true;
-            this.checkBox_alwaysUseFullElementSet.Location = new System.Drawing.Point(5, 117);
-            this.checkBox_alwaysUseFullElementSet.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_alwaysUseFullElementSet.Location = new System.Drawing.Point(8, 176);
             this.checkBox_alwaysUseFullElementSet.Name = "checkBox_alwaysUseFullElementSet";
-            this.checkBox_alwaysUseFullElementSet.Size = new System.Drawing.Size(222, 16);
+            this.checkBox_alwaysUseFullElementSet.Size = new System.Drawing.Size(331, 22);
             this.checkBox_alwaysUseFullElementSet.TabIndex = 11;
-            this.checkBox_alwaysUseFullElementSet.Text = "‘⁄ªÒ»°‰Ø¿¿º«¬ºΩ◊∂Œº¥ªÒµ√»´º«¬º(&F)";
+            this.checkBox_alwaysUseFullElementSet.Text = "Âú®Ëé∑ÂèñÊµèËßàËÆ∞ÂΩïÈò∂ÊÆµÂç≥Ëé∑ÂæóÂÖ®ËÆ∞ÂΩï(&F)";
             this.checkBox_alwaysUseFullElementSet.UseVisualStyleBackColor = true;
             // 
             // tabPage_charset
@@ -661,36 +652,33 @@ namespace dp2Catalog
             this.tabPage_charset.Controls.Add(this.comboBox_queryTermEncoding);
             this.tabPage_charset.Controls.Add(this.label13);
             this.tabPage_charset.Controls.Add(this.groupBox2);
-            this.tabPage_charset.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_charset.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_charset.Location = new System.Drawing.Point(4, 28);
             this.tabPage_charset.Name = "tabPage_charset";
-            this.tabPage_charset.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_charset.Size = new System.Drawing.Size(565, 487);
             this.tabPage_charset.TabIndex = 4;
-            this.tabPage_charset.Text = "◊÷∑˚ºØ";
+            this.tabPage_charset.Text = "Â≠óÁ¨¶ÈõÜ";
             this.tabPage_charset.UseVisualStyleBackColor = true;
             // 
             // checkBox_charNegoRecordsInSelectedCharSets
             // 
             this.checkBox_charNegoRecordsInSelectedCharSets.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_charNegoRecordsInSelectedCharSets.AutoSize = true;
-            this.checkBox_charNegoRecordsInSelectedCharSets.Location = new System.Drawing.Point(5, 279);
-            this.checkBox_charNegoRecordsInSelectedCharSets.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_charNegoRecordsInSelectedCharSets.Location = new System.Drawing.Point(8, 421);
             this.checkBox_charNegoRecordsInSelectedCharSets.Name = "checkBox_charNegoRecordsInSelectedCharSets";
-            this.checkBox_charNegoRecordsInSelectedCharSets.Size = new System.Drawing.Size(384, 16);
+            this.checkBox_charNegoRecordsInSelectedCharSets.Size = new System.Drawing.Size(574, 22);
             this.checkBox_charNegoRecordsInSelectedCharSets.TabIndex = 16;
-            this.checkBox_charNegoRecordsInSelectedCharSets.Text = "»Ù∆Ù”√¡À◊÷∑˚ºØ–≠…Ãπ¶ƒ‹£¨¡Ó ˝æ›º«¬º“≤“ªÕ¨≤…”√UTF-8±‡¬Î∑Ω Ω(&S)";
+            this.checkBox_charNegoRecordsInSelectedCharSets.Text = "Ëã•ÂêØÁî®‰∫ÜÂ≠óÁ¨¶ÈõÜÂçèÂïÜÂäüËÉΩÔºå‰ª§Êï∞ÊçÆËÆ∞ÂΩï‰πü‰∏ÄÂêåÈááÁî®UTF-8ÁºñÁ†ÅÊñπÂºè(&S)";
             this.checkBox_charNegoRecordsInSelectedCharSets.UseVisualStyleBackColor = true;
             // 
             // checkBox_charNegoUTF8
             // 
             this.checkBox_charNegoUTF8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_charNegoUTF8.AutoSize = true;
-            this.checkBox_charNegoUTF8.Location = new System.Drawing.Point(5, 258);
-            this.checkBox_charNegoUTF8.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_charNegoUTF8.Location = new System.Drawing.Point(8, 389);
             this.checkBox_charNegoUTF8.Name = "checkBox_charNegoUTF8";
-            this.checkBox_charNegoUTF8.Size = new System.Drawing.Size(336, 16);
+            this.checkBox_charNegoUTF8.Size = new System.Drawing.Size(502, 22);
             this.checkBox_charNegoUTF8.TabIndex = 15;
-            this.checkBox_charNegoUTF8.Text = "∆Ù”√◊÷∑˚ºØ–≠…Ãπ¶ƒ‹£¨”≈œ»Œ™ºÏÀ˜¥ —°”√UTF-8±‡¬Î∑Ω Ω(&N)";
+            this.checkBox_charNegoUTF8.Text = "ÂêØÁî®Â≠óÁ¨¶ÈõÜÂçèÂïÜÂäüËÉΩÔºå‰ºòÂÖà‰∏∫Ê£ÄÁ¥¢ËØçÈÄâÁî®UTF-8ÁºñÁ†ÅÊñπÂºè(&N)";
             this.checkBox_charNegoUTF8.UseVisualStyleBackColor = true;
             this.checkBox_charNegoUTF8.CheckedChanged += new System.EventHandler(this.checkBox_charNegoUTF8_CheckedChanged);
             // 
@@ -708,10 +696,9 @@ namespace dp2Catalog
             "BIG5",
             "ks_c_5601-1987",
             "shift_jis"});
-            this.comboBox_queryTermEncoding.Location = new System.Drawing.Point(136, 11);
-            this.comboBox_queryTermEncoding.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_queryTermEncoding.Location = new System.Drawing.Point(204, 16);
             this.comboBox_queryTermEncoding.Name = "comboBox_queryTermEncoding";
-            this.comboBox_queryTermEncoding.Size = new System.Drawing.Size(153, 20);
+            this.comboBox_queryTermEncoding.Size = new System.Drawing.Size(228, 26);
             this.comboBox_queryTermEncoding.TabIndex = 8;
             this.comboBox_queryTermEncoding.Text = "GB2312";
             this.comboBox_queryTermEncoding.SizeChanged += new System.EventHandler(this.comboBox_queryTermEncoding_SizeChanged);
@@ -719,12 +706,11 @@ namespace dp2Catalog
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 14);
-            this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label13.Location = new System.Drawing.Point(4, 21);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(137, 12);
+            this.label13.Size = new System.Drawing.Size(206, 18);
             this.label13.TabIndex = 7;
-            this.label13.Text = "ºÏÀ˜¥ »± °±‡¬Î∑Ω Ω(&T):";
+            this.label13.Text = "Ê£ÄÁ¥¢ËØçÁº∫ÁúÅÁºñÁ†ÅÊñπÂºè(&T):";
             // 
             // groupBox2
             // 
@@ -739,14 +725,12 @@ namespace dp2Catalog
             this.groupBox2.Controls.Add(this.label11);
             this.groupBox2.Controls.Add(this.comboBox_defaultEncoding);
             this.groupBox2.Controls.Add(this.label15);
-            this.groupBox2.Location = new System.Drawing.Point(5, 46);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox2.Location = new System.Drawing.Point(8, 69);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Size = new System.Drawing.Size(362, 197);
+            this.groupBox2.Size = new System.Drawing.Size(543, 296);
             this.groupBox2.TabIndex = 14;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "  ˝æ›º«¬º»± °±‡¬Î∑Ω Ω ";
+            this.groupBox2.Text = " Êï∞ÊçÆËÆ∞ÂΩïÁº∫ÁúÅÁºñÁ†ÅÊñπÂºè ";
             // 
             // listView_recordSyntaxAndEncodingBinding
             // 
@@ -756,10 +740,9 @@ namespace dp2Catalog
             this.listView_recordSyntaxAndEncodingBinding.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_recordSyntax,
             this.columnHeader_encoding});
-            this.listView_recordSyntaxAndEncodingBinding.Location = new System.Drawing.Point(130, 70);
-            this.listView_recordSyntaxAndEncodingBinding.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_recordSyntaxAndEncodingBinding.Location = new System.Drawing.Point(195, 105);
             this.listView_recordSyntaxAndEncodingBinding.Name = "listView_recordSyntaxAndEncodingBinding";
-            this.listView_recordSyntaxAndEncodingBinding.Size = new System.Drawing.Size(210, 117);
+            this.listView_recordSyntaxAndEncodingBinding.Size = new System.Drawing.Size(313, 174);
             this.listView_recordSyntaxAndEncodingBinding.TabIndex = 13;
             this.listView_recordSyntaxAndEncodingBinding.UseCompatibleStateImageBehavior = false;
             this.listView_recordSyntaxAndEncodingBinding.View = System.Windows.Forms.View.Details;
@@ -767,23 +750,22 @@ namespace dp2Catalog
             // 
             // columnHeader_recordSyntax
             // 
-            this.columnHeader_recordSyntax.Text = " ˝æ›∏Ò Ω";
+            this.columnHeader_recordSyntax.Text = "Êï∞ÊçÆÊ†ºÂºè";
             this.columnHeader_recordSyntax.Width = 192;
             // 
             // columnHeader_encoding
             // 
-            this.columnHeader_encoding.Text = "±‡¬Î∑Ω Ω";
+            this.columnHeader_encoding.Text = "ÁºñÁ†ÅÊñπÂºè";
             this.columnHeader_encoding.Width = 128;
             // 
             // button_deleteBindingItem
             // 
             this.button_deleteBindingItem.Enabled = false;
-            this.button_deleteBindingItem.Location = new System.Drawing.Point(45, 124);
-            this.button_deleteBindingItem.Margin = new System.Windows.Forms.Padding(2);
+            this.button_deleteBindingItem.Location = new System.Drawing.Point(68, 186);
             this.button_deleteBindingItem.Name = "button_deleteBindingItem";
-            this.button_deleteBindingItem.Size = new System.Drawing.Size(81, 22);
+            this.button_deleteBindingItem.Size = new System.Drawing.Size(122, 33);
             this.button_deleteBindingItem.TabIndex = 12;
-            this.button_deleteBindingItem.Text = "…æ≥˝(&D)...";
+            this.button_deleteBindingItem.Text = "Âà†Èô§(&D)...";
             this.button_deleteBindingItem.UseVisualStyleBackColor = true;
             this.button_deleteBindingItem.Click += new System.EventHandler(this.button_deleteBindingItem_Click);
             // 
@@ -793,47 +775,43 @@ namespace dp2Catalog
             | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_autoDetectEACC.AutoSize = true;
             this.checkBox_autoDetectEACC.Enabled = false;
-            this.checkBox_autoDetectEACC.Location = new System.Drawing.Point(21, 171);
-            this.checkBox_autoDetectEACC.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_autoDetectEACC.Location = new System.Drawing.Point(32, 256);
             this.checkBox_autoDetectEACC.Name = "checkBox_autoDetectEACC";
-            this.checkBox_autoDetectEACC.Size = new System.Drawing.Size(210, 16);
+            this.checkBox_autoDetectEACC.Size = new System.Drawing.Size(313, 22);
             this.checkBox_autoDetectEACC.TabIndex = 4;
-            this.checkBox_autoDetectEACC.Text = "◊‘∂Ø◊™ªªMARCº«¬º÷–µƒEACC◊÷∑˚(&E)";
+            this.checkBox_autoDetectEACC.Text = "Ëá™Âä®ËΩ¨Êç¢MARCËÆ∞ÂΩï‰∏≠ÁöÑEACCÂ≠óÁ¨¶(&E)";
             this.checkBox_autoDetectEACC.UseVisualStyleBackColor = true;
             this.checkBox_autoDetectEACC.Visible = false;
             // 
             // button_modifyBindingItem
             // 
             this.button_modifyBindingItem.Enabled = false;
-            this.button_modifyBindingItem.Location = new System.Drawing.Point(45, 97);
-            this.button_modifyBindingItem.Margin = new System.Windows.Forms.Padding(2);
+            this.button_modifyBindingItem.Location = new System.Drawing.Point(68, 146);
             this.button_modifyBindingItem.Name = "button_modifyBindingItem";
-            this.button_modifyBindingItem.Size = new System.Drawing.Size(81, 22);
+            this.button_modifyBindingItem.Size = new System.Drawing.Size(122, 33);
             this.button_modifyBindingItem.TabIndex = 11;
-            this.button_modifyBindingItem.Text = "–ﬁ∏ƒ(&M)...";
+            this.button_modifyBindingItem.Text = "‰øÆÊîπ(&M)...";
             this.button_modifyBindingItem.UseVisualStyleBackColor = true;
             this.button_modifyBindingItem.Click += new System.EventHandler(this.button_modifyBindingItem_Click);
             // 
             // button_newBindingItem
             // 
-            this.button_newBindingItem.Location = new System.Drawing.Point(45, 70);
-            this.button_newBindingItem.Margin = new System.Windows.Forms.Padding(2);
+            this.button_newBindingItem.Location = new System.Drawing.Point(68, 105);
             this.button_newBindingItem.Name = "button_newBindingItem";
-            this.button_newBindingItem.Size = new System.Drawing.Size(81, 22);
+            this.button_newBindingItem.Size = new System.Drawing.Size(122, 33);
             this.button_newBindingItem.TabIndex = 10;
-            this.button_newBindingItem.Text = "–¬‘ˆ(&N)...";
+            this.button_newBindingItem.Text = "Êñ∞Â¢û(&N)...";
             this.button_newBindingItem.UseVisualStyleBackColor = true;
             this.button_newBindingItem.Click += new System.EventHandler(this.button_newBindingItem_Click);
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(19, 27);
-            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label11.Location = new System.Drawing.Point(28, 40);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(101, 12);
+            this.label11.Size = new System.Drawing.Size(152, 18);
             this.label11.TabIndex = 5;
-            this.label11.Text = "»± °±‡¬Î∑Ω Ω(&E):";
+            this.label11.Text = "Áº∫ÁúÅÁºñÁ†ÅÊñπÂºè(&E):";
             // 
             // comboBox_defaultEncoding
             // 
@@ -849,10 +827,9 @@ namespace dp2Catalog
             "BIG5",
             "ks_c_5601-1987",
             "shift_jis"});
-            this.comboBox_defaultEncoding.Location = new System.Drawing.Point(130, 25);
-            this.comboBox_defaultEncoding.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_defaultEncoding.Location = new System.Drawing.Point(195, 38);
             this.comboBox_defaultEncoding.Name = "comboBox_defaultEncoding";
-            this.comboBox_defaultEncoding.Size = new System.Drawing.Size(153, 20);
+            this.comboBox_defaultEncoding.Size = new System.Drawing.Size(228, 26);
             this.comboBox_defaultEncoding.TabIndex = 6;
             this.comboBox_defaultEncoding.Text = "GB2312";
             this.comboBox_defaultEncoding.SizeChanged += new System.EventHandler(this.comboBox_defaultEncoding_SizeChanged);
@@ -860,19 +837,17 @@ namespace dp2Catalog
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(19, 55);
-            this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label15.Location = new System.Drawing.Point(28, 82);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(221, 12);
+            this.label15.Size = new System.Drawing.Size(332, 18);
             this.label15.TabIndex = 9;
-            this.label15.Text = " ˝æ›∏Ò Ω∫Õ◊÷∑˚ºØ±‡¬Î∑Ω Ω∞Û∂®πÿœµ(&B):";
+            this.label15.Text = "Êï∞ÊçÆÊ†ºÂºèÂíåÂ≠óÁ¨¶ÈõÜÁºñÁ†ÅÊñπÂºèÁªëÂÆöÂÖ≥Á≥ª(&B):";
             // 
             // tabPage_MARC
             // 
-            this.tabPage_MARC.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_MARC.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_MARC.Location = new System.Drawing.Point(4, 28);
             this.tabPage_MARC.Name = "tabPage_MARC";
-            this.tabPage_MARC.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_MARC.Size = new System.Drawing.Size(565, 487);
             this.tabPage_MARC.TabIndex = 5;
             this.tabPage_MARC.Text = "MARC";
             this.tabPage_MARC.UseVisualStyleBackColor = true;
@@ -884,12 +859,11 @@ namespace dp2Catalog
             this.tabPage_unionCatalog.Controls.Add(this.button_unionCatalog_findDp2Server);
             this.tabPage_unionCatalog.Controls.Add(this.textBox_unionCatalog_bindingDp2ServerName);
             this.tabPage_unionCatalog.Controls.Add(this.label17);
-            this.tabPage_unionCatalog.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_unionCatalog.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_unionCatalog.Location = new System.Drawing.Point(4, 28);
             this.tabPage_unionCatalog.Name = "tabPage_unionCatalog";
-            this.tabPage_unionCatalog.Size = new System.Drawing.Size(374, 320);
+            this.tabPage_unionCatalog.Size = new System.Drawing.Size(565, 487);
             this.tabPage_unionCatalog.TabIndex = 6;
-            this.tabPage_unionCatalog.Text = "¡™∫œ±‡ƒø";
+            this.tabPage_unionCatalog.Text = "ËÅîÂêàÁºñÁõÆ";
             this.tabPage_unionCatalog.UseVisualStyleBackColor = true;
             // 
             // textBox_unionCatalog_bindingUcServerUrl
@@ -897,29 +871,26 @@ namespace dp2Catalog
             this.textBox_unionCatalog_bindingUcServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_unionCatalog_bindingUcServerUrl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_unionCatalog_bindingUcServerUrl.Location = new System.Drawing.Point(5, 103);
-            this.textBox_unionCatalog_bindingUcServerUrl.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_unionCatalog_bindingUcServerUrl.Location = new System.Drawing.Point(8, 154);
             this.textBox_unionCatalog_bindingUcServerUrl.Name = "textBox_unionCatalog_bindingUcServerUrl";
-            this.textBox_unionCatalog_bindingUcServerUrl.Size = new System.Drawing.Size(314, 21);
+            this.textBox_unionCatalog_bindingUcServerUrl.Size = new System.Drawing.Size(470, 28);
             this.textBox_unionCatalog_bindingUcServerUrl.TabIndex = 4;
             // 
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(3, 89);
-            this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label18.Location = new System.Drawing.Point(4, 134);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(221, 12);
+            this.label18.Size = new System.Drawing.Size(332, 18);
             this.label18.TabIndex = 3;
-            this.label18.Text = "À˘∞Û∂®µƒ UnionCatalog ∑˛ŒÒ∆˜ URL(&U):";
+            this.label18.Text = "ÊâÄÁªëÂÆöÁöÑ UnionCatalog ÊúçÂä°Âô® URL(&U):";
             // 
             // button_unionCatalog_findDp2Server
             // 
             this.button_unionCatalog_findDp2Server.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_unionCatalog_findDp2Server.Location = new System.Drawing.Point(323, 36);
-            this.button_unionCatalog_findDp2Server.Margin = new System.Windows.Forms.Padding(2);
+            this.button_unionCatalog_findDp2Server.Location = new System.Drawing.Point(484, 54);
             this.button_unionCatalog_findDp2Server.Name = "button_unionCatalog_findDp2Server";
-            this.button_unionCatalog_findDp2Server.Size = new System.Drawing.Size(43, 22);
+            this.button_unionCatalog_findDp2Server.Size = new System.Drawing.Size(64, 33);
             this.button_unionCatalog_findDp2Server.TabIndex = 2;
             this.button_unionCatalog_findDp2Server.Text = "...";
             this.button_unionCatalog_findDp2Server.UseVisualStyleBackColor = true;
@@ -930,69 +901,54 @@ namespace dp2Catalog
             this.textBox_unionCatalog_bindingDp2ServerName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_unionCatalog_bindingDp2ServerName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_unionCatalog_bindingDp2ServerName.Location = new System.Drawing.Point(5, 36);
-            this.textBox_unionCatalog_bindingDp2ServerName.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_unionCatalog_bindingDp2ServerName.Location = new System.Drawing.Point(8, 54);
             this.textBox_unionCatalog_bindingDp2ServerName.Name = "textBox_unionCatalog_bindingDp2ServerName";
-            this.textBox_unionCatalog_bindingDp2ServerName.Size = new System.Drawing.Size(314, 21);
+            this.textBox_unionCatalog_bindingDp2ServerName.Size = new System.Drawing.Size(470, 28);
             this.textBox_unionCatalog_bindingDp2ServerName.TabIndex = 1;
             // 
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(3, 22);
-            this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label17.Location = new System.Drawing.Point(4, 33);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(197, 12);
+            this.label17.Size = new System.Drawing.Size(296, 18);
             this.label17.TabIndex = 0;
-            this.label17.Text = "À˘∞Û∂®µƒ dp2library ∑˛ŒÒ∆˜√˚(&S):";
+            this.label17.Text = "ÊâÄÁªëÂÆöÁöÑ dp2library ÊúçÂä°Âô®Âêç(&S):";
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(275, 362);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(412, 543);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(84, 33);
             this.button_OK.TabIndex = 1;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(336, 362);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(504, 543);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
             this.button_Cancel.TabIndex = 2;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // checkBox_isbn_wild
-            // 
-            this.checkBox_isbn_wild.AutoSize = true;
-            this.checkBox_isbn_wild.Location = new System.Drawing.Point(19, 66);
-            this.checkBox_isbn_wild.Name = "checkBox_isbn_wild";
-            this.checkBox_isbn_wild.Size = new System.Drawing.Size(90, 16);
-            this.checkBox_isbn_wild.TabIndex = 4;
-            this.checkBox_isbn_wild.Text = "“∞¬˘∆•≈‰(&W)";
-            this.checkBox_isbn_wild.UseVisualStyleBackColor = true;
-            // 
             // ZServerPropertyForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(401, 394);
+            this.ClientSize = new System.Drawing.Size(602, 591);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ZServerPropertyForm";
             this.ShowInTaskbar = false;
-            this.Text = "Z39.50∑˛ŒÒ∆˜ Ù–‘";
+            this.Text = "Z39.50ÊúçÂä°Âô®Â±ûÊÄß";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ZServerPropertyForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ZServerPropertyForm_FormClosed);
             this.Load += new System.EventHandler(this.ZServerPropertyForm_Load);
@@ -1091,5 +1047,6 @@ namespace dp2Catalog
         private System.Windows.Forms.CheckBox checkBox_isbn_forceIsbn10;
         private System.Windows.Forms.CheckBox checkBox_isbn_forceIsbn13;
         private System.Windows.Forms.CheckBox checkBox_isbn_wild;
+        private System.Windows.Forms.CheckBox checkBox_forceIssn8;
     }
 }

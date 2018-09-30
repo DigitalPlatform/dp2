@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <ref>%bindir%/digitalplatform.amazoninterface.dll</ref>
+</root>

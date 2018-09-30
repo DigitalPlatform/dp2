@@ -1,25 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
-using System.IO;
-using System.Collections;
-using System.Reflection;
-using System.Threading;
 using System.Diagnostics;
 
-using DigitalPlatform;	// Stop类
-using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
-using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Script;
-using DigitalPlatform.MarcDom;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
-
-using DigitalPlatform.Message;
-using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -78,7 +63,20 @@ namespace DigitalPlatform.LibraryServer
             if (sessioninfo != null
                 && sessioninfo.Account != null
                 && sessioninfo.UserType == "reader")
-                element_table = readerchangeable_comment_element_names;
+            {
+                // 2018/8/15
+                // 注意: 读者也可能具备修改 state 的能力，如果读者具备 managecomment 权限的话
+                bool bManager = false;
+                if (string.IsNullOrEmpty(sessioninfo.UserID) == true
+    || StringUtil.IsInList("managecomment", sessioninfo.RightsOrigin) == false)
+                    bManager = false;
+                else
+                    bManager = true;
+
+                // 对不具备管理 comment 权限的读者，降低修改字段的权限范围
+                if (bManager == false)
+                    element_table = readerchangeable_comment_element_names;
+            }
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
@@ -491,29 +489,34 @@ out string strError)
                     return 0;
                 }
 
-                string strOperator = sessioninfo.UserID;
-                string strOldUserID = DomUtil.GetElementText(domExist.DocumentElement,
-                    "creator");
-                if (strOperator != strOldUserID)
+                // 2018/8/15
+                // 注意读者身份，也可能具备 managecomment 权限。具备权限的读者和普通读者不同
+                if (StringUtil.IsInList("managecomment", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "读者身份的用户不能修改由其他用户创建的评注记录";
-                    return 0;
-                }
+                    string strOperator = sessioninfo.UserID;
+                    string strOldUserID = DomUtil.GetElementText(domExist.DocumentElement,
+                        "creator");
+                    if (strOperator != strOldUserID)
+                    {
+                        strError = "读者身份的用户不能修改由其他用户创建的评注记录";
+                        return 0;
+                    }
 
-                string strNewUserID = DomUtil.GetElementText(domNew.DocumentElement,
-    "creator");
-                if (strNewUserID != strOperator)
-                {
-                    strError = "读者身份的用户不能修改已有评注记录的<creator>元素";
-                    return 0;
-                }
+                    string strNewUserID = DomUtil.GetElementText(domNew.DocumentElement,
+        "creator");
+                    if (strNewUserID != strOperator)
+                    {
+                        strError = "读者身份的用户不能修改已有评注记录的<creator>元素";
+                        return 0;
+                    }
 
-                string strState = DomUtil.GetElementText(domExist.DocumentElement,
-"state");
-                if (StringUtil.IsInList("锁定", strState) == true)
-                {
-                    strError = "读者身份的用户不能修改处于锁定状态的评注记录";
-                    return 0;
+                    string strState = DomUtil.GetElementText(domExist.DocumentElement,
+    "state");
+                    if (StringUtil.IsInList("锁定", strState) == true)
+                    {
+                        strError = "读者身份的用户不能修改处于锁定状态的评注记录";
+                        return 0;
+                    }
                 }
             }
 
@@ -561,21 +564,26 @@ out string strError)
                     return 0;
                 }
 
-                string strNewUserID = sessioninfo.UserID;
-                string strOldUserID = DomUtil.GetElementText(domExist.DocumentElement,
-                    "creator");
-                if (strNewUserID != strOldUserID)
+                // 2018/8/15
+                // 注意读者身份，也可能具备 managecomment 权限。具备权限的读者和普通读者不同
+                if (StringUtil.IsInList("managecomment", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "读者身份的用户不能删除由其他用户创建的评注记录";
-                    return 0;
-                }
+                    string strNewUserID = sessioninfo.UserID;
+                    string strOldUserID = DomUtil.GetElementText(domExist.DocumentElement,
+                        "creator");
+                    if (strNewUserID != strOldUserID)
+                    {
+                        strError = "读者身份的用户不能删除由其他用户创建的评注记录";
+                        return 0;
+                    }
 
-                string strState = DomUtil.GetElementText(domExist.DocumentElement,
-                    "state");
-                if (StringUtil.IsInList("锁定", strState) == true)
-                {
-                    strError = "读者身份的用户不能删除处于锁定状态的评注记录";
-                    return 0;
+                    string strState = DomUtil.GetElementText(domExist.DocumentElement,
+                        "state");
+                    if (StringUtil.IsInList("锁定", strState) == true)
+                    {
+                        strError = "读者身份的用户不能删除处于锁定状态的评注记录";
+                        return 0;
+                    }
                 }
             }
 

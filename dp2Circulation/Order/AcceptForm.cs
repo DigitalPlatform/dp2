@@ -223,6 +223,7 @@ namespace dp2Circulation
             SetTabPageEnabled(this.tabPage_finish, false);
 #endif
             FillDbNameList();
+            FillSellerList();
 
             this.UiState = Program.MainForm.AppInfo.GetString(
                 "accept_form",
@@ -421,6 +422,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 controls.Add(new ComboBoxText(comboBox_accept_from));
                 controls.Add(comboBox_accept_matchStyle);
                 controls.Add(this.checkedListBox_prepare_dbNames);
+                controls.Add(this.comboBox_sellerFilter);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -437,6 +439,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 controls.Add(new ComboBoxText(comboBox_accept_from));
                 controls.Add(comboBox_accept_matchStyle);
                 controls.Add(this.checkedListBox_prepare_dbNames);
+                controls.Add(this.comboBox_sellerFilter);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -704,7 +707,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -1888,6 +1891,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 2012/5/7
             e.CreateCallNumber = this.checkBox_prepare_createCallNumber.Checked;
 
+            e.SellerFilter = this.comboBox_sellerFilter.Text;
 
             Debug.Assert(String.IsNullOrEmpty(e.SourceRecPath) == false, "");
             // e.SourceRecPath 中是种册窗内当前记录，有强烈的倾向把它作为源，但是和当前AcceprtForm的浏览列表中可能已经设定的源不是同一个
@@ -4513,7 +4517,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     string strFromStyle = "";
                     string strFromCaption = "";
 
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = BiblioSearchForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
 
 
                     if (this.comboBox_prepare_type.Text == "图书")
@@ -4815,6 +4819,30 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             return strResult;
         }
+
+        void FillSellerList()
+        {
+            this.comboBox_sellerFilter.Items.Clear();
+
+            this.comboBox_sellerFilter.Items.Add("<不过滤>");
+
+            {
+                int nRet = Program.MainForm.GetValueTable("orderSeller",
+                    "",
+                    out string[] values,
+                    out string strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
+
+                var list = new List<string>(values);
+
+                // 去掉每个元素内的 {} 部分
+                list = StringUtil.FromListString(StringUtil.GetPureSelectedValue(StringUtil.MakePathList(list)));
+
+                this.comboBox_sellerFilter.Items.AddRange(list.ToArray());
+            }
+        }
+
 
         void FillDbNameList()
         {

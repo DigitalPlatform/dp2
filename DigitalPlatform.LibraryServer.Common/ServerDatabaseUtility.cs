@@ -93,6 +93,15 @@ namespace DigitalPlatform.LibraryServer.Common
                     return 0;
                 }
             }
+
+            if (strDbType == "authority")
+            {
+                if (IsAuthorityDbName(cfg_dom, strDbName) == true)
+                {
+                    strError = "删除完成后，" + strDbTypeCaption + "库名 '" + strDbName + "' 在 library.xml 的 authdbgroup/database 元素内没有清理干净";
+                    return 0;
+                }
+            }
             return 1;
         }
 
@@ -221,6 +230,8 @@ namespace DigitalPlatform.LibraryServer.Common
                     return "盘点";
                 case "reader":
                     return "读者";
+                case "authority":
+                    return "规范";
                 default:
                     throw new ArgumentException("未知的 strDbType 值 '" + strDbType + "'", "strDbType");
             }
@@ -242,6 +253,23 @@ namespace DigitalPlatform.LibraryServer.Common
         }
 
         #endregion
+
+        #region 规范库
+        // 是否在配置的规范库名之列?
+        // 注：未考虑规范库名字的其他语种情况
+        public static bool IsAuthorityDbName(XmlDocument LibraryCfgDom,
+            string strAuthorityDbName)
+        {
+            if (string.IsNullOrEmpty(strAuthorityDbName) == true)
+                return false;
+            XmlNode node = LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strAuthorityDbName + "']");
+            if (node != null)
+                return true;
+            return false;
+        }
+
+        #endregion
+
 
         #region 书目库
 

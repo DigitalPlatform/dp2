@@ -2187,6 +2187,50 @@ strPubType);
             MessageBox.Show(this, strError);
         }
 
+        public static void ParseItemVolumeString(string strVolumeString,
+           out string strIssue,
+           out string strZong,
+           out string strVolume)
+        {
+            strIssue = "";
+            strZong = "";
+            strVolume = "";
+
+            string[] segments = strVolumeString.Split(new char[] { '=' });
+            for (int i = 0; i < segments.Length; i++)
+            {
+                string strSegment = segments[i].Trim();
+
+                if (strSegment.IndexOf("no.") != -1)
+                    strIssue = strSegment;
+                else if (strSegment.IndexOf("总.") != -1)
+                    strZong = strSegment;
+                else if (strSegment.IndexOf("v.") != -1)
+                    strVolume = strSegment;
+            }
+        }
+
+        // 根据 type 在 Table XML 中获得一个内容值
+        static string FindBiblioTableContent(XmlDocument dom, string type)
+        {
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+            int i = 0;
+            foreach (XmlElement line in nodes)
+            {
+                string strName = line.GetAttribute("name");
+                string strValue = line.GetAttribute("value");
+                string strType = line.GetAttribute("type");
+
+                if (strName == "_coverImage")
+                    continue;
+
+                if (strType == type)
+                    return strValue;
+            }
+
+            return "";
+        }
+
 
         // 打印一个合订册的装订单
         int PrintOneBinding(
@@ -2225,15 +2269,58 @@ strPubType);
             if (string.IsNullOrEmpty(strBindingBarcode) == false)
                 macro_table["%bindingbarcode_label%"] = "*" + strBindingBarcode + "*";
 
+            string strBindingVolume = ListViewUtil.GetItemText(item, COLUMN_VOLUME);
+
             macro_table["%bindingintact%"] = ListViewUtil.GetItemText(item, COLUMN_INTACT);
             macro_table["%bindingprice%"] = ListViewUtil.GetItemText(item, COLUMN_PRICE);
-            macro_table["%bindingvolume%"] = ListViewUtil.GetItemText(item, COLUMN_VOLUME);
+            macro_table["%bindingvolume%"] = strBindingVolume;
             macro_table["%bindingpublishtime%"] = ListViewUtil.GetItemText(item, COLUMN_PUBLISHTIME);
             macro_table["%bindinglocation%"] = ListViewUtil.GetItemText(item, COLUMN_LOCATION);
             macro_table["%bindingrefid%"] = ListViewUtil.GetItemText(item, COLUMN_REFID);
 
+            // 2018/8/20
+            ParseItemVolumeString(strBindingVolume,
+                     out string strIssue,
+                     out string strZong,
+                     out string strVolume);
+            macro_table["%bindingvolume_issue%"] = strIssue;
+            macro_table["%bindingvolume_volume%"] = strVolume;
+            macro_table["%bindingvolume_zong%"] = strZong;
+
             // string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
-            // TODO: 获得书目记录，创建某种格式，并获得某些宏内容？
+
+            // 添加书目 table 格式列
+            {
+                string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
+
+                Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
+
+                nRet = GetTable(strBiblioRecPath,
+                    "",
+                    out string strTableXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(strTableXml);
+                int i = 0;
+                foreach (Column column in secondary_option.Columns)
+                {
+                    string col = StringUtil.GetLeft(column.Name);
+                    if (col.StartsWith("bindingbiblio_") == false)
+                        continue;
+                    string key = col.Substring("bindingbiblio_".Length);
+                    string strValue = "";
+                    if (key == "recpath" || key.EndsWith("_recpath"))
+                        strValue = strBiblioRecPath;
+                    else
+                        strValue = FindBiblioTableContent(dom, key);
+
+                    macro_table.Remove("%" + col + "%");
+                    macro_table.Add("%" + col + "%", strValue);
+                }
+            }
 
             if (this.MarcFilter != null)
             {
@@ -2281,6 +2368,7 @@ strPubType);
 
                     macro_table.Add("%" + key + "%", this.ColumnTable[key]);
                 }
+
             }
 
             // 需要将属于合订册的文件名前缀区别开来
@@ -2291,7 +2379,6 @@ strPubType);
 
             // 提前创建成员表格的内容，因为里面也要顺便创建若干和统计数据有关的宏值
             // 内容暂时不输出
-            string strMemberTableResult = "";
             // 构造下属成员的详情表格
             // return:
             //      实际到达的成员册数
@@ -2299,7 +2386,7 @@ strPubType);
                 main_option,
                 macro_table,
                 item,
-                out strMemberTableResult,
+                out string strMemberTableResult,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2433,9 +2520,17 @@ strPubType);
                     StreamUtil.WriteText(strFilename,
                         "<table class='binding'>");
 
-                    OutputBindingTableContent(strFilename,
-                        macro_table,
-                        secondary_option.Columns);
+                    try
+                    {
+                        OutputBindingTableContent(strFilename,
+      macro_table,
+      secondary_option.Columns);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "OutputBindingTableContent() 出现异常: " + ExceptionUtil.GetAutoText(ex);
+                        return -1;
+                    }
 
                     // 表格结束
                     StreamUtil.WriteText(strFilename,
@@ -2469,154 +2564,6 @@ strPubType);
                 if (nRet != -1)
                     strName = strName.Substring(0, nRet).Trim();
 
-                if (strName == "bindingsummary")
-                {
-                    // 期刊信息
-                    StreamUtil.WriteText(strFilename,
-                        "<tr class='biblio'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>期刊</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingsummary%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingissn")
-                {
-                    // ISSN
-                    StreamUtil.WriteText(strFilename,
-                        "<tr class='issn'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>ISSN</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingissn%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingaccessno")
-                {
-                    // 索取号
-                    StreamUtil.WriteText(strFilename,
-                        "<tr class='accessno'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>索取号</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingaccessno%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindinglocation")
-                {
-                    // 馆藏地点
-                    StreamUtil.WriteText(strFilename,
-                        "<tr class='location'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>馆藏地点</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindinglocation%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingbarcode")
-                {
-
-                    // 条码号
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='barcode'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>册条码号</td>");
-
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value' " /*+ strBindingBarcodeStyle*/ + " >" + HttpUtility.HtmlEncode((string)macro_table["%bindingbarcode%"])
-                        + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingbarcode_label")
-                {
-
-                    // 条码标签
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='barcode'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>册条码标签</td>");
-
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value barcode_label' >" + HttpUtility.HtmlEncode((string)macro_table["%bindingbarcode_label%"])
-                        + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingrefid")
-                {
-
-                    // 参考ID
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='refid'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>参考ID</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingrefid%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingintact")
-                {
-
-                    // 完好率
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='intact'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>完好率</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingintact%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingprice")
-                {
-
-                    // 价格
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='bindingprice'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>合订价格</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingprice%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
-                if (strName == "bindingpublishtime")
-                {
-
-                    // 出版时间
-                    StreamUtil.WriteText(strFilename,
-                    "<tr class='publishtime'>");
-                    StreamUtil.WriteText(strFilename,
-                       "<td class='name'>出版时间</td>");
-                    StreamUtil.WriteText(strFilename,
-                      "<td class='value'>" + HttpUtility.HtmlEncode(
-                      (string)macro_table["%bindingpublishtime%"]) + "</td>");
-                    StreamUtil.WriteText(strFilename,
-                        "</tr>");
-                }
-
                 if (strName == "bindingissuecount")
                 {
 
@@ -2636,8 +2583,159 @@ strPubType);
                     StreamUtil.WriteText(strFilename,
                         "</tr>");
                 }
+                else if (strName == "bindingbarcode_label")
+                {
 
-                if (strName == "bindingvolume")
+                    // 条码标签
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='barcode'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>册条码标签</td>");
+
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value barcode_label' >" + HttpUtility.HtmlEncode((string)macro_table["%bindingbarcode_label%"])
+                        + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+#if NO
+                if (strName == "bindingsummary")
+                {
+                    // 期刊信息
+                    StreamUtil.WriteText(strFilename,
+                        "<tr class='biblio'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>期刊</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingsummary%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingissn")
+                {
+                    // ISSN
+                    StreamUtil.WriteText(strFilename,
+                        "<tr class='issn'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>ISSN</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingissn%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingaccessno")
+                {
+                    // 索取号
+                    StreamUtil.WriteText(strFilename,
+                        "<tr class='accessno'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>索取号</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingaccessno%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindinglocation")
+                {
+                    // 馆藏地点
+                    StreamUtil.WriteText(strFilename,
+                        "<tr class='location'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>馆藏地点</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindinglocation%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingbarcode")
+                {
+
+                    // 条码号
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='barcode'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>册条码号</td>");
+
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value' " /*+ strBindingBarcodeStyle*/ + " >" + HttpUtility.HtmlEncode((string)macro_table["%bindingbarcode%"])
+                        + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+
+
+                else if (strName == "bindingrefid")
+                {
+
+                    // 参考ID
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='refid'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>参考ID</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingrefid%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingintact")
+                {
+
+                    // 完好率
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='intact'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>完好率</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingintact%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingprice")
+                {
+
+                    // 价格
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='bindingprice'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>合订价格</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingprice%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingpublishtime")
+                {
+
+                    // 出版时间
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='publishtime'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>出版时间</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingpublishtime%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+
+
+                else if (strName == "bindingvolume")
                 {
 
                     // 包含的期
@@ -2652,14 +2750,75 @@ strPubType);
                         "</tr>");
                 }
 
+                //*** 以下是分解以后的序列
+                else if (strName == "bindingvolume_issue")
+                {
+                    // 包含的期
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='volume_issue'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>包含期号</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingvolume_issue%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingvolume_volume")
+                {
+                    // 包含的卷
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='volume_volume'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>包含卷号</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingvolume_volume%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+
+                else if (strName == "bindingvolume_zong")
+                {
+                    // 包含的总期号
+                    StreamUtil.WriteText(strFilename,
+                    "<tr class='volume_zong'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>包含总期号</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      (string)macro_table["%bindingvolume_zong%"]) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
+#endif
+
+                else
+                {
+                    if (macro_table.ContainsKey("%" + strName + "%") == false)
+                        throw new Exception("无法识别的列名 '" + strName + "'");
+
+                    string strValue = macro_table["%" + strName + "%"] as string;
+
+                    StreamUtil.WriteText(strFilename,
+    "<tr class='" + strName + "'>");
+                    StreamUtil.WriteText(strFilename,
+                       "<td class='name'>" + column.Caption + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                      "<td class='value'>" + HttpUtility.HtmlEncode(
+                      strValue) + "</td>");
+                    StreamUtil.WriteText(strFilename,
+                        "</tr>");
+                }
             }
         }
 
-    // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
-    // parameters:
-    //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
-    string GetAutoCssUrl(PrintOption option,
-            string strDefaultCssFileName)
+        // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
+        // parameters:
+        //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
+        string GetAutoCssUrl(PrintOption option,
+                string strDefaultCssFileName)
         {
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
@@ -3182,6 +3341,46 @@ strPubType);
 
             return 1;
         }
+
+        int GetMarcTable(ListViewItem item,
+    out string strResult,
+    out string strError)
+        {
+            strError = "";
+            strResult = "";
+            int nRet = 0;
+
+            string[] formats = new string[1];
+            formats[0] = "table";
+
+            string[] results = null;
+            byte[] timestamp = null;
+
+            string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
+
+            Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
+
+            long lRet = Channel.GetBiblioInfos(
+                    null, // stop,
+                    strBiblioRecPath,
+                    "",
+                    formats,
+                    out results,
+                    out timestamp,
+                    out strError);
+            if (lRet == -1 || lRet == 0)
+            {
+                if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
+                    strError = "书目记录 '" + strBiblioRecPath + "' 不存在";
+
+                strError = "获得书目记录 table 格式时发生错误: " + strError;
+                return -1;
+            }
+
+            strResult = results[0];
+            return 1;
+        }
+
         /// <summary>
         /// 错误信息窗
         /// </summary>
@@ -3751,9 +3950,22 @@ strPubType);
                 return;
             }
 
-            string strBarcode = list.SelectedItems[0].Text;
-            string strRecPath = ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_RECPATH);
-            string strRefID = ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_REFID);
+            string strBarcode = "";
+            string strRecPath = "";
+            string strRefID = "";
+
+            if (list == this.listView_parent)
+            {
+                strBarcode = list.SelectedItems[0].Text;
+                strRecPath = ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_RECPATH);
+                strRefID = ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_REFID);
+            }
+            else
+            {
+                strBarcode = list.SelectedItems[0].Text;
+                strRecPath = "";    //  ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_MEMBER_RECPATH);
+                strRefID = ListViewUtil.GetItemText(list.SelectedItems[0], COLUMN_MEMBER_REFID);
+            }
 
             EntityForm form = new EntityForm();
 
@@ -3861,7 +4073,7 @@ strPubType);
         }
 
         const string MAIN_NAME_PATH = "printbinding_printoption";
-        const string SECONDARY_NAME_PATH =  "printbinding_printoption_secondary";
+        const string SECONDARY_NAME_PATH = "printbinding_printoption_secondary";
 
         private void button_print_option_Click(object sender, EventArgs e)
         {
@@ -3961,6 +4173,7 @@ strPubType);
 
         public override List<Column> GetAllColumns(bool bDefault)
         {
+            // TODO: 改造为 PrintBindingPrintOption1 的方式
             List<Column> results = new List<Column>();
 
             // "missing -- 缺期状态",
@@ -4077,6 +4290,7 @@ strPubType);
             this.Columns.AddRange(GetAllColumns(true));
         }
 
+#if NO
         public override List<Column> GetAllColumns(bool bDefault)
         {
             List<Column> results = new List<Column>();
@@ -4161,14 +4375,88 @@ strPubType);
             column.MaxChars = -1;
             results.Add(column);
 
-            // "bindingvolume -- 包含期号";
+            // "bindingvolume -- 包含卷期号";
             column = new Column();
-            column.Name = "bindingvolume -- 包含期号";
-            column.Caption = "包含期号";
+            column.Name = "bindingvolume -- 包含卷期号";
+            column.Caption = "包含卷期号";
+            column.MaxChars = -1;
+            results.Add(column);
+
+            // "bindingvolume_issue -- 包含卷期号(期)";
+            column = new Column();
+            column.Name = "bindingvolume_issue -- 包含卷期号(期)";
+            column.Caption = "包含卷期号(期)";
+            column.MaxChars = -1;
+            results.Add(column);
+
+            // "bindingvolume_volume -- 包含卷期号(卷)";
+            column = new Column();
+            column.Name = "bindingvolume_volume -- 包含卷期号(卷)";
+            column.Caption = "包含卷期号(卷)";
+            column.MaxChars = -1;
+            results.Add(column);
+
+            // "bindingvolume_zong -- 包含卷期号(总)";
+            column = new Column();
+            column.Name = "bindingvolume_zong -- 包含卷期号(总)";
+            column.Caption = "包含卷期号(总)";
             column.MaxChars = -1;
             results.Add(column);
 
             return results;
+        }
+
+#endif
+
+        public override List<Column> GetAllColumns(bool bDefault)
+        {
+            List<Column> results = new List<Column>();
+
+            string[] lines = new string[] {
+            "bindingsummary -- 期刊",
+            "bindingissn -- ISSN",
+            "bindingaccessno -- 索取号",
+            "bindinglocation -- 馆藏地点",
+            "bindingbarcode -- 册条码号",
+             "*bindingbarcode_label -- 册条码标签",   // 可选
+             "bindingrefid -- 参考ID",
+             "bindingintact -- 完好率",
+             "bindingprice -- 合订价格",
+             "bindingpublishtime -- 出版时间",
+             "bindingissuecount -- 期数",
+             "bindingvolume -- 包含卷期号",
+             "*bindingvolume_issue -- 包含卷期号(期)", // 可选
+             "*bindingvolume_volume -- 包含卷期号(卷)",    // 可选
+             "*bindingvolume_zong -- 包含卷期号(总)", // 可选
+             "*bindingbiblio_title -- 刊名", // 可选
+             "*bindingbiblio_author -- 编者",    // 可选
+             "*bindingbiblio_publication_area -- 出版项", // 可选
+        };
+
+            foreach (string line in lines)
+            {
+                if (line[0] == '*' && bDefault == true)
+                    continue;
+                string strLine = line;
+                if (strLine[0] == '*')
+                    strLine = strLine.Substring(1);
+                Column column = new Column();
+                column.Name = strLine;
+                column.Caption = GetRightPart(strLine);
+                column.MaxChars = -1;
+                results.Add(column);
+            }
+
+            return results;
+        }
+
+        internal static string GetRightPart(string strText)
+        {
+            int nRet = strText.IndexOf("--");
+            if (nRet == -1)
+                return "";
+
+            return strText.Substring(nRet + 2).Trim();
         }
 
 #if NO

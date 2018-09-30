@@ -50,6 +50,7 @@ namespace dp2Circulation
             "order","订购",
             "issue","期",
             "reader","读者",
+            "authority", "规范",
             "message","消息",
             "arrived","预约到书",
             "amerce","违约金",
@@ -905,6 +906,42 @@ out strError);
             Program.MainForm.StartPrepareNames(false, false);
         }
 
+        // 创建规范库
+        private void ToolStripMenuItem_createAuthorityDatabase_Click(object sender, EventArgs e)
+        {
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") < 0)
+            {
+                MessageBox.Show(this, "本功能只能和 dp2library 3.6 及以上版本配套使用");
+                return;
+            }
+
+            BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.DbType = "authority";
+            dlg.Text = "创建新规范库";
+            dlg.ManagerForm = this;
+            dlg.CreateMode = true;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            // 刷新库名列表
+            string strError = "";
+            int nRet = ListAllDatabases(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 选定刚创建的数据库
+            SelectDatabaseLine(dlg.BiblioDatabaseName);
+
+            // 重新获得各种库名、列表
+            Program.MainForm.StartPrepareNames(false, false);
+        }
+
         void SelectDatabaseLine(string strDatabaseName)
         {
             for (int i = 0; i < this.listView_databases.Items.Count; i++)
@@ -1642,6 +1679,49 @@ out strError);
                 // 重新获得各种库名、列表
                 Program.MainForm.StartPrepareNames(false, false);
             }
+            else if (strType == "authority")
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") < 0)
+                {
+                    strError = "本功能只能和 dp2library 3.6 及以上版本配套使用";
+                    goto ERROR1;
+                }
+
+                BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+
+                dlg.DbType = "authority";
+                dlg.Text = "修改规范库特性";
+                dlg.ManagerForm = this;
+                dlg.CreateMode = false;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+
+                nRet = dlg.Initial((string)item.Tag,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult != DialogResult.OK)
+                    return;
+
+                // 刷新库名列表
+                nRet = ListAllDatabases(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+
+                // 选定刚修改的数据库
+                SelectDatabaseLine(dlg.BiblioDatabaseName);
+
+                RefreshOpacDatabaseList();
+                RefreshOpacBrowseFormatTree();
+
+                // 重新获得各种库名、列表
+                Program.MainForm.StartPrepareNames(false, false);
+            }
             else if (strType == "reader")
             {
                 ReaderDatabaseDialog dlg = new ReaderDatabaseDialog();
@@ -1830,6 +1910,13 @@ out strError);
             menuItem = new MenuItem("创建读者库(&V)");
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createReaderDatabase_Click);
             contextMenu.MenuItems.Add(menuItem);
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+            {
+                menuItem = new MenuItem("创建规范库(&A)");
+                menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createAuthorityDatabase_Click);
+                contextMenu.MenuItems.Add(menuItem);
+            }
 
             menuItem = new MenuItem("创建违约金库(&A)");
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createAmerceDatabase_Click);

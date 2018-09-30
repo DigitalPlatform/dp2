@@ -261,7 +261,7 @@ namespace DigitalPlatform.rms
             {
                 task.Stop();
 
-                infos.Add( task.GetCurrentInfo(param.ResultOffset,
+                infos.Add(task.GetCurrentInfo(param.ResultOffset,
                     param.MaxResultBytes));
             }
 
@@ -336,7 +336,7 @@ namespace DigitalPlatform.rms
         }
     }
 
-            // 系统挂起的理由
+    // 系统挂起的理由
     public enum HangupReason
     {
         None = 0,   // 没有挂起

@@ -493,7 +493,7 @@
             this.Name = "ImportExportForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "从书目转储文件导入";
+            this.Text = "从书目转储(.bdf)文件导入";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportExportForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImportExportForm_FormClosed);
             this.Load += new System.EventHandler(this.ImportExportForm_Load);

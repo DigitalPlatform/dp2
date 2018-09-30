@@ -347,7 +347,20 @@ namespace dp2Library
                     {
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
-                            address_list);
+                            address_list,
+                            strApiName == "Logout" ? false : true);
+                        // 2008/8/17
+                        if (this.sessioninfo == null && strApiName == "Logout")
+                        {
+                            // Logout 时发现 session 并不存在
+                            this._ip = "";
+                            this.sessioninfo = null;
+                            OperationContext.Current.InstanceContext.ReleaseServiceInstance();
+                            result.Value = -1;
+                            result.ErrorInfo = "通道先前已经被释放，本次 Logout 操作失败";
+                            result.ErrorCode = ErrorCode.ChannelReleased;
+                            return result;
+                        }
                     }
 #if NO
                     catch (OutofSessionException ex)
@@ -3349,10 +3362,10 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchbiblio,order,searchauthority", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "检索书目信息被拒绝。不具备order或searchbiblio权限。";
+                    result.ErrorInfo = "检索书目或规范信息被拒绝。不具备order、searchbiblio或searchauthority权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -3541,6 +3554,7 @@ namespace dp2Library
             strMatchStyle,
             strLang,
             strSearchStyle,
+            out List<string> dbTypes,
             out strQueryXml,
                     out strError);
                 if (nRet == -1 || nRet == 0)
@@ -3551,6 +3565,31 @@ namespace dp2Library
                     result.ErrorInfo = strError;
                     result.ErrorCode = ErrorCode.FromNotFound;
                     return result;
+                }
+
+                // 再次检查权限。分为书目和规范两种细致检查
+                foreach (string type in dbTypes)
+                {
+                    if (type == "biblio")
+                    {
+                        if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "检索书目信息被拒绝。不具备 order 或 searchbiblio权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else if (type == "authority")
+                    {
+                        if (StringUtil.IsInList("searchauthority", sessioninfo.RightsOrigin) == false)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "检索规范信息被拒绝。不具备 searchauthority 权限。";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
                 }
 
                 // strLocationFilter = "海淀分馆"; // testing
@@ -3626,7 +3665,7 @@ namespace dp2Library
         }
 
         // TODO: 需要增加返回保存后记录 XML 的参数。因为保存过程中，可能会略微修改前端提交的记录，比如增加一些字段
-        // 设置书目信息(目前只能xml一种格式)
+        // 设置书目信息或者规范信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
         //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
@@ -4568,7 +4607,7 @@ namespace dp2Library
                     if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息(GetItemInfo()被拒绝。不具备 getcommentinfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11865,8 +11904,6 @@ Stack:
                 if (string.IsNullOrEmpty(strResPath) == false
     && strResPath[0] == '!')
                 {
-                    string strFilePath = "";
-                    string strLibraryCode = "";
 
                     // 检查用户使用 GetRes API 的权限
                     // return:
@@ -11878,8 +11915,8 @@ Stack:
                         sessioninfo.LibraryCodeList,
                         sessioninfo.RightsOrigin,
                         strResPath,
-                        out strLibraryCode,
-                        out strFilePath,
+                        out string strLibraryCode,
+                        out string strFilePath,
                         out strError);
                     if (nRet == 0)
                     {
@@ -12340,6 +12377,14 @@ Stack:
          * */
 
         // 写入资源
+        // 注：写入 backup 或 cfgs 目录要求具备 backup 或者 managedatabase 权限；
+        //      写入 upload 目录需要 upload 或者 managedatabase 权限
+        //      写入 library.xml 需要 managedatabase 权限
+        //      写入 cfgs/template 文件需要 writetemplate 权限
+        //      写入数据库记录，需要 writerecord 权限
+        //      写入数据库记录下的对象，需要 writeobject 权限
+        //      写入其他(比如 库名/cfgs/配置文件名 )资源，需要 writeres 权限
+        //      writeres 权限
         public LibraryServerResult WriteRes(
             string strResPath,
             string strRanges,
@@ -12785,7 +12830,8 @@ Stack:
                 if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                    // result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                    result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -14260,6 +14306,7 @@ out strError);
         //		strNumber	返回号码
         //		strError	出错信息
         // return:
+        // result.Value:
         //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
         //		-3	需要回答问题
         //      -2  strID验证失败

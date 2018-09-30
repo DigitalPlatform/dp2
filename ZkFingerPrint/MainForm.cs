@@ -243,6 +243,18 @@ namespace ZkFingerprint
                 {
                     if (this.WindowState == FormWindowState.Minimized)
                         this.WindowState = FormWindowState.Normal;
+
+                    // 如果 this.TopMost 不奏效，可以试试下面这个 URL 里面的方法
+                    // https://stackoverflow.com/questions/5282588/how-can-i-bring-my-application-window-to-the-front
+                    /*
+                    {
+                        this.WindowState = FormWindowState.Minimized;
+                        this.Show();
+                        this.WindowState = FormWindowState.Normal;
+                    }
+                    */
+
+
                     this.TopMost = true;
                     // SetForegroundWindow(this.Handle);    // 接受键盘输入
                 }

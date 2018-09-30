@@ -2,16 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
@@ -70,6 +66,12 @@ namespace dp2Circulation
         /// </summary>
         public string PriceDefault = "验收价";  // 为册记录中的价格字段设置何种价格值。书目价/订购价/验收价/空白
 
+        // 2018/8/19
+        /// <summary>
+        /// 书商过滤器
+        /// </summary>
+        public string SellerFilter { get; set; }
+        
         // 
         /// <summary>
         /// 打开验收目标记录(以便输入条码等)
@@ -113,125 +115,6 @@ namespace dp2Circulation
             this.ItemType = "order";
             this.ItemTypeName = "订购";
         }
-
-#if NO
-        public int OrderCount
-        {
-            get
-            {
-                if (this.Items != null)
-                    return this.Items.Count;
-
-                return 0;
-            }
-        }
-
-        // 将listview中的订购事项修改为new状态
-        public void ChangeAllItemToNewState()
-        {
-            foreach (OrderItem orderitem in this.Items)
-            {
-                // OrderItem orderitem = this.OrderItems[i];
-
-                if (orderitem.ItemDisplayState == ItemDisplayState.Normal
-                    || orderitem.ItemDisplayState == ItemDisplayState.Changed
-                    || orderitem.ItemDisplayState == ItemDisplayState.Deleted)   // 注意未提交的deleted也变为new了
-                {
-                    orderitem.ItemDisplayState = ItemDisplayState.New;
-                    orderitem.RefreshListView();
-                    orderitem.Changed = true;    // 这一句决定了使能后如果立即关闭窗口，是否会警告(实体修改)内容丢失
-                }
-            }
-        }
-
-        public string BiblioRecPath
-        {
-            get
-            {
-                return this.m_strBiblioRecPath;
-            }
-            set
-            {
-                this.m_strBiblioRecPath = value;
-
-                if (this.Items != null)
-                {
-                    string strID = Global.GetRecordID(value);
-                    this.Items.SetParentID(strID);
-                }
-
-            }
-        }
-
-        /// <summary>
-        /// 内容是否发生过修改
-        /// </summary>
-        public bool Changed
-        {
-            get
-            {
-                if (this.Items == null)
-                    return false;
-
-                return this.Items.Changed;
-            }
-            set
-            {
-                if (this.Items != null)
-                    this.Items.Changed = value;
-            }
-        }
-
-        // 清除listview中的全部事项
-        public void Clear()
-        {
-            this.ListView.Items.Clear();
-
-            // 2009/2/10
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.ListView.Columns);
-
-            // 2012/7/24
-            this.TargetRecPath = "";
-        }
-
-        // 清除订购有关信息
-        public void ClearOrders()
-        {
-            this.Clear();
-            this.Items = new OrderItemCollection();
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-
-        public int CountOfVisibleOrderItems()
-        {
-            return this.ListView.Items.Count;
-        }
-
-        public int IndexOfVisibleOrderItems(OrderItem orderitem)
-        {
-            for (int i = 0; i < this.ListView.Items.Count; i++)
-            {
-                OrderItem cur = (OrderItem)this.ListView.Items[i].Tag;
-
-                if (cur == orderitem)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        public OrderItem GetAtVisibleOrderItems(int nIndex)
-        {
-            return (OrderItem)this.ListView.Items[nIndex].Tag;
-        }
-
-#endif
 
         // 
         // return:
@@ -447,6 +330,42 @@ namespace dp2Circulation
             e.values = values;
         }
 
+        // 从一般订购默认记录中 获得订购批次号
+        string GetOrderingBatchNo()
+        {
+            bool bDontDisplayDialog = GetBoolParam("ordercontrol_dontdisplay_order_batchno_dialog");
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+                bDontDisplayDialog = false;
+
+            string strDefault = EntityFormOptionDlg.GetFieldValue("order_normalRegister_default",
+    "batchNo");
+            bool bOldValue = bDontDisplayDialog;
+            string strResult = bDontDisplayDialog ?
+                strDefault :
+                InputDlg.GetInput(this, "请指定订购批次号",
+                "订购批次号:",
+                strDefault,
+                "下次不再出现此对话框",
+                ref bDontDisplayDialog,
+                this.Font);
+            if (strResult == null)
+                return "";
+
+            // 记忆
+            SetBoolParam("ordercontrol_dontdisplay_order_batchno_dialog", bDontDisplayDialog);
+            if (bDontDisplayDialog == true && bOldValue == false)
+                MessageBox.Show(this, "您已选择“下次不再出现此对话框”。\r\n\r\n提示：如果希望重新出现此对话框，可在使用本功能前，先按住键盘 Ctrl 键并且不要放开，然后启动本功能");
+
+            if (strResult != strDefault)
+            {
+                EntityFormOptionDlg.SetFieldValue("order_normalRegister_default",
+    "batchNo",
+    strResult);
+            }
+
+            return strResult;
+        }
+
         // 规划多个订购事项
         void DoDesignOrder()
         {
@@ -461,6 +380,13 @@ namespace dp2Circulation
 
             OrderDesignForm dlg = new OrderDesignForm();
 
+            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+            dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
+            dlg.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+
             this.ParentShowMessage("正在准备数据 ...", "green", false);
             try
             {
@@ -472,6 +398,7 @@ namespace dp2Circulation
                 // dlg.Text = "订购 -- 批次号:" + this.OrderBatchNo;
                 dlg.ClearAllItems();
 
+                dlg.BeginInitial();
                 // 将已有的订购信息反映到对话框中。
                 // 已经发出的订单事项，不能修改。而其他事项都可以修改
                 foreach (OrderItem item in this.Items)
@@ -498,13 +425,8 @@ namespace dp2Circulation
                 }
 
                 dlg.Changed = false;
+                dlg.EndInitial();
 
-                dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
-                dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
-                dlg.GetDefaultRecord -= new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-                dlg.GetDefaultRecord += new DigitalPlatform.CommonControl.GetDefaultRecordEventHandler(dlg_GetDefaultRecord);
-                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
-                dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
             }
             finally
             {
@@ -761,10 +683,13 @@ namespace dp2Circulation
                 this.VerifyLibraryCode(sender, e);
         }
 
-        // 获得缺省记录
+        // 订购设计对话框，获得缺省记录
         void dlg_GetDefaultRecord(object sender, DigitalPlatform.CommonControl.GetDefaultRecordEventArgs e)
         {
             string strError = "";
+
+            // 给一个机会，设定订购批次号
+            GetOrderingBatchNo();
 
             string strNewDefault = Program.MainForm.AppInfo.GetString(
                 "entityform_optiondlg",
@@ -865,7 +790,7 @@ namespace dp2Circulation
                 {
                     dom.LoadXml(strXml);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "订购记录装入 XMLDOM 失败: " + ex.Message;
                     return -1;
@@ -1009,12 +934,65 @@ namespace dp2Circulation
             return 1;
         }
 
+        static bool GetBoolParam(string name)
+        {
+            return Program.MainForm.ParamTable.ContainsKey(name) ?
+                (bool)Program.MainForm.ParamTable[name] : false;
+        }
+
+        static void SetBoolParam(string name, bool value)
+        {
+            Program.MainForm.ParamTable[name] = value;
+        }
+
+        // 从快速册登记默认记录中 获得装订批次号
+        string GetAcceptingBatchNo()
+        {
+            bool bDontDisplayDialog = GetBoolParam("ordercontrol_dontdisplay_accept_batchno_dialog");
+            if ((Control.ModifierKeys & Keys.Control) != 0)
+                bDontDisplayDialog = false;
+
+            string strDefault = EntityFormOptionDlg.GetFieldValue("quickRegister_default",
+    "batchNo");
+            bool bOldValue = bDontDisplayDialog;
+            string strResult = bDontDisplayDialog ?
+                strDefault :
+                InputDlg.GetInput(this, "请指定验收批次号",
+                "验收批次号:",
+                strDefault,
+                "下次不再出现此对话框",
+                ref bDontDisplayDialog,
+                this.Font);
+            if (strResult == null)
+                return "";
+
+            // 记忆
+            SetBoolParam("ordercontrol_dontdisplay_accept_batchno_dialog", bDontDisplayDialog);
+            if (bDontDisplayDialog == true && bOldValue == false)
+                MessageBox.Show(this, "您已选择“下次不再出现此对话框”。\r\n\r\n提示：如果希望重新出现此对话框，可在使用本功能前，先按住键盘 Ctrl 键并且不要放开，然后启动本功能");
+
+            if (strResult != strDefault)
+            {
+                EntityFormOptionDlg.SetFieldValue("quickRegister_default",
+    "batchNo",
+    strResult);
+            }
+
+            return strResult;
+        }
+
         // 进行验收
         // TODO: 中途不让关闭 EntityForm
         void DoAccept()
         {
             string strError = "";
             int nRet = 0;
+
+            if (this.listView.Items.Count == 0)
+            {
+                strError = "当前不存在订购记录，无法进行验收。需先订购和打印订单，才能进行验收操作";
+                goto ERROR1;
+            }
 
             // this.AcceptedBookItems.Clear();
             string strBiblioSourceRecord = "";
@@ -1038,6 +1016,7 @@ namespace dp2Circulation
                 this.InputItemsBarcode = e.InputItemsBarcode;
                 this.SetProcessingState = e.SetProcessingState;
                 this.CreateCallNumber = e.CreateCallNumber;
+                this.SellerFilter = e.SellerFilter;
 
                 this.PriceDefault = e.PriceDefault;
 
@@ -1057,7 +1036,14 @@ namespace dp2Circulation
                 }
             }
             else
+            {
                 this.TargetRecPath = "";    // 2017/7/6
+
+                // 2018/8/19
+                // 从快速册登记默认记录中取得批次号字段内容。并允许修改
+                // this.AcceptBatchNo = GetAcceptingBatchNo();
+                // 改为延迟到真正创建册记录时候询问
+            }
 
             // 
             if (this.Items == null)
@@ -1066,13 +1052,22 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             OrderArriveForm dlg = new OrderArriveForm();
+
+            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+
+            dlg.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+            dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
+
             // dlg.MainForm = Program.MainForm;
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.Text = "验收 -- 批次号:" + this.AcceptBatchNo + " -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
             dlg.TargetRecPath = this.TargetRecPath;
             dlg.ClearAllItems();
-
+            dlg.SellerFilter = this.SellerFilter;
             // bool bCleared = false;  // 是否清除过对话框里面的参与事项?
+
+            dlg.BeginInitial();
 
             // 将已有的订购信息反映到对话框中。
             foreach (OrderItem item in this.Items)
@@ -1109,9 +1104,7 @@ namespace dp2Circulation
             }
 
             dlg.Changed = false;
-
-            dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
-            dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
+            dlg.EndInitial();
 
             Program.MainForm.AppInfo.LinkFormState(dlg,
                 "order_accept_design_form_state");
@@ -1121,6 +1114,9 @@ namespace dp2Circulation
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            if (dlg.Changed == false)
                 return;
 
             bool bOldChanged = this.Items.Changed;
@@ -1138,7 +1134,8 @@ namespace dp2Circulation
             {
                 DigitalPlatform.CommonControl.Item design_item = dlg.Items[i];
 
-                if ((design_item.State & ItemState.ReadOnly) != 0)
+                if ((design_item.State & ItemState.ReadOnly) != 0
+                    || (design_item.State & ItemState.Changed) == 0)    // 2018/8/22
                 {
                     // 复原
                     OrderItem order_item = (OrderItem)design_item.Tag;
@@ -1200,7 +1197,7 @@ namespace dp2Circulation
 
                 orderitem.Copy = dp2StringUtil.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
 
-                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValue(design_item.OldFixedPrice, design_item.FixedPrice);
+                orderitem.FixedPrice = dp2StringUtil.LinkOldNewValueVirtual(design_item.OldFixedPrice, design_item.FixedPrice);
                 orderitem.Discount = dp2StringUtil.LinkOldNewValue(design_item.OldDiscount, design_item.Discount);
 
                 orderitem.Price = dp2StringUtil.LinkOldNewValue(design_item.OldPrice, design_item.Price);
@@ -1272,13 +1269,12 @@ namespace dp2Circulation
 
             if (this.GenerateEntity != null)
             {
-                string strTargetRecPath = "";
                 // 根据验收数据，自动创建实体数据
                 nRet = GenerateEntities(
                     strBiblioSourceRecord,
                     strBiblioSourceSyntax,
                     changed_orderitems,
-                    out strTargetRecPath,
+                    out string strTargetRecPath,
                     out strError);
                 if (nRet == -1)
                 {
@@ -1337,34 +1333,59 @@ namespace dp2Circulation
             string strBiblioPrice,
             int nRightCopy)
         {
-            string strResult = "";
+            // string strResult = "";
+            List<string> results = new List<string>();
 
             if (String.IsNullOrEmpty(strOrderPrice) == false)
             {
-                strResult += "订购价:" + strOrderPrice;
+                string strPrice = strOrderPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("订购价:" + strPrice);
             }
 
             if (String.IsNullOrEmpty(strAcceptPrice) == false)
             {
-                if (String.IsNullOrEmpty(strResult) == false)
-                    strResult += ";";
-                strResult += "验收价:" + strAcceptPrice;
+                string strPrice = strAcceptPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("验收价:" + strPrice);
             }
 
             if (String.IsNullOrEmpty(strBiblioPrice) == false)
             {
-                if (String.IsNullOrEmpty(strResult) == false)
-                    strResult += ";";
-                strResult += "书目价:" + strBiblioPrice;
+                string strPrice = strBiblioPrice;
                 if (nRightCopy > 1)
-                    strResult += "/" + nRightCopy.ToString();
+                    strPrice += "/" + nRightCopy.ToString();
+
+                strPrice = CanonicalizePrice(strPrice);
+
+                results.Add("书目价:" + strPrice); 
             }
 
-            return strResult;
+            return StringUtil.MakePathList(results, ";");
+        }
+
+        // 正规化金额字符串。把 "CNY100.00/3/5" 变换为 "CNY100.00/3*5"
+        static string CanonicalizePrice(string strPrice)
+        {
+            if (string.IsNullOrEmpty(strPrice))
+                return strPrice;
+            List<string> parts = StringUtil.SplitList(strPrice, "/");
+            if (parts.Count != 3)
+                return strPrice;
+            if (Int64.TryParse(parts[1], out Int64 v1) == false)
+                return strPrice;
+            if (Int64.TryParse(parts[2], out Int64 v2) == false)
+                return strPrice;
+
+            return parts[0] + "/" + (v1 * v2);
         }
 
         // 根据验收数据，自动创建实体数据
@@ -1389,6 +1410,8 @@ namespace dp2Circulation
                 strError = "GenerateEntity事件尚未挂接";
                 return -1;
             }
+
+            bool bAsked = false;    // 是否询问过验收批次号了
 
             GenerateEntityEventArgs data_container = new GenerateEntityEventArgs();
             data_container.InputItemBarcode = this.InputItemsBarcode;
@@ -1516,7 +1539,7 @@ namespace dp2Circulation
                         else if (this.PriceDefault == "书目价")
                             strPriceValue = strBiblioPrice;
 
-
+                        // 注：strPriceValue 中可能是 "CNY100/2" 这样的形态。如果再追加 "/3" 之类，就需要规整为 "CNY100/6"
                         if (nRightCopy == 1)
                         {
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -1527,7 +1550,7 @@ namespace dp2Circulation
                             if (String.IsNullOrEmpty(strArrivePrice) == false)
                             {
                                 DomUtil.SetElementText(dom.DocumentElement,
-                                    "price", strPriceValue + "/" + nRightCopy.ToString());
+                                    "price", CanonicalizePrice(strPriceValue + "/" + nRightCopy.ToString()));
                             }
                         }
 
@@ -1540,6 +1563,15 @@ namespace dp2Circulation
                         // location
                         DomUtil.SetElementText(dom.DocumentElement,
                             "location", location.Name);
+
+                        // 非流程验收时，询问验收批次号
+                        if (this.PrepareAccept == null && bAsked == false)
+                        {
+                            // 2018/8/19
+                            // 从快速册登记默认记录中取得批次号字段内容。并允许修改
+                            this.AcceptBatchNo = GetAcceptingBatchNo();
+                            bAsked = true;
+                        }
 
                         // 批次号
                         DomUtil.SetElementText(dom.DocumentElement,
@@ -4136,7 +4168,11 @@ namespace dp2Circulation
         /// </summary>
         public string PriceDefault = "验收价";  // 为册记录中的价格字段设置何种价格值。书目价/订购价/验收价/空白
 
-        // 
+        /// <summary>
+        /// [out] 书商过滤器
+        /// </summary>
+        public string SellerFilter { get; set; }
+
         /// <summary>
         /// [out] 警告信息。可以对操作者提出警告，如果操作者执意要继续执行，也可以。这里主要警告源和目标title不符合的情况
         /// </summary>
