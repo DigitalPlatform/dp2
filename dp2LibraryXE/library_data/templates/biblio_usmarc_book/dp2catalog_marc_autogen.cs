@@ -10,7 +10,6 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 

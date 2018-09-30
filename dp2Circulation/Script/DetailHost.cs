@@ -18,7 +18,6 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
@@ -212,10 +211,12 @@ namespace dp2Circulation
         /// </summary>
         public EntityForm DetailForm = null;
 
+#if OLD_CODE
         /// <summary>
         /// GCAT 通讯通道
         /// </summary>
         DigitalPlatform.GcatClient.Channel GcatChannel = null;
+#endif
 
         /// <summary>
         /// 构造函数
@@ -229,8 +230,10 @@ namespace dp2Circulation
 
         public void Dispose()
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+#endif
 
             // 2017/4/23
             if (this.DetailForm != null)
@@ -1030,8 +1033,10 @@ namespace dp2Circulation
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Abort();
+#endif
         }
 
         bool bMarcEditorFocued = false;
@@ -1321,6 +1326,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
                 strGcatWebServiceUrl = "http://dp2003.com/dp2library/";  // "http://dp2003.com/gcatserver/"    //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
+#if OLD_CODE
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
 
@@ -1437,7 +1443,9 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
-            else // dp2library 服务器
+            else 
+#endif
+            // dp2library 服务器
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -1985,7 +1993,7 @@ namespace dp2Circulation
             }
         }
 #if NO
-        #region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
+#region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
 
         // 获得种次号以外的其他区分号，主要是著者号
         // return:
@@ -2229,7 +2237,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -3032,7 +3040,7 @@ namespace dp2Circulation
 
 #if SHITOUTANG
 
-        #region 石头汤著者号
+#region 石头汤著者号
 
         static string FirstContent(MarcNodeList nodes)
         {
@@ -3427,7 +3435,7 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-        #endregion
+#endregion
 
 #endif
 
@@ -3707,6 +3715,13 @@ chi	中文	如果是中文，则为空。
             return 1;
         }
 #endif
+        // 去掉索取号中的回车换行和其他禁止出现的特殊字符
+        public static string RemoveSpecialChars(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return strText;
+            return strText.Replace("\r", "").Replace("\n", "");
+        }
 
         // 创建一个索取号
         // return:
@@ -4070,8 +4085,9 @@ chi	中文	如果是中文，则为空。
                 Debug.Assert(nRet == 1, "");
 
                 // 先设置已经获得的索取类号部分
-                func_setText((strHeadLine != null ? strHeadLine + "/" : "")
-                        + strClass);
+                func_setText(RemoveSpecialChars(
+                    (strHeadLine != null ? strHeadLine + "/" : "") + strClass)
+                    );
 
 #if NO
                 // 先设置已经获得的索取类号部分
@@ -4194,10 +4210,12 @@ chi	中文	如果是中文，则为空。
                 }
 
                 // 最后设置完整的索取类号
-                func_setText((strHeadLine != null ? strHeadLine + "/" : "")
+                func_setText(RemoveSpecialChars(
+                    ((strHeadLine != null ? strHeadLine + "/" : "")
                         + strClass +
                         (string.IsNullOrEmpty(strQufenhao) == false ?
-                        "/" + strQufenhao : ""));
+                        "/" + strQufenhao : "")
+                        )));
 
 #if NO
                 // 最后设置完整的索取类号
@@ -4359,6 +4377,7 @@ chi	中文	如果是中文，则为空。
             }
         }
 
+#if OLD_CODE
         // GCAT通道登录
         internal void gcat_channel_BeforeLogin(object sender,
             DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
@@ -4412,6 +4431,7 @@ chi	中文	如果是中文，则为空。
             Program.MainForm.ParamTable["author_number_account_username"] = strUserName;
             Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
         /// <summary>
         /// 通过资源 ID 找到对应的 856 字段

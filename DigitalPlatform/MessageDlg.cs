@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -95,7 +95,7 @@ namespace DigitalPlatform
             this.checkBox_noAsk.Name = "checkBox_noAsk";
             this.checkBox_noAsk.Size = new System.Drawing.Size(174, 16);
             this.checkBox_noAsk.TabIndex = 1;
-            this.checkBox_noAsk.Text = "ÒÔºóÓöÏàÍ¬Çé¿ö²»ÔÙÑ¯ÎÊ(&N)";
+            this.checkBox_noAsk.Text = "ä»¥åŽé‡ç›¸åŒæƒ…å†µä¸å†è¯¢é—®(&N)";
             // 
             // button_1
             // 
@@ -104,7 +104,7 @@ namespace DigitalPlatform
             this.button_1.Name = "button_1";
             this.button_1.Size = new System.Drawing.Size(76, 22);
             this.button_1.TabIndex = 2;
-            this.button_1.Text = "ÊÇ(&Y)";
+            this.button_1.Text = "æ˜¯(&Y)";
             this.button_1.Click += new System.EventHandler(this.button_1_Click);
             // 
             // button_2
@@ -114,7 +114,7 @@ namespace DigitalPlatform
             this.button_2.Name = "button_2";
             this.button_2.Size = new System.Drawing.Size(74, 22);
             this.button_2.TabIndex = 3;
-            this.button_2.Text = "·ñ(&N)";
+            this.button_2.Text = "å¦(&N)";
             this.button_2.Click += new System.EventHandler(this.button_2_Click);
             // 
             // button_3
@@ -124,7 +124,7 @@ namespace DigitalPlatform
             this.button_3.Name = "button_3";
             this.button_3.Size = new System.Drawing.Size(75, 22);
             this.button_3.TabIndex = 4;
-            this.button_3.Text = "È¡Ïû(&C)";
+            this.button_3.Text = "å–æ¶ˆ(&C)";
             this.button_3.Click += new System.EventHandler(this.button_3_Click);
             // 
             // MessageDlg
@@ -165,19 +165,19 @@ namespace DigitalPlatform
             {
                 if (buttons == MessageBoxButtons.AbortRetryIgnore)
                 {
-                    button_1.Text = "ÖÕÖ¹ Abort";
+                    button_1.Text = "ç»ˆæ­¢ Abort";
                     button_1.Enabled = true;
 
-                    button_2.Text = "ÖØÊÔ Retry";
+                    button_2.Text = "é‡è¯• Retry";
                     button_2.Enabled = true;
 
-                    button_3.Text = "ºöÂÔ Ignore";
+                    button_3.Text = "å¿½ç•¥ Ignore";
                     button_3.Enabled = true;
                 }
 
                 if (buttons == MessageBoxButtons.OK)
                 {
-                    button_1.Text = "È·¶¨ OK";
+                    button_1.Text = "ç¡®å®š OK";
                     button_1.Enabled = true;
 
                     button_2.Text = "";
@@ -190,10 +190,10 @@ namespace DigitalPlatform
 
                 if (buttons == MessageBoxButtons.OKCancel)
                 {
-                    button_1.Text = "È·¶¨ OK";
+                    button_1.Text = "ç¡®å®š OK";
                     button_1.Enabled = true;
 
-                    button_2.Text = "È¡Ïû Cancel";
+                    button_2.Text = "å–æ¶ˆ Cancel";
                     button_2.Enabled = true;
 
                     button_3.Text = "";
@@ -202,10 +202,10 @@ namespace DigitalPlatform
 
                 if (buttons == MessageBoxButtons.RetryCancel)
                 {
-                    button_1.Text = "ÖØÊÔ Retry";
+                    button_1.Text = "é‡è¯• Retry";
                     button_1.Enabled = true;
 
-                    button_2.Text = "È¡Ïû Cancel";
+                    button_2.Text = "å–æ¶ˆ Cancel";
                     button_2.Enabled = true;
 
                     button_3.Text = "";
@@ -214,10 +214,10 @@ namespace DigitalPlatform
 
                 if (buttons == MessageBoxButtons.YesNo)
                 {
-                    button_1.Text = "ÊÇ Yes";
+                    button_1.Text = "æ˜¯ Yes";
                     button_1.Enabled = true;
 
-                    button_2.Text = "·ñ No";
+                    button_2.Text = "å¦ No";
                     button_2.Enabled = true;
 
                     button_3.Text = "";
@@ -226,13 +226,13 @@ namespace DigitalPlatform
 
                 if (buttons == MessageBoxButtons.YesNoCancel)
                 {
-                    button_1.Text = "ÊÇ Yes";
+                    button_1.Text = "æ˜¯ Yes";
                     button_1.Enabled = true;
 
-                    button_2.Text = "·ñ No";
+                    button_2.Text = "å¦ No";
                     button_2.Enabled = true;
 
-                    button_3.Text = "È¡Ïû Cancel";
+                    button_3.Text = "å–æ¶ˆ Cancel";
                     button_3.Enabled = true;
                 }
             }
@@ -249,8 +249,8 @@ namespace DigitalPlatform
 
         void _initial()
         {
-            this.textBox_message.SelectionStart = this.textBox_message.Text.Length;
-            this.textBox_message.ScrollToCaret();
+            //this.textBox_message.SelectionStart = this.textBox_message.Text.Length;
+            //this.textBox_message.ScrollToCaret();
 
 
             if (this.AcceptButton != null)
@@ -262,22 +262,29 @@ namespace DigitalPlatform
             if (texts == null)
                 return;
 
+            button_1.Visible = false;
+            button_2.Visible = false;
+            button_3.Visible = false;
+
             if (texts.Length > 0)
             {
                 button_1.Text = texts[0];
                 button_1.Enabled = true;
+                button_1.Visible = true;
             }
 
             if (texts.Length > 1)
             {
                 button_2.Text = texts[1];
                 button_2.Enabled = true;
+                button_2.Visible = true;
             }
 
             if (texts.Length > 2)
             {
                 button_3.Text = texts[2];
                 button_3.Enabled = true;
+                button_3.Visible = true;
             }
         }
 
@@ -382,6 +389,18 @@ namespace DigitalPlatform
 			this.Close();
 		}
 
+        public bool CheckBoxVisible
+        {
+            get
+            {
+                return this.checkBox_noAsk.Visible;
+            }
+            set
+            {
+                this.checkBox_noAsk.Visible = value;
+            }
+        }
+
 		public static DialogResult Show(IWin32Window owner, 
 			string strText,
 			string strCaption,
@@ -397,6 +416,8 @@ namespace DigitalPlatform
                 dlg.Font = font;
             if (string.IsNullOrEmpty(strCheckBoxText) == false)
                 dlg.checkBox_noAsk.Text = strCheckBoxText;
+            else
+                dlg.CheckBoxVisible = false;
 			dlg.checkBox_noAsk.Checked = bChecked;
 			dlg.buttons = buttons;
 			dlg.defaultButton = defaultButton;
@@ -410,5 +431,21 @@ namespace DigitalPlatform
 
 			return dlg.DialogResult;
 		}
-	}
+
+        public static DialogResult Show(IWin32Window owner,
+    string strText,
+    string strCaption)
+        {
+            bool bTemp = false;
+            return MessageDlg.Show(owner,
+strText,
+strCaption,
+MessageBoxButtons.OK,
+MessageBoxDefaultButton.Button1,
+ref bTemp,
+new string[] { "ç¡®å®š" },
+null);
+        }
+
+    }
 }

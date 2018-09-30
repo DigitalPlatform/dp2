@@ -882,7 +882,8 @@ this.splitContainer_queryAndResultInfo,
                 + (connection.TargetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
                 + (connection.TargetInfo.IsbnForce10 == true ? "force10," : "")
                 + (connection.TargetInfo.IsbnForce13 == true ? "force13," : "")
-                + (connection.TargetInfo.IsbnWild == true ? "wild," : "");
+                + (connection.TargetInfo.IsbnWild == true ? "wild," : "")
+                + (connection.TargetInfo.IssnForce8 == true ? "force8," : "");
 
             nRet = ZQueryControl.GetQueryString(
                 this.MainForm.Froms,
@@ -983,7 +984,8 @@ this.splitContainer_queryAndResultInfo,
                 + (connection.TargetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
                 + (connection.TargetInfo.IsbnForce10 == true ? "force10," : "")
                 + (connection.TargetInfo.IsbnForce13 == true ? "force13," : "")
-                + (connection.TargetInfo.IsbnWild == true ? "wild," : "");
+                + (connection.TargetInfo.IsbnWild == true ? "wild," : "")
+                + (connection.TargetInfo.IssnForce8 == true ? "force8," : "");
 
 
                 nRet = ZQueryControl.GetQueryString(

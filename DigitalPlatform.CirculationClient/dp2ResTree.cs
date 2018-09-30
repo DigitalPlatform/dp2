@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
@@ -12,7 +10,6 @@ using System.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -24,6 +21,8 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public partial class dp2ResTree : System.Windows.Forms.TreeView
     {
+        public event GuiAppendMenuEventHandle OnSetMenu;
+
         public CfgCache cfgCache = null;
 
         public bool SortTableChanged = false;
@@ -1463,55 +1462,62 @@ namespace DigitalPlatform.CirculationClient
             if (e.Button != MouseButtons.Right)
                 return;
 
-            ContextMenu contextMenu = new ContextMenu();
-            MenuItem menuItem = null;
+            // ContextMenu contextMenu = new ContextMenu();
+            // MenuItem menuItem = null;
+            ContextMenuStrip contextMenu = new ContextMenuStrip();
+            ToolStripMenuItem menuItem = null;
 
             TreeNode node = this.SelectedNode;
 
             //
-            menuItem = new MenuItem("上移(&U)");
+            menuItem = new ToolStripMenuItem("上移(&U)");
             menuItem.Click += new System.EventHandler(this.button_moveUp_Click);
             if (node == null || IsFirstChild(node) == true)
                 menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(menuItem);
 
             //
-            menuItem = new MenuItem("下移(&D)");
+            menuItem = new ToolStripMenuItem("下移(&D)");
             menuItem.Click += new System.EventHandler(this.button_moveDown_Click);
             if (node == null || IsLastChild(node) == true)
                 menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(menuItem);
 
             // ---
-            menuItem = new MenuItem("-");
-            contextMenu.MenuItems.Add(menuItem);
-
+            contextMenu.Items.Add(new ToolStripSeparator());
 
             // 
-            menuItem = new MenuItem("允许复选(&M)");
+            menuItem = new ToolStripMenuItem("允许复选(&M)");
             menuItem.Click += new System.EventHandler(this.menu_toggleCheckBoxes);
             if (this.CheckBoxes == true)
                 menuItem.Checked = true;
             else
                 menuItem.Checked = false;
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(menuItem);
 
-            menuItem = new MenuItem("清除全部复选(&C)");
+            menuItem = new ToolStripMenuItem("清除全部复选(&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearCheckBoxes);
             if (this.CheckBoxes == true)
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(menuItem);
 
             // ---
-            menuItem = new MenuItem("-");
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(new ToolStripSeparator());
 
-            menuItem = new MenuItem("刷新(&R)");
+            menuItem = new ToolStripMenuItem("刷新(&R)");
             menuItem.Click += new System.EventHandler(this.menu_refresh);
-            contextMenu.MenuItems.Add(menuItem);
+            contextMenu.Items.Add(menuItem);
 
+            if (OnSetMenu != null)
+            {
+                GuiAppendMenuEventArgs newargs = new GuiAppendMenuEventArgs();
+                newargs.ContextMenuStrip = contextMenu;
+                OnSetMenu(this, newargs);
+                if (newargs.ContextMenuStrip != contextMenu)
+                    contextMenu = newargs.ContextMenuStrip;
+            }
 
             contextMenu.Show(this, new Point(e.X, e.Y));
         }

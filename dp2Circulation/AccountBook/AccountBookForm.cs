@@ -4627,242 +4627,243 @@ strTotalPrice);
             out List<string> filenames,
             out string strError)
         {
+            filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
             strError = "";
             int nRet = 0;
 
-            Hashtable macro_table = new Hashtable();
-
-            string strNamePath = "accountbook_printoption_html";
-
-            // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
-                this.comboBox_load_type.Text);
-            option.LoadData(Program.MainForm.AppInfo,
-                strNamePath);
-
-            // 检查当前排序状态和包含种价格列之间是否存在矛盾
-            if (bHasBiblioPriceColumn(option) == true)
+            try
             {
-                if (this.SortColumns_in.Count != 0
-                    && this.SortColumns_in[0].No == COLUMN_BIBLIORECPATH)
+                Hashtable macro_table = new Hashtable();
+
+                string strNamePath = "accountbook_printoption_html";
+
+                // 获得打印参数
+                PrintOption option = new AccountBookPrintOption(Program.MainForm.UserDir, // Program.MainForm.DataDir,
+                    this.comboBox_load_type.Text);
+                option.LoadData(Program.MainForm.AppInfo,
+                    strNamePath);
+
+                // 检查当前排序状态和包含种价格列之间是否存在矛盾
+                if (bHasBiblioPriceColumn(option) == true)
                 {
+                    if (this.SortColumns_in.Count != 0
+                        && this.SortColumns_in[0].No == COLUMN_BIBLIORECPATH)
+                    {
+                    }
+                    else
+                    {
+                        MessageBox.Show(this, "由于当前打印用到了 “种价格”列，为保证打印结果的准确，程序自动按 ‘种记录路径’ 列对全部列表事项进行一次自动排序。\r\n\r\n为避免这里的自动排序，可在打印前用鼠标左键点栏标题进行符合自己意愿的排序，只要最后一次点的是‘种记录路径’栏标题即可。");
+                        ForceSortColumnsIn(COLUMN_BIBLIORECPATH);
+                    }
+                }
+
+                // 计算出页总数
+                int nTablePageCount = items.Count / option.LinesPerPage;
+                if ((items.Count % option.LinesPerPage) != 0)
+                    nTablePageCount++;
+
+                int nPageCount = nTablePageCount + 1;
+
+                // 2009/7/24 changed
+                if (this.SourceStyle == "batchno")
+                {
+                    // 2008/11/22 
+                    macro_table["%batchno%"] = HttpUtility.HtmlEncode(this.BatchNo); // 批次号
+                    macro_table["%location%"] = HttpUtility.HtmlEncode(this.LocationString); // 馆藏地点 用HtmlEncode()的原因是要防止里面出现的“<不指定>”字样
                 }
                 else
                 {
-                    MessageBox.Show(this, "由于当前打印用到了 “种价格”列，为保证打印结果的准确，程序自动按 ‘种记录路径’ 列对全部列表事项进行一次自动排序。\r\n\r\n为避免这里的自动排序，可在打印前用鼠标左键点栏标题进行符合自己意愿的排序，只要最后一次点的是‘种记录路径’栏标题即可。");
-                    ForceSortColumnsIn(COLUMN_BIBLIORECPATH);
+                    macro_table["%batchno%"] = "";
+                    macro_table["%location%"] = "";
                 }
-            }
 
-            // 计算出页总数
-            int nTablePageCount = items.Count / option.LinesPerPage;
-            if ((items.Count % option.LinesPerPage) != 0)
-                nTablePageCount++;
+                macro_table["%pagecount%"] = nPageCount.ToString();
+                macro_table["%linesperpage%"] = option.LinesPerPage.ToString();
+                macro_table["%date%"] = DateTime.Now.ToLongDateString();
 
-            int nPageCount = nTablePageCount + 1;
-
-            // 2009/7/24 changed
-            if (this.SourceStyle == "batchno")
-            {
-                // 2008/11/22 
-                macro_table["%batchno%"] = HttpUtility.HtmlEncode(this.BatchNo); // 批次号
-                macro_table["%location%"] = HttpUtility.HtmlEncode(this.LocationString); // 馆藏地点 用HtmlEncode()的原因是要防止里面出现的“<不指定>”字样
-            }
-            else
-            {
-                macro_table["%batchno%"] = "";
-                macro_table["%location%"] = "";
-            }
-
-            macro_table["%pagecount%"] = nPageCount.ToString();
-            macro_table["%linesperpage%"] = option.LinesPerPage.ToString();
-            macro_table["%date%"] = DateTime.Now.ToLongDateString();
-
-            // 2009/7/24 changed
-            if (this.SourceStyle == "barcodefile")
-            {
-                macro_table["%barcodefilepath%"] = this.BarcodeFilePath;
-                macro_table["%barcodefilename%"] = Path.GetFileName(this.BarcodeFilePath);
-            }
-            else
-            {
-                macro_table["%barcodefilepath%"] = "";
-                macro_table["%barcodefilename%"] = "";
-            }
-
-            // 2009/7/30 
-            if (this.SourceStyle == "recpathfile")
-            {
-                macro_table["%recpathfilepath%"] = this.RecPathFilePath;
-                macro_table["%recpathfilename%"] = Path.GetFileName(this.RecPathFilePath);
-            }
-            else
-            {
-                Debug.Assert(this.SourceStyle == "batchno"
-                    || this.SourceStyle == "barcodefile"
-                    || this.SourceDescription == "",
-                    "");
-
-                macro_table["%recpathfilepath%"] = "";
-                macro_table["%recpathfilename%"] = "";
-            }
-
-            macro_table["%sourcedescription%"] = this.SourceDescription;
-
-            filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
-
-            string strFileNamePrefix = Path.Combine(Program.MainForm.DataDir, "~accountbook");
-
-            string strFileName = "";
-
-            // 输出统计信息页
-            {
-                int nItemCount = items.Count;
-                int nBiblioCount = GetBiblioCount(items);
-                string strTotalPrice = GetTotalPrice(items);
-
-                macro_table["%itemcount%"] = nItemCount.ToString();
-                macro_table["%bibliocount%"] = nBiblioCount.ToString();
-                macro_table["%totalprice%"] = strTotalPrice;
-
-                macro_table["%pageno%"] = "1";
-
-                // 2008/11/23 
-                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
-                // 2009/10/10 
-                macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "accountbook.css");  // 便于引用服务器端或“css”模板的CSS文件
-
-                // strFileName = strFileNamePrefix + "0" + ".html";
-                strFileName = strFileNamePrefix + "0-" + Guid.NewGuid().ToString() + ".html";
-
-                filenames.Add(strFileName);
-
-                string strTemplateFilePath = option.GetTemplatePageFilePath("统计页");
-                if (String.IsNullOrEmpty(strTemplateFilePath) == false)
+                // 2009/7/24 changed
+                if (this.SourceStyle == "barcodefile")
                 {
-                    /*
-<html>
-<head>
-	老用法<LINK href='%libraryserverdir%/accountbook.css' type='text/css' rel='stylesheet'>
-	新用法<LINK href='%cssfilepath%' type='text/css' rel='stylesheet'>
-</head>
-<body>
-	<div class='pageheader'>%date% 财产帐簿 -- %sourcedescription% -- (共 %pagecount% 页)</div>
-	<div class='tabletitle'>%date% 财产帐簿 -- %barcodefilepath%</div>
-	<div class='itemcount'>册数: %itemcount%</div>
-	<div class='bibliocount'>种数: %bibliocount%</div>
-	<div class='totalprice'>总价: %totalprice%</div>
-	<div class='sepline'><hr/></div>
-	<div class='batchno'>批次号: %batchno%</div>
-	<div class='location'>馆藏地点: %location%</div>
-	<div class='location'>条码号文件: %barcodefilepath%</div>
-	<div class='location'>记录路径文件: %recpathfilepath%</div>
-	<div class='sepline'><hr/></div>
-	<div class='pagefooter'>%pageno%/%pagecount%</div>
-</body>
-</html>
-                     * * */
-
-                    // 根据模板打印
-                    string strContent = "";
-                    // 能自动识别文件内容的编码方式的读入文本文件内容模块
-                    // return:
-                    //      -1  出错
-                    //      0   文件不存在
-                    //      1   文件存在
-                    nRet = Global.ReadTextFileContent(strTemplateFilePath,
-                        out strContent,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-
-                    string strResult = StringUtil.MacroString(macro_table,
-                        strContent);
-                    StreamUtil.WriteText(strFileName,
-                        strResult);
+                    macro_table["%barcodefilepath%"] = this.BarcodeFilePath;
+                    macro_table["%barcodefilename%"] = Path.GetFileName(this.BarcodeFilePath);
                 }
                 else
                 {
-                    // 缺省的固定内容打印
-
-                    BuildHtmlPageTop(option,
-                        macro_table,
-                        strFileName,
-                        false);
-
-                    // 内容行
-
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='itemcount'>册数: " + nItemCount.ToString() + "</div>");
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='bibliocount'>种数: " + nBiblioCount.ToString() + "</div>");
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='totalprice'>总价: " + strTotalPrice + "</div>");
-
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='sepline'><hr/></div>");
-
-
-                    if (this.SourceStyle == "batchno")
-                    {
-
-                        // 2008/11/22 
-                        if (String.IsNullOrEmpty(this.BatchNo) == false)
-                        {
-                            StreamUtil.WriteText(strFileName,
-                                "<div class='batchno'>批次号: " + this.BatchNo + "</div>");
-                        }
-                        if (String.IsNullOrEmpty(this.LocationString) == false
-                            && this.LocationString != "<不指定>")
-                        {
-                            StreamUtil.WriteText(strFileName,
-                                "<div class='location'>馆藏地点: " + this.LocationString + "</div>");
-                        }
-                    }
-
-
-                    if (this.SourceStyle == "barcodefile")
-                    {
-                        if (String.IsNullOrEmpty(this.BarcodeFilePath) == false)
-                        {
-                            StreamUtil.WriteText(strFileName,
-                                "<div class='barcodefilepath'>条码号文件: " + this.BarcodeFilePath + "</div>");
-                        }
-                    }
-
-                    // 2009/7/30
-                    if (this.SourceStyle == "recpathfile")
-                    {
-                        if (String.IsNullOrEmpty(this.RecPathFilePath) == false)
-                        {
-                            StreamUtil.WriteText(strFileName,
-                                "<div class='recpathfilepath'>记录路径文件: " + this.RecPathFilePath + "</div>");
-                        }
-                    }
-
-                    /*
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='sepline'><hr/></div>");
-
-
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='sender'>移交者: </div>");
-                    StreamUtil.WriteText(strFileName,
-                        "<div class='recipient'>接受者: </div>");
-                     * */
-
-
-                    BuildHtmlPageBottom(option,
-                        macro_table,
-                        strFileName,
-                        false);
+                    macro_table["%barcodefilepath%"] = "";
+                    macro_table["%barcodefilename%"] = "";
                 }
-            }
 
-            string strMarcFilterFilePath = option.GetTemplatePageFilePath("MARC过滤器");
-            if (String.IsNullOrEmpty(strMarcFilterFilePath) == false)
-            {
+                // 2009/7/30 
+                if (this.SourceStyle == "recpathfile")
+                {
+                    macro_table["%recpathfilepath%"] = this.RecPathFilePath;
+                    macro_table["%recpathfilename%"] = Path.GetFileName(this.RecPathFilePath);
+                }
+                else
+                {
+                    Debug.Assert(this.SourceStyle == "batchno"
+                        || this.SourceStyle == "barcodefile"
+                        || this.SourceDescription == "",
+                        "");
+
+                    macro_table["%recpathfilepath%"] = "";
+                    macro_table["%recpathfilename%"] = "";
+                }
+
+                macro_table["%sourcedescription%"] = this.SourceDescription;
+
+                string strFileNamePrefix = Path.Combine(Program.MainForm.DataDir, "~accountbook");
+
+                string strFileName = "";
+
+                // 输出统计信息页
+                {
+                    int nItemCount = items.Count;
+                    int nBiblioCount = GetBiblioCount(items);
+                    string strTotalPrice = GetTotalPrice(items);
+
+                    macro_table["%itemcount%"] = nItemCount.ToString();
+                    macro_table["%bibliocount%"] = nBiblioCount.ToString();
+                    macro_table["%totalprice%"] = strTotalPrice;
+
+                    macro_table["%pageno%"] = "1";
+
+                    // 2008/11/23 
+                    macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                                                                           ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                                                                           // 2009/10/10 
+                    macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "accountbook.css");  // 便于引用服务器端或“css”模板的CSS文件
+
+                    // strFileName = strFileNamePrefix + "0" + ".html";
+                    strFileName = strFileNamePrefix + "0-" + Guid.NewGuid().ToString() + ".html";
+
+                    filenames.Add(strFileName);
+
+                    string strTemplateFilePath = option.GetTemplatePageFilePath("统计页");
+                    if (String.IsNullOrEmpty(strTemplateFilePath) == false)
+                    {
+                        /*
+    <html>
+    <head>
+        老用法<LINK href='%libraryserverdir%/accountbook.css' type='text/css' rel='stylesheet'>
+        新用法<LINK href='%cssfilepath%' type='text/css' rel='stylesheet'>
+    </head>
+    <body>
+        <div class='pageheader'>%date% 财产帐簿 -- %sourcedescription% -- (共 %pagecount% 页)</div>
+        <div class='tabletitle'>%date% 财产帐簿 -- %barcodefilepath%</div>
+        <div class='itemcount'>册数: %itemcount%</div>
+        <div class='bibliocount'>种数: %bibliocount%</div>
+        <div class='totalprice'>总价: %totalprice%</div>
+        <div class='sepline'><hr/></div>
+        <div class='batchno'>批次号: %batchno%</div>
+        <div class='location'>馆藏地点: %location%</div>
+        <div class='location'>条码号文件: %barcodefilepath%</div>
+        <div class='location'>记录路径文件: %recpathfilepath%</div>
+        <div class='sepline'><hr/></div>
+        <div class='pagefooter'>%pageno%/%pagecount%</div>
+    </body>
+    </html>
+                         * * */
+
+                        // 根据模板打印
+                        string strContent = "";
+                        // 能自动识别文件内容的编码方式的读入文本文件内容模块
+                        // return:
+                        //      -1  出错
+                        //      0   文件不存在
+                        //      1   文件存在
+                        nRet = Global.ReadTextFileContent(strTemplateFilePath,
+                            out strContent,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        string strResult = StringUtil.MacroString(macro_table,
+                            strContent);
+                        StreamUtil.WriteText(strFileName,
+                            strResult);
+                    }
+                    else
+                    {
+                        // 缺省的固定内容打印
+
+                        BuildHtmlPageTop(option,
+                            macro_table,
+                            strFileName,
+                            false);
+
+                        // 内容行
+
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='itemcount'>册数: " + nItemCount.ToString() + "</div>");
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='bibliocount'>种数: " + nBiblioCount.ToString() + "</div>");
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='totalprice'>总价: " + strTotalPrice + "</div>");
+
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='sepline'><hr/></div>");
+
+
+                        if (this.SourceStyle == "batchno")
+                        {
+
+                            // 2008/11/22 
+                            if (String.IsNullOrEmpty(this.BatchNo) == false)
+                            {
+                                StreamUtil.WriteText(strFileName,
+                                    "<div class='batchno'>批次号: " + this.BatchNo + "</div>");
+                            }
+                            if (String.IsNullOrEmpty(this.LocationString) == false
+                                && this.LocationString != "<不指定>")
+                            {
+                                StreamUtil.WriteText(strFileName,
+                                    "<div class='location'>馆藏地点: " + this.LocationString + "</div>");
+                            }
+                        }
+
+
+                        if (this.SourceStyle == "barcodefile")
+                        {
+                            if (String.IsNullOrEmpty(this.BarcodeFilePath) == false)
+                            {
+                                StreamUtil.WriteText(strFileName,
+                                    "<div class='barcodefilepath'>条码号文件: " + this.BarcodeFilePath + "</div>");
+                            }
+                        }
+
+                        // 2009/7/30
+                        if (this.SourceStyle == "recpathfile")
+                        {
+                            if (String.IsNullOrEmpty(this.RecPathFilePath) == false)
+                            {
+                                StreamUtil.WriteText(strFileName,
+                                    "<div class='recpathfilepath'>记录路径文件: " + this.RecPathFilePath + "</div>");
+                            }
+                        }
+
+                        /*
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='sepline'><hr/></div>");
+
+
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='sender'>移交者: </div>");
+                        StreamUtil.WriteText(strFileName,
+                            "<div class='recipient'>接受者: </div>");
+                         * */
+
+
+                        BuildHtmlPageBottom(option,
+                            macro_table,
+                            strFileName,
+                            false);
+                    }
+                }
+
+                string strMarcFilterFilePath = option.GetTemplatePageFilePath("MARC过滤器");
+                if (String.IsNullOrEmpty(strMarcFilterFilePath) == false)
+                {
 #if NO
                 ColumnFilterDocument filter = null;
 
@@ -4881,54 +4882,60 @@ strTotalPrice);
 
                 this.MarcFilter = filter;
 #endif
-                nRet = PrepareMarcFilter(strMarcFilterFilePath, out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-
-            stop.SetProgressRange(0, nTablePageCount);
-
-            // 表格页循环
-            for (int i = 0; i < nTablePageCount; i++)
-            {
-                Application.DoEvents();
-
-                if (stop != null && stop.State != 0)
-                {
-                    strError = "用户中断";
-                    return -1;
+                    nRet = PrepareMarcFilter(strMarcFilterFilePath, out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
 
-                macro_table["%pageno%"] = (i + 1 + 1).ToString();
+                stop.SetProgressRange(0, nTablePageCount);
 
-                // strFileName = strFileNamePrefix + (i + 1).ToString() + ".html";
-                strFileName = strFileNamePrefix + (i + 1).ToString() + "-" + Guid.NewGuid().ToString() + ".html";
-
-                filenames.Add(strFileName);
-
-                BuildHtmlPageTop(option,
-                    macro_table,
-                    strFileName,
-                    true);
-                // 行循环
-                for (int j = 0; j < option.LinesPerPage; j++)
+                // 表格页循环
+                for (int i = 0; i < nTablePageCount; i++)
                 {
                     Application.DoEvents();
 
-                    BuildHtmlTableLine(option,
-                        items,
-                        strFileName, i, j);
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    macro_table["%pageno%"] = (i + 1 + 1).ToString();
+
+                    // strFileName = strFileNamePrefix + (i + 1).ToString() + ".html";
+                    strFileName = strFileNamePrefix + (i + 1).ToString() + "-" + Guid.NewGuid().ToString() + ".html";
+
+                    filenames.Add(strFileName);
+
+                    BuildHtmlPageTop(option,
+                        macro_table,
+                        strFileName,
+                        true);
+                    // 行循环
+                    for (int j = 0; j < option.LinesPerPage; j++)
+                    {
+                        Application.DoEvents();
+
+                        BuildHtmlTableLine(option,
+                            items,
+                            strFileName, i, j);
+                    }
+
+                    BuildHtmlPageBottom(option,
+                        macro_table,
+                        strFileName,
+                        true);
+
+                    stop.SetProgressValue(i + 1);
                 }
 
-                BuildHtmlPageBottom(option,
-                    macro_table,
-                    strFileName,
-                    true);
-
-                stop.SetProgressValue(i + 1);
+                return 0;
             }
-
-            return 0;
+            catch(Exception ex)
+            {
+                strError = "BuildHtml() 出现异常: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
         }
 
         // 用于缩进格式的tab字符串
@@ -5258,12 +5265,18 @@ strTotalPrice);
                     engine.EnableExposedClrTypes = true;
                     engine.SetGlobalValue("syntax", strOutMarcSyntax);
                     engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
-                    strContent = engine.Evaluate(column.Evalue).ToString();
-
+                    try
+                    {
+                        // 脚本代码例如 biblio.select("field[@name='200]/subfield[@name='a']").FirstContent
+                        strContent = engine.Evaluate(column.Evalue).ToString();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("解析 javascript 代码 '" + column.Evalue + "' 时出现异常: " + ex.Message, ex);
+                    }
                 }
                 else
                 {
-
                     strContent = GetColumnContent(item,
                         column.Name);
 

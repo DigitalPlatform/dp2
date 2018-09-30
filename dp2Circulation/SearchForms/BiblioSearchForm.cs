@@ -31,10 +31,28 @@ using DigitalPlatform.dp2.Statis;
 namespace dp2Circulation
 {
     /// <summary>
-    /// 书目查询窗
+    /// 书目或规范查询窗
     /// </summary>
     public partial class BiblioSearchForm : MyForm
     {
+        string _dbType = "biblio";
+        public string DbType
+        {
+            get
+            {
+                return _dbType;
+            }
+            set
+            {
+                _dbType = value;
+                SetTitle("");
+                if (value == "biblio")
+                    this.label_biblioDbName.Text = "书目库(&D)";
+                if (value == "authority")
+                    this.label_biblioDbName.Text = "规范库(&D)";
+            }
+        }
+
         Commander commander = null;
 
         CommentViewerForm m_commentViewer = null;
@@ -174,28 +192,31 @@ namespace dp2Circulation
             Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
             Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
-            Program.MainForm.FillBiblioFromList(this.comboBox_from);
+            if (this._dbType == "biblio")
+                Program.MainForm.FillBiblioFromList(this.comboBox_from);
+            else if (this._dbType == "authority")
+                FillAuthorityFromList(this.comboBox_from);
 
             this.m_strUsedMarcQueryFilename = Program.MainForm.AppInfo.GetString(
-                "bibliosearchform",
+                this._dbType + "searchform",
                 "usedMarcQueryFilename",
                 "");
 
             // 恢复上次退出时保留的检索途径
             string strFrom = Program.MainForm.AppInfo.GetString(
-                "bibliosearchform",
+                this._dbType + "searchform",
                 "search_from",
                 "");
             if (String.IsNullOrEmpty(strFrom) == false)
                 this.comboBox_from.Text = strFrom;
 
             this.checkedComboBox_biblioDbNames.Text = Program.MainForm.AppInfo.GetString(
-                "bibliosearchform",
+                this._dbType + "searchform",
                 "biblio_db_name",
                 "<全部>");
 
             this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
-                "bibliosearchform",
+                this._dbType + "searchform",
                 "match_style",
                 "前方一致");
 
@@ -212,9 +233,9 @@ namespace dp2Circulation
             }
 
             string strSaveString = Program.MainForm.AppInfo.GetString(
-"bibliosearchform",
-"query_lines",
-"^^^");
+                this._dbType + "searchform",
+                "query_lines",
+                "^^^");
             this.dp2QueryControl1.Restore(strSaveString);
 
             comboBox_matchStyle_TextChanged(null, null);
@@ -258,10 +279,100 @@ namespace dp2Circulation
                 }
 
                 this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
-    "bibliosearchform",
+                    this._dbType + "searchform",
     "location_filter",
     "<不筛选>");
             }
+        }
+
+        // TabComboBox版本
+        // 右边列出style名
+        /// <summary>
+        /// 填充书目库检索途径 TabComboBox 列表
+        /// 每一行左边是检索途径名，右边是 style 名
+        /// </summary>
+        /// <param name="comboBox_from">TabComboBox对象</param>
+        public static void FillBiblioFromList(DigitalPlatform.CommonControl.TabComboBox comboBox_from)
+        {
+            comboBox_from.Items.Clear();
+
+            comboBox_from.Items.Add("<全部>");
+
+            if (Program.MainForm.BiblioDbFromInfos == null)
+                return;
+
+            Debug.Assert(Program.MainForm.BiblioDbFromInfos != null);
+
+            string strFirstItem = "";
+            // 装入检索途径
+            foreach (BiblioDbFromInfo info in Program.MainForm.BiblioDbFromInfos)
+            {
+                comboBox_from.Items.Add(info.Caption + "\t" + GetDisplayStyle(info.Style));
+
+                if (string.IsNullOrEmpty(strFirstItem))
+                    strFirstItem = info.Caption;
+            }
+
+            comboBox_from.Text = strFirstItem;
+        }
+
+        public static void FillAuthorityFromList(DigitalPlatform.CommonControl.TabComboBox comboBox_from)
+        {
+            comboBox_from.Items.Clear();
+
+            comboBox_from.Items.Add("<全部>");
+
+            if (Program.MainForm.AuthorityDbFromInfos == null)
+                return;
+
+            Debug.Assert(Program.MainForm.AuthorityDbFromInfos != null);
+
+            string strFirstItem = "";
+            // 装入检索途径
+            foreach (BiblioDbFromInfo info in Program.MainForm.AuthorityDbFromInfos)
+            {
+                comboBox_from.Items.Add(info.Caption + "\t" + GetDisplayStyle(info.Style));
+
+                if (string.IsNullOrEmpty(strFirstItem))
+                    strFirstItem = info.Caption;
+            }
+
+            comboBox_from.Text = strFirstItem;
+        }
+
+        // 过滤掉 _ 开头的那些style子串
+        // parameters:
+        //      bRemove2    是否也要滤除 __ 前缀的
+        //                  当出现在检索途径列表里面的时候，为了避免误会，要出现 __ 前缀的；而发送检索请求到 dp2library 的时候，为了避免连带也引起匹配其他检索途径，要把 __ 前缀的 style 滤除
+        public static string GetDisplayStyle(string strStyles,
+            bool bRemove2 = false)
+        {
+            string[] parts = strStyles.Split(new char[] { ',' });
+            List<string> results = new List<string>();
+            foreach (string part in parts)
+            {
+                string strText = part.Trim();
+                if (String.IsNullOrEmpty(strText) == true)
+                    continue;
+
+                if (bRemove2 == false)
+                {
+                    // 只滤除 _ 开头的
+                    if (StringUtil.HasHead(strText, "_") == true
+                        && StringUtil.HasHead(strText, "__") == false)
+                        continue;
+                }
+                else
+                {
+                    // 2013/12/30 _ 和 __ 开头的都被滤除
+                    if (StringUtil.HasHead(strText, "_") == true)
+                        continue;
+                }
+
+                results.Add(strText);
+            }
+
+            return StringUtil.MakePathList(results, ",");
         }
 
         void MainForm_FixedSelectedPageChanged(object sender, EventArgs e)
@@ -287,13 +398,13 @@ namespace dp2Circulation
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "record_list_column_width",
                     strWidths);
 
                 Program.MainForm.SaveSplitterPos(
     this.splitContainer_main,
-    "bibliosearchform",
+                    this._dbType + "searchform",
     "splitContainer_main_ratio");
             }
         }
@@ -304,7 +415,7 @@ namespace dp2Circulation
                 return;
 
             string strWidths = Program.MainForm.AppInfo.GetString(
-    "bibliosearchform",
+                    this._dbType + "searchform",
     "record_list_column_width",
     "");
             if (String.IsNullOrEmpty(strWidths) == false)
@@ -317,7 +428,7 @@ namespace dp2Circulation
 
             Program.MainForm.LoadSplitterPos(
 this.splitContainer_main,
-"bibliosearchform",
+                    this._dbType + "searchform",
 "splitContainer_main_ratio");
         }
 
@@ -359,33 +470,33 @@ this.splitContainer_main,
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 Program.MainForm.AppInfo.SetString(
-        "bibliosearchform",
+                    this._dbType + "searchform",
         "usedMarcQueryFilename",
         this.m_strUsedMarcQueryFilename);
 
                 // 保存检索途径
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "search_from",
                     this.comboBox_from.Text);
 
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "biblio_db_name",
                     this.checkedComboBox_biblioDbNames.Text);
 
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "match_style",
                     this.comboBox_matchStyle.Text);
 
                 Program.MainForm.AppInfo.SetString(
-    "bibliosearchform",
+                    this._dbType + "searchform",
     "query_lines",
     this.dp2QueryControl1.GetSaveString());
 
                 Program.MainForm.AppInfo.SetString(
-"bibliosearchform",
+                    this._dbType + "searchform",
 "location_filter",
 this.comboBox_location.Text);
 
@@ -437,7 +548,6 @@ this.comboBox_location.Text);
                     "biblio_search_form",
                     "max_result_count",
                     -1);
-
             }
         }
 
@@ -579,7 +689,8 @@ Keys keyData)
                 bClear = false;
 
             // 修改窗口标题
-            this.Text = "书目查询 逻辑检索";
+            // this.Text = "书目查询 逻辑检索";
+            this.SetTitle("逻辑查询");
 
             if (bOutputKeyID == true)
                 this.m_bFirstColumnIsKey = true;
@@ -810,6 +921,17 @@ Keys keyData)
             MessageBox.Show(this, strError);
         }
 
+        internal void SetTitle(string text)
+        {
+            string title = "书目查询";
+            if (this._dbType == "authority")
+                title = "规范查询";
+            if (string.IsNullOrEmpty(text) == false)
+                this.Text = title + " " + text;
+            else
+                this.Text = title;
+        }
+
         List<ItemQueryParam> m_queries = new List<ItemQueryParam>();
         int m_nQueryIndex = -1;
 
@@ -951,6 +1073,124 @@ Keys keyData)
 
         }
 
+        public static string GetBiblioFromStyle(string strCaptions)
+        {
+            return GetBiblioFromStyle("biblio", strCaptions);
+        }
+
+        public static string GetAuthorityFromStyle(string strCaptions)
+        {
+            return GetBiblioFromStyle("biblio", strCaptions);
+        }
+
+        // 
+        // Exception:
+        //     可能会抛出Exception异常
+        /// <summary>
+        /// 根据from名列表字符串得到from style列表字符串
+        /// </summary>
+        /// <param name="strDbType">数据库类型</param>
+        /// <param name="strCaptions">检索途径名</param>
+        /// <returns>style列表字符串</returns>
+        public static string GetBiblioFromStyle(string strDbType,
+            string strCaptions)
+        {
+            BiblioDbFromInfo[] infos = null;
+            if (strDbType == "biblio")
+            {
+                if (Program.MainForm.BiblioDbFromInfos == null)
+                    throw new Exception("Program.MainForm.DbFromInfos尚未初始化");
+
+                Debug.Assert(Program.MainForm.BiblioDbFromInfos != null, "Program.MainForm.BiblioDbFromInfos 尚未初始化");
+
+                infos = Program.MainForm.BiblioDbFromInfos;
+            }
+            if (strDbType == "authority")
+            {
+                if (Program.MainForm.AuthorityDbFromInfos == null)
+                    throw new Exception("Program.MainForm.AuthorityDbFromInfos");
+
+                Debug.Assert(Program.MainForm.AuthorityDbFromInfos != null, "Program.MainForm.AuthorityDbFromInfos 尚未初始化");
+
+                infos = Program.MainForm.AuthorityDbFromInfos;
+            }
+
+            string strResult = "";
+
+            string[] parts = strCaptions.Split(new char[] { ',' });
+            for (int k = 0; k < parts.Length; k++)
+            {
+                string strCaption = parts[k].Trim();
+
+                // 2009/9/23 
+                // TODO: 是否可以直接使用\t后面的部分呢？
+                // 规整一下caption字符串，切除后面可能有的\t部分
+                int nRet = strCaption.IndexOf("\t");
+                if (nRet != -1)
+                    strCaption = strCaption.Substring(0, nRet).Trim();
+
+                if (strCaption.ToLower() == "<all>"
+                    || strCaption == "<全部>"
+                    || String.IsNullOrEmpty(strCaption) == true)
+                    return "<all>";
+
+                foreach (BiblioDbFromInfo info in infos)
+                {
+                    if (strCaption == info.Caption)
+                    {
+                        if (string.IsNullOrEmpty(strResult) == false)
+                            strResult += ",";
+                        // strResult += GetDisplayStyle(info.Style, true);   // 注意，去掉 _ 和 __ 开头的那些，应该还剩下至少一个 style
+                        strResult += GetDisplayStyle(info.Style, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
+                    }
+                }
+            }
+
+            return strResult;
+        }
+
+        // 过滤掉 _ 开头的那些style子串
+        // parameters:
+        //      bRemove2    是否滤除 __ 前缀的
+        //      bRemove1    是否滤除 _ 前缀的
+        static string GetDisplayStyle(string strStyles,
+            bool bRemove2,
+            bool bRemove1)
+        {
+            string[] parts = strStyles.Split(new char[] { ',' });
+            List<string> results = new List<string>();
+            foreach (string part in parts)
+            {
+                string strText = part.Trim();
+                if (String.IsNullOrEmpty(strText) == true)
+                    continue;
+
+                if (strText[0] == '_')
+                {
+                    if (bRemove1 == true)
+                    {
+                        if (strText.Length >= 2 && /*strText[0] == '_' &&*/ strText[1] != '_')
+                            continue;
+#if NO
+                        if (strText[0] == '_')
+                            continue;
+#endif
+                        if (strText.Length == 1)
+                            continue;
+                    }
+
+                    if (bRemove2 == true && strText.Length >= 2)
+                    {
+                        if (/*strText[0] == '_' && */ strText[1] == '_')
+                            continue;
+                    }
+                }
+
+                results.Add(strText);
+            }
+
+            return StringUtil.MakePathList(results, ",");
+        }
 
         public void DoSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
@@ -977,7 +1217,8 @@ Keys keyData)
                 bClear = false;
 
             // 修改窗口标题
-            this.Text = "书目查询 " + this.textBox_queryWord.Text;
+            //this.Text = "书目查询 " + this.textBox_queryWord.Text;
+            this.SetTitle(this.textBox_queryWord.Text);
 
             if (input_query != null)
             {
@@ -1047,7 +1288,7 @@ Keys keyData)
 
                 try
                 {
-                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                    strFromStyle = GetBiblioFromStyle(this._dbType, this.comboBox_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -1787,13 +2028,74 @@ out strError);
             return form;
         }
 
+        AuthorityForm OpenAuthorityForm(bool bAuto, bool bFixed)
+        {
+            AuthorityForm form = null;
+            AuthorityForm exist_fixed = null;   // Program.MainForm.FixedEntityForm;
+
+            if (bFixed == true && exist_fixed != null)
+                form = exist_fixed;
+            else
+            {
+                if (bAuto == true && this.LoadToExistDetailWindow == true)
+                    form = MainForm.GetTopChildWindow<AuthorityForm>();
+            }
+
+            if (form != null)
+                Global.Activate(form);
+            else
+            {
+                form = new AuthorityForm();
+
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
+                if (bFixed)
+                {
+                    form.Fixed = true;
+                    form.SuppressSizeSetting = true;
+                    Program.MainForm.SetMdiToNormal();
+                }
+                else
+                {
+                    // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                    if (exist_fixed != null)
+                    {
+                        form.SuppressSizeSetting = true;
+                        Program.MainForm.SetMdiToNormal();
+                    }
+                }
+
+                form.Show();
+                if (bFixed)
+                    Program.MainForm.SetFixedPosition(form, "left");
+                else
+                {
+                    // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                    if (exist_fixed != null)
+                    {
+                        Program.MainForm.SetFixedPosition(form, "right");
+                    }
+                }
+            }
+
+            Debug.Assert(form != null, "");
+            return form;
+        }
+
+        string GetRelativeEntityFormName()
+        {
+            if (this._dbType == "biblio")
+                return "种册窗";
+            return "规范窗";
+        }
+
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "尚未选定要装入种册窗的事项";
+                strError = "尚未选定要装入" + this.GetRelativeEntityFormName() + "的事项";
                 goto ERROR1;
             }
 
@@ -1833,32 +2135,65 @@ out strError);
                     }
                 }
 #endif
-                EntityForm form = OpenEntityForm(true, false);
-                Debug.Assert(form != null, "");
+                if (this._dbType == "biblio")
+                {
+                    EntityForm form = OpenEntityForm(true, false);
+                    Debug.Assert(form != null, "");
 
-                if (strPath.IndexOf("@") == -1)
-                    form.LoadRecordOld(strPath, "", true);
+                    if (strPath.IndexOf("@") == -1)
+                        form.LoadRecordOld(strPath, "", true);
+                    else
+                    {
+                        // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
+                        if (this.m_biblioTable == null)
+                        {
+                            strError = "m_biblioTable == null";
+                            goto ERROR1;
+                        }
+
+                        BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
+                        if (info == null)
+                        {
+                            strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                            goto ERROR1;
+                        }
+
+                        int nRet = form.LoadRecord(info,
+                            true,
+                            out strError);
+                        if (nRet != 1)
+                            goto ERROR1;
+                    }
+                }
                 else
                 {
-                    // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
-                    if (this.m_biblioTable == null)
-                    {
-                        strError = "m_biblioTable == null";
-                        goto ERROR1;
-                    }
+                    AuthorityForm form = OpenAuthorityForm(true, false);
+                    Debug.Assert(form != null, "");
 
-                    BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
-                    if (info == null)
+                    if (strPath.IndexOf("@") == -1)
+                        form.LoadRecordOld(strPath, "", true);
+                    else
                     {
-                        strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
-                        goto ERROR1;
-                    }
+                        // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
+                        if (this.m_biblioTable == null)
+                        {
+                            strError = "m_biblioTable == null";
+                            goto ERROR1;
+                        }
 
-                    int nRet = form.LoadRecord(info,
-                        true,
-                        out strError);
-                    if (nRet != 1)
-                        goto ERROR1;
+                        BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
+                        if (info == null)
+                        {
+                            strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                            goto ERROR1;
+                        }
+
+                        int nRet = form.LoadRecord(info,
+                            true,
+                            out strError);
+                        if (nRet != 1)
+                            goto ERROR1;
+                    }
                 }
             }
             else
@@ -2067,14 +2402,32 @@ out strError);
             if (this.checkedComboBox_biblioDbNames.Items.Count > 0)
                 return;
 
-            this.checkedComboBox_biblioDbNames.Items.Add("<全部>");
 
-            if (Program.MainForm.BiblioDbProperties != null)
+            if (this._dbType == "biblio")
             {
-                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.6") >= 0)
+                    this.checkedComboBox_biblioDbNames.Items.Add("<全部书目>");
+                else
+                    this.checkedComboBox_biblioDbNames.Items.Add("<全部>");
+
+                if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
-                    this.checkedComboBox_biblioDbNames.Items.Add(property.DbName);
+                    foreach (BiblioDbProperty property in Program.MainForm.BiblioDbProperties)
+                    {
+                        this.checkedComboBox_biblioDbNames.Items.Add(property.DbName);
+                    }
+                }
+            }
+
+            if (this._dbType == "authority")
+            {
+                this.checkedComboBox_biblioDbNames.Items.Add("<全部规范>");
+                if (Program.MainForm.AuthorityDbProperties != null)
+                {
+                    foreach (BiblioDbProperty property in Program.MainForm.AuthorityDbProperties)
+                    {
+                        this.checkedComboBox_biblioDbNames.Items.Add(property.DbName);
+                    }
                 }
             }
         }
@@ -2424,7 +2777,7 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("导出书目转储文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
+                subMenuItem = new MenuItem("导出书目转储(.bdf)文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToBiblioDumpFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
@@ -2893,6 +3246,37 @@ out strError);
             return strMacroName;
         }
 
+        // return:
+        //      -2  码洋和订购价货币单位不同，无法进行校验。
+        //      -1  校验过程出错
+        //      0   校验发现三者关系不正确
+        //      1   校验三者关系正确
+        public static int VerifyThreeFields(XmlDocument order_dom, out string strError)
+        {
+            strError = "";
+
+            string strFixedPrice = DomUtil.GetElementText(order_dom.DocumentElement, "fixedPrice");
+            string strPrice = DomUtil.GetElementText(order_dom.DocumentElement, "price");
+            string strDiscount = DomUtil.GetElementText(order_dom.DocumentElement, "discount");
+
+            if (string.IsNullOrEmpty(strFixedPrice)
+                || string.IsNullOrEmpty(strPrice))
+                return 1;
+
+            // 检查码洋、折扣和单价之间的关系
+            // return:
+            //      -2  码洋和订购价货币单位不同，无法进行校验。
+            //      -1  校验过程出错
+            //      0   校验发现三者关系不正确
+            //      1   校验三者关系正确
+            int nRet = OrderDesignControl.VerifyOrderPriceByFixedPricePair(
+                strFixedPrice,
+                strDiscount,
+                strPrice,
+                "both",
+                out strError);
+            return nRet;
+        }
 
         // 导出订购去向分配表 Excel 文件
         void menu_exportDistributeExcelFile_Click(object sender, EventArgs e)
@@ -2947,13 +3331,10 @@ out strError);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
-            // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
-
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
-            // int nRowIndex = 2;  // 跟踪行号            
-            bool bDone = false; // 是否成功走完全部流程
+                                    // int nRowIndex = 2;  // 跟踪行号            
+                                    // bool bDone = false; // 是否成功走完全部流程
 
             int nBiblioCount = 0;   // 导出书目计数
             int nOrderCount = 0;    // 导出订购记录计数
@@ -2964,6 +3345,9 @@ out strError);
 + " 开始导出订购去向 Excel 文件</div>");
             try
             {
+                IXLWorksheet sheet = doc.Worksheets.Add("订购去向分配表");
+                // sheet.Protect().SetInsertRows().SetFormatColumns().SetFormatRows().SetFormatCells().SetScenarios();
+
                 // 准备书目列标题
                 Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
                     "");
@@ -3047,6 +3431,7 @@ out strError);
                                 "",
                                 (biblio_recpath, order_recpath) =>
                                 {
+                                    REDO_0:
                                     if (string.IsNullOrEmpty(strDefaultOrderXml))
                                     {
                                         REDO:
@@ -3099,6 +3484,9 @@ out strError);
                                         }
 
                                         // TODO: 验证一下书商名称是否在合法值范围内?
+
+
+
                                     }
 
                                     // 兑现模板记录中的宏
@@ -3123,6 +3511,22 @@ out strError);
                                         strResultXml = MacroXml(strDefaultOrderXml,
         strMARC,
         strMarcSyntax);
+                                        XmlDocument temp_dom = new XmlDocument();
+                                        temp_dom.LoadXml(strResultXml);
+                                        // 验证三个字段之间的关系
+                                        // return:
+                                        //      -2  码洋和订购价货币单位不同，无法进行校验。
+                                        //      -1  校验过程出错
+                                        //      0   校验发现三者关系不正确
+                                        //      1   校验三者关系正确
+                                        nRet = VerifyThreeFields(temp_dom, out strError);
+                                        if (nRet == 0 || nRet == -1)
+                                        {
+                                            strError = "校验三个字段关系时发现问题: " + strError + "\r\n\r\n请重新输入。特别注意关注码洋、折扣和单价之间的计算关系";
+                                            MessageBox.Show(this, strError);
+                                            strDefaultOrderXml = "";
+                                            goto REDO_0;
+                                        }
                                     }
 
                                     EntityInfo order = new EntityInfo
@@ -3180,7 +3584,13 @@ out strError);
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 
-                bDone = true;
+                // bDone = true;
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.OutputFileName);
+                    doc.Dispose();
+                }
             }
             catch (InterruptException ex)
             {
@@ -3199,29 +3609,20 @@ out strError);
 
                 this.ClearMessage();
 
-                if (bDone == true)
-                {
-                    if (doc != null)
-                    {
-                        doc.SaveAs(dlg.OutputFileName);
-                        doc.Dispose();
-                    }
-
-                    if (bLaunchExcel)
-                    {
-                        try
-                        {
-                            System.Diagnostics.Process.Start(dlg.OutputFileName);
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 结束导出订购去向 Excel 文件</div>");
+            }
+
+            if (bLaunchExcel)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(dlg.OutputFileName);
+                }
+                catch
+                {
+
+                }
             }
 
             // 提示完成和统计信息
@@ -7160,14 +7561,14 @@ MessageBoxDefaultButton.Button2);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_filename",
                     "");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_filename",
                     value);
             }
@@ -7181,14 +7582,14 @@ MessageBoxDefaultButton.Button2);
             get
             {
                 return Program.MainForm.AppInfo.GetBoolean(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_crlf",
                     false);
             }
             set
             {
                 Program.MainForm.AppInfo.SetBoolean(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_crlf",
                     value);
             }
@@ -7202,14 +7603,14 @@ MessageBoxDefaultButton.Button2);
             get
             {
                 return Program.MainForm.AppInfo.GetBoolean(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_removefield998",
                     false);
             }
             set
             {
                 Program.MainForm.AppInfo.SetBoolean(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_iso2709_removefield998",
                     value);
             }
@@ -7223,14 +7624,14 @@ MessageBoxDefaultButton.Button2);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_encoding_name",
                     "");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_encoding_name",
                     value);
             }
@@ -7244,14 +7645,14 @@ MessageBoxDefaultButton.Button2);
             get
             {
                 return Program.MainForm.AppInfo.GetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_cataloging_rule",
                     "<无限制>");
             }
             set
             {
                 Program.MainForm.AppInfo.SetString(
-                    "bibliosearchform",
+                    this._dbType + "searchform",
                     "last_cataloging_rule",
                     value);
             }
@@ -9369,7 +9770,8 @@ MessageBoxDefaultButton.Button1);
 
         private void textBox_queryWord_TextChanged(object sender, EventArgs e)
         {
-            this.Text = "书目查询 " + this.textBox_queryWord.Text;
+            // this.Text = "书目查询 " + this.textBox_queryWord.Text;
+            this.SetTitle(this.textBox_queryWord.Text);
         }
 
         private void listView_records_ItemDrag(object sender, ItemDragEventArgs e)
@@ -9913,7 +10315,7 @@ out strError);
 
         private void dp2QueryControl1_GetFromStyle(object sender, GetFromStyleArgs e)
         {
-            e.FromStyles = Program.MainForm.GetBiblioFromStyle(e.FromCaption);
+            e.FromStyles = GetBiblioFromStyle(this._dbType, e.FromCaption);
         }
 
         // return:

@@ -1147,7 +1147,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 + (connection.TargetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
                 + (connection.TargetInfo.IsbnForce10 == true ? "force10," : "")
                 + (connection.TargetInfo.IsbnForce13 == true ? "force13," : "")
-                + (connection.TargetInfo.IsbnWild == true ? "wild," : "");
+                + (connection.TargetInfo.IsbnWild == true ? "wild," : "")
+                + (connection.TargetInfo.IssnForce8 == true ? "force8," : "");
 
             nRet = ZQueryControl.GetQueryString(
                 this.m_mainForm.Froms,

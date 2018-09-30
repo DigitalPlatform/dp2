@@ -28,6 +28,12 @@ namespace dp2Circulation
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
+        // 2018/8/30
+        /// <summary>
+        /// 检查馆代码是否在管辖范围内
+        /// </summary>
+        public event VerifyLibraryCodeEventHandler VerifyLibraryCode = null;
+
         // 事项数组
         public List<DigitalPlatform.CommonControl.Item> Items
         {
@@ -37,9 +43,27 @@ namespace dp2Circulation
             }
         }
 
+        public void BeginInitial()
+        {
+            this.orderDesignControl1.InInitial = true;
+        }
+
+        public void EndInitial()
+        {
+            this.orderDesignControl1.InInitial = false;
+        }
+
         public OrderArriveForm()
         {
             InitializeComponent();
+
+            this.orderDesignControl1.ToolTip = this.toolTip1;
+
+            this.orderDesignControl1.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
+            this.orderDesignControl1.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
+
+            this.orderDesignControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
+            this.orderDesignControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
         }
 
         private void OrderArriveForm_Load(object sender, EventArgs e)
@@ -48,8 +72,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-            this.orderDesignControl1.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
-            this.orderDesignControl1.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
 
             // 如果窗口打开的时候，发现一个事项也没有，就需要加入一个空白事项，以便用户在此基础上进行编辑
             if (this.orderDesignControl1.Items.Count == 0)
@@ -61,6 +83,12 @@ namespace dp2Circulation
         void orderCrossControl1_GetValueTable(object sender, DigitalPlatform.GetValueTableEventArgs e)
         {
             this.GetValueTable(sender, e);
+        }
+
+        void orderDesignControl1_VerifyLibraryCode(object sender, VerifyLibraryCodeEventArgs e)
+        {
+            if (this.VerifyLibraryCode != null)
+                this.VerifyLibraryCode(sender, e);
         }
 
         /// <summary>
@@ -99,7 +127,7 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -146,6 +174,42 @@ namespace dp2Circulation
             set
             {
                 this.orderDesignControl1.BiblioDbName = value;
+            }
+        }
+
+        public string SellerFilter
+        {
+            get
+            {
+                return this.orderDesignControl1.SellerFilter;
+            }
+            set
+            {
+                this.orderDesignControl1.SellerFilter = value;
+            }
+        }
+
+        Control _currentToolTipControl = null;
+
+        private void OrderArriveForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            // https://stackoverflow.com/questions/1732140/displaying-tooltip-over-a-disabled-control
+            Control control = GetChildAtPoint(e.Location);
+            if (control != null)
+            {
+                if (!control.Enabled && _currentToolTipControl == null)
+                {
+                    string toolTipString = toolTip1.GetToolTip(control);
+                    // trigger the tooltip with no delay and some basic positioning just to give you an idea
+                    toolTip1.Show(toolTipString, control, control.Width / 2, control.Height / 2);
+                    _currentToolTipControl = control;
+                }
+            }
+            else
+            {
+                if (_currentToolTipControl != null)
+                    toolTip1.Hide(_currentToolTipControl);
+                _currentToolTipControl = null;
             }
         }
     }

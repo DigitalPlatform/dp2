@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-// using System.ServiceProcess;
-using System.Text;
 using System.Threading;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.Xml;
-
-using Microsoft.Win32;
 
 using dp2Library;
 
@@ -335,6 +327,10 @@ strUrl.Substring(5));   // rest. 这几个字符要去掉
 
         public void SetFunction(string strFunction)
         {
+            if (string.IsNullOrEmpty(strFunction) == false
+                && strFunction.IndexOf("|") != -1)
+                throw new ArgumentException("strFunction 参数值中不允许包含字符 '|'。应改用逗号");
+
             foreach (ServiceHost host in this.m_hosts)
             {
                 HostInfo info = host.Extensions.Find<HostInfo>();

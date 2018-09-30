@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <col title="标目">
+    <title>
+      <caption lang='zh-CN'>标目</caption>
+      <caption lang='en'>Heading</caption>
+    </title>
+    <script>
+	var result = "";
+	var subfields = biblio.select("field[@name='100']/subfield");
+    	for(i = 0; i &lt; subfields.count; i++)
+    	{
+		result += subfields[i].Content + " ";
+   	 }
+    	result = DigitalPlatform.Marc.MarcQuery.TrimEnd(result);
+    </script>
+  </col>
+  <col title="类型">
+    <title>
+      <caption lang='zh-CN'>类型</caption>
+      <caption lang='en'>Type</caption>
+    </title>
+    <script>
+/*
+100	个人名称
+110	团体名称
+111	会议名称
+*/
+	var result = "";
+	var subfields = biblio.select("field[@name='100' or @name='110' or @name='111']/subfield[@name='a']");
+	if (subfields.count >0)
+	{
+		var field_name = subfields[0].Parent.Name;
+		if (field_name == '100')
+			result = "个人名称";
+		else if (field_name == '110')
+			result = "团体名称";
+		else if (field_name == '111')
+			result = "会议名称";	
+		else result = "未知的字段名 " + field_name;	
+	}
+	else
+		results = "";
+    </script>
+  </col>
+</root>

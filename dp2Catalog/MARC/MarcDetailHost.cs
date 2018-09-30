@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -11,15 +11,14 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Catalog
 {
@@ -41,15 +40,17 @@ namespace dp2Catalog
 
         public void Dispose()
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+#endif
         }
 
         public void Invoke(string strFuncName)
         {
             Type classType = this.GetType();
 
-            // newÒ»¸öHostÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªHostæ´¾ç”Ÿå¯¹è±¡
             classType.InvokeMember(strFuncName,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -71,7 +72,7 @@ namespace dp2Catalog
             {
                 try
                 {
-                    // ÓĞÁ½¸ö²ÎÊıµÄ³ÉÔ±º¯Êı
+                    // æœ‰ä¸¤ä¸ªå‚æ•°çš„æˆå‘˜å‡½æ•°
                     classType.InvokeMember(strFuncName,
                         BindingFlags.DeclaredOnly |
                         BindingFlags.Public | BindingFlags.NonPublic |
@@ -95,12 +96,12 @@ namespace dp2Catalog
             {
                 classType = this.GetType();
 
-                // ÀÏµÄHostEventArgs e ²ÎÊı
+                // è€çš„HostEventArgs e å‚æ•°
                 while (classType != null)
                 {
                     try
                     {
-                        // ÓĞÁ½¸ö²ÎÊıµÄ³ÉÔ±º¯Êı
+                        // æœ‰ä¸¤ä¸ªå‚æ•°çš„æˆå‘˜å‡½æ•°
                         classType.InvokeMember(strFuncName,
                             BindingFlags.DeclaredOnly |
                             BindingFlags.Public | BindingFlags.NonPublic |
@@ -128,7 +129,7 @@ namespace dp2Catalog
             {
                 try
                 {
-                    // ¼æÈİÒÔÇ°µÄÊéĞ´·½·¨ -- Ã»ÓĞ²ÎÊı
+                    // å…¼å®¹ä»¥å‰çš„ä¹¦å†™æ–¹æ³• -- æ²¡æœ‰å‚æ•°
                     classType.InvokeMember(strFuncName,
                         BindingFlags.DeclaredOnly |
                         BindingFlags.Public | BindingFlags.NonPublic |
@@ -145,7 +146,7 @@ namespace dp2Catalog
                 }
             }
 
-            throw new Exception("º¯Êı void " + strFuncName + "(object sender, GenerateDataEventArgs e) »ò void " + strFuncName + "() Ã»ÓĞÕÒµ½");
+            throw new Exception("å‡½æ•° void " + strFuncName + "(object sender, GenerateDataEventArgs e) æˆ– void " + strFuncName + "() æ²¡æœ‰æ‰¾åˆ°");
         }
 
         public virtual void Main(object sender, HostEventArgs e)
@@ -154,10 +155,10 @@ namespace dp2Catalog
         }
 
         // parameters:
-        //      strIndicator    ×Ö¶ÎÖ¸Ê¾·û¡£Èç¹ûÓÃnullµ÷ÓÃ£¬Ôò±íÊ¾²»¶ÔÖ¸Ê¾·û½øĞĞÉ¸Ñ¡
+        //      strIndicator    å­—æ®µæŒ‡ç¤ºç¬¦ã€‚å¦‚æœç”¨nullè°ƒç”¨ï¼Œåˆ™è¡¨ç¤ºä¸å¯¹æŒ‡ç¤ºç¬¦è¿›è¡Œç­›é€‰
         // return:
-        //      0   Ã»ÓĞÕÒµ½Æ¥ÅäµÄÅäÖÃÊÂÏî
-        //      >=1 ÕÒµ½¡£·µ»ØÕÒµ½µÄÅäÖÃÊÂÏî¸öÊı
+        //      0   æ²¡æœ‰æ‰¾åˆ°åŒ¹é…çš„é…ç½®äº‹é¡¹
+        //      >=1 æ‰¾åˆ°ã€‚è¿”å›æ‰¾åˆ°çš„é…ç½®äº‹é¡¹ä¸ªæ•°
         public static int GetPinyinCfgLine(XmlDocument cfg_dom,
             string strFieldName,
             string strIndicator,
@@ -188,7 +189,7 @@ namespace dp2Catalog
             return cfg_items.Count;
         }
 
-        // °ü×°ºóµÄ°æ±¾£¬¼æÈİÒÔÇ°µÄµ÷ÓÃÏ°¹ß
+        // åŒ…è£…åçš„ç‰ˆæœ¬ï¼Œå…¼å®¹ä»¥å‰çš„è°ƒç”¨ä¹ æƒ¯
         public int AddPinyin(string strCfgXml,
     bool bUseCache = true,
     PinyinStyle style = PinyinStyle.None,
@@ -203,14 +204,14 @@ namespace dp2Catalog
         }
 
         /// <summary>
-        /// Îª MARC ±à¼­Æ÷ÄÚµÄ¼ÇÂ¼¼ÓÆ´Òô
+        /// ä¸º MARC ç¼–è¾‘å™¨å†…çš„è®°å½•åŠ æ‹¼éŸ³
         /// </summary>
-        /// <param name="strCfgXml">Æ´ÒôÅäÖÃ XML</param>
-        /// <param name="bUseCache">ÊÇ·ñÊ¹ÓÃ¼ÇÂ¼ÖĞÒÔÇ°»º´æµÄ½á¹û£¿</param>
-        /// <param name="style">·ç¸ñ</param>
-        /// <param name="strPrefix">Ç°×º×Ö·û´®¡£È±Ê¡Îª¿Õ [ÔİÊ±Ã»ÓĞÊ¹ÓÃ±¾²ÎÊı]</param>
-        /// <param name="strDuoyinStyle">ÊÇ·ñ×Ô¶¯Ñ¡Ôñ¶àÒô×Ö¡£auto/first Ö®Ò»»òÕß×éºÏ</param>
-        /// <returns>-1: ³ö´í¡£°üÀ¨ÖĞ¶ÏµÄÇé¿ö; 0: Õı³£</returns>
+        /// <param name="strCfgXml">æ‹¼éŸ³é…ç½® XML</param>
+        /// <param name="bUseCache">æ˜¯å¦ä½¿ç”¨è®°å½•ä¸­ä»¥å‰ç¼“å­˜çš„ç»“æœï¼Ÿ</param>
+        /// <param name="style">é£æ ¼</param>
+        /// <param name="strPrefix">å‰ç¼€å­—ç¬¦ä¸²ã€‚ç¼ºçœä¸ºç©º [æš‚æ—¶æ²¡æœ‰ä½¿ç”¨æœ¬å‚æ•°]</param>
+        /// <param name="strDuoyinStyle">æ˜¯å¦è‡ªåŠ¨é€‰æ‹©å¤šéŸ³å­—ã€‚auto/first ä¹‹ä¸€æˆ–è€…ç»„åˆ</param>
+        /// <returns>-1: å‡ºé”™ã€‚åŒ…æ‹¬ä¸­æ–­çš„æƒ…å†µ; 0: æ­£å¸¸</returns>
         public virtual int AddPinyin(string strCfgXml,
             bool bUseCache, //  = true,
             PinyinStyle style,  // = PinyinStyle.None,
@@ -226,7 +227,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "strCfgXml×°ÔØµ½XMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "strCfgXmlè£…è½½åˆ°XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -238,7 +239,7 @@ namespace dp2Catalog
 
             try
             {
-                // PinyinStyle style = PinyinStyle.None;	// ÔÚÕâÀïĞŞ¸ÄÆ´Òô´óĞ¡Ğ´·ç¸ñ
+                // PinyinStyle style = PinyinStyle.None;	// åœ¨è¿™é‡Œä¿®æ”¹æ‹¼éŸ³å¤§å°å†™é£æ ¼
 
                 for (int i = 0; i < DetailForm.MarcEditor.Record.Fields.Count; i++)
                 {
@@ -264,7 +265,7 @@ namespace dp2Catalog
                         {
                             if (item.From.Length != item.To.Length)
                             {
-                                strError = "ÅäÖÃÊÂÏî fieldname='" + item.FieldName + "' from='" + item.From + "' to='" + item.To + "' ÆäÖĞfromºÍto²ÎÊıÖµµÄ×Ö·ûÊı²»µÈ";
+                                strError = "é…ç½®äº‹é¡¹ fieldname='" + item.FieldName + "' from='" + item.From + "' to='" + item.To + "' å…¶ä¸­fromå’Œtoå‚æ•°å€¼çš„å­—ç¬¦æ•°ä¸ç­‰";
                                 goto ERROR1;
                             }
 
@@ -301,17 +302,17 @@ namespace dp2Catalog
                                 if (string.IsNullOrEmpty(strPinyin) == true)
                                 {
 
-                                    // °Ñ×Ö·û´®ÖĞµÄºº×ÖºÍÆ´Òô·ÖÀë
+                                    // æŠŠå­—ç¬¦ä¸²ä¸­çš„æ±‰å­—å’Œæ‹¼éŸ³åˆ†ç¦»
                                     // return:
-                                    //      -1  ³ö´í
-                                    //      0   ÓÃ»§Ï£ÍûÖĞ¶Ï
-                                    //      1   Õı³£
+                                    //      -1  å‡ºé”™
+                                    //      0   ç”¨æˆ·å¸Œæœ›ä¸­æ–­
+                                    //      1   æ­£å¸¸
                                     if (string.IsNullOrEmpty(this.DetailForm.MainForm.PinyinServerUrl) == true
                                        || this.DetailForm.MainForm.ForceUseLocalPinyinFunc == true)
                                     {
                                         nRet = this.DetailForm.MainForm.HanziTextToPinyin(
                                             this.DetailForm,
-                                            true,	// ±¾µØ£¬¿ìËÙ
+                                            true,	// æœ¬åœ°ï¼Œå¿«é€Ÿ
                                             strHanzi,
                                             style,
                                             strDuoyinStyle,
@@ -320,13 +321,13 @@ namespace dp2Catalog
                                     }
                                     else
                                     {
-                                        // ºº×Ö×Ö·û´®×ª»»ÎªÆ´Òô
-                                        // Èç¹ûº¯ÊıÖĞÒÑ¾­MessageBox±¨´í£¬ÔòstrErrorµÚÒ»×Ö·û»áÎª¿Õ¸ñ
+                                        // æ±‰å­—å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ‹¼éŸ³
+                                        // å¦‚æœå‡½æ•°ä¸­å·²ç»MessageBoxæŠ¥é”™ï¼Œåˆ™strErrorç¬¬ä¸€å­—ç¬¦ä¼šä¸ºç©ºæ ¼
                                         // return:
-                                        //      -1  ³ö´í
-                                        //      0   ÓÃ»§Ï£ÍûÖĞ¶Ï
-                                        //      1   Õı³£
-                                        //      2   ½á¹û×Ö·û´®ÖĞÓĞÃ»ÓĞÕÒµ½Æ´ÒôµÄºº×Ö
+                                        //      -1  å‡ºé”™
+                                        //      0   ç”¨æˆ·å¸Œæœ›ä¸­æ–­
+                                        //      1   æ­£å¸¸
+                                        //      2   ç»“æœå­—ç¬¦ä¸²ä¸­æœ‰æ²¡æœ‰æ‰¾åˆ°æ‹¼éŸ³çš„æ±‰å­—
                                         nRet = this.DetailForm.MainForm.SmartHanziTextToPinyin(
                                             this.DetailForm,
                                             strHanzi,
@@ -343,7 +344,7 @@ namespace dp2Catalog
                                     if (nRet == 0)
                                     {
                                         new_selected = null;
-                                        strError = "ÓÃ»§ÖĞ¶Ï¡£Æ´Òô×Ó×Ö¶ÎÄÚÈİ¿ÉÄÜ²»ÍêÕû¡£";
+                                        strError = "ç”¨æˆ·ä¸­æ–­ã€‚æ‹¼éŸ³å­å­—æ®µå†…å®¹å¯èƒ½ä¸å®Œæ•´ã€‚";
                                         goto ERROR1;
                                     }
                                 }
@@ -395,7 +396,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "strCfgXml×°ÔØµ½XMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "strCfgXmlè£…è½½åˆ°XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -411,7 +412,7 @@ namespace dp2Catalog
                     int nRet = GetPinyinCfgLine(
                         cfg_dom,
                         field.Name,
-                        field.Indicator,    // TODO: ¿ÉÒÔ²»¿¼ÂÇÖ¸Ê¾·ûµÄÇé¿ö£¬À©´óÉ¾³ıµÄËÑÑ°·¶Î§
+                        field.Indicator,    // TODO: å¯ä»¥ä¸è€ƒè™‘æŒ‡ç¤ºç¬¦çš„æƒ…å†µï¼Œæ‰©å¤§åˆ é™¤çš„æœå¯»èŒƒå›´
                         out cfg_items);
                     if (nRet <= 0)
                         continue;
@@ -425,12 +426,12 @@ namespace dp2Catalog
                             string to = new string(item.To[k], 1);
                             for (; ; )
                             {
-                                // É¾³ıÒ»¸ö×Ó×Ö¶Î
-                                // ÆäÊµÔ­À´µÄReplaceSubfield()Ò²¿ÉÒÔµ±×÷É¾³ıÀ´Ê¹ÓÃ
+                                // åˆ é™¤ä¸€ä¸ªå­å­—æ®µ
+                                // å…¶å®åŸæ¥çš„ReplaceSubfield()ä¹Ÿå¯ä»¥å½“ä½œåˆ é™¤æ¥ä½¿ç”¨
                                 // return:
-                                //      -1  ³ö´í
-                                //      0   Ã»ÓĞÕÒµ½×Ó×Ö¶Î
-                                //      1   ÕÒµ½²¢É¾³ı
+                                //      -1  å‡ºé”™
+                                //      0   æ²¡æœ‰æ‰¾åˆ°å­å­—æ®µ
+                                //      1   æ‰¾åˆ°å¹¶åˆ é™¤
                                 nRet = MarcUtil.DeleteSubfield(
                                     ref strField,
                                     to,
@@ -455,9 +456,11 @@ namespace dp2Catalog
             MessageBox.Show(this.DetailForm, strError);
         }
 
+#if OLD_CODE
         DigitalPlatform.GcatClient.Channel GcatChannel = null;
+#endif
 
-        // »ñµÃÖøÕßºÅ
+        // è·å¾—è‘—è€…å·
         // return:
         //      -1  error
         //      0   canceled
@@ -473,6 +476,7 @@ namespace dp2Catalog
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
                 strGcatWebServiceUrl = "http://dp2003.com/dp2library/";  // "http://dp2003.com/gcatserver/" //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
+#if OLD_CODE
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
 
@@ -481,7 +485,7 @@ namespace dp2Catalog
 
                 string strDebugInfo = "";
 
-                BeginGcatLoop("ÕıÔÚ»ñÈ¡ '" + strAuthor + "' µÄÖøÕßºÅ£¬´Ó " + strGcatWebServiceUrl + " ...");
+                BeginGcatLoop("æ­£åœ¨è·å– '" + strAuthor + "' çš„è‘—è€…å·ï¼Œä» " + strGcatWebServiceUrl + " ...");
                 try
                 {
                     // return:
@@ -502,7 +506,7 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "È¡ ÖøÕß '" + strAuthor + "' Ö®ºÅÂëÊ±³ö´í : " + strError;
+                        strError = "å– è‘—è€… '" + strAuthor + "' ä¹‹å·ç æ—¶å‡ºé”™ : " + strError;
                         return -1;
                     }
 
@@ -515,7 +519,7 @@ namespace dp2Catalog
             }
             else if (strGcatWebServiceUrl.Contains("gcat"))
             {
-                // ĞÂµÄWebService
+                // æ–°çš„WebService
 
                 string strID = this.DetailForm.MainForm.AppInfo.GetString("DetailHost", "gcat_id", "");
                 bool bSaveID = this.DetailForm.MainForm.AppInfo.GetBoolean("DetailHost", "gcat_saveid", false);
@@ -527,7 +531,7 @@ namespace dp2Catalog
             REDO_GETNUMBER:
                 string strDebugInfo = "";
 
-                BeginGcatLoop("ÕıÔÚ»ñÈ¡ '" + strAuthor + "' µÄÖøÕßºÅ£¬´Ó " + strGcatWebServiceUrl + " ...");
+                BeginGcatLoop("æ­£åœ¨è·å– '" + strAuthor + "' çš„è‘—è€…å·ï¼Œä» " + strGcatWebServiceUrl + " ...");
                 try
                 {
                     // return:
@@ -549,15 +553,15 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "È¡ ÖøÕß '" + strAuthor + "' Ö®ºÅÂëÊ±³ö´í : " + strError;
+                        strError = "å– è‘—è€… '" + strAuthor + "' ä¹‹å·ç æ—¶å‡ºé”™ : " + strError;
                         return -1;
                     }
                     if (nRet == -2)
                     {
                         IdLoginDialog login_dlg = new IdLoginDialog();
                         GuiUtil.AutoSetDefaultFont(login_dlg);
-                        login_dlg.Text = "»ñµÃÖøÕßºÅ -- "
-                            + ((string.IsNullOrEmpty(strID) == true) ? "ÇëÊäÈëID" : strError);
+                        login_dlg.Text = "è·å¾—è‘—è€…å· -- "
+                            + ((string.IsNullOrEmpty(strID) == true) ? "è¯·è¾“å…¥ID" : strError);
                         login_dlg.ID = strID;
                         login_dlg.SaveID = bSaveID;
                         login_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -589,7 +593,9 @@ namespace dp2Catalog
                     EndGcatLoop();
                 }
             }
-            else // dp2library ·şÎñÆ÷
+            else 
+#endif
+            // dp2library æœåŠ¡å™¨
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -597,7 +603,7 @@ namespace dp2Catalog
 
                 string strDebugInfo = "";
 
-                BeginGcatLoop("ÕıÔÚ»ñÈ¡ '" + strAuthor + "' µÄÖøÕßºÅ£¬´Ó " + strGcatWebServiceUrl + " ...");
+                BeginGcatLoop("æ­£åœ¨è·å– '" + strAuthor + "' çš„è‘—è€…å·ï¼Œä» " + strGcatWebServiceUrl + " ...");
                 try
                 {
                     // return:
@@ -618,7 +624,7 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "È¡ ÖøÕß '" + strAuthor + "' Ö®ºÅÂëÊ±³ö´í : " + strError;
+                        strError = "å– è‘—è€… '" + strAuthor + "' ä¹‹å·ç æ—¶å‡ºé”™ : " + strError;
                         return -1;
                     }
                     Program.MainForm.ParamTable["question_table"] = question_table;
@@ -632,10 +638,10 @@ namespace dp2Catalog
 
         }
 
-        // Íâ²¿µ÷ÓÃ
-        // ÌØÊâ°æ±¾£¬¾ßÓĞ»º´æÎÊÌâºÍ´ğ°¸µÄ¹¦ÄÜ
+        // å¤–éƒ¨è°ƒç”¨
+        // ç‰¹æ®Šç‰ˆæœ¬ï¼Œå…·æœ‰ç¼“å­˜é—®é¢˜å’Œç­”æ¡ˆçš„åŠŸèƒ½
         // return:
-        //      -2  strIDÑéÖ¤Ê§°Ü
+        //      -2  strIDéªŒè¯å¤±è´¥
         //      -1  error
         //      0   canceled
         //      1   succeed
@@ -667,12 +673,12 @@ namespace dp2Catalog
                 LibraryChannel channel = Program.MainForm.GetChannel(strUrl, "public");
                 try
                 {
-                    // Õâ¸öº¯Êı¾ßÓĞcatch Í¨Ñ¶ÖĞ exeptionµÄÄÜÁ¦
+                    // è¿™ä¸ªå‡½æ•°å…·æœ‰catch é€šè®¯ä¸­ exeptionçš„èƒ½åŠ›
                     // return:
-                    //		-3	ĞèÒª»Ø´ğÎÊÌâ
-                    //      -2  strIDÑéÖ¤Ê§°Ü
-                    //      -1  ³ö´í
-                    //      0   ³É¹¦
+                    //		-3	éœ€è¦å›ç­”é—®é¢˜
+                    //      -2  strIDéªŒè¯å¤±è´¥
+                    //      -1  å‡ºé”™
+                    //      0   æˆåŠŸ
                     nRet = channel.GetAuthorNumber(
                         strAuthor,
                         bSelectPinyin,
@@ -705,24 +711,25 @@ namespace dp2Catalog
 
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "·ÅÆú";
+                    strError = "æ”¾å¼ƒ";
                     return 0;
                 }
 
                 questions[questions.Length - 1].Answer = dlg.textBox_result.Text;
 
-                question_table[strAuthor] = questions;  // ±£´æ
+                question_table[strAuthor] = questions;  // ä¿å­˜
             }
 
             if (nRet == -1)
                 return -1;
             if (nRet == -2)
-                return -2;  // strIDÑéÖ¤Ê§°Ü
+                return -2;  // strIDéªŒè¯å¤±è´¥
 
             return 1;
         }
 
-        // GCATÍ¨µÀµÇÂ¼ ¾ÉµÄ·½Ê½
+#if OLD_CODE
+        // GCATé€šé“ç™»å½• æ—§çš„æ–¹å¼
         public void gcat_channel_BeforeLogin(object sender,
             DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
         {
@@ -735,7 +742,7 @@ namespace dp2Catalog
                 strPassword = "";
             }
 
-            // Ö±½ÓÊÔÌ½
+            // ç›´æ¥è¯•æ¢
             if (!(e.UserName == strUserName && e.Failed == true)
                 && strUserName != "")
             {
@@ -748,9 +755,9 @@ namespace dp2Catalog
             GuiUtil.SetControlFont(dlg, this.DetailForm.MainForm.Font);
 
             if (e.Failed == true)
-                dlg.textBox_comment.Text = "µÇÂ¼Ê§°Ü¡£¼ÓÖøÕßºÅÂë¹¦ÄÜĞèÒªÖØĞÂµÇÂ¼";
+                dlg.textBox_comment.Text = "ç™»å½•å¤±è´¥ã€‚åŠ è‘—è€…å·ç åŠŸèƒ½éœ€è¦é‡æ–°ç™»å½•";
             else
-                dlg.textBox_comment.Text = "¼ÓÖøÕßºÅÂë¹¦ÄÜĞèÒªµÇÂ¼";
+                dlg.textBox_comment.Text = "åŠ è‘—è€…å·ç åŠŸèƒ½éœ€è¦ç™»å½•";
 
             dlg.textBox_serverAddr.Text = e.GcatServerUrl;
             dlg.textBox_userName.Text = strUserName;
@@ -758,11 +765,11 @@ namespace dp2Catalog
             dlg.checkBox_savePassword.Checked = true;
 
             dlg.textBox_serverAddr.Enabled = false;
-            dlg.TopMost = true; // 2009/11/12 ÒòÎªShowDialog(null)£¬ÎªÁË·ÀÖ¹¶Ô»°¿ò±»·ÅÔÚ·Ç¶¥²¿
+            dlg.TopMost = true; // 2009/11/12 å› ä¸ºShowDialog(null)ï¼Œä¸ºäº†é˜²æ­¢å¯¹è¯æ¡†è¢«æ”¾åœ¨éé¡¶éƒ¨
             dlg.ShowDialog(null);
             if (dlg.DialogResult != DialogResult.OK)
             {
-                e.Cancel = true;    // 2009/11/12 Èç¹ûÈ±ÕâÒ»¾ä£¬»áÔì³ÉCancelºóÈÔÈ»ÖØĞÂµ¯³öµÇÂ¼¶Ô»°¿ò
+                e.Cancel = true;    // 2009/11/12 å¦‚æœç¼ºè¿™ä¸€å¥ï¼Œä¼šé€ æˆCancelåä»ç„¶é‡æ–°å¼¹å‡ºç™»å½•å¯¹è¯æ¡†
                 return;
             }
 
@@ -775,11 +782,14 @@ namespace dp2Catalog
             this.DetailForm.MainForm.ParamTable["author_number_account_username"] = strUserName;
             this.DetailForm.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
+#endif
 
         void DoGcatStop(object sender, StopEventArgs e)
         {
+#if OLD_CODE
             if (this.GcatChannel != null)
                 this.GcatChannel.Abort();
+#endif
         }
 
         bool bMarcEditorFocued = false;
@@ -811,7 +821,7 @@ namespace dp2Catalog
                 this.DetailForm.MarcEditor.Focus();
         }
 
-        // ¹ıÂË³ö°üº¬ºº×ÖµÄ×Ö·û´®
+        // è¿‡æ»¤å‡ºåŒ…å«æ±‰å­—çš„å­—ç¬¦ä¸²
         public List<string> ContainHanzi(List<string> authors)
         {
             List<string> results = new List<string>();
@@ -840,7 +850,7 @@ namespace dp2Catalog
             return true;
         }
 
-        // ¶Ô¼´½«È¡ËÄ½ÇºÅÂëµÄÖøÕß×Ö·û´®½øĞĞÔ¤¼Ó¹¤¡£ÀıÈçÈ¥µôËùÓĞ·Çºº×Ö×Ö·û
+        // å¯¹å³å°†å–å››è§’å·ç çš„è‘—è€…å­—ç¬¦ä¸²è¿›è¡Œé¢„åŠ å·¥ã€‚ä¾‹å¦‚å»æ‰æ‰€æœ‰éæ±‰å­—å­—ç¬¦
         public static int PrepareSjhmAuthorString(string strAuthor,
             out string strResult,
             out string strError)
@@ -848,7 +858,7 @@ namespace dp2Catalog
             strResult = "";
             strError = "";
 
-            // string strSpecialChars = "£¡¡¤£££¤£¥¡­¡­¡ª£ª£¨£©¡ª¡ª£«£­£½£Û£İ¡¶¡·£¼£¾£¬¡££¿£¯£Ü£ü£û£ı¡°¡±¡®¡¯";
+            // string strSpecialChars = "ï¼Â·ï¼ƒï¿¥ï¼…â€¦â€¦â€”ï¼Šï¼ˆï¼‰â€”â€”ï¼‹ï¼ï¼ï¼»ï¼½ã€Šã€‹ï¼œï¼ï¼Œã€‚ï¼Ÿï¼ï¼¼ï½œï½›ï½â€œâ€â€˜â€™";
 
             for (int i = 0; i < strAuthor.Length; i++)
             {
@@ -857,20 +867,20 @@ namespace dp2Catalog
                 if (StringUtil.IsHanzi(ch) == false)
                     continue;
 
-                // ¿´¿´ÊÇ·ñÌØÊâ·ûºÅ
+                // çœ‹çœ‹æ˜¯å¦ç‰¹æ®Šç¬¦å·
                 if (StringUtil.SpecialChars.IndexOf(ch) != -1)
                 {
                     continue;
                 }
 
-                // ºº×Ö
+                // æ±‰å­—
                 strResult += ch;
             }
 
             return 0;
         }
 
-        // »ñµÃÖøÕßºÅ -- ËÄ½ÇºÅÂë
+        // è·å¾—è‘—è€…å· -- å››è§’å·ç 
         // return:
         //      -1  error
         //      0   canceled
@@ -890,18 +900,18 @@ namespace dp2Catalog
                 return -1;
             if (String.IsNullOrEmpty(strResult) == true)
             {
-                strError = "ÖøÕß×Ö·û´® '" + strAuthor + "' ÀïÃæÃ»ÓĞ°üº¬ÓĞĞ§µÄºº×Ö×Ö·û";
+                strError = "è‘—è€…å­—ç¬¦ä¸² '" + strAuthor + "' é‡Œé¢æ²¡æœ‰åŒ…å«æœ‰æ•ˆçš„æ±‰å­—å­—ç¬¦";
                 return -1;
             }
 
             List<string> sjhms = null;
-            // °Ñ×Ö·û´®ÖĞµÄºº×Ö×ª»»ÎªËÄ½ÇºÅÂë
+            // æŠŠå­—ç¬¦ä¸²ä¸­çš„æ±‰å­—è½¬æ¢ä¸ºå››è§’å·ç 
             // parameters:
-            //      bLocal  ÊÇ·ñ´Ó±¾µØ»ñÈ¡ËÄ½ÇºÅÂë
+            //      bLocal  æ˜¯å¦ä»æœ¬åœ°è·å–å››è§’å·ç 
             // return:
-            //      -1  ³ö´í
-            //      0   ÓÃ»§Ï£ÍûÖĞ¶Ï
-            //      1   Õı³£
+            //      -1  å‡ºé”™
+            //      0   ç”¨æˆ·å¸Œæœ›ä¸­æ–­
+            //      1   æ­£å¸¸
             nRet = this.DetailForm.MainForm.HanziTextToSjhm(
                 true,
             strResult,
@@ -912,24 +922,24 @@ namespace dp2Catalog
 
             if (strResult.Length != sjhms.Count)
             {
-                strError = "ÖøÕß×Ö·û´® '" + strResult + "' ÀïÃæµÄ×Ö·ûÊı(" + strResult.Length.ToString() + ")ºÍÈ¡ËÄ½ÇºÅÂëºóµÄ½á¹ûÊÂÏî¸öÊı " + sjhms.Count.ToString() + " ²»·û";
+                strError = "è‘—è€…å­—ç¬¦ä¸² '" + strResult + "' é‡Œé¢çš„å­—ç¬¦æ•°(" + strResult.Length.ToString() + ")å’Œå–å››è§’å·ç åçš„ç»“æœäº‹é¡¹ä¸ªæ•° " + sjhms.Count.ToString() + " ä¸ç¬¦";
                 return -1;
             }
 
-            // 1£¬ÖøÕßÃû³ÆÎªÒ»×ÖÕß£¬È¡¸Ã×ÖµÄËÄ½ÇºÅÂë¡£Èç£ºĞ¤=9022
+            // 1ï¼Œè‘—è€…åç§°ä¸ºä¸€å­—è€…ï¼Œå–è¯¥å­—çš„å››è§’å·ç ã€‚å¦‚ï¼šè‚–=9022
             if (strResult.Length == 1)
             {
                 strAuthorNumber = sjhms[0].Substring(0, 4);
                 return 1;
             }
-            // 2£¬ÖøÕßÃû³ÆÎª¶ş×ÖÕß£¬·Ö±ğÈ¡Á½¸ö×ÖµÄ×óÉÏ½ÇºÍÓÒÉÏ½Ç¡£Èç£ºÁõÏè=0287
+            // 2ï¼Œè‘—è€…åç§°ä¸ºäºŒå­—è€…ï¼Œåˆ†åˆ«å–ä¸¤ä¸ªå­—çš„å·¦ä¸Šè§’å’Œå³ä¸Šè§’ã€‚å¦‚ï¼šåˆ˜ç¿”=0287
             if (strResult.Length == 2)
             {
                 strAuthorNumber = sjhms[0].Substring(0, 2) + sjhms[1].Substring(0, 2);
                 return 1;
             }
 
-            // 3£¬ÖøÕßÃû³ÆÎªÈı×ÖÕß£¬ÒÀ´ÎÈ¡Ê××Ö×óÉÏ¡¢ÓÒÉÏÁ½½ÇºÍºóÁ½×ÖµÄ×óÉÏ½Ç¡£Èç£ºÂŞ¹áÖĞ=6075
+            // 3ï¼Œè‘—è€…åç§°ä¸ºä¸‰å­—è€…ï¼Œä¾æ¬¡å–é¦–å­—å·¦ä¸Šã€å³ä¸Šä¸¤è§’å’Œåä¸¤å­—çš„å·¦ä¸Šè§’ã€‚å¦‚ï¼šç½—è´¯ä¸­=6075
             if (strResult.Length == 3)
             {
                 strAuthorNumber = sjhms[0].Substring(0, 2)
@@ -938,8 +948,8 @@ namespace dp2Catalog
                 return 1;
             }
 
-            // 4£¬ÖøÕßÃû³ÆÎªËÄ×ÖÕß£¬ÒÀ´ÎÈ¡¸÷×ÖµÄ×óÉÏ½Ç¡£Èç£ºÖĞÌïÓ¢ÊÙ=5645
-            // 5£¬Îå×Ö¼°ÒÔÉÏ×ÖÊıÕß£¬¾ùÒÔÇ°ËÄ×ÖÈ¡ºÅ£¬·½·¨Í¬ÉÏ¡£Èç£º°ÂË¹ÌØÂå·òË¹»ù=2423
+            // 4ï¼Œè‘—è€…åç§°ä¸ºå››å­—è€…ï¼Œä¾æ¬¡å–å„å­—çš„å·¦ä¸Šè§’ã€‚å¦‚ï¼šä¸­ç”°è‹±å¯¿=5645
+            // 5ï¼Œäº”å­—åŠä»¥ä¸Šå­—æ•°è€…ï¼Œå‡ä»¥å‰å››å­—å–å·ï¼Œæ–¹æ³•åŒä¸Šã€‚å¦‚ï¼šå¥¥æ–¯ç‰¹æ´›å¤«æ–¯åŸº=2423
             if (strResult.Length >= 4)
             {
                 strAuthorNumber = sjhms[0].Substring(0, 1)
@@ -953,7 +963,7 @@ namespace dp2Catalog
             return -1;
         }
 
-        // Êı¾İ±£´æÇ°µÄ´¦Àí¹¤×÷
+        // æ•°æ®ä¿å­˜å‰çš„å¤„ç†å·¥ä½œ
         public virtual void BeforeSaveRecord(object sender,
             BeforeSaveRecordEventArgs e)
         {
@@ -964,16 +974,16 @@ namespace dp2Catalog
             string strError = "";
             bool bChanged = false;
 
-            // ¶ÔMARC¼ÇÂ¼½øĞĞ´¦Àí
+            // å¯¹MARCè®°å½•è¿›è¡Œå¤„ç†
             if (sender is MarcEditor)
             {
-                // ±àÄ¿Åú´ÎºÅ
+                // ç¼–ç›®æ‰¹æ¬¡å·
                 string strBatchNo = this.GetFirstSubfield("998", "a");
                 if (string.IsNullOrEmpty(strBatchNo) == true)
                 {
                     string strValue = "";
-                    // ¼ì²é±¾µØ %catalog_batchno% ºêÊÇ·ñ´æÔÚ
-                    // ´Ómarceditor_macrotable.xmlÎÄ¼şÖĞ½âÎöºê
+                    // æ£€æŸ¥æœ¬åœ° %catalog_batchno% å®æ˜¯å¦å­˜åœ¨
+                    // ä»marceditor_macrotable.xmlæ–‡ä»¶ä¸­è§£æå®
                     // return:
                     //      -1  error
                     //      0   not found
@@ -995,7 +1005,7 @@ namespace dp2Catalog
                     }
                 }
 
-                // ¼ÇÂ¼´´½¨Ê±¼ä
+                // è®°å½•åˆ›å»ºæ—¶é—´
                 string strCreateTime = this.GetFirstSubfield("998", "u");
                 if (string.IsNullOrEmpty(strCreateTime) == true)
                 {
@@ -1005,7 +1015,7 @@ namespace dp2Catalog
                     bChanged = true;
                 }
 
-                // ¼ÇÂ¼´´½¨Õß
+                // è®°å½•åˆ›å»ºè€…
                 string strCreator = this.GetFirstSubfield("998", "z");
                 if (string.IsNullOrEmpty(strCreator) == true)
                 {
@@ -1056,11 +1066,11 @@ namespace dp2Catalog
     public class HostEventArgs : EventArgs
     {
         /*
-        // ´ÓºÎ´¦Æô¶¯? MarcEditor EntityEditForm
+        // ä»ä½•å¤„å¯åŠ¨? MarcEditor EntityEditForm
         public object StartFrom = null;
          * */
 
-        // ´´½¨Êı¾İµÄÊÂ¼ş²ÎÊı
+        // åˆ›å»ºæ•°æ®çš„äº‹ä»¶å‚æ•°
         public GenerateDataEventArgs e = null;
     }
 

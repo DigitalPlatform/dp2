@@ -1,24 +1,36 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Xml;
-using System.Text;
 using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-using System.ServiceModel;
-
 using DigitalPlatform.IO;
-using DigitalPlatform.ResultSet;
 
 namespace DigitalPlatform.rms
 {
     // 全局信息
     public partial class KernelApplication : IDisposable
     {
+        public static string Version
+        {
+            get
+            {
+                Assembly assembly = Assembly.GetAssembly(typeof(KernelApplication));
+                Version version = assembly.GetName().Version;
+                return version.Major + "." + version.Minor;
+            }
+        }
+
+        public static string FullVersion
+        {
+            get
+            {
+                Assembly assembly = Assembly.GetAssembly(typeof(KernelApplication));
+                Version version = assembly.GetName().Version;
+                return version.ToString();
+            }
+        }
         // private string m_strLogFileName = "";	//日志文件名称
         private string m_strDebugFileName = "";	// 
         public bool DebugMode = false;
@@ -119,6 +131,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
+                                // TODO: 在日志中记载全局结果集个数
                                 this.ResultSets.Clean(new TimeSpan(1, 0, 0));   // 一个小时
                                 // this.ResultSets.Clean(new TimeSpan(0, 5, 0));   // 5 分钟
                             }
@@ -355,7 +368,7 @@ namespace DigitalPlatform.rms
             // this.m_strLogFileName = strLogDir + "\\log.txt";
             this.m_strDebugFileName = strLogDir + "\\debug.txt";
 
-            this.WriteErrorLog("kernel application 开始初始化");
+            this.WriteErrorLog("kernel (" + KernelApplication.FullVersion + ") application 开始初始化");
 
             CleanSessionDir(this.SessionDir);
 
@@ -550,7 +563,6 @@ namespace DigitalPlatform.rms
 
 
             this.WriteErrorLog("kernel application 成功降落。");
-
             this.Dbs = null;
         }
 
@@ -669,7 +681,6 @@ namespace DigitalPlatform.rms
         [DataMember]
         public string FromValue; // 来源值
     }
-
 
     //结果对象
     [DataContract(Namespace = "http://dp2003.com/dp2kernel/")]

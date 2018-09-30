@@ -255,13 +255,10 @@ namespace DigitalPlatform.Text
             strError = "";
             strResult = "";
 
-            string strPrefix = "";
-            string strValue = "";
-            string strPostfix = "";
             int nRet = PriceUtil.ParsePriceUnit(strPrice,
-                out strPrefix,
-                out strValue,
-                out strPostfix,
+                out string strPrefix,
+                out string strValue,
+                out string strPostfix,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -279,7 +276,7 @@ namespace DigitalPlatform.Text
 
             value *= (decimal)nCopy;
 
-            strResult = strPrefix + value.ToString() + strPostfix;
+            strResult = strPrefix + value.ToString(CurrencyItem.fmt) + strPostfix;
             return 0;
         }
 
@@ -383,7 +380,7 @@ namespace DigitalPlatform.Text
                     value = (decimal)((double)value / multiper);
                 }
 
-                return value.ToString();
+                return value.ToString(CurrencyItem.fmt);
             }
 
             return strValue;
@@ -1429,7 +1426,7 @@ namespace DigitalPlatform.Text
                 CurrencyItem item = items[i];
                 decimal value = item.Value;
 
-                // string fmt = "0.00";    // #.##
+                // string fmt = "0.00";    // #.##  // 注: value.ToString("#.##") 采用的是四舍五入的方法
                 string fmt = CurrencyItem.fmt;
 
                 // 负号要放在最前面
@@ -1438,8 +1435,7 @@ namespace DigitalPlatform.Text
                 else
                     results.Add(item.Prefix + value.ToString(fmt) + item.Postfix);
             }
-
-            // 注: value.ToString("#.##") 采用的是四舍五入的方法
+            
             return 0;
         }
 

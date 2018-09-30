@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections;   // Hashtable
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
@@ -12,7 +10,6 @@ using System.IO;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
@@ -1018,12 +1015,11 @@ bool bChanged)
 
             foreach (string filename in expanded_filenames)
             {
-                ListViewItem item = null;
                 int nRet = this.AppendNewItem(
     filename,
     strUsage,
     "",
-    out item,
+    out ListViewItem item,
     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1813,21 +1809,18 @@ bool bChanged)
 
             try
             {
-                byte[] baOutputTimeStamp = null;
 
                 // EnableControlsInLoading(true);
 
-                string strMetaData;
-                string strOutputPath = "";
 
                 long lRet = channel.GetRes(
                     Stop,
                     strResPath,
                     dlg.FileName,
                     "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
-                    out strMetaData,
-                    out baOutputTimeStamp,
-                    out strOutputPath,
+                    out string strMetaData,
+                    out byte[] baOutputTimeStamp,
+                    out string strOutputPath,
                     out strError);
                 // EnableControlsInLoading(false);
                 if (lRet == -1)
@@ -2205,6 +2198,12 @@ out strError);
                             channel.Timeout = old_timeout;
                         }
                         timestamp = output_timestamp;
+
+                        // 2018/8/29
+                        if (timestamp != null)
+                            ListViewUtil.ChangeItemText(item,
+                            COLUMN_TIMESTAMP,
+                            ByteArray.GetHexTimeStampString(timestamp));
 
                         if (lRet == -1)
                             goto ERROR1;

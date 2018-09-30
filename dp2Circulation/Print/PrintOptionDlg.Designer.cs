@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class PrintOptionDlg
     {
@@ -58,11 +58,11 @@ namespace dp2Circulation
             this.listView_templates = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_template_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_template_filepath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.textBox_templates_content = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel_template_bottom = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
+            this.textBox_templates_content = new System.Windows.Forms.TextBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.tableLayoutPanel_template_bottom = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_normal.SuspendLayout();
             this.tabPage_columns.SuspendLayout();
@@ -82,11 +82,10 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_normal);
             this.tabControl_main.Controls.Add(this.tabPage_columns);
             this.tabControl_main.Controls.Add(this.tabPage_templates);
-            this.tabControl_main.Location = new System.Drawing.Point(9, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Location = new System.Drawing.Point(14, 15);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(399, 214);
+            this.tabControl_main.Size = new System.Drawing.Size(598, 321);
             this.tabControl_main.TabIndex = 10;
             // 
             // tabPage_normal
@@ -101,34 +100,31 @@ namespace dp2Circulation
             this.tabPage_normal.Controls.Add(this.label2);
             this.tabPage_normal.Controls.Add(this.textBox_linesPerPage);
             this.tabPage_normal.Controls.Add(this.label1);
-            this.tabPage_normal.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_normal.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_normal.Location = new System.Drawing.Point(4, 28);
             this.tabPage_normal.Name = "tabPage_normal";
-            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_normal.Size = new System.Drawing.Size(391, 188);
+            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_normal.Size = new System.Drawing.Size(590, 289);
             this.tabPage_normal.TabIndex = 0;
-            this.tabPage_normal.Text = "“ª∞„≤Œ ˝";
+            this.tabPage_normal.Text = "‰∏ÄËà¨ÂèÇÊï∞";
             this.tabPage_normal.UseVisualStyleBackColor = true;
             // 
             // textBox_maxSummaryChars
             // 
             this.textBox_maxSummaryChars.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_maxSummaryChars.Location = new System.Drawing.Point(106, 132);
-            this.textBox_maxSummaryChars.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_maxSummaryChars.Location = new System.Drawing.Point(159, 198);
             this.textBox_maxSummaryChars.Name = "textBox_maxSummaryChars";
-            this.textBox_maxSummaryChars.Size = new System.Drawing.Size(84, 21);
+            this.textBox_maxSummaryChars.Size = new System.Drawing.Size(125, 28);
             this.textBox_maxSummaryChars.TabIndex = 9;
             this.textBox_maxSummaryChars.Visible = false;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(4, 134);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(6, 201);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(101, 12);
+            this.label5.Size = new System.Drawing.Size(152, 18);
             this.label5.TabIndex = 8;
-            this.label5.Text = "’™“™◊÷ ˝…œœﬁ(&S):";
+            this.label5.Text = "ÊëòË¶ÅÂ≠óÊï∞‰∏äÈôê(&S):";
             this.label5.Visible = false;
             // 
             // textBox_tableTitle
@@ -136,82 +132,74 @@ namespace dp2Circulation
             this.textBox_tableTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_tableTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_tableTitle.Location = new System.Drawing.Point(106, 72);
-            this.textBox_tableTitle.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_tableTitle.Location = new System.Drawing.Point(159, 108);
             this.textBox_tableTitle.Name = "textBox_tableTitle";
-            this.textBox_tableTitle.Size = new System.Drawing.Size(208, 21);
+            this.textBox_tableTitle.Size = new System.Drawing.Size(311, 28);
             this.textBox_tableTitle.TabIndex = 5;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 74);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Location = new System.Drawing.Point(6, 111);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(77, 12);
+            this.label4.Size = new System.Drawing.Size(116, 18);
             this.label4.TabIndex = 4;
-            this.label4.Text = "±Ì∏Ò±ÍÃ‚(&T):";
+            this.label4.Text = "Ë°®Ê†ºÊ†áÈ¢ò(&T):";
             // 
             // textBox_pageFooter
             // 
             this.textBox_pageFooter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_pageFooter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_pageFooter.Location = new System.Drawing.Point(106, 35);
-            this.textBox_pageFooter.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_pageFooter.Location = new System.Drawing.Point(159, 52);
             this.textBox_pageFooter.Name = "textBox_pageFooter";
-            this.textBox_pageFooter.Size = new System.Drawing.Size(208, 21);
+            this.textBox_pageFooter.Size = new System.Drawing.Size(311, 28);
             this.textBox_pageFooter.TabIndex = 3;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 38);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(6, 57);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 12);
+            this.label3.Size = new System.Drawing.Size(116, 18);
             this.label3.TabIndex = 2;
-            this.label3.Text = "“≥Ω≈Œƒ◊÷(&F):";
+            this.label3.Text = "È°µËÑöÊñáÂ≠ó(&F):";
             // 
             // textBox_pageHeader
             // 
             this.textBox_pageHeader.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_pageHeader.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_pageHeader.Location = new System.Drawing.Point(106, 10);
-            this.textBox_pageHeader.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_pageHeader.Location = new System.Drawing.Point(159, 15);
             this.textBox_pageHeader.Name = "textBox_pageHeader";
-            this.textBox_pageHeader.Size = new System.Drawing.Size(208, 21);
+            this.textBox_pageHeader.Size = new System.Drawing.Size(311, 28);
             this.textBox_pageHeader.TabIndex = 1;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 13);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(6, 20);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(116, 18);
             this.label2.TabIndex = 0;
-            this.label2.Text = "“≥√ºŒƒ◊÷(&H):";
+            this.label2.Text = "È°µÁúâÊñáÂ≠ó(&H):";
             // 
             // textBox_linesPerPage
             // 
             this.textBox_linesPerPage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_linesPerPage.Location = new System.Drawing.Point(106, 107);
-            this.textBox_linesPerPage.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_linesPerPage.Location = new System.Drawing.Point(159, 160);
             this.textBox_linesPerPage.Name = "textBox_linesPerPage";
-            this.textBox_linesPerPage.Size = new System.Drawing.Size(84, 21);
+            this.textBox_linesPerPage.Size = new System.Drawing.Size(125, 28);
             this.textBox_linesPerPage.TabIndex = 7;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 110);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(6, 165);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 12);
+            this.label1.Size = new System.Drawing.Size(116, 18);
             this.label1.TabIndex = 6;
-            this.label1.Text = "√ø“≥–– ˝(&L):";
+            this.label1.Text = "ÊØèÈ°µË°åÊï∞(&L):";
             // 
             // tabPage_columns
             // 
@@ -221,13 +209,12 @@ namespace dp2Circulation
             this.tabPage_columns.Controls.Add(this.button_columns_moveDown);
             this.tabPage_columns.Controls.Add(this.button_columns_moveUp);
             this.tabPage_columns.Controls.Add(this.listView_columns);
-            this.tabPage_columns.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_columns.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_columns.Location = new System.Drawing.Point(4, 28);
             this.tabPage_columns.Name = "tabPage_columns";
-            this.tabPage_columns.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_columns.Size = new System.Drawing.Size(391, 188);
+            this.tabPage_columns.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_columns.Size = new System.Drawing.Size(590, 289);
             this.tabPage_columns.TabIndex = 1;
-            this.tabPage_columns.Text = "¿∏ƒø∂®“Â";
+            this.tabPage_columns.Text = "Ê†èÁõÆÂÆö‰πâ";
             this.tabPage_columns.UseVisualStyleBackColor = true;
             // 
             // button_columns_modify
@@ -235,12 +222,11 @@ namespace dp2Circulation
             this.button_columns_modify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_columns_modify.Enabled = false;
             this.button_columns_modify.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_columns_modify.Location = new System.Drawing.Point(332, 105);
-            this.button_columns_modify.Margin = new System.Windows.Forms.Padding(2);
+            this.button_columns_modify.Location = new System.Drawing.Point(498, 158);
             this.button_columns_modify.Name = "button_columns_modify";
-            this.button_columns_modify.Size = new System.Drawing.Size(56, 22);
+            this.button_columns_modify.Size = new System.Drawing.Size(84, 33);
             this.button_columns_modify.TabIndex = 4;
-            this.button_columns_modify.Text = "–ﬁ∏ƒ(&M)";
+            this.button_columns_modify.Text = "‰øÆÊîπ(&M)";
             this.button_columns_modify.UseVisualStyleBackColor = true;
             this.button_columns_modify.Click += new System.EventHandler(this.button_columns_modify_Click);
             // 
@@ -249,12 +235,11 @@ namespace dp2Circulation
             this.button_columns_delete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_columns_delete.Enabled = false;
             this.button_columns_delete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_columns_delete.Location = new System.Drawing.Point(332, 132);
-            this.button_columns_delete.Margin = new System.Windows.Forms.Padding(2);
+            this.button_columns_delete.Location = new System.Drawing.Point(498, 198);
             this.button_columns_delete.Name = "button_columns_delete";
-            this.button_columns_delete.Size = new System.Drawing.Size(56, 22);
+            this.button_columns_delete.Size = new System.Drawing.Size(84, 33);
             this.button_columns_delete.TabIndex = 5;
-            this.button_columns_delete.Text = "…æ≥˝(&R)";
+            this.button_columns_delete.Text = "Âà†Èô§(&R)";
             this.button_columns_delete.UseVisualStyleBackColor = true;
             this.button_columns_delete.Click += new System.EventHandler(this.button_columns_delete_Click);
             // 
@@ -262,12 +247,11 @@ namespace dp2Circulation
             // 
             this.button_columns_new.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_columns_new.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_columns_new.Location = new System.Drawing.Point(332, 78);
-            this.button_columns_new.Margin = new System.Windows.Forms.Padding(2);
+            this.button_columns_new.Location = new System.Drawing.Point(498, 117);
             this.button_columns_new.Name = "button_columns_new";
-            this.button_columns_new.Size = new System.Drawing.Size(56, 22);
+            this.button_columns_new.Size = new System.Drawing.Size(84, 33);
             this.button_columns_new.TabIndex = 3;
-            this.button_columns_new.Text = "–¬‘ˆ(&N)";
+            this.button_columns_new.Text = "Êñ∞Â¢û(&N)";
             this.button_columns_new.UseVisualStyleBackColor = true;
             this.button_columns_new.Click += new System.EventHandler(this.button_columns_new_Click);
             // 
@@ -276,12 +260,11 @@ namespace dp2Circulation
             this.button_columns_moveDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_columns_moveDown.Enabled = false;
             this.button_columns_moveDown.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_columns_moveDown.Location = new System.Drawing.Point(332, 33);
-            this.button_columns_moveDown.Margin = new System.Windows.Forms.Padding(2);
+            this.button_columns_moveDown.Location = new System.Drawing.Point(498, 50);
             this.button_columns_moveDown.Name = "button_columns_moveDown";
-            this.button_columns_moveDown.Size = new System.Drawing.Size(56, 22);
+            this.button_columns_moveDown.Size = new System.Drawing.Size(84, 33);
             this.button_columns_moveDown.TabIndex = 2;
-            this.button_columns_moveDown.Text = "œ¬“∆(&D)";
+            this.button_columns_moveDown.Text = "‰∏ãÁßª(&D)";
             this.button_columns_moveDown.UseVisualStyleBackColor = true;
             this.button_columns_moveDown.Click += new System.EventHandler(this.button_columns_moveDown_Click);
             // 
@@ -290,12 +273,11 @@ namespace dp2Circulation
             this.button_columns_moveUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_columns_moveUp.Enabled = false;
             this.button_columns_moveUp.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_columns_moveUp.Location = new System.Drawing.Point(332, 6);
-            this.button_columns_moveUp.Margin = new System.Windows.Forms.Padding(2);
+            this.button_columns_moveUp.Location = new System.Drawing.Point(498, 9);
             this.button_columns_moveUp.Name = "button_columns_moveUp";
-            this.button_columns_moveUp.Size = new System.Drawing.Size(56, 22);
+            this.button_columns_moveUp.Size = new System.Drawing.Size(84, 33);
             this.button_columns_moveUp.TabIndex = 1;
-            this.button_columns_moveUp.Text = "…œ“∆(&U)";
+            this.button_columns_moveUp.Text = "‰∏äÁßª(&U)";
             this.button_columns_moveUp.UseVisualStyleBackColor = true;
             this.button_columns_moveUp.Click += new System.EventHandler(this.button_columns_moveUp_Click);
             // 
@@ -313,10 +295,9 @@ namespace dp2Circulation
             this.columnHeader_evalue});
             this.listView_columns.FullRowSelect = true;
             this.listView_columns.HideSelection = false;
-            this.listView_columns.Location = new System.Drawing.Point(5, 6);
-            this.listView_columns.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_columns.Location = new System.Drawing.Point(8, 9);
             this.listView_columns.Name = "listView_columns";
-            this.listView_columns.Size = new System.Drawing.Size(323, 182);
+            this.listView_columns.Size = new System.Drawing.Size(484, 272);
             this.listView_columns.TabIndex = 0;
             this.listView_columns.UseCompatibleStateImageBehavior = false;
             this.listView_columns.View = System.Windows.Forms.View.Details;
@@ -325,48 +306,46 @@ namespace dp2Circulation
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = "¿∏ƒø√˚";
+            this.columnHeader_name.Text = "Ê†èÁõÆÂêç";
             this.columnHeader_name.Width = 200;
             // 
             // columnHeader_caption
             // 
-            this.columnHeader_caption.Text = "±ÍÃ‚Œƒ◊÷";
+            this.columnHeader_caption.Text = "Ê†áÈ¢òÊñáÂ≠ó";
             this.columnHeader_caption.Width = 150;
             // 
             // columnHeader_widthChars
             // 
             this.columnHeader_widthChars.DisplayIndex = 4;
-            this.columnHeader_widthChars.Text = "¿∏øÌ◊÷∑˚öH";
+            this.columnHeader_widthChars.Text = "Ê†èÂÆΩÂ≠óÁ¨¶Ê¨ª";
             this.columnHeader_widthChars.Width = 100;
             // 
             // columnHeader_maxChars
             // 
             this.columnHeader_maxChars.DisplayIndex = 2;
-            this.columnHeader_maxChars.Text = "Ωÿ∂œ◊÷∑˚ ˝";
+            this.columnHeader_maxChars.Text = "Êà™Êñ≠Â≠óÁ¨¶Êï∞";
             this.columnHeader_maxChars.Width = 100;
             // 
             // columnHeader_evalue
             // 
             this.columnHeader_evalue.DisplayIndex = 3;
-            this.columnHeader_evalue.Text = "Ω≈±æ";
+            this.columnHeader_evalue.Text = "ËÑöÊú¨";
             this.columnHeader_evalue.Width = 200;
             // 
             // tabPage_templates
             // 
             this.tabPage_templates.Controls.Add(this.splitContainer_templates);
-            this.tabPage_templates.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_templates.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_templates.Location = new System.Drawing.Point(4, 28);
             this.tabPage_templates.Name = "tabPage_templates";
-            this.tabPage_templates.Size = new System.Drawing.Size(391, 188);
+            this.tabPage_templates.Size = new System.Drawing.Size(590, 289);
             this.tabPage_templates.TabIndex = 2;
-            this.tabPage_templates.Text = "ƒ£∞Â";
+            this.tabPage_templates.Text = "Ê®°Êùø";
             this.tabPage_templates.UseVisualStyleBackColor = true;
             // 
             // splitContainer_templates
             // 
             this.splitContainer_templates.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_templates.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer_templates.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer_templates.Name = "splitContainer_templates";
             this.splitContainer_templates.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -377,9 +356,9 @@ namespace dp2Circulation
             // splitContainer_templates.Panel2
             // 
             this.splitContainer_templates.Panel2.Controls.Add(this.tableLayoutPanel_template_bottom);
-            this.splitContainer_templates.Size = new System.Drawing.Size(391, 188);
-            this.splitContainer_templates.SplitterDistance = 78;
-            this.splitContainer_templates.SplitterWidth = 6;
+            this.splitContainer_templates.Size = new System.Drawing.Size(590, 289);
+            this.splitContainer_templates.SplitterDistance = 119;
+            this.splitContainer_templates.SplitterWidth = 9;
             this.splitContainer_templates.TabIndex = 0;
             // 
             // listView_templates
@@ -392,9 +371,8 @@ namespace dp2Circulation
             this.listView_templates.FullRowSelect = true;
             this.listView_templates.HideSelection = false;
             this.listView_templates.Location = new System.Drawing.Point(0, 0);
-            this.listView_templates.Margin = new System.Windows.Forms.Padding(2);
             this.listView_templates.Name = "listView_templates";
-            this.listView_templates.Size = new System.Drawing.Size(391, 78);
+            this.listView_templates.Size = new System.Drawing.Size(590, 119);
             this.listView_templates.TabIndex = 1;
             this.listView_templates.UseCompatibleStateImageBehavior = false;
             this.listView_templates.View = System.Windows.Forms.View.Details;
@@ -403,13 +381,38 @@ namespace dp2Circulation
             // 
             // columnHeader_template_name
             // 
-            this.columnHeader_template_name.Text = "ƒ£∞Â√˚";
+            this.columnHeader_template_name.Text = "Ê®°ÊùøÂêç";
             this.columnHeader_template_name.Width = 120;
             // 
             // columnHeader_template_filepath
             // 
-            this.columnHeader_template_filepath.Text = "Œƒº˛¬∑æ∂";
+            this.columnHeader_template_filepath.Text = "Êñá‰ª∂Ë∑ØÂæÑ";
             this.columnHeader_template_filepath.Width = 522;
+            // 
+            // tableLayoutPanel_template_bottom
+            // 
+            this.tableLayoutPanel_template_bottom.ColumnCount = 1;
+            this.tableLayoutPanel_template_bottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_template_bottom.Controls.Add(this.label7, 0, 0);
+            this.tableLayoutPanel_template_bottom.Controls.Add(this.textBox_templates_content, 0, 1);
+            this.tableLayoutPanel_template_bottom.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_template_bottom.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_template_bottom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_template_bottom.Name = "tableLayoutPanel_template_bottom";
+            this.tableLayoutPanel_template_bottom.RowCount = 2;
+            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_template_bottom.Size = new System.Drawing.Size(590, 161);
+            this.tableLayoutPanel_template_bottom.TabIndex = 3;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(3, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(116, 18);
+            this.label7.TabIndex = 1;
+            this.label7.Text = "Êñá‰ª∂ÂÜÖÂÆπ(&C):";
             // 
             // textBox_templates_content
             // 
@@ -422,35 +425,23 @@ namespace dp2Circulation
             this.textBox_templates_content.Enabled = false;
             this.textBox_templates_content.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_templates_content.HideSelection = false;
-            this.textBox_templates_content.Location = new System.Drawing.Point(2, 14);
-            this.textBox_templates_content.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_templates_content.Location = new System.Drawing.Point(3, 21);
             this.textBox_templates_content.MaxLength = 0;
             this.textBox_templates_content.Multiline = true;
             this.textBox_templates_content.Name = "textBox_templates_content";
             this.textBox_templates_content.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_templates_content.Size = new System.Drawing.Size(387, 88);
+            this.textBox_templates_content.Size = new System.Drawing.Size(584, 137);
             this.textBox_templates_content.TabIndex = 2;
             this.textBox_templates_content.TextChanged += new System.EventHandler(this.textBox_templates_content_TextChanged);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(2, 0);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(77, 12);
-            this.label7.TabIndex = 1;
-            this.label7.Text = "Œƒº˛ƒ⁄»›(&C):";
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(291, 229);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(436, 344);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(84, 33);
             this.button_OK.TabIndex = 11;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -458,45 +449,28 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(352, 229);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(528, 344);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
             this.button_Cancel.TabIndex = 12;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // tableLayoutPanel_template_bottom
-            // 
-            this.tableLayoutPanel_template_bottom.ColumnCount = 1;
-            this.tableLayoutPanel_template_bottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel_template_bottom.Controls.Add(this.label7, 0, 0);
-            this.tableLayoutPanel_template_bottom.Controls.Add(this.textBox_templates_content, 0, 1);
-            this.tableLayoutPanel_template_bottom.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_template_bottom.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_template_bottom.Name = "tableLayoutPanel_template_bottom";
-            this.tableLayoutPanel_template_bottom.RowCount = 2;
-            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_template_bottom.Size = new System.Drawing.Size(391, 104);
-            this.tableLayoutPanel_template_bottom.TabIndex = 3;
             // 
             // PrintOptionDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(417, 257);
+            this.ClientSize = new System.Drawing.Size(626, 386);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PrintOptionDlg";
             this.ShowInTaskbar = false;
-            this.Text = "¥Ú”°≤Œ ˝≈‰÷√";
+            this.Text = "ÊâìÂç∞ÂèÇÊï∞ÈÖçÁΩÆ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PrintOptionDlg_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.PrintOptionDlg_FormClosed);
             this.Load += new System.EventHandler(this.PrintOptionDlg_Load);

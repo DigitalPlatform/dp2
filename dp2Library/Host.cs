@@ -2,10 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
@@ -22,6 +19,7 @@ using System.IdentityModel.Selectors;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
+using System.Runtime.Serialization.Formatters;
 
 using Microsoft.Win32;
 
@@ -29,7 +27,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Runtime.Serialization.Formatters;
+using System.Threading.Tasks;
 
 namespace dp2Library
 {
@@ -228,6 +226,7 @@ namespace dp2Library
             return null;
         }
 
+#if NO
         void CloseHosts()
         {
             foreach (ServiceHost host in this.m_hosts)
@@ -243,6 +242,36 @@ namespace dp2Library
             }
 
             this.m_hosts.Clear();
+        }
+#endif
+
+        void CloseHosts()
+        {
+            List<HostInfo> infos = new List<HostInfo>();
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info != null)
+                {
+                    infos.Add(info);
+                    host.Extensions.Remove(info);
+                }
+
+                host.Close();
+            }
+
+            this.m_hosts.Clear();
+
+            // 用多线程集中 Dispose()
+            if (infos.Count > 0)
+            {
+                List<Task> tasks = new List<Task>();
+                foreach (HostInfo info in infos)
+                {
+                    Task.Run(() => info.Dispose());
+                }
+                Task.WaitAll(tasks.ToArray());
+            }
         }
 
         // 关闭一个指定的 host
@@ -323,9 +352,16 @@ namespace dp2Library
         {
             string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
             Hashtable table = StringUtil.ParseParameters(strExtParams);
-            return (string)table["function"];
+            return CanonicalizeFunction((string)table["function"]);
         }
 
+        // 将 function 参数值中的竖线替换为逗号
+        static string CanonicalizeFunction(string text)
+        {
+            if (text == null)
+                return "";
+            return text.Replace("|", ",");
+        }
         // 检查序列号中是否具备某个功能
         static bool CheckFunction(string strSerialCode, string strFunction)
         {

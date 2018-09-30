@@ -2422,7 +2422,6 @@ out string strError)
     // 按照拼音条目的使用频率排序
     public class HitCountComparer : IComparer<XmlNode>
     {
-
         int IComparer<XmlNode>.Compare(XmlNode x, XmlNode y)
         {
             string s1 = DomUtil.GetAttr(x, "c");

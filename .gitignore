@@ -216,4 +216,7 @@ _Pvt_Extensions/
 ModelManifest.xml
 /dp2Installer/library_data_save
 
+!/dp2Kernel/gsdll32.dll
+!/dp2LibraryXE/gsdll32.dll
+
 

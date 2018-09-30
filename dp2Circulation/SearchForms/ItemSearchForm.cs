@@ -4102,6 +4102,14 @@ out strError);
 
             List<string> errors = new List<string>();
 
+            // 2018/8/16
+            string strPublishTime = DomUtil.GetElementText(dom.DocumentElement, "publishTime");
+            if (string.IsNullOrEmpty(strPublishTime))
+            {
+                strError = "出版日期字段为空";
+                errors.Add(strError);
+            }
+
             List<string> refids = new List<string>();   // 内嵌订购记录的 refid
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
@@ -4217,6 +4225,7 @@ out strError);
                 strError = StringUtil.MakePathList(errors, "; ");
                 return -1;
             }
+
             return 0;
         }
 
@@ -6167,19 +6176,18 @@ out strError);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = null;
-            sheet = doc.Worksheets.Add("订购去向分配表");
-            // sheet.Protect();
-
             List<int> column_max_chars = new List<int>();   // 每个列的最大字符数            
             int nLineNumber = 0;    // 序号            
-            // int nRowIndex = 2;  // 跟踪行号            
-            bool bDone = false; // 是否成功走完全部流程
+            // bool bDone = false; // 是否成功走完全部流程
 
             int nOrderCount = 0;    // 导出订购记录计数
 
             try
             {
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add("订购去向分配表");
+                // sheet.Protect();
+
                 // 准备书目列标题
                 Order.BiblioColumnOption biblio_column_option = new Order.BiblioColumnOption(Program.MainForm.UserDir,
     "");
@@ -6390,7 +6398,13 @@ out strError);
 
                 Order.DistributeExcelFile.AdjectColumnWidth(sheet, column_max_chars, 20);
 
-                bDone = true;
+                // bDone = true;
+
+                    if (doc != null)
+                    {
+                        doc.SaveAs(dlg.OutputFileName);
+                        doc.Dispose();
+                    }
             }
             catch (Exception ex)
             {
@@ -6404,25 +6418,17 @@ out strError);
 
                 this.ClearMessage();
 
-                if (bDone)
+            }
+
+            if (bLaunchExcel)
+            {
+                try
                 {
-                    if (doc != null)
-                    {
-                        doc.SaveAs(dlg.OutputFileName);
-                        doc.Dispose();
-                    }
+                    System.Diagnostics.Process.Start(dlg.OutputFileName);
+                }
+                catch
+                {
 
-                    if (bLaunchExcel)
-                    {
-                        try
-                        {
-                            System.Diagnostics.Process.Start(dlg.OutputFileName);
-                        }
-                        catch
-                        {
-
-                        }
-                    }
                 }
             }
 

@@ -365,18 +365,21 @@ namespace dp2Circulation
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
             {
-                // 警告尚未保存
-                DialogResult result = MessageBox.Show(this,
-    "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
-    "ReaderInfoForm",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result != DialogResult.Yes)
+                this.Invoke((Action)(() =>
                 {
-                    e.Cancel = true;
-                    return;
-                }
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+        "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
+        "ReaderInfoForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }));
             }
         }
 

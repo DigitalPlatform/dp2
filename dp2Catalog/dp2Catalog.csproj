@@ -13,7 +13,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
     </SccProjectName>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>13</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -624,6 +624,10 @@
       <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonDialog\DigitalPlatform.CommonDialog.csproj">
+      <Project>{3dcfca4d-0205-4684-a9a6-1db8640cd579}</Project>
+      <Name>DigitalPlatform.CommonDialog</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
       <Project>{060DD22D-8C7A-4D17-AC72-06B45AE65174}</Project>
       <Name>DigitalPlatform.dp2.Statis</Name>
@@ -635,10 +639,6 @@
     <ProjectReference Include="..\Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj">
       <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
       <Name>DigitalPlatform.DTLP</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
-      <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
-      <Name>DigitalPlatform.GcatClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>

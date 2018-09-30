@@ -1,20 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using MySql.Data;
 using MySql.Data.MySqlClient;
-
-using System.Diagnostics;
-
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Install;
 
 namespace DigitalPlatform.rms
 {
@@ -86,6 +74,23 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public string MySqlSslMode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(comboBox_sslMode.Text))
+                    return "Preferred";
+                return this.comboBox_sslMode.Text;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    this.comboBox_sslMode.Text = "Preferred";
+                else
+                    this.comboBox_sslMode.Text = value;
+            }
+        }
+
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -154,6 +159,7 @@ namespace DigitalPlatform.rms
                     this.SqlServerName,
                     this.textBox_loginName.Text,
                     this.textBox_loginPassword.Text,
+                    this.comboBox_sslMode.Text,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -197,17 +203,21 @@ namespace DigitalPlatform.rms
     string strSqlServerName,
     string strSqlUserName,
     string strSqlUserPassword,
+    string strSslMode,
     bool bSSPI,
     out string strError)
         {
             strError = "";
 
+            if (strSslMode == "Preferred")
+                strSslMode = "";
+
             string strConnection = @"Persist Security Info=False;"
                 + "User ID=" + strSqlUserName + ";"    //帐户和密码
                 + "Password=" + strSqlUserPassword + ";"
                 + "Data Source=" + strSqlServerName + ";"
-                + "Connect Timeout=30;"
-                + "SslMode=none;";  // 2018/7/24
+                + (string.IsNullOrEmpty(strSslMode) ? "" : "SslMode=" + strSslMode + ";") // 2018/9/22
+                + "Connect Timeout=30;";
             // "charset=utf8;";
 
 
@@ -219,33 +229,33 @@ namespace DigitalPlatform.rms
                     + "Connect Timeout=30"; // 30秒
             }
 
-            MySqlConnection connection = null;
             try
             {
-                connection = new MySqlConnection(strConnection);
+                using (MySqlConnection connection = new MySqlConnection(strConnection))
+                {
+                    try
+                    {
+                        connection.Open();
+                        MySqlConnection.ClearPool(connection);
+                    }
+                    catch (MySqlException sqlEx)
+                    {
+                        strError = "连接 SQL 数据库出错： " + sqlEx.Message + "。";
+                        int nError = sqlEx.ErrorCode;
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
+                        return -1;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 strError = "建立连接出错：" + ex.Message + " 类型:" + ex.GetType().ToString();
                 return -1;
             }
-
-            try
-            {
-                connection.Open();
-            }
-            catch (MySqlException sqlEx)
-            {
-                strError = "连接 SQL 数据库出错： " + sqlEx.Message + "。";
-                int nError = sqlEx.ErrorCode;
-                return -1;
-            }
-            catch (Exception ex)
-            {
-                strError = "连接 SQL 数据库出错： " + ex.Message + " 类型:" + ex.GetType().ToString();
-                return -1;
-            }
-
             return 0;
         }
     }

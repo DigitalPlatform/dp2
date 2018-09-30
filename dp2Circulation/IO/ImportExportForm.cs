@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Collections;
+using System.Web;
 
 using Newtonsoft.Json;
 
@@ -22,10 +20,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
-
 using DigitalPlatform.CirculationClient;
-using System.Web;
-
 
 namespace dp2Circulation
 {
@@ -1734,7 +1729,7 @@ int nCount)
                     throw new Exception(strError);
                 }
                 if (lRet == -1)
-                    throw new Exception(strError);
+                    throw new ChannelException(info.Channel.ErrorCode, strError);
 
                 if (errorinfos == null || errorinfos.Length == 0)
                     continue;

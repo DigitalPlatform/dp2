@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -99,7 +99,7 @@ namespace dp2Catalog
             return false;
         }
 
-        // Ê÷½ÚµãÊÇ·ñÎªDatabaseÀàĞÍ?
+        // æ ‘èŠ‚ç‚¹æ˜¯å¦ä¸ºDatabaseç±»å‹?
         public static bool IsDatabaseType(TreeNode node)
         {
             if (node == null)
@@ -147,7 +147,7 @@ namespace dp2Catalog
             base.OnPaint(pe);
         }
 
-        // ´ÓXMLÎÄ¼şÖĞ×°ÔØÊ÷½á¹¹
+        // ä»XMLæ–‡ä»¶ä¸­è£…è½½æ ‘ç»“æ„
         public int Load(string strFileName,
             out string strError)
         {
@@ -163,7 +163,7 @@ namespace dp2Catalog
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØÎÄ¼ş '"+strFileName+"' µ½XMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "è£…è½½æ–‡ä»¶ '"+strFileName+"' åˆ°XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -188,9 +188,9 @@ namespace dp2Catalog
 
 
 
-        // ¸ù¾İXML½ÚµãĞÅÏ¢´´½¨TreeViewµÄÒ»¸ö½ÚµãºÍÏÂ¼¶½Úµã
-        // ÓÃÓÚ´ÓXMLÎÄ¼şÖĞ×°ÔØÊ÷½á¹¹
-        // ±¾º¯ÊıÒªµİ¹é
+        // æ ¹æ®XMLèŠ‚ç‚¹ä¿¡æ¯åˆ›å»ºTreeViewçš„ä¸€ä¸ªèŠ‚ç‚¹å’Œä¸‹çº§èŠ‚ç‚¹
+        // ç”¨äºä»XMLæ–‡ä»¶ä¸­è£…è½½æ ‘ç»“æ„
+        // æœ¬å‡½æ•°è¦é€’å½’
         int NewOneNodeAndChildren(XmlNode node,
             TreeNode parent,
             out string strError)
@@ -232,10 +232,10 @@ namespace dp2Catalog
 
                 TreeNodeInfo info = new TreeNodeInfo(node);
                 info.Name = strName;
-                curTreeNode.Tag = info; // ¼ÇÒä
+                curTreeNode.Tag = info; // è®°å¿†
             }
 
-            // µİ¹é
+            // é€’å½’
             for (int i = 0; i < node.ChildNodes.Count; i++)
             {
                 XmlNode child_node = node.ChildNodes[i];
@@ -254,15 +254,15 @@ namespace dp2Catalog
 
 
         // 2007/7/28
-        // ½«·şÎñÆ÷½ÚµãµÄÍ¼±ê±ä³Éonline/offline×´Ì¬
+        // å°†æœåŠ¡å™¨èŠ‚ç‚¹çš„å›¾æ ‡å˜æˆonline/offlineçŠ¶æ€
         public static void OnlineServerNodeIcon(TreeNode treenode,
             bool bOnline)
         {
             if (treenode == null)
-                throw new Exception("treenodeÎª¿Õ");
+                throw new Exception("treenodeä¸ºç©º");
 
             if (IsServerType(treenode) == false)
-                throw new Exception("²»ÊÇserverÀàĞÍ½Úµã");
+                throw new Exception("ä¸æ˜¯serverç±»å‹èŠ‚ç‚¹");
 
             if (bOnline == true)
             {
@@ -318,7 +318,7 @@ namespace dp2Catalog
         }
 
         // 2007/8/3
-        // µÃµ½Ò»¸ö½ÚµãµÄÂ·¾¶¡£Õâ¸öº¯ÊıµÄÌØµã£¬ÊÇµÃµ½´¿¾»µÄ½ÚµãÃû£¬¶ø²»°üº¬ÃüÖĞÊı²¿·ÖÎÄ×Ö
+        // å¾—åˆ°ä¸€ä¸ªèŠ‚ç‚¹çš„è·¯å¾„ã€‚è¿™ä¸ªå‡½æ•°çš„ç‰¹ç‚¹ï¼Œæ˜¯å¾—åˆ°çº¯å‡€çš„èŠ‚ç‚¹åï¼Œè€Œä¸åŒ…å«å‘½ä¸­æ•°éƒ¨åˆ†æ–‡å­—
         public static string GetNodeFullPath(TreeNode node,
             char delimeter)
         {
@@ -359,7 +359,7 @@ namespace dp2Catalog
             {
                 if (treenode.Parent == null)
                 {
-                    throw new Exception("Êı¾İ¿âÀàĞÍÊ÷½Úµã '" + treenode.Name + "' ¾ÓÈ»Ã»ÓĞ¸¸½Úµã");
+                    throw new Exception("æ•°æ®åº“ç±»å‹æ ‘èŠ‚ç‚¹ '" + treenode.Name + "' å±…ç„¶æ²¡æœ‰çˆ¶èŠ‚ç‚¹");
                 }
                 else
                 {
@@ -369,13 +369,13 @@ namespace dp2Catalog
                 return treenode.Parent;
             }
 
-            return null;    // ²»ÊÇ·şÎñÆ÷ÀàĞÍ½Úµã
+            return null;    // ä¸æ˜¯æœåŠ¡å™¨ç±»å‹èŠ‚ç‚¹
         }
 
         // 2007/7/28
-        // ÉèÖÃµ±Ç°Ê÷ÉÏÒÑ¾­Ñ¡ÔñµÄ½ÚµãµÄÀ©Õ¹ĞÅÏ¢
+        // è®¾ç½®å½“å‰æ ‘ä¸Šå·²ç»é€‰æ‹©çš„èŠ‚ç‚¹çš„æ‰©å±•ä¿¡æ¯
         // parameters:
-        //      treenode   ·şÎñÆ÷»òÕßÊı¾İ¿âÀàĞÍ½Úµã
+        //      treenode   æœåŠ¡å™¨æˆ–è€…æ•°æ®åº“ç±»å‹èŠ‚ç‚¹
         public static int SetCurrentTargetExtraInfo(
             TreeNode treenode,
             string strExtraInfo,
@@ -393,7 +393,7 @@ namespace dp2Catalog
                 treenode = this.SelectedNode;
                 if (treenode == null)
                 {
-                    strError = "ÉĞÎ´Ñ¡Ôñ½Úµã";
+                    strError = "å°šæœªé€‰æ‹©èŠ‚ç‚¹";
                     return 0;
                 }
             }
@@ -401,11 +401,11 @@ namespace dp2Catalog
 
             if (treenode.ImageIndex == TYPE_DIR)
             {
-                strError = "Ä¿Â¼ÀàĞÍµÄÊ÷½Úµã£¬ÎŞ·¨½øĞĞSetCurrentTargetExtraInfo()";
+                strError = "ç›®å½•ç±»å‹çš„æ ‘èŠ‚ç‚¹ï¼Œæ— æ³•è¿›è¡ŒSetCurrentTargetExtraInfo()";
                 return -1;
             }
 
-            // ¶¨Î»server½Úµã
+            // å®šä½serverèŠ‚ç‚¹
 
             if (IsServerType(treenode) == true)
             {
@@ -416,7 +416,7 @@ namespace dp2Catalog
             {
                 if (treenode.Parent == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Name + "' Ã»ÓĞ¸¸½Úµã";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Name + "' æ²¡æœ‰çˆ¶èŠ‚ç‚¹";
                     return -1;
                 }
 
@@ -427,7 +427,7 @@ namespace dp2Catalog
 
         /*
         // 2007/7/28
-        // ÉèÖÃµ±Ç°Ê÷ÉÏÒÑ¾­Ñ¡ÔñµÄ½ÚµãµÄÀ©Õ¹ĞÅÏ¢
+        // è®¾ç½®å½“å‰æ ‘ä¸Šå·²ç»é€‰æ‹©çš„èŠ‚ç‚¹çš„æ‰©å±•ä¿¡æ¯
         public int SetCurrentTargetExtraInfo(
             string strExtraInfo,
             out string strError)
@@ -437,17 +437,17 @@ namespace dp2Catalog
             TreeNode treenode = this.SelectedNode;
             if (treenode == null)
             {
-                strError = "ÉĞÎ´Ñ¡Ôñ½Úµã";
+                strError = "å°šæœªé€‰æ‹©èŠ‚ç‚¹";
                 return 0;
             }
 
             if (treenode.ImageIndex == TYPE_DIR)
             {
-                strError = "Ôİ²»Ö§³ÖÄ¿±êÄ¿Â¼¼ìË÷";
+                strError = "æš‚ä¸æ”¯æŒç›®æ ‡ç›®å½•æ£€ç´¢";
                 return -1;
             }
 
-            // ¶¨Î»server½ÚµãµÄXML½Úµã
+            // å®šä½serverèŠ‚ç‚¹çš„XMLèŠ‚ç‚¹
             XmlNode xmlServerNode = null;
 
             if (IsServer(treenode) == true)
@@ -455,7 +455,7 @@ namespace dp2Catalog
                 xmlServerNode = TreeNodeInfo.GetXmlNode(treenode);
                 if (xmlServerNode == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Name + "' Tag»òTreeNodeInfo.XmlNodeÎª¿Õ";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Name + "' Tagæˆ–TreeNodeInfo.XmlNodeä¸ºç©º";
                     return -1;
                 }
             }
@@ -464,14 +464,14 @@ namespace dp2Catalog
             {
                 if (treenode.Parent == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Name + "' Ã»ÓĞ¸¸½Úµã";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Name + "' æ²¡æœ‰çˆ¶èŠ‚ç‚¹";
                     return -1;
                 }
 
                 xmlServerNode = TreeNodeInfo.GetXmlNode(treenode.Parent);
                 if (xmlServerNode == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Parent.Name + "' Tag»òTreeNodeInfo.XmlNodeÎª¿Õ";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Parent.Name + "' Tagæˆ–TreeNodeInfo.XmlNodeä¸ºç©º";
                     return -1;
                 }
 
@@ -489,7 +489,7 @@ namespace dp2Catalog
             if (IsServerType(node_server) == false)
             {
                 Debug.Assert(false, "");
-                throw new Exception("±ØĞëÊÇ Server ÀàĞÍµÄ½Úµã");
+                throw new Exception("å¿…é¡»æ˜¯ Server ç±»å‹çš„èŠ‚ç‚¹");
             }
 
             Debug.Assert(node_server != null, "");
@@ -521,14 +521,14 @@ namespace dp2Catalog
                 treenode = this.SelectedNode;
                 if (treenode == null)
                 {
-                    strError = "treenode²ÎÊıÎª¿ÕÊ±£¬µ±Ç°Ä¿±êÊ÷ÓÖÉĞÎ´Ñ¡Ôñ½Úµã";
+                    strError = "treenodeå‚æ•°ä¸ºç©ºæ—¶ï¼Œå½“å‰ç›®æ ‡æ ‘åˆå°šæœªé€‰æ‹©èŠ‚ç‚¹";
                     return 0;
                 }
             }
 
             if (treenode.ImageIndex == TYPE_DIR)
             {
-                strError = "Ôİ²»Ö§³ÖÄ¿±êÄ¿Â¼¼ìË÷";
+                strError = "æš‚ä¸æ”¯æŒç›®æ ‡ç›®å½•æ£€ç´¢";
                 return -1;
             }
             
@@ -538,23 +538,23 @@ namespace dp2Catalog
 
             XmlNode xmlServerNode = null;
 
-            // Èç¹ûÊÇserverÀàĞÍ½Úµã£¬ÔòÑ¡ÔñÏÂÃæµÄÈ«²¿Êı¾İ¿âÃû
+            // å¦‚æœæ˜¯serverç±»å‹èŠ‚ç‚¹ï¼Œåˆ™é€‰æ‹©ä¸‹é¢çš„å…¨éƒ¨æ•°æ®åº“å
             if (IsServerType(treenode) == true)
             {
                 targetinfo.ServerNode = treenode;
-                targetinfo.StartNode = treenode;    // ÕâÊÇ·¢ÆğµÄ½Úµã
+                targetinfo.StartNode = treenode;    // è¿™æ˜¯å‘èµ·çš„èŠ‚ç‚¹
 
                 xmlServerNode = TreeNodeInfo.GetXmlNode(treenode);
                 if (xmlServerNode == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Text + "' Tag»òTreeNodeInfo.XmlNodeÎª¿Õ";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Text + "' Tagæˆ–TreeNodeInfo.XmlNodeä¸ºç©º";
                     return -1;
                 }
 
                 /*
                 if (treenode.Nodes.Count == 0)
                 {
-                    strError = "·şÎñÆ÷½Úµã '" + treenode.Text + "' ÏÂ²»°üº¬ÈÎºÎÊı¾İ¿â½Úµã£¬ÎŞ·¨½øĞĞ¼ìË÷";
+                    strError = "æœåŠ¡å™¨èŠ‚ç‚¹ '" + treenode.Text + "' ä¸‹ä¸åŒ…å«ä»»ä½•æ•°æ®åº“èŠ‚ç‚¹ï¼Œæ— æ³•è¿›è¡Œæ£€ç´¢";
                     return -1;
                 }
                  * */
@@ -563,7 +563,7 @@ namespace dp2Catalog
                 if (this.CheckBoxes == true)
                     dbname_list = GetCheckedDbNames(treenode);
 
-                // Èç¹ûcheckboxesÇé¿öÏÂÃ»ÓĞ¹´Ñ¡µÄÊı¾İ¿â½Úµã£¬Ôòµ±×÷È«²¿Êı¾İ¿â½Úµã¶¼Òª°üÀ¨½øÀ´µÄÇé¿ö
+                // å¦‚æœcheckboxesæƒ…å†µä¸‹æ²¡æœ‰å‹¾é€‰çš„æ•°æ®åº“èŠ‚ç‚¹ï¼Œåˆ™å½“ä½œå…¨éƒ¨æ•°æ®åº“èŠ‚ç‚¹éƒ½è¦åŒ…æ‹¬è¿›æ¥çš„æƒ…å†µ
                 if (dbname_list == null
                     || dbname_list.Count == 0)
                 {
@@ -573,7 +573,7 @@ namespace dp2Catalog
                         TreeNode child = treenode.Nodes[i];
 
                         if (child.ImageIndex == TYPE_DATABASE_NOTINALL)
-                            continue;    // Ìø¹ınotInAllÊı¾İ¿â½Úµã 
+                            continue;    // è·³è¿‡notInAllæ•°æ®åº“èŠ‚ç‚¹ 
 
                         TreeNodeInfo info = (TreeNodeInfo)child.Tag;
                         Debug.Assert(info != null, "");
@@ -583,7 +583,7 @@ namespace dp2Catalog
                     /*
                     if (dbname_list.Count == 0)
                     {
-                        strError = "·şÎñÆ÷½Úµã '" + treenode.Text + "' ÏÂµÄ " + treenode.Nodes.Count.ToString() + "  ¸öÊı¾İ¿â½ÚµãÈ«²¿Îª 'ÔÚÈ«Ñ¡Ê±²»²ÎÓë¼ìË÷' ÊôĞÔ£¬ËùÒÔÍ¨¹ıÑ¡¶¨¸Ã·şÎñÆ÷½ÚµãÎŞ·¨Ö±½Ó½øĞĞ¼ìË÷£¬Ö»ÄÜÍ¨¹ıÑ¡¶¨ÆäÏÂµÄÄ³¸öÊı¾İ¿â½Úµã½øĞĞ¼ìË÷";
+                        strError = "æœåŠ¡å™¨èŠ‚ç‚¹ '" + treenode.Text + "' ä¸‹çš„ " + treenode.Nodes.Count.ToString() + "  ä¸ªæ•°æ®åº“èŠ‚ç‚¹å…¨éƒ¨ä¸º 'åœ¨å…¨é€‰æ—¶ä¸å‚ä¸æ£€ç´¢' å±æ€§ï¼Œæ‰€ä»¥é€šè¿‡é€‰å®šè¯¥æœåŠ¡å™¨èŠ‚ç‚¹æ— æ³•ç›´æ¥è¿›è¡Œæ£€ç´¢ï¼Œåªèƒ½é€šè¿‡é€‰å®šå…¶ä¸‹çš„æŸä¸ªæ•°æ®åº“èŠ‚ç‚¹è¿›è¡Œæ£€ç´¢";
                         return -1;
                     }
                      * */
@@ -593,23 +593,23 @@ namespace dp2Catalog
                 dbname_list.CopyTo(dbnames);
             }
 
-            // Èç¹ûÊÇdatabaseÀàĞÍ½Úµã£¬ÔòÖ»Ñ¡ÔñÒ»¸öÊı¾İ¿âÃû
+            // å¦‚æœæ˜¯databaseç±»å‹èŠ‚ç‚¹ï¼Œåˆ™åªé€‰æ‹©ä¸€ä¸ªæ•°æ®åº“å
             if (IsDatabaseType(treenode) == true)
             {
                 if (treenode.Parent == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Name + "' Ã»ÓĞ¸¸½Úµã";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Name + "' æ²¡æœ‰çˆ¶èŠ‚ç‚¹";
                     return -1;
                 }
 
-                // ZTargetInfo.ServerNodeÖĞ´æ·ÅµÄÆäÊµÊÇserver node
+                // ZTargetInfo.ServerNodeä¸­å­˜æ”¾çš„å…¶å®æ˜¯server node
                 targetinfo.ServerNode = treenode.Parent;
-                targetinfo.StartNode = treenode;    // ÕâÊÇ·¢ÆğµÄ½Úµã
+                targetinfo.StartNode = treenode;    // è¿™æ˜¯å‘èµ·çš„èŠ‚ç‚¹
 
                 xmlServerNode = TreeNodeInfo.GetXmlNode(treenode.Parent);
                 if (xmlServerNode == null)
                 {
-                    strError = "Ê÷½Úµã '" + treenode.Parent.Name + "' Tag»òTreeNodeInfo.XmlNodeÎª¿Õ";
+                    strError = "æ ‘èŠ‚ç‚¹ '" + treenode.Parent.Name + "' Tagæˆ–TreeNodeInfo.XmlNodeä¸ºç©º";
                     return -1;
                 }
 
@@ -656,7 +656,7 @@ namespace dp2Catalog
     DomUtil.GetAttr(xmlServerNode,
     "ignorereferenceid"));
 
-            // ¶ÔISBNµÄÔ¤´¦Àí
+            // å¯¹ISBNçš„é¢„å¤„ç†
             targetinfo.IsbnForce13 = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
 "isbn_force13"));
@@ -673,13 +673,17 @@ DomUtil.GetAttr(xmlServerNode,
 DomUtil.GetAttr(xmlServerNode,
 "isbn_wild"));
 
+            targetinfo.IssnForce8 = ZServerPropertyForm.GetBool(
+DomUtil.GetAttr(xmlServerNode,
+"issn_force8"));
+
             string strPresentPerBatchCount = DomUtil.GetAttr(xmlServerNode,
                 "recsperbatch");
 
             if (String.IsNullOrEmpty(strPresentPerBatchCount) == false)
                 targetinfo.PresentPerBatchCount = Convert.ToInt32(strPresentPerBatchCount);
 
-            // È±Ê¡±àÂë·½Ê½
+            // ç¼ºçœç¼–ç æ–¹å¼
             string strDefaultEncodingName = DomUtil.GetAttr(xmlServerNode,
                 "defaultEncoding");
 
@@ -687,13 +691,13 @@ DomUtil.GetAttr(xmlServerNode,
             {
                 try
                 {
-                    // µ¥¶À´¦ÀíMARC-8 Encoding
+                    // å•ç‹¬å¤„ç†MARC-8 Encoding
                     if (strDefaultEncodingName.ToLower() == "eacc"
                         || strDefaultEncodingName.ToLower() == "marc-8")
                     {
                         if (this.Marc8Encoding == null)
                         {
-                            strError = "ÉĞÎ´³õÊ¼»¯this.EaccEncoding³ÉÔ±";
+                            strError = "å°šæœªåˆå§‹åŒ–this.EaccEncodingæˆå‘˜";
                             return -1;
                         }
                         targetinfo.DefaultRecordsEncoding = this.Marc8Encoding;
@@ -707,7 +711,7 @@ DomUtil.GetAttr(xmlServerNode,
                 }
             }
 
-            // ¼ìË÷´Ê±àÂë·½Ê½
+            // æ£€ç´¢è¯ç¼–ç æ–¹å¼
             string strQueryTermEncodingName = DomUtil.GetAttr(xmlServerNode,
                 "queryTermEncoding");
 
@@ -725,7 +729,7 @@ DomUtil.GetAttr(xmlServerNode,
 
             string strDefaultMarcSyntax = DomUtil.GetAttr(xmlServerNode,
                 "defaultMarcSyntaxOID");
-            // strDefaultMarcSyntax = strDefaultMarcSyntax;    // ¿ÉÒÔÓĞ--²¿·Ö
+            // strDefaultMarcSyntax = strDefaultMarcSyntax;    // å¯ä»¥æœ‰--éƒ¨åˆ†
 
             if (String.IsNullOrEmpty(strDefaultMarcSyntax) == false)
                 targetinfo.PreferredRecordSyntax = strDefaultMarcSyntax;
@@ -733,12 +737,12 @@ DomUtil.GetAttr(xmlServerNode,
             //
             string strDefaultElementSetName = DomUtil.GetAttr(xmlServerNode,
                 "defaultElementSetName");
-            // strDefaultElementSetName = strDefaultElementSetName;    // ¿ÉÒÔÓĞ--²¿·Ö
+            // strDefaultElementSetName = strDefaultElementSetName;    // å¯ä»¥æœ‰--éƒ¨åˆ†
 
             if (String.IsNullOrEmpty(strDefaultElementSetName) == false)
                 targetinfo.DefaultElementSetName = strDefaultElementSetName;
 
-            // ¸ñÊ½ºÍ±àÂëÖ®¼äµÄ°ó¶¨ĞÅÏ¢
+            // æ ¼å¼å’Œç¼–ç ä¹‹é—´çš„ç»‘å®šä¿¡æ¯
             string strBindingDef = DomUtil.GetAttr(xmlServerNode,
                 "recordSyntaxAndEncodingBinding");
             targetinfo.Bindings = new RecordSyntaxAndEncodingBindingCollection();
@@ -765,7 +769,7 @@ DomUtil.GetAttr(xmlServerNode,
             return 0;
         }
 
-        // ½âÎö³ö '-' ×ó±ßµÄÖµ
+        // è§£æå‡º '-' å·¦è¾¹çš„å€¼
         public static string GetLeftValue(string strText)
         {
             int nRet = strText.IndexOf("-");
@@ -788,8 +792,8 @@ DomUtil.GetAttr(xmlServerNode,
 
             TreeNode node = this.SelectedNode;
 
-            // ÊôĞÔ
-            menuItem = new ToolStripMenuItem("ÊôĞÔ(&P)");
+            // å±æ€§
+            menuItem = new ToolStripMenuItem("å±æ€§(&P)");
             if (node == null
                 || (node != null && IsDatabaseType(node) == true ))
                 menuItem.Enabled = false;
@@ -802,8 +806,8 @@ DomUtil.GetAttr(xmlServerNode,
             menuItem = new ToolStripMenuItem("-");
             contextMenu.Items.Add(menuItem);
 
-            // ÇĞ¶ÏÁ¬½Ó
-            menuItem = new ToolStripMenuItem("¶Ï¿ªÁ¬½Ó(&C)");
+            // åˆ‡æ–­è¿æ¥
+            menuItem = new ToolStripMenuItem("æ–­å¼€è¿æ¥(&C)");
             if (node == null
                 || (node != null && node.ImageIndex != TYPE_SERVER))
                 menuItem.Enabled = false;
@@ -812,15 +816,15 @@ DomUtil.GetAttr(xmlServerNode,
              * */
 
 
-            // ĞÂÔöÏÂ¼¶
-            menuItem = new ToolStripMenuItem("ĞÂÔöÏÂ¼¶(&C)");
+            // æ–°å¢ä¸‹çº§
+            menuItem = new ToolStripMenuItem("æ–°å¢ä¸‹çº§(&C)");
             if (node != null && IsDatabaseType(node) == true)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Ä¿Â¼(&D)";
+            subMenuItem.Text = "ç›®å½•(&D)";
             subMenuItem.Tag = "dir";
             if (IsServerType(node) == true)
                 subMenuItem.Enabled = false;
@@ -828,7 +832,7 @@ DomUtil.GetAttr(xmlServerNode,
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "·şÎñÆ÷(&S)";
+            subMenuItem.Text = "æœåŠ¡å™¨(&S)";
             subMenuItem.Tag = "server";
             if (IsServerType(node) == true)
                 subMenuItem.Enabled = false;
@@ -836,29 +840,29 @@ DomUtil.GetAttr(xmlServerNode,
             menuItem.DropDown.Items.Add(subMenuItem);
 
 
-            // ĞÂÔöÍ¬¼¶
-            menuItem = new ToolStripMenuItem("ĞÂÔöÍ¬¼¶(&S)");
+            // æ–°å¢åŒçº§
+            menuItem = new ToolStripMenuItem("æ–°å¢åŒçº§(&S)");
             if (node == null
                 || (node != null && IsDatabaseType(node) == true))
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ×Ó²Ëµ¥
+            // å­èœå•
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "Ä¿Â¼(&D)";
+            subMenuItem.Text = "ç›®å½•(&D)";
             subMenuItem.Tag = "dir";
             subMenuItem.Click += new EventHandler(MenuItem_newSibling_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
             subMenuItem = new ToolStripMenuItem();
-            subMenuItem.Text = "·şÎñÆ÷(&S)";
+            subMenuItem.Text = "æœåŠ¡å™¨(&S)";
             subMenuItem.Tag = "server";
             subMenuItem.Click += new EventHandler(MenuItem_newSibling_Click);
             menuItem.DropDown.Items.Add(subMenuItem);
 
 
-            // É¾³ı
-            menuItem = new ToolStripMenuItem("É¾³ı(&R)");
+            // åˆ é™¤
+            menuItem = new ToolStripMenuItem("åˆ é™¤(&R)");
             if (node == null)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_delete_Click);
@@ -871,14 +875,13 @@ DomUtil.GetAttr(xmlServerNode,
                 // ---
                 sep = new ToolStripSeparator();
                 contextMenu.Items.Add(sep);
-                // ¸´Ñ¡
-                menuItem = new ToolStripMenuItem("¸´Ñ¡(&H)");
+                // å¤é€‰
+                menuItem = new ToolStripMenuItem("å¤é€‰(&H)");
                 if (this.CheckBoxes == true)
                     menuItem.Checked = true;
                 menuItem.Click += new EventHandler(menuItem_toggleCheckBoxes_Click);
                 contextMenu.Items.Add(menuItem);
             }
-
 
             if (OnSetMenu != null)
             {
@@ -888,7 +891,6 @@ DomUtil.GetAttr(xmlServerNode,
                 if (newargs.ContextMenuStrip != contextMenu)
                     contextMenu = newargs.ContextMenuStrip;
             }		
-
 
             contextMenu.Show(this, e.Location);
         }
@@ -916,12 +918,12 @@ DomUtil.GetAttr(xmlServerNode,
             TreeNode node = this.SelectedNode;
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡Ôñ½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©èŠ‚ç‚¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-"È·ÊµÒªÉ¾³ı½Úµã '"+node.Text+"'? ",
+"ç¡®å®è¦åˆ é™¤èŠ‚ç‚¹ '"+node.Text+"'? ",
 "dp2Catalog",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -950,7 +952,7 @@ MessageBoxDefaultButton.Button2);
                 this.SelectedNode = parent;
         }
 
-        // ¸ù¾İXMLÊı¾İ£¬Ë¢ĞÂ·şÎñÆ÷¶ÔÏóÏÂµÄÊı¾İ¿âÃû
+        // æ ¹æ®XMLæ•°æ®ï¼Œåˆ·æ–°æœåŠ¡å™¨å¯¹è±¡ä¸‹çš„æ•°æ®åº“å
         void RefreshDatabaseNames(TreeNode server_node)
         {
             server_node.Nodes.Clear();
@@ -989,7 +991,7 @@ MessageBoxDefaultButton.Button2);
             TreeNode parent_tree_node = this.SelectedNode;
             if (parent_tree_node == null)
             {
-                // MessageBox.Show(this, "ÉĞÎ´Ñ¡Ôñ½Úµã");
+                // MessageBox.Show(this, "å°šæœªé€‰æ‹©èŠ‚ç‚¹");
                 // return;
                 // first level
                 container = this.Nodes;
@@ -1011,7 +1013,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (IsServerType(parent_tree_node) == true)
                 {
-                    MessageBox.Show(this, "·şÎñÆ÷ÏÂ²»ÄÜÔÙÔö¼Ó·şÎñÆ÷");
+                    MessageBox.Show(this, "æœåŠ¡å™¨ä¸‹ä¸èƒ½å†å¢åŠ æœåŠ¡å™¨");
                     return;
                 }
 
@@ -1026,7 +1028,7 @@ MessageBoxDefaultButton.Button2);
                 DomUtil.SetAttr(newxmlnode, "recsperbatch", "10");
 
                 TreeNodeInfo info = new TreeNodeInfo(newxmlnode);
-                newnode.Tag = info; // ¼ÇÒä
+                newnode.Tag = info; // è®°å¿†
 
                 ZServerPropertyForm dlg = new ZServerPropertyForm();
                 GuiUtil.SetControlFont(dlg, this.Font);
@@ -1041,7 +1043,7 @@ MessageBoxDefaultButton.Button2);
                     info.Name = dlg.ServerName;
                     this.SelectedNode = newnode;
 
-                    // ÏÔÊ¾ÏÂÃæµÄÊı¾İ¿â½Úµã
+                    // æ˜¾ç¤ºä¸‹é¢çš„æ•°æ®åº“èŠ‚ç‚¹
                     RefreshDatabaseNames(newnode);
                     newnode.Expand();
 
@@ -1064,7 +1066,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (IsServerType(parent_tree_node) == true)
                 {
-                    MessageBox.Show(this, "·şÎñÆ÷ÏÂ²»ÄÜÔÙÔö¼ÓÄ¿Â¼");
+                    MessageBox.Show(this, "æœåŠ¡å™¨ä¸‹ä¸èƒ½å†å¢åŠ ç›®å½•");
                     return;
                 }
 
@@ -1077,7 +1079,7 @@ MessageBoxDefaultButton.Button2);
                 parent_xml_node.AppendChild(newxmlnode);
 
                 TreeNodeInfo info = new TreeNodeInfo(newxmlnode);
-                newnode.Tag = info; // ¼ÇÒä
+                newnode.Tag = info; // è®°å¿†
 
                 ZDirPopertyForm dlg = new ZDirPopertyForm();
                 GuiUtil.SetControlFont(dlg, this.Font);
@@ -1107,11 +1109,11 @@ MessageBoxDefaultButton.Button2);
 
             info.ResultCount = nResultCount;
 
-            // Ë¢ĞÂÃû×ÖÏÔÊ¾
+            // åˆ·æ–°åå­—æ˜¾ç¤º
             RefreshNodeNameDisplay(node);
         }
 
-        // Ë¢ĞÂÃû×ÖÏÔÊ¾
+        // åˆ·æ–°åå­—æ˜¾ç¤º
         public static void RefreshNodeNameDisplay(TreeNode node)
         {
             TreeNodeInfo info = (TreeNodeInfo)node.Tag;
@@ -1120,14 +1122,14 @@ MessageBoxDefaultButton.Button2);
             else if (info.ResultCount == -2)
                 node.Text = info.Name + "(?)";
             else if (info.ResultCount == -1)
-                node.Text = info.Name + "(³ö´í...)";
+                node.Text = info.Name + "(å‡ºé”™...)";
             else
                 node.Text = info.Name + " (" + info.ResultCount.ToString() + ")";
 
             node.TreeView.Update();
         }
 
-        // ĞÂÔöÍ¬¼¶
+        // æ–°å¢åŒçº§
         void MenuItem_newSibling_Click(object sender,
             EventArgs e)
         {
@@ -1137,7 +1139,7 @@ MessageBoxDefaultButton.Button2);
             TreeNode node = this.SelectedNode;
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡Ôñ½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©èŠ‚ç‚¹");
                 return;
             }
 
@@ -1149,7 +1151,7 @@ MessageBoxDefaultButton.Button2);
             else
                 nodes = parent.Nodes;
 
-            node = null;    // ·ÀÖ¹ºóÃæ¼ÌĞøÓÃ
+            node = null;    // é˜²æ­¢åé¢ç»§ç»­ç”¨
 
             if (strType == "server")
             {
@@ -1185,7 +1187,7 @@ MessageBoxDefaultButton.Button2);
                     info.Name = dlg.ServerName;
                     this.SelectedNode = newnode;
 
-                    // ÏÔÊ¾ÏÂÃæµÄÊı¾İ¿â½Úµã
+                    // æ˜¾ç¤ºä¸‹é¢çš„æ•°æ®åº“èŠ‚ç‚¹
                     RefreshDatabaseNames(newnode);
                     newnode.Expand();
 
@@ -1255,7 +1257,7 @@ MessageBoxDefaultButton.Button2);
             TreeNode node = this.SelectedNode;
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡Ôñ½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©èŠ‚ç‚¹");
                 return;
             }
 
@@ -1276,7 +1278,7 @@ MessageBoxDefaultButton.Button2);
                     TreeNodeInfo info = (TreeNodeInfo)node.Tag;
                     info.Name = dlg.ServerName;
 
-                    // ÏÔÊ¾ÏÂÃæµÄÊı¾İ¿â½Úµã
+                    // æ˜¾ç¤ºä¸‹é¢çš„æ•°æ®åº“èŠ‚ç‚¹
                     RefreshDatabaseNames(node);
                     node.Expand();
 
@@ -1288,7 +1290,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     if (node.ImageIndex == TYPE_SERVER_ONLINE)
-                        MessageBox.Show(this, "×¢Òâ£º(µ±Ç°Z39.50·şÎñÆ÷´¦ÓÚÒÑÁª»ú×´Ì¬¡£) ¶ÔZ39.50·şÎñÆ÷ÊôĞÔ²ÎÊıµÄĞŞ¸Ä£¬ÒªÔÚÏÂÒ»´ÎÁ¬½ÓÖĞ²ÅÄÜÉúĞ§¡£\r\n\r\nÎªÊ¹²ÎÊıÁ¢¼´ÉúĞ§£¬¿É¶Ï¿ªÁ¬½Ó£¬È»ºóÖØĞÂ½øĞĞ¼ìË÷²Ù×÷¡£");
+                        MessageBox.Show(this, "æ³¨æ„ï¼š(å½“å‰Z39.50æœåŠ¡å™¨å¤„äºå·²è”æœºçŠ¶æ€ã€‚) å¯¹Z39.50æœåŠ¡å™¨å±æ€§å‚æ•°çš„ä¿®æ”¹ï¼Œè¦åœ¨ä¸‹ä¸€æ¬¡è¿æ¥ä¸­æ‰èƒ½ç”Ÿæ•ˆã€‚\r\n\r\nä¸ºä½¿å‚æ•°ç«‹å³ç”Ÿæ•ˆï¼Œå¯æ–­å¼€è¿æ¥ï¼Œç„¶åé‡æ–°è¿›è¡Œæ£€ç´¢æ“ä½œã€‚");
 
                 }
             }
@@ -1327,10 +1329,10 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ¼ÆËãcheckedµÄ·şÎñÆ÷½ÚµãÊıÁ¿
+        // è®¡ç®—checkedçš„æœåŠ¡å™¨èŠ‚ç‚¹æ•°é‡
         public int GetCheckedServerCount(TreeNode start_node = null)
         {
-            Debug.Assert(this.CheckBoxes == true, "Ö»ÓĞÔÚ CheckBoxes == true Çé¿öÏÂµ÷ÓÃ±¾º¯Êı²ÅÓĞÒâÒå");
+            Debug.Assert(this.CheckBoxes == true, "åªæœ‰åœ¨ CheckBoxes == true æƒ…å†µä¸‹è°ƒç”¨æœ¬å‡½æ•°æ‰æœ‰æ„ä¹‰");
 
             TreeNodeCollection nodes = null;
 
@@ -1346,7 +1348,7 @@ MessageBoxDefaultButton.Button2);
                     && IsServerType(node) == true)
                     nCount++;
 
-                // µİ¹é
+                // é€’å½’
                 if (IsDirType(node) == true)
                     nCount += GetCheckedServerCount(node);
             }
@@ -1354,11 +1356,11 @@ MessageBoxDefaultButton.Button2);
             return nCount;
         }
 
-        int m_nInInitial = 0;   // checkedÊÇ·ñÔÚ³õÊ¼»¯×´Ì¬
+        int m_nInInitial = 0;   // checkedæ˜¯å¦åœ¨åˆå§‹åŒ–çŠ¶æ€
 
         private void ZTargetControl_AfterCheck(object sender, TreeViewEventArgs e)
         {
-            // ³õÊ¼»¯×´Ì¬ÏÂ²»Òª½øĞĞÁ¬´øÑ¡¶¨
+            // åˆå§‹åŒ–çŠ¶æ€ä¸‹ä¸è¦è¿›è¡Œè¿å¸¦é€‰å®š
             if (this.m_nInInitial > 0)
                 return;
 
@@ -1372,23 +1374,23 @@ MessageBoxDefaultButton.Button2);
             {
                 ClearOneLevelChildrenCheck(node);
 
-                // Èç¹ûĞÖµÜ¶¼ÎªUnckecked£¬ÔòUncheck parent node
+                // å¦‚æœå…„å¼Ÿéƒ½ä¸ºUnckeckedï¼Œåˆ™Uncheck parent node
                 IfClearParentNodeCheck(node);
             }
             else
             {
-                // Èç¹ûÏÂ¼¶ÎªÒ»¸ö¶¼Ã»ÓĞChecked£¬ÔòÈ«²¿CheckËüÃÇ£¬²¢Õ¹¿ª±¾node
+                // å¦‚æœä¸‹çº§ä¸ºä¸€ä¸ªéƒ½æ²¡æœ‰Checkedï¼Œåˆ™å…¨éƒ¨Checkå®ƒä»¬ï¼Œå¹¶å±•å¼€æœ¬node
                 IfCheckChildNodes(node);
 
-                // Ö»Òª±¾¼¶ÓĞÒ»¸öchecked£¬Ôòcheck parent
+                // åªè¦æœ¬çº§æœ‰ä¸€ä¸ªcheckedï¼Œåˆ™check parent
                 if (node.Parent != null)
                     node.Parent.Checked = true;
             }
 
-            // ×¢£ºÊÂ¼ş×Ô¼º»áµİ¹é
+            // æ³¨ï¼šäº‹ä»¶è‡ªå·±ä¼šé€’å½’
         }
 
-        // Çå³ıÏÂ¼¶ËùÓĞµÄÑ¡ÖĞµÄÏî(²»°üÀ¨×Ô¼º)
+        // æ¸…é™¤ä¸‹çº§æ‰€æœ‰çš„é€‰ä¸­çš„é¡¹(ä¸åŒ…æ‹¬è‡ªå·±)
         public void ClearOneLevelChildrenCheck(TreeNode nodeStart)
         {
             if (nodeStart == null)
@@ -1396,11 +1398,11 @@ MessageBoxDefaultButton.Button2);
             foreach (TreeNode node in nodeStart.Nodes)
             {
                 node.Checked = false;
-                // ClearChildrenCheck(node);	// ÔİÊ±²»µİ¹é
+                // ClearChildrenCheck(node);	// æš‚æ—¶ä¸é€’å½’
             }
         }
 
-        // Èç¹ûÈ«²¿ĞÖµÜ½Úµã¶¼ÊÇUnchecked£¬ÔòUnchecked parent node
+        // å¦‚æœå…¨éƒ¨å…„å¼ŸèŠ‚ç‚¹éƒ½æ˜¯Uncheckedï¼Œåˆ™Unchecked parent node
         public void IfClearParentNodeCheck(TreeNode node)
         {
             if (node.Parent == null)
@@ -1416,7 +1418,7 @@ MessageBoxDefaultButton.Button2);
                 node.Parent.Checked = false;
         }
 
-        // Èç¹ûÏÂ¼¶ÎªÒ»¸ö¶¼Ã»ÓĞChecked£¬ÔòÈ«²¿CheckËüÃÇ£¬²¢Õ¹¿ª±¾node
+        // å¦‚æœä¸‹çº§ä¸ºä¸€ä¸ªéƒ½æ²¡æœ‰Checkedï¼Œåˆ™å…¨éƒ¨Checkå®ƒä»¬ï¼Œå¹¶å±•å¼€æœ¬node
         public void IfCheckChildNodes(TreeNode node)
         {
             if (node.Nodes.Count == 0)
@@ -1442,13 +1444,13 @@ MessageBoxDefaultButton.Button2);
     }
 
     // 2007/7/28
-    // TreeNodeµÄTagÀïÃæ´æ´¢µÄĞÅÏ¢½á¹¹
+    // TreeNodeçš„Tagé‡Œé¢å­˜å‚¨çš„ä¿¡æ¯ç»“æ„
     public class TreeNodeInfo
     {
         public XmlNode XmlNode = null;
         public string ExtraInfo = "";
-        public string Name = "";    // ÏÔÊ¾³öÀ´µÄ·şÎñÆ÷Ãû²¿·Ö
-        public int ResultCount = -3;    // ÏÔÊ¾³öÀ´µÄ¼ìË÷ÃüÖĞÊı²¿·Ö -3±íÊ¾Î´Ôø¼ìË÷¹ı(²»ÏÔÊ¾Êı×Ö); -2±íÊ¾ÕıÔÚ¼ìË÷; -1±íÊ¾¼ìË÷³ö´í; >=0±íÊ¾ÃüÖĞÊıÁ¿
+        public string Name = "";    // æ˜¾ç¤ºå‡ºæ¥çš„æœåŠ¡å™¨åéƒ¨åˆ†
+        public int ResultCount = -3;    // æ˜¾ç¤ºå‡ºæ¥çš„æ£€ç´¢å‘½ä¸­æ•°éƒ¨åˆ† -3è¡¨ç¤ºæœªæ›¾æ£€ç´¢è¿‡(ä¸æ˜¾ç¤ºæ•°å­—); -2è¡¨ç¤ºæ­£åœ¨æ£€ç´¢; -1è¡¨ç¤ºæ£€ç´¢å‡ºé”™; >=0è¡¨ç¤ºå‘½ä¸­æ•°é‡
 
         public TreeNodeInfo(XmlNode xmlnode,
             string strExtraInfo)
@@ -1491,11 +1493,11 @@ MessageBoxDefaultButton.Button2);
 
     }
 
-    // ¼ìË÷Ä¿±êĞÅÏ¢½á¹¹
+    // æ£€ç´¢ç›®æ ‡ä¿¡æ¯ç»“æ„
     public class TargetInfo
     {
-        public TreeNode ServerNode = null;  // Ïà¹ØµÄserverÀàĞÍ½Úµã
-        public TreeNode StartNode = null;   // ·¢Æğ¼ìË÷µÄ½Úµã¡£¿ÉÒÔ²»ÊÇserverÀàĞÍ½Úµã
+        public TreeNode ServerNode = null;  // ç›¸å…³çš„serverç±»å‹èŠ‚ç‚¹
+        public TreeNode StartNode = null;   // å‘èµ·æ£€ç´¢çš„èŠ‚ç‚¹ã€‚å¯ä»¥ä¸æ˜¯serverç±»å‹èŠ‚ç‚¹
 
         public string HostName = "";
         public int Port = 210;
@@ -1508,12 +1510,12 @@ MessageBoxDefaultButton.Button2);
 		public string GroupID = "";
 		public int AuthenticationMethod = 0;
 
-        public string PreferredRecordSyntax = BerTree.MARC_SYNTAX;  // ¿ÉÒÔÓĞ--²¿·Ö¡£Ê¹ÓÃÊ±ºòĞ¡ĞÄ£¬ÓÃGetLeftValue()»ñµÃ¸É¾»µÄÖµ
+        public string PreferredRecordSyntax = BerTree.MARC_SYNTAX;  // å¯ä»¥æœ‰--éƒ¨åˆ†ã€‚ä½¿ç”¨æ—¶å€™å°å¿ƒï¼Œç”¨GetLeftValue()è·å¾—å¹²å‡€çš„å€¼
         public string DefaultResultSetName = "default";
 
-        public string DefaultElementSetName = "F -- Full"; // ¿ÉÒÔÓĞ--²¿·Ö¡£Ê¹ÓÃÊ±ºòĞ¡ĞÄ£¬ÓÃGetLeftValue()»ñµÃ¸É¾»µÄÖµ
+        public string DefaultElementSetName = "F -- Full"; // å¯ä»¥æœ‰--éƒ¨åˆ†ã€‚ä½¿ç”¨æ—¶å€™å°å¿ƒï¼Œç”¨GetLeftValue()è·å¾—å¹²å‡€çš„å€¼
 
-        public int PresentPerBatchCount = 10;   // Ã¿ÅúÊıÁ¿
+        public int PresentPerBatchCount = 10;   // æ¯æ‰¹æ•°é‡
 
         public bool ConvertEACC = true;
         public bool FirstFull = true;
@@ -1524,6 +1526,8 @@ MessageBoxDefaultButton.Button2);
         public bool IsbnAddHyphen = false;
         public bool IsbnRemoveHyphen = false;
         public bool IsbnWild = false;
+
+        public bool IssnForce8 { get; set; }
 
         public Encoding DefaultRecordsEncoding = Encoding.GetEncoding(936);
         public Encoding DefaultQueryTermEncoding = Encoding.GetEncoding(936);
@@ -1538,7 +1542,7 @@ MessageBoxDefaultButton.Button2);
 
         bool m_bChanged = false;
 
-        // Ê÷ÉÏÏÔÊ¾µÄÃû×Ö
+        // æ ‘ä¸Šæ˜¾ç¤ºçš„åå­—
         public string Name
         {
             get
@@ -1559,7 +1563,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ·şÎñÆ÷Ãû¡£Ê÷½ÚµãÉÏÏÔÊ¾µÄÃû×Ö£¬²»°üº¬À¨ºÅ²¿·Ö
+        // æœåŠ¡å™¨åã€‚æ ‘èŠ‚ç‚¹ä¸Šæ˜¾ç¤ºçš„åå­—ï¼Œä¸åŒ…å«æ‹¬å·éƒ¨åˆ†
         public string ServerName
         {
             get
@@ -1617,7 +1621,7 @@ MessageBoxDefaultButton.Button2);
         }
 #endif 
 
-        // ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        // å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         public bool Changed
         {
             get
@@ -1630,7 +1634,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ÓÃÓÚÅĞ¶Ï¶ÔÏóÎ¨Ò»ĞÔµÄÃû×Ö
+        // ç”¨äºåˆ¤æ–­å¯¹è±¡å”¯ä¸€æ€§çš„åå­—
         public string QualifiedName
         {
             get
@@ -1653,7 +1657,7 @@ MessageBoxDefaultButton.Button2);
         }
     }
 
-    // °ó¶¨ĞÅÏ¢ÔªËØ
+    // ç»‘å®šä¿¡æ¯å…ƒç´ 
     public class RecordSyntaxAndEncodingBindingItem
     {
         public string RecordSyntaxOID = "";
@@ -1661,7 +1665,7 @@ MessageBoxDefaultButton.Button2);
         public string EncodingName = "";
         public string EncodingNameComment = "";
 
-        // ½« "value -- comment" ĞÎÌ¬µÄ×Ö·û´®²ğ·ÖÎª"value"ºÍ"comment"Á½¸ö²¿·Ö
+        // å°† "value -- comment" å½¢æ€çš„å­—ç¬¦ä¸²æ‹†åˆ†ä¸º"value"å’Œ"comment"ä¸¤ä¸ªéƒ¨åˆ†
         public static void ParseValueAndComment(string strText,
             out string strValue,
             out string strComment)
@@ -1718,11 +1722,11 @@ MessageBoxDefaultButton.Button2);
         }
     }
 
-    // °ó¶¨ĞÅÏ¢Êı×é
+    // ç»‘å®šä¿¡æ¯æ•°ç»„
     public class RecordSyntaxAndEncodingBindingCollection : List<RecordSyntaxAndEncodingBindingItem>
     {
         // parameters:
-        //      strBindingString    ¸ñÊ½Îª"syntaxoid1 -- syntaxcomment1|encodingname1 -- encodingcomment1||syntaxoid2 -- syntaxcomment2|encodingname2 -- encodingcomment2"£¬Ä©Î²¿ÉÄÜÓĞ¶àÓàµÄ¡°||¡±
+        //      strBindingString    æ ¼å¼ä¸º"syntaxoid1 -- syntaxcomment1|encodingname1 -- encodingcomment1||syntaxoid2 -- syntaxcomment2|encodingname2 -- encodingcomment2"ï¼Œæœ«å°¾å¯èƒ½æœ‰å¤šä½™çš„â€œ||â€
         public void Load(string strBindingString)
         {
             this.Clear();
@@ -1756,7 +1760,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ·µ»¹Îª×Ö·û´®ĞÎÌ¬
+        // è¿”è¿˜ä¸ºå­—ç¬¦ä¸²å½¢æ€
         public string GetString()
         {
             string strResult = "";
@@ -1784,7 +1788,7 @@ MessageBoxDefaultButton.Button2);
 
     }
 
-    // ·şÎñÆ÷·¢Éú¸Ä±ä
+    // æœåŠ¡å™¨å‘ç”Ÿæ”¹å˜
     public delegate void ServerChangedEventHandle(object sender,
         ServerChangedEventArgs e);
 

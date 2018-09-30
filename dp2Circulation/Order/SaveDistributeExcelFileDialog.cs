@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation.Order
 {
@@ -57,6 +58,15 @@ namespace dp2Circulation.Order
                 goto ERROR1;
             }
 
+            // 检查输出文件名
+            string strOutputFileName = this.textBox_outputFileName.Text;
+            strError = PathUtil.CheckXlsxFileName(ref strOutputFileName);
+            if (strError != null)
+            {
+                strError = "输出文件名 '" + strOutputFileName + "' 不合法: " + strError;
+                goto ERROR1;
+            }
+            this.textBox_outputFileName.Text = strOutputFileName;
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();

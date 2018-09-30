@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 
-using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
@@ -253,7 +246,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -369,6 +362,7 @@ namespace DigitalPlatform.rms
                     datasource_dlg.InstanceName = this.LineInfo.DatabaseInstanceName;
                     datasource_dlg.KernelLoginName = this.LineInfo.DatabaseLoginName;
                     datasource_dlg.KernelLoginPassword = this.LineInfo.DatabaseLoginPassword;
+                    datasource_dlg.MySqlSslMode = this.LineInfo.SslMode;
                 }
                 else
                 {
@@ -376,13 +370,9 @@ namespace DigitalPlatform.rms
                     datasource_dlg.InstanceName = "dp2kernel"
                         + (String.IsNullOrEmpty(this.InstanceName) == false ? "_" : "")
                         + this.InstanceName;    // 应当没有空格和特殊字符
-#if NO
-                    datasource_dlg.KernelLoginName = "dp2kernel"
-                        + (String.IsNullOrEmpty(this.InstanceName) == false ? "_" : "")
-                        + this.InstanceName;
-#endif
                     datasource_dlg.KernelLoginName = "root";
                     datasource_dlg.KernelLoginPassword = "";
+                    datasource_dlg.MySqlSslMode = "";
                 }
 
                 datasource_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -398,6 +388,7 @@ namespace DigitalPlatform.rms
                 this.LineInfo.DatabaseInstanceName = datasource_dlg.InstanceName;
                 this.LineInfo.DatabaseLoginName = datasource_dlg.KernelLoginName;
                 this.LineInfo.DatabaseLoginPassword = datasource_dlg.KernelLoginPassword;
+                this.LineInfo.SslMode = datasource_dlg.MySqlSslMode;
                 RefreshSqlDef();
             }
             else if (this.comboBox_sqlServerType.Text == "Oracle")
@@ -453,7 +444,7 @@ namespace DigitalPlatform.rms
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -538,7 +529,8 @@ namespace DigitalPlatform.rms
                 this.textBox_sqlDef.Text = "SQL Server Name = " + this.LineInfo.SqlServerName
                     + "; Database Prefix = " + this.LineInfo.DatabaseInstanceName
                     + "; SQL Login Name = " + this.LineInfo.DatabaseLoginName
-                    + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length);
+                    + "; SQL Login Password = " + new string('*', this.LineInfo.DatabaseLoginPassword.Length)
+                    + "; SslMode = " + this.LineInfo.SslMode;
                 if (this.comboBox_sqlServerType.Text != "MySQL Server")
                 {
                     this.m_nDisableTextChange++;
@@ -648,7 +640,7 @@ namespace DigitalPlatform.rms
         // 准备可选的缺省绑定内容
         // 2015/6/19 为了安全考虑，缺省情况下只绑定 net.pipe 协议。其他协议需要安装者主动选择才行
         int PrepareDefaultBindings(string strTail,
-            out string [] default_urls,
+            out string[] default_urls,
             out string strError)
         {
             default_urls = null;
@@ -738,9 +730,9 @@ namespace DigitalPlatform.rms
             }
 
             // TODO: 要找到一个没有被使用过的tcp端口号
-            string strTail =  this.InstanceName + (String.IsNullOrEmpty(this.InstanceName) == false ? "/" : "");
+            string strTail = this.InstanceName + (String.IsNullOrEmpty(this.InstanceName) == false ? "/" : "");
 
-            string [] default_urls = null;
+            string[] default_urls = null;
             nRet = PrepareDefaultBindings(strTail,
                 out default_urls,
                 out strError);
@@ -764,7 +756,7 @@ namespace DigitalPlatform.rms
             if (this.IsNew && String.IsNullOrEmpty(this.textBox_bindings.Text) == true)
                 dlg.Urls = default_urls;
             else
-                dlg.Urls = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] {';'});
+                dlg.Urls = this.textBox_bindings.Text.Replace("\r\n", ";").Split(new char[] { ';' });
             dlg.DefaultUrls = default_urls;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -862,7 +854,7 @@ namespace DigitalPlatform.rms
                 return;
 
             // 新建时
-            if (IsNew == true 
+            if (IsNew == true
                 && String.IsNullOrEmpty(this.textBox_dataDir.Text) == false
                 && this.LoadedDataDir != this.textBox_dataDir.Text)
             {
@@ -1002,7 +994,7 @@ MessageBoxDefaultButton.Button1);
                     // 修改目录名
 
                     DialogResult result = MessageBox.Show(ForegroundWindow.Instance,
-"要将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '"+this.textBox_dataDir.Text+"' 么?\r\n\r\n(如果选择“否”，则安装程序在稍后将新创建一个数据目录，并复制进初始内容)",
+"要将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 么?\r\n\r\n(如果选择“否”，则安装程序在稍后将新创建一个数据目录，并复制进初始内容)",
 "安装 dp2Kernel",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -1022,7 +1014,7 @@ MessageBoxDefaultButton.Button1);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, "将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '"+this.textBox_dataDir.Text+"' 时发生错误: " + ex.Message);
+                        MessageBox.Show(this, "将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 时发生错误: " + ex.Message);
                     }
 
                 }

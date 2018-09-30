@@ -116,6 +116,8 @@
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_uninstallDp2zserver = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator24 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
@@ -579,6 +581,7 @@
             this.MenuItem_dp2zserver.Name = "MenuItem_dp2zserver";
             this.MenuItem_dp2zserver.Size = new System.Drawing.Size(121, 28);
             this.MenuItem_dp2zserver.Text = "dp2ZServer";
+            this.MenuItem_dp2zserver.Visible = false;
             // 
             // MenuItem_dp2ZServer_install
             // 
@@ -716,6 +719,8 @@
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder,
             this.toolStripSeparator3,
+            this.ToolStripMenuItem_uninstallDp2zserver,
+            this.toolStripSeparator24,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
             this.MenuItem_help.Size = new System.Drawing.Size(84, 28);
@@ -747,6 +752,18 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(354, 6);
             this.toolStripSeparator3.Visible = false;
+            // 
+            // ToolStripMenuItem_uninstallDp2zserver
+            // 
+            this.ToolStripMenuItem_uninstallDp2zserver.Name = "ToolStripMenuItem_uninstallDp2zserver";
+            this.ToolStripMenuItem_uninstallDp2zserver.Size = new System.Drawing.Size(357, 30);
+            this.ToolStripMenuItem_uninstallDp2zserver.Text = "卸载 dp2ZServer";
+            this.ToolStripMenuItem_uninstallDp2zserver.Click += new System.EventHandler(this.ToolStripMenuItem_uninstallDp2zserver_Click);
+            // 
+            // toolStripSeparator24
+            // 
+            this.toolStripSeparator24.Name = "toolStripSeparator24";
+            this.toolStripSeparator24.Size = new System.Drawing.Size(354, 6);
             // 
             // MenuItem_copyright
             // 
@@ -829,7 +846,7 @@
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser1.Location = new System.Drawing.Point(0, 65);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(867, 449);
@@ -846,7 +863,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "dp2Installer V3 -- dp2 安装实用工具";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
@@ -956,6 +973,8 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_uninstallService;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator26;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_uninstall;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_uninstallDp2zserver;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator24;
     }
 }
 

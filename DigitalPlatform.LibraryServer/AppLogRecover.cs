@@ -8268,6 +8268,7 @@ DO_SNAPSHOT:
                     else if (strAction == "changeDatabase")
                     {
                         // 注意处理 attach 和 detach 风格。或者明确报错不予处理
+                        // TODO: 操作日志中没有记载改名以前的数据库名
                     }
                     else if (strAction == "initializeDatabase")
                     {

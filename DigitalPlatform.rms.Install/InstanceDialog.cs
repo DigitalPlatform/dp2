@@ -1155,11 +1155,10 @@ out strError);
     + "Data Source=" + info.SqlServerName + ";"
     // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
     + "Connect Timeout=" + nTimeout.ToString() + ";"
-                + "SslMode=none;"  // 2018/7/24
+                + (string.IsNullOrEmpty(info.SslMode) ? "" : "SslMode=" + info.SslMode + ";")  // 2018/9/22
                 + "charset=utf8;";
                 return 0;
             }
-
 
             if (info.SqlServerType == "Oracle")
             {
@@ -2596,6 +2595,26 @@ MessageBoxDefaultButton.Button1);
         // SQL Login Password
         public string DatabaseLoginPassword = "";
 
+        // 2018/9/22
+        // 值可以为空
+        string _sslMode = "";
+        public string SslMode
+        {
+            get
+            {
+                return _sslMode;
+            }
+            set
+            {
+                // TODO: 检查值的正确性
+
+                if (value != null && value.IndexOf(":") != -1)
+                    throw new ArgumentException("SslMode 值内不允许出现冒号");
+
+                _sslMode = value;
+            }
+        }
+
         // *** root账户信息
         public string RootUserName = null;
         public string RootPassword = null;  // null表示不修改以前的密码
@@ -2678,6 +2697,11 @@ MessageBoxDefaultButton.Button1);
                 this.DatabaseLoginPassword = "";
             }
 
+            // 2018/9/23
+            if (strMode != null && strMode.StartsWith("SslMode:"))
+                this.SslMode = strMode.Substring("SslMode:".Length);
+            else if (this.SqlServerType == "MySQL Server")
+                this.SslMode = "None";  // 兼容以前无 mode 属性时的情况，此情况下等于 SslMode:None
 
             XmlNode nodeDbs = dom.DocumentElement.SelectSingleNode("dbs");
             if (nodeDbs == null)
@@ -2714,18 +2738,29 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            XmlNode nodeDatasource = dom.DocumentElement.SelectSingleNode("datasource");
+            XmlElement nodeDatasource = dom.DocumentElement.SelectSingleNode("datasource") as XmlElement;
             if (nodeDatasource == null)
             {
                 strError = "文件 " + strFilename + " 内容不合法，根下的<datasource>元素不存在。";
                 return -1;
             }
 
-            if (this.SqlServerType == "MS SQL Server"
-                && string.IsNullOrEmpty(this.DatabaseLoginName) == true)
-                DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");    // 2015/4/23
+            if (this.SqlServerType == "MySQL Server")
+            {
+                // 2018/9/22
+                if (string.IsNullOrEmpty(this.SslMode) == false)
+                    DomUtil.SetAttr(nodeDatasource, "mode", "SslMode:" + this.SslMode);
+                else
+                    nodeDatasource.RemoveAttribute("mode");
+            }
             else
-                DomUtil.SetAttr(nodeDatasource, "mode", null);
+            {
+                if (this.SqlServerType == "MS SQL Server"
+                    && string.IsNullOrEmpty(this.DatabaseLoginName) == true)
+                    DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");    // 2015/4/23
+                else
+                    DomUtil.SetAttr(nodeDatasource, "mode", null);
+            }
 
             DomUtil.SetAttr(nodeDatasource,
                 "servertype",
@@ -2770,6 +2805,5 @@ MessageBoxDefaultButton.Button1);
             dom.Save(strFilename);
             return 0;
         }
-
     }
 }

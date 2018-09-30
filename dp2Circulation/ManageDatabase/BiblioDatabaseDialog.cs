@@ -11,6 +11,7 @@ using System.Collections;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -29,7 +30,21 @@ namespace dp2Circulation
 
         public bool CreateMode = false; // 是否为创建模式？==true为创建模式；==false为修改模式
         public bool Recreate = false;   // 是否为重新创建模式？当CreateMode == true 时起作用
+
         XmlDocument dom = null;
+
+        string _dbType = "biblio";  // biblio/authority
+        public string DbType
+        {
+            get
+            {
+                return _dbType;
+            }
+            set
+            {
+                _dbType = value;
+            }
+        }
 
         public BiblioDatabaseDialog()
         {
@@ -75,10 +90,21 @@ namespace dp2Circulation
 
             string strType = DomUtil.GetAttr(dom.DocumentElement,
                 "type");
-            if (strType != "biblio")
+            if (this.DbType == "biblio")
             {
-                strError = "<database>元素的type属性值('" + strType + "')应当为biblio";
-                return -1;
+                if (strType != "biblio")
+                {
+                    strError = "<database> 元素的 type 属性值 ('" + strType + "') 应当为 biblio";
+                    return -1;
+                }
+            }
+            if (this.DbType == "authority")
+            {
+                if (strType != "authority")
+                {
+                    strError = "<database> 元素的 type 属性值 ('" + strType + "') 应当为 authority";
+                    return -1;
+                }
             }
 
             this.m_nInInitial++;    // 避免xxxchanged响应
@@ -89,51 +115,66 @@ namespace dp2Circulation
                     "name");
                 this.comboBox_syntax.Text = DomUtil.GetAttr(dom.DocumentElement,
                     "syntax");
-                // 2009/10/23 
-                this.checkedComboBox_role.Text = DomUtil.GetAttr(dom.DocumentElement,
-                    "role");
 
-                SetReplicationParam(DomUtil.GetAttr(dom.DocumentElement, "replication"));
-
-                this.textBox_entityDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
-                    "entityDbName");
-                this.textBox_issueDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
-                    "issueDbName");
-                this.textBox_orderDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
-                    "orderDbName");
-                this.textBox_commentDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
-                    "commentDbName");
-
-                string strInCirculation = DomUtil.GetAttr(dom.DocumentElement,
-                    "inCirculation");
-                if (String.IsNullOrEmpty(strInCirculation) == true)
-                    strInCirculation = "true";
-                this.checkBox_inCirculation.Checked = DomUtil.IsBooleanTrue(strInCirculation);
-
-
-                // usage属性一般在从服务器传来的XML片段中是没有的。仅仅在创建的时候，client发给server的xml片段中才有
-                string strUsage = DomUtil.GetAttr(dom.DocumentElement,
-                    "usage");
-                if (String.IsNullOrEmpty(strUsage) == true)
+                if (this.DbType == "biblio")
                 {
-                    // 如果usage参数为空，则需要综合判断
-                    if (this.textBox_issueDbName.Text == "")
+                    // 2009/10/23 
+                    this.checkedComboBox_role.Text = DomUtil.GetAttr(dom.DocumentElement,
+                        "role");
+
+                    SetReplicationParam(DomUtil.GetAttr(dom.DocumentElement, "replication"));
+
+                    this.textBox_entityDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                        "entityDbName");
+                    this.textBox_issueDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                        "issueDbName");
+                    this.textBox_orderDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                        "orderDbName");
+                    this.textBox_commentDbName.Text = DomUtil.GetAttr(dom.DocumentElement,
+                        "commentDbName");
+
+                    string strInCirculation = DomUtil.GetAttr(dom.DocumentElement,
+                        "inCirculation");
+                    if (String.IsNullOrEmpty(strInCirculation) == true)
+                        strInCirculation = "true";
+                    this.checkBox_inCirculation.Checked = DomUtil.IsBooleanTrue(strInCirculation);
+
+                    // usage属性一般在从服务器传来的XML片段中是没有的。仅仅在创建的时候，client发给server的xml片段中才有
+                    string strUsage = DomUtil.GetAttr(dom.DocumentElement,
+                        "usage");
+                    if (String.IsNullOrEmpty(strUsage) == true)
                     {
-                        strUsage = "book -- 图书";
+                        // 如果usage参数为空，则需要综合判断
+                        if (this.textBox_issueDbName.Text == "")
+                        {
+                            strUsage = "book -- 图书";
+                        }
+                        else
+                        {
+                            strUsage = "series -- 期刊";
+                        }
                     }
-                    else
-                    {
-                        strUsage = "series -- 期刊";
-                    }
+
+                    this.comboBox_documentType.Text = strUsage;
                 }
 
-                this.comboBox_documentType.Text = strUsage;
+                if (this.DbType == "authority")
+                {
+                    // usage属性一般在从服务器传来的XML片段中是没有的。仅仅在创建的时候，client发给server的xml片段中才有
+                    string strUsage = DomUtil.GetAttr(dom.DocumentElement,
+                        "usage");
+                    if (String.IsNullOrEmpty(strUsage) == true)
+                    {
+                        strUsage = "name -- 名称";
+                    }
+
+                    this.comboBox_documentType.Text = strUsage;
+                }
             }
             finally
             {
                 this.m_nInInitial--;
             }
-
 
             return 0;
         }
@@ -146,6 +187,32 @@ namespace dp2Circulation
                 this.comboBox_documentType.Enabled = false;
             }
 
+            if (this._dbType == "authority")
+            {
+                this.textBox_commentDbName.Visible = false;
+                this.textBox_entityDbName.Visible = false;
+                this.textBox_issueDbName.Visible = false;
+                this.textBox_orderDbName.Visible = false;
+                this.checkBox_inCirculation.Visible = false;
+                this.comboBox_documentType.Visible = false;
+                this.checkedComboBox_role.Visible = false;
+
+                this.label_commentDbName.Visible = false;
+                this.label_entityDbName.Visible = false;
+                this.label_issueDbName.Visible = false;
+                this.label_orderDbName.Visible = false;
+                this.label_usage.Visible = false;
+                this.label_role.Visible = false;
+
+                this.label_biblioDbName.Text = "规范库名(&A)";
+
+                this.comboBox_syntax.Items.Clear();
+                this.comboBox_syntax.Items.Add("usmarc");
+                this.comboBox_syntax.Text = "usmarc";
+
+                this.tabControl1.Controls.Remove(this.tabPage_replicate);
+                this.tabPage_replicate.Dispose();
+            }
         }
 
         private void textBox_biblioDbName_TextChanged(object sender, EventArgs e)
@@ -246,19 +313,27 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            if (this._dbType == "biblio")
+                CreateBiblioDatabase();
+            else if (this._dbType == "authority")
+                CreateAuthorityDatabase();
+        }
+
+        void CreateBiblioDatabase()
+        {
             string strError = "";
             int nRet = 0;
 
             // 检查
 
             // syntax
-            if (this.comboBox_syntax.Text == "")
+            if (string.IsNullOrEmpty(this.comboBox_syntax.Text))
             {
                 strError = "尚未指定数据格式";
                 goto ERROR1;
             }
 
-            if (this.comboBox_documentType.Text == "")
+            if (string.IsNullOrEmpty(this.comboBox_documentType.Text))
             {
                 strError = "尚未指定文献类型";
                 goto ERROR1;
@@ -288,7 +363,7 @@ namespace dp2Circulation
             string strReplication = GetReplicationParam();
 
             {
-            REDO:
+                REDO:
                 if (strUsage == "book")
                 {
                     if (String.IsNullOrEmpty(this.textBox_issueDbName.Text) == false)
@@ -541,7 +616,6 @@ namespace dp2Circulation
 
                         DomUtil.SetAttr(nodeDatabase, "commentDbName", this.textBox_commentDbName.Text);
                     }
-
 
                     // 为确认身份而登录
                     // return:
@@ -1060,11 +1134,323 @@ namespace dp2Circulation
 
             }
 
-        END1:
+            END1:
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
+            // MessageBox.Show(this, strError);
+            MessageDlg.Show(this, strError, "BiblioDatabaseDialog");
+        }
+
+        void CreateAuthorityDatabase()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 检查
+
+            // syntax
+            if (string.IsNullOrEmpty(this.comboBox_syntax.Text))
+            {
+                strError = "尚未指定数据格式";
+                goto ERROR1;
+            }
+
+#if NO
+            if (string.IsNullOrEmpty(this.comboBox_documentType.Text))
+            {
+                strError = "尚未指定文献类型";
+                goto ERROR1;
+            }
+#endif
+
+            // string strUsage = GetPureValue(this.comboBox_documentType.Text);
+            string strUsage = "name";
+
+            if (this.CreateMode == true)
+            {
+                // 创建模式
+                EnableControls(false);
+
+                try
+                {
+                    string strDatabaseInfo = "";
+                    string strOutputInfo = "";
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<root />");
+                    XmlElement nodeDatabase = dom.CreateElement("database");
+                    dom.DocumentElement.AppendChild(nodeDatabase);
+
+                    // type
+                    nodeDatabase.SetAttribute("type", "authority");
+
+                    // syntax
+                    if (string.IsNullOrEmpty(this.comboBox_syntax.Text))
+                    {
+                        strError = "尚未指定数据格式";
+                        goto ERROR1;
+                    }
+
+                    string strSyntax = GetPureValue(this.comboBox_syntax.Text);
+                    nodeDatabase.SetAttribute("syntax", strSyntax);
+
+                    nodeDatabase.SetAttribute("usage", strUsage);
+
+                    // 书目库名
+                    if (string.IsNullOrEmpty(this.textBox_biblioDbName.Text))
+                    {
+                        strError = "尚未指定规范库名";
+                        goto ERROR1;
+                    }
+                    nRet = Global.CheckDbName(this.textBox_biblioDbName.Text,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    nodeDatabase.SetAttribute("name", this.textBox_biblioDbName.Text);
+
+                    // 为确认身份而登录
+                    // return:
+                    //      -1  出错
+                    //      0   放弃登录
+                    //      1   登录成功
+                    nRet = this.ManagerForm.ConfirmLogin(out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "创建数据库的操作被放弃";
+                        MessageBox.Show(this, strError);
+                    }
+                    else
+                    {
+                        strDatabaseInfo = dom.OuterXml;
+
+                        // 创建数据库
+                        nRet = this.ManagerForm.CreateDatabase(
+                            strDatabaseInfo,
+                            this.Recreate,
+                            out strOutputInfo,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            }
+            else
+            {
+                // 修改模式
+                EnableControls(false);
+
+                try
+                {
+                    string strDatabaseInfo = "";
+                    string strOutputInfo = "";
+
+                    // 修改的数据库名
+                    List<string> change_dbnames = new List<string>();
+                    // 删除的数据库名
+                    List<string> delete_dbnames = new List<string>();
+                    // 创建的数据库名
+                    List<string> create_dbnames = new List<string>();
+
+                    // 用于修改命令的DOM
+                    XmlDocument change_dom = new XmlDocument();
+                    change_dom.LoadXml("<root />");
+                    XmlNode nodeChangeDatabase = change_dom.CreateElement("database");
+                    change_dom.DocumentElement.AppendChild(nodeChangeDatabase);
+
+                    // 用于创建命令的DOM
+                    XmlDocument create_dom = new XmlDocument();
+                    create_dom.LoadXml("<root />");
+
+                    // type
+                    DomUtil.SetAttr(nodeChangeDatabase, "type", "authority");
+
+                    // syntax
+                    if (string.IsNullOrEmpty(this.comboBox_syntax.Text))
+                    {
+                        strError = "尚未指定数据格式";
+                        goto ERROR1;
+                    }
+
+                    string strSyntax = GetPureValue(this.comboBox_syntax.Text);
+                    DomUtil.SetAttr(nodeChangeDatabase, "syntax", strSyntax);
+
+                    DomUtil.SetAttr(nodeChangeDatabase, "usage", strUsage);
+
+                    // 规范库名
+                    string strOldBiblioDbName = DomUtil.GetAttr(this.dom.DocumentElement,
+                        "name");
+
+                    if (String.IsNullOrEmpty(strOldBiblioDbName) == false
+                        && this.textBox_biblioDbName.Text == "")
+                    {
+                        strError = "规范库名不能修改为空";
+                        goto ERROR1;
+                    }
+
+                    bool bChanged = false;  // 是否有实质性修改命令。但不用于表示是否需要创建和删除数据库
+
+                    if (strOldBiblioDbName != this.textBox_biblioDbName.Text)
+                    {
+                        nRet = Global.CheckDbName(this.textBox_biblioDbName.Text,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        DomUtil.SetAttr(nodeChangeDatabase, "name", this.textBox_biblioDbName.Text);
+                        bChanged = true;
+                        change_dbnames.Add(strOldBiblioDbName + " --> " + this.textBox_biblioDbName.Text);
+                    }
+
+                    // 提示修改的数据库名，要删除的数据库，要创建的数据库
+                    string strText = "";
+                    if (change_dbnames.Count > 0)
+                    {
+                        strText += "要进行下列数据库名修改:\r\n---\r\n";
+                        strText += MakeListString(change_dbnames);
+                        strText += "\r\n";
+                    }
+
+                    if (delete_dbnames.Count > 0)
+                    {
+                        strText += "要删除下列数据库:\r\n---\r\n";
+                        strText += MakeListString(delete_dbnames);
+                        strText += "警告: 数据库被删除后，其中的数据再也无法复原！\r\n";
+                        strText += "\r\n";
+                    }
+
+                    if (create_dbnames.Count > 0)
+                    {
+                        strText += "要创建下列数据库:\r\n---\r\n";
+                        strText += MakeListString(create_dbnames);
+                        strText += "\r\n";
+                    }
+
+                    if (bChanged == false && string.IsNullOrEmpty(strText) == true)
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(strText) == true, "");
+
+#if DEBUG
+                        XmlNodeList nodes = create_dom.DocumentElement.SelectNodes("database");
+                        Debug.Assert(nodes.Count == 0, "");
+#endif
+
+                        // 要测试，发生修改的情况下(还有新创建数据库的情况下)，OK按钮按下后，不应静悄悄退出 
+                        this.DialogResult = DialogResult.Cancel;
+                        this.Close();
+                        return;
+                    }
+
+                    // 对话框警告
+                    DialogResult result = MessageBox.Show(this,
+                        strText + "\r\n确实要继续?",
+                        "BiblioDatabaseDialog",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                        return;
+
+                    if (bChanged == true)
+                    {
+                        strDatabaseInfo = change_dom.OuterXml;
+
+                        // 修改数据库
+                        nRet = this.ManagerForm.ChangeDatabase(
+                            strOldBiblioDbName,
+                            strDatabaseInfo,
+                            out strOutputInfo,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
+                    // 删除数据库
+                    bool bConfirmed = false;
+                    if (delete_dbnames.Count > 0)
+                    {
+                        // 为确认身份而登录
+                        // return:
+                        //      -1  出错
+                        //      0   放弃登录
+                        //      1   登录成功
+                        nRet = this.ManagerForm.ConfirmLogin(out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            strError = "刷新数据库的操作被放弃";
+                            MessageBox.Show(this, strError);
+                        }
+                        else
+                        {
+                            bConfirmed = true;
+                            // 删除数据库
+                            nRet = this.ManagerForm.DeleteDatabase(
+                                StringUtil.MakePathList(delete_dbnames),    // 2017/6/2 从 MakeListString() 修改为 MakePathList()
+                                out strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                    }
+
+                    // 创建数据库
+                    {
+                        XmlNodeList nodes = create_dom.DocumentElement.SelectNodes("database");
+                        if (nodes.Count > 0)
+                        {
+                            if (bConfirmed == false)
+                            {
+                                // 为确认身份而登录
+                                // return:
+                                //      -1  出错
+                                //      0   放弃登录
+                                //      1   登录成功
+                                nRet = this.ManagerForm.ConfirmLogin(out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 0)
+                                {
+                                    strError = "创建数据库的操作被放弃";
+                                    MessageBox.Show(this, strError);
+                                    goto END1;
+                                }
+                            }
+
+                            strDatabaseInfo = create_dom.OuterXml;
+
+                            // 创建数据库
+                            nRet = this.ManagerForm.CreateDatabase(
+                                strDatabaseInfo,
+                                false,
+                                out strOutputInfo,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                        }
+                    }
+                }
+                finally
+                {
+                    EnableControls(true);
+                }
+            }
+
+            END1:
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+            return;
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1193,7 +1579,7 @@ namespace dp2Circulation
                 m_nInDropDown--;
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
     }

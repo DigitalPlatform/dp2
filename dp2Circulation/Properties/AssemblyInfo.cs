@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.0.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.1.*")]
+[assembly: AssemblyFileVersion("3.1.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -60,3 +60,4 @@ using System.Runtime.InteropServices;
 // 2.29 2017/9/19 IsbnSplitter 类里面增加了处理 ISSN 的函数，中文期刊库的 dp2circulation_marc_autogen.cs 里面增加了 ISSN 13/8 转换的功能
 // 2.30 2017/9/20 修正日志文件本地缓存功能中的几个 bug
 // 3.0 2018/6/23 改为用 .NET Framework 4.6.1 编译
+// 3.1 2018/8/13 修正种册窗对象属性页单独修改权限时，保存以后会清除对象内容的 bug

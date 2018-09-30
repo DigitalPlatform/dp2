@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.Remoting;
-using System.Web;   // HttpUtility
 
 using DigitalPlatform;
 using DigitalPlatform.Script;
@@ -18,10 +12,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
-
-using DigitalPlatform.dp2.Statis;
-
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation

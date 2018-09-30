@@ -185,9 +185,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         this.App.WriteErrorLog("ERR006 初始化 mongodb database 失败: " + strError);
                     }
-                    // 清除 Hangup 状态
-                    if (this.App.ContainsHangup("ERR002"))
-                        this.App.ClearHangup("ERR002");
+                    else
+                    {
+                        // 清除 Hangup 状态
+                        if (this.App.ContainsHangup("ERR002"))
+                            this.App.ClearHangup("ERR002");
+                    }
                 }
                 catch (Exception ex)
                 {

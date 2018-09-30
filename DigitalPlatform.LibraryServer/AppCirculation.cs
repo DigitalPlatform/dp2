@@ -12199,7 +12199,6 @@ out string strError)
                 return -1;
             }
 
-
             if (bChanged == true)
                 return 1;
             return 0;
