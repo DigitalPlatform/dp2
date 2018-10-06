@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.6.*")]
-[assembly: AssemblyFileVersion("3.6.0.0")]
+[assembly: AssemblyVersion("3.7.*")]
+[assembly: AssemblyFileVersion("3.7.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -154,3 +154,36 @@ using System.Runtime.InteropServices;
 //      3.4 (2018/8/7) SetOrders() API 所保存的订购记录里面增加了 fixedPrice 和 discount 元素。早先版本如果保存时候提交这两个元素，会被 dp2library 过滤掉
 //      3.5 (2018/9/20) 这个版本要求 dp2kernel 3.1 配套
 //      3.6 (2018/9/26) ListDbFroms() API 的 strDbType 新增类型 "authority"
+//      3.7 (2018/9/30) library.xml 中脚本函数 ItemCanBorrow() 和 ItemCanReturn() 都增加了一个 readerdom 参数。原来的参数形态也继续兼容。
+/*
+ItemCanBorrow()
+早期版本里，本函数的类型是这样的：
+	public bool ItemCanBorrow(
+		bool bRenew,
+		Account account, 
+		XmlDocument itemdom,
+		out string strMessageText)
+新版本继续兼容这种类型。但新版本提供了新的类型，能更好地参考读者记录信息：
+	public bool ItemCanBorrow(
+		bool bRenew,
+		Account account, 
+                XmlDocument readerdom,  // 这是新增加的参数
+		XmlDocument itemdom,
+		out string strMessageText)
+ItemCanReturn()
+早期版本里，本函数的类型是这样的：
+	public bool ItemCanReturn(Account account, 
+		XmlDocument itemdom,
+		out string strMessageText)
+新版本继续兼容这种类型。但新版本提供了新的类型，能更好地参考读者记录信息：
+	public bool ItemCanReturn(Account account, 
+                XmlDocument readerdom,  // 这是新增加的参数
+		XmlDocument itemdom,
+		out string strMessageText)
+ * */
+//      (续上) 3.7 版本还为 locationType//item/@canBorrow 属性扩展了用法，除了继续兼容以前的 'yes' 和 'no' 值以外，还可以
+//      使用 javascript 脚本定义，如 "javascript:xxxxx"。脚本执行前，宿主给准备好了 account readerRecord itemRecord 三个变量。
+//      脚本通过 result 变量返回 'yes' 或 'no' 表示是否允许外借。如果脚本中没有定义这个变量，默认 'no' 的效果。
+//      此外，脚本返回前，可以设置变量 message 的值，这是一个字符串，宿主会用于向前端提示。
+//      注意脚本函数可能会被 GetEntities() API 调用(当 strStyle 中包含 'opac' 时)，但此种情况下 readerRecord 变量值为 null，注意在 javascript 代码中用 if (readerRecord == null) 来甄别判断处理
+//      3.8 （）

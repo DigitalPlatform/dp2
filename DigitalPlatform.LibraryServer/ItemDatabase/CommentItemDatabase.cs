@@ -446,7 +446,7 @@ out string strError)
 
             if (sessioninfo.UserType == "reader")
             {
-                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.ReaderDom.DocumentElement,
+                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.PatronDom.DocumentElement,
                     "state");
                 if (StringUtil.IsInList("注销", strReaderState) == true)
                 {
@@ -481,7 +481,7 @@ out string strError)
 
             if (sessioninfo.UserType == "reader")
             {
-                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.ReaderDom.DocumentElement,
+                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.PatronDom.DocumentElement,
                     "state");
                 if (StringUtil.IsInList("注销", strReaderState) == true)
                 {
@@ -556,7 +556,7 @@ out string strError)
 
             if (sessioninfo.UserType == "reader")
             {
-                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.ReaderDom.DocumentElement,
+                string strReaderState = DomUtil.GetElementText(sessioninfo.Account.PatronDom.DocumentElement,
     "state");
                 if (StringUtil.IsInList("注销", strReaderState) == true)
                 {
@@ -873,7 +873,7 @@ out string strError)
                 return -1;
             }
 
-            return 0;
+            // return 0;
         }
 
     }

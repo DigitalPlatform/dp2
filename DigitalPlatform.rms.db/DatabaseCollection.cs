@@ -500,7 +500,14 @@ namespace DigitalPlatform.rms
                             TimeSpan.FromMinutes(2),
                             (filename) =>
                             {
-                                sql_db._streamCache.FileDelete(filename);
+                                try
+                                {
+                                    sql_db._streamCache.FileDelete(filename);
+                                }
+                                catch (Exception ex)
+                                {
+                                    this.KernelApplication.WriteErrorLog("删除 streamCache 文件 " + filename + " 出现异常: " + ExceptionUtil.GetAutoText(ex));
+                                }
                             }
                             );
                     }

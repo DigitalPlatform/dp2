@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -76,7 +73,7 @@ namespace DigitalPlatform.LibraryClient
                         throw new InterruptException("用户中断");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     EntityInfo[] entities = null;
 
                     long lRet = 0;

@@ -1,4 +1,4 @@
-using DigitalPlatform.GUI;
+Ôªøusing DigitalPlatform.GUI;
 
 
 namespace dp2Circulation
@@ -61,6 +61,7 @@ namespace dp2Circulation
             this.listView_opacDatabases = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_opac_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_opac_type = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_opac_alias = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_opac_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip_opacDatabases = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_insertOpacDatabase = new System.Windows.Forms.ToolStripDropDownButton();
@@ -207,7 +208,7 @@ namespace dp2Circulation
             this.imageList_opacDatabaseType = new System.Windows.Forms.ImageList(this.components);
             this.imageList_zhongcihao = new System.Windows.Forms.ImageList(this.components);
             this.imageList_arrangement = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_opac_alias = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_location_canReturn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main.SuspendLayout();
             this.tabPage_databases.SuspendLayout();
             this.toolStrip_databases.SuspendLayout();
@@ -277,11 +278,10 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_newLoanPolicy);
             this.tabControl_main.Controls.Add(this.tabPage_calendar);
             this.tabControl_main.Controls.Add(this.tabPage_kernel);
-            this.tabControl_main.Location = new System.Drawing.Point(0, 10);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 15);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(540, 286);
+            this.tabControl_main.Size = new System.Drawing.Size(810, 429);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -289,19 +289,19 @@ namespace dp2Circulation
             // 
             this.tabPage_databases.Controls.Add(this.toolStrip_databases);
             this.tabPage_databases.Controls.Add(this.listView_databases);
-            this.tabPage_databases.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_databases.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_databases.Location = new System.Drawing.Point(4, 28);
             this.tabPage_databases.Name = "tabPage_databases";
-            this.tabPage_databases.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_databases.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_databases.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_databases.Size = new System.Drawing.Size(802, 397);
             this.tabPage_databases.TabIndex = 0;
-            this.tabPage_databases.Text = " ˝æ›ø‚";
+            this.tabPage_databases.Text = "Êï∞ÊçÆÂ∫ì";
             this.tabPage_databases.UseVisualStyleBackColor = true;
             // 
             // toolStrip_databases
             // 
             this.toolStrip_databases.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_databases.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_databases.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_databases.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_create,
             this.toolStripButton_modifyDatabase,
@@ -311,9 +311,10 @@ namespace dp2Circulation
             this.toolStripSeparator4,
             this.toolStripButton_refresh,
             this.toolStripButton_initialAllDatabases});
-            this.toolStrip_databases.Location = new System.Drawing.Point(2, 233);
+            this.toolStrip_databases.Location = new System.Drawing.Point(3, 363);
             this.toolStrip_databases.Name = "toolStrip_databases";
-            this.toolStrip_databases.Size = new System.Drawing.Size(528, 25);
+            this.toolStrip_databases.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_databases.Size = new System.Drawing.Size(796, 31);
             this.toolStrip_databases.TabIndex = 6;
             this.toolStrip_databases.Text = "toolStrip1";
             // 
@@ -331,56 +332,56 @@ namespace dp2Circulation
             this.toolStripDropDownButton_create.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_create.Image")));
             this.toolStripDropDownButton_create.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_create.Name = "toolStripDropDownButton_create";
-            this.toolStripDropDownButton_create.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton_create.Text = "¥¥Ω®";
+            this.toolStripDropDownButton_create.Size = new System.Drawing.Size(64, 28);
+            this.toolStripDropDownButton_create.Text = "ÂàõÂª∫";
             // 
             // ToolStripMenuItem_createBiblioDatabase
             // 
             this.ToolStripMenuItem_createBiblioDatabase.Name = "ToolStripMenuItem_createBiblioDatabase";
-            this.ToolStripMenuItem_createBiblioDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createBiblioDatabase.Text = " Èƒøø‚(&B)...";
+            this.ToolStripMenuItem_createBiblioDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createBiblioDatabase.Text = "‰π¶ÁõÆÂ∫ì(&B)...";
             this.ToolStripMenuItem_createBiblioDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createBiblioDatabase_Click);
             // 
             // ToolStripMenuItem_createReaderDatabase
             // 
             this.ToolStripMenuItem_createReaderDatabase.Name = "ToolStripMenuItem_createReaderDatabase";
-            this.ToolStripMenuItem_createReaderDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createReaderDatabase.Text = "∂¡’ﬂø‚(&R)...";
+            this.ToolStripMenuItem_createReaderDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createReaderDatabase.Text = "ËØªËÄÖÂ∫ì(&R)...";
             this.ToolStripMenuItem_createReaderDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createReaderDatabase_Click);
             // 
             // ToolStripMenuItem_createAmerceDatabase
             // 
             this.ToolStripMenuItem_createAmerceDatabase.Name = "ToolStripMenuItem_createAmerceDatabase";
-            this.ToolStripMenuItem_createAmerceDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createAmerceDatabase.Text = "Œ•‘ºΩø‚(&A)...";
+            this.ToolStripMenuItem_createAmerceDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createAmerceDatabase.Text = "ËøùÁ∫¶ÈáëÂ∫ì(&A)...";
             this.ToolStripMenuItem_createAmerceDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createAmerceDatabase_Click);
             // 
             // ToolStripMenuItem_createArrivedDatabase
             // 
             this.ToolStripMenuItem_createArrivedDatabase.Name = "ToolStripMenuItem_createArrivedDatabase";
-            this.ToolStripMenuItem_createArrivedDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createArrivedDatabase.Text = "‘§‘ºµΩ Èø‚(&V)...";
+            this.ToolStripMenuItem_createArrivedDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createArrivedDatabase.Text = "È¢ÑÁ∫¶Âà∞‰π¶Â∫ì(&V)...";
             this.ToolStripMenuItem_createArrivedDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createArrivedDatabase_Click);
             // 
             // ToolStripMenuItem_createPublisherDatabase
             // 
             this.ToolStripMenuItem_createPublisherDatabase.Name = "ToolStripMenuItem_createPublisherDatabase";
-            this.ToolStripMenuItem_createPublisherDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createPublisherDatabase.Text = "≥ˆ∞Ê’ﬂø‚(&P)...";
+            this.ToolStripMenuItem_createPublisherDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createPublisherDatabase.Text = "Âá∫ÁâàËÄÖÂ∫ì(&P)...";
             this.ToolStripMenuItem_createPublisherDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createPublisherDatabase_Click);
             // 
             // ToolStripMenuItem_createMessageDatabase
             // 
             this.ToolStripMenuItem_createMessageDatabase.Name = "ToolStripMenuItem_createMessageDatabase";
-            this.ToolStripMenuItem_createMessageDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createMessageDatabase.Text = "œ˚œ¢ø‚(&M)..";
+            this.ToolStripMenuItem_createMessageDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createMessageDatabase.Text = "Ê∂àÊÅØÂ∫ì(&M)..";
             this.ToolStripMenuItem_createMessageDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createMessageDatabase_Click);
             // 
             // ToolStripMenuItem_createZhongcihaoDatabase
             // 
             this.ToolStripMenuItem_createZhongcihaoDatabase.Name = "ToolStripMenuItem_createZhongcihaoDatabase";
-            this.ToolStripMenuItem_createZhongcihaoDatabase.Size = new System.Drawing.Size(161, 22);
-            this.ToolStripMenuItem_createZhongcihaoDatabase.Text = "÷÷¥Œ∫≈ø‚(&Z)...";
+            this.ToolStripMenuItem_createZhongcihaoDatabase.Size = new System.Drawing.Size(218, 30);
+            this.ToolStripMenuItem_createZhongcihaoDatabase.Text = "ÁßçÊ¨°Âè∑Â∫ì(&Z)...";
             this.ToolStripMenuItem_createZhongcihaoDatabase.Click += new System.EventHandler(this.ToolStripMenuItem_createZhongcihaoDatabase_Click);
             // 
             // toolStripButton_modifyDatabase
@@ -390,8 +391,8 @@ namespace dp2Circulation
             this.toolStripButton_modifyDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modifyDatabase.Image")));
             this.toolStripButton_modifyDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_modifyDatabase.Name = "toolStripButton_modifyDatabase";
-            this.toolStripButton_modifyDatabase.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_modifyDatabase.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_modifyDatabase.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_modifyDatabase.Text = "‰øÆÊîπ";
             this.toolStripButton_modifyDatabase.Click += new System.EventHandler(this.toolStripButton_modifyDatabase_Click);
             // 
             // toolStripButton_deleteDatabase
@@ -401,8 +402,8 @@ namespace dp2Circulation
             this.toolStripButton_deleteDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_deleteDatabase.Image")));
             this.toolStripButton_deleteDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_deleteDatabase.Name = "toolStripButton_deleteDatabase";
-            this.toolStripButton_deleteDatabase.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_deleteDatabase.Text = "…æ≥˝";
+            this.toolStripButton_deleteDatabase.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_deleteDatabase.Text = "Âà†Èô§";
             this.toolStripButton_deleteDatabase.Click += new System.EventHandler(this.toolStripButton_deleteDatabase_Click);
             // 
             // toolStripButton_initializeDatabase
@@ -412,8 +413,8 @@ namespace dp2Circulation
             this.toolStripButton_initializeDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_initializeDatabase.Image")));
             this.toolStripButton_initializeDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_initializeDatabase.Name = "toolStripButton_initializeDatabase";
-            this.toolStripButton_initializeDatabase.Size = new System.Drawing.Size(48, 22);
-            this.toolStripButton_initializeDatabase.Text = "≥ı ºªØ";
+            this.toolStripButton_initializeDatabase.Size = new System.Drawing.Size(68, 28);
+            this.toolStripButton_initializeDatabase.Text = "ÂàùÂßãÂåñ";
             this.toolStripButton_initializeDatabase.Click += new System.EventHandler(this.toolStripButton_initializeDatabase_Click);
             // 
             // toolStripButton_refreshDatabaseDef
@@ -423,14 +424,14 @@ namespace dp2Circulation
             this.toolStripButton_refreshDatabaseDef.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refreshDatabaseDef.Image")));
             this.toolStripButton_refreshDatabaseDef.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_refreshDatabaseDef.Name = "toolStripButton_refreshDatabaseDef";
-            this.toolStripButton_refreshDatabaseDef.Size = new System.Drawing.Size(60, 22);
-            this.toolStripButton_refreshDatabaseDef.Text = "À¢–¬∂®“Â";
+            this.toolStripButton_refreshDatabaseDef.Size = new System.Drawing.Size(86, 28);
+            this.toolStripButton_refreshDatabaseDef.Text = "Âà∑Êñ∞ÂÆö‰πâ";
             this.toolStripButton_refreshDatabaseDef.Click += new System.EventHandler(this.toolStripButton_refreshDatabaseDef_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_refresh
             // 
@@ -438,8 +439,8 @@ namespace dp2Circulation
             this.toolStripButton_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refresh.Image")));
             this.toolStripButton_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_refresh.Name = "toolStripButton_refresh";
-            this.toolStripButton_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_refresh.Text = "À¢–¬";
+            this.toolStripButton_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_refresh.Click += new System.EventHandler(this.toolStripButton_refresh_Click);
             // 
             // toolStripButton_initialAllDatabases
@@ -449,8 +450,8 @@ namespace dp2Circulation
             this.toolStripButton_initialAllDatabases.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_initialAllDatabases.Image")));
             this.toolStripButton_initialAllDatabases.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_initialAllDatabases.Name = "toolStripButton_initialAllDatabases";
-            this.toolStripButton_initialAllDatabases.Size = new System.Drawing.Size(108, 22);
-            this.toolStripButton_initialAllDatabases.Text = "≥ı ºªØÀ˘”– ˝æ›ø‚";
+            this.toolStripButton_initialAllDatabases.Size = new System.Drawing.Size(158, 28);
+            this.toolStripButton_initialAllDatabases.Text = "ÂàùÂßãÂåñÊâÄÊúâÊï∞ÊçÆÂ∫ì";
             this.toolStripButton_initialAllDatabases.Click += new System.EventHandler(this.toolStripButton_initialAllDatabases_Click);
             // 
             // listView_databases
@@ -465,10 +466,9 @@ namespace dp2Circulation
             this.columnHeader_comment});
             this.listView_databases.FullRowSelect = true;
             this.listView_databases.HideSelection = false;
-            this.listView_databases.Location = new System.Drawing.Point(5, 6);
-            this.listView_databases.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_databases.Location = new System.Drawing.Point(8, 9);
             this.listView_databases.Name = "listView_databases";
-            this.listView_databases.Size = new System.Drawing.Size(523, 225);
+            this.listView_databases.Size = new System.Drawing.Size(784, 336);
             this.listView_databases.TabIndex = 1;
             this.listView_databases.UseCompatibleStateImageBehavior = false;
             this.listView_databases.View = System.Windows.Forms.View.Details;
@@ -478,26 +478,25 @@ namespace dp2Circulation
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = " ˝æ›ø‚√˚";
+            this.columnHeader_name.Text = "Êï∞ÊçÆÂ∫ìÂêç";
             this.columnHeader_name.Width = 150;
             // 
             // columnHeader_type
             // 
-            this.columnHeader_type.Text = "¿‡–Õ";
+            this.columnHeader_type.Text = "Á±ªÂûã";
             this.columnHeader_type.Width = 80;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "Àµ√˜";
+            this.columnHeader_comment.Text = "ËØ¥Êòé";
             this.columnHeader_comment.Width = 300;
             // 
             // tabPage_opacDatabases
             // 
             this.tabPage_opacDatabases.Controls.Add(this.splitContainer_opac);
-            this.tabPage_opacDatabases.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_opacDatabases.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_opacDatabases.Location = new System.Drawing.Point(4, 28);
             this.tabPage_opacDatabases.Name = "tabPage_opacDatabases";
-            this.tabPage_opacDatabases.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_opacDatabases.Size = new System.Drawing.Size(802, 397);
             this.tabPage_opacDatabases.TabIndex = 1;
             this.tabPage_opacDatabases.Text = "OPAC";
             this.tabPage_opacDatabases.UseVisualStyleBackColor = true;
@@ -507,8 +506,7 @@ namespace dp2Circulation
             this.splitContainer_opac.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer_opac.Location = new System.Drawing.Point(5, 14);
-            this.splitContainer_opac.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer_opac.Location = new System.Drawing.Point(8, 21);
             this.splitContainer_opac.Name = "splitContainer_opac";
             this.splitContainer_opac.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -519,9 +517,9 @@ namespace dp2Circulation
             // splitContainer_opac.Panel2
             // 
             this.splitContainer_opac.Panel2.Controls.Add(this.tableLayoutPanel_opac_down);
-            this.splitContainer_opac.Size = new System.Drawing.Size(524, 247);
-            this.splitContainer_opac.SplitterDistance = 149;
-            this.splitContainer_opac.SplitterWidth = 13;
+            this.splitContainer_opac.Size = new System.Drawing.Size(786, 370);
+            this.splitContainer_opac.SplitterDistance = 223;
+            this.splitContainer_opac.SplitterWidth = 20;
             this.splitContainer_opac.TabIndex = 8;
             // 
             // tableLayoutPanel_opac_up
@@ -533,12 +531,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_opac_up.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel_opac_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_opac_up.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_opac_up.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_opac_up.Name = "tableLayoutPanel_opac_up";
             this.tableLayoutPanel_opac_up.RowCount = 3;
             this.tableLayoutPanel_opac_up.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_opac_up.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_opac_up.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_opac_up.Size = new System.Drawing.Size(524, 149);
+            this.tableLayoutPanel_opac_up.Size = new System.Drawing.Size(786, 223);
             this.tableLayoutPanel_opac_up.TabIndex = 8;
             // 
             // listView_opacDatabases
@@ -552,10 +551,9 @@ namespace dp2Circulation
             this.listView_opacDatabases.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_opacDatabases.FullRowSelect = true;
             this.listView_opacDatabases.HideSelection = false;
-            this.listView_opacDatabases.Location = new System.Drawing.Point(2, 14);
-            this.listView_opacDatabases.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_opacDatabases.Location = new System.Drawing.Point(3, 21);
             this.listView_opacDatabases.Name = "listView_opacDatabases";
-            this.listView_opacDatabases.Size = new System.Drawing.Size(520, 108);
+            this.listView_opacDatabases.Size = new System.Drawing.Size(780, 168);
             this.listView_opacDatabases.TabIndex = 2;
             this.listView_opacDatabases.UseCompatibleStateImageBehavior = false;
             this.listView_opacDatabases.View = System.Windows.Forms.View.Details;
@@ -565,31 +563,38 @@ namespace dp2Circulation
             // 
             // columnHeader_opac_name
             // 
-            this.columnHeader_opac_name.Text = " ˝æ›ø‚√˚";
+            this.columnHeader_opac_name.Text = "Êï∞ÊçÆÂ∫ìÂêç";
             this.columnHeader_opac_name.Width = 150;
             // 
             // columnHeader_opac_type
             // 
-            this.columnHeader_opac_type.Text = "¿‡–Õ";
+            this.columnHeader_opac_type.Text = "Á±ªÂûã";
             this.columnHeader_opac_type.Width = 80;
+            // 
+            // columnHeader_opac_alias
+            // 
+            this.columnHeader_opac_alias.Text = "Âà´Âêç";
+            this.columnHeader_opac_alias.Width = 100;
             // 
             // columnHeader_opac_comment
             // 
-            this.columnHeader_opac_comment.Text = "Àµ√˜";
+            this.columnHeader_opac_comment.Text = "ËØ¥Êòé";
             this.columnHeader_opac_comment.Width = 300;
             // 
             // toolStrip_opacDatabases
             // 
             this.toolStrip_opacDatabases.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_opacDatabases.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_opacDatabases.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_opacDatabases.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_insertOpacDatabase,
             this.toolStripButton_modifyOpacDatabase,
             this.toolStripButton_removeOpacDatabase,
             this.toolStripButton_refreshOpacDatabaseList});
-            this.toolStrip_opacDatabases.Location = new System.Drawing.Point(0, 124);
+            this.toolStrip_opacDatabases.Location = new System.Drawing.Point(0, 192);
             this.toolStrip_opacDatabases.Name = "toolStrip_opacDatabases";
-            this.toolStrip_opacDatabases.Size = new System.Drawing.Size(524, 25);
+            this.toolStrip_opacDatabases.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_opacDatabases.Size = new System.Drawing.Size(786, 31);
             this.toolStrip_opacDatabases.TabIndex = 7;
             this.toolStrip_opacDatabases.Text = "toolStrip1";
             // 
@@ -602,21 +607,21 @@ namespace dp2Circulation
             this.toolStripDropDownButton_insertOpacDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_insertOpacDatabase.Image")));
             this.toolStripDropDownButton_insertOpacDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_insertOpacDatabase.Name = "toolStripDropDownButton_insertOpacDatabase";
-            this.toolStripDropDownButton_insertOpacDatabase.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton_insertOpacDatabase.Text = "≤Â»Î";
+            this.toolStripDropDownButton_insertOpacDatabase.Size = new System.Drawing.Size(64, 28);
+            this.toolStripDropDownButton_insertOpacDatabase.Text = "ÊèíÂÖ•";
             // 
             // toolStripMenuItem_insertOpacDatabase_normal
             // 
             this.toolStripMenuItem_insertOpacDatabase_normal.Name = "toolStripMenuItem_insertOpacDatabase_normal";
-            this.toolStripMenuItem_insertOpacDatabase_normal.Size = new System.Drawing.Size(139, 22);
-            this.toolStripMenuItem_insertOpacDatabase_normal.Text = "∆’Õ®ø‚(&N)...";
+            this.toolStripMenuItem_insertOpacDatabase_normal.Size = new System.Drawing.Size(185, 30);
+            this.toolStripMenuItem_insertOpacDatabase_normal.Text = "ÊôÆÈÄöÂ∫ì(&N)...";
             this.toolStripMenuItem_insertOpacDatabase_normal.Click += new System.EventHandler(this.toolStripMenuItem_insertOpacDatabase_normal_Click);
             // 
             // toolStripMenuItem_insertOpacDatabase_virtual
             // 
             this.toolStripMenuItem_insertOpacDatabase_virtual.Name = "toolStripMenuItem_insertOpacDatabase_virtual";
-            this.toolStripMenuItem_insertOpacDatabase_virtual.Size = new System.Drawing.Size(139, 22);
-            this.toolStripMenuItem_insertOpacDatabase_virtual.Text = "–Èƒ‚ø‚(&V)...";
+            this.toolStripMenuItem_insertOpacDatabase_virtual.Size = new System.Drawing.Size(185, 30);
+            this.toolStripMenuItem_insertOpacDatabase_virtual.Text = "ËôöÊãüÂ∫ì(&V)...";
             this.toolStripMenuItem_insertOpacDatabase_virtual.Click += new System.EventHandler(this.toolStripMenuItem_insertOpacDatabase_virtual_Click);
             // 
             // toolStripButton_modifyOpacDatabase
@@ -626,8 +631,8 @@ namespace dp2Circulation
             this.toolStripButton_modifyOpacDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modifyOpacDatabase.Image")));
             this.toolStripButton_modifyOpacDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_modifyOpacDatabase.Name = "toolStripButton_modifyOpacDatabase";
-            this.toolStripButton_modifyOpacDatabase.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_modifyOpacDatabase.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_modifyOpacDatabase.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_modifyOpacDatabase.Text = "‰øÆÊîπ";
             this.toolStripButton_modifyOpacDatabase.Click += new System.EventHandler(this.toolStripButton_modifyOpacDatabase_Click);
             // 
             // toolStripButton_removeOpacDatabase
@@ -637,8 +642,8 @@ namespace dp2Circulation
             this.toolStripButton_removeOpacDatabase.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_removeOpacDatabase.Image")));
             this.toolStripButton_removeOpacDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_removeOpacDatabase.Name = "toolStripButton_removeOpacDatabase";
-            this.toolStripButton_removeOpacDatabase.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_removeOpacDatabase.Text = "“∆≥˝";
+            this.toolStripButton_removeOpacDatabase.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_removeOpacDatabase.Text = "ÁßªÈô§";
             this.toolStripButton_removeOpacDatabase.Click += new System.EventHandler(this.toolStripButton_removeOpacDatabase_Click);
             // 
             // toolStripButton_refreshOpacDatabaseList
@@ -647,19 +652,18 @@ namespace dp2Circulation
             this.toolStripButton_refreshOpacDatabaseList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refreshOpacDatabaseList.Image")));
             this.toolStripButton_refreshOpacDatabaseList.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_refreshOpacDatabaseList.Name = "toolStripButton_refreshOpacDatabaseList";
-            this.toolStripButton_refreshOpacDatabaseList.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_refreshOpacDatabaseList.Text = "À¢–¬";
+            this.toolStripButton_refreshOpacDatabaseList.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_refreshOpacDatabaseList.Text = "Âà∑Êñ∞";
             this.toolStripButton_refreshOpacDatabaseList.Click += new System.EventHandler(this.toolStripButton_refreshOpacDatabaseList_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 0);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(149, 12);
+            this.label1.Size = new System.Drawing.Size(224, 18);
             this.label1.TabIndex = 3;
-            this.label1.Text = "≤Œ”ÎOPACºÏÀ˜µƒ ˝æ›ø‚(&D):";
+            this.label1.Text = "ÂèÇ‰∏éOPACÊ£ÄÁ¥¢ÁöÑÊï∞ÊçÆÂ∫ì(&D):";
             // 
             // tableLayoutPanel_opac_down
             // 
@@ -670,36 +674,38 @@ namespace dp2Circulation
             this.tableLayoutPanel_opac_down.Controls.Add(this.treeView_opacBrowseFormats, 0, 1);
             this.tableLayoutPanel_opac_down.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_opac_down.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_opac_down.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_opac_down.Name = "tableLayoutPanel_opac_down";
             this.tableLayoutPanel_opac_down.RowCount = 3;
             this.tableLayoutPanel_opac_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_opac_down.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_opac_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_opac_down.Size = new System.Drawing.Size(524, 85);
+            this.tableLayoutPanel_opac_down.Size = new System.Drawing.Size(786, 127);
             this.tableLayoutPanel_opac_down.TabIndex = 14;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 0);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(3, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(116, 18);
             this.label2.TabIndex = 12;
-            this.label2.Text = "œ‘ æ∏Ò Ω(&F):";
+            this.label2.Text = "ÊòæÁ§∫Ê†ºÂºè(&F):";
             // 
             // toolStrip_opacBrowseFormats
             // 
             this.toolStrip_opacBrowseFormats.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_opacBrowseFormats.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_opacBrowseFormats.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_opacBrowseFormats.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton1,
             this.toolStripButton_opacBrowseFormats_modify,
             this.toolStripButton_opacBrowseFormats_remove,
             this.toolStripButton_opacBrowseFormats_refresh});
-            this.toolStrip_opacBrowseFormats.Location = new System.Drawing.Point(0, 60);
+            this.toolStrip_opacBrowseFormats.Location = new System.Drawing.Point(0, 96);
             this.toolStrip_opacBrowseFormats.Name = "toolStrip_opacBrowseFormats";
-            this.toolStrip_opacBrowseFormats.Size = new System.Drawing.Size(524, 25);
+            this.toolStrip_opacBrowseFormats.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_opacBrowseFormats.Size = new System.Drawing.Size(786, 31);
             this.toolStrip_opacBrowseFormats.TabIndex = 13;
             this.toolStrip_opacBrowseFormats.Text = "toolStrip1";
             // 
@@ -712,21 +718,21 @@ namespace dp2Circulation
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton1.Text = "≤Â»Î";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(64, 28);
+            this.toolStripDropDownButton1.Text = "ÊèíÂÖ•";
             // 
             // toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode
             // 
             this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Name = "toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode";
-            this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Size = new System.Drawing.Size(195, 22);
-            this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Text = "≤Â»Îø‚√˚Ω⁄µ„(&N)...";
+            this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Size = new System.Drawing.Size(270, 30);
+            this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Text = "ÊèíÂÖ•Â∫ìÂêçËäÇÁÇπ(&N)...";
             this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode.Click += new System.EventHandler(this.toolStripMenuItem_opacBrowseFormats_insertDatabaseNameNode_Click);
             // 
             // toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode
             // 
             this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Name = "toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode";
-            this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Size = new System.Drawing.Size(195, 22);
-            this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Text = "≤Â»Îœ‘ æ∏Ò ΩΩ⁄µ„(&F)...";
+            this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Size = new System.Drawing.Size(270, 30);
+            this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Text = "ÊèíÂÖ•ÊòæÁ§∫Ê†ºÂºèËäÇÁÇπ(&F)...";
             this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode.Click += new System.EventHandler(this.toolStripMenuItem_opacBrowseFormats_insertBrowseFormatNode_Click);
             // 
             // toolStripButton_opacBrowseFormats_modify
@@ -736,8 +742,8 @@ namespace dp2Circulation
             this.toolStripButton_opacBrowseFormats_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_opacBrowseFormats_modify.Image")));
             this.toolStripButton_opacBrowseFormats_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_opacBrowseFormats_modify.Name = "toolStripButton_opacBrowseFormats_modify";
-            this.toolStripButton_opacBrowseFormats_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_opacBrowseFormats_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_opacBrowseFormats_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_opacBrowseFormats_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_opacBrowseFormats_modify.Click += new System.EventHandler(this.toolStripButton_opacBrowseFormats_modify_Click);
             // 
             // toolStripButton_opacBrowseFormats_remove
@@ -747,8 +753,8 @@ namespace dp2Circulation
             this.toolStripButton_opacBrowseFormats_remove.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_opacBrowseFormats_remove.Image")));
             this.toolStripButton_opacBrowseFormats_remove.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_opacBrowseFormats_remove.Name = "toolStripButton_opacBrowseFormats_remove";
-            this.toolStripButton_opacBrowseFormats_remove.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_opacBrowseFormats_remove.Text = "“∆≥˝";
+            this.toolStripButton_opacBrowseFormats_remove.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_opacBrowseFormats_remove.Text = "ÁßªÈô§";
             this.toolStripButton_opacBrowseFormats_remove.Click += new System.EventHandler(this.toolStripButton_opacBrowseFormats_remove_Click);
             // 
             // toolStripButton_opacBrowseFormats_refresh
@@ -757,8 +763,8 @@ namespace dp2Circulation
             this.toolStripButton_opacBrowseFormats_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_opacBrowseFormats_refresh.Image")));
             this.toolStripButton_opacBrowseFormats_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_opacBrowseFormats_refresh.Name = "toolStripButton_opacBrowseFormats_refresh";
-            this.toolStripButton_opacBrowseFormats_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_opacBrowseFormats_refresh.Text = "À¢–¬";
+            this.toolStripButton_opacBrowseFormats_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_opacBrowseFormats_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_opacBrowseFormats_refresh.Click += new System.EventHandler(this.toolStripButton_opacBrowseFormats_refresh_Click);
             // 
             // treeView_opacBrowseFormats
@@ -766,10 +772,9 @@ namespace dp2Circulation
             this.treeView_opacBrowseFormats.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.treeView_opacBrowseFormats.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView_opacBrowseFormats.HideSelection = false;
-            this.treeView_opacBrowseFormats.Location = new System.Drawing.Point(2, 14);
-            this.treeView_opacBrowseFormats.Margin = new System.Windows.Forms.Padding(2);
+            this.treeView_opacBrowseFormats.Location = new System.Drawing.Point(3, 21);
             this.treeView_opacBrowseFormats.Name = "treeView_opacBrowseFormats";
-            this.treeView_opacBrowseFormats.Size = new System.Drawing.Size(520, 44);
+            this.treeView_opacBrowseFormats.Size = new System.Drawing.Size(780, 72);
             this.treeView_opacBrowseFormats.TabIndex = 11;
             this.treeView_opacBrowseFormats.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_opacBrowseFormats_AfterSelect);
             this.treeView_opacBrowseFormats.DoubleClick += new System.EventHandler(this.treeView_opacBrowseFormats_DoubleClick);
@@ -780,24 +785,25 @@ namespace dp2Circulation
             // 
             this.tabPage_dup.Controls.Add(this.toolStrip_dup_main);
             this.tabPage_dup.Controls.Add(this.splitContainer_main);
-            this.tabPage_dup.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_dup.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_dup.Location = new System.Drawing.Point(4, 28);
             this.tabPage_dup.Name = "tabPage_dup";
-            this.tabPage_dup.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_dup.Size = new System.Drawing.Size(802, 397);
             this.tabPage_dup.TabIndex = 2;
-            this.tabPage_dup.Text = "≤È÷ÿ";
+            this.tabPage_dup.Text = "Êü•Èáç";
             this.tabPage_dup.UseVisualStyleBackColor = true;
             // 
             // toolStrip_dup_main
             // 
             this.toolStrip_dup_main.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_dup_main.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_dup_main.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_dup_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_dup_refresh,
             this.toolStripButton_dup_save});
-            this.toolStrip_dup_main.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_dup_main.Location = new System.Drawing.Point(0, 365);
             this.toolStrip_dup_main.Name = "toolStrip_dup_main";
-            this.toolStrip_dup_main.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_dup_main.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_dup_main.Size = new System.Drawing.Size(802, 32);
             this.toolStrip_dup_main.TabIndex = 9;
             this.toolStrip_dup_main.Text = "toolStrip1";
             // 
@@ -808,20 +814,20 @@ namespace dp2Circulation
             this.toolStripButton_dup_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_refresh.Image")));
             this.toolStripButton_dup_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_refresh.Name = "toolStripButton_dup_refresh";
-            this.toolStripButton_dup_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_refresh.Text = "À¢–¬";
+            this.toolStripButton_dup_refresh.Size = new System.Drawing.Size(50, 29);
+            this.toolStripButton_dup_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_dup_refresh.Click += new System.EventHandler(this.toolStripButton_dup_refresh_Click);
             // 
             // toolStripButton_dup_save
             // 
             this.toolStripButton_dup_save.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripButton_dup_save.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_dup_save.Font = new System.Drawing.Font("Œ¢»Ì—≈∫⁄", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripButton_dup_save.Font = new System.Drawing.Font("ÂæÆËΩØÈõÖÈªë", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripButton_dup_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_save.Image")));
             this.toolStripButton_dup_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_save.Name = "toolStripButton_dup_save";
-            this.toolStripButton_dup_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_save.Text = "±£¥Ê";
+            this.toolStripButton_dup_save.Size = new System.Drawing.Size(52, 29);
+            this.toolStripButton_dup_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_dup_save.Click += new System.EventHandler(this.toolStripButton_dup_save_Click);
             // 
             // splitContainer_main
@@ -841,9 +847,9 @@ namespace dp2Circulation
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.tableLayoutPanel_dup_down);
-            this.splitContainer_main.Size = new System.Drawing.Size(534, 235);
-            this.splitContainer_main.SplitterDistance = 129;
-            this.splitContainer_main.SplitterWidth = 13;
+            this.splitContainer_main.Size = new System.Drawing.Size(801, 352);
+            this.splitContainer_main.SplitterDistance = 193;
+            this.splitContainer_main.SplitterWidth = 20;
             this.splitContainer_main.TabIndex = 1;
             // 
             // panel_projects
@@ -851,9 +857,8 @@ namespace dp2Circulation
             this.panel_projects.Controls.Add(this.tableLayoutPanel_dup_up);
             this.panel_projects.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_projects.Location = new System.Drawing.Point(0, 0);
-            this.panel_projects.Margin = new System.Windows.Forms.Padding(2);
             this.panel_projects.Name = "panel_projects";
-            this.panel_projects.Size = new System.Drawing.Size(534, 129);
+            this.panel_projects.Size = new System.Drawing.Size(801, 193);
             this.panel_projects.TabIndex = 0;
             // 
             // tableLayoutPanel_dup_up
@@ -864,11 +869,12 @@ namespace dp2Circulation
             this.tableLayoutPanel_dup_up.Controls.Add(this.toolStrip_dup_project, 0, 1);
             this.tableLayoutPanel_dup_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_dup_up.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_dup_up.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_dup_up.Name = "tableLayoutPanel_dup_up";
             this.tableLayoutPanel_dup_up.RowCount = 2;
             this.tableLayoutPanel_dup_up.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_dup_up.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_dup_up.Size = new System.Drawing.Size(534, 129);
+            this.tableLayoutPanel_dup_up.Size = new System.Drawing.Size(801, 193);
             this.tableLayoutPanel_dup_up.TabIndex = 9;
             // 
             // listView_dup_projects
@@ -878,13 +884,12 @@ namespace dp2Circulation
             this.columnHeader4,
             this.columnHeader5});
             this.listView_dup_projects.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView_dup_projects.Font = new System.Drawing.Font("ÀŒÃÂ", 9F);
+            this.listView_dup_projects.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F);
             this.listView_dup_projects.FullRowSelect = true;
             this.listView_dup_projects.HideSelection = false;
-            this.listView_dup_projects.Location = new System.Drawing.Point(2, 2);
-            this.listView_dup_projects.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_dup_projects.Location = new System.Drawing.Point(3, 3);
             this.listView_dup_projects.Name = "listView_dup_projects";
-            this.listView_dup_projects.Size = new System.Drawing.Size(530, 100);
+            this.listView_dup_projects.Size = new System.Drawing.Size(795, 156);
             this.listView_dup_projects.TabIndex = 0;
             this.listView_dup_projects.UseCompatibleStateImageBehavior = false;
             this.listView_dup_projects.View = System.Windows.Forms.View.Details;
@@ -893,25 +898,27 @@ namespace dp2Circulation
             // 
             // columnHeader4
             // 
-            this.columnHeader4.Text = "≤È÷ÿ∑Ω∞∏";
+            this.columnHeader4.Text = "Êü•ÈáçÊñπÊ°à";
             this.columnHeader4.Width = 170;
             // 
             // columnHeader5
             // 
-            this.columnHeader5.Text = "Àµ√˜";
+            this.columnHeader5.Text = "ËØ¥Êòé";
             this.columnHeader5.Width = 300;
             // 
             // toolStrip_dup_project
             // 
             this.toolStrip_dup_project.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_dup_project.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_dup_project.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_dup_project.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_dup_project_new,
             this.toolStripButton_dup_project_modify,
             this.toolStripButton_dup_project_delete});
-            this.toolStrip_dup_project.Location = new System.Drawing.Point(0, 104);
+            this.toolStrip_dup_project.Location = new System.Drawing.Point(0, 162);
             this.toolStrip_dup_project.Name = "toolStrip_dup_project";
-            this.toolStrip_dup_project.Size = new System.Drawing.Size(534, 25);
+            this.toolStrip_dup_project.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_dup_project.Size = new System.Drawing.Size(801, 31);
             this.toolStrip_dup_project.TabIndex = 8;
             this.toolStrip_dup_project.Text = "toolStrip1";
             // 
@@ -921,8 +928,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_project_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_project_new.Image")));
             this.toolStripButton_dup_project_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_project_new.Name = "toolStripButton_dup_project_new";
-            this.toolStripButton_dup_project_new.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_project_new.Text = "–¬‘ˆ";
+            this.toolStripButton_dup_project_new.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_project_new.Text = "Êñ∞Â¢û";
             this.toolStripButton_dup_project_new.Click += new System.EventHandler(this.toolStripButton_dup_project_new_Click);
             // 
             // toolStripButton_dup_project_modify
@@ -932,8 +939,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_project_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_project_modify.Image")));
             this.toolStripButton_dup_project_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_project_modify.Name = "toolStripButton_dup_project_modify";
-            this.toolStripButton_dup_project_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_project_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_dup_project_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_project_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_dup_project_modify.Click += new System.EventHandler(this.toolStripButton_dup_project_modify_Click);
             // 
             // toolStripButton_dup_project_delete
@@ -943,8 +950,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_project_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_project_delete.Image")));
             this.toolStripButton_dup_project_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_project_delete.Name = "toolStripButton_dup_project_delete";
-            this.toolStripButton_dup_project_delete.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_project_delete.Text = "…æ≥˝";
+            this.toolStripButton_dup_project_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_project_delete.Text = "Âà†Èô§";
             this.toolStripButton_dup_project_delete.Click += new System.EventHandler(this.toolStripButton_dup_project_delete_Click);
             // 
             // tableLayoutPanel_dup_down
@@ -956,35 +963,37 @@ namespace dp2Circulation
             this.tableLayoutPanel_dup_down.Controls.Add(this.listView_dup_defaults, 0, 1);
             this.tableLayoutPanel_dup_down.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_dup_down.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_dup_down.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_dup_down.Name = "tableLayoutPanel_dup_down";
             this.tableLayoutPanel_dup_down.RowCount = 3;
             this.tableLayoutPanel_dup_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_dup_down.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_dup_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_dup_down.Size = new System.Drawing.Size(534, 93);
+            this.tableLayoutPanel_dup_down.Size = new System.Drawing.Size(801, 139);
             this.tableLayoutPanel_dup_down.TabIndex = 9;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(2, 0);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(3, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(77, 12);
+            this.label5.Size = new System.Drawing.Size(116, 18);
             this.label5.TabIndex = 0;
-            this.label5.Text = "»± °πÿœµ(&F):";
+            this.label5.Text = "Áº∫ÁúÅÂÖ≥Á≥ª(&F):";
             // 
             // toolStrip_dup_default
             // 
             this.toolStrip_dup_default.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_dup_default.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_dup_default.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_dup_default.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_dup_default_new,
             this.toolStripButton_dup_default_modify,
             this.toolStripButton_dup_default_delete});
-            this.toolStrip_dup_default.Location = new System.Drawing.Point(0, 68);
+            this.toolStrip_dup_default.Location = new System.Drawing.Point(0, 108);
             this.toolStrip_dup_default.Name = "toolStrip_dup_default";
-            this.toolStrip_dup_default.Size = new System.Drawing.Size(534, 25);
+            this.toolStrip_dup_default.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_dup_default.Size = new System.Drawing.Size(801, 31);
             this.toolStrip_dup_default.TabIndex = 8;
             this.toolStrip_dup_default.Text = "toolStrip1";
             // 
@@ -994,8 +1003,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_default_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_default_new.Image")));
             this.toolStripButton_dup_default_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_default_new.Name = "toolStripButton_dup_default_new";
-            this.toolStripButton_dup_default_new.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_default_new.Text = "–¬‘ˆ";
+            this.toolStripButton_dup_default_new.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_default_new.Text = "Êñ∞Â¢û";
             this.toolStripButton_dup_default_new.Click += new System.EventHandler(this.toolStripButton_dup_default_new_Click);
             // 
             // toolStripButton_dup_default_modify
@@ -1005,8 +1014,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_default_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_default_modify.Image")));
             this.toolStripButton_dup_default_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_default_modify.Name = "toolStripButton_dup_default_modify";
-            this.toolStripButton_dup_default_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_default_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_dup_default_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_default_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_dup_default_modify.Click += new System.EventHandler(this.toolStripButton_dup_default_modify_Click);
             // 
             // toolStripButton_dup_default_delete
@@ -1016,8 +1025,8 @@ namespace dp2Circulation
             this.toolStripButton_dup_default_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_dup_default_delete.Image")));
             this.toolStripButton_dup_default_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_dup_default_delete.Name = "toolStripButton_dup_default_delete";
-            this.toolStripButton_dup_default_delete.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_dup_default_delete.Text = "…æ≥˝";
+            this.toolStripButton_dup_default_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_dup_default_delete.Text = "Âà†Èô§";
             this.toolStripButton_dup_default_delete.Click += new System.EventHandler(this.toolStripButton_dup_default_delete_Click);
             // 
             // listView_dup_defaults
@@ -1029,11 +1038,10 @@ namespace dp2Circulation
             this.listView_dup_defaults.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_dup_defaults.FullRowSelect = true;
             this.listView_dup_defaults.HideSelection = false;
-            this.listView_dup_defaults.Location = new System.Drawing.Point(2, 14);
-            this.listView_dup_defaults.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_dup_defaults.Location = new System.Drawing.Point(3, 21);
             this.listView_dup_defaults.MultiSelect = false;
             this.listView_dup_defaults.Name = "listView_dup_defaults";
-            this.listView_dup_defaults.Size = new System.Drawing.Size(530, 52);
+            this.listView_dup_defaults.Size = new System.Drawing.Size(795, 84);
             this.listView_dup_defaults.TabIndex = 1;
             this.listView_dup_defaults.UseCompatibleStateImageBehavior = false;
             this.listView_dup_defaults.View = System.Windows.Forms.View.Details;
@@ -1042,23 +1050,22 @@ namespace dp2Circulation
             // 
             // columnHeader_databaseName
             // 
-            this.columnHeader_databaseName.Text = " ˝æ›ø‚";
+            this.columnHeader_databaseName.Text = "Êï∞ÊçÆÂ∫ì";
             this.columnHeader_databaseName.Width = 230;
             // 
             // columnHeader_defaultProjectName
             // 
-            this.columnHeader_defaultProjectName.Text = "»± °≤È÷ÿ∑Ω∞∏√˚";
+            this.columnHeader_defaultProjectName.Text = "Áº∫ÁúÅÊü•ÈáçÊñπÊ°àÂêç";
             this.columnHeader_defaultProjectName.Width = 166;
             // 
             // tabPage_locations
             // 
             this.tabPage_locations.Controls.Add(this.tableLayoutPanel_locations);
-            this.tabPage_locations.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_locations.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_locations.Location = new System.Drawing.Point(4, 28);
             this.tabPage_locations.Name = "tabPage_locations";
-            this.tabPage_locations.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_locations.Size = new System.Drawing.Size(802, 397);
             this.tabPage_locations.TabIndex = 4;
-            this.tabPage_locations.Text = "π›≤ÿµÿ";
+            this.tabPage_locations.Text = "È¶ÜËóèÂú∞";
             this.tabPage_locations.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel_locations
@@ -1070,12 +1077,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_locations.Controls.Add(this.toolStrip_location, 0, 1);
             this.tableLayoutPanel_locations.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_locations.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_locations.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_locations.Name = "tableLayoutPanel_locations";
             this.tableLayoutPanel_locations.RowCount = 3;
             this.tableLayoutPanel_locations.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_locations.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_locations.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_locations.Size = new System.Drawing.Size(532, 260);
+            this.tableLayoutPanel_locations.Size = new System.Drawing.Size(802, 397);
             this.tableLayoutPanel_locations.TabIndex = 10;
             // 
             // listView_location_list
@@ -1087,13 +1095,13 @@ namespace dp2Circulation
             this.columnHeader_location_libraryCode,
             this.columnHeader_location_name,
             this.columnHeader_location_canBorrow,
+            this.columnHeader_location_canReturn,
             this.columnHeader_location_itemBarcodeNullable});
             this.listView_location_list.FullRowSelect = true;
             this.listView_location_list.HideSelection = false;
-            this.listView_location_list.Location = new System.Drawing.Point(2, 2);
-            this.listView_location_list.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_location_list.Location = new System.Drawing.Point(3, 3);
             this.listView_location_list.Name = "listView_location_list";
-            this.listView_location_list.Size = new System.Drawing.Size(528, 180);
+            this.listView_location_list.Size = new System.Drawing.Size(796, 286);
             this.listView_location_list.TabIndex = 0;
             this.listView_location_list.UseCompatibleStateImageBehavior = false;
             this.listView_location_list.View = System.Windows.Forms.View.Details;
@@ -1104,22 +1112,22 @@ namespace dp2Circulation
             // 
             // columnHeader_location_libraryCode
             // 
-            this.columnHeader_location_libraryCode.Text = "π›¥˙¬Î";
+            this.columnHeader_location_libraryCode.Text = "È¶Ü‰ª£Á†Å";
             this.columnHeader_location_libraryCode.Width = 186;
             // 
             // columnHeader_location_name
             // 
-            this.columnHeader_location_name.Text = "π›≤ÿµÿ";
+            this.columnHeader_location_name.Text = "È¶ÜËóèÂú∞";
             this.columnHeader_location_name.Width = 168;
             // 
             // columnHeader_location_canBorrow
             // 
-            this.columnHeader_location_canBorrow.Text = "‘ –ÌÕ‚ΩË";
-            this.columnHeader_location_canBorrow.Width = 94;
+            this.columnHeader_location_canBorrow.Text = "ÂÖÅËÆ∏Â§ñÂÄü";
+            this.columnHeader_location_canBorrow.Width = 100;
             // 
             // columnHeader_location_itemBarcodeNullable
             // 
-            this.columnHeader_location_itemBarcodeNullable.Text = "≤·Ãı¬Î∫≈ø…Œ™ø’";
+            this.columnHeader_location_itemBarcodeNullable.Text = "ÂÜåÊù°Á†ÅÂè∑ÂèØ‰∏∫Á©∫";
             this.columnHeader_location_itemBarcodeNullable.Width = 100;
             // 
             // textBox_location_comment
@@ -1128,14 +1136,13 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_location_comment.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_location_comment.ForeColor = System.Drawing.SystemColors.InfoText;
-            this.textBox_location_comment.Location = new System.Drawing.Point(2, 211);
-            this.textBox_location_comment.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_location_comment.Location = new System.Drawing.Point(3, 326);
             this.textBox_location_comment.Multiline = true;
             this.textBox_location_comment.Name = "textBox_location_comment";
             this.textBox_location_comment.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_location_comment.Size = new System.Drawing.Size(528, 47);
+            this.textBox_location_comment.Size = new System.Drawing.Size(796, 68);
             this.textBox_location_comment.TabIndex = 9;
-            this.textBox_location_comment.Text = "◊¢: µ±library.xml÷–”–ItemCanBorrow()∫Ø ˝ ±£¨‘⁄’‚¿Ô≈‰÷√µƒπÿ”⁄π›≤ÿµÿµ„ «∑Ò‘ –ÌÕ‚ΩËµƒ≤Œ ˝ª·◊‘∂Ø ß–ß°£";
+            this.textBox_location_comment.Text = "Ê≥®: ÂΩìlibrary.xml‰∏≠ÊúâItemCanBorrow()ÂáΩÊï∞Êó∂ÔºåÂú®ËøôÈáåÈÖçÁΩÆÁöÑÂÖ≥‰∫éÈ¶ÜËóèÂú∞ÁÇπÊòØÂê¶ÂÖÅËÆ∏Â§ñÂÄüÁöÑÂèÇÊï∞‰ºöËá™Âä®Â§±Êïà„ÄÇ";
             // 
             // toolStrip_location
             // 
@@ -1143,6 +1150,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.toolStrip_location.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip_location.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_location.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_location.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_location_save,
             this.toolStripButton_location_refresh,
@@ -1154,9 +1162,10 @@ namespace dp2Circulation
             this.toolStripButton_location_modify,
             this.toolStripButton_location_delete});
             this.toolStrip_location.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.toolStrip_location.Location = new System.Drawing.Point(0, 184);
+            this.toolStrip_location.Location = new System.Drawing.Point(0, 292);
             this.toolStrip_location.Name = "toolStrip_location";
-            this.toolStrip_location.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_location.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_location.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_location.TabIndex = 8;
             this.toolStrip_location.Text = "toolStrip1";
             // 
@@ -1167,8 +1176,8 @@ namespace dp2Circulation
             this.toolStripButton_location_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_save.Image")));
             this.toolStripButton_location_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_save.Name = "toolStripButton_location_save";
-            this.toolStripButton_location_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_save.Text = "±£¥Ê";
+            this.toolStripButton_location_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_location_save.Click += new System.EventHandler(this.toolStripButton_location_save_Click);
             // 
             // toolStripButton_location_refresh
@@ -1177,14 +1186,14 @@ namespace dp2Circulation
             this.toolStripButton_location_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_refresh.Image")));
             this.toolStripButton_location_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_refresh.Name = "toolStripButton_location_refresh";
-            this.toolStripButton_location_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_refresh.Text = "À¢–¬";
+            this.toolStripButton_location_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_location_refresh.Click += new System.EventHandler(this.toolStripButton_location_refresh_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_location_up
             // 
@@ -1193,8 +1202,8 @@ namespace dp2Circulation
             this.toolStripButton_location_up.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_up.Image")));
             this.toolStripButton_location_up.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_up.Name = "toolStripButton_location_up";
-            this.toolStripButton_location_up.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_up.Text = "…œ“∆";
+            this.toolStripButton_location_up.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_up.Text = "‰∏äÁßª";
             this.toolStripButton_location_up.Click += new System.EventHandler(this.toolStripButton_location_up_Click);
             // 
             // toolStripButton_location_down
@@ -1204,14 +1213,14 @@ namespace dp2Circulation
             this.toolStripButton_location_down.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_down.Image")));
             this.toolStripButton_location_down.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_down.Name = "toolStripButton_location_down";
-            this.toolStripButton_location_down.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_down.Text = "œ¬“∆";
+            this.toolStripButton_location_down.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_down.Text = "‰∏ãÁßª";
             this.toolStripButton_location_down.Click += new System.EventHandler(this.toolStripButton_location_down_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_location_new
             // 
@@ -1219,8 +1228,8 @@ namespace dp2Circulation
             this.toolStripButton_location_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_new.Image")));
             this.toolStripButton_location_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_new.Name = "toolStripButton_location_new";
-            this.toolStripButton_location_new.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_new.Text = "–¬‘ˆ";
+            this.toolStripButton_location_new.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_new.Text = "Êñ∞Â¢û";
             this.toolStripButton_location_new.Click += new System.EventHandler(this.toolStripButton_location_new_Click);
             // 
             // toolStripButton_location_modify
@@ -1230,8 +1239,8 @@ namespace dp2Circulation
             this.toolStripButton_location_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_modify.Image")));
             this.toolStripButton_location_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_modify.Name = "toolStripButton_location_modify";
-            this.toolStripButton_location_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_location_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_location_modify.Click += new System.EventHandler(this.toolStripButton_location_modify_Click);
             // 
             // toolStripButton_location_delete
@@ -1241,26 +1250,26 @@ namespace dp2Circulation
             this.toolStripButton_location_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_location_delete.Image")));
             this.toolStripButton_location_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_location_delete.Name = "toolStripButton_location_delete";
-            this.toolStripButton_location_delete.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_location_delete.Text = "…æ≥˝";
+            this.toolStripButton_location_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_location_delete.Text = "Âà†Èô§";
             this.toolStripButton_location_delete.Click += new System.EventHandler(this.toolStripButton_location_delete_Click);
             // 
             // tabPage_zhongcihaoDatabases
             // 
             this.tabPage_zhongcihaoDatabases.Controls.Add(this.toolStrip_zhongcihao);
             this.tabPage_zhongcihaoDatabases.Controls.Add(this.treeView_zhongcihao);
-            this.tabPage_zhongcihaoDatabases.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_zhongcihaoDatabases.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_zhongcihaoDatabases.Location = new System.Drawing.Point(4, 28);
             this.tabPage_zhongcihaoDatabases.Name = "tabPage_zhongcihaoDatabases";
-            this.tabPage_zhongcihaoDatabases.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_zhongcihaoDatabases.Size = new System.Drawing.Size(802, 397);
             this.tabPage_zhongcihaoDatabases.TabIndex = 5;
-            this.tabPage_zhongcihaoDatabases.Text = "÷÷¥Œ∫≈";
+            this.tabPage_zhongcihaoDatabases.Text = "ÁßçÊ¨°Âè∑";
             this.tabPage_zhongcihaoDatabases.UseVisualStyleBackColor = true;
             // 
             // toolStrip_zhongcihao
             // 
             this.toolStrip_zhongcihao.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_zhongcihao.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_zhongcihao.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_zhongcihao.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_zhongcihao_save,
             this.toolStripButton_zhongcihao_refresh,
@@ -1268,9 +1277,10 @@ namespace dp2Circulation
             this.toolStripDropDownButton_insert,
             this.toolStripButton_zhongcihao_modify,
             this.toolStripButton_zhongcihao_remove});
-            this.toolStrip_zhongcihao.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_zhongcihao.Location = new System.Drawing.Point(0, 366);
             this.toolStrip_zhongcihao.Name = "toolStrip_zhongcihao";
-            this.toolStrip_zhongcihao.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_zhongcihao.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_zhongcihao.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_zhongcihao.TabIndex = 14;
             this.toolStrip_zhongcihao.Text = "toolStrip1";
             // 
@@ -1281,8 +1291,8 @@ namespace dp2Circulation
             this.toolStripButton_zhongcihao_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_zhongcihao_save.Image")));
             this.toolStripButton_zhongcihao_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_zhongcihao_save.Name = "toolStripButton_zhongcihao_save";
-            this.toolStripButton_zhongcihao_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_zhongcihao_save.Text = "±£¥Ê";
+            this.toolStripButton_zhongcihao_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_zhongcihao_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_zhongcihao_save.Click += new System.EventHandler(this.toolStripButton_zhongcihao_save_Click);
             // 
             // toolStripButton_zhongcihao_refresh
@@ -1291,14 +1301,14 @@ namespace dp2Circulation
             this.toolStripButton_zhongcihao_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_zhongcihao_refresh.Image")));
             this.toolStripButton_zhongcihao_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_zhongcihao_refresh.Name = "toolStripButton_zhongcihao_refresh";
-            this.toolStripButton_zhongcihao_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_zhongcihao_refresh.Text = "À¢–¬";
+            this.toolStripButton_zhongcihao_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_zhongcihao_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_zhongcihao_refresh.Click += new System.EventHandler(this.toolStripButton_zhongcihao_refresh_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripDropDownButton_insert
             // 
@@ -1310,28 +1320,28 @@ namespace dp2Circulation
             this.toolStripDropDownButton_insert.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_insert.Image")));
             this.toolStripDropDownButton_insert.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_insert.Name = "toolStripDropDownButton_insert";
-            this.toolStripDropDownButton_insert.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton_insert.Text = "≤Â»Î";
+            this.toolStripDropDownButton_insert.Size = new System.Drawing.Size(64, 28);
+            this.toolStripDropDownButton_insert.Text = "ÊèíÂÖ•";
             // 
             // toolStripMenuItem_zhongcihao_insert_group
             // 
             this.toolStripMenuItem_zhongcihao_insert_group.Name = "toolStripMenuItem_zhongcihao_insert_group";
-            this.toolStripMenuItem_zhongcihao_insert_group.Size = new System.Drawing.Size(197, 22);
-            this.toolStripMenuItem_zhongcihao_insert_group.Text = "≤Â»Î◊ÈΩ⁄µ„(&G)...";
+            this.toolStripMenuItem_zhongcihao_insert_group.Size = new System.Drawing.Size(271, 30);
+            this.toolStripMenuItem_zhongcihao_insert_group.Text = "ÊèíÂÖ•ÁªÑËäÇÁÇπ(&G)...";
             this.toolStripMenuItem_zhongcihao_insert_group.Click += new System.EventHandler(this.toolStripMenuItem_zhongcihao_insert_group_Click);
             // 
             // toolStripMenuItem_zhongcihao_insert_database
             // 
             this.toolStripMenuItem_zhongcihao_insert_database.Name = "toolStripMenuItem_zhongcihao_insert_database";
-            this.toolStripMenuItem_zhongcihao_insert_database.Size = new System.Drawing.Size(197, 22);
-            this.toolStripMenuItem_zhongcihao_insert_database.Text = "≤Â»Î Èƒøø‚√˚Ω⁄µ„(&B)...";
+            this.toolStripMenuItem_zhongcihao_insert_database.Size = new System.Drawing.Size(271, 30);
+            this.toolStripMenuItem_zhongcihao_insert_database.Text = "ÊèíÂÖ•‰π¶ÁõÆÂ∫ìÂêçËäÇÁÇπ(&B)...";
             this.toolStripMenuItem_zhongcihao_insert_database.Click += new System.EventHandler(this.toolStripMenuItem_zhongcihao_insert_database_Click);
             // 
             // ToolStripMenuItem_zhongcihao_insert_nstable
             // 
             this.ToolStripMenuItem_zhongcihao_insert_nstable.Name = "ToolStripMenuItem_zhongcihao_insert_nstable";
-            this.ToolStripMenuItem_zhongcihao_insert_nstable.Size = new System.Drawing.Size(197, 22);
-            this.ToolStripMenuItem_zhongcihao_insert_nstable.Text = "≤Â»Î√˚◊÷±ÌΩ⁄µ„(&N)...";
+            this.ToolStripMenuItem_zhongcihao_insert_nstable.Size = new System.Drawing.Size(271, 30);
+            this.ToolStripMenuItem_zhongcihao_insert_nstable.Text = "ÊèíÂÖ•ÂêçÂ≠óË°®ËäÇÁÇπ(&N)...";
             this.ToolStripMenuItem_zhongcihao_insert_nstable.Click += new System.EventHandler(this.ToolStripMenuItem_zhongcihao_insert_nstable_Click);
             // 
             // toolStripButton_zhongcihao_modify
@@ -1341,8 +1351,8 @@ namespace dp2Circulation
             this.toolStripButton_zhongcihao_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_zhongcihao_modify.Image")));
             this.toolStripButton_zhongcihao_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_zhongcihao_modify.Name = "toolStripButton_zhongcihao_modify";
-            this.toolStripButton_zhongcihao_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_zhongcihao_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_zhongcihao_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_zhongcihao_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_zhongcihao_modify.Click += new System.EventHandler(this.toolStripButton_zhongcihao_modify_Click);
             // 
             // toolStripButton_zhongcihao_remove
@@ -1352,8 +1362,8 @@ namespace dp2Circulation
             this.toolStripButton_zhongcihao_remove.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_zhongcihao_remove.Image")));
             this.toolStripButton_zhongcihao_remove.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_zhongcihao_remove.Name = "toolStripButton_zhongcihao_remove";
-            this.toolStripButton_zhongcihao_remove.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_zhongcihao_remove.Text = "“∆≥˝";
+            this.toolStripButton_zhongcihao_remove.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_zhongcihao_remove.Text = "ÁßªÈô§";
             this.toolStripButton_zhongcihao_remove.Click += new System.EventHandler(this.toolStripButton_zhongcihao_remove_Click);
             // 
             // treeView_zhongcihao
@@ -1363,10 +1373,9 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.treeView_zhongcihao.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.treeView_zhongcihao.HideSelection = false;
-            this.treeView_zhongcihao.Location = new System.Drawing.Point(4, 25);
-            this.treeView_zhongcihao.Margin = new System.Windows.Forms.Padding(2);
+            this.treeView_zhongcihao.Location = new System.Drawing.Point(6, 38);
             this.treeView_zhongcihao.Name = "treeView_zhongcihao";
-            this.treeView_zhongcihao.Size = new System.Drawing.Size(525, 208);
+            this.treeView_zhongcihao.Size = new System.Drawing.Size(786, 311);
             this.treeView_zhongcihao.TabIndex = 12;
             this.treeView_zhongcihao.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_zhongcihao_AfterSelect);
             this.treeView_zhongcihao.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeView_zhongcihao_MouseDown);
@@ -1376,18 +1385,18 @@ namespace dp2Circulation
             // 
             this.tabPage_bookshelf.Controls.Add(this.toolStrip_arrangement);
             this.tabPage_bookshelf.Controls.Add(this.treeView_arrangement);
-            this.tabPage_bookshelf.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_bookshelf.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_bookshelf.Location = new System.Drawing.Point(4, 28);
             this.tabPage_bookshelf.Name = "tabPage_bookshelf";
-            this.tabPage_bookshelf.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_bookshelf.Size = new System.Drawing.Size(802, 397);
             this.tabPage_bookshelf.TabIndex = 7;
-            this.tabPage_bookshelf.Text = "≈≈º‹ÃÂœµ";
+            this.tabPage_bookshelf.Text = "ÊéíÊû∂‰ΩìÁ≥ª";
             this.tabPage_bookshelf.UseVisualStyleBackColor = true;
             // 
             // toolStrip_arrangement
             // 
             this.toolStrip_arrangement.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_arrangement.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_arrangement.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_arrangement.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_arrangement_save,
             this.toolStripButton_arrangement_refresh,
@@ -1396,9 +1405,10 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_modify,
             this.toolStripButton_arrangement_remove,
             this.toolStripButton_arrangement_viewXml});
-            this.toolStrip_arrangement.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_arrangement.Location = new System.Drawing.Point(0, 366);
             this.toolStrip_arrangement.Name = "toolStrip_arrangement";
-            this.toolStrip_arrangement.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_arrangement.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_arrangement.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_arrangement.TabIndex = 16;
             this.toolStrip_arrangement.Text = "toolStrip1";
             // 
@@ -1409,8 +1419,8 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_arrangement_save.Image")));
             this.toolStripButton_arrangement_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_arrangement_save.Name = "toolStripButton_arrangement_save";
-            this.toolStripButton_arrangement_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_arrangement_save.Text = "±£¥Ê";
+            this.toolStripButton_arrangement_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_arrangement_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_arrangement_save.Click += new System.EventHandler(this.toolStripButton_arrangement_save_Click);
             // 
             // toolStripButton_arrangement_refresh
@@ -1418,14 +1428,14 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_refresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_arrangement_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_arrangement_refresh.Name = "toolStripButton_arrangement_refresh";
-            this.toolStripButton_arrangement_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_arrangement_refresh.Text = "À¢–¬";
+            this.toolStripButton_arrangement_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_arrangement_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_arrangement_refresh.Click += new System.EventHandler(this.toolStripButton_arrangement_refresh_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripDropDownButton2
             // 
@@ -1436,21 +1446,21 @@ namespace dp2Circulation
             this.toolStripDropDownButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton2.Image")));
             this.toolStripDropDownButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
-            this.toolStripDropDownButton2.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton2.Text = "≤Â»Î";
+            this.toolStripDropDownButton2.Size = new System.Drawing.Size(64, 28);
+            this.toolStripDropDownButton2.Text = "ÊèíÂÖ•";
             // 
             // toolStripMenuItem_arrangement_insert_group
             // 
             this.toolStripMenuItem_arrangement_insert_group.Name = "toolStripMenuItem_arrangement_insert_group";
-            this.toolStripMenuItem_arrangement_insert_group.Size = new System.Drawing.Size(209, 22);
-            this.toolStripMenuItem_arrangement_insert_group.Text = "≤Â»Î≈≈º‹ÃÂœµΩ⁄µ„(&G)...";
+            this.toolStripMenuItem_arrangement_insert_group.Size = new System.Drawing.Size(289, 30);
+            this.toolStripMenuItem_arrangement_insert_group.Text = "ÊèíÂÖ•ÊéíÊû∂‰ΩìÁ≥ªËäÇÁÇπ(&G)...";
             this.toolStripMenuItem_arrangement_insert_group.Click += new System.EventHandler(this.toolStripMenuItem_arrangement_insert_group_Click);
             // 
             // toolStripMenuItem_arrangement_insert_location
             // 
             this.toolStripMenuItem_arrangement_insert_location.Name = "toolStripMenuItem_arrangement_insert_location";
-            this.toolStripMenuItem_arrangement_insert_location.Size = new System.Drawing.Size(209, 22);
-            this.toolStripMenuItem_arrangement_insert_location.Text = "≤Â»Îπ›≤ÿµÿµ„√˚Ω⁄µ„(&B)...";
+            this.toolStripMenuItem_arrangement_insert_location.Size = new System.Drawing.Size(289, 30);
+            this.toolStripMenuItem_arrangement_insert_location.Text = "ÊèíÂÖ•È¶ÜËóèÂú∞ÁÇπÂêçËäÇÁÇπ(&B)...";
             this.toolStripMenuItem_arrangement_insert_location.Click += new System.EventHandler(this.toolStripMenuItem_arrangement_insert_location_Click);
             // 
             // toolStripButton_arrangement_modify
@@ -1460,8 +1470,8 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_arrangement_modify.Image")));
             this.toolStripButton_arrangement_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_arrangement_modify.Name = "toolStripButton_arrangement_modify";
-            this.toolStripButton_arrangement_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_arrangement_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_arrangement_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_arrangement_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_arrangement_modify.Click += new System.EventHandler(this.toolStripButton_arrangement_modify_Click);
             // 
             // toolStripButton_arrangement_remove
@@ -1470,8 +1480,8 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_remove.Enabled = false;
             this.toolStripButton_arrangement_remove.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_arrangement_remove.Name = "toolStripButton_arrangement_remove";
-            this.toolStripButton_arrangement_remove.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_arrangement_remove.Text = "“∆≥˝";
+            this.toolStripButton_arrangement_remove.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_arrangement_remove.Text = "ÁßªÈô§";
             this.toolStripButton_arrangement_remove.Click += new System.EventHandler(this.toolStripButton_arrangement_remove_Click);
             // 
             // toolStripButton_arrangement_viewXml
@@ -1480,8 +1490,8 @@ namespace dp2Circulation
             this.toolStripButton_arrangement_viewXml.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_arrangement_viewXml.Image")));
             this.toolStripButton_arrangement_viewXml.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_arrangement_viewXml.Name = "toolStripButton_arrangement_viewXml";
-            this.toolStripButton_arrangement_viewXml.Size = new System.Drawing.Size(110, 22);
-            this.toolStripButton_arrangement_viewXml.Text = "π€≤ÏXML∂®“Â¥˙¬Î";
+            this.toolStripButton_arrangement_viewXml.Size = new System.Drawing.Size(161, 28);
+            this.toolStripButton_arrangement_viewXml.Text = "ËßÇÂØüXMLÂÆö‰πâ‰ª£Á†Å";
             this.toolStripButton_arrangement_viewXml.Click += new System.EventHandler(this.toolStripButton_arrangement_viewXml_Click);
             // 
             // treeView_arrangement
@@ -1491,10 +1501,9 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.treeView_arrangement.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.treeView_arrangement.HideSelection = false;
-            this.treeView_arrangement.Location = new System.Drawing.Point(4, 24);
-            this.treeView_arrangement.Margin = new System.Windows.Forms.Padding(2);
+            this.treeView_arrangement.Location = new System.Drawing.Point(6, 36);
             this.treeView_arrangement.Name = "treeView_arrangement";
-            this.treeView_arrangement.Size = new System.Drawing.Size(525, 209);
+            this.treeView_arrangement.Size = new System.Drawing.Size(786, 312);
             this.treeView_arrangement.TabIndex = 15;
             this.treeView_arrangement.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_arrangement_AfterSelect);
             this.treeView_arrangement.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeView_arrangement_MouseDown);
@@ -1503,34 +1512,32 @@ namespace dp2Circulation
             // tabPage_script
             // 
             this.tabPage_script.Controls.Add(this.splitContainer_script);
-            this.tabPage_script.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_script.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_script.Location = new System.Drawing.Point(4, 28);
             this.tabPage_script.Name = "tabPage_script";
-            this.tabPage_script.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_script.Size = new System.Drawing.Size(802, 397);
             this.tabPage_script.TabIndex = 6;
-            this.tabPage_script.Text = "Ω≈±æ≥Ã–Ú";
+            this.tabPage_script.Text = "ËÑöÊú¨Á®ãÂ∫è";
             this.tabPage_script.UseVisualStyleBackColor = true;
             // 
             // splitContainer_script
             // 
             this.splitContainer_script.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_script.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer_script.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer_script.Name = "splitContainer_script";
             this.splitContainer_script.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer_script.Panel1
             // 
             this.splitContainer_script.Panel1.Controls.Add(this.tableLayoutPanel_script);
-            this.splitContainer_script.Panel1.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            this.splitContainer_script.Panel1.Padding = new System.Windows.Forms.Padding(0, 9, 0, 0);
             // 
             // splitContainer_script.Panel2
             // 
             this.splitContainer_script.Panel2.Controls.Add(this.textBox_script_comment);
-            this.splitContainer_script.Panel2.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-            this.splitContainer_script.Size = new System.Drawing.Size(532, 260);
-            this.splitContainer_script.SplitterDistance = 225;
-            this.splitContainer_script.SplitterWidth = 8;
+            this.splitContainer_script.Panel2.Padding = new System.Windows.Forms.Padding(0, 0, 0, 9);
+            this.splitContainer_script.Size = new System.Drawing.Size(802, 397);
+            this.splitContainer_script.SplitterDistance = 343;
+            this.splitContainer_script.SplitterWidth = 12;
             this.splitContainer_script.TabIndex = 12;
             // 
             // tableLayoutPanel_script
@@ -1540,12 +1547,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_script.Controls.Add(this.textBox_script, 0, 0);
             this.tableLayoutPanel_script.Controls.Add(this.toolStrip_script, 0, 1);
             this.tableLayoutPanel_script.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_script.Location = new System.Drawing.Point(0, 6);
+            this.tableLayoutPanel_script.Location = new System.Drawing.Point(0, 9);
+            this.tableLayoutPanel_script.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel_script.Name = "tableLayoutPanel_script";
             this.tableLayoutPanel_script.RowCount = 2;
             this.tableLayoutPanel_script.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_script.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_script.Size = new System.Drawing.Size(532, 219);
+            this.tableLayoutPanel_script.Size = new System.Drawing.Size(802, 334);
             this.tableLayoutPanel_script.TabIndex = 12;
             // 
             // textBox_script
@@ -1557,13 +1565,12 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_script.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_script.HideSelection = false;
-            this.textBox_script.Location = new System.Drawing.Point(2, 2);
-            this.textBox_script.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_script.Location = new System.Drawing.Point(3, 3);
             this.textBox_script.MaxLength = 0;
             this.textBox_script.Multiline = true;
             this.textBox_script.Name = "textBox_script";
             this.textBox_script.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_script.Size = new System.Drawing.Size(528, 190);
+            this.textBox_script.Size = new System.Drawing.Size(796, 297);
             this.textBox_script.TabIndex = 2;
             this.textBox_script.TextChanged += new System.EventHandler(this.textBox_script_TextChanged);
             this.textBox_script.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_script_KeyDown);
@@ -1573,13 +1580,15 @@ namespace dp2Circulation
             // 
             this.toolStrip_script.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStrip_script.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_script.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_script.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_script_save,
             this.toolStripButton_script_refresh,
             this.toolStripLabel_script_caretPos});
-            this.toolStrip_script.Location = new System.Drawing.Point(0, 194);
+            this.toolStrip_script.Location = new System.Drawing.Point(0, 303);
             this.toolStrip_script.Name = "toolStrip_script";
-            this.toolStrip_script.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_script.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_script.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_script.TabIndex = 11;
             this.toolStrip_script.Text = "toolStrip1";
             // 
@@ -1590,8 +1599,8 @@ namespace dp2Circulation
             this.toolStripButton_script_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_script_save.Image")));
             this.toolStripButton_script_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_script_save.Name = "toolStripButton_script_save";
-            this.toolStripButton_script_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_script_save.Text = "±£¥Ê";
+            this.toolStripButton_script_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_script_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_script_save.Click += new System.EventHandler(this.toolStripButton_script_save_Click);
             // 
             // toolStripButton_script_refresh
@@ -1600,15 +1609,15 @@ namespace dp2Circulation
             this.toolStripButton_script_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_script_refresh.Image")));
             this.toolStripButton_script_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_script_refresh.Name = "toolStripButton_script_refresh";
-            this.toolStripButton_script_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_script_refresh.Text = "À¢–¬";
+            this.toolStripButton_script_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_script_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_script_refresh.Click += new System.EventHandler(this.toolStripButton_script_refresh_Click);
             // 
             // toolStripLabel_script_caretPos
             // 
             this.toolStripLabel_script_caretPos.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel_script_caretPos.Name = "toolStripLabel_script_caretPos";
-            this.toolStripLabel_script_caretPos.Size = new System.Drawing.Size(0, 22);
+            this.toolStripLabel_script_caretPos.Size = new System.Drawing.Size(0, 28);
             // 
             // textBox_script_comment
             // 
@@ -1618,22 +1627,22 @@ namespace dp2Circulation
             this.textBox_script_comment.ForeColor = System.Drawing.SystemColors.InfoText;
             this.textBox_script_comment.HideSelection = false;
             this.textBox_script_comment.Location = new System.Drawing.Point(0, 0);
-            this.textBox_script_comment.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_script_comment.Multiline = true;
             this.textBox_script_comment.Name = "textBox_script_comment";
             this.textBox_script_comment.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_script_comment.Size = new System.Drawing.Size(532, 21);
+            this.textBox_script_comment.Size = new System.Drawing.Size(802, 33);
             this.textBox_script_comment.TabIndex = 10;
             this.textBox_script_comment.DoubleClick += new System.EventHandler(this.textBox_script_comment_DoubleClick);
             // 
             // tabPage_valueTable
             // 
             this.tabPage_valueTable.Controls.Add(this.tableLayoutPanel1);
-            this.tabPage_valueTable.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_valueTable.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_valueTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_valueTable.Name = "tabPage_valueTable";
-            this.tabPage_valueTable.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_valueTable.Size = new System.Drawing.Size(802, 397);
             this.tabPage_valueTable.TabIndex = 8;
-            this.tabPage_valueTable.Text = "÷µ¡–±Ì";
+            this.tabPage_valueTable.Text = "ÂÄºÂàóË°®";
             this.tabPage_valueTable.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
@@ -1644,11 +1653,12 @@ namespace dp2Circulation
             this.tableLayoutPanel1.Controls.Add(this.toolStrip_valueTables, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(532, 260);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(802, 397);
             this.tableLayoutPanel1.TabIndex = 13;
             // 
             // textBox_valueTables
@@ -1660,13 +1670,12 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_valueTables.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_valueTables.HideSelection = false;
-            this.textBox_valueTables.Location = new System.Drawing.Point(2, 2);
-            this.textBox_valueTables.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_valueTables.Location = new System.Drawing.Point(3, 3);
             this.textBox_valueTables.MaxLength = 0;
             this.textBox_valueTables.Multiline = true;
             this.textBox_valueTables.Name = "textBox_valueTables";
             this.textBox_valueTables.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_valueTables.Size = new System.Drawing.Size(528, 231);
+            this.textBox_valueTables.Size = new System.Drawing.Size(796, 360);
             this.textBox_valueTables.TabIndex = 2;
             this.textBox_valueTables.TextChanged += new System.EventHandler(this.textBox_valueTables_TextChanged);
             // 
@@ -1674,13 +1683,15 @@ namespace dp2Circulation
             // 
             this.toolStrip_valueTables.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStrip_valueTables.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_valueTables.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_valueTables.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_valueTable_save,
             this.toolStripButton_valueTable_refresh,
             this.toolStripLabel1});
-            this.toolStrip_valueTables.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_valueTables.Location = new System.Drawing.Point(0, 366);
             this.toolStrip_valueTables.Name = "toolStrip_valueTables";
-            this.toolStrip_valueTables.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_valueTables.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_valueTables.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_valueTables.TabIndex = 11;
             this.toolStrip_valueTables.Text = "toolStrip1";
             // 
@@ -1691,8 +1702,8 @@ namespace dp2Circulation
             this.toolStripButton_valueTable_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_valueTable_save.Image")));
             this.toolStripButton_valueTable_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_valueTable_save.Name = "toolStripButton_valueTable_save";
-            this.toolStripButton_valueTable_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_valueTable_save.Text = "±£¥Ê";
+            this.toolStripButton_valueTable_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_valueTable_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_valueTable_save.Click += new System.EventHandler(this.toolStripButton_valueTable_save_Click);
             // 
             // toolStripButton_valueTable_refresh
@@ -1701,26 +1712,27 @@ namespace dp2Circulation
             this.toolStripButton_valueTable_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_valueTable_refresh.Image")));
             this.toolStripButton_valueTable_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_valueTable_refresh.Name = "toolStripButton_valueTable_refresh";
-            this.toolStripButton_valueTable_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_valueTable_refresh.Text = "À¢–¬";
+            this.toolStripButton_valueTable_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_valueTable_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_valueTable_refresh.Click += new System.EventHandler(this.toolStripButton_valueTable_refresh_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(0, 22);
+            this.toolStripLabel1.Size = new System.Drawing.Size(0, 28);
             // 
             // tabPage_center
             // 
             this.tabPage_center.Controls.Add(this.listView_center);
             this.tabPage_center.Controls.Add(this.toolStrip_center);
-            this.tabPage_center.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_center.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_center.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_center.Name = "tabPage_center";
-            this.tabPage_center.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_center.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_center.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_center.Size = new System.Drawing.Size(802, 397);
             this.tabPage_center.TabIndex = 9;
-            this.tabPage_center.Text = "÷––ƒ∑˛ŒÒ∆˜";
+            this.tabPage_center.Text = "‰∏≠ÂøÉÊúçÂä°Âô®";
             this.tabPage_center.UseVisualStyleBackColor = true;
             // 
             // listView_center
@@ -1736,10 +1748,9 @@ namespace dp2Circulation
             this.columnHeader_center_refid});
             this.listView_center.FullRowSelect = true;
             this.listView_center.HideSelection = false;
-            this.listView_center.Location = new System.Drawing.Point(4, 4);
-            this.listView_center.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_center.Location = new System.Drawing.Point(6, 6);
             this.listView_center.Name = "listView_center";
-            this.listView_center.Size = new System.Drawing.Size(524, 227);
+            this.listView_center.Size = new System.Drawing.Size(785, 340);
             this.listView_center.TabIndex = 0;
             this.listView_center.UseCompatibleStateImageBehavior = false;
             this.listView_center.View = System.Windows.Forms.View.Details;
@@ -1749,7 +1760,7 @@ namespace dp2Circulation
             // 
             // columnHeader_center_name
             // 
-            this.columnHeader_center_name.Text = "÷––ƒ√˚≥∆";
+            this.columnHeader_center_name.Text = "‰∏≠ÂøÉÂêçÁß∞";
             this.columnHeader_center_name.Width = 139;
             // 
             // columnHeader_center_url
@@ -1759,18 +1770,19 @@ namespace dp2Circulation
             // 
             // columnHeader_center_userName
             // 
-            this.columnHeader_center_userName.Text = "”√ªß√˚";
+            this.columnHeader_center_userName.Text = "Áî®Êà∑Âêç";
             this.columnHeader_center_userName.Width = 100;
             // 
             // columnHeader_center_refid
             // 
-            this.columnHeader_center_refid.Text = "≤Œøº ID";
+            this.columnHeader_center_refid.Text = "ÂèÇËÄÉ ID";
             this.columnHeader_center_refid.Width = 280;
             // 
             // toolStrip_center
             // 
             this.toolStrip_center.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_center.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_center.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_center.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_center_modify,
             this.toolStripButton_center_add,
@@ -1778,9 +1790,10 @@ namespace dp2Circulation
             this.toolStripButton_center_refresh,
             this.toolStripSeparator6,
             this.toolStripButton_center_save});
-            this.toolStrip_center.Location = new System.Drawing.Point(2, 233);
+            this.toolStrip_center.Location = new System.Drawing.Point(3, 363);
             this.toolStrip_center.Name = "toolStrip_center";
-            this.toolStrip_center.Size = new System.Drawing.Size(528, 25);
+            this.toolStrip_center.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_center.Size = new System.Drawing.Size(796, 31);
             this.toolStrip_center.TabIndex = 1;
             this.toolStrip_center.Text = "toolStrip1";
             // 
@@ -1791,8 +1804,8 @@ namespace dp2Circulation
             this.toolStripButton_center_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_center_modify.Image")));
             this.toolStripButton_center_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_center_modify.Name = "toolStripButton_center_modify";
-            this.toolStripButton_center_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_center_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_center_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_center_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_center_modify.Click += new System.EventHandler(this.toolStripButton_center_modify_Click);
             // 
             // toolStripButton_center_add
@@ -1801,8 +1814,8 @@ namespace dp2Circulation
             this.toolStripButton_center_add.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_center_add.Image")));
             this.toolStripButton_center_add.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_center_add.Name = "toolStripButton_center_add";
-            this.toolStripButton_center_add.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_center_add.Text = "ÃÌº”";
+            this.toolStripButton_center_add.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_center_add.Text = "Ê∑ªÂä†";
             this.toolStripButton_center_add.Click += new System.EventHandler(this.toolStripButton_center_add_Click);
             // 
             // toolStripButton_center_delete
@@ -1812,8 +1825,8 @@ namespace dp2Circulation
             this.toolStripButton_center_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_center_delete.Image")));
             this.toolStripButton_center_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_center_delete.Name = "toolStripButton_center_delete";
-            this.toolStripButton_center_delete.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_center_delete.Text = "…æ≥˝";
+            this.toolStripButton_center_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_center_delete.Text = "Âà†Èô§";
             this.toolStripButton_center_delete.Click += new System.EventHandler(this.toolStripButton_center_delete_Click);
             // 
             // toolStripButton_center_refresh
@@ -1822,14 +1835,14 @@ namespace dp2Circulation
             this.toolStripButton_center_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_center_refresh.Image")));
             this.toolStripButton_center_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_center_refresh.Name = "toolStripButton_center_refresh";
-            this.toolStripButton_center_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_center_refresh.Text = "À¢–¬";
+            this.toolStripButton_center_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_center_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_center_refresh.Click += new System.EventHandler(this.toolStripButton_center_refresh_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_center_save
             // 
@@ -1838,18 +1851,19 @@ namespace dp2Circulation
             this.toolStripButton_center_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_center_save.Image")));
             this.toolStripButton_center_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_center_save.Name = "toolStripButton_center_save";
-            this.toolStripButton_center_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_center_save.Text = "±£¥Ê";
+            this.toolStripButton_center_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_center_save.Text = "‰øùÂ≠ò";
             // 
             // tabPage_newLoanPolicy
             // 
             this.tabPage_newLoanPolicy.Controls.Add(this.tabControl_newLoanPolicy);
             this.tabPage_newLoanPolicy.Controls.Add(this.toolStrip_newLoanPolicy);
-            this.tabPage_newLoanPolicy.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_newLoanPolicy.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_newLoanPolicy.Name = "tabPage_newLoanPolicy";
-            this.tabPage_newLoanPolicy.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_newLoanPolicy.Size = new System.Drawing.Size(802, 397);
             this.tabPage_newLoanPolicy.TabIndex = 10;
-            this.tabPage_newLoanPolicy.Text = "¡˜Õ®»®œﬁ";
+            this.tabPage_newLoanPolicy.Text = "ÊµÅÈÄöÊùÉÈôê";
             this.tabPage_newLoanPolicy.UseVisualStyleBackColor = true;
             // 
             // tabControl_newLoanPolicy
@@ -1859,30 +1873,33 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_newLoanPolicy.Controls.Add(this.tabPage_newLoanPolicy_rightsTable);
             this.tabControl_newLoanPolicy.Controls.Add(this.tabPage_newLoanPolicy_xml);
-            this.tabControl_newLoanPolicy.Location = new System.Drawing.Point(3, 3);
+            this.tabControl_newLoanPolicy.Location = new System.Drawing.Point(4, 4);
+            this.tabControl_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl_newLoanPolicy.Name = "tabControl_newLoanPolicy";
             this.tabControl_newLoanPolicy.SelectedIndex = 0;
-            this.tabControl_newLoanPolicy.Size = new System.Drawing.Size(526, 229);
+            this.tabControl_newLoanPolicy.Size = new System.Drawing.Size(789, 344);
             this.tabControl_newLoanPolicy.TabIndex = 9;
             this.tabControl_newLoanPolicy.SelectedIndexChanged += new System.EventHandler(this.tabControl_newLoanPolicy_SelectedIndexChanged);
             // 
             // tabPage_newLoanPolicy_rightsTable
             // 
             this.tabPage_newLoanPolicy_rightsTable.Controls.Add(this.elementHost1);
-            this.tabPage_newLoanPolicy_rightsTable.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_newLoanPolicy_rightsTable.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_newLoanPolicy_rightsTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_newLoanPolicy_rightsTable.Name = "tabPage_newLoanPolicy_rightsTable";
-            this.tabPage_newLoanPolicy_rightsTable.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_newLoanPolicy_rightsTable.Size = new System.Drawing.Size(518, 203);
+            this.tabPage_newLoanPolicy_rightsTable.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_rightsTable.Size = new System.Drawing.Size(781, 312);
             this.tabPage_newLoanPolicy_rightsTable.TabIndex = 0;
-            this.tabPage_newLoanPolicy_rightsTable.Text = "»®œﬁ±Ì";
+            this.tabPage_newLoanPolicy_rightsTable.Text = "ÊùÉÈôêË°®";
             this.tabPage_newLoanPolicy_rightsTable.UseVisualStyleBackColor = true;
             // 
             // elementHost1
             // 
             this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.elementHost1.Location = new System.Drawing.Point(3, 3);
+            this.elementHost1.Location = new System.Drawing.Point(4, 4);
+            this.elementHost1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(512, 197);
+            this.elementHost1.Size = new System.Drawing.Size(773, 304);
             this.elementHost1.TabIndex = 1;
             this.elementHost1.Text = "elementHost1";
             this.elementHost1.Child = this.loanPolicyControlWrapper1;
@@ -1890,10 +1907,11 @@ namespace dp2Circulation
             // tabPage_newLoanPolicy_xml
             // 
             this.tabPage_newLoanPolicy_xml.Controls.Add(this.textBox_newLoanPolicy_xml);
-            this.tabPage_newLoanPolicy_xml.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_newLoanPolicy_xml.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_newLoanPolicy_xml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_newLoanPolicy_xml.Name = "tabPage_newLoanPolicy_xml";
-            this.tabPage_newLoanPolicy_xml.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_newLoanPolicy_xml.Size = new System.Drawing.Size(518, 203);
+            this.tabPage_newLoanPolicy_xml.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_xml.Size = new System.Drawing.Size(781, 312);
             this.tabPage_newLoanPolicy_xml.TabIndex = 1;
             this.tabPage_newLoanPolicy_xml.Text = "XML";
             this.tabPage_newLoanPolicy_xml.UseVisualStyleBackColor = true;
@@ -1905,13 +1923,12 @@ namespace dp2Circulation
             this.textBox_newLoanPolicy_xml.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_newLoanPolicy_xml.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox_newLoanPolicy_xml.HideSelection = false;
-            this.textBox_newLoanPolicy_xml.Location = new System.Drawing.Point(3, 3);
-            this.textBox_newLoanPolicy_xml.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_newLoanPolicy_xml.Location = new System.Drawing.Point(4, 4);
             this.textBox_newLoanPolicy_xml.MaxLength = 0;
             this.textBox_newLoanPolicy_xml.Multiline = true;
             this.textBox_newLoanPolicy_xml.Name = "textBox_newLoanPolicy_xml";
             this.textBox_newLoanPolicy_xml.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_newLoanPolicy_xml.Size = new System.Drawing.Size(512, 197);
+            this.textBox_newLoanPolicy_xml.Size = new System.Drawing.Size(773, 304);
             this.textBox_newLoanPolicy_xml.TabIndex = 2;
             this.textBox_newLoanPolicy_xml.TextChanged += new System.EventHandler(this.textBox_newLoanPolicy_xml_TextChanged);
             // 
@@ -1919,12 +1936,14 @@ namespace dp2Circulation
             // 
             this.toolStrip_newLoanPolicy.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_newLoanPolicy.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_newLoanPolicy.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_newLoanPolicy.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_newLoanPolicy_save,
             this.toolStripButton_newLoanPolicy_refresh});
-            this.toolStrip_newLoanPolicy.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_newLoanPolicy.Location = new System.Drawing.Point(0, 366);
             this.toolStrip_newLoanPolicy.Name = "toolStrip_newLoanPolicy";
-            this.toolStrip_newLoanPolicy.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_newLoanPolicy.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_newLoanPolicy.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_newLoanPolicy.TabIndex = 8;
             this.toolStrip_newLoanPolicy.Text = "toolStrip1";
             // 
@@ -1935,8 +1954,8 @@ namespace dp2Circulation
             this.toolStripButton_newLoanPolicy_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_newLoanPolicy_save.Image")));
             this.toolStripButton_newLoanPolicy_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_newLoanPolicy_save.Name = "toolStripButton_newLoanPolicy_save";
-            this.toolStripButton_newLoanPolicy_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_newLoanPolicy_save.Text = "±£¥Ê";
+            this.toolStripButton_newLoanPolicy_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_newLoanPolicy_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_newLoanPolicy_save.Click += new System.EventHandler(this.toolStripButton_newLoanPolicy_save_Click);
             // 
             // toolStripButton_newLoanPolicy_refresh
@@ -1945,19 +1964,20 @@ namespace dp2Circulation
             this.toolStripButton_newLoanPolicy_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_newLoanPolicy_refresh.Image")));
             this.toolStripButton_newLoanPolicy_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_newLoanPolicy_refresh.Name = "toolStripButton_newLoanPolicy_refresh";
-            this.toolStripButton_newLoanPolicy_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_newLoanPolicy_refresh.Text = "À¢–¬";
+            this.toolStripButton_newLoanPolicy_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_newLoanPolicy_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_newLoanPolicy_refresh.Click += new System.EventHandler(this.toolStripButton_newLoanPolicy_refresh_Click);
             // 
             // tabPage_calendar
             // 
             this.tabPage_calendar.Controls.Add(this.listView_calendar);
             this.tabPage_calendar.Controls.Add(this.toolStrip_calendar);
-            this.tabPage_calendar.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_calendar.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_calendar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_calendar.Name = "tabPage_calendar";
-            this.tabPage_calendar.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_calendar.Size = new System.Drawing.Size(802, 397);
             this.tabPage_calendar.TabIndex = 11;
-            this.tabPage_calendar.Text = "ø™π›»’¿˙";
+            this.tabPage_calendar.Text = "ÂºÄÈ¶ÜÊó•ÂéÜ";
             this.tabPage_calendar.UseVisualStyleBackColor = true;
             // 
             // listView_calendar
@@ -1973,10 +1993,9 @@ namespace dp2Circulation
             this.listView_calendar.FullRowSelect = true;
             this.listView_calendar.HideSelection = false;
             this.listView_calendar.LargeImageList = this.imageList_itemType;
-            this.listView_calendar.Location = new System.Drawing.Point(3, 2);
-            this.listView_calendar.Margin = new System.Windows.Forms.Padding(2);
+            this.listView_calendar.Location = new System.Drawing.Point(4, 3);
             this.listView_calendar.Name = "listView_calendar";
-            this.listView_calendar.Size = new System.Drawing.Size(528, 231);
+            this.listView_calendar.Size = new System.Drawing.Size(790, 344);
             this.listView_calendar.SmallImageList = this.imageList_itemType;
             this.listView_calendar.TabIndex = 9;
             this.listView_calendar.UseCompatibleStateImageBehavior = false;
@@ -1988,22 +2007,22 @@ namespace dp2Circulation
             // 
             // columnHeader_calendar_name
             // 
-            this.columnHeader_calendar_name.Text = "»’¿˙√˚";
+            this.columnHeader_calendar_name.Text = "Êó•ÂéÜÂêç";
             this.columnHeader_calendar_name.Width = 186;
             // 
             // columnHeader_calendar_range
             // 
-            this.columnHeader_calendar_range.Text = " ±º‰∑∂Œß";
+            this.columnHeader_calendar_range.Text = "Êó∂Èó¥ËåÉÂõ¥";
             this.columnHeader_calendar_range.Width = 168;
             // 
             // columnHeader_calendar_comment
             // 
-            this.columnHeader_calendar_comment.Text = "Àµ√˜";
+            this.columnHeader_calendar_comment.Text = "ËØ¥Êòé";
             this.columnHeader_calendar_comment.Width = 200;
             // 
             // columnHeader_calendar_content
             // 
-            this.columnHeader_calendar_content.Text = "ƒ⁄»›";
+            this.columnHeader_calendar_content.Text = "ÂÜÖÂÆπ";
             this.columnHeader_calendar_content.Width = 200;
             // 
             // imageList_itemType
@@ -2020,6 +2039,7 @@ namespace dp2Circulation
             // 
             this.toolStrip_calendar.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_calendar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_calendar.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_calendar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_calendar_save,
             this.toolStripButton_calendar_refresh,
@@ -2031,9 +2051,10 @@ namespace dp2Circulation
             this.toolStripButton_calendar_modify,
             this.toolStripButton_calendar_delete});
             this.toolStrip_calendar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.toolStrip_calendar.Location = new System.Drawing.Point(0, 235);
+            this.toolStrip_calendar.Location = new System.Drawing.Point(0, 366);
             this.toolStrip_calendar.Name = "toolStrip_calendar";
-            this.toolStrip_calendar.Size = new System.Drawing.Size(532, 25);
+            this.toolStrip_calendar.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_calendar.Size = new System.Drawing.Size(802, 31);
             this.toolStrip_calendar.TabIndex = 10;
             this.toolStrip_calendar.Text = "toolStrip1";
             // 
@@ -2044,8 +2065,8 @@ namespace dp2Circulation
             this.toolStripButton_calendar_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_calendar_save.Image")));
             this.toolStripButton_calendar_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_calendar_save.Name = "toolStripButton_calendar_save";
-            this.toolStripButton_calendar_save.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_calendar_save.Text = "±£¥Ê";
+            this.toolStripButton_calendar_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_calendar_save.Text = "‰øùÂ≠ò";
             this.toolStripButton_calendar_save.Click += new System.EventHandler(this.toolStripButton_calendar_save_Click);
             // 
             // toolStripButton_calendar_refresh
@@ -2054,14 +2075,14 @@ namespace dp2Circulation
             this.toolStripButton_calendar_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_calendar_refresh.Image")));
             this.toolStripButton_calendar_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_calendar_refresh.Name = "toolStripButton_calendar_refresh";
-            this.toolStripButton_calendar_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_calendar_refresh.Text = "À¢–¬";
+            this.toolStripButton_calendar_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_calendar_refresh.Text = "Âà∑Êñ∞";
             this.toolStripButton_calendar_refresh.Click += new System.EventHandler(this.toolStripButton_calendar_refresh_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton3
             // 
@@ -2070,8 +2091,8 @@ namespace dp2Circulation
             this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
             this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton3.Text = "…œ“∆";
+            this.toolStripButton3.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton3.Text = "‰∏äÁßª";
             // 
             // toolStripButton4
             // 
@@ -2080,13 +2101,13 @@ namespace dp2Circulation
             this.toolStripButton4.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton4.Image")));
             this.toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton4.Name = "toolStripButton4";
-            this.toolStripButton4.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton4.Text = "œ¬“∆";
+            this.toolStripButton4.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton4.Text = "‰∏ãÁßª";
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_calendar_new
             // 
@@ -2094,8 +2115,8 @@ namespace dp2Circulation
             this.toolStripButton_calendar_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_calendar_new.Image")));
             this.toolStripButton_calendar_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_calendar_new.Name = "toolStripButton_calendar_new";
-            this.toolStripButton_calendar_new.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_calendar_new.Text = "–¬‘ˆ";
+            this.toolStripButton_calendar_new.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_calendar_new.Text = "Êñ∞Â¢û";
             this.toolStripButton_calendar_new.Click += new System.EventHandler(this.toolStripButton_calendar_new_Click);
             // 
             // toolStripButton_calendar_modify
@@ -2105,8 +2126,8 @@ namespace dp2Circulation
             this.toolStripButton_calendar_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_calendar_modify.Image")));
             this.toolStripButton_calendar_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_calendar_modify.Name = "toolStripButton_calendar_modify";
-            this.toolStripButton_calendar_modify.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_calendar_modify.Text = "–ﬁ∏ƒ";
+            this.toolStripButton_calendar_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_calendar_modify.Text = "‰øÆÊîπ";
             this.toolStripButton_calendar_modify.Click += new System.EventHandler(this.toolStripButton_calendar_modify_Click);
             // 
             // toolStripButton_calendar_delete
@@ -2116,18 +2137,19 @@ namespace dp2Circulation
             this.toolStripButton_calendar_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_calendar_delete.Image")));
             this.toolStripButton_calendar_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_calendar_delete.Name = "toolStripButton_calendar_delete";
-            this.toolStripButton_calendar_delete.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_calendar_delete.Text = "…æ≥˝";
+            this.toolStripButton_calendar_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_calendar_delete.Text = "Âà†Èô§";
             this.toolStripButton_calendar_delete.Click += new System.EventHandler(this.toolStripButton_calendar_delete_Click);
             // 
             // tabPage_kernel
             // 
             this.tabPage_kernel.Controls.Add(this.kernelResTree1);
-            this.tabPage_kernel.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_kernel.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_kernel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_kernel.Name = "tabPage_kernel";
-            this.tabPage_kernel.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_kernel.Size = new System.Drawing.Size(802, 397);
             this.tabPage_kernel.TabIndex = 12;
-            this.tabPage_kernel.Text = "ƒ⁄∫À";
+            this.tabPage_kernel.Text = "ÂÜÖÊ†∏";
             this.tabPage_kernel.UseVisualStyleBackColor = true;
             // 
             // kernelResTree1
@@ -2137,9 +2159,10 @@ namespace dp2Circulation
             this.kernelResTree1.ImageIndex = 0;
             this.kernelResTree1.Lang = null;
             this.kernelResTree1.Location = new System.Drawing.Point(0, 0);
+            this.kernelResTree1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.kernelResTree1.Name = "kernelResTree1";
             this.kernelResTree1.SelectedImageIndex = 0;
-            this.kernelResTree1.Size = new System.Drawing.Size(532, 260);
+            this.kernelResTree1.Size = new System.Drawing.Size(802, 397);
             this.kernelResTree1.TabIndex = 0;
             this.kernelResTree1.GetChannel += new DigitalPlatform.LibraryClient.GetChannelEventHandler(this.kernelResTree1_GetChannel);
             this.kernelResTree1.ReturnChannel += new DigitalPlatform.LibraryClient.ReturnChannelEventHandler(this.kernelResTree1_ReturnChannel);
@@ -2177,22 +2200,21 @@ namespace dp2Circulation
             this.imageList_arrangement.Images.SetKeyName(1, "database.bmp");
             this.imageList_arrangement.Images.SetKeyName(2, "error_entity.bmp");
             // 
-            // columnHeader_opac_alias
+            // columnHeader_location_canReturn
             // 
-            this.columnHeader_opac_alias.Text = "±√˚";
-            this.columnHeader_opac_alias.Width = 100;
+            this.columnHeader_location_canReturn.Text = "ÂÖÅËÆ∏ËøòÂõû";
+            this.columnHeader_location_canReturn.Width = 100;
             // 
             // ManagerForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(540, 306);
+            this.ClientSize = new System.Drawing.Size(810, 459);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ManagerForm";
             this.ShowInTaskbar = false;
-            this.Text = "œµÕ≥π‹¿Ì";
+            this.Text = "Á≥ªÁªüÁÆ°ÁêÜ";
             this.Activated += new System.EventHandler(this.ManagerForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ManagerForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ManagerForm_FormClosed);
@@ -2458,5 +2480,6 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_kernel;
         private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
         private System.Windows.Forms.ColumnHeader columnHeader_opac_alias;
+        private System.Windows.Forms.ColumnHeader columnHeader_location_canReturn;
     }
 }

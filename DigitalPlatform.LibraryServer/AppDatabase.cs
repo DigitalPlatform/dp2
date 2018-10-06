@@ -8035,7 +8035,7 @@ out strError);
 
                 created_dbnames.Clear();
 
-                CONTINUE:
+                // CONTINUE:
                 // 及时保存library.xml的变化
                 if (this.Changed == true)
                     this.Flush();

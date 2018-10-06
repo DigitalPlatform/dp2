@@ -2511,7 +2511,7 @@ namespace dp2Library
                 }
 
                 string strBack = DomUtil.GetElementText(readerdom.DocumentElement, "friends");
-                string strTo = DomUtil.GetElementText(sessioninfo.Account.ReaderDom.DocumentElement, "friends");
+                string strTo = DomUtil.GetElementText(sessioninfo.Account?.PatronDom?.DocumentElement, "friends");
 
                 if (StringUtil.IsInList(strReaderBarcode, strTo) == true
                     && StringUtil.IsInList(sessioninfo.UserID, strBack) == true)

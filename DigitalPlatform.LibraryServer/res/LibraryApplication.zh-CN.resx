@@ -213,6 +213,10 @@
     <value>册 {0} 的馆藏地点为 '{1}'，按规定(&lt;locationTypes&gt;配置)此册不允许外借。</value>
     <comment>AppCirculation.cs</comment>
   </data>
+  <data name="册s的馆藏地点为s，不允许外借:s" xml:space="preserve">
+    <value>册 {0} 的馆藏地点为 '{1}'，不允许外借。原因: {2}</value>
+    <comment>AppCirculation.cs</comment>
+  </data>
   <data name="册条码号s不存在" xml:space="preserve">
     <value>册条码号 {0} 不存在</value>
     <comment>AppReservation.cs</comment>

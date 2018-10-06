@@ -155,9 +155,8 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -289,7 +288,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         int nRedoCount = 0;
 
-                    REDO_LOAD:
+                        REDO_LOAD:
                         byte[] item_timestamp = null;
 
                         // 获得册记录
@@ -333,9 +332,8 @@ namespace DigitalPlatform.LibraryServer
                             // "册条码号 '" + strItemBarcode + "' 有重复(" + nRet.ToString() + "条)，无法进行预约操作。";
                         }
 
-                        XmlDocument itemdom = null;
                         nRet = LibraryApplication.LoadToDom(strItemXml,
-                            out itemdom,
+                            out XmlDocument itemdom,
                             out strError);
                         if (nRet == -1)
                         {
@@ -350,39 +348,66 @@ namespace DigitalPlatform.LibraryServer
 
                         // TODO: 若册属于个人藏书，则不仅要求预约者是同一分馆的读者，另外还要求预约者是主人的好友。即，主人的读者记录中 firends 列表中有预约者
 
-                        // 2012/9/13
-                        // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-                        // return:
-                        //      -1  检查过程出错
-                        //      0   符合要求
-                        //      1   不符合要求
-                        nRet = CheckItemLibraryCode(itemdom,
-                            strLibraryCode,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet == 1)
+                        if (strFunction != "delete")
                         {
-                            strError = "册记录 '" + strItemBarcode + "' 因馆藏地而不能进行预约: " + strError;
-                            goto ERROR1;
+                            // 2012/9/13
+                            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+                            // return:
+                            //      -1  检查过程出错
+                            //      0   符合要求
+                            //      1   不符合要求
+                            nRet = CheckItemLibraryCode(itemdom,
+                                strLibraryCode,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 1)
+                            {
+                                strError = "册记录 '" + strItemBarcode + "' 因馆藏地而不能进行预约: " + strError;
+                                goto ERROR1;
+                            }
                         }
 
-                        // 2011/12/7
-                        // 检查册记录状态
-                        string strState = DomUtil.GetElementText(itemdom.DocumentElement,
-                            "state");
-                        if (string.IsNullOrEmpty(strState) == false)
+                        // 检查册是否允许借出?
+                        if (strFunction == "new")
                         {
-                            // text-level: 用户提示
-                            strError = string.Format(this.GetString("册状态为s无法预约"),   // "册 {0} 状态为 '{1}' ，无法进行预约操作。"
-                                strItemBarcode,
-                                strState,
-                                nRet.ToString());
-                            goto ERROR1;
-                        }
+                            // 2011/12/7
+                            // 检查册记录状态
+                            string strState = DomUtil.GetElementText(itemdom.DocumentElement,
+                                "state");
+                            if (string.IsNullOrEmpty(strState) == false)
+                            {
+                                // text-level: 用户提示
+                                strError = string.Format(this.GetString("册状态为s无法预约"),   // "册 {0} 状态为 '{1}' ，无法进行预约操作。"
+                                    strItemBarcode,
+                                    strState,
+                                    nRet.ToString());
+                                goto ERROR1;
+                            }
 
-                        bool bOnShelf = false;
-                        bool bArrived = false;
+                            StringBuilder debugInfo = null;
+                            // 检查册是否允许被借出
+                            // return:
+                            //      -1  出错
+                            //      0   借阅操作应该被拒绝
+                            //      1   借阅操作应该被允许
+                            nRet = CheckCanBorrow(
+                                strLibraryCode,
+                                false,
+                                sessioninfo.Account,
+                                readerdom,
+                                itemdom,
+                                ref debugInfo,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 0)
+                            {
+                                strError = string.Format("因册 {0} 不允许借出，所以也不允许预约: {1}", strItemBarcode, strError);
+                                goto ERROR1;
+                                // TODO: 这里是否可以跳过不允许借书的一册，继续向后处理?
+                            }
+                        }
 
                         // 在册记录中添加或者删除预约信息
                         nRet = this.DoReservationItemXml(
@@ -392,8 +417,8 @@ namespace DigitalPlatform.LibraryServer
                             strReaderBarcode,
                             sessioninfo.UserID,
                             ref itemdom,
-                            out bOnShelf,
-                            out bArrived,
+                            out bool bOnShelf,
+                            out bool bArrived,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -535,7 +560,6 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
                     // 通知预约到书的操作
                     // 出于对读者库加锁方面的便利考虑, 单独做了此函数
                     // return:
@@ -550,7 +574,7 @@ namespace DigitalPlatform.LibraryServer
                         true,   // 在普通架
                         true,   // 需要修改当前册记录的<request>元素state属性
                         "",
-                        out DeletedNotifyRecPaths,
+                        out List<string> DeletedNotifyRecPaths, // 被删除的通知记录。不用。
                         out strError);
                     if (nRet == -1)
                     {
@@ -610,7 +634,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -642,9 +666,6 @@ namespace DigitalPlatform.LibraryServer
             string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                 "readerType");
 
-            string strParamValue = "";
-            MatchResult matchresult;
-
             // 得到该读者类型针对所有类型图书的"可预约册数"
             // return:
             //      reader和book类型均匹配 算4分
@@ -657,8 +678,8 @@ namespace DigitalPlatform.LibraryServer
                 strReaderType,
                 "",
                 "可预约册数",
-                out strParamValue,
-                out matchresult,
+                out string strParamValue,
+                out MatchResult matchresult,
                 out strError);
             if (nRet == -1 || nRet < 3)
             {
@@ -681,7 +702,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             string[] newbarcodes = strItemBarcodeList.Split(new char[] { ',' });
 
             XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("reservations/request");
@@ -699,21 +719,21 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 检查是否曾经预约过
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
                 string strItems = DomUtil.GetAttr(node, "items");
 
                 string[] barcodes = strItems.Split(new char[] { ',' });
-                for (int j = 0; j < barcodes.Length; j++)
+                foreach (string barcode in barcodes)
                 {
-                    string strBarcode = barcodes[j].Trim();
+                    string strBarcode = barcode.Trim();
                     if (String.IsNullOrEmpty(strBarcode) == true)
                         continue;
 
-                    for (int k = 0; k < newbarcodes.Length; k++)
+                    foreach (string newbarcode in newbarcodes)
                     {
-                        string strNewBarcode = newbarcodes[k].Trim();
+                        string strNewBarcode = newbarcode.Trim();
                         if (String.IsNullOrEmpty(strNewBarcode) == true)
                             continue;
 
@@ -726,25 +746,25 @@ namespace DigitalPlatform.LibraryServer
                             return 1;
                         }
 
-                    } // end of k
+                    } // end of newbarcodes
 
-                } // end for j
+                } // end for barcode
 
-            } // end for i
+            } // end for nodes
 
             // 检查是否正被当前读者借阅
             nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
+                // XmlNode node = nodes[i];
 
                 string strItemBarcode = DomUtil.GetAttr(node, "barcode");
                 if (String.IsNullOrEmpty(strItemBarcode) == true)
                     continue;
 
-                for (int k = 0; k < newbarcodes.Length; k++)
+                foreach (string newbarcode in newbarcodes)
                 {
-                    string strNewBarcode = newbarcodes[k].Trim();
+                    string strNewBarcode = newbarcode.Trim();
                     if (String.IsNullOrEmpty(strNewBarcode) == true)
                         continue;
 
@@ -756,11 +776,20 @@ namespace DigitalPlatform.LibraryServer
                         // "册 '" + strNewBarcode + "' 已被当前读者借阅，因此不能被预约...";
                         return 1;
                     }
+                } // end of newbarcodes
+            } // end for nodes
 
-                } // end of k
+#if NO
+            // 检查册是否允许借出?
+            foreach (string newbarcode in newbarcodes)
+            {
+                string strNewBarcode = newbarcode.Trim();
+                if (String.IsNullOrEmpty(strNewBarcode) == true)
+                    continue;
 
 
-            } // end for i
+            }
+#endif
 
             return 0;
         }
@@ -1282,7 +1311,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 return 0;   // not found request
-            FOUND:
+                FOUND:
                 Debug.Assert(readerRequestNode != null, "");
 
                 // 将相关册中的<request>元素清除
@@ -1549,7 +1578,7 @@ namespace DigitalPlatform.LibraryServer
             CachedRecordCollection records,
             RmsChannel channel,
             string strItemBarcodeParam,
-            ref string strItemXml, 
+            ref string strItemXml,
             out string strError)
         {
             strError = "";
@@ -2008,7 +2037,7 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-        REDODELETE:
+            REDODELETE:
             // 如果队列中已经存在同册条码号的记录, 要先删除
             string strNotifyXml = "";
             // 获得预约到书队列记录
@@ -2035,8 +2064,8 @@ namespace DigitalPlatform.LibraryServer
             if (nRet >= 1)
             {
                 int nRedoDeleteCount = 0;
-            // TODO: 这一段删除代码可以专门编制在一个函数中，不必这么费力循环。可以优化处理
-            REDO_DELETE:
+                // TODO: 这一段删除代码可以专门编制在一个函数中，不必这么费力循环。可以优化处理
+                REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
                     out output_timestamp,

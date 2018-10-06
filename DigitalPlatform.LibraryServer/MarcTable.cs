@@ -6,6 +6,7 @@ using System.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
+using static DigitalPlatform.Script.ScriptUtil;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -421,7 +422,9 @@ namespace DigitalPlatform.LibraryServer
             // 数字资源
             if (StringUtil.IsInList("object", strStyle))
             {
-                string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC);
+                string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
+                    BuildObjectHtmlTableStyle.None,
+                    "unimarc");
                 if (string.IsNullOrEmpty(objectTable) == false)
                     results.Add(new NameValueLine("数字资源", objectTable, "object"));
             }
@@ -1514,7 +1517,9 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='856' or @name='859']");
             if (fields.count > 0)
             {
-                string strXml = ScriptUtil.BuildObjectXmlTable(strMARC);
+                string strXml = ScriptUtil.BuildObjectXmlTable(strMARC,
+                    BuildObjectHtmlTableStyle.None,
+                    "usmarc");
                 if (string.IsNullOrEmpty(strXml) == false)
                 {
                     var line = new NameValueLine("Digital Resource", "", "object");

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -194,7 +192,8 @@ namespace DigitalPlatform.LibraryServer
         {
             string strError = "";
 
-            // 临时的SessionInfo对象
+            // TODO: 要设法把临时的 Session 对象管理起来。在 Application down 的时候，主动对这些 session 的 Channels 执行 stop
+            // 临时的 SessionInfo 对象
             SessionInfo session = new SessionInfo(this);
             try
             {

@@ -3799,6 +3799,8 @@ namespace DigitalPlatform.LibraryServer
 
         public void Close()
         {
+            // TODO: 切断所有 session 的 Channels
+
             _app_down.Cancel();
 
             this.EndWather();
@@ -5213,7 +5215,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             account = new Account();
-            account.XmlNode = node;
+            account._xmlNode = node;
             account.LoginName = node.GetAttribute("name");
             account.UserID = node.GetAttribute("name");
 
@@ -10514,7 +10516,7 @@ out strError);
 
 
             // 2007/2/15 
-            account.ReaderDom = readerdom;
+            account.PatronDom = readerdom;
             account.ReaderDomLastTime = DateTime.Now;
 
 
@@ -10545,7 +10547,7 @@ out strError);
                     return -1;
                 timestamp = output_timestamp;
 
-                account.ReaderDom = readerdom;
+                account.PatronDom = readerdom;
                 account.ReaderDomTimestamp = timestamp;
             }
 
@@ -10598,7 +10600,7 @@ out strError);
                 // 遇到错误，如何报错?
             }
 
-            sessioninfo.Account.ReaderDom = null;
+            sessioninfo.Account.PatronDom = null;
         }
 
 
@@ -10653,7 +10655,7 @@ out strError);
             if (sessioninfo.Account.ReaderDomChanged == false)
                 return 0;
 
-            XmlDocument readerdom = sessioninfo.Account.ReaderDom;
+            XmlDocument readerdom = sessioninfo.Account.PatronDom;
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -10764,7 +10766,7 @@ out strError);
                 strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                 return -1;
             }
-            sessioninfo.Account.ReaderDom = readerdom;
+            sessioninfo.Account.PatronDom = readerdom;
             RefreshReaderAccount(ref sessioninfo.Account, readerdom);
 
             sessioninfo.Account.ReaderDomChanged = false;
@@ -10808,7 +10810,7 @@ out strError);
             if (sessioninfo.Account.ReaderDomChanged == false)
                 return 0;
 
-            XmlDocument readerdom = sessioninfo.Account.ReaderDom;
+            XmlDocument readerdom = sessioninfo.Account.PatronDom;
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -10918,7 +10920,7 @@ out strError);
                 strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                 return -1;
             }
-            sessioninfo.Account.ReaderDom = readerdom;
+            sessioninfo.Account.PatronDom = readerdom;
             RefreshReaderAccount(ref sessioninfo.Account, readerdom);
 
             sessioninfo.Account.ReaderDomChanged = false;
@@ -10968,10 +10970,10 @@ out strError);
             if (delta.TotalSeconds > 60
                 && sessioninfo.Account.ReaderDomChanged == false)
             {
-                sessioninfo.Account.ReaderDom = null;
+                sessioninfo.Account.PatronDom = null;
             }
 
-            if (sessioninfo.Account.ReaderDom == null)
+            if (sessioninfo.Account.PatronDom == null)
             {
                 string strBarcode = "";
 
@@ -11021,12 +11023,12 @@ out strError);
 
                 sessioninfo.Account.ReaderDomPath = strOutputPath;
                 sessioninfo.Account.ReaderDomTimestamp = timestamp;
-                sessioninfo.Account.ReaderDom = readerdom;
+                sessioninfo.Account.PatronDom = readerdom;
                 sessioninfo.Account.ReaderDomLastTime = DateTime.Now;
             }
             else
             {
-                readerdom = sessioninfo.Account.ReaderDom;  // 沿用cache中的
+                readerdom = sessioninfo.Account.PatronDom;  // 沿用cache中的
             }
 
             return 1;
@@ -11071,10 +11073,10 @@ out strError);
             if (delta.TotalSeconds > 60
                 && sessioninfo.Account.ReaderDomChanged == false)
             {
-                sessioninfo.Account.ReaderDom = null;
+                sessioninfo.Account.PatronDom = null;
             }
 
-            if (sessioninfo.Account.ReaderDom == null
+            if (sessioninfo.Account.PatronDom == null
                 || sessioninfo.Account.ReaderDomBarcode != strReaderBarcode)
             {
                 string strBarcode = "";
@@ -11126,13 +11128,13 @@ out strError);
                 sessioninfo.Account.ReaderDomBarcode = strReaderBarcode;
                 sessioninfo.Account.ReaderDomPath = strOutputPath;
                 sessioninfo.Account.ReaderDomTimestamp = timestamp;
-                sessioninfo.Account.ReaderDom = readerdom;
+                sessioninfo.Account.PatronDom = readerdom;
                 sessioninfo.Account.ReaderDomLastTime = DateTime.Now;
             }
             else
             {
                 Debug.Assert(strReaderBarcode == sessioninfo.Account.ReaderDomBarcode, "");
-                readerdom = sessioninfo.Account.ReaderDom;  // 沿用cache中的
+                readerdom = sessioninfo.Account.PatronDom;  // 沿用cache中的
             }
 
             return 1;
@@ -14718,9 +14720,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
                 return 0;
-
             }
-
 
 #if NO
             // 读者库
@@ -15155,14 +15155,20 @@ strLibraryCode);    // 读者所在的馆代码
     // 帐户信息
     public class Account
     {
-        public string Location = "";
+        private string location = "";
+        public string Location { get => location; set => location = value; }
 
-        public XmlElement XmlNode = null;  // library.xml 配置文件中相关小节
+        internal XmlElement _xmlNode = null;  // library.xml 配置文件中相关小节
 
-        public string LoginName = "";   // 登录名 带有前缀的各种渠道的登录名字
+        private string loginName = "";   
+        // 登录名 带有前缀的各种渠道的登录名字
+        public string LoginName { get => loginName; set => loginName = value; }
 
-        public string Password = "";
-        public string Type = "";
+        private string password = "";
+        public string Password { get => password; set => password = value; }
+
+        private string type = "";
+        public string Type { get => type; set => type = value; }
 
         string m_strRights = "";
         public string Rights
@@ -15189,31 +15195,59 @@ strLibraryCode);    // 读者所在的馆代码
             }
         }
 
-        public string AccountLibraryCode = ""; // 2007/12/15 
-        public string Access = "";  // 存取权限代码 2008/2/28 
+        private string accountLibraryCode = ""; 
+        // 2007/12/15 
+        public string AccountLibraryCode { get => accountLibraryCode; set => accountLibraryCode = value; }
 
-        public string UserID = "";  // 用户唯一标识。对于读者，这就是证条码号
+        private string access = "";  
+        // 存取权限代码 2008/2/28 
+        public string Access { get => access; set => access = value; }
 
-        public string RmsUserName = "";
-        public string RmsPassword = "";
-        public string Binding = ""; // 2016/10/26
+        private string userID = "";  
+        // 用户唯一标识。对于读者，这就是证条码号
+        public string UserID { get => userID; set => userID = value; }
 
-        public string Barcode = ""; // 证条码号。对于读者型的帐户有意义
+        private string rmsUserName = "";
+        public string RmsUserName { get => rmsUserName; set => rmsUserName = value; }
 
-        public string Name = "";    // 姓名。对于读者型的帐户有意义
+        private string rmsPassword = "";
+        public string RmsPassword { get => rmsPassword; set => rmsPassword = value; }
 
-        public string DisplayName = ""; // 显示名。对于读者型的帐户有意义
+        private string binding = ""; // 2016/10/26
+        public string Binding { get => binding; set => binding = value; }
 
-        public string PersonalLibrary;  // 书斋名。对于读者型的帐户有意义
+        private string barcode = ""; // 证条码号。对于读者型的帐户有意义
+        public string Barcode { get => barcode; set => barcode = value; }
 
-        public string Token = "";   // 随机创建的标记
+        private string name = "";    // 姓名。对于读者型的帐户有意义
+        public string Name { get => name; set => name = value; }
 
-        public XmlDocument ReaderDom = null;    // 如果是读者帐户，这里是读者记录DOM
-        public string ReaderDomBarcode = "";   // 缓冲的DOM代表的读者证条码号
-        public byte[] ReaderDomTimestamp = null;    // 读者记录时间戳
-        public string ReaderDomPath = "";   // 读者记录路径
-        public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
-        public bool ReaderDomChanged = false;
+        private string displayName = ""; // 显示名。对于读者型的帐户有意义
+        public string DisplayName { get => displayName; set => displayName = value; }
+
+        private string personalLibrary;  // 书斋名。对于读者型的帐户有意义
+        public string PersonalLibrary { get => personalLibrary; set => personalLibrary = value; }
+
+        private string token = "";   // 随机创建的标记
+        public string Token { get => token; set => token = value; }
+
+        private XmlDocument patronDom = null;    // 如果是读者帐户，这里是读者记录DOM
+        public XmlDocument PatronDom { get => patronDom; set => patronDom = value; }
+
+        private string readerDomBarcode = "";   // 缓冲的DOM代表的读者证条码号
+        public string ReaderDomBarcode { get => readerDomBarcode; set => readerDomBarcode = value; }
+
+        private byte[] readerDomTimestamp = null;    // 读者记录时间戳
+        public byte[] ReaderDomTimestamp { get => readerDomTimestamp; set => readerDomTimestamp = value; }
+
+        private string readerDomPath = "";   // 读者记录路径
+        public string ReaderDomPath { get => readerDomPath; set => readerDomPath = value; }
+
+        private DateTime readerDomLastTime = new DateTime((long)0);  // 最近装载的时间
+        public DateTime ReaderDomLastTime { get => readerDomLastTime; set => readerDomLastTime = value; }
+
+        private bool readerDomChanged = false;
+        public bool ReaderDomChanged { get => readerDomChanged; set => readerDomChanged = value; }
 
         #region 手机短信验证码
 
@@ -15366,6 +15400,26 @@ strLibraryCode);    // 读者所在的馆代码
                 return LibraryApplication.ExpandRightString(this.Rights);
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // 匹配 IP 地址
         // parameters:

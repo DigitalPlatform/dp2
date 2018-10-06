@@ -2019,15 +2019,13 @@ out string strError)
                         dom.DocumentElement.AppendChild(node);
                         node.InnerText = strPinyin;
                     }
-                    string strOutputPath = "";
-                    byte[] output_timestamp = null;
                     lRet = channel.DoSaveTextRes(strCreatePath,
                         dom.DocumentElement.OuterXml,
                         false,
                         "", // strStyle,
                         null,   // timestamp
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                         return -1;
@@ -2054,17 +2052,12 @@ out string strError)
                     // 取记录
                     string strStyle = "content,data,timestamp";
 
-                    string strMetaData;
-                    string strOutputPath;
-                    string strXml = "";
-                    byte[] baTimeStamp = null;
-
                     lRet = channel.GetRes(strPath,
                         strStyle,
-                        out strXml,
-                        out strMetaData,
-                        out baTimeStamp,
-                        out strOutputPath,
+                        out string strXml,
+                        out string strMetaData,
+                        out byte[] baTimeStamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                     {

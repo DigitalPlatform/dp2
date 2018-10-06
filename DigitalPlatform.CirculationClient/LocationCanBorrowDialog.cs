@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
@@ -156,7 +152,8 @@ namespace DigitalPlatform.CirculationClient
                 return;
 
             ListViewItem item = new ListViewItem(dlg.LocationString, 0);
-            item.SubItems.Add(dlg.CanBorrow == true ? "是" : "否");
+            // item.SubItems.Add(dlg.CanBorrow == true ? "是" : "否");
+            item.SubItems.Add(dlg.CanBorrow);
 
             this.listView_location_list.Items.Add(item);
             ListViewUtil.SelectLine(item, true);
@@ -175,7 +172,8 @@ namespace DigitalPlatform.CirculationClient
             LocationItemDialog dlg = new LocationItemDialog();
 
             dlg.LocationString = ListViewUtil.GetItemText(item, 0);
-            dlg.CanBorrow = (ListViewUtil.GetItemText(item, 1) == "是") ? true : false;
+            // dlg.CanBorrow = (ListViewUtil.GetItemText(item, 1) == "是") ? true : false;
+            dlg.CanBorrow = ListViewUtil.GetItemText(item, 1);
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
 
@@ -183,7 +181,8 @@ namespace DigitalPlatform.CirculationClient
                 return;
 
             ListViewUtil.ChangeItemText(item, 0, dlg.LocationString);
-            ListViewUtil.ChangeItemText(item, 1, dlg.CanBorrow == true ? "是" : "否");
+            // ListViewUtil.ChangeItemText(item, 1, dlg.CanBorrow == true ? "是" : "否");
+            ListViewUtil.ChangeItemText(item, 1, dlg.CanBorrow);
 
             ListViewUtil.SelectLine(item, true);
             return;
