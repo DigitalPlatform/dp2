@@ -7703,12 +7703,22 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(dlg, this.Font);
             dlg.CreateMode = true;
 
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+"BiblioSearchForm",
+"OpenBiblioDumpFileDialog_uiState",
+"");
             Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
             dlg.ShowDialog(this);
             Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
+            Program.MainForm.AppInfo.SetString(
+"BiblioSearchForm",
+"OpenBiblioDumpFileDialog_uiState",
+dlg.UiState);
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            bool bControl = (Control.ModifierKeys & Keys.Control) != 0;
 
             // 观察对象目录中是否已经存在文件
             if (dlg.IncludeObjectFile)
@@ -7906,6 +7916,7 @@ MessageBoxDefaultButton.Button1);
                                 "order",
                                 writer,
                                 dlg,
+                                bControl ? "opac" : "",
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.IssueDbName) == false
@@ -7919,6 +7930,7 @@ MessageBoxDefaultButton.Button1);
                                 "issue",
                                 writer,
                                 dlg,
+                                bControl ? "opac" : "",
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.ItemDbName) == false
@@ -7932,6 +7944,7 @@ MessageBoxDefaultButton.Button1);
                                 "item",
                                 writer,
                                 dlg,
+                                bControl ? "opac" : "",
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.CommentDbName) == false
@@ -7945,6 +7958,7 @@ MessageBoxDefaultButton.Button1);
                                 "comment",
                                 writer,
                                 dlg,
+                                bControl ? "opac" : "",
                                 out strError);
                         }
 
@@ -8204,13 +8218,14 @@ MessageBoxDefaultButton.Button1);
         }
 
         public int OutputEntities(
-Stop stop,
-LibraryChannel channel,
-string strBiblioRecPath,
-string strDbType,
-XmlTextWriter writer,
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            string strDbType,
+            XmlTextWriter writer,
             OpenBiblioDumpFileDialog dlg,
-out string strError)
+            string strStyle,
+            out string strError)
         {
             strError = "";
 
@@ -8221,6 +8236,7 @@ out string strError)
             loader.Channel = channel;
             loader.Stop = stop;
             loader.DbType = strDbType;
+            loader.Format = strStyle;
 
             loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
             loader.Prompt += new MessagePromptEventHandler(loader_Prompt);

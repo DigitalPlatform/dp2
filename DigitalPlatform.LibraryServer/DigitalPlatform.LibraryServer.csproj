@@ -73,12 +73,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="Jint, Version=0.0.0.0, Culture=neutral, PublicKeyToken=2e92ba9c8d81157f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Jint.2.11.58\lib\net451\Jint.dll</HintPath>
+    </Reference>
     <Reference Include="Jurassic, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Jurassic.2.2.2\lib\net35\Jurassic.dll</HintPath>
     </Reference>
     <Reference Include="Lucene.Net">
       <HintPath>.\Lucene.Net.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="MongoDB.Bson, Version=1.10.1.73, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
       <HintPath>..\packages\mongocsharpdriver.1.10.1\lib\net35\MongoDB.Bson.dll</HintPath>
       <Private>True</Private>
@@ -112,6 +116,7 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppAuthorNumber.cs" />
@@ -192,6 +197,7 @@
     <Compile Include="ReaderConverter.cs" />
     <Compile Include="RecordConverter.cs" />
     <Compile Include="deleted\RightsTableControl.cs" />
+    <Compile Include="Script\Interfaces.cs" />
     <Compile Include="SessionInfo.cs" />
     <Compile Include="Smart.cs" />
     <Compile Include="Statis.cs" />

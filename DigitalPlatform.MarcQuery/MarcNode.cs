@@ -477,7 +477,11 @@ namespace DigitalPlatform.Marc
             return new MarcNavigator(this);
         }
 #endif
-
+        /// <summary>
+        /// 用 XPath 字符串选择节点
+        /// </summary>
+        /// <param name="strXPath">XPath 字符串</param>
+        /// <returns>被选中的节点集合</returns>
         public MarcNodeList select(string strXPath)
         {
             return select(strXPath, -1);
@@ -2643,6 +2647,9 @@ namespace DigitalPlatform.Marc
 
         // 2015/5/31
         // 按照UNIMARC惯例强制填充ISO2709头标区
+        /// <summary>
+        /// 按照 UNIMARC 惯例强制填充 ISO2709 头标区
+        /// </summary>
         public void ForceUNIMARCHeader()
         {
             indicount = "2";

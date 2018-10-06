@@ -22,6 +22,8 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Jint;
+using Jint.Native;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -454,7 +456,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nBorrowInfoCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -802,7 +804,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nOperCount;
-        ERROR1:
+            ERROR1:
             // Undo已经进行过的操作
             // TODO: 写入错误日志
 
@@ -815,7 +817,7 @@ namespace DigitalPlatform.LibraryServer
                     string strTempError = "";
                     byte[] timestamp = null;
                     byte[] output_timestamp = null;
-                REDO_DELETE:
+                    REDO_DELETE:
                     long lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
                         out output_timestamp,
@@ -1028,7 +1030,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return nOperCount;
-        ERROR1:
+            ERROR1:
             // 不要Undo
             return -1;
         }
@@ -1067,7 +1069,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
 
-            REDO_DELETE:
+                REDO_DELETE:
 
                 this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -1173,7 +1175,7 @@ namespace DigitalPlatform.LibraryServer
 
 
             return nDeletedCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1221,7 +1223,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1815,7 +1817,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
 
                         {
-                            string strLibraryCode = "";
                             // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
                             // return:
                             //      -1  检查过程出错
@@ -1823,7 +1824,7 @@ namespace DigitalPlatform.LibraryServer
                             //      1   不符合要求
                             nRet = CheckItemLibraryCode(itemdom,
                                         sessioninfo.LibraryCodeList,
-                                        out strLibraryCode,
+                                        out string strLibraryCode,
                                         out strError);
                             if (nRet == -1)
                                 goto ERROR1;
@@ -1872,7 +1873,7 @@ namespace DigitalPlatform.LibraryServer
                     entityinfo.NewRecord = "";
                     entityinfo.NewTimestamp = null;
                     entityinfo.Action = "";
-                CONTINUE:
+                    CONTINUE:
                     entityinfos.Add(entityinfo);
                 }
 
@@ -1899,7 +1900,7 @@ namespace DigitalPlatform.LibraryServer
             entities = entityinfos.ToArray();
             result.Value = nResultCount;   // entities.Length;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -1937,69 +1938,160 @@ namespace DigitalPlatform.LibraryServer
                 // TODO: 如何报错?
             }
 
-
+            //////////
             // 馆藏地点
             string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
             // 去掉#reservation部分
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
             // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
-            string strPureLocationName = "";
-            string strItemLibraryCode = ""; // 当前册所在的馆代码
+            // 当前册所在的馆代码
 
             // 解析
             ParseCalendarName(strLocation,
-        out strItemLibraryCode,
-        out strPureLocationName);
+        out string strItemLibraryCode,
+        out string strPureLocationName);
 
-            bool bResultValue = false;
-            string strMessageText = "";
 
-            // 执行脚本函数ItemCanBorrow
-            // parameters:
-            // return:
-            //      -2  not found script
-            //      -1  出错
-            //      0   成功
-            nRet = this.DoItemCanBorrowScriptFunction(
-                false,
-                sessioninfo.Account,
-                item_dom,
-                out bResultValue,
-                out strMessageText,
-                out strError);
-            if (nRet == -1)
+            // 根据状态是否为空, 设置checkbox状态
+            if (string.IsNullOrEmpty(strState) == false)
             {
-                strMessageText = strError;
+                string strText = "此册因状态为 " + strState + " 而不能外借。";
+                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+                    "canBorrow", strText);
+                DomUtil.SetAttr(node, "canBorrow", "false");
+                goto SKIP1;
             }
-
-            if (nRet == -2)
+            else
             {
-                // 根据状态是否为空, 设置checkbox状态
-                if (string.IsNullOrEmpty(strState) == false)
+                // 注：全局用户就当每个分馆都可借。但OPAC items 界面上实际上要到输入读者证件条码号提交预约后才知道效果
+                if (sessioninfo.GlobalUser == false
+                    && StringUtil.IsInList(strItemLibraryCode, sessioninfo.LibraryCodeList) == false)
                 {
-                    string strText = "此册因状态为 " + strState + " 而不能外借。";
+                    string strText = "此册因属其他分馆 " + strItemLibraryCode + " 而不能借阅。";
                     XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                         "canBorrow", strText);
                     DomUtil.SetAttr(node, "canBorrow", "false");
+                    goto SKIP1;
                 }
-                else
+            }
+
+            // 根据馆藏地点是否允许借阅, 设置checkbox状态
+            // 个人书斋不在 library.xml 中定义
+            if (IsPersonalLibraryRoom(strPureLocationName) == true)    // 2015/6/14
+                goto SKIP1;
+
+            StringBuilder debugInfo = null;
+            // 检查册是否允许被借出
+            // return:
+            //      -1  出错
+            //      0   借阅操作应该被拒绝
+            //      1   借阅操作应该被允许
+            nRet = CheckCanBorrow(
+                strItemLibraryCode, // 读者的 librarycode?
+                false,
+                sessioninfo.Account,
+                sessioninfo.Account?.PatronDom,
+                item_dom,
+                ref debugInfo,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+    "canBorrow", strError);
+                DomUtil.SetAttr(node, "canBorrow", "false");
+            }
+
+            if (String.IsNullOrEmpty(strError) == false)
+            {
+                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+    "stateMessage", strError);
+            }
+
+#if NO
+                bool bResultValue = false;
+                string strMessageText = "";
+
+                // 执行脚本函数ItemCanBorrow
+                // parameters:
+                //      bResultValue    [out] 是否允许外借。如果返回 true，表示允许外借；false 表示不允许外借
+                // return:
+                //      -2  not found script
+                //      -1  出错
+                //      0   成功
+                nRet = this.DoItemCanBorrowScriptFunction(
+                    false,
+                    sessioninfo.Account,
+                    null,
+                    item_dom,
+                    out bResultValue,
+                    out strMessageText,
+                    out strError);
+                if (nRet == -1)
                 {
-                    // 注：全局用户就当每个分馆都可借。但OPAC items 界面上实际上要到输入读者证件条码号提交预约后才知道效果
-                    if (sessioninfo.GlobalUser == false
-                        && StringUtil.IsInList(strItemLibraryCode, sessioninfo.LibraryCodeList) == false)
+                    strMessageText = strError;
+                }
+
+                if (nRet == -2)
+                {
+
+
                     {
-                        string strText = "此册因属其他分馆 " + strItemLibraryCode + " 而不能借阅。";
-                        XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
-                            "canBorrow", strText);
-                        DomUtil.SetAttr(node, "canBorrow", "false");
-                    }
-                    else
-                    {
-                        // 根据馆藏地点是否允许借阅, 设置checkbox状态
-                        // 个人书斋不在 library.xml 中定义
-                        if (IsPersonalLibraryRoom(strPureLocationName) == false)    // 2015/6/14
+                        List<LocationType> locations = this.GetLocationTypes(strItemLibraryCode);
+                        LocationType location = locations.Find((o) => { return o.Location == strPureLocationName; });
+
+                        if (location == null
+                            || string.IsNullOrEmpty(location.CanBorrow) == true
+                            || location.CanBorrow == "no")
                         {
+                            string strText = "此册因属馆藏地点 " + strLocation + " 而不能外借。";
+                            XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+                                "canBorrow", strText);
+                            DomUtil.SetAttr(node, "canBorrow", "false");
+                        }
+
+                        // 执行脚本
+                        if (location.CanBorrow != "yes")
+                        {
+                            if (location.CanBorrow.StartsWith("javascript:") == false)
+                            {
+                                strError = "locationTypes//item 元素定义不合法：出现了无法识别的脚本代码: '" + location.CanBorrow + "'";
+                                return -1;
+                            }
+                            string strScript = location.CanBorrow.Substring("javascript:".Length);
+                            Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly))
+            .SetValue("account", sessioninfo.Account)
+            .SetValue("readerRecord", JsValue.Null)
+            .SetValue("itemRecord", new ItemRecord(item_dom));
+
+                            engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                                + strScript) // execute a statement
+                                ?.GetCompletionValue() // get the latest statement completion value
+                                ?.ToObject()?.ToString() // converts the value to .NET
+                                ;
+                            string result = GetString(engine, "result", "no");
+                            string message = GetString(engine, "message", "");
+                            //if (debugInfo != null)
+                            //    debugInfo.Append("馆藏地事项 '" + location.ToString() + "' 脚本执行后返回 result='" + result + "'(message='" + message + "')\r\n");
+
+                            if (string.IsNullOrEmpty(result) == true
+                                || result == "no")
+                            {
+                                // 不允许外借
+                                // text-level: 用户提示
+                                if (string.IsNullOrEmpty(message))
+                                    strError = "此册因属馆藏地点 " + strLocation + " 并且脚本执行结果表示不能外借。";
+                                else
+                                    strError = "此册因属馆藏地点 " + strLocation + " 而不能外借。原因: " + message;
+
+                                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+                                    "canBorrow", strError);
+                                DomUtil.SetAttr(node, "canBorrow", "false");
+                            }
+                        }
+#if NO
                             List<string> locations = this.GetLocationTypes(strItemLibraryCode, true);
                             if (locations.IndexOf(strPureLocationName) == -1)
                             {
@@ -2008,43 +2100,35 @@ namespace DigitalPlatform.LibraryServer
                                     "canBorrow", strText);
                                 DomUtil.SetAttr(node, "canBorrow", "false");
                             }
-                        }
-#if NO
-                        // 2015/6/14
-                        // 同一分馆情况下，根据馆藏地点是否允许借阅, 设置checkbox状态
-                        // 个人书斋不在 library.xml 中定义。因此这里采用观察不能定义的地点的方法，只要不在这个不允许借阅的地点列表中，就算允许
-                        List<string> locations = this.GetCantBorrowLocationTypes(strItemLibraryCode);
-                        if (locations.IndexOf(strPureLocationName) != -1)
-                        {
-                            string strText = "此册因属馆藏地点 " + strLocation + " 而不能外借。";
-                            XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
-                                "canBorrow", strText);
-                            DomUtil.SetAttr(node, "canBorrow", "false");
-                        }
 #endif
+
+                    }
+
+                }
+                else
+                {
+                    if (bResultValue == false)
+                    {
+                        XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+            "canBorrow", strMessageText);
+                        DomUtil.SetAttr(node, "canBorrow", "false");
                     }
                 }
-            }
-            else
-            {
-                if (bResultValue == false)
+
+
+                if (String.IsNullOrEmpty(strMessageText) == false)
                 {
                     XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
-        "canBorrow", strMessageText);
-                    DomUtil.SetAttr(node, "canBorrow", "false");
+        "stateMessage", strMessageText);
                 }
-            }
 
-            if (String.IsNullOrEmpty(strMessageText) == false)
-            {
-                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
-    "stateMessage", strMessageText);
             }
+#endif
 
+
+            SKIP1:
             // 状态
             // string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
-
-
 
             // 借者条码
             //string strBorrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");
@@ -2337,7 +2421,7 @@ out strError);
 
             result.ErrorCode = ErrorCodeValue.NoError;
             return 0;
-        ERROR1:
+            ERROR1:
             result.ErrorInfo = strError;
             return -1;
         }
@@ -2923,7 +3007,7 @@ out strError);
                                 || info.Action == "move")       // delete操作不查重
                             && String.IsNullOrEmpty(strNewBarcode) == false
                             && bNoCheckDup == false    // 2008/10/6 
-                            // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
+                                                       // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
                             )
                         {
 
@@ -3415,7 +3499,7 @@ out strError);
 
             result.Value = ErrorInfos.Count;  // 返回信息的数量
             return result;
-        ERROR1:
+            ERROR1:
             // 这里的报错，是比较严重的错误。如果是数组中部分的请求发生的错误，则不在这里报错，而是通过返回错误信息数组的方式来表现
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -3423,7 +3507,7 @@ out strError);
             return result;
         }
 
-        #region SetEntities() 下级函数
+#region SetEntities() 下级函数
 
         // return:
         //      -1  出错
@@ -3738,7 +3822,7 @@ out strError);
                 // 在管辖范围内
                 return 0;
             }
-        NOTMATCH:
+            NOTMATCH:
             strError = "馆藏地点 '" + strLocation + "' 不在 '" + strLibraryCodeList + "' 管辖范围内";
             return 1;
         }
@@ -4128,7 +4212,7 @@ out strError);
             string strMetaData = "";
             string strExistingXml = "";
 
-        REDOLOAD:
+            REDOLOAD:
 
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(info.NewRecPath,
@@ -4359,7 +4443,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -4434,7 +4518,7 @@ out strError);
             string strMetaData = "";
 
             // 先读出数据库中即将覆盖位置的已有记录
-        REDOLOAD:
+            REDOLOAD:
 
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
@@ -4950,7 +5034,7 @@ out strError);
 
             return 0;
 
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -5562,7 +5646,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -5585,7 +5669,7 @@ out strError);
             return true;
         }
 
-        #endregion
+#endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表
@@ -5917,7 +6001,7 @@ out strError);
                 }
             }
 
-        END1:
+            END1:
             strResult = StringUtil.MakePathList(results);
             return 1;
         }
@@ -6027,7 +6111,7 @@ out strError);
                 int nRedoCount = 0;
                 string strRefID = "";
 
-            REDO_CHANGE:
+                REDO_CHANGE:
 
                 string strXml = info.OldRecord;
                 // 为册记录 XML 内添加 biblio 元素
@@ -6128,7 +6212,7 @@ out strError);
             }
 
             return nDeletedCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
     }

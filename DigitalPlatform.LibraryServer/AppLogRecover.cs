@@ -62,7 +62,7 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
             int nRet = 0;
 
-            bool bMissing = false;  // 是否缺失快照信息?
+            // bool bMissing = false;  // 是否缺失快照信息?
 
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -2785,7 +2785,7 @@ strElementName);
             }
 
             bool bForce = false;
-            bool bNoCheckDup = false;
+            // bool bNoCheckDup = false;
 
             string strStyle = DomUtil.GetElementText(domLog.DocumentElement,
                 "style");
@@ -2793,8 +2793,8 @@ strElementName);
             if (StringUtil.IsInList("force", strStyle) == true)
                 bForce = true;
 
-            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
-                bNoCheckDup = true;
+            //if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            //    bNoCheckDup = true;
 
             // 逻辑恢复或者混合恢复
             if (level == RecoverLevel.Logic
@@ -3751,7 +3751,7 @@ strElementName);
             }
 
             bool bForce = false;
-            bool bNoCheckDup = false;
+            // bool bNoCheckDup = false;
 
             string strStyle = DomUtil.GetElementText(domLog.DocumentElement,
                 "style");
@@ -3759,8 +3759,8 @@ strElementName);
             if (StringUtil.IsInList("force", strStyle) == true)
                 bForce = true;
 
-            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
-                bNoCheckDup = true;
+            //if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            //    bNoCheckDup = true;
 
             // 逻辑恢复或者混合恢复或者容错恢复
             if (level == RecoverLevel.Logic
@@ -4138,7 +4138,7 @@ strElementName);
             }
 
             bool bForce = false;
-            bool bNoCheckDup = false;
+            // bool bNoCheckDup = false;
 
             string strStyle = DomUtil.GetElementText(domLog.DocumentElement,
                 "style");
@@ -4146,8 +4146,8 @@ strElementName);
             if (StringUtil.IsInList("force", strStyle) == true)
                 bForce = true;
 
-            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
-                bNoCheckDup = true;
+            //if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            //    bNoCheckDup = true;
 
             // 逻辑恢复或者混合恢复或者容错恢复
             if (level == RecoverLevel.Logic
@@ -4522,7 +4522,7 @@ strElementName);
             }
 
             bool bForce = false;
-            bool bNoCheckDup = false;
+            // bool bNoCheckDup = false;
 
             string strStyle = DomUtil.GetElementText(domLog.DocumentElement,
                 "style");
@@ -4530,8 +4530,8 @@ strElementName);
             if (StringUtil.IsInList("force", strStyle) == true)
                 bForce = true;
 
-            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
-                bNoCheckDup = true;
+            //if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            //    bNoCheckDup = true;
 
             // 逻辑恢复或者混合恢复或者容错恢复
             if (level == RecoverLevel.Logic
@@ -7824,13 +7824,15 @@ domLog.DocumentElement,
                 goto DO_SNAPSHOT;
             }
             return 0;
-        ERROR1:
+#if NO
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 level = RecoverLevel.Snapshot;
                 goto DO_SNAPSHOT;
             }
             return -1;
+#endif
         }
 
         /*
@@ -8201,7 +8203,7 @@ out string strError)
         {
             strError = "";
             int nRet = 0;
-            long lRet = 0;
+            // long lRet = 0;
 
             // 暂时把Robust当作Logic处理
             if (level == RecoverLevel.Robust)

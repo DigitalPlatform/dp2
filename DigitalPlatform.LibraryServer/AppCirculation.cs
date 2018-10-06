@@ -32,6 +32,8 @@ using DigitalPlatform.Drawing;  // ShrinkPic()
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Jint;
+using Jint.Native;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1052,7 +1054,7 @@ namespace DigitalPlatform.LibraryServer
     strItemBarcode,
     ref strFrom,
     strConfirmItemRecPath,
-    ref strLibraryCode,
+    // ref strLibraryCode,
     out aPath,
     out strItemXml,
     out strOutputItemRecPath,
@@ -1084,7 +1086,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                     else if (result.Value == -1)
                         return result;
-
 
                     string strItemDbName = "";
 
@@ -2432,7 +2433,7 @@ start_time_1,
             string strItemBarcode,
             ref string strItemFrom, // 号码实际上属于哪个检索途径?
             string strConfirmItemRecPath,
-            ref string strLibraryCode,
+            // ref string strLibraryCode,
             out List<string> aPath,
             out string strItemXml,
             out string strOutputItemRecPath,
@@ -3314,6 +3315,432 @@ start_time_1,
 
         #region Borrow()下级函数
 
+        void SetValue(Engine engine, string name, object o)
+        {
+            if (o == null)
+                engine.SetValue(name, JsValue.Null);
+            else
+                engine.SetValue(name, o);
+        }
+
+        static string GetString(Engine engine, string name, string default_value)
+        {
+            var result_obj = engine.GetValue(name);
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
+            if (value == null)
+                value = "";
+            return value;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   还回操作应该被拒绝
+        //      1   还回操作应该被允许
+        int CheckCanReturn(
+            string strReaderLibraryCode,
+            Account account,
+            XmlDocument readerdom,
+            XmlDocument itemdom,
+            ref StringBuilder debugInfo,
+            out string strError)
+        {
+            strError = "";
+
+            string strRefID = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+            string strItemBarcodeParam = strItemBarcode;
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+                // 如果册条码号为空，则使用 参考ID
+                if (String.IsNullOrEmpty(strRefID) == true)
+                {
+                    // text-level: 内部错误
+                    strError = "册记录中册条码号和参考ID不应同时为空";
+                    return -1;
+                }
+                strItemBarcodeParam = "@refID:" + strRefID;
+            }
+
+            // 馆藏地点
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+
+            // 去掉#reservation部分
+            // StringUtil.RemoveFromInList("#reservation", true, ref strLocation);
+            strLocation = StringUtil.GetPureLocationString(strLocation);
+
+
+            // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
+
+            string strRoomOrigin = "";  // 尚未去除冒号后面部分的馆藏地字符串。例如 班级书架:一年级一班
+
+            // 解析
+            ParseCalendarName(strLocation,
+        out string strItemLibraryCode,
+        out string strRoom);
+            if (strItemLibraryCode != strReaderLibraryCode)
+            {
+                strError = "还书操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strReaderLibraryCode + "' ";
+                return 0;
+            }
+
+            // 去除 strRoom 内容中横杠或者冒号以后的部分
+            {
+                strRoomOrigin = strRoom;    // 2017/8/24
+                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
+                strRoom = parts[0];
+            }
+
+            // 确保在 readerdom 中添加 libraryCode 元素。这样让脚本函数内可以利用这个信息
+            if (readerdom != null && readerdom.DocumentElement != null)
+                DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strReaderLibraryCode);
+
+            ///
+            // 检查册是否能够被还回
+            bool bResultValue = false;
+            string strMessageText = "";
+
+            // 执行脚本函数ItemCanReturn
+            // parameters:
+            // return:
+            //      -2  not found script
+            //      -1  出错
+            //      0   成功
+            int nRet = this.DoItemCanReturnScriptFunction(
+                account,
+                readerdom,
+                itemdom,
+                out bResultValue,
+                out strMessageText,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "执行 C# CanReturn() 脚本函数时出错: " + strError;
+                return -1;
+            }
+            if (nRet == -2)
+            {
+                strError = "";
+
+                List<LocationType> locations = this.GetLocationTypes(strItemLibraryCode);
+                LocationType location = locations.Find((o) => { return o.Location == strRoom; });
+                if (debugInfo != null)
+                    debugInfo.Append("获得馆代码 '" + strItemLibraryCode + "' 的可以借阅的馆藏地列表为: '" + LocationType.ToString(locations) + "'\r\n");
+
+                if (location == null
+                    || location.CanReturn == "no")
+                {
+                    // text-level: 用户提示
+                    strError = string.Format("册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许还回。",
+                        strItemBarcodeParam,
+                        strLocation);
+
+                    if (debugInfo != null)
+                        debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中没有匹配上 '" + strRoom + "'\r\n");
+
+                    return 0;
+                }
+
+                if (debugInfo != null)
+                    debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
+
+                // 执行脚本
+                if (string.IsNullOrEmpty(location.CanReturn) == false
+                    && location.CanReturn != "yes")
+                {
+                    if (location.CanReturn.StartsWith("javascript:") == false)
+                    {
+                        strError = "locationTypes//item 元素定义不合法：出现了无法识别的脚本代码 @canreturn: '" + location.CanReturn + "'";
+                        return -1;
+                    }
+                    string strScript = location.CanReturn.Substring("javascript:".Length);
+                    Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly));
+                    // .SetValue("account", account);
+
+                    SetValue(engine,
+    "account",
+    account == null ? null : new AccountRecord(account));
+
+                    SetValue(engine,
+                        "patron",
+                        readerdom == null ? null : new PatronRecord(readerdom));
+
+                    SetValue(engine,
+    "item",
+    itemdom == null ? null : new ItemRecord(itemdom));
+
+                    engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                        + strScript) // execute a statement
+                        ?.GetCompletionValue() // get the latest statement completion value
+                        ?.ToObject()?.ToString() // converts the value to .NET
+                        ;
+                    string result = GetString(engine, "result", "yes");
+                    string message = GetString(engine, "message", "");
+                    if (debugInfo != null)
+                        debugInfo.Append("馆藏地事项 '" + location.ToString() + "' @canreturn 脚本执行后返回 result='" + result + "'(message='" + message + "')\r\n");
+
+                    // 注: result == "unknown" 被当作可以还回。因为设计原则是倾向于允许还回
+                    if (result == "no")
+                    {
+                        // 不允许还回
+                        // text-level: 用户提示
+                        if (string.IsNullOrEmpty(message))
+                            strError = string.Format("册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许还回。",
+                                strItemBarcodeParam,
+                                strLocation);
+                        else
+                            strError = string.Format("册 {0} 的馆藏地点为 {1}，不允许还回: {2}",
+        strItemBarcodeParam,
+        strLocation,
+        message);
+                        return 0;
+                    }
+                }
+            }
+            else
+            {
+                // 根据脚本返回结果
+                if (bResultValue == false)
+                {
+                    strError = "还书被拒绝。因为册 " + strItemBarcodeParam + " 的状态为 " + strMessageText;
+                    // return -1;
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
+        // TODO: 增加一个参数，指示是两态还是三态。
+        //      两态是 yes/no，脚本返回 unknown 也当作 no。两态一般是为 Borrow() API 服务
+        //      三态是 yes/no/unknown。三态一般是为 GetEntities() API 服务
+        // 检查册是否允许被借出
+        // parameters:
+        //      strReaderLibraryCode  借阅者的馆代码
+        // return:
+        //      -1  出错
+        //      0   借阅操作应该被拒绝
+        //      1   借阅操作应该被允许
+        int CheckCanBorrow(
+            string strReaderLibraryCode,
+            bool bRenew,
+            Account account,
+            XmlDocument readerdom,
+            XmlDocument itemdom,
+            ref StringBuilder debugInfo,
+            out string strError)
+        {
+            strError = "";
+
+            string strOperName = this.GetString("借阅");
+
+            if (bRenew == true)
+                strOperName = this.GetString("续借");
+
+            string strRefID = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+            string strItemBarcodeParam = strItemBarcode;
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+#if NO
+                // text-level: 内部错误
+                strError = "册记录中册条码号不能为空";
+                return -1;
+#endif
+                // 如果册条码号为空，则使用 参考ID
+                if (String.IsNullOrEmpty(strRefID) == true)
+                {
+                    // text-level: 内部错误
+                    strError = "册记录中册条码号和参考ID不应同时为空";
+                    return -1;
+                }
+                strItemBarcodeParam = "@refID:" + strRefID;
+            }
+
+            // 馆藏地点
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+
+            // 去掉#reservation部分
+            // StringUtil.RemoveFromInList("#reservation", true, ref strLocation);
+            strLocation = StringUtil.GetPureLocationString(strLocation);
+
+
+            // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
+
+            string strRoomOrigin = "";  // 尚未去除冒号后面部分的馆藏地字符串。例如 班级书架:一年级一班
+
+            // 解析
+            ParseCalendarName(strLocation,
+        out string strItemLibraryCode,
+        out string strRoom);
+            if (strItemLibraryCode != strReaderLibraryCode)
+            {
+                strError = "借阅操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strReaderLibraryCode + "' ";
+                return 0;
+            }
+
+            // 去除 strRoom 内容中横杠或者冒号以后的部分
+            {
+                strRoomOrigin = strRoom;    // 2017/8/24
+                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
+                strRoom = parts[0];
+            }
+
+            // 确保在 readerdom 中添加 libraryCode 元素。这样让脚本函数内可以利用这个信息
+            if (readerdom != null && readerdom.DocumentElement != null)
+                DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strReaderLibraryCode);
+
+            // 2006/12/29
+            // 检查册是否能够被借出
+
+            // 执行脚本函数ItemCanBorrow
+            // parameters:
+            //      bResultValue    [out] 是否允许外借。如果返回 true，表示允许外借；false 表示不允许外借
+            // return:
+            //      -2  not found script
+            //      -1  出错
+            //      0   成功
+            int nRet = this.DoItemCanBorrowScriptFunction(
+                bRenew,
+                account,
+                readerdom,
+                itemdom,
+                out bool bResultValue,
+                out string strMessageText,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 内部错误
+                strError = "执行 C# CanBorrow() 脚本函数时出错: " + strError;
+                return -1;
+            }
+            if (nRet == -2)
+            {
+                strError = "";
+
+                List<LocationType> locations = this.GetLocationTypes(strItemLibraryCode);
+                LocationType location = locations.Find((o) => { return o.Location == strRoom; });
+                if (debugInfo != null)
+                    debugInfo.Append("获得馆代码 '" + strItemLibraryCode + "' 的可以借阅的馆藏地列表为: '" + LocationType.ToString(locations) + "'\r\n");
+
+                if (location == null
+                    || string.IsNullOrEmpty(location.CanBorrow) == true
+                    || location.CanBorrow == "no")
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("册s的馆藏地点为s，按规定此册不允许外借"),  // "册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许外借。"
+                        strItemBarcodeParam,
+                        strLocation);
+
+                    // "册 " + strItemBarcode + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
+
+                    if (debugInfo != null)
+                        debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中没有匹配上 '" + strRoom + "'\r\n");
+
+                    return 0;
+                }
+
+                if (debugInfo != null)
+                    debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
+
+                // 执行脚本
+                if (location.CanBorrow != "yes")
+                {
+                    if (location.CanBorrow.StartsWith("javascript:") == false)
+                    {
+                        strError = "locationTypes//item 元素定义不合法：出现了无法识别的脚本代码 @canborrow: '" + location.CanBorrow + "'";
+                        return -1;
+                    }
+                    string strScript = location.CanBorrow.Substring("javascript:".Length);
+                    Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly));
+                    // .SetValue("account", account);
+
+                    SetValue(engine,
+"account",
+account == null ? null : new AccountRecord(account));
+
+                    SetValue(engine,
+                        "patron",
+                        readerdom == null ? null : new PatronRecord(readerdom));
+
+                    SetValue(engine,
+    "item",
+    itemdom == null ? null : new ItemRecord(itemdom));
+
+                    engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                        + strScript) // execute a statement
+                        ?.GetCompletionValue() // get the latest statement completion value
+                        ?.ToObject()?.ToString() // converts the value to .NET
+                        ;
+                    string result = GetString(engine, "result", "no");
+                    string message = GetString(engine, "message", "");
+                    if (debugInfo != null)
+                        debugInfo.Append("馆藏地事项 '" + location.ToString() + "' 脚本执行后返回 result='" + result + "'(message='" + message + "')\r\n");
+
+                    if (string.IsNullOrEmpty(result) == true
+                        || result == "no" || result == "unknown")
+                    {
+                        // 不允许外借
+                        // text-level: 用户提示
+                        if (string.IsNullOrEmpty(message))
+                            strError = string.Format(this.GetString("册s的馆藏地点为s，按规定此册不允许外借"),  // "册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许外借。"
+                                strItemBarcodeParam,
+                                strLocation);
+                        else
+                            strError = string.Format(this.GetString("册s的馆藏地点为s，不允许外借:s"),
+        strItemBarcodeParam,
+        strLocation,
+        message);
+                        return 0;
+                    }
+                }
+#if NO
+                // 如果没有配置脚本函数，就根据馆藏地点察看地点允许配置来决定是否允许借阅
+                List<string> locations = app.GetLocationTypes(strLibraryCode, true);
+
+                if (debugInfo != null)
+                    debugInfo.Append("获得馆代码 '" + strLibraryCode + "' 的可以借阅的馆藏地列表为: '" + StringUtil.MakePathList(locations) + "'\r\n");
+
+                if (locations.IndexOf(strRoom) == -1)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("册s的馆藏地点为s，按规定此册不允许外借"),  // "册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许外借。"
+                        strItemBarcodeParam,
+                        strLocation);
+
+                    // "册 " + strItemBarcode + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
+
+                    if (debugInfo != null)
+                        debugInfo.Append("在列表 '" + StringUtil.MakePathList(locations) + "' 中没有匹配上 '" + strRoom + "'\r\n");
+
+                    return 0;
+                }
+
+                if (debugInfo != null)
+                    debugInfo.Append("在列表 '" + StringUtil.MakePathList(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
+#endif
+            }
+            else
+            {
+                // 根据脚本返回结果
+                if (bResultValue == false)
+                {
+                    strError = string.Format(this.GetString("不允许s。因为册s的状态为s"),   // "不允许 {0}。因为册 {1} 的状态为 {2}"
+                        strOperName,
+                        strItemBarcodeParam,
+                        strMessageText);
+                    /*
+                    strError = "不允许" 
+                        + (bRenew == true ? "续借" : "外借")
+                        + "。因为册 " + strItemBarcode + " 的状态为 "+strMessageText;
+                     * */
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
         // 借阅API的从属函数
         // 检查借阅权限
         // text-level: 用户提示 OPAC的续借要调用Borrow()函数，进而调用本函数
@@ -3360,12 +3787,11 @@ start_time_1,
                  * */
 
                 // 是否存在以停代金事项？
-                string strMessage = "";
                 nRet = HasPauseBorrowing(
                     calendar,
                     strLibraryCode,
                     readerdom,
-                    out strMessage,
+                    out string strMessage,
                     out strError);
                 if (nRet == -1)
                 {
@@ -3479,13 +3905,32 @@ start_time_1,
                 }
             }
 
+            // 检查册是否允许被借出
+            // return:
+            //      -1  出错
+            //      0   借阅操作应该被拒绝
+            //      1   借阅操作应该被允许
+            nRet = CheckCanBorrow(
+                strLibraryCode,
+                bRenew,
+                account,
+                readerdom,
+                itemdom,
+                ref debugInfo,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+#if NO
+
             // 2006/12/29
             // 检查册是否能够被借出
-            bool bResultValue = false;
-            string strMessageText = "";
 
             // 执行脚本函数ItemCanBorrow
             // parameters:
+            //      bResultValue    [out] 是否允许外借。如果返回 true，表示允许外借；false 表示不允许外借
             // return:
             //      -2  not found script
             //      -1  出错
@@ -3493,9 +3938,10 @@ start_time_1,
             nRet = app.DoItemCanBorrowScriptFunction(
                 bRenew,
                 account,
+                readerdom,
                 itemdom,
-                out bResultValue,
-                out strMessageText,
+                out bool bResultValue,
+                out string strMessageText,
                 out strError);
             if (nRet == -1)
             {
@@ -3505,6 +3951,73 @@ start_time_1,
             }
             if (nRet == -2)
             {
+                List<LocationType> locations = app.GetLocationTypes(strLibraryCode);
+                LocationType location = locations.Find((o) => { return o.Location == strRoom; });
+                if (debugInfo != null)
+                    debugInfo.Append("获得馆代码 '" + strLibraryCode + "' 的可以借阅的馆藏地列表为: '" + LocationType.ToString(locations) + "'\r\n");
+
+                if (location == null
+                    || string.IsNullOrEmpty(location.CanBorrow) == true
+                    || location.CanBorrow == "no")
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("册s的馆藏地点为s，按规定此册不允许外借"),  // "册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许外借。"
+                        strItemBarcodeParam,
+                        strLocation);
+
+                    // "册 " + strItemBarcode + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
+
+                    if (debugInfo != null)
+                        debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中没有匹配上 '" + strRoom + "'\r\n");
+
+                    return 0;
+                }
+
+                if (debugInfo != null)
+                    debugInfo.Append("在列表 '" + LocationType.ToString(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
+
+                // 执行脚本
+                if (location.CanBorrow != "yes")
+                {
+                    if (location.CanBorrow.StartsWith("javascript:") == false)
+                    {
+                        strError = "locationTypes//item 元素定义不合法：出现了无法识别的脚本代码: '" + location.CanBorrow + "'";
+                        return -1;
+                    }
+                    string strScript = location.CanBorrow.Substring("javascript:".Length);
+                    Engine engine = new Engine(cfg => cfg.AllowClr(typeof(MarcQuery).Assembly))
+    .SetValue("account", account)
+    .SetValue("readerRecord", new ReaderRecord(readerdom))
+    .SetValue("itemRecord", new ItemRecord(itemdom));
+
+                    engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+                        + strScript) // execute a statement
+                        ?.GetCompletionValue() // get the latest statement completion value
+                        ?.ToObject()?.ToString() // converts the value to .NET
+                        ;
+                    string result = GetString(engine, "result", "no");
+                    string message = GetString(engine, "message", "");
+                    if (debugInfo != null)
+                        debugInfo.Append("馆藏地事项 '" + location.ToString() + "' 脚本执行后返回 result='" + result + "'(message='" + message + "')\r\n");
+
+                    if (string.IsNullOrEmpty(result) == true
+                        || result == "no")
+                    {
+                        // 不允许外借
+                        // text-level: 用户提示
+                        if (string.IsNullOrEmpty(message))
+                            strError = string.Format(this.GetString("册s的馆藏地点为s，按规定此册不允许外借"),  // "册 {0} 的馆藏地点为 {1}，按规定(<locationTypes>配置)此册不允许外借。"
+                                strItemBarcodeParam,
+                                strLocation);
+                        else
+                            strError = string.Format(this.GetString("册s的馆藏地点为s，不允许外借:s"),
+        strItemBarcodeParam,
+        strLocation,
+        message);
+                        return 0;
+                    }
+                }
+#if NO
                 // 如果没有配置脚本函数，就根据馆藏地点察看地点允许配置来决定是否允许借阅
                 List<string> locations = app.GetLocationTypes(strLibraryCode, true);
 
@@ -3528,6 +4041,7 @@ start_time_1,
 
                 if (debugInfo != null)
                     debugInfo.Append("在列表 '" + StringUtil.MakePathList(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
+#endif
             }
             else
             {
@@ -3546,6 +4060,8 @@ start_time_1,
                     return 0;
                 }
             }
+
+#endif
 
             // 
             // 个人书斋的检查
@@ -4737,7 +5253,7 @@ start_time_1,
     strItemBarcodeParam,
     ref strFrom,
     strConfirmItemRecPath,
-    ref strLibraryCode,
+    // ref strLibraryCode,
     out aPath,
     out strItemXml,
     out strOutputItemRecPath,
@@ -8696,6 +9212,66 @@ out string strError)
             }
 
             return result;
+        }
+
+        public class LocationType
+        {
+            public string Location { get; set; }
+            public string CanBorrow { get; set; }
+            public string CanReturn { get; set; }
+
+            public override string ToString()
+            {
+                return string.Format("Location='{0}',CanBorrow='{1}',CanReturn='{2}'",
+                    this.Location, this.CanBorrow, this.CanReturn);
+            }
+
+            public static string ToString(List<LocationType> types)
+            {
+                StringBuilder text = new StringBuilder();
+                foreach (LocationType location in types)
+                {
+                    text.Append(location.ToString() + "; ");
+                }
+                return text.ToString();
+            }
+        }
+
+        public List<LocationType> GetLocationTypes(string strLibraryCode)
+        {
+            List<LocationType> results = new List<LocationType>();
+            string strXPath = "";
+
+            strXPath = "locationTypes/library[@code='" + strLibraryCode + "']/item";
+
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
+            foreach (XmlElement item in nodes)
+            {
+                results.Add(new LocationType
+                {
+                    Location = item.InnerText.Trim(),
+                    CanBorrow = item.GetAttribute("canborrow"),
+                    CanReturn = item.GetAttribute("canreturn")
+                });
+            }
+
+            // 兼容原来的习惯。找到那些不属于<library>元素后代的<item>元素
+            if (string.IsNullOrEmpty(strLibraryCode) == true)
+            {
+                strXPath = "locationTypes/item[count(ancestor::library) = 0]";
+                nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
+                foreach (XmlElement item in nodes)
+                {
+                    results.Add(new LocationType
+                    {
+                        Location = item.InnerText.Trim(),
+                        CanBorrow = item.GetAttribute("canborrow"),
+                        CanReturn = item.GetAttribute("canreturn")
+                    });
+                }
+            }
+
+            return results;
         }
 
         // 2015/6/14 改造，采用先获得集合然后筛选的方法
@@ -13553,7 +14129,8 @@ out string strError)
             }
 
             // 检查存取定义馆藏地列表
-            if (string.IsNullOrEmpty(strAccessParameters) == false && strAccessParameters != "*")
+            if (string.IsNullOrEmpty(strAccessParameters) == false
+                && strAccessParameters != "*")
             {
                 bool bFound = false;
                 List<string> locations = StringUtil.SplitList(strAccessParameters);
@@ -13586,6 +14163,8 @@ out string strError)
                     return -1;
                 }
             }
+
+#if NO
             ///
             // 检查册是否能够被还回
             bool bResultValue = false;
@@ -13599,6 +14178,7 @@ out string strError)
             //      0   成功
             nRet = app.DoItemCanReturnScriptFunction(
                 sessioninfo.Account,
+                readerdom,
                 itemdom,
                 out bResultValue,
                 out strMessageText,
@@ -13620,6 +14200,21 @@ out string strError)
                     return -1;
                 }
             }
+#endif
+            StringBuilder debugInfo = null;
+            // return:
+            //      -1  出错
+            //      0   还回操作应该被拒绝
+            //      1   还回操作应该被允许
+            nRet = CheckCanReturn(
+                strLibraryCode,
+                sessioninfo.Account,
+                readerdom,
+                itemdom,
+                ref debugInfo,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
 
             // 
             // 个人书斋的检查
@@ -15270,7 +15865,7 @@ out string strError)
                 }
             }
 
-            return 0;
+            // return 0;
         }
 
         // 借阅API的从属函数

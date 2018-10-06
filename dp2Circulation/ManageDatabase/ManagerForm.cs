@@ -5115,11 +5115,10 @@ out strError);
             */
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//item");
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
-
                 bool bCanBorrow = false;
+#if NO
 
                 // 获得布尔型的属性参数值
                 // return:
@@ -5133,6 +5132,16 @@ out strError);
                      out strError);
                 if (nRet == -1)
                     return -1;
+#endif
+                string strCanBorrow = node.GetAttribute("canborrow");
+                if (string.IsNullOrEmpty(strCanBorrow))
+                    strCanBorrow = "否";
+                else if (strCanBorrow == "yes")
+                    strCanBorrow = "是";
+                else if (strCanBorrow == "no")
+                    strCanBorrow = "否";
+
+                string strCanReturn = node.GetAttribute("canreturn");
 
                 string strText = node.InnerText;
 
@@ -5149,7 +5158,6 @@ out strError);
                     strLibraryCode = DomUtil.GetAttr(parent, "code");
                 }
 
-                bool bNullable = true;
 
                 // 获得布尔型的属性参数值
                 // return:
@@ -5159,7 +5167,7 @@ out strError);
                 nRet = DomUtil.GetBooleanParam(node,
                      "itemBarcodeNullable",
                      true,
-                     out bNullable,
+                     out bool bNullable,
                      out strError);
                 if (nRet == -1)
                     return -1;
@@ -5172,7 +5180,8 @@ out strError);
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_LIBRARYCODE, strLibraryCode);
                 ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ROOM, strText);
-                ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, bCanBorrow == true ? "是" : "否");
+                ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, strCanBorrow);
+                ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANRETURN, strCanReturn);
                 ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE, bNullable == true ? "是" : "否");
 
                 this.listView_location_list.Items.Add(item);
@@ -5282,11 +5291,18 @@ out strError);
                 string strLibraryCode = ListViewUtil.GetItemText(item, LOCATION_COLUMN_LIBRARYCODE);
                 string strLocation = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ROOM);
                 string strCanBorrow = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANBORROW);
+                string strCanReturn = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANRETURN);
                 string strNullable = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE);
 
+#if NO
                 bool bCanBorrow = false;
                 if (strCanBorrow == "是" || strCanBorrow == "yes")
                     bCanBorrow = true;
+#endif
+                if (strCanBorrow == "是")
+                    strCanBorrow = "yes";
+                else if (strCanBorrow == "否")
+                    strCanBorrow = "no";
 
                 bool bNullable = true;
                 if (strNullable == "是" || strNullable == "yes")
@@ -5296,11 +5312,13 @@ out strError);
 
                 if (string.IsNullOrEmpty(strLibraryCode) == true)
                 {
-                    XmlNode nodeItem = dom.CreateElement("item");
+                    XmlElement nodeItem = dom.CreateElement("item");
                     dom.DocumentElement.AppendChild(nodeItem);
 
                     nodeItem.InnerText = strLocation;
-                    DomUtil.SetAttr(nodeItem, "canborrow", bCanBorrow == true ? "yes" : "no");
+                    // DomUtil.SetAttr(nodeItem, "canborrow", bCanBorrow == true ? "yes" : "no");
+                    DomUtil.SetAttr(nodeItem, "canborrow", strCanBorrow);
+                    nodeItem.SetAttribute("canreturn", strCanReturn);
                     DomUtil.SetAttr(nodeItem, "itemBarcodeNullable", bNullable == true ? "yes" : "no");
                 }
                 else
@@ -5326,7 +5344,7 @@ out strError);
                 {
                     List<ListViewItem> items = (List<ListViewItem>)table[key];
 
-                    XmlNode nodeLibrary = dom.CreateElement("library");
+                    XmlElement nodeLibrary = dom.CreateElement("library");
                     dom.DocumentElement.AppendChild(nodeLibrary);
                     DomUtil.SetAttr(nodeLibrary, "code", key);
 
@@ -5334,11 +5352,18 @@ out strError);
                     {
                         string strLocation = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ROOM);
                         string strCanBorrow = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANBORROW);
+                        string strCanReturn = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANRETURN);
                         string strNullable = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE);
 
+#if NO
                         bool bCanBorrow = false;
                         if (strCanBorrow == "是" || strCanBorrow == "yes")
                             bCanBorrow = true;
+#endif
+                        if (strCanBorrow == "是")
+                            strCanBorrow = "yes";
+                        else if (strCanBorrow == "否")
+                            strCanBorrow = "no";
 
                         bool bNullable = true;
                         if (strNullable == "是" || strNullable == "yes")
@@ -5346,11 +5371,13 @@ out strError);
                         else
                             bNullable = false;
 
-                        XmlNode nodeItem = dom.CreateElement("item");
+                        XmlElement nodeItem = dom.CreateElement("item");
                         nodeLibrary.AppendChild(nodeItem);
 
                         nodeItem.InnerText = strLocation;
-                        DomUtil.SetAttr(nodeItem, "canborrow", bCanBorrow == true ? "yes" : "no");
+                        // DomUtil.SetAttr(nodeItem, "canborrow", bCanBorrow == true ? "yes" : "no");
+                        DomUtil.SetAttr(nodeItem, "canborrow", strCanBorrow);
+                        nodeItem.SetAttribute("canreturn", strCanReturn);
                         DomUtil.SetAttr(nodeItem, "itemBarcodeNullable", bNullable == true ? "yes" : "no");
                     }
                 }
@@ -5486,7 +5513,9 @@ out strError);
             ListViewItem item = new ListViewItem();
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_LIBRARYCODE, dlg.LibraryCode);
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ROOM, dlg.LocationString);
-            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow == true ? "是" : "否");
+            // ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow == true ? "是" : "否");
+            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow);
+            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANRETURN, dlg.CanReturn);
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE, dlg.ItemBarcodeNullable == true ? "是" : "否");
 
             this.listView_location_list.Items.Add(item);
@@ -5513,7 +5542,9 @@ out strError);
             dlg.LibraryCodeList = this.GetLibraryCodeList();
             dlg.LibraryCode = ListViewUtil.GetItemText(item, LOCATION_COLUMN_LIBRARYCODE);
             dlg.LocationString = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ROOM);
-            dlg.CanBorrow = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANBORROW) == "是") ? true : false;
+            // dlg.CanBorrow = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANBORROW) == "是") ? true : false;
+            dlg.CanBorrow = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANBORROW);
+            dlg.CanReturn = ListViewUtil.GetItemText(item, LOCATION_COLUMN_CANRETURN);
             dlg.ItemBarcodeNullable = (ListViewUtil.GetItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE) == "是") ? true : false;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
@@ -5537,7 +5568,9 @@ out strError);
 
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_LIBRARYCODE, dlg.LibraryCode);
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ROOM, dlg.LocationString);
-            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow == true ? "是" : "否");
+            // ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow == true ? "是" : "否");
+            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANBORROW, dlg.CanBorrow);
+            ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_CANRETURN, dlg.CanReturn);
             ListViewUtil.ChangeItemText(item, LOCATION_COLUMN_ITEMBARCODENULLABLE, dlg.ItemBarcodeNullable == true ? "是" : "否");
 
             ListViewUtil.SelectLine(item, true);
@@ -5550,7 +5583,8 @@ out strError);
         const int LOCATION_COLUMN_LIBRARYCODE = 0;
         const int LOCATION_COLUMN_ROOM = 1;
         const int LOCATION_COLUMN_CANBORROW = 2;
-        const int LOCATION_COLUMN_ITEMBARCODENULLABLE = 3;
+        const int LOCATION_COLUMN_CANRETURN = 3;
+        const int LOCATION_COLUMN_ITEMBARCODENULLABLE = 4;
 
         // 2014/9/6
         static string GetLocationItemName(ListViewItem item)
@@ -5867,9 +5901,9 @@ out strError);
             MoveLocationItemUpDown(false);
         }
 
-        #endregion
+#endregion
 
-        #region 值列表
+#region 值列表
 
         int ListValueTables(out string strError)
         {
@@ -6100,9 +6134,9 @@ out strError);
             this.ValueTableChanged = true;
         }
 
-        #endregion
+#endregion
 
-        #region 脚本
+#region 脚本
 
         int ListScript(out string strError)
         {
@@ -6403,9 +6437,9 @@ out strError);
 
         }
 
-        #endregion
+#endregion
 
-        #region 种次号
+#region 种次号
 
         private void treeView_zhongcihao_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -7365,9 +7399,9 @@ out strError);
         }
 
 
-        #endregion // 种次号
+#endregion // 种次号
 
-        #region 排架体系
+#region 排架体系
 
 
         private void treeView_arrangement_AfterSelect(object sender, TreeViewEventArgs e)
@@ -8063,10 +8097,10 @@ out strError);
 
         }
 
-        #endregion // 排架体系
+#endregion // 排架体系
 
 
-        #region 查重
+#region 查重
 
         private void listView_dup_projects_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -8650,7 +8684,7 @@ out strError);
             }
         }
 
-        #region 日历有关功能
+#region 日历有关功能
 
         private void listView_calendar_MouseUp(object sender, MouseEventArgs e)
         {
@@ -9043,7 +9077,7 @@ out strError);
             ListViewUtil.OnColumnClick(this.listView_calendar, e, false);
         }
 
-        #endregion
+#endregion
 
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
@@ -9075,5 +9109,5 @@ out strError);
 
     }
 
-    #endregion // 查重
+#endregion // 查重
 }

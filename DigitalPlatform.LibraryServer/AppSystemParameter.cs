@@ -169,7 +169,7 @@ namespace DigitalPlatform.LibraryServer
                         strValue = text.ToString();
                         goto END1;
                     }
-                    catch (DirectoryNotFoundException ex)
+                    catch (DirectoryNotFoundException /*ex*/)
                     {
                         strError = "目录 '" + strName + "' 不存在";
                         goto ERROR1;

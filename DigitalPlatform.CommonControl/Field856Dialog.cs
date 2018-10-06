@@ -2,10 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.GUI;
@@ -714,7 +712,7 @@ namespace DigitalPlatform.CommonControl
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -811,7 +809,7 @@ namespace DigitalPlatform.CommonControl
             this.textBox_objectRights.Text = e1.Results[0].Rights;
             EnableObjectRights(true);
             return;
-        IS_NOT_ID:
+            IS_NOT_ID:
             EnableObjectRights(false);
         }
 
@@ -840,7 +838,7 @@ namespace DigitalPlatform.CommonControl
             this.textBox_objectRights.Text = e1.Results[0].Rights;
             EnableObjectRights(true);
             return;
-        IS_NOT_ID:
+            IS_NOT_ID:
             EnableObjectRights(false);
         }
 
