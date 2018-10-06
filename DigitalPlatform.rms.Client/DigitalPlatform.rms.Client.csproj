@@ -112,6 +112,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{fe846fac-d4cb-4013-ad69-39e72e31d204}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -288,6 +292,7 @@
     <Compile Include="ResTree.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="RmsChannelList.cs" />
     <Compile Include="RmsStream.cs" />
     <Compile Include="Script.cs">
       <SubType>Code</SubType>

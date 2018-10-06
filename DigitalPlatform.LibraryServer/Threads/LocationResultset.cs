@@ -16,6 +16,8 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        RmsChannelList _channelList = new RmsChannelList();
+
         private static readonly Object syncRoot_location = new Object();
 
         List<string> _requests = new List<string>();
@@ -220,55 +222,63 @@ namespace DigitalPlatform.LibraryServer
 
                 this._app_down.Token.ThrowIfCancellationRequested();
 
-                RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                // RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                RmsChannel channel = _channelList.GetChannel(session.Channels, this.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
                     goto ERROR1;
                 }
 
+                try
+                {
 #if DETAIL_LOG
                 this.WriteErrorLog("开始检索");
 #endif
-                long lHitCount = channel.DoSearch(strQueryXml,
-    "default",
-    "", // strOutputStyle,
-    out strError);
-                if (lHitCount == -1)
-                    goto ERROR1;
+                    long lHitCount = channel.DoSearch(strQueryXml,
+        "default",
+        "", // strOutputStyle,
+        out strError);
+                    if (lHitCount == -1)
+                        goto ERROR1;
 
-                if (lHitCount == 0)
-                {
-                    // 没有命中任何记录，也要继续后面的处理
-                }
-
-                this._app_down.Token.ThrowIfCancellationRequested();
-
-                DpResultSet resultset = new DpResultSet(true);
-
-                try
-                {
-                    if (lHitCount > 0)
+                    if (lHitCount == 0)
                     {
-                        nRet = GetResultset(channel,
-                    "default",
-                    resultset,
-                    out strError);
+                        // 没有命中任何记录，也要继续后面的处理
+                    }
+
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
+                    DpResultSet resultset = new DpResultSet(true);
+
+                    try
+                    {
+                        if (lHitCount > 0)
+                        {
+                            nRet = GetResultset(channel,
+                        "default",
+                        resultset,
+                        out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+
+                        // 写入 dp2kernel 成为永久结果集
+                        nRet = UploadPermanentResultset(channel,
+                strLocation,
+                resultset,
+                out strError);
                         if (nRet == -1)
                             goto ERROR1;
                     }
-
-                    // 写入 dp2kernel 成为永久结果集
-                    nRet = UploadPermanentResultset(channel,
-            strLocation,
-            resultset,
-            out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    finally
+                    {
+                        resultset.Close();
+                    }
                 }
                 finally
                 {
-                    resultset.Close();
+                    _channelList.ReturnChannel(session.Channels, channel);
                 }
 
                 return;

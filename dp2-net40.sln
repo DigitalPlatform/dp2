@@ -176,6 +176,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3DTools", "3DTools\3DTools.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GcatLite", "GcatLite\GcatLite.csproj", "{D188E6C5-12F8-4593-BFC9-14EEF2BA5B0A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.Core", "dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj", "{FE846FAC-D4CB-4013-AD69-39E72E31D204}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1348,6 +1350,24 @@ Global
 		{D188E6C5-12F8-4593-BFC9-14EEF2BA5B0A}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{D188E6C5-12F8-4593-BFC9-14EEF2BA5B0A}.Test|x86.ActiveCfg = Release|Any CPU
 		{D188E6C5-12F8-4593-BFC9-14EEF2BA5B0A}.Test|x86.Build.0 = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Debug|x86.Build.0 = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|x86.ActiveCfg = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Release|x86.Build.0 = Release|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|Any CPU.Build.0 = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|Mixed Platforms.Build.0 = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|x86.ActiveCfg = Debug|Any CPU
+		{FE846FAC-D4CB-4013-AD69-39E72E31D204}.Test|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
