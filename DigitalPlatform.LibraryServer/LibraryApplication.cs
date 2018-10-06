@@ -3799,7 +3799,8 @@ namespace DigitalPlatform.LibraryServer
 
         public void Close()
         {
-            // TODO: 切断所有 session 的 Channels
+            // 切断所有正在请求中的 RmsChannel
+            _channelList.Abort();
 
             _app_down.Cancel();
 
