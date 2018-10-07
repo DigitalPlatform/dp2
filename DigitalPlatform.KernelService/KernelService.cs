@@ -715,7 +715,6 @@ namespace dp2Kernel
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
             }
 
-
             sessioninfo.BeginSearch();
             try
             {
