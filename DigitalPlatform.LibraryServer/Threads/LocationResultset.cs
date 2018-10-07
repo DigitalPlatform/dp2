@@ -16,7 +16,8 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
-        RmsChannelList _channelList = new RmsChannelList();
+        // 正在进行慢速检索的 RmsChannel 通道列表
+        RmsChannelList _slowChannelList = new RmsChannelList();
 
         private static readonly Object syncRoot_location = new Object();
 
@@ -199,7 +200,6 @@ namespace DigitalPlatform.LibraryServer
             SessionInfo session = new SessionInfo(this);
             try
             {
-                string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
                 // return:
                 //      -1  出错
@@ -213,7 +213,7 @@ namespace DigitalPlatform.LibraryServer
     "left",
     "zh",
     "", // strSearchStyle,
-                out strQueryXml,
+                out string strQueryXml,
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -223,10 +223,10 @@ namespace DigitalPlatform.LibraryServer
                 this._app_down.Token.ThrowIfCancellationRequested();
 
                 // RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
-                RmsChannel channel = _channelList.GetChannel(session.Channels, this.WsUrl);
+                RmsChannel channel = _slowChannelList.GetChannel(session.Channels, this.WsUrl);
                 if (channel == null)
                 {
-                    strError = "get channel error";
+                    strError = "get channel null error";
                     goto ERROR1;
                 }
 
@@ -278,7 +278,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 finally
                 {
-                    _channelList.ReturnChannel(session.Channels, channel);
+                    _slowChannelList.ReturnChannel(session.Channels, channel);
                 }
 
                 return;
@@ -289,8 +289,8 @@ namespace DigitalPlatform.LibraryServer
                 session = null;
             }
 
-        ERROR1:
-            this.WriteErrorLog("馆藏地结果集创建出错: " + strError);
+            ERROR1:
+            this.WriteErrorLog("馆藏地 '" + strLocation + "' 结果集创建出错: " + strError);
             return;
         }
 
