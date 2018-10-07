@@ -23,7 +23,6 @@ using Oracle.ManagedDataAccess.Types;
 
 using Ghostscript.NET;
 
-using DigitalPlatform;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -102,6 +101,27 @@ namespace DigitalPlatform.rms
                 return this.KernelApplication.DataDir;
             }
         }
+
+#if NO
+        internal CancellationTokenSource _app_down
+        {
+            get
+            {
+                return this.KernelApplication?._app_down;
+            }
+        }
+
+        internal bool IsDowning
+        {
+            get
+            {
+                CancellationTokenSource source = this._app_down;
+                if (source != null)
+                    return source.IsCancellationRequested;
+                return false;
+            }
+        }
+#endif
 
         public bool Changed = false;	//内容是否发生改变
 
@@ -2105,7 +2125,7 @@ namespace DigitalPlatform.rms
         // 慢速检索阈值
         static TimeSpan slow_length = TimeSpan.FromSeconds(5);
 
-        #region CopyRecord() 下级函数
+#region CopyRecord() 下级函数
 
         // 判断一个路径是否为追加方式的路径
         bool IsAppendPath(string strResPath)
@@ -2297,7 +2317,7 @@ namespace DigitalPlatform.rms
             return strID;
         }
 
-        #endregion
+#endregion
 
         // 拷贝一条源记录到目标记录，要求对源记录有读权限，对目标记录有写权限
         // 关键点是锁的问题
@@ -6579,6 +6599,11 @@ ChannelIdleEventArgs e);
         //      true    希望继续
         public bool DoIdle()
         {
+            // 2018/10/7
+            bool? is_cancel = this.App?._app_down?.IsCancellationRequested;
+            if (is_cancel != null && is_cancel == true)
+                return false;
+
             if (this.m_bStop == true)
                 return false;
 
@@ -6639,7 +6664,7 @@ ChannelIdleEventArgs e);
          * */
     }
 
-    #region 专门用于检索的类
+#region 专门用于检索的类
 
     public class DatabaseCommandTask : IDisposable
     {
@@ -6839,7 +6864,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
         }
     }
 
-    #endregion
+#endregion
 
     // 资源项信息
     // 当时放在DigitalPlatform.rms.Service里，后来要在Database.xml里使用，所以移动到这儿

@@ -513,10 +513,14 @@ namespace DigitalPlatform.rms
             return strResult;
         }
 
+        internal CancellationTokenSource _app_down = new CancellationTokenSource();
+
         // TODO: 改进为可以重复调用。然后被 Dispose() 调用
         // 关闭
         public void Close()
         {
+            _app_down.Cancel();
+
             eventClose.Set();	// 令工作线程退出
 
             // 等待工作线程真正退出
