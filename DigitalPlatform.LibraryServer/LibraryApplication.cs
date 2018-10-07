@@ -3800,7 +3800,8 @@ namespace DigitalPlatform.LibraryServer
         public void Close()
         {
             // 切断所有正在请求中的 RmsChannel
-            _channelList.Abort();
+            _slowChannelList.Disabled = true;   // 先禁用
+            _slowChannelList.Abort();
 
             _app_down.Cancel();
 

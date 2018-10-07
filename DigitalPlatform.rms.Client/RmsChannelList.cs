@@ -13,7 +13,19 @@ namespace DigitalPlatform.rms.Client
     /// </summary>
     public class RmsChannelList : SafeList<RmsChannel>
     {
-        RmsChannelCollection _channels { get; set; }
+        bool _disabled = false; // 是否处在禁用状态
+
+        public bool Disabled
+        {
+            get
+            {
+                return _disabled;
+            }
+            set
+            {
+                _disabled = value;
+            }
+        }
 
         public void Abort()
         {
@@ -30,6 +42,9 @@ namespace DigitalPlatform.rms.Client
             RmsChannelCollection channels,
             string strServerUrl)
         {
+            if (_disabled)
+                return null;
+
             RmsChannel channel = channels.GetChannel(strServerUrl);
             this.Add(channel);
             // TODO: 检查数组是否溢出
