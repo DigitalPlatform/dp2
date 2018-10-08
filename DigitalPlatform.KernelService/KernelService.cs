@@ -567,8 +567,7 @@ namespace dp2Kernel
                 if (PrepareUser(ref result) == -1)
                     return result;
 
-                ChannelHandle handle = new ChannelHandle();
-                handle.App = app;
+                ChannelHandle handle = new ChannelHandle(app);
                 handle.Idle += new ChannelIdleEventHandler(handle_Idle);
                 handle.Stop += new EventHandler(handle_Stop);
 
@@ -736,8 +735,7 @@ namespace dp2Kernel
                     new Delegate_isConnected(this.myIsConnected);
 #endif
 
-                ChannelHandle handle = new ChannelHandle();
-                handle.App = app;
+                ChannelHandle handle = new ChannelHandle(app);
                 handle.Idle += new ChannelIdleEventHandler(handle_Idle);
                 handle.Stop += new EventHandler(handle_Stop);
 
