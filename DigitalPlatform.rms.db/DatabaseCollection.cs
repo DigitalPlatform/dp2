@@ -2125,7 +2125,7 @@ namespace DigitalPlatform.rms
         // 慢速检索阈值
         static TimeSpan slow_length = TimeSpan.FromSeconds(5);
 
-#region CopyRecord() 下级函数
+        #region CopyRecord() 下级函数
 
         // 判断一个路径是否为追加方式的路径
         bool IsAppendPath(string strResPath)
@@ -2317,7 +2317,7 @@ namespace DigitalPlatform.rms
             return strID;
         }
 
-#endregion
+        #endregion
 
         // 拷贝一条源记录到目标记录，要求对源记录有读权限，对目标记录有写权限
         // 关键点是锁的问题
@@ -6581,7 +6581,8 @@ ChannelIdleEventArgs e);
 
     public class ChannelHandle
     {
-        //public DatabaseCollection Dbs = null;
+        public CancellationTokenSource CancelTokenSource { get; set; }
+
         public KernelApplication App = null;
 
         bool m_bStop = false;
@@ -6589,9 +6590,16 @@ ChannelIdleEventArgs e);
         public event ChannelIdleEventHandler Idle = null;
         public event EventHandler Stop = null;
 
+        public ChannelHandle(KernelApplication app)
+        {
+            this.App = app;
+            this.CancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(app._app_down.Token);
+        }
+
         public void Clear()
         {
             this.m_bStop = false;
+            this.CancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.App._app_down.Token);
         }
 
         // return:
@@ -6600,8 +6608,12 @@ ChannelIdleEventArgs e);
         public bool DoIdle()
         {
             // 2018/10/7
+#if NO
             bool? is_cancel = this.App?._app_down?.IsCancellationRequested;
             if (is_cancel != null && is_cancel == true)
+                return false;
+#endif
+            if (this.CancelTokenSource.IsCancellationRequested)
                 return false;
 
             if (this.m_bStop == true)
@@ -6617,8 +6629,10 @@ ChannelIdleEventArgs e);
             {
                 this.App.MyWriteDebugInfo("abort");
 
-                this.m_bStop = true;    // 2011/1/19 
+                if (this.CancelTokenSource.IsCancellationRequested == false)
+                    this.CancelTokenSource.Cancel();
 
+                this.m_bStop = true;    // 2011/1/19 
                 return false;
             }
             return true;
@@ -6626,6 +6640,9 @@ ChannelIdleEventArgs e);
 
         public void DoStop()
         {
+            if (this.CancelTokenSource.IsCancellationRequested == false)
+                this.CancelTokenSource.Cancel();
+
             this.m_bStop = true;
 
             if (this.Stop != null)
@@ -6638,6 +6655,9 @@ ChannelIdleEventArgs e);
         {
             get
             {
+                if (this.CancelTokenSource.IsCancellationRequested == true)
+                    return true;
+
                 return this.m_bStop;
             }
         }
@@ -6664,7 +6684,7 @@ ChannelIdleEventArgs e);
          * */
     }
 
-#region 专门用于检索的类
+    #region 专门用于检索的类
 
     public class DatabaseCommandTask : IDisposable
     {
@@ -6864,7 +6884,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
         }
     }
 
-#endregion
+    #endregion
 
     // 资源项信息
     // 当时放在DigitalPlatform.rms.Service里，后来要在Database.xml里使用，所以移动到这儿
