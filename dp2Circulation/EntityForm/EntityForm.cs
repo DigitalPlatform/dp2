@@ -3450,7 +3450,20 @@ true);
 
             XmlDocument collection_dom = new XmlDocument();
             if (string.IsNullOrEmpty(strSubRecords) == false)
-                collection_dom.LoadXml(strSubRecords);
+            {
+                try
+                {
+                    collection_dom.LoadXml(strSubRecords);
+                }
+                catch (Exception ex)
+                {
+                    // 2018/10/9
+                    strError = "strSubRecords 装入 XMLDOM 时出现异常: "
+                        + ex.Message
+                        + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
+                    return -1;
+                }
+            }
 
             string strBiblioDbName = "";
 

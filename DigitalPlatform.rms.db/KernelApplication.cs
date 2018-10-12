@@ -63,6 +63,8 @@ namespace DigitalPlatform.rms
         public void Dispose()
         {
             // TODO: 加入 this.Close()。还需要进行一些改造
+            this.Close();   // 2018/10/12
+
             eventClose.Dispose();
             eventActive.Dispose();
             eventCommit.Dispose();
@@ -89,12 +91,17 @@ namespace DigitalPlatform.rms
             this.eventCommit.Set();
         }
 
+        // 上一次记载统计数据的时间
+        DateTime _lastStatisTime = DateTime.Now;
+
         // 工作线程
-        // TODO: 要确保所有异常都被捕获。否则线程会被退出，不再具备监控能力
+        // 要确保所有异常都被捕获。否则线程会被退出，不再具备监控能力
         public void ThreadMain()
         {
             try
             {
+                this.WriteErrorLog("管理线程启动");
+
                 WaitHandle[] events = new WaitHandle[3];
 
                 events[0] = eventClose;
@@ -103,22 +110,29 @@ namespace DigitalPlatform.rms
 
                 while (true)
                 {
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
                     int index = WaitHandle.WaitAny(events, PerTime, false);
 
                     if (index == WaitHandle.WaitTimeout)
                     {
+                        this._app_down.Token.ThrowIfCancellationRequested();
+
                         // timeout
                         eventActive.Reset();
                         // 超时请况下做事
-                        TryShrink();
 
+                        // 如果内存用户数超出范围，则移出指定的对象。
+                        TryShrink(this._app_down.Token);
+
+                        // 将 Connection 的 Transaction Commit
                         TryCommit();
 
                         if (this.Dbs != null)
                         {
-                            // 定时保存一下databases.xml的修改
                             try
                             {
+                                // 定时保存一下databases.xml的修改
                                 this.Dbs.SaveXmlSafety(true);
                             }
                             catch (Exception ex)
@@ -131,30 +145,45 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                // TODO: 在日志中记载全局结果集个数
-                                this.ResultSets.Clean(new TimeSpan(1, 0, 0));   // 一个小时
-                                // this.ResultSets.Clean(new TimeSpan(0, 5, 0));   // 5 分钟
+                                // 这个操作可能耗时较长，导致退出 dp2kernel 不是很灵敏。是否能让它感知到 cancellation_token?
+                                int count = this.ResultSets.Clean(new TimeSpan(1, 0, 0),  // 一个小时
+                                    this._app_down.Token);
+                                // 在日志中记载全局结果集个数
+                                if (count > 0)
+                                    this.WriteErrorLog(string.Format("自动清理了 {0} 个结果集", count));
                             }
                             catch (Exception ex)
                             {
                                 this.WriteErrorLog("管理线程中 ResultSets.Clean() 遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                                this._app_down.Token.ThrowIfCancellationRequested();
                             }
                         }
 
                         if (this.Dbs != null)
                         {
-                            // 定时保存一下databases.xml的修改
                             try
                             {
-                                this.Dbs.ClearStreamCache();
+                                // 清除 StreamCache (流缓存，这是为了加快普通文件访问速度而设计的一套机制)
+                                this.Dbs.ClearStreamCache(this._app_down.Token);
                             }
                             catch (Exception ex)
                             {
                                 this.WriteErrorLog("管理线程 ClearStreamCache() 时遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                                this._app_down.Token.ThrowIfCancellationRequested();
                             }
                         }
 
-                        TryVerifyTailNumber();
+                        // 这个操作可能耗时较长，导致退出 dp2kernel 不是很灵敏。是否能让它感知到 cancellation_token?
+                        TryVerifyTailNumber(this._app_down.Token);
+
+                        // 记载各种统计参数，每十分钟一次
+                        if (DateTime.Now - _lastStatisTime >= TimeSpan.FromMinutes(10))
+                        {
+                            _lastStatisTime = DateTime.Now;
+                            this.WriteErrorLog(string.Format("结果集临时目录 {0} 中文件个数: {1}",
+                                this.ResultsetDir,
+                                 PathUtil.GetFileCount(this.ResultsetDir)));
+                        }
                     }
                     else if (index == 0)
                     {
@@ -163,32 +192,46 @@ namespace DigitalPlatform.rms
                     }
                     else if (index == 1)
                     {
+                        this._app_down.Token.ThrowIfCancellationRequested();
+
                         // be activating
                         eventActive.Reset();
 
                         // 得到通知的情况下做事
-                        TryShrink();
+                        TryShrink(this._app_down.Token);
 
                         /// 
-                        TryVerifyTailNumber();
+                        TryVerifyTailNumber(this._app_down.Token);
                     }
                     else if (index == 2)
                     {
+                        this._app_down.Token.ThrowIfCancellationRequested();
+
                         eventCommit.Reset();
 
                         TryCommit();
                     }
-
                 }
 
-                eventFinished.Set();
+                // eventFinished.Set();
+                this.WriteErrorLog("管理线程正常结束");
+            }
+            catch(System.OperationCanceledException)
+            {
+                this.WriteErrorLog("管理线程被中断");
             }
             catch (Exception ex)
             {
                 this.WriteErrorLog("管理线程异常(线程已退出):" + ExceptionUtil.GetDebugText(ex));
             }
+            finally
+            {
+                // 2018/10/12 移到这里
+                eventFinished.Set();
+            }
         }
 
+        // 将 Connection 的 Transaction Commit
         void TryCommit()
         {
             if (this.Dbs != null)
@@ -204,13 +247,14 @@ namespace DigitalPlatform.rms
             }
         }
 
-        void TryShrink()
+        // 如果内存用户数超出范围，则移出指定的对象。
+        void TryShrink(CancellationToken token)
         {
             if (this.Users != null)
             {
                 try
                 {
-                    this.Users.Shrink();
+                    this.Users.Shrink(token);
                 }
                 catch (Exception ex)
                 {
@@ -222,8 +266,10 @@ namespace DigitalPlatform.rms
         DateTime _lastVerifyTime = new DateTime(0); // 最近一次重试校验尾号的时刻
         int _retryVerifyCount = 0;  // 重试校验尾号的次数
 
-        void TryVerifyTailNumber()
+        void TryVerifyTailNumber(CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             // 重试10次以后，每次重试间隔拉长到 20 分钟以上
             // 10次以内，是按需执行的
             if (this._retryVerifyCount > 10
@@ -234,8 +280,9 @@ namespace DigitalPlatform.rms
             {
                 try
                 {
-                    string strError = "";
-                    int nRet = this.Dbs.CheckDbsTailNo(out strError);
+                    this.WriteErrorLog("重试校验全部数据库尾号");
+
+                    int nRet = this.Dbs.CheckDbsTailNo(token, out string strError);
                     if (nRet == -1)
                         this.WriteErrorLog("ERR002 重试校验数据库尾号发生错误:" + strError);
                     else
@@ -370,7 +417,9 @@ namespace DigitalPlatform.rms
 
             this.WriteErrorLog("kernel (" + KernelApplication.FullVersion + ") application 开始初始化");
 
+            this.WriteErrorLog("开始清理 session 临时目录");
             CleanSessionDir(this.SessionDir);
+            this.WriteErrorLog("结束清理 session 临时目录。");
 
             // 全局结果集目录
             string strResultSetDir = Path.Combine(this.DataDir, "resultsets");
@@ -389,7 +438,9 @@ namespace DigitalPlatform.rms
             }
 
             // 清除以前遗留的结果集文件
+            this.WriteErrorLog("开始清理 resultset 临时目录");
             CleanResultSetDir(strResultSetDir);
+            this.WriteErrorLog("结束清理 resultset 临时目录。");
 
             this.ResultsetDir = strResultSetDir;
 
@@ -413,17 +464,21 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            this.WriteErrorLog("开始校验全部数据库尾号");
+
             // 检验各个数据库记录尾号
             // return:
             //      -1  出错
             //      0   成功
             // 线：安全
-            nRet = this.Dbs.CheckDbsTailNo(out strError);
+            nRet = this.Dbs.CheckDbsTailNo(this._app_down.Token, out strError);
             if (nRet == -1)
             {
                 // 虽然发生错误，但是初始化过程继续进行
                 this.WriteErrorLog("ERR001 首次校验数据库尾号发生错误:" + strError);
             }
+
+            this.WriteErrorLog("结束校验全部数据库尾号。");
 
             /*
             // 初始化用户库集合
@@ -513,12 +568,26 @@ namespace DigitalPlatform.rms
             return strResult;
         }
 
+        public CancellationToken CancelToken
+        {
+            get
+            {
+                if (_app_down == null)
+                    return new CancellationToken();
+                return _app_down.Token;
+            }
+        }
         internal CancellationTokenSource _app_down = new CancellationTokenSource();
 
-        // TODO: 改进为可以重复调用。然后被 Dispose() 调用
+        bool _closed = false;
         // 关闭
         public void Close()
         {
+            // 可以重复调用。以便 Close() 可以被 Dispose() 调用
+            if (_closed == true)
+                return;
+
+            this.WriteErrorLog("kernel application 开始降落");
             _app_down.Cancel();
 
             eventClose.Set();	// 令工作线程退出
@@ -553,6 +622,10 @@ namespace DigitalPlatform.rms
                 this.WriteErrorLog("Users Close() error : " + ex.Message);
             }
 
+            // TODO: 可以考虑把结果集临时文件目录改名，然后等下次启动时候来后台删除里面的文件
+            // TODO: 是否记载一下退出时候尚未删除的临时文件个数?
+#if NO
+            // 为了快速退出，这里就不删除结果集临时文件了
             if (this.ResultSets != null)
             {
                 try
@@ -564,10 +637,11 @@ namespace DigitalPlatform.rms
                     this.WriteErrorLog("释放 ResultSets 遇到异常:" + ExceptionUtil.GetDebugText(ex));
                 }
             }
-
+#endif
 
             this.WriteErrorLog("kernel application 成功降落。");
             this.Dbs = null;
+            _closed = true;
         }
 
         // 写入Windows系统日志

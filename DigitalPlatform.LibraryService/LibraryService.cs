@@ -12102,18 +12102,32 @@ Stack:
                 StringUtil.ParseObjectPath(strResPath,
                     out strXmlRecPath,
                     out strObjectID);
-                if (app.GetObjectWriteToOperLog == true
-                    && StringUtil.IsInList("skipLog", strStyle) == false
+                if (// app.GetObjectWriteToOperLog == true &&
+                    StringUtil.IsInList("skipLog", strStyle) == false
                     && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
                     && string.IsNullOrEmpty(strObjectID) == false
                     && StringUtil.IsInList("data", strStyle) == true)
                 {
-                    bWriteLog = true;
-                    // 为了获得对象的大小信息，需要得到 metadata
-                    if (StringUtil.IsInList("metadata", strStyle) == false)
+                    if (app.GetObjectWriteToOperLog == true)
                     {
-                        StringUtil.SetInList(ref strStyle, "metadata", true);
-                        bClearMetadata = true;
+                        bWriteLog = true;
+                        // 为了获得对象的大小信息，需要得到 metadata
+                        if (StringUtil.IsInList("metadata", strStyle) == false)
+                        {
+                            StringUtil.SetInList(ref strStyle, "metadata", true);
+                            bClearMetadata = true;
+                        }
+                    }
+                    else
+                    {
+                        // 限制最大事项数
+                        string date = DateTimeUtil.DateTimeToString8(DateTime.Now);
+                        long newValue = app.DailyItemCountTable.GetValue("warning_getres", date, 1);
+                        if (newValue <= 1)
+                        {
+                            // 希望写入存取日志，但 library.xml 中的 object/@writeGetResOperLog 属性值为 false，此时需要记入错误日志表示警告
+                            app.WriteErrorLog("警告：有前端请求 GetRes()，希望连带写入存取日志，但 library.xml 中的 object/@writeGetResOperLog 属性值为 false，导致写入存取日志动作被忽略");
+                        }
                     }
                 }
 

@@ -1062,6 +1062,35 @@ namespace DigitalPlatform.IO
             }
         }
 
+        // 2018/10/12
+        // 计算一个目录中的文件个数
+        public static long GetFileCount(string strDir)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strDir);
+                if (di.Exists == false)
+                    return 0;
+
+                long count = 0;
+                // 计算所有的下级目录中的文件个数
+                DirectoryInfo[] dirs = di.GetDirectories();
+                foreach (DirectoryInfo childDir in dirs)
+                {
+                    count += GetFileCount(childDir.FullName);
+                }
+
+                // 所有文件
+                FileInfo[] fis = di.GetFiles();
+                count += fis.Length;
+                return count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         // 删除一个目录内的所有文件和目录
         // 不会抛出异常
         public static bool TryClearDir(string strDir)

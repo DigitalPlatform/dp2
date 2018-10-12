@@ -6153,14 +6153,21 @@ dlg.UiState);
                 return;
 
             int nRet = GetLocationList(
-out List<string> location_list,
+out List<string> location_list_param,
 out strError);
             if (nRet == -1)
             {
                 strError = "获得馆藏地配置参数时出错: " + strError;
                 goto ERROR1;
             }
-            location_list = Order.DistributeExcelFile.FilterLocationList(location_list, dlg.LibraryCode);
+            var location_list = Order.DistributeExcelFile.FilterLocationList(location_list_param, dlg.LibraryCode);
+            if (location_list.Count == 0)
+            {
+                strError = "当前用户能管辖的馆藏地 '"
+                    + StringUtil.MakePathList(location_list_param)
+                    + "' 和您选择的馆藏地过滤 '" + dlg.LibraryCode + "' 没有任何共同部分";
+                goto ERROR1;
+            }
 
             bool bLaunchExcel = true;
 
@@ -6368,9 +6375,9 @@ out strError);
         ref nLineNumber,
         strTableXml,
         "", // strStyle,
-        //biblio_title_list,
-        //nRowIndex,
-        //order_title_list,
+            //biblio_title_list,
+            //nRowIndex,
+            //order_title_list,
         strOrderRecPath,
                                         (biblio_recpath, order_recpath) =>
                                         {
@@ -6400,11 +6407,11 @@ out strError);
 
                 // bDone = true;
 
-                    if (doc != null)
-                    {
-                        doc.SaveAs(dlg.OutputFileName);
-                        doc.Dispose();
-                    }
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.OutputFileName);
+                    doc.Dispose();
+                }
             }
             catch (Exception ex)
             {

@@ -47,6 +47,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   正确
         //      1   有部分修改没有兑现。说明在strError中
+        //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
         public override int MergeTwoItemXml(
             SessionInfo sessioninfo,
             XmlDocument domExist,
@@ -126,6 +127,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strWarning = "";
+            bool bAllDenied = false;    // 对字段的修改是否全部被拒绝
 
             // 分馆用户要特意单独处理<distribute>元素
             if (sessioninfo.GlobalUser == false
@@ -141,6 +143,7 @@ namespace DigitalPlatform.LibraryServer
                 //      0   正常
                 //      1   发生了超越范围的修改
                 //      2   有部分修改需求没有兑现
+                //      3   全部修改都没有兑现 (2018/10/9)
                 nRet = MergeOrderNode(domExist.DocumentElement,
         domNew.DocumentElement,
         sessioninfo.LibraryCodeList,
@@ -157,8 +160,12 @@ namespace DigitalPlatform.LibraryServer
                     strError = "当前用户对不完全管辖(" + strControlWarning + ")的订购数据修改超过权限范围: " + strError;
                     return -1;
                 }
-                if (nRet == 2)
+                if (nRet == 2 || nRet == 3)
+                {
+                    if (nRet == 3)
+                        bAllDenied = true;
                     strWarning = strError;
+                }
 
                 domExist.DocumentElement.InnerXml = strTempMergedXml;
             }
@@ -186,6 +193,8 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strWarning) == false)
             {
                 strError = strWarning;
+                if (bAllDenied)
+                    return 2;
                 return 1;
             }
 
@@ -202,6 +211,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   正常
         //      1   发生了超越范围的修改
         //      2   有部分修改需求没有兑现
+        //      3   全部修改都没有兑现 (2018/10/9)
         public int MergeOrderNode(XmlNode exist_node,
             XmlNode new_node,
             string strLibraryCodeList,
@@ -430,7 +440,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "exist_node.OuterXml装入XMLDOM失败: " + ex.Message;
+                strError = "exist_node.OuterXml 装入 XMLDOM 失败: " + ex.Message;
                 return -1;
             }
 
@@ -456,7 +466,9 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
             {
                 strError = "对下列元素的修改没有兑现: " + StringUtil.MakePathList(differents);
-                return 2;
+                if (bDistributeChanged)
+                    return 2;   // 部分修改兑现
+                return 3;   // 所有修改都没有兑现
             }
             if (nRet == 0 && bDistributeChanged == false)
             {
