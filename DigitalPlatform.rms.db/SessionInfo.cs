@@ -692,8 +692,16 @@ out strError);
                         }
 #endif
                         if (nRet == -1)
-                            return -1;
-                        if (nRet == 0)
+                        {
+                            // return -1;
+                            // 2018/10/10
+                            record.RecordBody = new RecordBody();
+                            if (record.RecordBody.Result == null)
+                                record.RecordBody.Result = new Result();
+                            record.RecordBody.Result.ErrorCode = ErrorCodeValue.CommonError;
+                            record.RecordBody.Result.ErrorString = strError;
+                        }
+                        else if (nRet == 0)
                         {
                             record.RecordBody = new RecordBody();
                             if (record.RecordBody.Result == null)

@@ -108,7 +108,8 @@ namespace DigitalPlatform.rms
             int dpi,
             string format,
             Delegate_prepareFile procPrepareFile,
-            Delegate_deleteFile procDeleteFile)
+            Delegate_deleteFile procDeleteFile,
+            CancellationToken token)
         {
             string key = PageItem.MakeKey(object_recpath, page_no, dpi, format);
             PageItem item = null;
@@ -126,7 +127,7 @@ namespace DigitalPlatform.rms
                     if (_pageTable.Count >= MAX_ITEMS)
                     {
                         // 紧急清理一次
-                        Clean(false, TimeSpan.FromMilliseconds(0), procDeleteFile);
+                        Clean(false, TimeSpan.FromMilliseconds(0), procDeleteFile, token);
                     }
 
                     item = new PageItem
@@ -241,7 +242,8 @@ namespace DigitalPlatform.rms
         //      delta   闲置多少时间以上才清理
         public void Clean(bool bLock,
             TimeSpan delta,
-            Delegate_deleteFile procDeleteFile)
+            Delegate_deleteFile procDeleteFile,
+            CancellationToken token)
         {
             List<string> keys = new List<string>();
             List<PageItem> items = new List<PageItem>();
@@ -252,6 +254,8 @@ namespace DigitalPlatform.rms
                 DateTime now = DateTime.Now;
                 foreach (string key in _pageTable.Keys)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     PageItem item = _pageTable[key];
                     if (item.State == "OK"
                         && now - item.LastUse > delta)
@@ -275,6 +279,8 @@ namespace DigitalPlatform.rms
                 {
                     foreach (string key in keys)
                     {
+                        token.ThrowIfCancellationRequested();
+
                         _pageTable.Remove(key);
                     }
                 }
@@ -286,6 +292,8 @@ namespace DigitalPlatform.rms
 
                 foreach (PageItem item in items)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     if (procDeleteFile != null)
                         procDeleteFile(item.FilePath);
                     else

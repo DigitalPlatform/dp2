@@ -285,6 +285,7 @@ namespace dp2Kernel
             int nRet = app.Users.GetUserSafety(
                 false,
                 this.sessioninfo.UserName,
+                app.CancelToken,
                 out User user,
                 out strError);
             if (nRet != 1)

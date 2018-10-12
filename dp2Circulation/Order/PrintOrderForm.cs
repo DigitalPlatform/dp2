@@ -10447,8 +10447,8 @@ MessageBoxDefaultButton.Button2);
 
                 Debug.Assert(String.IsNullOrEmpty(errorinfo.RefID) == false, "");
 
-                ListViewItem item = null;
-                OriginItemData data = FindDataByRefID(errorinfo.RefID, out item);
+                OriginItemData data = FindDataByRefID(errorinfo.RefID,
+                    out ListViewItem item);
                 if (data == null)
                 {
                     strError = "RefID '" + errorinfo.RefID + "' 居然在原始数据列表中找不到对应的事项";

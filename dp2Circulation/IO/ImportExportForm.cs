@@ -1331,7 +1331,7 @@ new string[] { "重试", "跳过", "中断" });
             if (string.IsNullOrEmpty(strItemBarcode) == false)
                 DomUtil.SetElementText(item_dom.DocumentElement,
                     "barcode",
-                    strItemBarcode + "_" + Guid.NewGuid().ToString());
+                    strItemBarcode + "_" + Guid.NewGuid().ToString().ToUpper());
         }
 
         static bool AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
