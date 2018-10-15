@@ -24,6 +24,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
+using System.Threading.Tasks;
 // using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.Install
@@ -83,6 +84,97 @@ out string strError)
             }
 
             return 1;
+        }
+
+        // return:
+        //      .Value  -1 表示出错。0 表示正确(可能 ErrorInfo 里面依然会有警告字符串)。
+        public static async Task<NormalResult> StopService(
+            IWin32Window owner,
+            string strServiceName)
+        {
+            // dlg.Font = this.Font;
+            //dlg.SourceFilePath = strPath;
+            //dlg.TargetFilePath = strTargetPath;
+            CancellationTokenSource cancel = new CancellationTokenSource();
+            using (FileDownloadDialog dlg = new FileDownloadDialog
+            {
+                Text = "正在停止 " + strServiceName
+            })
+            {
+                dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+                {
+                    cancel.Cancel();
+                });
+                dlg.StartMarquee();
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.Show(owner);
+                ServiceController service = new ServiceController(strServiceName);
+                try
+                {
+                    DateTime start = DateTime.Now;
+                    TimeSpan timeout = TimeSpan.FromMinutes(20);
+
+                    service.Stop();
+
+                    await WaitForStatusAsync(service,
+                        ServiceControllerStatus.Stopped,
+                        timeout,
+                        cancel.Token,
+                        () =>
+                        {
+                            TimeSpan delta = DateTime.Now - start;
+                            dlg.Invoke((Action)(() =>
+                            {
+                                dlg.Text = string.Format("({0}) 正在停止 " + strServiceName, Convert.ToInt64(delta.TotalSeconds));
+                            }));
+                        });
+                    // service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+                }
+                catch (Exception ex)
+                {
+                    if (GetNativeErrorCode(ex) == 1060)
+                    {
+                        return new NormalResult { Value = -1, ErrorInfo = "服务不存在" };
+                    }
+
+                    else if (GetNativeErrorCode(ex) == 1062)
+                    {
+                        return new NormalResult { ErrorInfo = "调用前已经停止了" };
+                    }
+                    else
+                    {
+                        return new NormalResult { Value = -1, ErrorInfo = ExceptionUtil.GetAutoText(ex) };
+                    }
+                }
+
+                return new NormalResult();
+            }
+        }
+
+        public delegate void Delagate_procIdle();
+
+        // https://stackoverflow.com/questions/38236238/how-do-do-an-async-servicecontroller-waitforstatus
+        public static async Task WaitForStatusAsync(ServiceController controller,
+            ServiceControllerStatus desiredStatus,
+            TimeSpan timeout,
+            CancellationToken cancellationToken,
+            Delagate_procIdle procIdle)
+        {
+            var utcNow = DateTime.UtcNow;
+            controller.Refresh();
+            while (controller.Status != desiredStatus)
+            {
+                if (DateTime.UtcNow - utcNow > timeout)
+                {
+                    throw new System.TimeoutException($"Failed to wait for '{controller.ServiceName}' to change status to '{desiredStatus}'.");
+                }
+                await Task.Delay(250, cancellationToken)
+                    .ConfigureAwait(false);
+
+                procIdle?.Invoke();
+
+                controller.Refresh();
+            }
         }
 
         public static int StopService(string strServiceName,

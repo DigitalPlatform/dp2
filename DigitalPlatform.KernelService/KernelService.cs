@@ -181,9 +181,7 @@ namespace dp2Kernel
         {
             strError = "";
 
-            string strIP = "";
-            string strVia = "";
-            GetClientAddress(out strIP, out strVia);
+            GetClientAddress(out string strIP, out string strVia);
 
             sessioninfo = new SessionInfo();
             // return:
@@ -224,6 +222,9 @@ namespace dp2Kernel
                 Debug.Assert(this.app != null, "");
             }
 
+            // 2018/10/14
+            this.app.CancelToken.ThrowIfCancellationRequested();
+
             if (bPrepareSessionInfo == true
                 && this.sessioninfo == null)
             {
@@ -244,7 +245,6 @@ namespace dp2Kernel
         // 准备this.user对象
         int PrepareUser(ref Result result)
         {
-
             this.user = this.GetUser(out string strError);
             if (user == null)
             {
@@ -277,6 +277,14 @@ namespace dp2Kernel
                 strError = "app.Users == null";
                 return null;
             }
+
+            // 2018/10/14
+            if (app.CancelToken.IsCancellationRequested)
+            {
+                strError = "Application 正在 downing ...";
+                return null;
+            }
+
             // 不管UserName对应的用户对象是否在内存, 都可以找到或创建
             // return:
             //      -1  出错

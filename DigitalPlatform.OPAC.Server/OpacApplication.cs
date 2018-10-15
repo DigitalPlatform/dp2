@@ -4331,7 +4331,7 @@ Value data: HEX 0x1
             Color.Transparent,
             Color.Gray,
             ArtEffect.None,
-            ImageFormat.Png,
+            ImageFormat.Png,    // TODO: 可否用 jpeg 格式?
             200))
             {
                 Page.Response.ContentType = "image/png";

@@ -5712,6 +5712,7 @@ namespace dp2Library
             }
         }
 
+        // TODO: 改造，实体库，如果必要可以检索登录号字段
         // 获得一条册、期、订购、评注记录
         // parameters:
         //      strRefID    当 strDbType 为 item 时，strRefID 中是册条码号。其他情况，是 refid 字符串
@@ -5979,6 +5980,8 @@ namespace dp2Library
 
                 if (itemDatabase == null)
                 {
+                    // *** 针对册条码号或者 @xxx: 途径进行检索
+
                     // 获得册记录
                     // 本函数可获得超过1条以上的路径
                     // return:
@@ -5997,15 +6000,56 @@ namespace dp2Library
                             out PathList,
                             out issue_timestamp,
                             out strError);
+                    // 2018/10/15
+                    // 如果需要，从登录号等辅助途径进行检索
+                    if (nRet == 0 && strRefID.StartsWith("@") == false)
+                    {
+                        foreach (string strFrom in app.ItemAdditionalFroms)
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   not found
+                            //      1   命中1条
+                            //      >1  命中多于1条
+                            nRet = app.GetOneItemRec(
+                                channel,
+                                "item",
+                                strRefID,
+                                strFrom,
+                                "xml,timestamp,withresmetadata",
+                                out strXml,
+                                100,
+                                out PathList,
+                                out issue_timestamp,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                // text-level: 内部错误
+                                strError = "用" + strFrom + " '" + strRefID + "' 从途径 '" + strFrom + "' 读入册记录时发生错误: " + strError;
+                                break;
+                            }
+                            if (nRet == 0)
+                                continue;
+                            if (nRet > 1)
+                            {
+                                //result.Value = -1;
+                                //result.ErrorInfo = "用" + strFrom + " '" + strItemBarcode + "' 检索册记录命中 " + nRet.ToString() + " 条，因此无法用" + strFrom + "来进行借还操作。请改用册条码号来进行借还操作。";
+                                //result.ErrorCode = ErrorCode.ItemBarcodeDup;
+                                break;
+                            }
+
+                            // strItemFrom = strFrom;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    List<string> locateParam = null;
 
                     nRet = itemDatabase.BuildLocateParam(
                         // strBiblioRecPath,
                         strRefID,
-                        out locateParam,
+                        out List<string> locateParam,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;

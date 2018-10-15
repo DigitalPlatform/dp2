@@ -940,20 +940,24 @@ namespace DigitalPlatform.CommonControl
 
         private void textBox_856Rights_Validating(object sender, CancelEventArgs e)
         {
+#if NO
             if (this.textBox_856Rights.Text.IndexOfAny(new char[] { ';', ':' }) != -1)
             {
                 MessageBox.Show(this, "856 权限字符串里不允许出现分号和冒号");
                 e.Cancel = true;
             }
+#endif
         }
 
         private void textBox_objectRights_Validating(object sender, CancelEventArgs e)
         {
+#if NO
             if (this.textBox_objectRights.Text.IndexOfAny(new char[] { ';', ':' }) != -1)
             {
                 MessageBox.Show(this, "对象权限字符串里不允许出现分号和冒号");
                 e.Cancel = true;
             }
+#endif
         }
 
         /// <summary>

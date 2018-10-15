@@ -245,6 +245,7 @@ namespace dp2Library
         }
 #endif
 
+#if NO
         void CloseHosts()
         {
             List<HostInfo> infos = new List<HostInfo>();
@@ -273,6 +274,59 @@ namespace dp2Library
                 Task.WaitAll(tasks.ToArray());
             }
         }
+#endif
+
+        static string GetTime()
+        {
+            return DateTime.Now.ToLongTimeString() + " ";
+        }
+
+        void CloseHosts()
+        {
+            StringBuilder debugInfo = new StringBuilder();
+
+            debugInfo.AppendFormat("{0}开始停止 {1} 个 host\r\n", GetTime(), this.m_hosts.Count);
+
+            List<Task> tasks = new List<Task>();
+            List<HostInfo> infos = new List<HostInfo>();
+            {
+                foreach (ServiceHost host in this.m_hosts)
+                {
+                    HostInfo info = host.Extensions.Find<HostInfo>();
+                    if (info != null)
+                    {
+                        infos.Add(info);
+                        host.Extensions.Remove(info);
+                    }
+                    tasks.Add(Task.Factory.FromAsync(host.BeginClose, host.EndClose, null));
+                }
+
+                this.m_hosts.Clear();
+            }
+
+            // 用多线程集中 Dispose()
+            if (infos.Count > 0)
+            {
+                foreach (HostInfo info in infos)
+                {
+                    Task.Run(() => info.Dispose());
+                }
+            }
+
+            // Task.WaitAll(tasks.ToArray());
+
+            int timeout = 10000;
+            while (!Task.WaitAll(tasks.ToArray(), timeout))
+            {
+                RequestAdditionalTime(timeout);
+            }
+
+            debugInfo.AppendFormat("{0}完成停止 hosts\r\n", GetTime());
+
+            this.Log.WriteEntry("dp2Library CloseHosts() debugInfo: \r\n" + debugInfo.ToString(),
+EventLogEntryType.Information);
+        }
+
 
         // 关闭一个指定的 host
         // return:
