@@ -16,6 +16,64 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        /// <summary>
+        /// 检测一个列表字符串是否包含一个具体的值
+        /// </summary>
+        /// <param name="strList">列表字符串。用逗号分隔多个子串</param>
+        /// <param name="strOne">要检测的一个具体的值</param>
+        /// <returns>false 没有包含; true 包含</returns>
+        public static bool Contains(string strList, string strOne, char delimeter = ',')
+        {
+            if (string.IsNullOrEmpty(strList) == true)
+                return false;
+            string[] list = strList.Split(new char[] { delimeter }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in list)
+            {
+                if (strOne == s)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 查找符合特定前缀的参数。增强版本，能处理 :username, operation:username, 这样的形态
+        // parameters:
+        //      strPrefix 前缀。例如 "getreaderinfo"
+        //      strDelimiter    前缀和后面参数的分隔符号。例如 ":"
+        // return:
+        //      null    没有找到前缀
+        //      ""      找到了前缀，并且值部分为空
+        //      其他     返回值部分
+        public static string GetParameterByPrefixEnvironment(string strList,
+            string strPrefix,
+            string strDelimiter = ":",
+            char segChar = ',')
+        {
+            if (string.IsNullOrEmpty(strList) == true)
+                return null;
+            string environment = "";    // 当前环境值
+            string[] list = strList.Split(new char[] { segChar }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in list)
+            {
+                if (s.StartsWith(strDelimiter) == true)
+                {
+                    environment = s.Substring(strDelimiter.Length);
+                    continue;
+                }
+                if (s.StartsWith(strPrefix + strDelimiter) == true)
+                {
+                    string value = s.Substring(strPrefix.Length + strDelimiter.Length);
+                    if (string.IsNullOrEmpty(value) == false)
+                        return value;
+                    return environment;
+                }
+                if (s == strPrefix)
+                    return environment;
+            }
+
+            return null;
+        }
+
         // 比较两个一般价格字符串。形态为 "CNY12.00+USD20.00"
         public static int ComparePrice(string s1, string s2)
         {

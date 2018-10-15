@@ -216,7 +216,7 @@ namespace DigitalPlatform.rms
                 // eventFinished.Set();
                 this.WriteErrorLog("管理线程正常结束");
             }
-            catch(System.OperationCanceledException)
+            catch (System.OperationCanceledException)
             {
                 this.WriteErrorLog("管理线程被中断");
             }
@@ -592,9 +592,24 @@ namespace DigitalPlatform.rms
 
             eventClose.Set();	// 令工作线程退出
 
+            // 2018/10/14
+            // 停止所有后台批处理任务
+            if (this.BatchTasks != null)
+            {
+                try
+                {
+                    this.StopAllBatchTasks();
+                    this.BatchTasks = null;
+                }
+                catch (Exception ex)
+                {
+                    this.WriteErrorLog("StopAllBatchTasks() 异常: " + ExceptionUtil.GetDebugText(ex));
+                }
+            }
+
             // 等待工作线程真正退出
             // 因为可能正在回写数据库
-            eventFinished.WaitOne(5000, false); // 最多5秒
+            eventFinished.WaitOne(5000, false); // 最多 5 秒
 
             if (this.Dbs != null)
             {
@@ -604,7 +619,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    this.WriteErrorLog("Dbs Close() error : " + ex.Message);
+                    this.WriteErrorLog("Dbs Close() 出现异常 : " + ExceptionUtil.GetDebugText(ex));
                 }
                 // this.Dbs.WriteErrorLog("在GlobalInfo.Close()处保存database.xml");
             }
@@ -619,7 +634,7 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                this.WriteErrorLog("Users Close() error : " + ex.Message);
+                this.WriteErrorLog("Users Close() 异常: " + ExceptionUtil.GetDebugText(ex));
             }
 
             // TODO: 可以考虑把结果集临时文件目录改名，然后等下次启动时候来后台删除里面的文件

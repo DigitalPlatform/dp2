@@ -3709,7 +3709,7 @@ nsmgr);
                     continue;
 
                 // 对象是否允许被获取?
-                if (CanGet(strUserRights, strObjectRights) == false)
+                if (CanGet("download", strUserRights, strObjectRights) == false)
                 {
                     field.Content += strMaskChar;
                     nCount++;
@@ -3758,7 +3758,7 @@ nsmgr);
                     continue;
 
                 // 对象是否允许被获取?
-                if (CanGet(strUserRights, strObjectRights) == false)
+                if (CanGet("download", strUserRights, strObjectRights) == false)
                     delete_fields.Add(field);
             }
 

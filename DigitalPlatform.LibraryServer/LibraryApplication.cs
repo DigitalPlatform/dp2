@@ -4218,15 +4218,18 @@ namespace DigitalPlatform.LibraryServer
             XmlElement database = this.LibraryCfgDom.DocumentElement.SelectSingleNode("authdbgroup/database[@name='" + strBiblioDbName + "']") as XmlElement;
             if (database == null)
                 return null;
-            return new ItemDbCfg { DbName = database.GetAttribute("name"),
-            BiblioDbSyntax = database.GetAttribute("syntax")};
+            return new ItemDbCfg
+            {
+                DbName = database.GetAttribute("name"),
+                BiblioDbSyntax = database.GetAttribute("syntax")
+            };
         }
 
         public List<string> GetAuthorityDbNames()
         {
             List<string> results = new List<string>();
             XmlNodeList databases = this.LibraryCfgDom.DocumentElement.SelectNodes("authdbgroup/database");
-            foreach(XmlElement database in databases)
+            foreach (XmlElement database in databases)
             {
                 results.Add(database.GetAttribute("name"));
             }
@@ -14700,7 +14703,10 @@ strLibraryCode);    // 读者所在的馆代码
                         if (string.IsNullOrEmpty(strObjectRights) == true)
                             goto ALLOW_ACCESS;   // 没有定义 rights 的对象是允许任何访问者来获取的
 
-                        if (CanGet(strRights, strObjectRights) == true)
+                        string strOperation = "download";
+                        if (string.IsNullOrEmpty(strPartCmd) == false)
+                            strOperation = "preview";
+                        if (CanGet(strOperation, strRights, strObjectRights) == true)
                             goto ALLOW_ACCESS;
 
                         strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
@@ -14819,18 +14825,40 @@ strLibraryCode);    // 读者所在的馆代码
             return false;
         }
 
-        // 对象是否允许被获取?
-        public static bool CanGet(string strUserRights, string strObjectRights)
+        // 对象是否允许执行某个操作?
+        // parameters:
+        //      strOperation   要查询的操作。为 download preview write 之一。默认 download
+        //      strObjectRights 对象权限定义。原始定义
+        //              简单用法: user1,user2   代表 user1 和 user2 同时具备所有操作(例如 download 和 preview 等)权限
+        //              详尽用法: download:user1,user2;preview:user3,user4
+        public static bool CanGet(string strOperation,
+            string strGroupOrLevels,
+            string strObjectRights)
         {
-            string[] users = strUserRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] objects = strObjectRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            // strRights 存放(从原始定义)过滤以后的权限，即针对特定操作的权限
+            string strRights = strObjectRights;
+            // 如果是详尽用法，要
+            // 把权限字符串中其它无关 strOperation 的部分滤除，只剩下需要关注的部分
+            if (strRights.IndexOf(":") != -1)
+            {
+                // return:
+                //      null    没有找到前缀
+                //      ""      找到了前缀，并且值部分为空
+                //      其他     返回值部分
+                strRights = StringUtil.GetParameterByPrefixEnvironment(strObjectRights, strOperation, ":", ';');
+                if (strRights == null)
+                    strRights = "";
+            }
+
+            string[] groups = strGroupOrLevels.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] objects = strRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string o in objects)
             {
-                if (IndexOf(users, o) != -1)
+                if (IndexOf(groups, o) != -1)
                     return true;
                 if (StringUtil.HasHead(o, "level-") == true)
                 {
-                    if (HasLevel(o, users) == true)
+                    if (HasLevel(o, groups) == true)
                         return true;
                 }
             }
@@ -15164,7 +15192,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         internal XmlElement _xmlNode = null;  // library.xml 配置文件中相关小节
 
-        private string loginName = "";   
+        private string loginName = "";
         // 登录名 带有前缀的各种渠道的登录名字
         public string LoginName { get => loginName; set => loginName = value; }
 
@@ -15199,15 +15227,15 @@ strLibraryCode);    // 读者所在的馆代码
             }
         }
 
-        private string accountLibraryCode = ""; 
+        private string accountLibraryCode = "";
         // 2007/12/15 
         public string AccountLibraryCode { get => accountLibraryCode; set => accountLibraryCode = value; }
 
-        private string access = "";  
+        private string access = "";
         // 存取权限代码 2008/2/28 
         public string Access { get => access; set => access = value; }
 
-        private string userID = "";  
+        private string userID = "";
         // 用户唯一标识。对于读者，这就是证条码号
         public string UserID { get => userID; set => userID = value; }
 

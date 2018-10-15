@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +10,6 @@ using System.IO;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Range;
-using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms
 {
@@ -44,7 +42,6 @@ namespace DigitalPlatform.rms
                 m_nInSearching = value;
             }
         }
-
 
         public int BeginSearch()
         {

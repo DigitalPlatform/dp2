@@ -67,8 +67,17 @@ namespace dp2Circulation
             this.Close();
             _sr = reader;
             this.m_nPageNo = 0;
-            _copyCache.Clear();
+            ClearCopyCache();
             return 0;
+        }
+
+        CopyCache _cache = new CopyCache();
+
+        void ClearCopyCache()
+        {
+            //_copyCache.Clear();
+            //_current_offset = 0;
+            _cache.Clear();
         }
 
         public int Open(string strLabelFilename,
@@ -88,7 +97,7 @@ namespace dp2Circulation
             }
 
             this.m_nPageNo = 0;
-            _copyCache.Clear();
+            ClearCopyCache();
 
             /*
             this.BeginPrint -= new PrintEventHandler(PrintLabelDocument_BeginPrint);
@@ -107,7 +116,7 @@ namespace dp2Circulation
                 this._sr.BaseStream.Seek(0, SeekOrigin.Begin);
             }
             this.m_nPageNo = 0;
-            _copyCache.Clear();
+            ClearCopyCache();
         }
 
         void PrintLabelDocument_BeginPrint(object sender,
@@ -125,9 +134,107 @@ namespace dp2Circulation
             }
         }
 
-        // 复制品集合
-        List<List<string>> _copyCache = new List<List<string>>();
+        public class CopyCache
+        {
+            // 复制品集合
+            public List<List<string>> _copyCache = new List<List<string>>();
+            public int _current_offset = 0;
+            public List<string> Lines { get; set; }
+            public bool EOF { get; set; }
 
+            public CopyCache()
+            {
+                Lines = new List<string>();
+            }
+
+            public void Clear()
+            {
+                _current_offset = 0;
+                _copyCache.Clear();
+                Lines = new List<string>();
+                EOF = false;
+            }
+        }
+
+        // parameters:
+        //      nCopyOffset 第一次调用前要设置为 0
+        // return:
+        //      -1  error
+        //      0   normal
+        //      1   reach file end
+        public int GetLabelLines(
+            int nCopies,
+            ref CopyCache cache,
+            out string strError)
+        {
+            strError = "";
+
+            if (nCopies <= 0)
+            {
+                strError = $"nCopies 参数必须大于等于 1 (然而现在是 {nCopies})";
+                return -1;
+            }
+            if (cache._current_offset < 0)
+            {
+                strError = $"nCopyOffset 参数必须大于等于 0 (然而现在是 {cache._current_offset})";
+                return -1;
+            }
+
+            bool bFirst = _sr.BaseStream.Position == 0;
+
+            Debug.Assert(nCopies >= 1, "");
+            Debug.Assert(cache._current_offset >= 0, "");
+
+            if (cache._copyCache.Count == 0
+                || cache._current_offset >= cache._copyCache.Count)
+            {
+                REDO:
+                // 重新获得 cache
+                // return:
+                //      -1  error
+                //      0   normal
+                //      1   reach file end
+                int nRet = _getLabelLines(
+                    out List<string> lines,
+                    out strError);
+
+                cache.Lines = lines;    // 记忆
+
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == 1)
+                    cache.EOF = true;   // 表示已经到达文件末尾
+
+                if (bFirst && lines.Count == 0)
+                    goto REDO;
+
+                // 2018/10/15
+                if (nRet == 1 && lines.Count == 0)
+                    return 1;
+
+                // 加入 _copyCache
+                cache._copyCache.Clear();
+                for (int i = 0; i < nCopies; i++)
+                {
+                    cache._copyCache.Add(lines);
+                }
+
+                cache._current_offset = 1;
+                // return nRet;
+            }
+            else
+            {
+                cache.Lines = cache._copyCache[cache._current_offset];
+                cache._current_offset++;
+            }
+
+            if (cache.EOF && cache._current_offset >= cache._copyCache.Count)
+                return 1;   // 倒数第一个 item，让调用者感知到已经到达文件末尾
+            return 0;
+        }
+
+#if NO
         // parameters:
         //      nCopyOffset 第一次调用前要设置为 0
         // return:
@@ -142,6 +249,17 @@ namespace dp2Circulation
         {
             lines = new List<string>();
             strError = "";
+
+            if (nCopies <= 0)
+            {
+                strError = $"nCopies 参数必须大于等于 1 (然而现在是 {nCopies})";
+                return -1;
+            }
+            if (nCopyOffset < 0)
+            {
+                strError = $"nCopyOffset 参数必须大于等于 0 (然而现在是 {nCopyOffset})";
+                return -1;
+            }
 
             bool bFirst = _sr.BaseStream.Position == 0;
 
@@ -167,6 +285,10 @@ namespace dp2Circulation
                 if (bFirst && lines.Count == 0)
                     goto REDO;
 
+                // 2018/10/15
+                if (nRet == 1 && lines.Count == 0)
+                    return 1;
+
                 // 加入 _copyCache
                 _copyCache.Clear();
                 for (int i = 0; i < nCopies; i++)
@@ -175,13 +297,15 @@ namespace dp2Circulation
                 }
 
                 nCopyOffset = 1;
-                return nRet;
+                // return nRet;
+                return 0;
             }
 
             lines = _copyCache[nCopyOffset];
             nCopyOffset++;
             return 0;
         }
+#endif
 
         // return:
         //      -1  error
@@ -473,8 +597,8 @@ namespace dp2Circulation
                 / (double)label_param.LabelWidth
                 );
 
-            int current_offset = 0;
-            _copyCache.Clear();
+            // int current_offset = 0;
+            // _copyCache.Clear();
 
             int from = 0;
             int to = 0;
@@ -509,11 +633,11 @@ namespace dp2Circulation
                             // 每一列的循环
                             for (int j = 0; j < nXCount; j++)
                             {
-                                List<string> lines = null;
                                 nRet = this.GetLabelLines(
                                     nCopies,
-                                    ref current_offset,
-                                    out lines,
+                                    ref _cache,
+                                    //ref this._current_offset,
+                                    //out List<string> lines,
                                     out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
@@ -523,6 +647,8 @@ namespace dp2Circulation
                                     e.Cancel = true;
                                     return;
                                 }
+
+                                List<string> lines = _cache.Lines;
 
                                 if (lines.Count > 0 && lines[0] == "{newPage}")
                                 {
@@ -796,17 +922,19 @@ namespace dp2Circulation
                     // 每一列的循环
                     for (int j = 0; j < nXCount; j++)
                     {
-                        List<string> lines = null;
                         nRet = this.GetLabelLines(
                             nCopies,
-                            ref current_offset,
-                            out lines,
+                            ref _cache,
+                            //ref this._current_offset,
+                            //out List<string> lines,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
                         if (nRet == 1)
                             bEOF = true;
+
+                        List<string> lines = _cache.Lines;
 
                         if (lines.Count > 0 && lines[0] == "{newPage}")
                         {
