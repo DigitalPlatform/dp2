@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -68,7 +69,7 @@ namespace dp2Circulation
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -244,6 +245,34 @@ namespace dp2Circulation
         private void textBox_biblioDumpFileName_TextChanged(object sender, EventArgs e)
         {
             AutoBuildObjectDirectoryName(true);
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_biblioDumpFileName);
+                controls.Add(this.checkBox_includeEntities);
+                controls.Add(this.checkBox_includeOrders);
+                controls.Add(this.checkBox_includeIssues);
+                controls.Add(this.checkBox_includeComments);
+                controls.Add(this.checkBox_includeObjectFile);
+                controls.Add(this.textBox_objectDirectoryName);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_biblioDumpFileName);
+                controls.Add(this.checkBox_includeEntities);
+                controls.Add(this.checkBox_includeOrders);
+                controls.Add(this.checkBox_includeIssues);
+                controls.Add(this.checkBox_includeComments);
+                controls.Add(this.checkBox_includeObjectFile);
+                controls.Add(this.textBox_objectDirectoryName);
+                GuiState.SetUiState(controls, value);
+            }
         }
     }
 }

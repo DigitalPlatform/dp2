@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Web;
-using System.Diagnostics;
 using System.Xml;
 using System.Reflection;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.Script
@@ -567,7 +564,8 @@ namespace DigitalPlatform.Script
         // 公开注释 $z
         public static string BuildObjectXmlTable(string strMARC,
             // string strRecPath,
-            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.None)
+            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.None,
+            string strMarcSyntax = "unimarc")
         {
             // Debug.Assert(false, "");
 
@@ -611,12 +609,30 @@ namespace DigitalPlatform.Script
                     strSaveAs = "true";
                 }
 
+#if NO
                 string y = field.select("subfield[@name='y']").FirstContent;
                 string f = field.select("subfield[@name='f']").FirstContent;
 
                 string urlLabel = "";
                 if (string.IsNullOrEmpty(y) == false)
                     urlLabel = y;
+                else
+                    urlLabel = f;
+                if (string.IsNullOrEmpty(urlLabel) == true)
+                    urlLabel = strType;
+#endif
+                string linkText = "";
+
+                if (strMarcSyntax == "unimarc")
+                    linkText = field.select("subfield[@name='2']").FirstContent;
+                else
+                    linkText = field.select("subfield[@name='y']").FirstContent;
+
+                string f = field.select("subfield[@name='f']").FirstContent;
+
+                string urlLabel = "";
+                if (string.IsNullOrEmpty(linkText) == false)
+                    urlLabel = linkText;
                 else
                     urlLabel = f;
                 if (string.IsNullOrEmpty(urlLabel) == true)

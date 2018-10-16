@@ -1185,7 +1185,7 @@ namespace DigitalPlatform.OPAC.Web
                 sessioninfo.ReturnChannel(channel);
             }
 
-        ERROR1:
+            ERROR1:
             // output.Write(strError);
             // 2011/4/21
             this.SetDebugInfo("errorinfo", strError);
@@ -1641,16 +1641,25 @@ namespace DigitalPlatform.OPAC.Web
             // string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
             // strState = strMessageText + strState;
+#if NO
             string strStateMessage = DomUtil.GetElementText(dom.DocumentElement,
                 "stateMessage");
             if (String.IsNullOrEmpty(strStateMessage) == false)
                 strState = strStateMessage;
+#endif
+            if (bCanBorrow == false)
+                strState += "[不可借]";
 
             if (bMember == true)
                 StringUtil.SetInList(ref strState, "已装入合订册", true);
 
             if (this.m_hidecolumns.IndexOf("state") == -1)
-                strResult += "<td class='state'>" + (strState == "" ? "&nbsp;" : strState) + "</td>";
+            {
+                string strFragment = (strState == "" ? "&nbsp;" : strState);
+                if (string.IsNullOrEmpty(strCanBorrowText) == false)
+                    strFragment = "<a title='" + HttpUtility.HtmlEncode(strCanBorrowText) + "'>" + strFragment + "</a>";
+                strResult += "<td class='state'>" + strFragment + "</td>";
+            }
 
             // 馆藏地
 
@@ -2017,10 +2026,10 @@ namespace DigitalPlatform.OPAC.Web
                     // 对于读者，隐去除自己以外的其他人的证条码号
                     if (loginstate == LoginState.NotLogin
                         || loginstate == LoginState.Public  // 2009/4/10
-                        /*sessioninfo.Account == null*/
+                                                            /*sessioninfo.Account == null*/
                         || (loginstate == LoginState.Reader
-                        /*sessioninfo.Account != null
-                        && sessioninfo.Account.Type == "reader"*/
+                            /*sessioninfo.Account != null
+                            && sessioninfo.Account.Type == "reader"*/
                             && bMyselfReserver == false))
                     {
                         int nLength = strReader.Length;
@@ -2075,7 +2084,7 @@ namespace DigitalPlatform.OPAC.Web
 
             right.Text = strResult;
             return;
-        ERROR1:
+            ERROR1:
             // tempOutput += strError;
             this.Page.Response.Write(strError);
         }

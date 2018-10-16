@@ -213,6 +213,10 @@
     <value>The location of item {0} is '{1}'. The items in this    location are reserved collection. (follow &lt;locationTypes&gt; defines)</value>
     <comment>AppCirculation.cs</comment>
   </data>
+  <data name="册s的馆藏地点为s，不允许外借:s" xml:space="preserve">
+    <value>The location of item {0} is '{1}'. The items in this location are reserved collection. reason: {2}</value>
+    <comment>AppCirculation.cs</comment>
+  </data>
   <data name="册条码号s不存在" xml:space="preserve">
     <value>The barcode {0} for the item does not exist.</value>
     <comment>AppReservation.cs</comment>

@@ -301,6 +301,12 @@ namespace DigitalPlatform.Marc
             this.m_list.Insert(nInsertPos, node);
         }
 
+        /// <summary>
+        /// 向当前集合中添加一个节点元素，按节点名字顺序决定加入的位置。寻找位置的算法是从集合尾部向开头寻找
+        /// </summary>
+        /// <param name="node">要加入的节点</param>
+        /// <param name="style">如何加入</param>
+        /// <param name="comparer">用于比较大小的接口</param>
         public virtual void insertSequenceReverse(MarcNode node,
     InsertSequenceStyle style = InsertSequenceStyle.PreferHead,
     IComparer<MarcNode> comparer = null)
@@ -656,6 +662,9 @@ namespace DigitalPlatform.Marc
         }
 
         // 2016/12/14
+        /// <summary>
+        /// 获得当前集合中全部节点的 Content 值拼接起来的字符串
+        /// </summary>
         public List<string> Contents
         {
             get

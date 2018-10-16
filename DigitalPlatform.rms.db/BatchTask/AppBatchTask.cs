@@ -1,24 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using System.Text;
-using System.Reflection;
-using System.Threading;
-using System.Diagnostics;
-using System.Runtime.Serialization;
 
-using System.ServiceModel;
-
-//using DigitalPlatform;
-//using DigitalPlatform.rms;
-//using DigitalPlatform.IO;
-//using DigitalPlatform.Xml;
-//using DigitalPlatform.Text;
-//using DigitalPlatform.ResultSet;
 using DigitalPlatform.IO;
-using DigitalPlatform.ResultSet;
 
 namespace DigitalPlatform.rms
 {
@@ -101,6 +86,7 @@ namespace DigitalPlatform.rms
             }
         }
 
+        // 停止所有批处理任务
         public void StopAllBatchTasks()
         {
             for (int i = 0; i < this.BatchTasks.Count; i++)

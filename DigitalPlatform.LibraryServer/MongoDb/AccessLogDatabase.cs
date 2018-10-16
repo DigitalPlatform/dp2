@@ -12,6 +12,7 @@ using MongoDB.Driver.Builders;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -554,7 +555,7 @@ return { None : '' };
         public DateTime OperTime { get; set; } // 操作时间
     }
 
-    class DailyItemCount
+    public class DailyItemCount
     {
         private static readonly Object syncRoot = new Object();
 
@@ -585,5 +586,70 @@ return { None : '' };
                 this.Count = lValue;
             }
         }
+    }
+
+    public class DailyItemCountTable
+    {
+        public int MAX_COUNT = 1000;
+        internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        Dictionary<string, DailyItemCount> _table = new Dictionary<string, DailyItemCount>();
+
+        public DailyItemCount FindItem(string name)
+        {
+            _lock.EnterReadLock();
+            try
+            {
+                if (_table.ContainsKey(name) == false)
+                    return null;
+                return _table[name];
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
+        public DailyItemCount GetItem(string name)
+        {
+            DailyItemCount item = FindItem(name);
+            if (item != null)
+                return item;
+
+            _lock.EnterWriteLock();
+            try
+            {
+                if (_table.ContainsKey(name))
+                    return _table[name];
+                if (_table.Count > MAX_COUNT)
+                    throw new Exception("DailyItem 数量超过 " + MAX_COUNT);
+
+                item = new DailyItemCount();
+                _table.Add(name, item);
+                return item;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+        }
+
+        public long GetValue(string name,
+            string strDate,
+            int nInc)
+        {
+            DailyItemCount item = GetItem(name);
+
+            return item.GetValue(strDate, nInc);
+        }
+
+        public void SetValue(string name,
+            string strDate, 
+            long lValue)
+        {
+            DailyItemCount item = GetItem(name);
+
+            item.SetValue(strDate, lValue);
+        }
+
     }
 }

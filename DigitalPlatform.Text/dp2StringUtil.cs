@@ -395,13 +395,15 @@ out string strPureName);
         // parameters:
         // return:
         //      -1  出错
-        //      0   超过管辖范围。strError中有解释
+        //      0   超过管辖范围(至少出现一处超过范围)。strError中有解释
         //      1   在管辖范围内
         public static int DistributeInControlled(string strDistribute,
             string strLibraryCodeList,
+            out bool bAllOutOf,
             out string strError)
         {
             strError = "";
+            bAllOutOf = false;
 
             //      bNarrow 如果为 true，表示 馆代码 "" 只匹配总馆，不包括各个分馆；如果为 false，表示 馆代码 "" 匹配总馆和所有分馆
             bool bNarrow = strLibraryCodeList == "[仅总馆]";
@@ -427,13 +429,16 @@ out string strPureName);
                 return -1;
             }
 
+            List<string> outof_list = new List<string>();
             foreach (Location location in locations)
             {
                 // 空的馆藏地点被视为不在分馆用户管辖范围内
                 if (bNarrow == false && string.IsNullOrEmpty(location.Name) == true)
                 {
-                    strError = "馆代码 '' 不在范围 '" + strLibraryCodeList + "' 内";
-                    return 0;
+                    //strError = "馆代码 '' 不在范围 '" + strLibraryCodeList + "' 内";
+                    //return 0;
+                    outof_list.Add("");
+                    continue;
                 }
 
                 // 解析
@@ -446,9 +451,18 @@ out string strPureName);
 
                 if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
                 {
-                    strError = "馆代码 '" + strLibraryCode + "' 不在范围 '" + strLibraryCodeList + "' 内";
-                    return 0;
+                    //strError = "馆代码 '" + strLibraryCode + "' 不在范围 '" + strLibraryCodeList + "' 内";
+                    //return 0;
+                    outof_list.Add(strLibraryCode);
                 }
+            }
+
+            if (outof_list.Count > 0)
+            {
+                strError = "馆代码 '" + StringUtil.MakePathList(outof_list) + "' 不在范围 '" + strLibraryCodeList + "' 内";
+                if (outof_list.Count == locations.Count)
+                    bAllOutOf = true;
+                return 0;
             }
 
             return 1;

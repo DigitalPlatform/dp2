@@ -739,7 +739,7 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (bReload == false)
             {
                 if (this.watcher == null)
@@ -1265,7 +1265,7 @@ namespace DigitalPlatform.OPAC.Server
 
             this.m_fromTable[strKey] = infos;
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1357,15 +1357,14 @@ namespace DigitalPlatform.OPAC.Server
                         }
                     }
 
-                    string strValue = "";
                     lRet = // session.Channel.
                         channel.GetSystemParameter(
                         null,
                         "circulation",
                         "chargingOperDatabase",
-                        out strValue,
+                        out string strValue,
                         out strError);
-                    this.WriteErrorLog("GetSystemParameters() circulation chargingOperDatabase return " + lRet + " , strError '" + strError + "'");
+                    this.WriteErrorLog("GetSystemParameters() circulation chargingOperDatabase return " + lRet + " , strValue '" + strValue + "', strError '" + strError + "'。(这是一条提示信息，不一定等于出错)");
                     if (strValue == "enabled")
                         this.ChargingHistoryType = strValue;
                     else
@@ -1596,7 +1595,7 @@ namespace DigitalPlatform.OPAC.Server
                 this.m_lock.ReleaseWriterLock();
             }
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2101,7 +2100,7 @@ System.Text.Encoding.UTF8))
                 }
 
                 int nRedoCount = 0;
-            REDO:
+                REDO:
                 XmlDocument webuidom = new XmlDocument();
                 try
                 {
@@ -3715,14 +3714,14 @@ System.Text.Encoding.UTF8))
 
                 string strLocalPath = postedFile.FileName;
 
-            // page.Response.Write("<br/>正在保存" + strLocalPath);
+                // page.Response.Write("<br/>正在保存" + strLocalPath);
 
-            REDOWHOLESAVE:
+                REDOWHOLESAVE:
                 string strWarning = "";
 
                 for (int j = 0; j < ranges.Length; j++)
                 {
-                REDOSINGLESAVE:
+                    REDOSINGLESAVE:
 
                     // Application.DoEvents();	// 出让界面控制权
 
@@ -3801,8 +3800,8 @@ out strError);
                 }
 
 
-                return 1;	// 已经保存
-            ERROR1:
+                return 1;   // 已经保存
+                ERROR1:
                 return -1;
             }
             finally
@@ -4332,7 +4331,7 @@ Value data: HEX 0x1
             Color.Transparent,
             Color.Gray,
             ArtEffect.None,
-            ImageFormat.Png,
+            ImageFormat.Png,    // TODO: 可否用 jpeg 格式?
             200))
             {
                 Page.Response.ContentType = "image/png";

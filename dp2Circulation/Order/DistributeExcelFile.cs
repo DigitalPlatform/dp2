@@ -289,6 +289,7 @@ context.ContentEndRow + 1 + 1, context.DistributeEndColumn + 1);
                 //      1   在管辖范围内
                 int nRet = dp2StringUtil.DistributeInControlled(strDistribute,
                     strLibraryCode,
+                    out bool bAllOutOf,
                     out string strError);
                 if (nRet == -1)
                     throw new Exception(strError);
@@ -703,9 +704,13 @@ out copyNumberCell);
         }
 
         // 根据分馆身份过滤馆藏地列表。并在列表末尾自动添加空馆藏地事项
-        public static List<string> FilterLocationList(List<string> location_list, string strLibraryCode)
+        public static List<string> FilterLocationList(List<string> location_list,
+            string strLibraryCode)
         {
             location_list = dp2StringUtil.FilterLocationList(location_list, strLibraryCode);
+            if (location_list.Count == 0)
+                return location_list;
+
             // 增加 (空) 这一项
             string strBlank = Order.DistributeExcelFile.NULL_LOCATION_CAPTION;
             if (string.IsNullOrEmpty(strLibraryCode) == false && strLibraryCode != "[仅总馆]")

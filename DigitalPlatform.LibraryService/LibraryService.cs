@@ -2511,7 +2511,7 @@ namespace dp2Library
                 }
 
                 string strBack = DomUtil.GetElementText(readerdom.DocumentElement, "friends");
-                string strTo = DomUtil.GetElementText(sessioninfo.Account.ReaderDom.DocumentElement, "friends");
+                string strTo = DomUtil.GetElementText(sessioninfo.Account?.PatronDom?.DocumentElement, "friends");
 
                 if (StringUtil.IsInList(strReaderBarcode, strTo) == true
                     && StringUtil.IsInList(sessioninfo.UserID, strBack) == true)
@@ -5712,6 +5712,7 @@ namespace dp2Library
             }
         }
 
+        // TODO: 改造，实体库，如果必要可以检索登录号字段
         // 获得一条册、期、订购、评注记录
         // parameters:
         //      strRefID    当 strDbType 为 item 时，strRefID 中是册条码号。其他情况，是 refid 字符串
@@ -5979,6 +5980,8 @@ namespace dp2Library
 
                 if (itemDatabase == null)
                 {
+                    // *** 针对册条码号或者 @xxx: 途径进行检索
+
                     // 获得册记录
                     // 本函数可获得超过1条以上的路径
                     // return:
@@ -5997,15 +6000,56 @@ namespace dp2Library
                             out PathList,
                             out issue_timestamp,
                             out strError);
+                    // 2018/10/15
+                    // 如果需要，从登录号等辅助途径进行检索
+                    if (nRet == 0 && strRefID.StartsWith("@") == false)
+                    {
+                        foreach (string strFrom in app.ItemAdditionalFroms)
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   not found
+                            //      1   命中1条
+                            //      >1  命中多于1条
+                            nRet = app.GetOneItemRec(
+                                channel,
+                                "item",
+                                strRefID,
+                                strFrom,
+                                "xml,timestamp,withresmetadata",
+                                out strXml,
+                                100,
+                                out PathList,
+                                out issue_timestamp,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                // text-level: 内部错误
+                                strError = "用" + strFrom + " '" + strRefID + "' 从途径 '" + strFrom + "' 读入册记录时发生错误: " + strError;
+                                break;
+                            }
+                            if (nRet == 0)
+                                continue;
+                            if (nRet > 1)
+                            {
+                                //result.Value = -1;
+                                //result.ErrorInfo = "用" + strFrom + " '" + strItemBarcode + "' 检索册记录命中 " + nRet.ToString() + " 条，因此无法用" + strFrom + "来进行借还操作。请改用册条码号来进行借还操作。";
+                                //result.ErrorCode = ErrorCode.ItemBarcodeDup;
+                                break;
+                            }
+
+                            // strItemFrom = strFrom;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
-                    List<string> locateParam = null;
 
                     nRet = itemDatabase.BuildLocateParam(
                         // strBiblioRecPath,
                         strRefID,
-                        out locateParam,
+                        out List<string> locateParam,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -12102,18 +12146,32 @@ Stack:
                 StringUtil.ParseObjectPath(strResPath,
                     out strXmlRecPath,
                     out strObjectID);
-                if (app.GetObjectWriteToOperLog == true
-                    && StringUtil.IsInList("skipLog", strStyle) == false
+                if (// app.GetObjectWriteToOperLog == true &&
+                    StringUtil.IsInList("skipLog", strStyle) == false
                     && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
                     && string.IsNullOrEmpty(strObjectID) == false
                     && StringUtil.IsInList("data", strStyle) == true)
                 {
-                    bWriteLog = true;
-                    // 为了获得对象的大小信息，需要得到 metadata
-                    if (StringUtil.IsInList("metadata", strStyle) == false)
+                    if (app.GetObjectWriteToOperLog == true)
                     {
-                        StringUtil.SetInList(ref strStyle, "metadata", true);
-                        bClearMetadata = true;
+                        bWriteLog = true;
+                        // 为了获得对象的大小信息，需要得到 metadata
+                        if (StringUtil.IsInList("metadata", strStyle) == false)
+                        {
+                            StringUtil.SetInList(ref strStyle, "metadata", true);
+                            bClearMetadata = true;
+                        }
+                    }
+                    else
+                    {
+                        // 限制最大事项数
+                        string date = DateTimeUtil.DateTimeToString8(DateTime.Now);
+                        long newValue = app.DailyItemCountTable.GetValue("warning_getres", date, 1);
+                        if (newValue <= 1)
+                        {
+                            // 希望写入存取日志，但 library.xml 中的 object/@writeGetResOperLog 属性值为 false，此时需要记入错误日志表示警告
+                            app.WriteErrorLog("警告：有前端请求 GetRes()，希望连带写入存取日志，但 library.xml 中的 object/@writeGetResOperLog 属性值为 false，导致写入存取日志动作被忽略");
+                        }
                     }
                 }
 

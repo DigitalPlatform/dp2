@@ -66,6 +66,22 @@ namespace DigitalPlatform.CirculationClient
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_scriptCanBorrow.Text) == false
+                && this.textBox_scriptCanBorrow.Text.StartsWith("javascript:") == false)
+            {
+                strError = "允许外借 脚本内容必须以 javascript: 开头";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(this.textBox_scriptCanReturn.Text) == false
+    && this.textBox_scriptCanReturn.Text.StartsWith("javascript:") == false)
+            {
+                strError = "允许还回 脚本内容必须以 javascript: 开头";
+                goto ERROR1;
+            }
+
             if (this.textBox_location.Text == "")
             {
                 // 允许馆藏地点为空，但是要确认一下
@@ -82,6 +98,9 @@ namespace DigitalPlatform.CirculationClient
 
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -120,6 +139,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+#if NO
         /// <summary>
         /// 是否允许外借
         /// </summary>
@@ -132,6 +152,43 @@ namespace DigitalPlatform.CirculationClient
             set
             {
                 this.checkBox_canBorrow.Checked = value;
+            }
+        }
+#endif
+        public string CanBorrow
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.textBox_scriptCanBorrow.Text))
+                    return this.checkBox_canBorrow.Checked ? "是" : "否";
+                return this.textBox_scriptCanBorrow.Text;
+            }
+            set
+            {
+                if (value == "是")
+                {
+                    this.checkBox_canBorrow.Checked = true;
+                    this.textBox_scriptCanBorrow.Text = "";
+                }
+                else if (value == "否")
+                {
+                    this.checkBox_canBorrow.Checked = false;
+                    this.textBox_scriptCanBorrow.Text = "";
+                }
+                else
+                    this.textBox_scriptCanBorrow.Text = value;
+            }
+        }
+
+        public string CanReturn
+        {
+            get
+            {
+                return this.textBox_scriptCanReturn.Text;
+            }
+            set
+            {
+                this.textBox_scriptCanReturn.Text = value;
             }
         }
 
@@ -148,6 +205,11 @@ namespace DigitalPlatform.CirculationClient
             {
                 this.checkBox_itemBarcodeNullable.Checked = value;
             }
+        }
+
+        private void checkBox_canBorrow_CheckedChanged(object sender, EventArgs e)
+        {
+            this.textBox_scriptCanBorrow.Text = "";
         }
     }
 }

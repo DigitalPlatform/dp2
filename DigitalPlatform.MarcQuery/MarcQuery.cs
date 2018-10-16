@@ -1201,6 +1201,12 @@ namespace DigitalPlatform.Marc
             return strText;
         }
 
+        /// <summary>
+        /// 切除一个字符串尾部的某些字符
+        /// </summary>
+        /// <param name="strText">待处理的字符串</param>
+        /// <param name="strDelimeters">包含要清除的字符的字符串</param>
+        /// <returns>返回结果字符串</returns>
         public static string TrimStartEndChar(string strText, string strDelimeters = "./,;:")
         {
             if (string.IsNullOrEmpty(strText))

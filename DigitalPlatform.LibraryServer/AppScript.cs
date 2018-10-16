@@ -482,13 +482,12 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             nResultValue = -1;
 
-            Assembly assembly = null;
             // return:
             //      -1  出错
             //      0   Assembly 为空
             //      1   找到 Assembly
             int nRet = GetAssembly("",
-        out assembly,
+        out Assembly assembly,
         out strError);
             if (nRet == -1)
                 return -1;
@@ -711,6 +710,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 执行脚本函数ItemCanBorrow
         // parameters:
+        //      bResultValue    [out] 是否允许外借。如果返回 true，表示允许外借；false 表示不允许外借
         // return:
         //      -2  not found script
         //      -1  出错
@@ -718,6 +718,7 @@ namespace DigitalPlatform.LibraryServer
         public int DoItemCanBorrowScriptFunction(
             bool bRenew,
             Account account,
+            XmlDocument readerdom,  // 2018/9/30 增加此参数
             XmlDocument itemdom,
             out bool bResultValue,
             out string strMessage,
@@ -730,13 +731,12 @@ namespace DigitalPlatform.LibraryServer
             // test 2016/10/25
             // account.Location = null;
 
-            Assembly assembly = null;
             // return:
             //      -1  出错
             //      0   Assembly 为空
             //      1   找到 Assembly
             int nRet = GetAssembly("",
-        out assembly,
+        out Assembly assembly,
         out strError);
             if (nRet == -1)
                 return -1;
@@ -791,24 +791,51 @@ namespace DigitalPlatform.LibraryServer
 
             host.App = this;
 
+            ParameterInfo[] parameters = mi.GetParameters();
+
+
             // 执行函数
             try
             {
-                object[] args = new object[4];
-                args[0] = bRenew;
-                args[1] = account;
-                args[2] = itemdom;
-                args[3] = strMessage;
-                bResultValue = (bool)mi.Invoke(host,
-                     BindingFlags.DeclaredOnly |
-                     BindingFlags.Public | BindingFlags.NonPublic |
-                     BindingFlags.Instance | BindingFlags.InvokeMethod,
-                     null,
-                     args,
-                     null);
+                if (parameters.Length == 4)
+                {
+                    // 老版本函数
+                    object[] args = new object[4];
+                    args[0] = bRenew;
+                    args[1] = account;
+                    args[2] = itemdom;
+                    args[3] = strMessage;
+                    bResultValue = (bool)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
 
-                // 取出out参数值
-                strMessage = (string)args[3];
+                    // 取出out参数值
+                    strMessage = (string)args[3];
+                }
+                else if (parameters.Length == 5)
+                {
+                    // 新版本函数
+                    object[] args = new object[5];
+                    args[0] = bRenew;
+                    args[1] = account;
+                    args[2] = readerdom;
+                    args[3] = itemdom;
+                    args[4] = strMessage;
+                    bResultValue = (bool)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strMessage = (string)args[4];
+                }
             }
             catch (Exception ex)
             {
@@ -827,6 +854,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   成功
         public int DoItemCanReturnScriptFunction(
             Account account,
+            XmlDocument readerdom,  // 2018/9/30 增加此参数
             XmlDocument itemdom,
             out bool bResultValue,
             out string strMessage,
@@ -836,13 +864,12 @@ namespace DigitalPlatform.LibraryServer
             strMessage = "";
             bResultValue = false;
 
-            Assembly assembly = null;
             // return:
             //      -1  出错
             //      0   Assembly 为空
             //      1   找到 Assembly
             int nRet = GetAssembly("",
-        out assembly,
+        out Assembly assembly,
         out strError);
             if (nRet == -1)
                 return -1;
@@ -897,23 +924,46 @@ namespace DigitalPlatform.LibraryServer
 
             host.App = this;
 
+            ParameterInfo[] parameters = mi.GetParameters();
+
             // 执行函数
             try
             {
-                object[] args = new object[3];
-                args[0] = account;
-                args[1] = itemdom;
-                args[2] = strMessage;
-                bResultValue = (bool)mi.Invoke(host,
-                     BindingFlags.DeclaredOnly |
-                     BindingFlags.Public | BindingFlags.NonPublic |
-                     BindingFlags.Instance | BindingFlags.InvokeMethod,
-                     null,
-                     args,
-                     null);
+                if (parameters.Length == 3)
+                {
+                    object[] args = new object[3];
+                    args[0] = account;
+                    args[1] = itemdom;
+                    args[2] = strMessage;
+                    bResultValue = (bool)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
 
-                // 取出out参数值
-                strMessage = (string)args[2];
+                    // 取出out参数值
+                    strMessage = (string)args[2];
+                }
+                else if (parameters.Length == 4)
+                {
+                    object[] args = new object[4];
+                    args[0] = account;
+                    args[1] = readerdom;
+                    args[2] = itemdom;
+                    args[3] = strMessage;
+                    bResultValue = (bool)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strMessage = (string)args[3];
+                }
             }
             catch (Exception ex)
             {
@@ -2373,7 +2423,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (Int32.TryParse(strIssueCount, out int value) == false)
                     {
-                        strError = "期数 '"+strIssueCount+"' 不合法。应为正整数";
+                        strError = "期数 '" + strIssueCount + "' 不合法。应为正整数";
                         return 1;
                     }
                 }
@@ -3620,4 +3670,21 @@ namespace DigitalPlatform.LibraryServer
         public Assembly Assembly = null;
         public ExternalMessageHost HostObj = null;
     }
+
+#if NO
+    class NameAttribute : Attribute
+    {
+        public NameAttribute(string name)
+        {
+            this._name = name;
+        }
+
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+    }
+#endif
 }

@@ -9,7 +9,6 @@ using System.Web;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Text;
 using System.Runtime.Serialization;
 
 namespace DigitalPlatform.rms

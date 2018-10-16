@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
@@ -11,7 +10,6 @@ using System.IO;
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Range;
-using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms
 {
@@ -44,7 +42,6 @@ namespace DigitalPlatform.rms
                 m_nInSearching = value;
             }
         }
-
 
         public int BeginSearch()
         {
@@ -692,8 +689,16 @@ out strError);
                         }
 #endif
                         if (nRet == -1)
-                            return -1;
-                        if (nRet == 0)
+                        {
+                            // return -1;
+                            // 2018/10/10
+                            record.RecordBody = new RecordBody();
+                            if (record.RecordBody.Result == null)
+                                record.RecordBody.Result = new Result();
+                            record.RecordBody.Result.ErrorCode = ErrorCodeValue.CommonError;
+                            record.RecordBody.Result.ErrorString = strError;
+                        }
+                        else if (nRet == 0)
                         {
                             record.RecordBody = new RecordBody();
                             if (record.RecordBody.Result == null)

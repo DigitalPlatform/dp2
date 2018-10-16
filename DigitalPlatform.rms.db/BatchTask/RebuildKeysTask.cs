@@ -133,7 +133,6 @@ namespace DigitalPlatform.rms
                     strLastTime);
                 string strErrorText = (bPerDayStart == true ? "(定时)" : "(不定时)") + strTaskName + "结束。共处理记录 ? 个。";
                 this.App.WriteErrorLog(strErrorText);
-
             }
 
             return;

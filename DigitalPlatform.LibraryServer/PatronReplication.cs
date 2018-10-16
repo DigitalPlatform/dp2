@@ -529,10 +529,12 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-        ERROR1:
+#if NO
+            ERROR1:
             AppendResultText("PatronReplication thread error : " + strError + "\r\n");
             this.App.WriteErrorLog("PatronReplication thread error : " + strError + "\r\n");
             return;
+#endif
         }
 
         IChannel m_cardCenterChannel = null;    // new IpcClientChannel();
