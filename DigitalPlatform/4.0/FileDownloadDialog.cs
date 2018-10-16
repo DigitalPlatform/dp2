@@ -132,5 +132,15 @@ namespace DigitalPlatform
         {
             this.Close();
         }
+
+        public void StartMarquee()
+        {
+            this.progressBar1.Style = ProgressBarStyle.Marquee;
+        }
+
+        public void StopMarquee()
+        {
+            this.progressBar1.Style = ProgressBarStyle.Continuous;
+        }
     }
 }

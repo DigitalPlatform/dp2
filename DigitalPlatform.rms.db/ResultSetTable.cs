@@ -253,11 +253,19 @@ namespace DigitalPlatform.rms
             }
         }
 
+        public delegate void Delegate_writeToLog(string text);
+
         // 清除最近没有使用过的 ResultSet 对象
         // parameters:
         //      delta   最近一次用过的时刻距离现在的时间长度。长于这个的对象才会被清除
-        public void Clean(TimeSpan delta)
+        //      proc_writeToLog    回调函数，把操作过程记入错误日志
+        public int Clean(TimeSpan delta,
+            CancellationToken token,
+            Delegate_writeToLog proc_writeToLog = null)
         {
+
+            proc_writeToLog?.Invoke("开始清理全局结果集");
+
             List<string> remove_keys = new List<string>();
 
             // 读锁定并不阻碍一般性访问
@@ -267,6 +275,8 @@ namespace DigitalPlatform.rms
             {
                 foreach (string key in this.Keys)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     DpResultSet resultset = (DpResultSet)this[key];
 
                     if (resultset == null)
@@ -286,8 +296,13 @@ namespace DigitalPlatform.rms
                 this.m_lock.ExitReadLock();
             }
 
+            proc_writeToLog?.Invoke(string.Format("搜集列表完成，总数 {0}", remove_keys.Count));
+
             if (remove_keys.Count == 0)
-                return;
+            {
+                proc_writeToLog?.Invoke("结束清理全局结果集。");
+                return 0;
+            }
 
             // 因为要删除某些元素，所以用写锁定
             List<DpResultSet> delete_resultsets = new List<DpResultSet>();
@@ -297,6 +312,8 @@ namespace DigitalPlatform.rms
             {
                 foreach (string key in remove_keys)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     DpResultSet resultset = (DpResultSet)this[key];
                     if (resultset == null)
                         continue;
@@ -314,12 +331,19 @@ namespace DigitalPlatform.rms
 
             foreach (DpResultSet resultset in delete_resultsets)
             {
+                token.ThrowIfCancellationRequested();
+
                 // 2016/1/23
                 if (resultset != null)
                     resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
 
                 resultset.Close();
             }
+
+            proc_writeToLog?.Invoke(string.Format("结束清理全局结果集，删除结果集总数 {0}。", 
+                delete_resultsets.Count));
+
+            return delete_resultsets.Count;
         }
     }
 }

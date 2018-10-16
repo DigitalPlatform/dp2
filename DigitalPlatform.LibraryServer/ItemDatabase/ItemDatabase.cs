@@ -553,7 +553,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -640,7 +640,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return (int)lHitCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -775,7 +775,7 @@ namespace DigitalPlatform.LibraryServer
             string strMetaData = "";
             string strExistingXml = "";
 
-        REDOLOAD:
+            REDOLOAD:
 
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(info.NewRecPath,
@@ -945,7 +945,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -1174,12 +1174,14 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
+            string part_type = "";
             string strWarning = "";
             // 合并新旧记录
             // return:
             //      -1  出错
             //      0   正确
             //      1   有部分修改没有兑现。说明在strError中
+            //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
             string strNewXml = "";
             nRet = MergeTwoItemXml(
                 sessioninfo,
@@ -1189,20 +1191,24 @@ out strError);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            if (nRet == 1)
+            if (nRet == 1 || nRet == 2)
+            {
+                if (nRet == 1)
+                    part_type = "部分";
+                else
+                    part_type = "全部都没有";
                 strWarning = strError;
+            }
 
             // 移动记录
-            byte[] output_timestamp = null;
-            string strIdChangeList = "";
             // TODO: Copy后还要写一次？因为Copy并不写入新记录。
             // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
             lRet = channel.DoCopyRecord(info.OldRecPath,
                 info.NewRecPath,
                 true,   // bDeleteSourceRecord
                 bSimulate ? "simulate" : "",
-                out strIdChangeList,
-                out output_timestamp,
+                out string strIdChangeList,
+                out byte[] output_timestamp,
                 out strOutputPath,
                 out strError);
             if (lRet == -1)
@@ -1268,7 +1274,7 @@ out strError);
                 error.ErrorInfo = "移动操作成功。NewRecPath中返回了实际保存的路径, NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的源记录稍有差异)。";
                 if (string.IsNullOrEmpty(strWarning) == false)
                 {
-                    error.ErrorInfo = "移动操作成功。但" + strWarning;
+                    error.ErrorInfo = "移动操作" + part_type + "兑现。" + strWarning;
                     error.ErrorCode = ErrorCodeValue.PartialDenied;
                 }
                 else
@@ -1277,7 +1283,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -1344,7 +1350,7 @@ out strError);
 
 
             // 先读出数据库中即将覆盖位置的已有记录
-        REDOLOAD:
+            REDOLOAD:
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
                 out strMetaData,
@@ -1446,6 +1452,8 @@ out strError);
                 // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
 
+            string part_type = "";
+
             // 合并新旧记录
             string strWarning = "";
             string strNewXml = "";
@@ -1490,6 +1498,7 @@ out strError);
                 //      -1  出错
                 //      0   正确
                 //      1   有部分修改没有兑现。说明在strError中
+                //      2   全部修改都没有兑现。说明在strError中 (2018/10/9)
                 nRet = MergeTwoItemXml(
                     sessioninfo,
                     domExist,
@@ -1498,8 +1507,14 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                if (nRet == 1)
+                if (nRet == 1 || nRet == 2)
+                {
+                    if (nRet == 1)
+                        part_type = "部分";
+                    else
+                        part_type = "全部都没有";
                     strWarning = strError;
+                }
             }
             else
             {
@@ -1557,10 +1572,10 @@ out strError);
                 error.NewTimestamp = output_timestamp;
                 error.NewRecord = strNewXml;
 
-                error.ErrorInfo = "保存操作成功。NewTimeStamp中返回了新的时间戳，NewRecord中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
+                error.ErrorInfo = "保存操作成功。NewTimeStamp 中返回了新的时间戳，NewRecord 中返回了实际保存的新记录(可能和提交的新记录稍有差异)。";
                 if (string.IsNullOrEmpty(strWarning) == false)
                 {
-                    error.ErrorInfo = "保存操作成功。但" + strWarning;
+                    error.ErrorInfo = "保存操作" + part_type + "兑现。" + strWarning;
                     error.ErrorCode = ErrorCodeValue.PartialDenied;
                 }
                 else
@@ -1569,7 +1584,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
             error.ErrorCode = ErrorCodeValue.CommonError;
@@ -1617,9 +1632,8 @@ out strError);
             }
 
             // 获得书目库对应的事项库名
-            string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
-                 out strItemDbName,
+                 out string strItemDbName,
                  out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1731,7 +1745,7 @@ out strError);
                     }
                 }
 
-                // 对info内的参数进行检查。
+                // 对 info 内的参数进行检查。
                 strError = "";
 
                 if (iteminfos.Length > 1  // 2013/9/26 只有一个记录的时候，不必依靠 refid 定位返回信息，因而也就不需要明显给出这个 RefID 成员了
@@ -2174,13 +2188,12 @@ out strError);
                         }
 
                         // 构造出适合保存的新事项记录
-                        string strNewXml = "";
                         nRet = BuildNewItemRecord(
                             sessioninfo,
                             bForce,
                             strBiblioRecId,
                             info.NewRecord,
-                            out strNewXml,
+                            out string strNewXml,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2409,7 +2422,7 @@ out strError);
 
             result.Value = ErrorInfos.Count;  // 返回信息的数量
             return result;
-        ERROR1:
+            ERROR1:
             // 这里的报错，是比较严重的错误。如果是数组中部分的请求发生的错误，则不在这里报错，而是通过返回错误信息数组的方式来表现
             result.Value = -1;
             result.ErrorInfo = strError;
@@ -2783,7 +2796,7 @@ out strError);
                     iteminfo.NewTimestamp = null;
                     iteminfo.Action = "";
 
-                CONTINUE:
+                    CONTINUE:
                     iteminfos.Add(iteminfo);
                 }
 
@@ -2812,7 +2825,7 @@ out strError);
 
             result.Value = nResultCount;    // items.Length;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2866,7 +2879,7 @@ out strError);
 
             result.Value = paths.Length;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3120,7 +3133,7 @@ out strError);
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3267,7 +3280,7 @@ out strError);
                 root.ParentNode.RemoveChild(root);
 
             return nOperCount;
-        ERROR1:
+            ERROR1:
             // Undo已经进行过的操作
             if (strAction == "copy")
             {
@@ -3278,7 +3291,7 @@ out strError);
                     string strTempError = "";
                     byte[] timestamp = null;
                     byte[] output_timestamp = null;
-                REDO_DELETE:
+                    REDO_DELETE:
                     long lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
                         out output_timestamp,
@@ -3370,7 +3383,7 @@ out strError);
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
 
-            REDO_DELETE:
+                REDO_DELETE:
 
                 // this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -3484,7 +3497,7 @@ out strError);
 
 
             return nDeletedCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3539,7 +3552,7 @@ out strError);
                 goto ERROR1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 

@@ -27,6 +27,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using System.Threading.Tasks;
 
 namespace dp2Installer
 {
@@ -233,7 +234,7 @@ FormWindowState.Normal);
             }
 
             string strHead = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
-                // + "<link rel='stylesheet' href='"+strCssFileName+"' type='text/css'>"
+    // + "<link rel='stylesheet' href='"+strCssFileName+"' type='text/css'>"
     + "<style media='screen' type='text/css'>"
     + "body { font-family:Microsoft YaHei; background-color:#555555; color:#eeeeee; } "
     + "</style>"
@@ -422,7 +423,12 @@ FormWindowState.Normal);
         }
 #endif
 
-        private void MenuItem_dp2library_upgrade_Click(object sender, EventArgs e)
+        private async void MenuItem_dp2library_upgrade_Click(object sender, EventArgs e)
+        {
+            await upgrade_dp2library();
+        }
+
+        private async Task upgrade_dp2library()
         {
             string strError = "";
             int nRet = 0;
@@ -452,10 +458,18 @@ FormWindowState.Normal);
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2library 服务 ...\r\n");
+                NormalResult result = await InstallHelper.StopService(this, "dp2LibraryService");
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+#if NO
                 nRet = InstallHelper.StopService("dp2LibraryService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+#endif
                 AppendString("dp2library 服务已经停止\r\n");
 
                 string strZipFileName = Path.Combine(this.DataDir, "library_app.zip");
@@ -503,7 +517,7 @@ FormWindowState.Normal);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -844,7 +858,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -1271,7 +1285,7 @@ MessageBoxDefaultButton.Button2);
 
             AppendSectionTitle("更新结束");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1371,7 +1385,7 @@ MessageBoxDefaultButton.Button2);
                     AppendString("实例 '" + strInstanceName + "' 的序列号 " + strSerialCode + " 失效了，正在请求重新设置 ...\r\n");
 
                     string strOldSerialCode = strSerialCode;
-                REDO_INPUT:
+                    REDO_INPUT:
                     // 出现对话框重新设置序列号
                     // return:
                     //      0   Cancel
@@ -1446,12 +1460,17 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
+        private async void MenuItem_dp2kernel_upgrade_Click(object sender, EventArgs e)
+        {
+            await upgrade_dp2kernel();
+        }
+
         // 升级 dp2kernel
-        private void MenuItem_dp2kernel_upgrade_Click(object sender, EventArgs e)
+        private async Task upgrade_dp2kernel()
         {
             string strError = "";
             int nRet = 0;
@@ -1475,10 +1494,18 @@ MessageBoxDefaultButton.Button2);
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2kernel 服务 ...\r\n");
+                NormalResult result = await InstallHelper.StopService(this, "dp2KernelService");
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+#if NO
                 nRet = InstallHelper.StopService("dp2KernelService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+#endif
                 AppendString("dp2kernel 服务已经停止\r\n");
 
                 string strZipFileName = Path.Combine(this.DataDir, "kernel_app.zip");
@@ -1513,7 +1540,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -1592,12 +1619,12 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
         // 自动升级
-        private void MenuItem_autoUpgrade_Click(object sender, EventArgs e)
+        private async void MenuItem_autoUpgrade_Click(object sender, EventArgs e)
         {
             string strError = "";
             List<string> names = new List<string>();
@@ -1669,9 +1696,9 @@ MessageBoxDefaultButton.Button1);
                 foreach (string name in names)
                 {
                     if (name == "dp2Kernel")
-                        MenuItem_dp2kernel_upgrade_Click(this, new EventArgs());
+                        await upgrade_dp2kernel();
                     else if (name == "dp2Library")
-                        MenuItem_dp2library_upgrade_Click(this, new EventArgs());
+                        await upgrade_dp2library();
                     else if (name == "dp2OPAC")
                         MenuItem_dp2opac_upgrade_Click(this, new EventArgs());
                     else if (name == "dp2ZServer")
@@ -1784,7 +1811,7 @@ MessageBoxDefaultButton.Button1);
                 else
                     menuItem.Enabled = false;
                 return;
-            ERROR1:
+                ERROR1:
                 menuItem.DropDownItems.Add(new ToolStripMenuItem(strError));
                 if (menuItem.DropDownItems.Count > 0)
                     menuItem.Enabled = true;
@@ -1941,7 +1968,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2512,7 +2539,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             return filenames;
-        ERROR1:
+            ERROR1:
             throw new Exception(strError);
         }
 
@@ -2950,7 +2977,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -3153,7 +3180,7 @@ MessageBoxDefaultButton.Button1);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3287,7 +3314,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             AppendString("dp2kernel 服务成功启动\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3317,7 +3344,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             AppendString("dp2kernel 服务已经停止\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3460,7 +3487,7 @@ out string strError)
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3542,7 +3569,7 @@ out string strError)
                 goto ERROR1;
             AppendString("dp2library 服务成功启动\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3578,7 +3605,7 @@ out string strError)
                 goto ERROR1;
             AppendString("dp2library 服务已经停止\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3704,7 +3731,7 @@ out string strError)
                 this.Refresh_dp2ZServer_MenuItems();
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3853,8 +3880,8 @@ MessageBoxDefaultButton.Button2);
 
                 AppendString("删除程序目录\r\n");
 
-            // 删除程序目录
-            REDO_DELETE_PROGRAMDIR:
+                // 删除程序目录
+                REDO_DELETE_PROGRAMDIR:
                 try
                 {
                     PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -3879,7 +3906,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3965,7 +3992,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4141,7 +4168,7 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
-            var featureNames = new[] 
+            var featureNames = new[]
     {
         "IIS-ApplicationDevelopment",
         "IIS-CommonHttpFeatures",
@@ -4165,12 +4192,12 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
 
-        #region 安装 dp2library 以后创建书目库的相关函数
+#region 安装 dp2library 以后创建书目库的相关函数
 
         // 出现提示
         // return:
@@ -4613,7 +4640,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return dlg;
         }
 
-        #endregion
+#endregion
 
         // 卸载 dp2library
         private void MenuItem_dp2library_uninstall_Click(object sender, EventArgs e)
@@ -4709,8 +4736,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     AppendString("注销 Windows Service 结束\r\n");
 
-                // 删除程序目录
-                REDO_DELETE_PROGRAMDIR:
+                    // 删除程序目录
+                    REDO_DELETE_PROGRAMDIR:
                     try
                     {
                         PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -4740,7 +4767,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4764,13 +4791,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             string strError = "";
             int nRet = 0;
 
-            var featureNames = new[] 
+            var featureNames = new[]
     {
         "MSMQ-Container",
         "MSMQ-Server",
     };
             // Windows Server 2008, Windows Server 2012 的用法
-            var server_featureNames = new[] 
+            var server_featureNames = new[]
     {
         "MSMQ-Services",
         "MSMQ-Server",
@@ -4801,7 +4828,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
              * */
 
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -4982,7 +5009,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5105,7 +5132,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5197,7 +5224,7 @@ MessageBoxDefaultButton.Button2);
                 AppendString("注销 Windows Service 结束\r\n");
 
                 // 删除程序目录
-            REDO_DELETE_PROGRAMDIR:
+                REDO_DELETE_PROGRAMDIR:
                 try
                 {
                     PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
@@ -5222,7 +5249,7 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
@@ -5290,7 +5317,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5342,7 +5369,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             AppendString("dp2ZServer 服务成功启动\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -5373,7 +5400,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             AppendString("dp2ZServer 服务已经停止\r\n");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5565,13 +5592,13 @@ MessageBoxDefaultButton.Button2);
                 this._floatingMessage.Text = "";
             }
             return;
-        ERROR1:
+            ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
 
 
-        #region Service Control 功能
+#region Service Control 功能
 
 #if NO
         IpcClientChannel m_dp2libraryScChannel = new IpcClientChannel();
@@ -5617,7 +5644,7 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_uninstallDp2zserver_Click(object sender, EventArgs e)
         {

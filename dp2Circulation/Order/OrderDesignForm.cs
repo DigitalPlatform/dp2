@@ -54,6 +54,8 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            this.orderDesignControl1.ToolTip = this.toolTip1;
+
             this.orderDesignControl1.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
             this.orderDesignControl1.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(orderCrossControl1_GetValueTable);
 

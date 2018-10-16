@@ -955,6 +955,8 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            if (bChanged == true)
+                return 1;
             return 0;
         }
 

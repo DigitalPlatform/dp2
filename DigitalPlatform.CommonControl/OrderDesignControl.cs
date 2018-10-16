@@ -1642,6 +1642,15 @@ namespace DigitalPlatform.CommonControl
 
             item.StateComment = "";
 
+            List<string> comments = new List<string>();
+
+            string strControlled = IsDistributeControlled(item.Distribute);
+            if (string.IsNullOrEmpty(strControlled) == false)
+            {
+                item.State |= ItemState.ReadOnly;
+                comments.Add(strControlled);
+            }
+
             if (this.ArriveMode == false)
             {
                 // *** 订购态
@@ -1650,20 +1659,14 @@ namespace DigitalPlatform.CommonControl
                 // 已订购(必然是全部发出，不可能局部发出)，或者已验收(有可能是局部验收，或者(虽然已验收完但是)潜在可以追加)，这样的事项都不能再进行任何订购操作，所以为readonly
 
                 if (strState == "已订购" || strState == "已验收")
+                {
                     item.State |= ItemState.ReadOnly;
+                    comments.Add("状态 '" + strState + "' 不允许进行订购修改操作");
+                }
             }
             else
             {
                 // *** 验收态
-
-                List<string> comments = new List<string>();
-
-                string strControlled = IsDistributeControlled(item.Distribute);
-                if (string.IsNullOrEmpty(strControlled) == false)
-                {
-                    item.State |= ItemState.ReadOnly;
-                    comments.Add(strControlled);
-                }
 
                 // 检查书商
                 bool seller_matched = true;
@@ -1697,13 +1700,13 @@ namespace DigitalPlatform.CommonControl
                         // 一般而言可能出现了空白的状态值，这表明尚未订出，还属于草稿记录，自然也就无从验收了
 
                         item.State |= ItemState.ReadOnly;
-                        comments.Add( "状态 '" + strState + "' 不允许进行验收操作");
+                        comments.Add("状态 '" + strState + "' 不允许进行验收操作");
                     }
                 }
-
-                if (comments.Count > 0)
-                    item.StateComment = StringUtil.MakePathList(comments, "; ");
             }
+
+            if (comments.Count > 0)
+                item.StateComment = StringUtil.MakePathList(comments, "; ");
 
             // 2009/2/13
             try
@@ -1773,7 +1776,7 @@ namespace DigitalPlatform.CommonControl
                 e.LibraryCode = StringUtil.MakePathList(codes);
                 this.VerifyLibraryCode(this, e);
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
-                    return "馆藏分配去向不在当前用户完全管辖范围内: " + e.ErrorInfo;
+                    return "馆藏分配去向不完全受当前用户管辖。详情: " + e.ErrorInfo;
             }
 
             return null;

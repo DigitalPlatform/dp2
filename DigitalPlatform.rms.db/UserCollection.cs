@@ -152,11 +152,14 @@ namespace DigitalPlatform.rms
         public int GetUserSafety(
             bool bIncreament,
             string strName,
+            CancellationToken token,
             out User user,
             out string strError)
         {
             user = null;
             strError = "";
+
+            token.ThrowIfCancellationRequested();
 
             // 只从用户集合中查找用户对象
             // parameters:
@@ -174,6 +177,8 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
+            token.ThrowIfCancellationRequested();
+
             if (nRet == 1)
             {
                 if (bIncreament == true)
@@ -183,6 +188,8 @@ namespace DigitalPlatform.rms
 
                 return 1;
             }
+
+            token.ThrowIfCancellationRequested();
 
             // return:
             //		-1	出错
@@ -215,6 +222,7 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
+                token.ThrowIfCancellationRequested();
 
                 // 达到红色尺寸
                 if (this.Count >= this.RedMax)
@@ -222,8 +230,10 @@ namespace DigitalPlatform.rms
                     // 必须先清除出空位，才能让新对象进入
                     int delta = this.Count - this.RedMax + 1;
 
-                    this.RemoveUserObjects(delta);
+                    this.RemoveUserObjects(token, delta);
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 this.Add(user);
                 user.PlusOneUse();  // 因为这是对象重返集合，所以无论如何要增加计数。但是被挤走前的计数值已经无从查考，所以象征性给1
@@ -232,7 +242,6 @@ namespace DigitalPlatform.rms
                 user.Activate();    // 更新最近使用时间
 
                 this.KernelApplication.ActivateWorker();  // 通知工作线程，需要整理尺寸了
-
                 return 1;
             }
             finally
@@ -272,6 +281,7 @@ namespace DigitalPlatform.rms
             int nRet = this.GetUserSafety(
                 true,
                 strUserName,
+                this.KernelApplication._app_down.Token,
                 out user,
                 out strError);
             if (nRet == -1)
@@ -516,7 +526,7 @@ namespace DigitalPlatform.rms
         //      strError    out参数，返回出错信息
         // 线：安全
         // 异常：可能会抛出异常
-        public void Shrink()
+        public void Shrink(CancellationToken token)
         {
             if (this.Count < this.GreenMax)
                 return; // 小于绿色尺寸，根本不必进入
@@ -531,6 +541,8 @@ namespace DigitalPlatform.rms
             {
                 for (int i = 0; i < this.Count; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     User user = this[i];
 
                     // usecount==0清除
@@ -552,7 +564,6 @@ namespace DigitalPlatform.rms
                 }
 
                 nCount = this.Count;
-
             }
             finally
             {
@@ -569,7 +580,7 @@ namespace DigitalPlatform.rms
                 // 挑选出delta个清除
                 int delta = nCount - this.YellowMax;
 
-                this.RemoveUserObjects(delta);
+                this.RemoveUserObjects(token, delta);
 
                 /*
                 m_lock.AcquireWriterLock(m_nTimeOut);
@@ -592,17 +603,15 @@ namespace DigitalPlatform.rms
 #endif
                 }
                  */
-
             }
-
-
         }
 
         // 挑出若干个最不常用的User对象从集合中移除
         // 线程安全
-        void RemoveUserObjects(int nRemoveCount)
+        void RemoveUserObjects(CancellationToken token,
+            int nRemoveCount)
         {
-            List<User> users = this.SortRecentUse();
+            List<User> users = this.SortRecentUse(token);
 
             m_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK
@@ -612,6 +621,8 @@ namespace DigitalPlatform.rms
             {
                 for (int i = 0; i < nRemoveCount; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     this.Remove(users[i]);
                 }
             }
@@ -644,11 +655,10 @@ namespace DigitalPlatform.rms
                     return 0;
                 return -1*1;
             }
-
         }
 
         // 为淘汰算法进行排序
-        public List<User> SortRecentUse()
+        public List<User> SortRecentUse(CancellationToken token)
         {
             // 复制出对象
             List<User> aItem = new List<User>();
@@ -663,6 +673,8 @@ namespace DigitalPlatform.rms
             {
                 this.m_lock.ReleaseReaderLock();
             }
+
+            token.ThrowIfCancellationRequested();
 
             UserComparer comp = new UserComparer();
 
@@ -728,6 +740,7 @@ namespace DigitalPlatform.rms
             int nRet = this.GetUserSafety(
                 false,
                 strChangedUserName,
+                this.KernelApplication._app_down.Token,
                 out changedUser,
                 out strError);
             if (nRet == -1)

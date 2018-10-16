@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -18,6 +16,9 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 正在进行慢速检索的 RmsChannel 通道列表
+        RmsChannelList _slowChannelList = new RmsChannelList();
+
         private static readonly Object syncRoot_location = new Object();
 
         List<string> _requests = new List<string>();
@@ -194,11 +195,11 @@ namespace DigitalPlatform.LibraryServer
         {
             string strError = "";
 
-            // 临时的SessionInfo对象
+            // TODO: 要设法把临时的 Session 对象管理起来。在 Application down 的时候，主动对这些 session 的 Channels 执行 stop
+            // 临时的 SessionInfo 对象
             SessionInfo session = new SessionInfo(this);
             try
             {
-                string strQueryXml = "";
                 // 构造检索实体库的 XML 检索式
                 // return:
                 //      -1  出错
@@ -212,7 +213,7 @@ namespace DigitalPlatform.LibraryServer
     "left",
     "zh",
     "", // strSearchStyle,
-                out strQueryXml,
+                out string strQueryXml,
                 out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -221,55 +222,63 @@ namespace DigitalPlatform.LibraryServer
 
                 this._app_down.Token.ThrowIfCancellationRequested();
 
-                RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                // RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                RmsChannel channel = _slowChannelList.GetChannel(session.Channels, this.WsUrl);
                 if (channel == null)
                 {
-                    strError = "get channel error";
+                    strError = "get channel null error";
                     goto ERROR1;
                 }
-
-#if DETAIL_LOG
-                this.WriteErrorLog("开始检索");
-#endif
-                long lHitCount = channel.DoSearch(strQueryXml,
-    "default",
-    "", // strOutputStyle,
-    out strError);
-                if (lHitCount == -1)
-                    goto ERROR1;
-
-                if (lHitCount == 0)
-                {
-                    // 没有命中任何记录，也要继续后面的处理
-                }
-
-                this._app_down.Token.ThrowIfCancellationRequested();
-
-                DpResultSet resultset = new DpResultSet(true);
 
                 try
                 {
-                    if (lHitCount > 0)
+#if DETAIL_LOG
+                this.WriteErrorLog("开始检索");
+#endif
+                    long lHitCount = channel.DoSearch(strQueryXml,
+        "default",
+        "", // strOutputStyle,
+        out strError);
+                    if (lHitCount == -1)
+                        goto ERROR1;
+
+                    if (lHitCount == 0)
                     {
-                        nRet = GetResultset(channel,
-                    "default",
-                    resultset,
-                    out strError);
+                        // 没有命中任何记录，也要继续后面的处理
+                    }
+
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
+                    DpResultSet resultset = new DpResultSet(true);
+
+                    try
+                    {
+                        if (lHitCount > 0)
+                        {
+                            nRet = GetResultset(channel,
+                        "default",
+                        resultset,
+                        out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+
+                        // 写入 dp2kernel 成为永久结果集
+                        nRet = UploadPermanentResultset(channel,
+                strLocation,
+                resultset,
+                out strError);
                         if (nRet == -1)
                             goto ERROR1;
                     }
-
-                    // 写入 dp2kernel 成为永久结果集
-                    nRet = UploadPermanentResultset(channel,
-            strLocation,
-            resultset,
-            out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    finally
+                    {
+                        resultset.Close();
+                    }
                 }
                 finally
                 {
-                    resultset.Close();
+                    _slowChannelList.ReturnChannel(session.Channels, channel);
                 }
 
                 return;
@@ -280,8 +289,8 @@ namespace DigitalPlatform.LibraryServer
                 session = null;
             }
 
-        ERROR1:
-            this.WriteErrorLog("馆藏地结果集创建出错: " + strError);
+            ERROR1:
+            this.WriteErrorLog("馆藏地 '" + strLocation + "' 结果集创建出错: " + strError);
             return;
         }
 

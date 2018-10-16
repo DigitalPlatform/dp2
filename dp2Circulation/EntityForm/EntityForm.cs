@@ -3450,7 +3450,20 @@ true);
 
             XmlDocument collection_dom = new XmlDocument();
             if (string.IsNullOrEmpty(strSubRecords) == false)
-                collection_dom.LoadXml(strSubRecords);
+            {
+                try
+                {
+                    collection_dom.LoadXml(strSubRecords);
+                }
+                catch (Exception ex)
+                {
+                    // 2018/10/9
+                    strError = "strSubRecords 装入 XMLDOM 时出现异常: "
+                        + ex.Message
+                        + "。(strSubRecords='" + StringUtil.CutString(strSubRecords, 300) + "')";
+                    return -1;
+                }
+            }
 
             string strBiblioDbName = "";
 
@@ -10773,7 +10786,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     ResInfo resinfo = new ResInfo();
                     resinfo.ID = strID;
-                    resinfo.LocalPath = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_LOCALPATH);
+                    resinfo.LocalPath = Path.GetFileName(ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_LOCALPATH));    // 只保留文件名部分
                     resinfo.Mime = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_MIME);
                     try
                     {

@@ -41,7 +41,7 @@ namespace DigitalPlatform.LibraryServer
                 "name",
                 "namePinyin",   // 2013/12/20
                 "gender",
-                "birthday",
+                "birthday",     // 注：逐步废止这个元素，用 dateOfBirth 替代
                 "dateOfBirth",
                 "idCardNumber",
                 "department",
@@ -1522,7 +1522,7 @@ strLibraryCode);    // 读者所在的馆代码
             out string strError)
         {
             strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             List<string> values = null;
 
