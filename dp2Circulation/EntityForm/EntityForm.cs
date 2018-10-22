@@ -1468,7 +1468,7 @@ true);
                     else if (nRet == 1)
                     {
                         data.WarningInfo = strError;
-                        data.WarningInfo += "\r\n\r\n不过上述包含重复册条码号的记录已经被成功创建或修改。请留意稍后去消除册条码号重复";
+                        data.WarningInfo += "\r\n\r\n不过上述包含重复册条码号的记录已经创建或修改成功。请留意稍后去消除册条码号重复";
                     }
 
                     if (data.Action == "new"
@@ -12405,7 +12405,6 @@ value);
             // 看看要另存的位置，记录是否已经存在?
             if (strRecID != "?")
             {
-                byte[] timestamp = null;
 
                 // 检测特定位置书目记录是否已经存在
                 // parameters:
@@ -12414,7 +12413,7 @@ value);
                 //      0   not found
                 //      1   found
                 nRet = DetectBiblioRecord(strTargetRecPathParam,
-                    out timestamp,
+                    out byte[] timestamp,
                     out strError);
                 if (nRet == 1)
                 {
