@@ -138,7 +138,7 @@ namespace dp2Circulation
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "读者密码已经被成功修改。");
+            MessageBox.Show(this, "读者密码修改成功。");
 
             this.textBox_reader_barcode.SelectAll();
             this.textBox_reader_barcode.Focus();
@@ -287,7 +287,7 @@ namespace dp2Circulation
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "工作人员 '" + this.textBox_worker_userName.Text + "' 密码已经被成功修改。");
+            MessageBox.Show(this, "工作人员 '" + this.textBox_worker_userName.Text + "' 密码修改成功。");
 
             this.textBox_worker_userName.SelectAll();
             this.textBox_worker_userName.Focus();
