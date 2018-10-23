@@ -13331,6 +13331,8 @@ strMARC);
                         if (Program.MainForm.SaveOriginCoverImage == false)
                             info.ClearBackupImage();
                     }
+
+                    GC.Collect();
                 }
                 finally
                 {

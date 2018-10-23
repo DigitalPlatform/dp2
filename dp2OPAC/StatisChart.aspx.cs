@@ -2,26 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Threading;
 using System.Xml;
-using System.Globalization;
 using System.IO;
 using System.Web.UI.DataVisualization.Charting;
 using System.Drawing;
-using System.Diagnostics;
 
-using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
-using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.OPAC.Server;
 
 public partial class StatisChart : MyWebPage
 {
@@ -50,6 +43,7 @@ ref sessioninfo) == false)
 
         this.TreeView1.EventMode = true;
 
+        // 这是已经宏兑现的文件
         string strDataFile = (string)this.Session["__timerange_data_filename__"];  // 只能使用备用值
 
         if (string.IsNullOrEmpty(strDataFile) == false)
@@ -112,7 +106,7 @@ ref sessioninfo) == false)
                 goto ERROR1;
         }
         return;
-    ERROR1:
+        ERROR1:
         this.Page.Response.Write(HttpUtility.HtmlEncode(strError));
         this.Page.Response.End();
         return;
@@ -208,7 +202,7 @@ ref sessioninfo) == false)
         {
             if (string.IsNullOrEmpty(this.HiddenField_imageWidth.Value) == false)
             {
-                string[] parts = this.HiddenField_imageWidth.Value.Split(new char[] {','});
+                string[] parts = this.HiddenField_imageWidth.Value.Split(new char[] { ',' });
                 string strWidth = parts[0];
                 string strHeight = "";
                 if (parts.Length >= 2)
@@ -251,20 +245,26 @@ ref sessioninfo) == false)
             this.DropDownList_chartType.Text = "Line";
         }
 
+        // 这是尚未宏兑现的原始 XML 文件
         string strDataFileName = this.Request["datafile"];
 
         if (String.IsNullOrEmpty(strDataFileName) == true)
             strDataFileName = "statis_timerange.xml";
 
+        // 进行宏兑现
+        MacroDataFile(strDataFileName, strDataFileName + ".1");
+
         if (string.IsNullOrEmpty(this.TreeView1.XmlFileName) == true || this.IsPostBack == false
-            // 如果数据文件名和参数中的不吻合，需要重新设置数据集
-    || PathUtil.PureName(this.TreeView1.XmlFileName).ToLower() != strDataFileName.ToLower()
+    // 如果数据文件名和参数中的不吻合，需要重新设置数据集
+    || PathUtil.PureName(this.TreeView1.XmlFileName).ToLower() != (strDataFileName + ".1").ToLower()
     )
         {
-            this.TreeView1.XmlFileName = app.DataDir + "/cfgs/" + strDataFileName;
+            string strSourceFileName = app.DataDir + "/cfgs/" + strDataFileName;
+            this.TreeView1.XmlFileName = strSourceFileName + ".1";
             if (File.Exists(this.TreeView1.XmlFileName) == false)
             {
-                BuildDefaultDataXmlFile(this.TreeView1.XmlFileName);
+                BuildDefaultDataXmlFile(strSourceFileName);
+                MacroDataFile(strSourceFileName, this.TreeView1.XmlFileName);
             }
             this.Session["__timerange_data_filename__"] = this.TreeView1.XmlFileName; // 补充保存在Session中，备用。因为在_Init()阶段是得不到隐藏字段的值的
         }
@@ -311,32 +311,65 @@ ref sessioninfo) == false)
                 goto ERROR1;
         }
         return;
-    ERROR1:
+        ERROR1:
         this.Page.Response.Write(HttpUtility.HtmlEncode(strError));
         this.Page.Response.End();
         return;
     }
 
-    // 创建一个表示当年的缺省XML内容
+    // statis_timerange.xml 文件兑现了宏以后写入一个目标文件。给 TreeView 用的是目标文件
+    static bool MacroDataFile(string strSourceFilename, string strTargetFilename)
+    {
+        if (File.Exists(strSourceFilename) == false)
+            return false;
+
+        File.Delete(strTargetFilename);
+
+        XmlDocument dom = new XmlDocument();
+        dom.Load(strSourceFilename);
+
+        // 兑现宏
+        // parameters:
+        //      attr_list   要替换的属性名列表。例如 name, command
+        int nRet = CacheBuilder.MacroDom(dom,
+            new List<string> { "name", "date" },
+            out string strError);
+        if (nRet == -1)
+            throw new Exception(strError);
+
+        dom.Save(strTargetFilename);
+
+        return true;
+    }
+
+    // 创建一个表示当年和去年的默认 XML 内容
+    // 尽量用宏表示时间
     static void BuildDefaultDataXmlFile(string strFilename)
     {
         XmlDocument dom = new XmlDocument();
         dom.LoadXml("<root />");
 
-        DateTime now = DateTime.Now;
-
-        XmlNode year = dom.CreateElement("class");
-        dom.DocumentElement.AppendChild(year);
-        DomUtil.SetAttr(year, "name", now.Year.ToString() + "年");
-        DomUtil.SetAttr(year, "date", now.Year.ToString().PadLeft(4, '0'));
-
-        // 12个月
-        for (int i = 0; i < 12; i++)
+        // DateTime now = DateTime.Now;
+        string[] macro_names = new string[] { "prevyear", "year" };
+        foreach (string macro_name in macro_names)
         {
-            XmlNode month = dom.CreateElement("class");
-            year.AppendChild(month);
-            DomUtil.SetAttr(month, "name", now.Year.ToString() + "年" + (i + 1).ToString() + "月");
-            DomUtil.SetAttr(month, "date", now.Year.ToString().PadLeft(4, '0') + (i + 1).ToString().PadLeft(2, '0'));
+            XmlNode year = dom.CreateElement("class");
+            dom.DocumentElement.AppendChild(year);
+            //DomUtil.SetAttr(year, "name", now.Year.ToString() + "年");
+            //DomUtil.SetAttr(year, "date", now.Year.ToString().PadLeft(4, '0'));
+            DomUtil.SetAttr(year, "name", "%" + macro_name + "%年");
+            DomUtil.SetAttr(year, "date", "%" + macro_name + "%");
+
+            // 12个月
+            for (int i = 0; i < 12; i++)
+            {
+                XmlNode month = dom.CreateElement("class");
+                year.AppendChild(month);
+                //DomUtil.SetAttr(month, "name", now.Year.ToString() + "年" + (i + 1).ToString() + "月");
+                //DomUtil.SetAttr(month, "date", now.Year.ToString().PadLeft(4, '0') + (i + 1).ToString().PadLeft(2, '0'));
+                DomUtil.SetAttr(month, "name", "%" + macro_name + "%年" + (i + 1).ToString() + "月");
+                DomUtil.SetAttr(month, "date", "%" + macro_name + "%" + (i + 1).ToString().PadLeft(2, '0'));
+            }
         }
 
         dom.Save(strFilename);
@@ -405,13 +438,13 @@ ref sessioninfo) == false)
         }
         else
             e.Closed = false;
-            
+
     }
 
     static List<XmlNode> GetParentNodes(XmlNode root, string strDate)
     {
         List<XmlNode> results = new List<XmlNode>();
-        XmlNode node = root.OwnerDocument.SelectSingleNode("//*[@date='"+strDate+"']");
+        XmlNode node = root.OwnerDocument.SelectSingleNode("//*[@date='" + strDate + "']");
         if (node == null)
             return results;
         node = node.ParentNode;
@@ -541,7 +574,7 @@ string strNodePath)
     // 把三段的路径缩减为两段形态
     static string MakePath(string strText)
     {
-        string[] parts = strText.Split(new char[] {'/'});
+        string[] parts = strText.Split(new char[] { '/' });
         if (parts.Length <= 2)
             return strText;
         return parts[1] + "/" + parts[2];   // 丢掉第一段
@@ -554,7 +587,7 @@ string strNodePath)
         {
             if (s == strPath)
                 return true;
-            string[] s_parts = s.Split(new char[] {'/'});
+            string[] s_parts = s.Split(new char[] { '/' });
             string[] c_parts = strPath.Split(new char[] { '/' });
             if (s_parts.Length == 1 && s_parts[0] == c_parts[0])
                 return true;
@@ -629,7 +662,7 @@ string strNodePath)
             return strDate + "年";
 
         if (strDate.Length == 6)
-            return strDate.Substring(0, 4) + "年" + strDate.Substring(4, 2).Trim(new char[] {'0'}) + "月";
+            return strDate.Substring(0, 4) + "年" + strDate.Substring(4, 2).Trim(new char[] { '0' }) + "月";
 
         return strDate;
     }
@@ -684,7 +717,7 @@ string strNodePath)
         }
         else
             bForce = true;
-        
+
 
         if (bForce == true)
         {
@@ -748,7 +781,7 @@ string strNodePath)
 
         List<string> selected_itemspaths = this.StatisEntryControl1.GetSelectedItems();
 
-        string strTotalXmlFilename = PathUtil.MergePath(app.DataDir, "~statis_entry_"+strRole+".xml");
+        string strTotalXmlFilename = PathUtil.MergePath(app.DataDir, "~statis_entry_" + strRole + ".xml");
 
         nRet = SetEntryPanel(dom.DocumentElement.OuterXml,
             strTotalXmlFilename,
@@ -843,7 +876,7 @@ string strNodePath)
                 series.Points.AddXY(current_date, d);
 
                 current_date = current_date.AddDays(1);
-            CONTINUE:
+                CONTINUE:
                 i++;
             }
 
@@ -906,10 +939,10 @@ string strNodePath)
     static string GetItemPath(XmlNode node)
     {
         string strResult = "";
-        while(node != null && node != node.OwnerDocument.DocumentElement)
+        while (node != null && node != node.OwnerDocument.DocumentElement)
         {
             string strName = "";
-            
+
             if (node.Name == "item" || node.Name == "category")
                 strName = DomUtil.GetAttr(node, "name");
             else
@@ -936,7 +969,7 @@ string strNodePath)
     {
         StatisEntryControl1_CheckedChanged(sender, e);
     }
-    
+
 
     // 将当前数据XML中的事项信息和累积文件合并。如果发现有增补，则修改累积文件
     int PrepareXml(
@@ -958,7 +991,7 @@ string strNodePath)
         }
         catch (Exception ex)
         {
-            strError = "将XML文件 '"+strTotalXmlFilename+"' 装入XMLDOM时出错: " + ex.Message;
+            strError = "将XML文件 '" + strTotalXmlFilename + "' 装入XMLDOM时出错: " + ex.Message;
             return -1;
         }
 
@@ -1030,7 +1063,7 @@ string strNodePath)
             if (string.IsNullOrEmpty(strValue) == true)
                 continue;
             string strCategoryName = DomUtil.GetAttr(source_cat, "name");
-            XmlNode target_cat = target_dom.DocumentElement.SelectSingleNode("category[@name='"+strCategoryName+"']");
+            XmlNode target_cat = target_dom.DocumentElement.SelectSingleNode("category[@name='" + strCategoryName + "']");
             if (target_cat == null)
                 continue;
 
@@ -1070,7 +1103,7 @@ string strNodePath)
             string strCategoryName = DomUtil.GetAttr(source_node, "name");
 
             // 看看目标中是否有这个<category>元素
-            XmlNode target_node = total_dom.DocumentElement.SelectSingleNode("category[@name='"+strCategoryName+"']");
+            XmlNode target_node = total_dom.DocumentElement.SelectSingleNode("category[@name='" + strCategoryName + "']");
             if (target_node == null)
             {
                 target_node = total_dom.CreateElement("category");
@@ -1084,7 +1117,7 @@ string strNodePath)
             foreach (XmlNode source_item in source_items)
             {
                 string strItemName = DomUtil.GetAttr(source_item, "name");
-                XmlNode target_item = target_node.SelectSingleNode("item[@name='"+strItemName+"']");
+                XmlNode target_item = target_node.SelectSingleNode("item[@name='" + strItemName + "']");
                 if (target_item == null)
                 {
                     target_item = total_dom.CreateElement("item");
@@ -1114,7 +1147,7 @@ string strNodePath)
                 goto ERROR1;
         }
         return;
-    ERROR1:
+        ERROR1:
         this.Page.Response.Write(HttpUtility.HtmlEncode(strError));
         this.Page.Response.End();
         return;
