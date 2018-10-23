@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -87,10 +82,22 @@ namespace DigitalPlatform.Drawing
         private void CameraClipDialog_Load(object sender, EventArgs e)
         {
             // this.qrRecognitionControl1.BeginInvoke(new Action<string>(this.qrRecognitionControl1.DisplayText), "test");
+#if NO
             this.qrRecognitionControl1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
                 Color.Gray,
                 64,
                 2000);
+#endif
+            {
+                // 2018/10/23
+                if (this.qrRecognitionControl1.Image != null)
+                    this.qrRecognitionControl1.Image.Dispose();
+
+                this.qrRecognitionControl1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
+                    Color.Gray,
+                    64,
+                    2000); ;
+            }
 
             this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
 
@@ -390,7 +397,7 @@ namespace DigitalPlatform.Drawing
                 Clipboard.SetImage(this.pictureBox_result.Image);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -445,7 +452,7 @@ namespace DigitalPlatform.Drawing
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

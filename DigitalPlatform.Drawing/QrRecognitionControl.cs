@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
@@ -32,7 +28,7 @@ namespace DigitalPlatform.Drawing
         }
 
         private CameraDevices camDevices;
-        private Bitmap currentBitmapForDecoding;
+        private Bitmap _currentBitmapForDecoding;
         private readonly Thread decodingThread;
         private Result currentResult;
         private readonly Pen resultRectPen;
@@ -59,6 +55,10 @@ namespace DigitalPlatform.Drawing
         {
             if (disposing)
             {
+                // 2018/10/23
+                if (_currentBitmapForDecoding != null)
+                    _currentBitmapForDecoding.Dispose();
+
                 if (resultRectPen != null)
                     resultRectPen.Dispose();
 
@@ -417,10 +417,10 @@ namespace DigitalPlatform.Drawing
             var reader = new BarcodeReader();
             while (true)
             {
-                if (currentBitmapForDecoding != null)
+                if (_currentBitmapForDecoding != null)
                 {
 
-                    var result = reader.Decode(currentBitmapForDecoding);
+                    var result = reader.Decode(_currentBitmapForDecoding);
                     if (result != null)
                     {
                         Invoke(new Action<Result>(ShowResult), result);
@@ -428,10 +428,9 @@ namespace DigitalPlatform.Drawing
                     else
                         this.Invoke(new Action<Color>(PaintColor), Color.Yellow);
 
-
                     if ((_iFrameCount % 2) == 0)
                     {
-                        motionLevel = motionDetector.ProcessFrame(currentBitmapForDecoding);
+                        motionLevel = motionDetector.ProcessFrame(_currentBitmapForDecoding);
                         // Debug.WriteLine("level=" + motionLevel.ToString());
                         if (motionLevel > AWAKE_LEVEL)
                         {
@@ -441,8 +440,8 @@ namespace DigitalPlatform.Drawing
                     }
                     _iFrameCount++;
 
-                    currentBitmapForDecoding.Dispose();
-                    currentBitmapForDecoding = null;
+                    _currentBitmapForDecoding.Dispose();
+                    _currentBitmapForDecoding = null;
                 }
                 int nInterval = 1000;
                 if (motionLevel > AWAKE_LEVEL)
@@ -538,7 +537,7 @@ namespace DigitalPlatform.Drawing
 
         int _inNewFrame = 0;
 
-        int _sourceFrameCount = 0;
+        // int _sourceFrameCount = 0;
 
         private void Current_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
@@ -551,9 +550,9 @@ namespace DigitalPlatform.Drawing
             _inNewFrame++;
             try
             {
-                if (currentBitmapForDecoding == null)
+                if (_currentBitmapForDecoding == null)
                 {
-                    currentBitmapForDecoding = (Bitmap)eventArgs.Frame.Clone();
+                    _currentBitmapForDecoding = (Bitmap)eventArgs.Frame.Clone();
                 }
                 //if ((_sourceFrameCount % 2) == 1)
                 BeginInvoke(new Action<Bitmap>(ShowFrame), eventArgs.Frame.Clone());
@@ -572,7 +571,6 @@ namespace DigitalPlatform.Drawing
             }
 
             _inNewFrame--;
-
         }
 
         bool _bFirstImageFilled = false;
@@ -591,7 +589,10 @@ namespace DigitalPlatform.Drawing
             if (pictureBox1.Height < _frameHeight)
                 pictureBox1.Height = _frameHeight;
 
-            pictureBox1.Image = frame;
+            // pictureBox1.Image = frame;
+            // 2018/10/23
+            ImageUtil.SetImage(pictureBox1, frame);
+
 #if NO
             if (_bFirstImageFilled == false)
             {
@@ -631,7 +632,7 @@ namespace DigitalPlatform.Drawing
         public static AForge.Vision.Motion.MotionDetector GetDefaultMotionDetector()
         {
             AForge.Vision.Motion.IMotionDetector detector = null;
-            AForge.Vision.Motion.IMotionProcessing processor = null;
+            // AForge.Vision.Motion.IMotionProcessing processor = null;
             AForge.Vision.Motion.MotionDetector motionDetector = null;
 
             detector = new AForge.Vision.Motion.TwoFramesDifferenceDetector()
@@ -664,7 +665,6 @@ namespace DigitalPlatform.Drawing
              * */
 
             motionDetector = new AForge.Vision.Motion.MotionDetector(detector);
-
             return (motionDetector);
         }
 #if NO
