@@ -709,16 +709,24 @@ namespace DigitalPlatform.OPAC
         {
             strError = "";
 
-            DirectoryInfo di = new DirectoryInfo(strDataDir);
-            if (di.Exists == false)
-                return 0;
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strDataDir);
+                if (di.Exists == false)
+                    return 0;
 
-            string strExistingFileName = Path.Combine(strDataDir,
-                "opac.xml");
-            if (File.Exists(strExistingFileName) == true)
-                return 2;
+                string strExistingFileName = Path.Combine(strDataDir,
+                    "opac.xml");
+                if (File.Exists(strExistingFileName) == true)
+                    return 2;
 
-            return 1;
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "检测数据目录名 '" + strDataDir + "' 时出现异常: " + ex.Message;
+                return -1;
+            }
         }
 
         // 创建数据目录，并复制进基本内容

@@ -5199,11 +5199,22 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
         private async void MenuItem_restoreDp2library_Click(object sender, EventArgs e)
         {
-            NormalResult result = await RestoreDp2library();
-            this.Invoke((Action)(() =>
+            this.EnableControls(false);
+            try
             {
-                MessageBox.Show(this, result.ErrorInfo);
-            }));
+                NormalResult result = await RestoreDp2library();
+                if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, result.ErrorInfo);
+                    }));
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
         }
 
         async Task<NormalResult> RestoreDp2library()
@@ -5328,7 +5339,6 @@ MessageBoxDefaultButton.Button2);
             });
             owner.Invoke((Action)(() =>
             {
-
                 dlg.Font = owner.Font;
                 dlg.Text = "正在恢复实例 " + param_base.DataDir;
                 //dlg.SourceFilePath = strPath;
