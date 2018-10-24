@@ -68,6 +68,10 @@ namespace DigitalPlatform.Script
         /// <returns>返回库名部分</returns>
         public static string GetDbName(string strPath)
         {
+            // 2018/10/24
+            if (strPath == null)
+                return "";
+
             int nRet = strPath.LastIndexOf("/");
             if (nRet == -1)
                 return strPath;
@@ -85,6 +89,10 @@ namespace DigitalPlatform.Script
         /// <returns>返回记录号部分</returns>
         public static string GetRecordID(string strPath)
         {
+            // 2018/10/24
+            if (strPath == null)
+                return "";
+
             int nRet = strPath.LastIndexOf("/");
             if (nRet == -1)
                 return "";
@@ -108,11 +116,10 @@ namespace DigitalPlatform.Script
             string strDbName = GetDbName(strRecPath);
             string strRecID = GetRecordID(strRecPath);
 
-            string strOutputUri = "";
             ReplaceUri(strUri,
                 strDbName,
                 strRecID,
-                out strOutputUri);
+                out string strOutputUri);
 
             return strOutputUri;
         }
@@ -493,15 +500,6 @@ namespace DigitalPlatform.Script
 
             u = u.Substring(4).Trim();
 
-#if NO
-            XmlElement container = this.WebUiDom.DocumentElement.SelectSingleNode("856_maps") as XmlElement;
-            if (container == null)
-            {
-                strError = "webui.xml 中没有配置 856_maps 元素";
-                return -1;
-            }
-#endif
-
             List<string> parts = StringUtil.ParseTwoPart(u, "@");
             string uri = parts[0];
             string type = parts[1];
@@ -512,7 +510,7 @@ namespace DigitalPlatform.Script
                 item = container.SelectSingleNode("item[@type='default']") as XmlElement;
                 if (item == null)
                 {
-                    strError = "webui.xml 中没有配置 type='default' 的 856_maps/item 元素";
+                    strError = "配置文件中没有配置 type='default' 的 856_maps/item 元素";
                     return -1;
                 }
             }
@@ -521,7 +519,7 @@ namespace DigitalPlatform.Script
                 item = container.SelectSingleNode("item[@type='" + type + "']") as XmlElement;
                 if (item == null)
                 {
-                    strError = "webui.xml 中没有配置 type='" + type + "' 的 856_maps/item 元素";
+                    strError = "配置文件中没有配置 type='" + type + "' 的 856_maps/item 元素";
                     return -1;
                 }
             }
@@ -529,7 +527,7 @@ namespace DigitalPlatform.Script
             string template = item.GetAttribute("template");
             if (string.IsNullOrEmpty(template))
             {
-                strError = "webui.xml 中元素 " + item.OuterXml + " 没有配置 template 属性";
+                strError = "配置文件中元素 " + item.OuterXml + " 没有配置 template 属性";
                 return -1;
             }
 
@@ -553,7 +551,6 @@ namespace DigitalPlatform.Script
 
         #endregion
 
-
         // 创建 table 中的对象资源局部 XML。这是一个 <table> 片段
         // 前导语 $3
         // 链接文字 $y $f
@@ -565,7 +562,9 @@ namespace DigitalPlatform.Script
         public static string BuildObjectXmlTable(string strMARC,
             // string strRecPath,
             BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.None,
-            string strMarcSyntax = "unimarc")
+            string strMarcSyntax = "unimarc",
+            string strRecPath = null,
+            XmlElement maps_container = null)
         {
             // Debug.Assert(false, "");
 
@@ -595,7 +594,32 @@ namespace DigitalPlatform.Script
                 string s_q = field.select("subfield[@name='q']").FirstContent;  // 注意， FirstContent 可能会返回 null
 
                 string u = field.select("subfield[@name='u']").FirstContent;
-                // string strUri = MakeObjectUrl(strRecPath, u);
+
+                // 2018/10/24
+                Hashtable parameters = new Hashtable();
+                if (maps_container != null
+                    && (style & BuildObjectHtmlTableStyle.Template) != 0)
+                {
+                    // string strUri = MakeObjectUrl(strRecPath, u);
+                    // return:
+                    //     -1  出错
+                    //     0   没有发生宏替换
+                    //     1   发生了宏替换
+                    int nRet = Map856u(u,
+                        strRecPath,
+                        maps_container,
+                        parameters,
+                        out string strUri,
+                        out string strError);
+                    if (nRet == -1)
+                    {
+                        strUri = "!error: 对 858$u 内容 '" + u + "' 进行映射变换时出错: " + strError;
+                        u = strUri;
+                    }
+                    if (nRet == 1)
+                        u = strUri;
+                }
+
 
                 string strSaveAs = "";
                 if (string.IsNullOrEmpty(s_q) == true   // 2016/9/4
@@ -677,6 +701,9 @@ namespace DigitalPlatform.Script
 
                 if (string.IsNullOrEmpty(u) == false)
                     line.SetAttribute("uri", u);
+
+                if (parameters != null && parameters.Count > 0)
+                    line.SetAttribute("uriEnv", StringUtil.BuildParameterString(parameters, ',', '=', "url"));
 
                 if (string.IsNullOrEmpty(s_q) == false)
                     line.SetAttribute("mime", s_q);

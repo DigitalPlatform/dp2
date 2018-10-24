@@ -13762,7 +13762,7 @@ type.ProcessCommand);
 
             try
             {
-                List<string> formats = new List<string> { "summary", "table" };
+                List<string> formats = new List<string> { "summary", "table:*,object_template" };
                 string[] results = null;
                 byte[] timestamp = null;
 
@@ -13807,7 +13807,8 @@ type.ProcessCommand);
             dlg.Text = "书目记录摘要";
             dlg.HtmlString = "<html><body>" +
                 "<div>" + HttpUtility.HtmlEncode(strBiblioSummary) + "</div>" +
-                "<div>" + HttpUtility.HtmlEncode(strBiblioTable).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
+                "<div>" + HttpUtility.HtmlEncode(strBiblioTable).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>" +
+                "<div>" + HttpUtility.HtmlEncode(strError).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
                 + "</body></html>";
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);

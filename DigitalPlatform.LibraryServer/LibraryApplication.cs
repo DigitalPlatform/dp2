@@ -3395,12 +3395,12 @@ namespace DigitalPlatform.LibraryServer
                             "//virtualDatabases",
                             "//valueTables",
                             "//calendars",
-                            "//traceDTLP",
-                            "//zhengyuan",
-                            "//dkyw",
+                            "traceDTLP",
+                            "zhengyuan",
+                            "dkyw",
                             "patronReplication",  // "//patronReplication", 2018/9/5
                             "//clientFineInterface",
-                            "//yczb",
+                            "yczb",
                             "script",
                             "mailTemplates",
                             "smtpServer",
@@ -3418,6 +3418,7 @@ namespace DigitalPlatform.LibraryServer
                             "cataloging",
                             "serverReplication",
                             "authdbgroup",  // 2018/9/2
+                            "maps_856u",    // 2018/10/24
                         };
 
                         RestoreElements(writer, elements);

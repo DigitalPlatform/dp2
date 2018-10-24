@@ -697,6 +697,7 @@ ISBD Structure
             string strSyntax,
             string strRecPath,
             string strStyle,
+            XmlElement maps_container,
             out string strBiblio,
             out string strError)
         {
@@ -752,6 +753,7 @@ ISBD Structure
                             strRecPath,
                             strMarc,
                             strStyle,
+                            maps_container,
                             out results,
                             out strError);
                         if (nRet == -1)
@@ -763,6 +765,7 @@ ISBD Structure
     strRecPath,
     strMarc,
     strStyle,
+    maps_container,
     out results,
     out strError);
                         if (nRet == -1)

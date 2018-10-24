@@ -1250,11 +1250,13 @@ namespace DigitalPlatform.LibraryServer
 
                     if (string.IsNullOrEmpty(strBiblioXml) == false)
                     {
+                        XmlElement maps_container = this.LibraryCfgDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
                         nRet = this.ConvertBiblioXmlToTable(
                             strBiblioXml,
                             null,
                             strCurrentBiblioRecPath,
                             style,
+                            maps_container,
                             out strBiblio,
                             out strError);
                         if (nRet == -1)

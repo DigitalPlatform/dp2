@@ -18,6 +18,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonDialog;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -965,7 +966,19 @@ namespace dp2Circulation
                         string strMessage = "字符串 '" + strHanzi + "' 取汉语著者号码时出现意外状况: " + strLastError + "\r\n\r\n后面软件会自动尝试用卡特表方式为拼音字符串 '" + strPinyin + "' 取号。";
                         strAuthor = strPinyin;
                         type = "Cutter-Sanborn Three-Figure";
-                        MessageBox.Show(this.Form, strMessage);
+                        // MessageBox.Show(this.Form, strMessage);
+
+                        object o = Program.MainForm.ParamTable["gcat_warning"];
+                        bool bTemp = (o == null ? false : (bool)o);
+                        if (bTemp == false)
+                        {
+                            MessageDialog.Show(this.Form,
+                                "汉语著者号码缺字",
+                                strMessage,
+                                "下次不再出现此对话框",
+                                ref bTemp);
+                            Program.MainForm.ParamTable["gcat_warning"] = bTemp;
+                        }
 
                         // 尝试把信息发给 dp2003.com
                         Program.MainForm.ReportError("dp2circulation 创建索取号", "(安静汇报)" + strMessage);

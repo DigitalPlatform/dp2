@@ -9342,13 +9342,14 @@ dlg.UiState);
             }
 
             Hashtable rule_name_table = null;
-            bool bTableExists = false;
+            bool bTableExists = false;  // 编目规则对照表是否存在
             // 将馆藏地点名和编目规则名的对照表装入内存
             // return:
             //      -1  出错
             //      0   文件不存在
             //      1   成功
-            nRet = LoadRuleNameTable(PathUtil.MergePath(Program.MainForm.DataDir, "cataloging_rules.xml"),
+            nRet = LoadRuleNameTable(PathUtil.MergePath(Program.MainForm.UserDir, // Program.MainForm.DataDir,
+                "cataloging_rules.xml"),
                 out rule_name_table,
                 out strError);
             if (nRet == -1)
@@ -9532,6 +9533,7 @@ dlg.UiState);
                 if (nRet == -1)
                     goto ERROR1;
 
+                bool bRuled = false;    // 是否被编目规则过滤过
                 string strMARC = "";
                 string strMarcSyntax = "";
                 MarcRecord record = null;
@@ -9550,6 +9552,7 @@ dlg.UiState);
                     {
 
                         strMARC = "";
+                        bRuled = false;
                         strMarcSyntax = "";
                         // 将XML格式转换为MARC格式
                         // 自动从数据记录中获得MARC语法
@@ -9569,15 +9572,22 @@ dlg.UiState);
 
                         record = new MarcRecord(strMARC);
 
-                        // 按照编目规则过滤
-                        // 获得一个特定风格的 MARC 记录
-                        // parameters:
-                        //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
-                        // return:
-                        //      0   没有实质性修改
-                        //      1   有实质性修改
-                        nRet = MarcUtil.GetMappedRecord(ref strMARC,
-                            strCatalogingRule);
+                        if (bTableExists == false)
+                        {
+                            // 按照编目规则过滤
+                            // 获得一个特定风格的 MARC 记录
+                            // parameters:
+                            //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
+                            // return:
+                            //      0   没有实质性修改
+                            //      1   有实质性修改
+                            nRet = MarcUtil.GetMappedRecord(ref strMARC,
+                                strCatalogingRule);
+                            if (nRet == 1)
+                                record = new MarcRecord(strMARC);
+                            bRuled = true;
+                        }
+
                         if (dlg.RemoveField998 == true)
                         {
                             record.select("field[@name='998']").detach();
@@ -9602,6 +9612,9 @@ dlg.UiState);
                         string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
                         strLocation = StringUtil.GetPureLocation(strLocation);
 
+                        // TODO: 如果发现编目规则不同(要汇总到底有几个规则)，那要把每个不同编目规则变换出来的 MARC 书目记录都保存，最后一并输出
+                        // 原本输出一条的书目记录，因为编目规则不同而输出多条，和自动合并创建 905 等功能矛盾了，要思考一下如何做
+                        // 或者用同一书目记录下第一个遇到的规则作为最后的规则
                         if (bTableExists == true)
                         {
                             strCatalogingRule = "";
@@ -9634,6 +9647,21 @@ dlg.UiState);
 
                                     rule_name_table[strLocation] = strCatalogingRule; // 储存到内存，后面就不再作相同的询问了
                                 }
+
+                                if (bRuled == false)
+                                {
+                                    strMARC = record.Content;
+                                    // 从一个 origin marc 变换为最终需要导出的 marc
+                                    // return:
+                                    //      0   没有实质性修改
+                                    //      1   有实质性修改
+                                    nRet = MarcUtil.GetMappedRecord(ref strMARC,
+        strCatalogingRule);
+                                    if (nRet == 1)
+                                        record = new MarcRecord(strMARC);
+
+                                    bRuled = true;
+                                }
                             }
                         }
 
@@ -9656,7 +9684,6 @@ dlg.UiState);
                             record,
                             sub_items);
 
-                        byte[] baTarget = null;
                         // 将MARC机内格式转换为ISO2709格式
                         // parameters:
                         //      strSourceMARC   [in]机内格式MARC记录。
@@ -9670,7 +9697,7 @@ dlg.UiState);
                             record.Text,
                             strMarcSyntax,
                             targetEncoding,
-                            out baTarget,
+                            out byte[] baTarget,
                             out strError);
                         if (nRet == -1)
                             throw new Exception(strError);

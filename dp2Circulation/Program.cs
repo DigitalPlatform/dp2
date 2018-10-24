@@ -189,18 +189,26 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
 
         public static void ReleaseMutex()
         {
-            ExecutionContext.Run(context, (state) =>
+            try
             {
-                if (mutex != null)
+                ExecutionContext.Run(context, (state) =>
                 {
+                    if (mutex != null)
+                    {
 #if NO
                     mutex.ReleaseMutex();
                     mutex.Dispose();
 #endif
-                    mutex.Close();
-                    mutex = null;
-                }
-            }, null);
+                        mutex.Close();
+                        mutex = null;
+                    }
+                }, null);
+            }
+            catch
+            {
+                mutex.Close();
+                mutex = null;
+            }
         }
 
         static List<string> _promptStrings = new List<string>();
