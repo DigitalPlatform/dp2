@@ -37,7 +37,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>53</ApplicationRevision>
+    <ApplicationRevision>57</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -74,7 +74,7 @@
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
@@ -247,6 +247,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
       <Project>{2f085431-027a-4ddf-9b3d-83219e629fa1}</Project>
       <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Install\DigitalPlatform.LibraryServer.Install.csproj">
+      <Project>{80344e08-5816-438f-bc88-f4bf038648cc}</Project>
+      <Name>DigitalPlatform.LibraryServer.Install</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer\DigitalPlatform.LibraryServer.csproj">
       <Project>{E153CC55-DA01-4403-A53F-AF801BDDF4BA}</Project>

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -43,7 +43,7 @@ namespace dp2Catalog
             this.Channels.AfterLogin += new AfterLoginEventHandle(Channels_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
         }
 
@@ -55,7 +55,7 @@ namespace dp2Catalog
             dp2Server server = this.MainForm.Servers[channel.Url];
             if (server == null)
             {
-                // e.ErrorInfo = "Ã»ÓĞÕÒµ½ URL Îª " + channel.Url + " µÄ·şÎñÆ÷¶ÔÏó";
+                // e.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ° URL ä¸º " + channel.Url + " çš„æœåŠ¡å™¨å¯¹è±¡";
                 return;
             }
 
@@ -63,7 +63,7 @@ namespace dp2Catalog
             if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
-                string strTitle = "ĞŞ¸ÄÃÜÂë´°ĞèÒªÏÈÉèÖÃĞòÁĞºÅ²ÅÄÜ·ÃÎÊ·şÎñÆ÷ " + server.Name + " " + server.Url;
+                string strTitle = "ä¿®æ”¹å¯†ç çª—éœ€è¦å…ˆè®¾ç½®åºåˆ—å·æ‰èƒ½è®¿é—®æœåŠ¡å™¨ " + server.Name + " " + server.Url;
                 int nRet = this.MainForm.VerifySerialCode(strTitle,
                     "",
                     true,
@@ -73,7 +73,7 @@ namespace dp2Catalog
                     channel.Close();
                     e.ErrorInfo = strTitle;
 #if NO
-                    MessageBox.Show(this.MainForm, "ĞŞ¸ÄÃÜÂë´°ĞèÒªÏÈÉèÖÃĞòÁĞºÅ²ÅÄÜÊ¹ÓÃ");
+                    MessageBox.Show(this.MainForm, "ä¿®æ”¹å¯†ç çª—éœ€è¦å…ˆè®¾ç½®åºåˆ—å·æ‰èƒ½ä½¿ç”¨");
                     API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
 #endif
                     return;
@@ -93,7 +93,7 @@ namespace dp2Catalog
             dp2Server server = this.MainForm.Servers[channel.Url];
             if (server == null)
             {
-                e.ErrorInfo = "Ã»ÓĞÕÒµ½ URL Îª " + channel.Url + " µÄ·şÎñÆ÷¶ÔÏó";
+                e.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ° URL ä¸º " + channel.Url + " çš„æœåŠ¡å™¨å¯¹è±¡";
                 e.Failed = true;
                 e.Cancel = true;
                 return;
@@ -113,7 +113,7 @@ namespace dp2Catalog
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
 
 #if SN
-                // ´ÓĞòÁĞºÅÖĞ»ñµÃ expire= ²ÎÊıÖµ
+                // ä»åºåˆ—å·ä¸­è·å¾— expire= å‚æ•°å€¼
                 string strExpire = this.MainForm.GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
@@ -121,7 +121,7 @@ namespace dp2Catalog
                 e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // Á¢¼´·µ»Ø, ÒÔ±ã×÷µÚÒ»´Î ²»³öÏÖ ¶Ô»°¿òµÄ×Ô¶¯µÇÂ¼
+                    return; // ç«‹å³è¿”å›, ä»¥ä¾¿ä½œç¬¬ä¸€æ¬¡ ä¸å‡ºç° å¯¹è¯æ¡†çš„è‡ªåŠ¨ç™»å½•
             }
 
             // 
@@ -213,7 +213,7 @@ namespace dp2Catalog
                 this.Channel.Abort();
         }
 
-        // Í¼Êé¹İ·şÎñÆ÷Ãû
+        // å›¾ä¹¦é¦†æœåŠ¡å™¨å
         public string LibraryServerName
         {
             get
@@ -229,9 +229,9 @@ namespace dp2Catalog
 
         private void ChangePasswordForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -261,20 +261,20 @@ namespace dp2Catalog
 
             if (this.textBox_dp2library_userName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈëÓÃ»§Ãû¡£");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥ç”¨æˆ·åã€‚");
                 this.textBox_dp2library_userName.Focus();
                 return;
             }
 
             if (this.textBox_dp2library_newPassword.Text != this.textBox_dp2library_confirmNewPassword.Text)
             {
-                MessageBox.Show(this, "ĞÂÃÜÂë ºÍ È·ÈÏĞÂÃÜÂë²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£");
+                MessageBox.Show(this, "æ–°å¯†ç  å’Œ ç¡®è®¤æ–°å¯†ç ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚");
                 this.textBox_dp2library_newPassword.Focus();
                 return;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚĞŞ¸Ä dp2library ÓÃ»§ÃÜÂë ...");
+            stop.Initial("æ­£åœ¨ä¿®æ”¹ dp2library ç”¨æˆ·å¯†ç  ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -287,16 +287,16 @@ namespace dp2Catalog
             {
                 long lRet = 0;
 
-                // »ñµÃserver url
+                // è·å¾—server url
                 if (String.IsNullOrEmpty(this.LibraryServerName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                    strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                     goto ERROR1;
                 }
                 dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
                 if (server == null)
                 {
-                    strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                    strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                     goto ERROR1;
                 }
 
@@ -305,14 +305,14 @@ namespace dp2Catalog
                 this.Channel = this.Channels.GetChannel(strServerUrl);
 
 
-                // ·ÇÇ¿ÖÆĞŞ¸ÄÃÜÂë£¬¼´±¾ÈËĞŞ¸Ä
+                // éå¼ºåˆ¶ä¿®æ”¹å¯†ç ï¼Œå³æœ¬äººä¿®æ”¹
                 if (this.checkBox_dp2library_force.Checked == false)
                 {
 
                     // return:
                     //      -1  error
-                    //      0   µÇÂ¼Î´³É¹¦
-                    //      1   µÇÂ¼³É¹¦
+                    //      0   ç™»å½•æœªæˆåŠŸ
+                    //      1   ç™»å½•æˆåŠŸ
                     lRet = Channel.Login(this.textBox_dp2library_userName.Text,
                         this.textBox_dp2library_oldPassword.Text,
                         "location=dp2Catalog,type=worker,client=dp2catalog|" + Program.ClientVersion,
@@ -328,7 +328,7 @@ namespace dp2Catalog
 
                     if (lRet == 0)
                     {
-                        strError = "¾ÉÃÜÂë²»ÕıÈ·";
+                        strError = "æ—§å¯†ç ä¸æ­£ç¡®";
                         goto ERROR1;
                     }
 
@@ -351,13 +351,13 @@ namespace dp2Catalog
                     }
                 }
 
-                // Ç¿ÖÆĞŞ¸ÄÃÜÂë
+                // å¼ºåˆ¶ä¿®æ”¹å¯†ç 
                 if (this.checkBox_dp2library_force.Checked == true)
                 {
                     UserInfo info = new UserInfo();
                     info.UserName = this.textBox_dp2library_userName.Text;
                     info.Password = this.textBox_dp2library_newPassword.Text;
-                    // µ±actionÎª"resetpassword"Ê±£¬Ôòinfo.ResetPassword×´Ì¬²»Æğ×÷ÓÃ£¬ÎŞÂÛÔõÑù¶¼ÒªĞŞ¸ÄÃÜÂë¡£resetpassword²¢²»ĞŞ¸ÄÆäËûĞÅÏ¢£¬Ò²¾ÍÊÇËµinfoÖĞ³ıÁËPassword/UserNameÒÔÍâÆäËû³ÉÔ±µÄÖµÎŞĞ§¡£
+                    // å½“actionä¸º"resetpassword"æ—¶ï¼Œåˆ™info.ResetPasswordçŠ¶æ€ä¸èµ·ä½œç”¨ï¼Œæ— è®ºæ€æ ·éƒ½è¦ä¿®æ”¹å¯†ç ã€‚resetpasswordå¹¶ä¸ä¿®æ”¹å…¶ä»–ä¿¡æ¯ï¼Œä¹Ÿå°±æ˜¯è¯´infoä¸­é™¤äº†Password/UserNameä»¥å¤–å…¶ä»–æˆå‘˜çš„å€¼æ— æ•ˆã€‚
                     lRet = Channel.SetUser(
                         stop,
                         "resetpassword",
@@ -379,7 +379,7 @@ namespace dp2Catalog
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "dp2library ÓÃ»§ '" + this.textBox_dp2library_userName.Text + "' ÃÜÂëÒÑ¾­±»³É¹¦ĞŞ¸Ä¡£");
+            MessageBox.Show(this, "dp2library ç”¨æˆ· '" + this.textBox_dp2library_userName.Text + "' å¯†ç ä¿®æ”¹æˆåŠŸã€‚");
 
             this.textBox_dp2library_userName.SelectAll();
             this.textBox_dp2library_userName.Focus();
@@ -387,7 +387,7 @@ namespace dp2Catalog
         ERROR1:
             MessageBox.Show(this, strError);
 
-            // ½¹µãÖØĞÂ¶¨Î»µ½ÃÜÂëÊäÈëÓò
+            // ç„¦ç‚¹é‡æ–°å®šä½åˆ°å¯†ç è¾“å…¥åŸŸ
             this.textBox_dp2library_oldPassword.Focus();
             this.textBox_dp2library_oldPassword.SelectAll();
         }

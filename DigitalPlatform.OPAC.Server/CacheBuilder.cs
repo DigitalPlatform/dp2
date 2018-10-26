@@ -372,6 +372,40 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 兑现宏
+        // parameters:
+        //      attr_list   要替换的属性名列表。例如 name, command
+        public static int MacroDom(XmlDocument dom,
+            List<string> attr_list,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            string strResult = "";
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//class");
+            foreach (XmlElement node in nodes)
+            {
+                foreach (string attr in attr_list)
+                {
+                    string strName = node.GetAttribute(attr);
+                    if (string.IsNullOrEmpty(strName) == false
+                        && strName.IndexOf("%") != -1)
+                    {
+                        // 解析宏
+                        nRet = ParseMacro(
+                            strName,
+                            out strResult,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        node.SetAttribute(attr, strResult);
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+#if NO
         public static int MacroDom(XmlDocument dom,
             out string strError)
         {
@@ -412,6 +446,7 @@ namespace DigitalPlatform.OPAC.Server
 
             return 0;
         }
+#endif
 
         // 解析宏
         static int ParseMacro(
@@ -605,6 +640,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             nRet = CacheBuilder.MacroDom(dom,
+                new List<string> { "name", "date" },
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -1027,6 +1063,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             int nRet = CacheBuilder.MacroDom(dom,
+                new List<string> { "name", "date" },
                 out strError);
             if (nRet == -1)
                 return -1;

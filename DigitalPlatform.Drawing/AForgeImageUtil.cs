@@ -116,9 +116,10 @@ namespace DigitalPlatform.Drawing
                 param.MinObjectHeight = 500;
 
             Bitmap autoCropImage = null;
+            Bitmap grayImage = null;
+            Bitmap rotatedImage = null;
             try
             {
-
                 autoCropImage = selectedImage;
 
 #if NO
@@ -126,7 +127,7 @@ namespace DigitalPlatform.Drawing
                 Grayscale filter = new Grayscale(0.2125, 0.7154, 0.0721);
                 Bitmap grayImage = filter.Apply(autoCropImage);
 #endif
-                Bitmap grayImage = selectedImage.Clone(new Rectangle(0, 0, selectedImage.Width, selectedImage.Height),
+                grayImage = selectedImage.Clone(new Rectangle(0, 0, selectedImage.Width, selectedImage.Height),
                 System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                 // create instance of skew checker
                 DocumentSkewChecker skewChecker = new DocumentSkewChecker();
@@ -137,7 +138,7 @@ namespace DigitalPlatform.Drawing
                 rotationFilter.FillColor = Color.Black; // .White;
                 rotationFilter.KeepSize = true;
                 // rotate image applying the filter
-                Bitmap rotatedImage = rotationFilter.Apply(grayImage);
+                rotatedImage = rotationFilter.Apply(grayImage);
                 new ContrastStretch().ApplyInPlace(rotatedImage);
                 new Threshold(100).ApplyInPlace(rotatedImage);
                 BlobCounter bc = new BlobCounter();
@@ -236,6 +237,12 @@ namespace DigitalPlatform.Drawing
             {
                 if (autoCropImage != null)
                     autoCropImage.Dispose();
+                // 2018/10/23
+                if (rotatedImage != null)
+                    rotatedImage.Dispose();
+                // 2018/10/23
+                if (grayImage != null)
+                    grayImage.Dispose();
             }
             return true;
         }

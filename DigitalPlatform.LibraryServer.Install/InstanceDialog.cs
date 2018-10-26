@@ -728,7 +728,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   放弃验证
                     //      1   成功
-                    nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
+                    nRet = LibraryInstallHelper.LibrarySupervisorLoginByInstanceName(this,
                         strInstanceName,
                         "删除实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
                         out strError);
@@ -1736,7 +1736,7 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  出错
                 //      0   放弃验证
                 //      1   成功
-                nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
+                nRet = LibraryInstallHelper.LibrarySupervisorLoginByInstanceName(this,
                     strInstanceName,
                     "删除实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
                     out strError);
@@ -1997,7 +1997,7 @@ MessageBoxDefaultButton.Button2);
                 //      -1  出错
                 //      0   放弃验证
                 //      1   成功
-                int nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
+                int nRet = LibraryInstallHelper.LibrarySupervisorLoginByInstanceName(this,
                     strInstanceName,
                     "恢复实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
                     out strError);

@@ -5197,6 +5197,206 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             MessageBox.Show(this, strError);
         }
 
+        private async void MenuItem_restoreDp2library_Click(object sender, EventArgs e)
+        {
+            this.EnableControls(false);
+            try
+            {
+                NormalResult result = await RestoreDp2library();
+                if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, result.ErrorInfo);
+                    }));
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
+        }
+
+        async Task<NormalResult> RestoreDp2library()
+        {
+            DialogResult result = MessageBox.Show(this,
+"确实要根据大备份文件恢复 dp2Library? \r\n\r\n(*** 警告：恢复操作会导致现有数据全部被来自大备份的数据覆盖，并无法撤回 ***)",
+"从大备份恢复 dp2Library",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return new NormalResult { Value = 0 };   // cancelled
+
+            string strRestoreMode = "";
+            {
+                SelectRestoreModeDialog dlg = new SelectRestoreModeDialog();
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    return new NormalResult { Value = 0 };   // cancelled
+
+                strRestoreMode = dlg.Action;
+                Debug.Assert(strRestoreMode == "full" || strRestoreMode == "blank", "");
+            }
+
+            {
+                // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
+                // 只需要 library.xml 即可，不需要 dp2library 在运行中。
+                // return:
+                //      -2  实例没有找到
+                //      -1  出错
+                //      0   放弃验证
+                //      1   成功
+                int nRet = LibraryInstallHelper.LibrarySupervisorLoginByDataDir(this,
+                    this.LibraryDataDir,
+                    "恢复 dp2library 前，需要验证您的 dp2library 管理员身份",
+                    out string strError);
+                if (nRet == -1)
+                {
+                    strError = strError + "\r\n\r\n已放弃恢复操作";
+                    return new NormalResult { Value = -1, ErrorInfo = strError};
+                }
+                if (nRet == 0)
+                    return new NormalResult();
+
+                if (nRet == -2)
+                    return new NormalResult { Value = -1, ErrorInfo = strError };
+            }
+
+            // TODO: 停止 dp2library 服务
+            dp2Library_stop();
+            try
+            {
+                string strDataDir = this.LibraryDataDir;
+
+                string strBackupFileName = "";
+
+                if (strRestoreMode == "full")
+                {
+                    OpenFileDialog dlg = new OpenFileDialog();
+
+                    dlg.Title = "请指定要导入的大备份文件名";
+                    // dlg.FileName = this.textBox_filename.Text;
+
+                    dlg.Filter = "大备份文件 (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
+                    dlg.RestoreDirectory = true;
+
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return new NormalResult { Value = 0 };   // cancelled
+
+                    strBackupFileName = dlg.FileName;
+                }
+                else
+                {
+                    OpenFileDialog dlg = new OpenFileDialog();
+
+                    dlg.Title = "请指定要使用的数据库定义文件名";
+                    dlg.Filter = "数据库定义文件 (*.dbdef.zip)|*.dbdef.zip|All files (*.*)|*.*";
+                    dlg.RestoreDirectory = true;
+
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return new NormalResult { Value = 0 };   // cancelled
+
+                    strBackupFileName = dlg.FileName;
+                }
+
+                LibraryInstallHelper.RestoreLibraryParam param_base = new LibraryInstallHelper.RestoreLibraryParam();
+                param_base.InstanceName = "*";  // 此参数暂时无用   // strInstanceName;
+                param_base.DataDir = strDataDir;
+                param_base.BackupFileName = strBackupFileName;
+                param_base.TempDirRoot = this.TempDir;
+                param_base.FastMode = true;
+
+                return await Task.Factory.StartNew(() =>
+                {
+                    return RestoreInstance(this, param_base);
+                });
+            }
+            finally
+            {
+                await dp2Library_start(true);
+            }
+        }
+
+
+        // 本函数会出现无模式对话框表示操作进程
+        static NormalResult RestoreInstance(
+            Control owner,
+ LibraryInstallHelper.RestoreLibraryParam param_base
+            )
+        {
+            string strError = "";
+
+            Stop stop = new Stop();
+
+            FileDownloadDialog dlg = null;
+            dlg = new FileDownloadDialog();
+            dlg.FormClosed += new FormClosedEventHandler(delegate (object o1, FormClosedEventArgs e1)
+            {
+                stop.DoStop();
+            });
+            owner.Invoke((Action)(() =>
+            {
+                dlg.Font = owner.Font;
+                dlg.Text = "正在恢复实例 " + param_base.DataDir;
+                //dlg.SourceFilePath = strPath;
+                //dlg.TargetFilePath = strTargetPath;
+                dlg.Show(owner);
+            }));
+
+            StopManager stopManager = new StopManager();
+            stopManager.Initial(dlg.MyCancelButton, dlg.MessageLabel, dlg.ProgressBar);
+#if NO
+            stopManager.OnDisplayMessage += new DisplayMessageEventHandler((sender, e) => {
+                dlg.SetMessage(e.Message);
+            });
+#endif
+
+            stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
+            stop.Register(stopManager, true);
+            stop.BeginLoop();
+
+            try
+            {
+                LibraryInstallHelper.RestoreLibraryParam param = new LibraryInstallHelper.RestoreLibraryParam();
+                param.Stop = stop;
+                param.DataDir = param_base.DataDir;
+                param.BackupFileName = param_base.BackupFileName;
+                param.TempDirRoot = param_base.TempDirRoot;
+                param.FastMode = param_base.FastMode;
+
+                // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
+                bool bRet = LibraryInstallHelper.RestoreLibrary(param);
+                if (bRet == false)
+                {
+                    strError = param.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                strError = "恢复实例 '" + param_base.DataDir + "' 完成";
+                return new NormalResult { Value = 1, ErrorInfo = strError };
+            }
+            finally
+            {
+                owner.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                    stop.EndLoop();
+                    stop.Unregister();
+                }));
+            }
+
+            ERROR1:
+#if NO
+            owner.Invoke((Action)(() =>
+            {
+                MessageBox.Show(owner, strError);
+            }));
+#endif
+            return new NormalResult { Value = -1, ErrorInfo = strError };
+        }
     }
 
     /*

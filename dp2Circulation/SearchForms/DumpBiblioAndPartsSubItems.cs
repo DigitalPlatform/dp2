@@ -104,9 +104,6 @@ namespace dp2Circulation
                 List<string> item_recpaths = (List<string>)groupTable[strBiblioRecPath];
                 foreach (string item_recpath in item_recpaths)
                 {
-
-                    string strItemXml = "";
-                    byte[] baItemTimestamp = null;
                     // 获得一条记录
                     //return:
                     //      -1  出错
@@ -117,8 +114,8 @@ namespace dp2Circulation
                         stop,
                         strDbType,
     item_recpath,
-    out strItemXml,
-    out baItemTimestamp,
+    out string strItemXml,
+    out byte[] baItemTimestamp,
     out strError);
                     if (nRet == -1)
                         return -1;

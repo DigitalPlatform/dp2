@@ -85,6 +85,7 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_restoreDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -140,7 +141,8 @@
             this.MenuItem_getSqllocaldbexePath,
             this.toolStripSeparator8,
             this.MenuItem_restartDp2library,
-            this.MenuItem_restartDp2Kernel});
+            this.MenuItem_restartDp2Kernel,
+            this.MenuItem_restoreDp2library});
             this.MenuItem_management1.Name = "MenuItem_management1";
             this.MenuItem_management1.Size = new System.Drawing.Size(88, 28);
             this.MenuItem_management1.Text = "维护(&M)";
@@ -506,11 +508,18 @@
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser1.Location = new System.Drawing.Point(0, 65);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(558, 357);
             this.webBrowser1.TabIndex = 7;
+            // 
+            // MenuItem_restoreDp2library
+            // 
+            this.MenuItem_restoreDp2library.Name = "MenuItem_restoreDp2library";
+            this.MenuItem_restoreDp2library.Size = new System.Drawing.Size(458, 30);
+            this.MenuItem_restoreDp2library.Text = "从大备份恢复 ...";
+            this.MenuItem_restoreDp2library.Click += new System.EventHandler(this.MenuItem_restoreDp2library_Click);
             // 
             // MainForm
             // 
@@ -525,7 +534,7 @@
             this.ForeColor = System.Drawing.SystemColors.WindowText;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "dp2Library XE V3";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -596,6 +605,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_configLibraryXmlMongoDB;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_setupMongoDB;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_restoreDp2library;
     }
 }
 

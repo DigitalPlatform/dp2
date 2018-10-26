@@ -3395,12 +3395,12 @@ namespace DigitalPlatform.LibraryServer
                             "//virtualDatabases",
                             "//valueTables",
                             "//calendars",
-                            "//traceDTLP",
-                            "//zhengyuan",
-                            "//dkyw",
+                            "traceDTLP",
+                            "zhengyuan",
+                            "dkyw",
                             "patronReplication",  // "//patronReplication", 2018/9/5
                             "//clientFineInterface",
-                            "//yczb",
+                            "yczb",
                             "script",
                             "mailTemplates",
                             "smtpServer",
@@ -3418,6 +3418,7 @@ namespace DigitalPlatform.LibraryServer
                             "cataloging",
                             "serverReplication",
                             "authdbgroup",  // 2018/9/2
+                            "maps_856u",    // 2018/10/24
                         };
 
                         RestoreElements(writer, elements);
@@ -7717,13 +7718,18 @@ out strError);
             if (channel == null)
                 throw new ArgumentException("channel 参数不应为空", "channel");
 
+            string strBrowseStyle = strStyle + ",id";
+            if (strStyle == "parent")
+                strBrowseStyle = "id,cols,format:@coldef://parent";
+
+
             Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
                 "default",
                 "", // strOuputStyle
                 1,
                 "zh",
-                strStyle + ",id",    // "id,xml,timestamp",
+                strBrowseStyle,    // "id,xml,timestamp",
                 out records,
                 out strError);
             if (lRet == -1)
@@ -7754,13 +7760,18 @@ out strError);
 
             aPath = new List<string>();
             aPath.Add(records[0].Path);
+
             if (records[0].RecordBody != null)
             {
                 strXml = records[0].RecordBody.Xml;
                 timestamp = records[0].RecordBody.Timestamp;
             }
 
-            // 如果命中结果多余一条，则继续获得第一条以后的各条的path
+            // 2018/10/21
+            if (strStyle == "parent")
+                strXml = records[0].Cols[0];
+
+            // 如果命中结果多于一条，则继续获得第一条以后的各条的path
             if (lHitCount > 1)  // TODO: && nMax > 1
             {
                 lRet = channel.DoGetSearchResult(

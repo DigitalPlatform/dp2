@@ -9335,6 +9335,8 @@ MessageBoxDefaultButton.Button2);
                                 info.ClearBackupImage();
                         }
 
+                        GC.Collect();
+
                         if (issue.SetCoverImage(info, out strError) == -1)
                             goto ERROR1;
                     }
