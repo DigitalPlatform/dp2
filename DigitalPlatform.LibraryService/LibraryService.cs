@@ -4630,7 +4630,6 @@ namespace dp2Library
                 }
 
                 string strBiblioDbName1 = "";
-                XmlDocument item_dom = null;
 
                 // 特殊用法 @barcode-list: 获得册记录路径列表
                 if (StringUtil.HasHead(strBarcode, "@barcode-list:") == true
@@ -4730,6 +4729,9 @@ namespace dp2Library
                 }
 
                 // 获得一条册、期、订购、评注记录
+                // parameters:
+                //      strRefID    当 strDbType 为 item 时，strRefID 中是册条码号。其他情况，是 refid 字符串
+                //      item_dom    [out] 返回记录的 XmlDocument 形态。注意有时候可能为 null (当 strXml 为空时)
                 // return:
                 //      -1  出错
                 //      0   没有找到
@@ -4744,7 +4746,7 @@ namespace dp2Library
                     ref strBiblioRecPath,
                     ref result,
                     out strXml,
-                    out item_dom,
+                    out XmlDocument item_dom,
                     out strError);
                 if (nRet == 0)
                     return result;
@@ -4915,12 +4917,12 @@ namespace dp2Library
                 // GET_OTHERINFO:
 
                 // 过滤<borrower>元素
-                // XmlDocument itemdom = null;
-                Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
-                Debug.Assert(item_dom != null, "");
+                // Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "string.IsNullOrEmpty(strBiblioRecPath) == false 未满足");
+                // Debug.Assert(item_dom != null, "item_dom != null 未满足");
 
                 // 修改<borrower>
-                if (strItemDbType == "item" && sessioninfo.GlobalUser == false) // 分馆用户必须要过滤，因为要修改<borrower>
+                if (item_dom != null && item_dom.DocumentElement != null
+                    && strItemDbType == "item" && sessioninfo.GlobalUser == false) // 分馆用户必须要过滤，因为要修改<borrower>
                 {
 #if NO
                     nRet = LibraryApplication.LoadToDom(strXml,
@@ -4931,7 +4933,6 @@ namespace dp2Library
 #endif
 
                     {
-                        string strLibraryCode = "";
                         // 检查一个册记录的馆藏地点是否符合当前用户管辖的馆代码列表要求
                         // return:
                         //      -1  检查过程出错
@@ -4939,7 +4940,7 @@ namespace dp2Library
                         //      1   不符合要求
                         nRet = app.CheckItemLibraryCode(item_dom,
                                     sessioninfo.LibraryCodeList,
-                                    out strLibraryCode,
+                                    out string strLibraryCode,
                                     out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -5011,9 +5012,10 @@ namespace dp2Library
                 }
 
                 // 若需要同时取得种记录
-                if (String.IsNullOrEmpty(strBiblioType) == false)
+                if (String.IsNullOrEmpty(strBiblioType) == false
+                    && string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
+                    // Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "string.IsNullOrEmpty(strBiblioRecPath) == false 未满足");
 
 #if NO
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
@@ -5076,16 +5078,12 @@ namespace dp2Library
                         strError = "channel == null";
                         goto ERROR1;
                     }
-                    string strMetaData = "";
-                    byte[] timestamp = null;
-                    string strTempOutputPath = "";
-                    string strBiblioXml = "";
 
                     lRet = channel.GetRes(strBiblioRecPath,
-                        out strBiblioXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strTempOutputPath,
+                        out string strBiblioXml,
+                        out string strMetaData,
+                        out byte[] timestamp,
+                        out string strTempOutputPath,
                         out strError);
                     if (lRet == -1)
                     {
@@ -5105,7 +5103,6 @@ namespace dp2Library
                         strBiblio = strBiblioXml;
                         goto END1;
                     }
-
 
                     // 需要从内核映射过来文件
                     string strLocalPath = "";
@@ -5716,6 +5713,7 @@ namespace dp2Library
         // 获得一条册、期、订购、评注记录
         // parameters:
         //      strRefID    当 strDbType 为 item 时，strRefID 中是册条码号。其他情况，是 refid 字符串
+        //      item_dom    [out] 返回记录的 XmlDocument 形态。注意有时候可能为 null (当 strXml 为空时)
         // return:
         //      -1  出错
         //      0   没有找到
@@ -5774,7 +5772,7 @@ namespace dp2Library
                 }
                 catch (Exception ex)
                 {
-                    strError = "评注记录XML装载到DOM出错:" + ex.Message;
+                    strError = "评注记录 XML 装载到 DOM 时出错:" + ex.Message;
                     goto ERROR1;
                 }
 
@@ -6088,7 +6086,7 @@ namespace dp2Library
 
             if (string.IsNullOrEmpty(strXml) == false)   // 是否有节省运算的办法?
             {
-                Debug.Assert(item_dom == null, "");
+                Debug.Assert(item_dom == null, "item_dom == null 未满足");
 
                 // 从期记录<parent>元素中取得书目记录的id，然后拼装成书目记录路径放入strOutputBiblioRecPath
                 item_dom = new XmlDocument();

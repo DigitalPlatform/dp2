@@ -1250,11 +1250,13 @@ namespace DigitalPlatform.LibraryServer
 
                     if (string.IsNullOrEmpty(strBiblioXml) == false)
                     {
+                        XmlElement maps_container = this.LibraryCfgDom.DocumentElement.SelectSingleNode("maps_856u") as XmlElement;
                         nRet = this.ConvertBiblioXmlToTable(
                             strBiblioXml,
                             null,
                             strCurrentBiblioRecPath,
                             style,
+                            maps_container,
                             out strBiblio,
                             out strError);
                         if (nRet == -1)
@@ -1785,7 +1787,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            string strItemXml = "";
+            // string strItemXml = "";
             string strOutputItemPath = "";
             string strMetaData = "";
 
@@ -1808,10 +1810,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 如果 strConfirmItemRecPath 形态为 xxx|xxx，右边部分就是书目记录路径
             {
-                string strLeft = "";
-                string strRight = "";
-
-                StringUtil.ParseTwoPart(strConfirmItemRecPath, "|", out strLeft, out strRight);
+                StringUtil.ParseTwoPart(strConfirmItemRecPath, "|", out string strLeft, out string strRight);
                 if (string.IsNullOrEmpty(strRight) == false)
                 {
                     strBiblioRecPath = strRight;
@@ -1820,7 +1819,7 @@ namespace DigitalPlatform.LibraryServer
                 strConfirmItemRecPath = strLeft;
             }
 
-            bool bByRecPath = false;    // 是否经过记录路径来获取的？
+            // bool bByRecPath = false;    // 是否经过记录路径来获取的？
 
             // 从册记录中获得从属的种id
             string strBiblioRecID = "";
@@ -1852,8 +1851,46 @@ namespace DigitalPlatform.LibraryServer
                     out strBiblioRecID,
                     out strOutputItemPath,
                     out strError);
+
+                // 2018/10/21
+                // 如果需要，从登录号等辅助途径进行检索
+                if (nRet == 0 && strItemBarcode.StartsWith("@") == false)
+                {
+                    foreach (string strFrom in this.ItemAdditionalFroms)
+                    {
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   命中1条
+                        //      >1  命中多于1条
+                        nRet = this.GetOneItemRec(
+                            channel,
+                            "item",
+                            strItemBarcode,
+                            strFrom,
+                            "parent",
+                            out strBiblioRecID,
+                            100,
+                            out List<string> PathList,
+                            out byte[] item_timestamp,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                            continue;
+                        if (PathList != null && PathList.Count > 0)
+                            strOutputItemPath = PathList[0];
+                        if (nRet > 1)
+                            break;
+
+                        // strItemFrom = strFrom;
+                        break;
+                    }
+                }
+
                 if (nRet == 0)
                 {
+
                     result.Value = 0;
                     result.ErrorInfo = "册记录没有找到";
                     result.ErrorCode = ErrorCode.NotFound;
@@ -1876,7 +1913,6 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet != 1)
                     goto ERROR1;
 
-                byte[] item_timestamp = null;
 
 #if NO
                 lRet = channel.GetRes(strConfirmItemRecPath,
@@ -1886,11 +1922,10 @@ namespace DigitalPlatform.LibraryServer
                     out strOutputItemPath,
                     out strError);
 #endif
-                string strValue = "";
                 lRet = channel.GetRes(strConfirmItemRecPath + "/xpath/@//parent",
-    out strValue,
+    out string strValue,
     out strMetaData,
-    out item_timestamp,
+    out byte[] item_timestamp,
     out strOutputItemPath,
     out strError);
                 if (lRet == -1)
@@ -2025,7 +2060,6 @@ return result;
  * */
 
             // 获得本地配置文件
-            string strLocalPath = "";
 
             string strRemotePath = BrowseFormat.CanonicalizeScriptFileName(
                 ResPath.GetDbName(strBiblioRecPath),
@@ -2035,7 +2069,7 @@ return result;
                 // sessioninfo.Channels,
                 channel,
                 strRemotePath,
-                out strLocalPath,
+                out string strLocalPath,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -2065,12 +2099,11 @@ return result;
             // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
             if (IsCsFileName(strRemotePath) == true)
             {
-                string strTempPath = "";
                 nRet = this.CfgsMap.MapFileToLocal(
                     // sessioninfo.Channels,
                     channel,
                     strRemotePath + ".ref",
-                    out strTempPath,
+                    out string strTempPath,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2082,11 +2115,10 @@ return result;
             }
 
             // 取得种记录
-            byte[] timestamp = null;
             lRet = channel.GetRes(strBiblioRecPath,
                 out strBiblioXml,
                 out strMetaData,
-                out timestamp,
+                out byte[] timestamp,
                 out strOutputItemPath,
                 out strError);
             if (lRet == -1)

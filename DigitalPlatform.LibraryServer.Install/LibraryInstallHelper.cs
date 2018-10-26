@@ -324,7 +324,93 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   放弃验证
         //      1   成功
-        public static int LibrarySupervisorLogin(IWin32Window owner,
+        public static int LibrarySupervisorLoginByDataDir(IWin32Window owner,
+            string strDataDir,
+            string strComment,
+            out string strError)
+        {
+            strError = "";
+
+            LibraryInstanceInfo info = null;
+
+            string strFileName = Path.Combine(strDataDir, "library.xml");
+            // 注意：本函数不会修改传入的 info 中的 InstanceName 成员
+            // return:
+            //      -1  出错
+            //      0   实例没有找到
+            //      1   成功
+            int nRet = GetLibraryInstanceInfoFromXml(strFileName,
+                ref info,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return -2;
+
+            if (string.IsNullOrEmpty(info.SupervisorUserName) == true)
+            {
+                // TODO: 此时是否可以不用验证了呢?
+                strError = "配置文件 '" + strFileName + "' 中，没有找到具有 managedatabase 权限的管理员账户，因此无法验证操作者身份";
+                return -1;
+            }
+
+            ConfirmSupervisorDialog dlg = new ConfirmSupervisorDialog();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.Comment = strComment;
+            dlg.ServerUrl = "配置文件 '" + strFileName + "'";
+            dlg.UserName = info.SupervisorUserName;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            REDO_LOGIN:
+            dlg.ShowDialog(owner);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return 0;
+
+            if (info.Version <= 2.0)
+            {
+                // 以前的做法
+                if (dlg.Password != info.SupervisorPassword)
+                {
+                    MessageBox.Show(owner, "密码不正确。请重新输入密码");
+                    goto REDO_LOGIN;
+                }
+            }
+            else
+            {
+                // 新的做法
+                // return:
+                //      -1  出错
+                //      0   不匹配
+                //      1   匹配
+                nRet = LibraryServerUtil.MatchUserPassword(dlg.Password,
+                    info.SupervisorPassword,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "MatchUserPassword() error: " + strError;
+                    return -1;
+                }
+                Debug.Assert(nRet == 0 || nRet == 1, "");
+                if (nRet == 0)  // 2016/12/26 从 == 1 修改为 == 0
+                {
+                    MessageBox.Show(owner, "密码不正确。请重新输入密码");
+                    goto REDO_LOGIN;
+                }
+            }
+
+            return 1;
+        }
+
+        // (本函数适用于标准版，不适用于 dp2libraryxe)
+        // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
+        // 只需要 library.xml 即可，不需要 dp2library 在运行中。
+        // return:
+        //      -2  实例没有找到
+        //      -1  出错
+        //      0   放弃验证
+        //      1   成功
+        public static int LibrarySupervisorLoginByInstanceName(IWin32Window owner,
             string strInstanceName,
             string strComment,
             out string strError)

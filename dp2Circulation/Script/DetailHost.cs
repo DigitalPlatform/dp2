@@ -1993,7 +1993,7 @@ namespace dp2Circulation
             }
         }
 #if NO
-#region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
+        #region 乐山图书馆四角号码。这里是验证用。实际应用的时候需要写在脚本中
 
         // 获得种次号以外的其他区分号，主要是著者号
         // return:
@@ -2237,7 +2237,7 @@ namespace dp2Circulation
             return -1;
         }
 
-#endregion
+        #endregion
 
 #endif
 
@@ -2489,7 +2489,19 @@ namespace dp2Circulation
                         string strMessage = "字符串 '" + strHanzi + "' 取汉语著者号码时出现意外状况: " + strLastError + "\r\n\r\n后面软件会自动尝试用卡特表方式为拼音字符串 '" + strPinyin + "' 取号。";
                         strAuthor = strPinyin;
                         type = "Cutter-Sanborn Three-Figure";
-                        MessageBox.Show(this.DetailForm, strMessage);
+                        // MessageBox.Show(this.DetailForm, strMessage);
+
+                        object o = Program.MainForm.ParamTable["gcat_warning"];
+                        bool bTemp = (o == null ? false : (bool)o);
+                        if (bTemp == false)
+                        {
+                            MessageDialog.Show(this.DetailForm,
+                                "汉语著者号码缺字",
+                                strMessage,
+                                "下次不再出现此对话框",
+                                ref bTemp);
+                            Program.MainForm.ParamTable["gcat_warning"] = bTemp;
+                        }
 
                         // 尝试把信息发给 dp2003.com
                         Program.MainForm.ReportError("dp2circulation 创建索取号", "(安静汇报)" + strMessage);
@@ -3040,7 +3052,7 @@ namespace dp2Circulation
 
 #if SHITOUTANG
 
-#region 石头汤著者号
+        #region 石头汤著者号
 
         static string FirstContent(MarcNodeList nodes)
         {
@@ -3435,7 +3447,7 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-#endregion
+        #endregion
 
 #endif
 

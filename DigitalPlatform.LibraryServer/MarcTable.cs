@@ -37,19 +37,24 @@ namespace DigitalPlatform.LibraryServer
             string strRecPath,
             string strMARC,
             string strStyle,
+            XmlElement maps_container,
             out List<NameValueLine> results,
             out string strError)
         {
             strError = "";
             results = new List<NameValueLine>();
 
+            if (strStyle == null)
+                strStyle = "";
+
             MarcRecord record = new MarcRecord(strMARC);
 
             if (record.ChildNodes.count == 0)
                 return 0;
 
-            if (strStyle == "*" || string.IsNullOrEmpty(strStyle))
-                strStyle = "areas,coverimageurl,titlepinyin,object,summary,subjects,classes";
+            if (StringUtil.IsInList("*", strStyle) // strStyle == "*" 
+                || string.IsNullOrEmpty(strStyle))
+                strStyle += ",areas,coverimageurl,titlepinyin,object,summary,subjects,classes";
 
             /*
 * content_form_area
@@ -422,9 +427,12 @@ namespace DigitalPlatform.LibraryServer
             // 数字资源
             if (StringUtil.IsInList("object", strStyle))
             {
+                
                 string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    BuildObjectHtmlTableStyle.None,
-                    "unimarc");
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template : BuildObjectHtmlTableStyle.None,
+                    "unimarc",
+                    strRecPath,
+                    maps_container);
                 if (string.IsNullOrEmpty(objectTable) == false)
                     results.Add(new NameValueLine("数字资源", objectTable, "object"));
             }
@@ -1138,6 +1146,7 @@ namespace DigitalPlatform.LibraryServer
             string strRecPath,
             string strMARC,
             string strStyle,
+            XmlElement maps_container,
             out List<NameValueLine> results,
             out string strError)
         {
@@ -1518,8 +1527,10 @@ namespace DigitalPlatform.LibraryServer
             if (fields.count > 0)
             {
                 string strXml = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    BuildObjectHtmlTableStyle.None,
-                    "usmarc");
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template : BuildObjectHtmlTableStyle.None,
+                    "usmarc",
+                    strRecPath,
+                    maps_container);
                 if (string.IsNullOrEmpty(strXml) == false)
                 {
                     var line = new NameValueLine("Digital Resource", "", "object");

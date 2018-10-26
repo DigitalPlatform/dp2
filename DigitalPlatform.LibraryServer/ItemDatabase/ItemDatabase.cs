@@ -1230,7 +1230,7 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
-                strError = "移动操作中，" + this.ItemName + "记录 '" + info.OldRecPath + "' 已经被成功移动到 '" + strTargetPath + "' ，但在写入新内容时发生错误: " + strError;
+                strError = "移动操作中，" + this.ItemName + "记录 '" + info.OldRecPath + "' 已经成功移动到 '" + strTargetPath + "' ，但在写入新内容时发生错误: " + strError;
 
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {

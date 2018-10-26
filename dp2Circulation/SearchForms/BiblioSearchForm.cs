@@ -6339,7 +6339,8 @@ MessageBoxDefaultButton.Button1);
     out string strError)
         {
             strError = "";
-            string strTempFileName = Path.Combine(Program.MainForm.DataDir, "~export_to_searchform.txt");
+            string strTempFileName = Path.Combine(Program.MainForm.UserTempDir, // Program.MainForm.DataDir, 
+                "~export_to_searchform.txt");
             int nRet = SaveToEntityRecordPathFile(strDbType,
                 strTempFileName,
                 out strError);

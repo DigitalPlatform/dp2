@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Xml;
 using System.IO;
@@ -16,11 +15,9 @@ using System.Drawing.Imaging;
 using System.Web.UI;
 
 using ZXing;
-using ZXing.Common;
 using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 
-using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -189,7 +186,6 @@ namespace DigitalPlatform.OPAC.Server
         public bool CanReserveOnshelf = true;   // 是否可以预约在架图书
 
         public SearchLog SearchLog = null;
-
 
         // 构造函数
         public OpacApplication()
@@ -408,6 +404,10 @@ namespace DigitalPlatform.OPAC.Server
 
                 if (PathUtil.TryClearDir(app.TempDir) == false)
                     this.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
+
+                // 2018/10/23
+                // 清除一些特殊的临时文件
+                this.TryClearSpecialTempFiles();
 
                 // bin dir
                 app.BinDir = Path.Combine(strHostDir, "bin");
@@ -811,6 +811,19 @@ namespace DigitalPlatform.OPAC.Server
 #endif
                 if (channel.Param is string)
                     e.Parameters = (string)channel.Param;
+            }
+        }
+
+        public void TryClearSpecialTempFiles()
+        {
+            string strFileName = Path.Combine(this.DataDir, "cfgs\\statis_timerange.xml.1");
+            try
+            {
+                File.Delete(strFileName);
+            }
+            catch
+            {
+
             }
         }
 

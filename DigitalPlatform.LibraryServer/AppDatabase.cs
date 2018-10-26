@@ -8799,7 +8799,7 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "数据库 '" + strDatabaseName + "' 的定义已经被成功刷新，但在刷新内核Keys表操作时失败: " + strError;
+                        strError = "数据库 '" + strDatabaseName + "' 的定义已经刷新成功，但在刷新内核Keys表操作时失败: " + strError;
                         return -1;
                     }
                     return 1;

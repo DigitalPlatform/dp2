@@ -1468,7 +1468,7 @@ true);
                     else if (nRet == 1)
                     {
                         data.WarningInfo = strError;
-                        data.WarningInfo += "\r\n\r\n不过上述包含重复册条码号的记录已经被成功创建或修改。请留意稍后去消除册条码号重复";
+                        data.WarningInfo += "\r\n\r\n不过上述包含重复册条码号的记录已经创建或修改成功。请留意稍后去消除册条码号重复";
                     }
 
                     if (data.Action == "new"
@@ -12405,7 +12405,6 @@ value);
             // 看看要另存的位置，记录是否已经存在?
             if (strRecID != "?")
             {
-                byte[] timestamp = null;
 
                 // 检测特定位置书目记录是否已经存在
                 // parameters:
@@ -12414,7 +12413,7 @@ value);
                 //      0   not found
                 //      1   found
                 nRet = DetectBiblioRecord(strTargetRecPathParam,
-                    out timestamp,
+                    out byte[] timestamp,
                     out strError);
                 if (nRet == 1)
                 {
@@ -13332,6 +13331,8 @@ strMARC);
                         if (Program.MainForm.SaveOriginCoverImage == false)
                             info.ClearBackupImage();
                     }
+
+                    GC.Collect();
                 }
                 finally
                 {
@@ -13761,7 +13762,7 @@ type.ProcessCommand);
 
             try
             {
-                List<string> formats = new List<string> { "summary", "table" };
+                List<string> formats = new List<string> { "summary", "table:*,object_template" };
                 string[] results = null;
                 byte[] timestamp = null;
 
@@ -13806,7 +13807,8 @@ type.ProcessCommand);
             dlg.Text = "书目记录摘要";
             dlg.HtmlString = "<html><body>" +
                 "<div>" + HttpUtility.HtmlEncode(strBiblioSummary) + "</div>" +
-                "<div>" + HttpUtility.HtmlEncode(strBiblioTable).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
+                "<div>" + HttpUtility.HtmlEncode(strBiblioTable).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>" +
+                "<div>" + HttpUtility.HtmlEncode(strError).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
                 + "</body></html>";
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
