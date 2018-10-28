@@ -249,7 +249,7 @@ namespace DigitalPlatform.LibraryServer
                 //strRecID = ResPath.GetRecordId((string)aPath[0]);
                 strPath = (string)aPath[nIndex];
 
-            ALREADYSELECTED:
+                ALREADYSELECTED:
 
                 if (bOutputDebugInfo == true)
                 {
@@ -1582,6 +1582,60 @@ namespace DigitalPlatform.LibraryServer
         // return:
         //      -1  出错
         //      0   成功
+        public int GetSjhmInternal(
+            SessionInfo sessioninfo,
+string strText,
+out string strSjhmXml,
+out string strError)
+        {
+            strSjhmXml = "";
+            strError = "";
+
+            // string strPinyin = "";
+            int nRet = 0;
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            foreach (char ch in strText)
+            {
+                // 汉字
+                XmlElement nodeChar = dom.CreateElement("char");
+                dom.DocumentElement.AppendChild(nodeChar);
+                nodeChar.InnerText = new string(ch, 1);
+
+                if (StringUtil.IsHanzi(ch) == false)
+                    continue;
+
+                // 看看是否特殊符号
+                if (StringUtil.SpecialChars.IndexOf(ch) != -1)
+                    continue;
+
+                nRet = SearchHanzi(channel,
+        new string(ch, 1),
+        out string strPinyin,
+        out string strSjhm,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    nodeChar.SetAttribute("p", strPinyin);
+            }
+
+            strSjhmXml = dom.DocumentElement.OuterXml;
+            return 0;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   成功
         public int GetPinyinInternal(
             SessionInfo sessioninfo,
 string strText,
@@ -1618,8 +1672,7 @@ out string strError)
 
             foreach (string text in parts)
             {
-                string strHanzi = "";
-                if (ContainHanzi(text, out strHanzi) == false
+                if (ContainHanzi(text, out string strHanzi) == false
                     || IsAllLetter(text) == true)
                 {
                     XmlNode nodeText = dom.CreateTextNode(text);
@@ -1666,6 +1719,7 @@ out string strError)
                     nRet = SearchHanzi(channel,
             new string(ch, 1),
             out strPinyin,
+            out string strSjhm,
             out strError);
                     if (nRet == -1)
                         return -1;
@@ -1698,6 +1752,7 @@ out string strError)
                 nRet = SearchHanzi(channel,
         strHanzi,
         out strPinyin,
+        out string strSjhm,
         out strError);
                 if (nRet == -1)
                     return -1;
@@ -1765,9 +1820,12 @@ out string strError)
             return 0;
         }
 
+        // 检索获得汉字的拼音和四角号码
+        // 注：只有当 strHanzi 中包含一个汉字时，才能获得其四角号码
         int SearchHanzi(RmsChannel channel,
             string strHanzi,
             out string strPinyin,
+            out string strSjhm,
             out string strError)
         {
             this.hanzi_locks.LockForRead(strHanzi);
@@ -1775,6 +1833,7 @@ out string strError)
             {
                 strError = "";
                 strPinyin = "";
+                strSjhm = "";
                 string strQueryXml = "";
 
                 if (strHanzi.Length == 1)
@@ -1890,14 +1949,13 @@ out string strError)
                 }
 
 #endif
-                Record[] records = null;
                 long lRet = channel.DoSearchEx(strQueryXml,
     "default",
     "", // strOutputStyle
     1,
     "zh",
     "id,xml",
-    out records,
+    out Record[] records,
     out strError);
                 if (lRet == -1)
                 {
@@ -1928,7 +1986,10 @@ out string strError)
                 }
 
                 if (strHanzi.Length == 1)
+                {
                     strPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
+                    strSjhm = dom.DocumentElement.GetAttribute("s");
+                }
                 else
                 {
                     XmlNodeList nodes = dom.DocumentElement.SelectNodes("pinyin");
@@ -1941,6 +2002,7 @@ out string strError)
                     }
                     node_array.Sort(new HitCountComparer());
 
+                    // TODO: 大小写不同的，都应该转换为小写形态，然后合并
                     foreach (XmlNode node in node_array)
                     {
                         if (string.IsNullOrEmpty(strPinyin) == false)
@@ -1948,6 +2010,7 @@ out string strError)
                         strPinyin += node.InnerText;
                     }
                 }
+                strPinyin = ToLower(strPinyin);
                 return 1;
             }
             finally
@@ -1964,6 +2027,8 @@ out string strError)
             this.hanzi_locks.LockForWrite(strHanzi);
             try
             {
+                // 2018/10/25
+                strPinyin = ToLower(strPinyin);
 
                 strError = "";
                 string strQueryXml = "";
@@ -2083,6 +2148,8 @@ out string strError)
                         // 老格式
                         string strExistPinyin = "";
                         strExistPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
+                        // 2018/10/25
+                        strExistPinyin = ToLower(strExistPinyin);
                         if (string.IsNullOrEmpty(strExistPinyin) == false)
                         {
                             string[] parts = strExistPinyin.Split(new char[] { ';' });
@@ -2106,12 +2173,11 @@ out string strError)
                         foreach (XmlNode node in nodes)
                         {
                             // existing_pinyins.Add(node.InnerText);
-                            if (node.InnerText == strPinyin)
+                            if (ToLower(node.InnerText) == strPinyin)
                             {
                                 // 累加计数器
                                 string strCount = DomUtil.GetAttr(node, "c");
-                                long nCount = 0;
-                                Int64.TryParse(strCount, out nCount);
+                                Int64.TryParse(strCount, out long nCount);
                                 nCount++;
                                 DomUtil.SetAttr(node, "c", nCount.ToString());
                                 bChanged = true;
@@ -2126,7 +2192,7 @@ out string strError)
                         bChanged = true;
                     }
 
-                DO_SAVE:
+                    DO_SAVE:
                     if (bChanged == true)
                     {
                         byte[] output_timestamp = null;
@@ -2152,6 +2218,13 @@ out string strError)
             {
                 this.hanzi_locks.UnlockForWrite(strHanzi);
             }
+        }
+
+        static string ToLower(string text)
+        {
+            if (text == null)
+                return null;
+            return text.ToLower();
         }
 
         // static string strSpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
@@ -2420,11 +2493,8 @@ out string strError)
             string s1 = DomUtil.GetAttr(x, "c");
             string s2 = DomUtil.GetAttr(y, "c");
 
-            Int64 c1 = 0;
-            Int64 c2 = 0;
-
-            Int64.TryParse(s1, out c1);
-            Int64.TryParse(s2, out c2);
+            Int64.TryParse(s1, out long c1);
+            Int64.TryParse(s2, out long c2);
 
             // 大在前
             return -1 * (int)(c1 - c2);

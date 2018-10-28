@@ -173,7 +173,6 @@ namespace DigitalPlatform
 
             int nPerTime = 1000;
 
-
             while (true)
             {
                 int nThisTime = Math.Min(nTimeLeft, nPerTime);

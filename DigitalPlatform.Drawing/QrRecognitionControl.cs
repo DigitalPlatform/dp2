@@ -419,7 +419,6 @@ namespace DigitalPlatform.Drawing
             {
                 if (_currentBitmapForDecoding != null)
                 {
-
                     var result = reader.Decode(_currentBitmapForDecoding);
                     if (result != null)
                     {

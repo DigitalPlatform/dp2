@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Threading;
 using System.Diagnostics;
 using System.Text;
-
-using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Marc
 {
@@ -586,10 +584,14 @@ namespace DigitalPlatform.Marc
             menuItem = new MenuItem("粘贴(&P)");
             menuItem.Click += new System.EventHandler(this.Menu_Paste);
             contextMenu.MenuItems.Add(menuItem);
-            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
-                menuItem.Enabled = true;
-            else
-                menuItem.Enabled = false;
+
+            StringUtil.RunClipboard(() =>
+            {
+                if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
+                    menuItem.Enabled = true;
+                else
+                    menuItem.Enabled = false;
+            });
 
             // 删除
             menuItem = new MenuItem("删除(&D)");

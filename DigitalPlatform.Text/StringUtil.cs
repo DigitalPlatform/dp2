@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using System.Xml;
 
@@ -15,6 +16,41 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
+
+        public delegate void Delegate_clipboardFunc();
+
+        public static void RunClipboard(Delegate_clipboardFunc func)
+        {
+            try
+            {
+                func();
+                return;
+            }
+            catch
+            {
+
+            }
+
+            // https://stackoverflow.com/questions/38421985/why-clipboard-setdataobject-doesnt-copy-object-to-the-clipboard-in-c-sharp
+            Exception threadEx = null;
+            Thread staThread = new Thread(
+                delegate ()
+                {
+                    try
+                    {
+                        func();
+                    }
+                    catch (Exception ex)
+                    {
+                        threadEx = ex;
+                    }
+                });
+            staThread.SetApartmentState(ApartmentState.STA);
+            staThread.Start();
+            staThread.Join();
+            if (threadEx != null)
+                throw threadEx;
+        }
 
         /// <summary>
         /// 检测一个列表字符串是否包含一个具体的值
@@ -2291,8 +2327,19 @@ string strTimestamp)
             }
         }
 
+        // parameters:
+        //      bSorted 是否在调用前就排过序?
+        public static void RemoveDup(ref List<string> list, bool bSorted)
+        {
+            if (bSorted == false)
+                list.Sort();
+
+            _removeDup(ref list);
+        }
+
         // 把一个字符串数组去重。调用前，应当已经排序
-        public static void RemoveDup(ref List<string> list)
+        // 警告：此函数极易在忘记先排序的情况下调用
+        public static void _removeDup(ref List<string> list)
         {
             for (int i = 0; i < list.Count; i++)
             {

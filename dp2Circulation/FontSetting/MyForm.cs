@@ -1698,17 +1698,18 @@ out string strError)
 
         public void ShowMessageBox(string strText)
         {
-            this.Invoke((Action)(() =>
-            {
-                try
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
                 {
-                    MessageBox.Show(this, strText);
-                }
-                catch (ObjectDisposedException)
-                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
 
-                }
-            }));
+                    }
+                }));
         }
 
         #region 指纹有关功能

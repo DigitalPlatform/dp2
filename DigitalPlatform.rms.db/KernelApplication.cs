@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 
 using DigitalPlatform.IO;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms
 {
@@ -579,7 +580,7 @@ namespace DigitalPlatform.rms
         }
         internal CancellationTokenSource _app_down = new CancellationTokenSource();
 
-        bool _closed = false;
+        volatile bool _closed = false;
         // 关闭
         public void Close()
         {
@@ -588,7 +589,13 @@ namespace DigitalPlatform.rms
                 return;
 
             this.WriteErrorLog("kernel application 开始降落");
-            _app_down.Cancel();
+            // _app_down.Cancel();
+            {
+                // 试一下这样是否可以避免 MySQL Driver 中 DbCommand.Cancel() 发生死锁
+                // https://stackoverflow.com/questions/31495411/a-call-to-cancellationtokensource-cancel-never-returns
+                Task.Run(() => _app_down.Cancel());
+                _app_down.Token.WaitHandle.WaitOne(); // make sure to only continue when the cancellation completed (without waiting for all the callbacks)
+            }
 
             eventClose.Set();	// 令工作线程退出
 

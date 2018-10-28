@@ -206,8 +206,11 @@ I've been trying to disable the DPI awareness on a ClickOnce application.
             }
             catch
             {
-                mutex.Close();
-                mutex = null;
+                if (mutex != null)
+                {
+                    mutex.Close();
+                    mutex = null;
+                }
             }
         }
 

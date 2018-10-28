@@ -832,8 +832,9 @@ namespace dp2Library
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetPinyin(
-string strText,
-out string strPinyinXml);
+            string strType,
+            string strText,
+            out string strPinyinXml);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult SetPinyin(
