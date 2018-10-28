@@ -523,9 +523,9 @@ namespace dp2Circulation
             List<string> right = new List<string>(this.textBox_textLines_source2.Lines);
 
             left.Sort();
-            StringUtil.RemoveDup(ref left);
+            StringUtil.RemoveDup(ref left, true);
             right.Sort();
-            StringUtil.RemoveDup(ref right);
+            StringUtil.RemoveDup(ref right, true);
 
             string strDebugInfo = "";
             string strError = "";
@@ -556,9 +556,9 @@ namespace dp2Circulation
             List<string> right = new List<string>(this.textBox_textLines_source2.Lines);
 
             left.Sort();
-            StringUtil.RemoveDup(ref left);
+            StringUtil.RemoveDup(ref left, true);
             right.Sort();
-            StringUtil.RemoveDup(ref right);
+            StringUtil.RemoveDup(ref right, true);
 
             string strDebugInfo = "";
             string strError = "";
@@ -601,7 +601,7 @@ namespace dp2Circulation
             List<string> left = new List<string>(this.textBox_textLines_source1.Lines);
 
             left.Sort();
-            StringUtil.RemoveDup(ref left);
+            StringUtil.RemoveDup(ref left, true);
             this.textBox_textLines_target.Text = StringUtil.MakePathList(left, "\r\n");
 
         }

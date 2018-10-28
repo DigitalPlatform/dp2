@@ -53,7 +53,7 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        public bool Connected
+        public volatile bool Connected
         {
             get
             {

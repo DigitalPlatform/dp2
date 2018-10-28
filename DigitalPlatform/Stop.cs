@@ -81,7 +81,7 @@ namespace DigitalPlatform
         public event EndLoopEventHandler OnEndLoop = null;
         public event ProgressChangedEventHandler OnProgressChanged = null;
 
-        int nStop = -1;	// -1: 尚未使用 0:正在处理 1:希望停止 2:已经停止，EndLoop()已经调用
+        volatile int nStop = -1;	// -1: 尚未使用 0:正在处理 1:希望停止 2:已经停止，EndLoop()已经调用
         StopManager m_manager = null;
 
         string m_strMessage = "";
@@ -309,10 +309,12 @@ namespace DigitalPlatform
             // 2017/12/16
             this.OnProgressChanged?.Invoke(
                 this,
-                new ProgressChangedEventArgs {
+                new ProgressChangedEventArgs
+                {
                     Start = this.ProgressMin,
                     End = this.ProgressMax,
-                    Value = lValue}
+                    Value = lValue
+                }
                 );
 
             if (m_manager != null)

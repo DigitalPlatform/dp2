@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Threading;
-using System.Xml;
-using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Diagnostics;
-using System.Runtime.Serialization.Json;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -89,7 +82,6 @@ ref sessioninfo) == false)
 
         // SSO登录
         PrepareSsoLogin();
-
 
         string strError = "";
         int nRet = 0;
@@ -293,7 +285,7 @@ ref sessioninfo) == false)
             this.DropDownList_roomName.Text);
         this.HiddenField_editors.Value = room != null ? StringUtil.MakePathList(room.EditorList) : "";
         return;
-    ERROR1:
+        ERROR1:
         this.Response.Write(strError);
         this.Response.End();
     }
@@ -342,7 +334,7 @@ ref sessioninfo) == false)
     static void DecodeUri(ref string strText)
     {
         if (string.IsNullOrEmpty(strText) == true)
-            return ;
+            return;
 
         if (strText.IndexOf("%u") != -1)
             strText = HttpUtility.UrlDecode(strText);
@@ -413,7 +405,7 @@ ref sessioninfo) == false)
         result_info.TotalLines = info.TotalLines;
         result_info.ResultVersion = info.ResultVersion;
 
-    END_GETINFO:
+        END_GETINFO:
         /*
         DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ChatResultInfo));
 
@@ -475,7 +467,7 @@ ref sessioninfo) == false)
         result_info.ErrorString = strError;
         result_info.ResultValue = nRet;
 
-    END_DELETE:
+        END_DELETE:
         this.Response.Write(GetResultString(result_info));
         this.Response.End();
     }
@@ -484,7 +476,6 @@ ref sessioninfo) == false)
     // chat.aspx?action=send&data=xxx&room=xxx&text=xxx&style=xxx&name=xxx
     void DoSendText(LoginState loginstate)
     {
-        string strError = "";
         int nRet = 0;
 
         SendResultInfo result_info = new SendResultInfo();
@@ -529,13 +520,13 @@ ref sessioninfo) == false)
             sessioninfo.PostedFileInfo != null ? sessioninfo.PostedFileInfo.FileName : "",
             // null,   // this.FileUpload1.PostedFile,
             sessioninfo.PhotoUrl,
-            out strError);
+            out string strError);
         result_info.ErrorString = strError;
         result_info.ResultValue = nRet;
 
         DeleteTempFile();
 
-    END_SEND:
+        END_SEND:
         this.Response.Write(GetResultString(result_info));
         this.Response.End();
     }
@@ -611,7 +602,7 @@ ref sessioninfo) == false)
         this.Response.Write("{\"result\":\"OK\"}");
         this.Response.End();
         return;
-    ERROR1:
+        ERROR1:
         // app.WriteErrorLog("DoSendImage() error :" + strError);
 
         this.Response.Charset = "utf-8";
@@ -856,7 +847,7 @@ ref sessioninfo) == false)
 
         this.DropDownList_roomName.Text = TextBox_roomName.Text;
         return;
-    ERROR1:
+        ERROR1:
         this.Response.Write(strError);
         this.Response.End();
     }
@@ -886,7 +877,7 @@ ref sessioninfo) == false)
             this.DropDownList_roomName.Items.Add(name);
         }
         return;
-    ERROR1:
+        ERROR1:
         this.Response.Write(strError);
         this.Response.End();
 

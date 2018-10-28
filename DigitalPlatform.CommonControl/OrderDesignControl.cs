@@ -1758,7 +1758,6 @@ namespace DigitalPlatform.CommonControl
                     continue;
                 }
 
-
                 // 解析
                 dp2StringUtil.ParseCalendarName(location.Name,
             out string strLibraryCode,
@@ -1767,7 +1766,7 @@ namespace DigitalPlatform.CommonControl
                 codes.Add(strLibraryCode);
             }
 
-            StringUtil.RemoveDup(ref codes);
+            StringUtil.RemoveDupNoSort(ref codes);
 
             // 检查馆代码是否在管辖范围内
             if (this.VerifyLibraryCode != null)

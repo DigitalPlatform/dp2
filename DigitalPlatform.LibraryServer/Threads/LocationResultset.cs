@@ -44,7 +44,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 去重
             locations.Sort();
-            StringUtil.RemoveDup(ref locations);
+            StringUtil.RemoveDup(ref locations, true);
             // 只要包含一个空字符串，就表示全部都需要刷新
             if (locations.IndexOf("") != -1)
                 return "";

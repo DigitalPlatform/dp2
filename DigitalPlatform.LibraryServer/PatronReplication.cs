@@ -433,9 +433,9 @@ namespace DigitalPlatform.LibraryServer
                 // current_ids 和 ids 进行交叉运算
                 this.AppendResultText("排序归并ID\r\n");
                 current_ids.Sort();
-                StringUtil.RemoveDup(ref current_ids);
+                StringUtil.RemoveDup(ref current_ids, true);
                 ids.Sort();
-                StringUtil.RemoveDup(ref ids);
+                StringUtil.RemoveDup(ref ids, true);
 
                 List<string> targetLeft = new List<string>();
                 List<string> targetMiddle = null;

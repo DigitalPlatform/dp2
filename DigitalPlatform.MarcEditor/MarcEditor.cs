@@ -2016,6 +2016,18 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             }
         }
 
+        static IDataObject GetClipboardDataObject()
+        {
+            IDataObject ido = null;
+
+            StringUtil.RunClipboard(() =>
+            {
+                ido = Clipboard.GetDataObject();
+            });
+
+            return ido;
+        }
+
         // 在已有的菜单事项上追加事项
         // parameters:
         //      bFull   是否包含一些重复事项
@@ -2101,8 +2113,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             else
                 menuItem.Enabled = false;
 
-            IDataObject ido = Clipboard.GetDataObject();
-
+            IDataObject ido = GetClipboardDataObject(); // Clipboard.GetDataObject();
 
             // 从dp2OPAC粘贴整个记录
             menuItem = new MenuItem("从 dp2OPAC 粘贴整个记录");// + strName);
@@ -3846,7 +3857,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 #if BIDI_SUPPORT
             strText = strText.Replace("\x200e", "");
 #endif
-            Clipboard.SetDataObject(strText);
+            StringUtil.RunClipboard(() => { Clipboard.SetDataObject(strText); });
         }
 
         [Serializable()]
@@ -3879,35 +3890,59 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             data_object.SetData(new MarcEditorData(strText));
 
             // Place the data in the Clipboard.
-            Clipboard.SetDataObject(data_object);
+            StringUtil.RunClipboard(() =>
+            {
+                Clipboard.SetDataObject(data_object);
+            });
         }
 
         internal static string ClipboardToText()
         {
-            IDataObject ido = Clipboard.GetDataObject();
-            if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
-                return "";
+            string result = "";
 
-            return (string)ido.GetData(DataFormats.UnicodeText);
+            StringUtil.RunClipboard(() =>
+            {
+                IDataObject ido = Clipboard.GetDataObject();
+                if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
+                    result = "";
+                else
+                    result = (string)ido.GetData(DataFormats.UnicodeText);
+            });
+
+            return result;
         }
 
         internal static string ClipboardToTextFormat()
         {
-            IDataObject ido = Clipboard.GetDataObject();
+            string result = "";
 
-            if (ido.GetDataPresent(typeof(MarcEditorData)) == true)
+            StringUtil.RunClipboard(() =>
             {
-                MarcEditorData data = (MarcEditorData)ido.GetData(typeof(MarcEditorData));
-                return data.Text;
-            }
+                IDataObject ido = Clipboard.GetDataObject();
 
-            if (ido.GetDataPresent(DataFormats.UnicodeText) == true)
-                return (string)ido.GetData(DataFormats.UnicodeText);
+                if (ido.GetDataPresent(typeof(MarcEditorData)) == true)
+                {
+                    MarcEditorData data = (MarcEditorData)ido.GetData(typeof(MarcEditorData));
+                    result = data.Text;
+                    return;
+                }
 
-            if (ido.GetDataPresent(DataFormats.Text) == true)
-                return (string)ido.GetData(DataFormats.Text);
+                if (ido.GetDataPresent(DataFormats.UnicodeText) == true)
+                {
+                    result = (string)ido.GetData(DataFormats.UnicodeText);
+                    return;
+                }
 
-            return null;
+                if (ido.GetDataPresent(DataFormats.Text) == true)
+                {
+                    result = (string)ido.GetData(DataFormats.Text);
+                    return;
+                }
+
+                result = null;
+            });
+
+            return result;
         }
 
         private void Menu_SelectAll(object sender,
@@ -3959,7 +3994,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
 
             MarcEditor.TextToClipboardFormat(strText);
-
 
             int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
             for (int i = 0; i < fieldIndices.Length; i++)

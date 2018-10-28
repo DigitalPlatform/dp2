@@ -259,7 +259,7 @@ namespace dp2Circulation
                 }
 
                 results.Sort();
-                StringUtil.RemoveDup(ref results);
+                StringUtil.RemoveDup(ref results, true);
             }
 
             return results;

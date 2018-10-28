@@ -195,7 +195,7 @@ namespace dp2Catalog
         // TODO: 需要实现 IDisposeable 接口，释放 CompleteEvent
         public AutoResetEvent CompleteEvent = new AutoResetEvent(false);
 
-        public int Searching = 0;   // 0 还没有开始 1 开始了 2 结束了
+        public volatile int Searching = 0;   // 0 还没有开始 1 开始了 2 结束了
 
         public string ElementSetName = "";
 
@@ -551,7 +551,6 @@ namespace dp2Catalog
                 this.Stop.SetMessage("正在检索 '" + this.QueryString + "' ...");
 
 
-                int nResultCount = 0;
                 // return:
                 //		-1	error
                 //		0	fail
@@ -561,7 +560,7 @@ namespace dp2Catalog
                     this.TargetInfo.DefaultQueryTermEncoding,
                     this.TargetInfo.DbNames,
                     this.TargetInfo.DefaultResultSetName,
-                    out nResultCount,
+                    out int nResultCount,
                     out strError);
                 if (nRet == -1)
                 {

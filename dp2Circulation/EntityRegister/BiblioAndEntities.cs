@@ -2585,7 +2585,7 @@ MessageBoxDefaultButton.Button2);
                     continue;
                 results.Add(error.FieldName);
             }
-            StringUtil.RemoveDup(ref results);  // 对结果集合中的名字去重
+            StringUtil.RemoveDupNoSort(ref results);  // 对结果集合中的名字去重
             return results;
         }
     }

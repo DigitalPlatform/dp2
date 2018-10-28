@@ -629,7 +629,8 @@ namespace dp2Circulation
                 stop.SetMessage("正在排序和去重");
 
                 // 排序
-                StringUtil.RemoveDup(ref barcodes);
+                barcodes.Sort();
+                StringUtil.RemoveDup(ref barcodes, true);
             }
             catch (Exception ex)
             {

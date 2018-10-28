@@ -3681,10 +3681,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyinResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strType, string strText);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyinResponse")]
-        System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetPinyin(string strType, string strText, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result);
         
@@ -9113,13 +9113,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         questions}, this.onEndGetAuthorNumberDelegate, this.onGetAuthorNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText) {
-            return base.Channel.GetPinyin(out strPinyinXml, strText);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strType, string strText) {
+            return base.Channel.GetPinyin(out strPinyinXml, strType, strText);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetPinyin(strText, callback, asyncState);
+        public System.IAsyncResult BeginGetPinyin(string strType, string strText, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetPinyin(strType, strText, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -9128,8 +9128,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         private System.IAsyncResult OnBeginGetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strText = ((string)(inValues[0]));
-            return this.BeginGetPinyin(strText, callback, asyncState);
+            string strType = ((string)(inValues[0]));
+            string strText = ((string)(inValues[1]));
+            return this.BeginGetPinyin(strType, strText, callback, asyncState);
         }
         
         private object[] OnEndGetPinyin(System.IAsyncResult result) {
@@ -9147,11 +9148,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void GetPinyinAsync(string strText) {
-            this.GetPinyinAsync(strText, null);
+        public void GetPinyinAsync(string strType, string strText) {
+            this.GetPinyinAsync(strType, strText, null);
         }
         
-        public void GetPinyinAsync(string strText, object userState) {
+        public void GetPinyinAsync(string strType, string strText, object userState) {
             if ((this.onBeginGetPinyinDelegate == null)) {
                 this.onBeginGetPinyinDelegate = new BeginOperationDelegate(this.OnBeginGetPinyin);
             }
@@ -9162,6 +9163,7 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 this.onGetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetPinyinCompleted);
             }
             base.InvokeAsync(this.onBeginGetPinyinDelegate, new object[] {
+                        strType,
                         strText}, this.onEndGetPinyinDelegate, this.onGetPinyinCompletedDelegate, userState);
         }
         
@@ -14308,10 +14310,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/GetPinyinResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strType, string strText);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/GetPinyinResponse")]
-        System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetPinyin(string strType, string strText, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result);
         
@@ -19734,13 +19736,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         questions}, this.onEndGetAuthorNumberDelegate, this.onGetAuthorNumberCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText) {
-            return base.Channel.GetPinyin(out strPinyinXml, strText);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strType, string strText) {
+            return base.Channel.GetPinyin(out strPinyinXml, strType, strText);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetPinyin(strText, callback, asyncState);
+        public System.IAsyncResult BeginGetPinyin(string strType, string strText, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetPinyin(strType, strText, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -19749,8 +19751,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         private System.IAsyncResult OnBeginGetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strText = ((string)(inValues[0]));
-            return this.BeginGetPinyin(strText, callback, asyncState);
+            string strType = ((string)(inValues[0]));
+            string strText = ((string)(inValues[1]));
+            return this.BeginGetPinyin(strType, strText, callback, asyncState);
         }
         
         private object[] OnEndGetPinyin(System.IAsyncResult result) {
@@ -19768,11 +19771,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void GetPinyinAsync(string strText) {
-            this.GetPinyinAsync(strText, null);
+        public void GetPinyinAsync(string strType, string strText) {
+            this.GetPinyinAsync(strType, strText, null);
         }
         
-        public void GetPinyinAsync(string strText, object userState) {
+        public void GetPinyinAsync(string strType, string strText, object userState) {
             if ((this.onBeginGetPinyinDelegate == null)) {
                 this.onBeginGetPinyinDelegate = new BeginOperationDelegate(this.OnBeginGetPinyin);
             }
@@ -19783,6 +19786,7 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 this.onGetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetPinyinCompleted);
             }
             base.InvokeAsync(this.onBeginGetPinyinDelegate, new object[] {
+                        strType,
                         strText}, this.onEndGetPinyinDelegate, this.onGetPinyinCompletedDelegate, userState);
         }
         

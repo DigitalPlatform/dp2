@@ -1,4 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Login" Codebehind="Login.aspx.cs" 
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Login" 
+    Codebehind="Login.aspx.cs" ViewStateEncryptionMode="Always"
      %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
