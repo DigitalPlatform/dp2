@@ -628,6 +628,7 @@ namespace dp2Circulation
                     {
                         // 注: 状态为New的不能修改为Changed，这是一个例外
                         orderitem.ItemDisplayState = ItemDisplayState.Changed;
+                        orderitem.Changed = true;   // 2018/10/31 避免 AddToListView() 出现 Assertion 警告
                     }
                 }
 
@@ -639,11 +640,12 @@ namespace dp2Circulation
                 // 先加入列表
                 this.Items.Add(orderitem);
 
-                orderitem.AddToListView(this.listView);
-                orderitem.HilightListViewItem(true);
-
+                // 2018/10/31 从最后移动到这里。避免 AddToListView() 出现 Assertion 警告
                 if (bChanged == true)
                     orderitem.Changed = true;    // 因为是新增的事项，无论如何都算修改过。这样可以避免集合中只有一个新增事项的时候，集合的changed值不对
+
+                orderitem.AddToListView(this.listView);
+                orderitem.HilightListViewItem(true);
             }
 
             // 标记删除某些元素

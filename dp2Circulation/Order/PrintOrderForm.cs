@@ -5196,15 +5196,15 @@ XLColor.DarkGreen); // 订单
         #region Excel 实用函数
 
         // 合计页的边沿
-        static int SUM_TOP_BLANK_LINES = 2;
-        static int SUM_LEFT_BLANK_COLUMS = 1;
+        public static int SUM_TOP_BLANK_LINES = 2;
+        public static int SUM_LEFT_BLANK_COLUMS = 1;
 
         // 表格页的边沿
-        static int TABLE_TOP_BLANK_LINES = 2;
-        static int TABLE_LEFT_BLANK_COLUMS = 1;
+        public static int TABLE_TOP_BLANK_LINES = 2;
+        public static int TABLE_LEFT_BLANK_COLUMS = 1;
 
         // 一次写左右两个单元，构成统计行
-        static void WriteExcelLine(
+        public static void WriteExcelLine(
                         IXLWorksheet sheet,
     int nLineIndex,
     string strName,
@@ -5221,7 +5221,7 @@ XLColor.DarkGreen); // 订单
                 strValue.Trim());
         }
 
-        static void WriteExcelLine(
+        public static void WriteExcelLine(
                 IXLWorksheet sheet,
 int nLineIndex,
 string strName,
@@ -5267,7 +5267,7 @@ string strName)
             }
         }
 
-        static IXLCell WriteExcelCell(
+        public static IXLCell WriteExcelCell(
     IXLWorksheet sheet,
 int nLineIndex,
 int nColIndex,
@@ -5282,7 +5282,7 @@ long value,
             return cell;
         }
 
-        static IXLCell WriteExcelCell(
+        public static IXLCell WriteExcelCell(
             IXLWorksheet sheet,
     int nLineIndex,
     int nColIndex,
@@ -5316,7 +5316,7 @@ long value,
         }
 #endif
 
-        static IXLRange WriteExcelTitle(
+        public static IXLRange WriteExcelTitle(
             IXLWorksheet sheet,
             int nLineIndex,
     int nStartCol,

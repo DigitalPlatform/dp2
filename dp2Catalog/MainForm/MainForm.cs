@@ -508,7 +508,7 @@ string strError)
             }
 
             List<string> types = StringUtil.SplitList(strOpenedMdiWindow);
-            StringUtil.RemoveDup(ref types);
+            StringUtil.RemoveDup(ref types, true);
             // string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
             foreach (string strType in types)
             {
@@ -3575,6 +3575,7 @@ out string strError)
                 //      -1  出错
                 //      0   成功
                 long lRet = channel.GetPinyin(
+                    "pinyin",
                     strText,
                     out strPinyinXml,
                     out strError);

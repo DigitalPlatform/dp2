@@ -356,7 +356,7 @@ namespace UpgradeDt1000ToDp2
 
             // 排序去重
             days.Sort();
-            StringUtil.RemoveDup(ref days);
+            StringUtil.RemoveDup(ref days, true);
 
             string strWarning = "";
             // 把dt1000 ltqx(2k).cfg中4字符的日期升级为dp28字符的形态
@@ -401,7 +401,7 @@ namespace UpgradeDt1000ToDp2
                 days.AddRange(weekenddays);
                 // 再次排序去重
                 days.Sort();
-                StringUtil.RemoveDup(ref days);
+                StringUtil.RemoveDup(ref days, true);
             }
 
             string strCalendarContent = Global.MakeListString(days, ",");

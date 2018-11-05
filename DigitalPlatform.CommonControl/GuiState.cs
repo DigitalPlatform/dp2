@@ -702,7 +702,7 @@ namespace DigitalPlatform.CommonControl
         // 获得表示控件状态的字符串
         public static string GetUiState(List<object> controls)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
 
             foreach (object obj in controls)
             {

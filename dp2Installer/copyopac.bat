@@ -6,6 +6,7 @@ xcopy ..\..\dp2opac\*.aspx /Y
 xcopy ..\..\dp2opac\*.aspx.cs /Y
 xcopy ..\..\dp2opac\*.aspx.designer.cs /Y
 xcopy ..\..\dp2opac\*.asax.cs /Y
+xcopy ..\..\dp2opac\*.js /Y
 xcopy ..\..\dp2opac\web.config /Y
 
 del about.* /Q
@@ -21,6 +22,8 @@ del circulation.* /Q
 del default.* /Q
 del restart.* /Q
 del test.* /Q
+
+del search2.js /Q
 
 md bin
 cd bin

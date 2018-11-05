@@ -5750,11 +5750,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     return;
                 }
 
-                string strError = "";
                 // TODO: 已经在 BeginLoop() 中了
+                // TODO: 这里要防范调用中出错，引发 MessageBox。MessageBox 可能会被 browseWindow 挡住，无法点按
                 nRet = this.LoadRecord(info,
                     true,
-                    out strError);
+                    out string strError);
                 if (nRet == 2)
                     this.AddToPendingList(info.RecPath, "");
                 else if (nRet != 1)
@@ -13811,10 +13811,33 @@ type.ProcessCommand);
                 "<div>" + HttpUtility.HtmlEncode(strError).Replace(" ", "&nbsp;").Replace("\r\n", "<br/>") + "</div>"
                 + "</body></html>";
             dlg.StartPosition = FormStartPosition.CenterScreen;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_HtmlViewerForm_state");
             dlg.ShowDialog(this);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 此函数没有用了。table xml 中应该本来“数字资源” line 元素就是元素直接构造的方式(不是 htmlEncode 方式的 value 属性)
+        // 把 table 格式 xml 中的 name="数字资源" value="..." 的 value 部分展开为 XML 结构
+        static string ExpandTableXml(string strTableXml)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strTableXml);
+
+            if (dom.DocumentElement == null)
+                return "";
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line[@type='object']");
+            foreach (XmlElement line in nodes)
+            {
+                string value = line.GetAttribute("value");
+                if (string.IsNullOrEmpty(value) == false)
+                {
+                    line.InnerXml = "<!-- 以下是对 value 属性的展开，以便观察，注意原始内容里面并没有这个部分 -->" + line.GetAttribute("value");
+                }
+            }
+
+            return DomUtil.GetIndentXml(dom);
         }
 
         bool _readOnly = false;

@@ -417,7 +417,7 @@ Stack:
             return false;
         }
 
-        static string _defaultDownloadBaseUrl = "http://dp2003.com/dp2circulation/v2/";
+        static string _defaultDownloadBaseUrl = "http://dp2003.com/dp2circulation/v3/";
 
         // 获得下载的基地址 URL。
         // 在参数配置里面配置这个地址的时候，如果希望强制发生作用，可以在第一字符使用 '~'。否则，程序会优先看 dp2003.com 域名是否可以解析，如果能解析则还是优先使用 dp2003.com 的地址

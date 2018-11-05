@@ -217,7 +217,7 @@ namespace DigitalPlatform.LibraryServer
 
             public string GetValueString(ValueStyle style)
             {
-                StringBuilder s = new StringBuilder(4096);
+                StringBuilder s = new StringBuilder();
                 if ((style & ValueStyle.Total) != 0)
                     s.Append(this.Total.ToString());
                 if ((style & ValueStyle.List) != 0)

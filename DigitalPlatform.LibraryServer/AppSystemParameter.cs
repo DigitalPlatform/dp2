@@ -153,7 +153,7 @@ namespace DigitalPlatform.LibraryServer
                             filenames.Add(MakeFileName(fi));
                         }
 
-                        StringBuilder text = new StringBuilder(4096);
+                        StringBuilder text = new StringBuilder();
                         string strHead = strDirectory;
                         foreach (string strFilename in filenames)
                         {
@@ -218,7 +218,7 @@ namespace DigitalPlatform.LibraryServer
                             filenames.AddRange(GetFilenames(sub.FullName, true, true));
                         }
 
-                        StringBuilder text = new StringBuilder(4096);
+                        StringBuilder text = new StringBuilder();
                         string strHead = Path.Combine(this.DataDir, "cfgs/");
                         foreach (string strFilename in filenames)
                         {
@@ -279,7 +279,7 @@ namespace DigitalPlatform.LibraryServer
                         strError = "get channel error";
                         goto ERROR1;
                     }
-                    StringBuilder text = new StringBuilder(4096);
+                    StringBuilder text = new StringBuilder();
                     foreach (string filename in filenames)
                     {
                         string strXml = "";

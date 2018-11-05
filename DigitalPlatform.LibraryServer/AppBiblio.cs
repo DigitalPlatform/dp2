@@ -7586,6 +7586,7 @@ out strError);
                 return true;
             return false;
         }
+
         /*
     <unique>
         <space dbnames="中文图书,中文编目" />
@@ -7605,7 +7606,7 @@ out strError);
                     results.AddRange(names);
             }
 
-            StringUtil.RemoveDup(ref results);
+            StringUtil.RemoveDupNoSort(ref results);
             return results;
         }
 
@@ -7731,14 +7732,13 @@ out strError);
             if (lRet == 0)
                 return 0;   // not found
 #endif
-            Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
     strResultSetName,   // "default",
     "", // strOutputStyle,
     1000,
             "zh",
             "id",
-            out records,
+            out Record[] records,
             out strError);
             if (lRet == -1)
                 return -1;
@@ -7762,6 +7762,11 @@ out strError);
             {
                 recpaths.Add(record.Path);
             }
+
+            // 2018/10/25
+            // 对命中的记录路径进行去重
+            recpaths.Sort();
+            StringUtil.RemoveDup(ref recpaths, true);
 
             // 去掉查重发起记录的路径
             recpaths.Remove(strBiblioRecPath);
