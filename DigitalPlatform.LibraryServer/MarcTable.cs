@@ -433,8 +433,16 @@ namespace DigitalPlatform.LibraryServer
                     "unimarc",
                     strRecPath,
                     maps_container);
+                //if (string.IsNullOrEmpty(objectTable) == false)
+                //    results.Add(new NameValueLine("数字资源", objectTable, "object"));
+
+                // 2018/11/5
                 if (string.IsNullOrEmpty(objectTable) == false)
-                    results.Add(new NameValueLine("数字资源", objectTable, "object"));
+                {
+                    var line = new NameValueLine("数字资源", "", "object");
+                    line.Xml = objectTable;
+                    results.Add(line);
+                }
             }
 
             return 0;
@@ -446,7 +454,7 @@ namespace DigitalPlatform.LibraryServer
         static string BuildUnimarcFields(MarcNodeList fields,
             string strSubfieldNameList = null)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             int i = 0;
             foreach (MarcField field in fields)
             {
@@ -456,7 +464,7 @@ namespace DigitalPlatform.LibraryServer
                 MarcNodeList nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    StringBuilder temp = new StringBuilder(4096);
+                    StringBuilder temp = new StringBuilder();
                     foreach (MarcSubfield subfield in nodes)
                     {
                         if (subfield.Name == "6")
@@ -1573,7 +1581,7 @@ namespace DigitalPlatform.LibraryServer
         // 直接串联每个子字段的内容
         static string ConcatSubfields(MarcNodeList nodes)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             foreach (MarcNode node in nodes)
             {
                 if (node.Name == "6")
@@ -1590,14 +1598,14 @@ namespace DigitalPlatform.LibraryServer
         static string BuildFields(MarcNodeList fields,
             string strSubfieldNameList = null)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             int i = 0;
             foreach (MarcNode field in fields)
             {
                 MarcNodeList nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    StringBuilder temp = new StringBuilder(4096);
+                    StringBuilder temp = new StringBuilder();
                     foreach (MarcNode subfield in nodes)
                     {
                         if (subfield.Name == "6")
@@ -1627,7 +1635,7 @@ namespace DigitalPlatform.LibraryServer
         // 组合构造若干个主题字段内容
         static string BuildSubjects(MarcNodeList fields)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             int i = 0;
             foreach (MarcNode field in fields)
             {
@@ -1638,7 +1646,7 @@ namespace DigitalPlatform.LibraryServer
                         text.Append(CRLF);
 
                     bool bPrevContent = false;  // 前一个子字段是除了 x y z 以外的子字段
-                    StringBuilder temp = new StringBuilder(4096);
+                    StringBuilder temp = new StringBuilder();
                     foreach (MarcNode subfield in nodes)
                     {
                         if (subfield.Name == "6")
@@ -1675,7 +1683,7 @@ namespace DigitalPlatform.LibraryServer
         // 组合构造若干个856字段内容
         static string BuildLinks(MarcNodeList fields)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             int i = 0;
             foreach (MarcNode field in fields)
             {
@@ -1706,7 +1714,7 @@ namespace DigitalPlatform.LibraryServer
                     if (i > 0)
                         text.Append(CRLF);
 
-                    StringBuilder temp = new StringBuilder(4096);
+                    StringBuilder temp = new StringBuilder();
 
                     if (string.IsNullOrEmpty(t3) == false)
                         temp.Append(t3 + ": <|");

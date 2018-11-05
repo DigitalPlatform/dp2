@@ -600,14 +600,17 @@ EventLogEntryType.Error);
                     host.Description.Behaviors.Add(behavior);
                 }
 
+                // 直接用默认值即可
+#if NO
                 if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
                 {
                     ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
+                    behavior.MaxConcurrentSessions = 1000;
                     behavior.MaxConcurrentCalls = 50;
                     behavior.MaxConcurrentInstances = 1000;
-                    behavior.MaxConcurrentSessions = 1000;
                     host.Description.Behaviors.Add(behavior);
                 }
+#endif
 
                 // IncludeExceptionDetailInFaults
                 ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
@@ -745,7 +748,7 @@ EventLogEntryType.Error);
             wshttp_binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
             // wshttp_binding.Security.Message.NegotiateServiceCredential = false;
             // wshttp_binding.Security.Message.EstablishSecurityContext = false;
-
+            
             wshttp_binding.MaxReceivedMessageSize = 1024 * 1024;
             wshttp_binding.MessageEncoding = WSMessageEncoding.Mtom;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -898,7 +901,7 @@ EventLogEntryType.Error);
             EndRemotingServer();
         }
 
-        #region Windows Service 控制命令设施
+#region Windows Service 控制命令设施
 
         IpcServerChannel m_serverChannel = null;
 
@@ -940,7 +943,7 @@ EventLogEntryType.Error);
             }
         }
 
-        #endregion
+#endregion
 
     }
 

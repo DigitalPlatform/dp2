@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Xml;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -64,6 +65,7 @@ namespace TestDp2Library
         "中文图书/1",
         record.Text,
         strStyle,
+        null,
         out List<NameValueLine> results,
         out string strError);
             if (nRet == -1)

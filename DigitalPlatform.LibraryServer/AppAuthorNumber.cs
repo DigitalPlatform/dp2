@@ -66,7 +66,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strNumber = "";
             strError = "";
-            debug_info = new StringBuilder(4096);
+            debug_info = new StringBuilder();
 
             Debug.Assert(questions != null, "");
 
@@ -618,8 +618,6 @@ namespace DigitalPlatform.LibraryServer
                 strNumber = strValue;
                 return 0;
             }
-
-
         }
 
         #region 下级函数

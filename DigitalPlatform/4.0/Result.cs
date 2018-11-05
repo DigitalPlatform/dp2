@@ -23,4 +23,9 @@ namespace DigitalPlatform
         }
     }
 
+    public class TextResult : NormalResult
+    {
+        public string Text { get; set; }
+
+    }
 }

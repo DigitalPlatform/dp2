@@ -1601,7 +1601,7 @@ out string strError)
             // 变换为字符串
             public override string ToString()
             {
-                StringBuilder text = new StringBuilder(4096);
+                StringBuilder text = new StringBuilder();
                 foreach (BreakPointInfo info in this)
                 {
                     text.Append(info.ToString() + ";");
@@ -1613,7 +1613,7 @@ out string strError)
             // 小结文字
             public string GetSummary()
             {
-                StringBuilder text = new StringBuilder(4096);
+                StringBuilder text = new StringBuilder();
                 foreach (BreakPointInfo info in this)
                 {
                     if (text.Length > 0)

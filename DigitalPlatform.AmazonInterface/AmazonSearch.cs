@@ -880,7 +880,7 @@ strServerUrl);
 
         static string Join(ICollection list)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             foreach (string s in list)
             {
                 if (text.Length > 0)
@@ -996,7 +996,7 @@ nsmgr,
             string strXPath,
             string strSep)
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             XmlNodeList nodes = root.SelectNodes(strXPath, nsmgr);
             foreach (XmlNode node in nodes)
             {

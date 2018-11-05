@@ -339,7 +339,7 @@ out strError);
                     else
                     {
                         long lLoadedLength = 0;
-                        StringBuilder temp = new StringBuilder(4096);
+                        StringBuilder temp = new StringBuilder();
                         for (; ; )
                         {
                             string strLine = sr.ReadLine();
