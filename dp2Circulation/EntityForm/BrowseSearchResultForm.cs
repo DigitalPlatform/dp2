@@ -216,9 +216,13 @@ namespace dp2Circulation
                 args.Paths = paths;
                 args.OpenNew = false;
 
+#if NO
                 this.listView_records.Enabled = false;
                 this.OpenDetail(this, args);
                 this.listView_records.Enabled = true;
+#endif
+                DoOpenDetail(args);
+
             }
             else
             {
@@ -235,9 +239,12 @@ namespace dp2Circulation
                 args.BiblioInfos.Add(info);
                 args.OpenNew = false;
 
+#if NO
                 this.listView_records.Enabled = false;
                 this.OpenDetail(this, args);
                 this.listView_records.Enabled = true;
+#endif
+                DoOpenDetail(args);
             }
 
             if (bCloseWindow == true)
@@ -248,6 +255,15 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void DoOpenDetail(OpenDetailEventArgs args)
+        {
+            this.Visible = false;   // 2018/10/31 避免在 OpenDetail 事件执行期间出现的 MessageBox.Show() 被本窗口遮挡出现无法用鼠标点按按钮的问题
+            this.listView_records.Enabled = false;
+            this.OpenDetail(this, args);
+            this.listView_records.Enabled = true;
+            this.Visible = true;
         }
 
         void OnLoadDetail()
@@ -290,9 +306,13 @@ namespace dp2Circulation
             args.BiblioInfos = biblioInfo_list;
             args.OpenNew = true;
 
+#if NO
             this.listView_records.Enabled = false;
             this.OpenDetail(this, args);
             this.listView_records.Enabled = true;
+#endif
+            DoOpenDetail(args);
+
             return;
         ERROR1:
             MessageBox.Show(this, strError);

@@ -2210,7 +2210,7 @@ namespace DigitalPlatform.LibraryServer
         // 变换为字符串
         public override string ToString()
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             foreach (BreakPointInfo info in this)
             {
                 text.Append(info.ToString() + ";");
@@ -2222,7 +2222,7 @@ namespace DigitalPlatform.LibraryServer
         // 小结文字
         public string GetSummary()
         {
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             foreach (BreakPointInfo info in this)
             {
                 text.Append(info.GetSummary() + "\r\n");

@@ -367,7 +367,7 @@ namespace DigitalPlatform.CirculationClient
             if (sort_table == null)
                 return "";
 
-            StringBuilder strResult = new StringBuilder(4096);
+            StringBuilder strResult = new StringBuilder();
             foreach (string key in sort_table.Keys)
             {
                 List<string> values = (List<string>)sort_table[key];

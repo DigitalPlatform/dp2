@@ -721,6 +721,8 @@ EventLogEntryType.Error);
                     host.Description.Behaviors.Add(behavior);
                 }
 
+                // 直接用默认值即可
+#if NO
                 if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
                 {
                     ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
@@ -729,6 +731,7 @@ EventLogEntryType.Error);
                     behavior.MaxConcurrentSessions = 1000;
                     host.Description.Behaviors.Add(behavior);
                 }
+#endif
 
                 // IncludeExceptionDetailInFaults
                 ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
@@ -1468,7 +1471,7 @@ EventLogEntryType.Error);
             Console.WriteLine("共删除 " + nCount.ToString() + " 个临时文件");
         }
 
-        #region Windows Service 控制命令设施
+#region Windows Service 控制命令设施
 
         IpcServerChannel m_serverChannel = null;
 
@@ -1510,7 +1513,7 @@ EventLogEntryType.Error);
             }
         }
 
-        #endregion
+#endregion
     }
 
     public class MyValidator : UserNamePasswordValidator

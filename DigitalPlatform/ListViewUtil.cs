@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -38,11 +38,11 @@ namespace DigitalPlatform.GUI
         }
 
         // 2012/5/9
-        // ´´½¨ÊÂÏîÃûÁĞ±í
+        // åˆ›å»ºäº‹é¡¹ååˆ—è¡¨
         public static string GetItemNameList(ListView.SelectedListViewItemCollection items,
             string strSep = ",")
         {
-            StringBuilder strItemNameList = new StringBuilder(4096);
+            StringBuilder strItemNameList = new StringBuilder();
             foreach (ListViewItem item in items)
             {
                 if (strItemNameList.Length > 0)
@@ -54,11 +54,11 @@ namespace DigitalPlatform.GUI
         }
 
         // 2012/5/9
-        // ´´½¨ÊÂÏîÃûÁĞ±í
+        // åˆ›å»ºäº‹é¡¹ååˆ—è¡¨
         public static string GetItemNameList(ListView list,
             string strSep = ",")
         {
-            StringBuilder strItemNameList = new StringBuilder(4096);
+            StringBuilder strItemNameList = new StringBuilder();
             foreach (ListViewItem item in list.SelectedItems)
             {
                 if (strItemNameList.Length > 0)
@@ -69,7 +69,7 @@ namespace DigitalPlatform.GUI
             return strItemNameList.ToString();
         }
 
-        // ÉÏÏÂÒÆ¶¯ÊÂÏîµÄ²Ëµ¥ÊÇ·ñÓ¦±»Ê¹ÄÜ
+        // ä¸Šä¸‹ç§»åŠ¨äº‹é¡¹çš„èœå•æ˜¯å¦åº”è¢«ä½¿èƒ½
         public static bool MoveItemEnabled(
             ListView list,
             bool bUp)
@@ -119,7 +119,7 @@ namespace DigitalPlatform.GUI
         }
 
         // parameters:
-        //      indices ·µ»ØÒÆ¶¯Éæ¼°µ½µÄÏÂ±êÎ»ÖÃ¡£µÚÒ»¸öÔªËØÊÇÒÆ¶¯Ç°µÄÎ»ÖÃ£¬µÚ¶ş¸öÔªËØÊÇÒÆ¶¯ºóµÄÎ»ÖÃ
+        //      indices è¿”å›ç§»åŠ¨æ¶‰åŠåˆ°çš„ä¸‹æ ‡ä½ç½®ã€‚ç¬¬ä¸€ä¸ªå…ƒç´ æ˜¯ç§»åŠ¨å‰çš„ä½ç½®ï¼Œç¬¬äºŒä¸ªå…ƒç´ æ˜¯ç§»åŠ¨åçš„ä½ç½®
         public static int MoveItemUpDown(
             ListView list,
             bool bUp,
@@ -132,7 +132,7 @@ namespace DigitalPlatform.GUI
 
             if (list.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª½øĞĞÉÏÏÂÒÆ¶¯µÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦è¿›è¡Œä¸Šä¸‹ç§»åŠ¨çš„äº‹é¡¹";
                 return -1;
             }
 
@@ -150,7 +150,7 @@ namespace DigitalPlatform.GUI
             {
                 if (index == 0)
                 {
-                    strError = "µ½Í·";
+                    strError = "åˆ°å¤´";
                     return -1;
                 }
 
@@ -167,7 +167,7 @@ namespace DigitalPlatform.GUI
             {
                 if (index >= list.Items.Count - 1)
                 {
-                    strError = "µ½Î²";
+                    strError = "åˆ°å°¾";
                     return -1;
                 }
                 list.Items.RemoveAt(index);
@@ -290,7 +290,7 @@ namespace DigitalPlatform.GUI
 
         #endregion
 
-        // »ñµÃÁĞ±êÌâ¿í¶È×Ö·û´®
+        // è·å¾—åˆ—æ ‡é¢˜å®½åº¦å­—ç¬¦ä¸²
         public static string GetColumnWidthListString(ListView list)
         {
             string strResult = "";
@@ -305,8 +305,8 @@ namespace DigitalPlatform.GUI
             return strResult;
         }
 
-        // »ñµÃÁĞ±êÌâ¿í¶È×Ö·û´®
-        // À©Õ¹¹¦ÄÜ°æ±¾¡£²»°üº¬ÓÒ±ßÁ¬ĞøµÄÃ»ÓĞ±êÌâÎÄ×ÖµÄÀ¸
+        // è·å¾—åˆ—æ ‡é¢˜å®½åº¦å­—ç¬¦ä¸²
+        // æ‰©å±•åŠŸèƒ½ç‰ˆæœ¬ã€‚ä¸åŒ…å«å³è¾¹è¿ç»­çš„æ²¡æœ‰æ ‡é¢˜æ–‡å­—çš„æ 
         public static string GetColumnWidthListStringExt(ListView list)
         {
             string strResult = "";
@@ -329,9 +329,9 @@ namespace DigitalPlatform.GUI
             return strResult;
         }
 
-        // ÉèÖÃÁĞ±êÌâµÄ¿í¶È
+        // è®¾ç½®åˆ—æ ‡é¢˜çš„å®½åº¦
         // parameters:
-        //      bExpandColumnCount  ÊÇ·ñÒªÀ©Õ¹ÁĞ±êÌâµ½×ã¹»ÊıÄ¿£¿
+        //      bExpandColumnCount  æ˜¯å¦è¦æ‰©å±•åˆ—æ ‡é¢˜åˆ°è¶³å¤Ÿæ•°ç›®ï¼Ÿ
         public static void SetColumnHeaderWidth(ListView list,
             string strWidthList,
             bool bExpandColumnCount)
@@ -364,9 +364,9 @@ namespace DigitalPlatform.GUI
 
 
 
-        // ÏìÓ¦Ñ¡Ôñ±ê¼Ç·¢Éú±ä»¯µÄ¶¯×÷£¬ĞŞ¸ÄÀ¸Ä¿±êÌâÎÄ×Ö
+        // å“åº”é€‰æ‹©æ ‡è®°å‘ç”Ÿå˜åŒ–çš„åŠ¨ä½œï¼Œä¿®æ”¹æ ç›®æ ‡é¢˜æ–‡å­—
         // parameters:
-        //      protect_column_numbers  ĞèÒª±£»¤µÄÁĞµÄÁĞºÅÊı×é¡£ÁĞºÅ´Ó0¿ªÊ¼¼ÆËã¡£ËùÎ½±£»¤¾ÍÊÇ²»ÆÆ»µÕâÑùµÄÁĞµÄ±êÌâ£¬ÉèÖÃ±êÌâ´ÓËüÃÇÒÔÍâµÄÁĞ¿ªÊ¼ËãÆğ¡£nRecPathColumn±íÊ¾µÄÁĞºÅ²»±ØÄÉÈë±¾Êı×é£¬Ò²»á×Ô¶¯ÊÜµ½±£»¤¡£Èç¹û²»ĞèÒª±¾²ÎÊı£¬¿ÉÒÔÓÃnull
+        //      protect_column_numbers  éœ€è¦ä¿æŠ¤çš„åˆ—çš„åˆ—å·æ•°ç»„ã€‚åˆ—å·ä»0å¼€å§‹è®¡ç®—ã€‚æ‰€è°“ä¿æŠ¤å°±æ˜¯ä¸ç ´åè¿™æ ·çš„åˆ—çš„æ ‡é¢˜ï¼Œè®¾ç½®æ ‡é¢˜ä»å®ƒä»¬ä»¥å¤–çš„åˆ—å¼€å§‹ç®—èµ·ã€‚nRecPathColumnè¡¨ç¤ºçš„åˆ—å·ä¸å¿…çº³å…¥æœ¬æ•°ç»„ï¼Œä¹Ÿä¼šè‡ªåŠ¨å—åˆ°ä¿æŠ¤ã€‚å¦‚æœä¸éœ€è¦æœ¬å‚æ•°ï¼Œå¯ä»¥ç”¨null
         public static void OnSelectedIndexChanged(ListView list,
             int nRecPathColumn,
             List<int> protect_column_numbers)
@@ -375,17 +375,17 @@ namespace DigitalPlatform.GUI
 
             if (prop == null)
             {
-                throw new Exception("ListView µÄ Tag Ã»ÓĞ°üº¬ ListViewProperty ¶ÔÏó");
+                throw new Exception("ListView çš„ Tag æ²¡æœ‰åŒ…å« ListViewProperty å¯¹è±¡");
             }
 
             if (list.SelectedItems.Count == 0)
             {
-                // Çå³ıËùÓĞÀ¸Ä¿±êÌâÎª1,2,3...£¬»òÕß±£ÁôÒÔÇ°µÄ²ĞÓàÖµ?
+                // æ¸…é™¤æ‰€æœ‰æ ç›®æ ‡é¢˜ä¸º1,2,3...ï¼Œæˆ–è€…ä¿ç•™ä»¥å‰çš„æ®‹ä½™å€¼?
                 return;
             }
 
             ListViewItem item = list.SelectedItems[0];
-            // »ñµÃÂ·¾¶¡£¼Ù¶¨¶¼ÔÚµÚÒ»ÁĞ£¿
+            // è·å¾—è·¯å¾„ã€‚å‡å®šéƒ½åœ¨ç¬¬ä¸€åˆ—ï¼Ÿ
             string strRecPath = GetItemText(item, nRecPathColumn);
 
             ColumnPropertyCollection props = null;
@@ -393,12 +393,12 @@ namespace DigitalPlatform.GUI
 
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-                strDbName = "<blank>";  // ÌØÊâµÄÊı¾İ¿âÃû£¬±íÊ¾µÚÒ»ÁĞ¿ÕµÄÇé¿ö
+                strDbName = "<blank>";  // ç‰¹æ®Šçš„æ•°æ®åº“åï¼Œè¡¨ç¤ºç¬¬ä¸€åˆ—ç©ºçš„æƒ…å†µ
                 props = prop.GetColumnName(strDbName);
                 goto DO_REFRESH;
             }
 
-            // È¡³öÊı¾İ¿âÃû
+            // å–å‡ºæ•°æ®åº“å
             strDbName = prop.ParseDbName(strRecPath);   //  GetDbName(strRecPath);
 
             if (String.IsNullOrEmpty(strDbName) == true)
@@ -407,7 +407,7 @@ namespace DigitalPlatform.GUI
             }
 
             if (strDbName == prop.CurrentDbName)
-                return; // Ã»ÓĞ±ØÒªË¢ĞÂ
+                return; // æ²¡æœ‰å¿…è¦åˆ·æ–°
 
             props = prop.GetColumnName(strDbName);
 
@@ -417,11 +417,11 @@ namespace DigitalPlatform.GUI
             {
                 // not found
 
-                // Çå³ıËùÓĞÀ¸Ä¿±êÌâÎª1,2,3...£¬»òÕß±£ÁôÒÔÇ°µÄ²ĞÓàÖµ?
+                // æ¸…é™¤æ‰€æœ‰æ ç›®æ ‡é¢˜ä¸º1,2,3...ï¼Œæˆ–è€…ä¿ç•™ä»¥å‰çš„æ®‹ä½™å€¼?
                 props = new ColumnPropertyCollection();
             }
 
-            // ĞŞ¸ÄÎÄ×Ö
+            // ä¿®æ”¹æ–‡å­—
             int index = 0;
             for (int i = 0; i < list.Columns.Count; i++)
             {
@@ -430,7 +430,7 @@ namespace DigitalPlatform.GUI
                 if (i == nRecPathColumn)
                     continue;
 
-                // Ô½¹ıĞèÒª±£»¤µÄÁĞ
+                // è¶Šè¿‡éœ€è¦ä¿æŠ¤çš„åˆ—
                 if (protect_column_numbers != null)
                 {
                     if (protect_column_numbers.IndexOf(i) != -1)
@@ -467,11 +467,11 @@ namespace DigitalPlatform.GUI
                     }
                 }
                 else
-                    temp = null;    // 2013/10/5 ¶à³öÀ´ÕÒ²»µ½¶¨ÒåµÄÁĞ£¬ĞèÒªÏÔÊ¾ÎªÊı×Ö
+                    temp = null;    // 2013/10/5 å¤šå‡ºæ¥æ‰¾ä¸åˆ°å®šä¹‰çš„åˆ—ï¼Œéœ€è¦æ˜¾ç¤ºä¸ºæ•°å­—
 
                 if (temp == null)
                 {
-                    // Èç¹û header ÒÔÇ°ÓĞÎÄ×Ö¾ÍÑØÓÃ£¬Ã»ÓĞÊ±²ÅÊ¹ÓÃ±àºÅÌî³ä 2014/9/6 Ïû³ı BUG
+                    // å¦‚æœ header ä»¥å‰æœ‰æ–‡å­—å°±æ²¿ç”¨ï¼Œæ²¡æœ‰æ—¶æ‰ä½¿ç”¨ç¼–å·å¡«å…… 2014/9/6 æ¶ˆé™¤ BUG
                     if (string.IsNullOrEmpty(header.Text) == true)
                         header.Text = i.ToString();
                 }
@@ -481,15 +481,15 @@ namespace DigitalPlatform.GUI
                 index++;
             }
 
-            // Ë¢ĞÂÅÅĞòÁĞµÄÏÔÊ¾¡£Ò²¾ÍÊÇËµË¢ĞÂÄÇĞ©²ÎÓëÁËÅÅĞòµÄ¸ö±ğÁĞµÄÏÔÊ¾
+            // åˆ·æ–°æ’åºåˆ—çš„æ˜¾ç¤ºã€‚ä¹Ÿå°±æ˜¯è¯´åˆ·æ–°é‚£äº›å‚ä¸äº†æ’åºçš„ä¸ªåˆ«åˆ—çš„æ˜¾ç¤º
             prop.SortColumns.RefreshColumnDisplay(list.Columns);
 
-            prop.CurrentDbName = strDbName; // ¼ÇÒä
+            prop.CurrentDbName = strDbName; // è®°å¿†
         }
 
-        // ÏìÓ¦µã»÷À¸Ä¿±êÌâµÄ¶¯×÷£¬½øĞĞÅÅĞò
+        // å“åº”ç‚¹å‡»æ ç›®æ ‡é¢˜çš„åŠ¨ä½œï¼Œè¿›è¡Œæ’åº
         // parameters:
-        //      bClearSorter    ÊÇ·ñÔÚÅÅĞòºóÇå³ı sorter º¯Êı
+        //      bClearSorter    æ˜¯å¦åœ¨æ’åºåæ¸…é™¤ sorter å‡½æ•°
         public static void OnColumnClick(ListView list,
             ColumnClickEventArgs e,
             bool bClearSorter = true)
@@ -500,11 +500,11 @@ namespace DigitalPlatform.GUI
 
             if (prop == null)
             {
-                throw new Exception("ListViewµÄTagÃ»ÓĞ°üº¬ListViewProperty¶ÔÏó");
+                throw new Exception("ListViewçš„Tagæ²¡æœ‰åŒ…å«ListViewPropertyå¯¹è±¡");
             }
 
             // 2013/3/31
-            // Èç¹û±êÌâÀ¸Ã»ÓĞ³õÊ¼»¯£¬ÔòĞèÒªÏÈ³õÊ¼»¯
+            // å¦‚æœæ ‡é¢˜æ æ²¡æœ‰åˆå§‹åŒ–ï¼Œåˆ™éœ€è¦å…ˆåˆå§‹åŒ–
             if (list.SelectedItems.Count == 0 && list.Items.Count > 0)
             {
                 list.Items[0].Selected = true;
@@ -521,7 +521,7 @@ namespace DigitalPlatform.GUI
                 list.Columns,
                 true);
 
-            // ÅÅĞò
+            // æ’åº
             SortColumnsComparer sorter = new SortColumnsComparer(prop.SortColumns);
             if (prop.HasCompareColumnEvent() == true)
             {
@@ -543,7 +543,7 @@ namespace DigitalPlatform.GUI
             public int ColumnIndex = -1;
         }
 
-        // ÏìÓ¦Êó±êÓÒ¼üµã»÷À¸Ä¿±êÌâµÄ¶¯×÷£¬³öÏÖÉÏÏÂÎÄ²Ëµ¥
+        // å“åº”é¼ æ ‡å³é”®ç‚¹å‡»æ ç›®æ ‡é¢˜çš„åŠ¨ä½œï¼Œå‡ºç°ä¸Šä¸‹æ–‡èœå•
         public static void OnColumnContextMenuClick(ListView list,
             ColumnClickEventArgs e)
         {
@@ -553,7 +553,7 @@ namespace DigitalPlatform.GUI
 
             if (prop == null)
             {
-                throw new Exception("ListViewµÄTagÃ»ÓĞ°üº¬ListViewProperty¶ÔÏó");
+                throw new Exception("ListViewçš„Tagæ²¡æœ‰åŒ…å«ListViewPropertyå¯¹è±¡");
             }
 
 #if NO
@@ -569,7 +569,7 @@ namespace DigitalPlatform.GUI
             ToolStripMenuItem subMenuItem = null;
 
             // list.Columns[nClickColumn].Text
-            menuItem = new ToolStripMenuItem("ÉèÖÃÅÅĞò·½Ê½");
+            menuItem = new ToolStripMenuItem("è®¾ç½®æ’åºæ–¹å¼");
             contextMenu.Items.Add(menuItem);
 
             ColumnSortStyle sortStyle = prop.GetSortStyle(list, nClickColumn);
@@ -603,9 +603,9 @@ namespace DigitalPlatform.GUI
             if (string.IsNullOrEmpty(strName) == true)
                 return "[None]";
 
-            // ½« call_number ĞÎÌ¬×ª»»Îª CallNumber ĞÎÌ¬
+            // å°† call_number å½¢æ€è½¬æ¢ä¸º CallNumber å½¢æ€
             string[] parts = strName.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
-            StringBuilder text = new StringBuilder(4096);
+            StringBuilder text = new StringBuilder();
             foreach (string s in parts)
             {
                 if (string.IsNullOrEmpty(s) == true)
@@ -626,7 +626,7 @@ namespace DigitalPlatform.GUI
             param.prop.SetSortStyle(param.ColumnIndex, param.Style);
         }
 
-        // Çå³ıËùÓĞÁô´æµÄÅÅĞòĞÅÏ¢£¬Ë¢ĞÂlistµÄ±êÌâÀ¸ÉÏµÄ³Â¾ÉµÄÅÅĞò±êÖ¾
+        // æ¸…é™¤æ‰€æœ‰ç•™å­˜çš„æ’åºä¿¡æ¯ï¼Œåˆ·æ–°listçš„æ ‡é¢˜æ ä¸Šçš„é™ˆæ—§çš„æ’åºæ ‡å¿—
         public static void ClearSortColumns(ListView list)
         {
             ListViewProperty prop = GetListViewProperty(list);
@@ -637,10 +637,10 @@ namespace DigitalPlatform.GUI
             prop.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(list.Columns);
 
-            prop.CurrentDbName = "";    // Çå³ı¼ÇÒä
+            prop.CurrentDbName = "";    // æ¸…é™¤è®°å¿†
         }
 
-        // »ñµÃListViewProperty¶ÔÏó
+        // è·å¾—ListViewPropertyå¯¹è±¡
         public static ListViewProperty GetListViewProperty(ListView list)
         {
             if (list.Tag == null)
@@ -651,7 +651,7 @@ namespace DigitalPlatform.GUI
             return (ListViewProperty)list.Tag;
         }
 
-        // ²éÕÒÒ»¸öÊÂÏî
+        // æŸ¥æ‰¾ä¸€ä¸ªäº‹é¡¹
         public static ListViewItem FindItem(ListView listview,
             string strText,
             int nColumn)
@@ -667,10 +667,10 @@ namespace DigitalPlatform.GUI
             return null;
         }
 
-        // ¼ì²âÒ»¸öxÎ»ÖÃÔÚºÎÁĞÉÏ¡£
+        // æ£€æµ‹ä¸€ä¸ªxä½ç½®åœ¨ä½•åˆ—ä¸Šã€‚
         // return:
-        //		-1	Ã»ÓĞÃüÖĞ
-        //		ÆäËû ÁĞºÅ
+        //		-1	æ²¡æœ‰å‘½ä¸­
+        //		å…¶ä»– åˆ—å·
         public static int ColumnHitTest(ListView listview,
             int x)
         {
@@ -686,7 +686,7 @@ namespace DigitalPlatform.GUI
             return -1;
         }
 
-        // È·±£ÁĞ±êÌâÊıÁ¿×ã¹»
+        // ç¡®ä¿åˆ—æ ‡é¢˜æ•°é‡è¶³å¤Ÿ
         public static void EnsureColumns(ListView listview,
             int nCount,
             int nInitialWidth = 200)
@@ -706,26 +706,26 @@ namespace DigitalPlatform.GUI
             }
         }
 
-        // »ñµÃÒ»¸öµ¥ÔªµÄÖµ
+        // è·å¾—ä¸€ä¸ªå•å…ƒçš„å€¼
         public static string GetItemText(ListViewItem item,
             int col)
         {
             if (col == 0)
                 return item.Text;
 
-            // 2008/5/14¡£·ñÔò»áÅ×³öÒì³£
+            // 2008/5/14ã€‚å¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
             if (col >= item.SubItems.Count)
                 return "";
 
             return item.SubItems[col].Text;
         }
 
-        // ĞŞ¸ÄÒ»¸öµ¥ÔªµÄÖµ
+        // ä¿®æ”¹ä¸€ä¸ªå•å…ƒçš„å€¼
         public static void ChangeItemText(ListViewItem item,
             int col,
             string strText)
         {
-            // È·±£Ïß³Ì°²È« 2014/9/3
+            // ç¡®ä¿çº¿ç¨‹å®‰å…¨ 2014/9/3
             if (item.ListView != null && item.ListView.InvokeRequired)
             {
                 item.ListView.BeginInvoke(new Action<ListViewItem, int, string>(ChangeItemText), item, col, strText);
@@ -738,8 +738,8 @@ namespace DigitalPlatform.GUI
                 return;
             }
 
-            // ±£ÏÕ
-            while (item.SubItems.Count < col + 1)   // Ô­À´Îª<=, »áÔì³É¶à¼ÓÒ»ÁĞµÄºó¹û 2006/10/9 changed
+            // ä¿é™©
+            while (item.SubItems.Count < col + 1)   // åŸæ¥ä¸º<=, ä¼šé€ æˆå¤šåŠ ä¸€åˆ—çš„åæœ 2006/10/9 changed
             {
                 item.SubItems.Add("");
             }
@@ -752,7 +752,7 @@ namespace DigitalPlatform.GUI
         }
 
         // 2009/10/21
-        // »ñµÃÒ»¸öĞĞµÄÖµ¡£¼´°Ñ¸÷¸öµ¥ÔªµÄÖµÓÃ\t×Ö·ûÁ¬½ÓÆğÀ´
+        // è·å¾—ä¸€ä¸ªè¡Œçš„å€¼ã€‚å³æŠŠå„ä¸ªå•å…ƒçš„å€¼ç”¨\tå­—ç¬¦è¿æ¥èµ·æ¥
         public static string GetLineText(ListViewItem item)
         {
             string strResult = "";
@@ -767,13 +767,13 @@ namespace DigitalPlatform.GUI
             return strResult;
         }
 
-        // Çå³ıÈ«²¿Ñ¡Ôñ×´Ì¬
+        // æ¸…é™¤å…¨éƒ¨é€‰æ‹©çŠ¶æ€
         public static void ClearSelection(ListView list)
         {
             list.SelectedItems.Clear();
         }
 
-        // Çå³ıÈ«²¿ Checked ×´Ì¬
+        // æ¸…é™¤å…¨éƒ¨ Checked çŠ¶æ€
         public static void ClearChecked(ListView list)
         {
             List<ListViewItem> items = new List<ListViewItem>();
@@ -788,10 +788,10 @@ namespace DigitalPlatform.GUI
             }
         }
 
-        // Ñ¡ÔñÒ»ĞĞ
+        // é€‰æ‹©ä¸€è¡Œ
         // parameters:
-        //		nIndex	ÒªÉèÖÃÑ¡Ôñ±ê¼ÇµÄĞĞ¡£Èç¹û==-1£¬±íÊ¾Çå³ıÈ«²¿Ñ¡Ôñ±ê¼Çµ«²»Ñ¡Ôñ¡£
-        //		bMoveFocus	ÊÇ·ñÍ¬Ê±ÒÆ¶¯focus±êÖ¾µ½ËùÑ¡ÔñĞĞ
+        //		nIndex	è¦è®¾ç½®é€‰æ‹©æ ‡è®°çš„è¡Œã€‚å¦‚æœ==-1ï¼Œè¡¨ç¤ºæ¸…é™¤å…¨éƒ¨é€‰æ‹©æ ‡è®°ä½†ä¸é€‰æ‹©ã€‚
+        //		bMoveFocus	æ˜¯å¦åŒæ—¶ç§»åŠ¨focusæ ‡å¿—åˆ°æ‰€é€‰æ‹©è¡Œ
         public static void SelectLine(ListView list,
             int nIndex,
             bool bMoveFocus)
@@ -809,10 +809,10 @@ namespace DigitalPlatform.GUI
             }
         }
 
-        // Ñ¡ÔñÒ»ĞĞ
+        // é€‰æ‹©ä¸€è¡Œ
         // 2008/9/9
         // parameters:
-        //		bMoveFocus	ÊÇ·ñÍ¬Ê±ÒÆ¶¯focus±êÖ¾µ½ËùÑ¡ÔñĞĞ
+        //		bMoveFocus	æ˜¯å¦åŒæ—¶ç§»åŠ¨focusæ ‡å¿—åˆ°æ‰€é€‰æ‹©è¡Œ
         public static void SelectLine(ListViewItem item,
             bool bMoveFocus)
         {
@@ -841,18 +841,18 @@ namespace DigitalPlatform.GUI
 
     public class ListViewProperty
     {
-        public string CurrentDbName = ""; // µ±Ç°ÒÑ¾­ÏÔÊ¾µÄ±êÌâËù¶ÔÓ¦µÄÊı¾İ¿âÃû¡£ÎªÁË¼Ó¿ìËÙ¶È
+        public string CurrentDbName = ""; // å½“å‰å·²ç»æ˜¾ç¤ºçš„æ ‡é¢˜æ‰€å¯¹åº”çš„æ•°æ®åº“åã€‚ä¸ºäº†åŠ å¿«é€Ÿåº¦
 
         public event GetColumnTitlesEventHandler GetColumnTitles = null;
         public event ParsePathEventHandler ParsePath = null;
         public event CompareEventHandler CompareColumn = null;
 
-        // ²ÎÓëÅÅĞòµÄÁĞºÅÊı×é
+        // å‚ä¸æ’åºçš„åˆ—å·æ•°ç»„
         public SortColumns SortColumns = new SortColumns();
 
         public List<ColumnSortStyle> SortStyles = new List<ColumnSortStyle>();
 
-        public Hashtable UsedColumnTitles = new Hashtable();   // keyÎªÊı¾İ¿âÃû£¬valueÎªList<string>
+        public Hashtable UsedColumnTitles = new Hashtable();   // keyä¸ºæ•°æ®åº“åï¼Œvalueä¸ºList<string>
 
         public void ClearCache()
         {
@@ -873,17 +873,17 @@ namespace DigitalPlatform.GUI
             return false;
         }
 
-        // »ñµÃÒ»¸öÁĞ¿ÉÓÃµÄÈ«²¿ sort style
+        // è·å¾—ä¸€ä¸ªåˆ—å¯ç”¨çš„å…¨éƒ¨ sort style
         public List<ColumnSortStyle> GetAllSortStyle(ListView list, int nColumn)
         {
             List<ColumnSortStyle> styles = new List<ColumnSortStyle>();
-            styles.Add(ColumnSortStyle.None); // Ã»ÓĞ
-            styles.Add(ColumnSortStyle.LeftAlign); // ×ó¶ÔÆë×Ö·û´®
-            styles.Add(ColumnSortStyle.RightAlign);// ÓÒ¶ÔÆë×Ö·û´®
-            styles.Add(ColumnSortStyle.RecPath);    // ¼ÇÂ¼Â·¾¶¡£ÀıÈç¡°ÖĞÎÄÍ¼Êé/1¡±£¬ÒÔ'/'Îª½ç£¬ÓÒ±ß²¿·Öµ±×÷Êı×ÖÖµÅÅĞò¡£»òÕß¡°localhost/ÖĞÎÄÍ¼Êé/ctlno/1¡±
-            styles.Add(ColumnSortStyle.LongRecPath);  // ¼ÇÂ¼Â·¾¶¡£ÀıÈç¡°ÖĞÎÄÍ¼Êé/1 @±¾µØ·şÎñÆ÷¡±
+            styles.Add(ColumnSortStyle.None); // æ²¡æœ‰
+            styles.Add(ColumnSortStyle.LeftAlign); // å·¦å¯¹é½å­—ç¬¦ä¸²
+            styles.Add(ColumnSortStyle.RightAlign);// å³å¯¹é½å­—ç¬¦ä¸²
+            styles.Add(ColumnSortStyle.RecPath);    // è®°å½•è·¯å¾„ã€‚ä¾‹å¦‚â€œä¸­æ–‡å›¾ä¹¦/1â€ï¼Œä»¥'/'ä¸ºç•Œï¼Œå³è¾¹éƒ¨åˆ†å½“ä½œæ•°å­—å€¼æ’åºã€‚æˆ–è€…â€œlocalhost/ä¸­æ–‡å›¾ä¹¦/ctlno/1â€
+            styles.Add(ColumnSortStyle.LongRecPath);  // è®°å½•è·¯å¾„ã€‚ä¾‹å¦‚â€œä¸­æ–‡å›¾ä¹¦/1 @æœ¬åœ°æœåŠ¡å™¨â€
 
-            // Ñ°ÕÒ±êÌâ .Tag ÖĞµÄ¶¨Òå
+            // å¯»æ‰¾æ ‡é¢˜ .Tag ä¸­çš„å®šä¹‰
             if (nColumn < list.Columns.Count)
             {
                 ColumnHeader header = list.Columns[nColumn];
@@ -913,7 +913,7 @@ namespace DigitalPlatform.GUI
 
             if (result == null || result == ColumnSortStyle.None)
             {
-                // Ñ°ÕÒ±êÌâ .Tag ÖĞµÄ¶¨Òå
+                // å¯»æ‰¾æ ‡é¢˜ .Tag ä¸­çš„å®šä¹‰
                 if (nColumn < list.Columns.Count)
                 {
                     ColumnHeader header = list.Columns[nColumn];
@@ -930,16 +930,16 @@ namespace DigitalPlatform.GUI
 
         public void SetSortStyle(int nColumn, ColumnSortStyle style)
         {
-            // È·±£ÔªËØ×ã¹»
+            // ç¡®ä¿å…ƒç´ è¶³å¤Ÿ
             while (this.SortStyles.Count < nColumn + 1)
             {
-                this.SortStyles.Add(null); // »òÕß .None // È±Ê¡µÄ ColumnSortStyle.LeftAlign
+                this.SortStyles.Add(null); // æˆ–è€… .None // ç¼ºçœçš„ ColumnSortStyle.LeftAlign
             }
 
             this.SortStyles[nColumn] = style;
 
             // 2013/3/27
-            // Ë¢ĞÂ SortColumns
+            // åˆ·æ–° SortColumns
             foreach (Column column in this.SortColumns)
             {
                 if (column.No == nColumn)
@@ -949,7 +949,7 @@ namespace DigitalPlatform.GUI
 
         public ColumnPropertyCollection GetColumnName(string strDbName)
         {
-            // ÏÈ´ÓHashtableÖĞÑ°ÕÒ
+            // å…ˆä»Hashtableä¸­å¯»æ‰¾
             if (this.UsedColumnTitles.Contains(strDbName) == true)
                 return (ColumnPropertyCollection)this.UsedColumnTitles[strDbName];
 
@@ -979,20 +979,20 @@ namespace DigitalPlatform.GUI
                 return e.DbName;
             }
 
-            // Èç¹ûÊÇ "ÖĞÎÄÍ¼Êé/3" Ôò·µ»ØÊı¾İ¿âÃû£¬Èç¹ûÊÇ"ÖĞÎÄÍ¼Êé/1@±¾µØ·şÎñÆ÷"Ôò·µ»ØÈ«Â·¾¶
+            // å¦‚æœæ˜¯ "ä¸­æ–‡å›¾ä¹¦/3" åˆ™è¿”å›æ•°æ®åº“åï¼Œå¦‚æœæ˜¯"ä¸­æ–‡å›¾ä¹¦/1@æœ¬åœ°æœåŠ¡å™¨"åˆ™è¿”å›å…¨è·¯å¾„
             return GetDbName(strPath);
         }
 
-        // ´ÓÂ·¾¶ÖĞÈ¡³ö¿âÃû²¿·Ö
+        // ä»è·¯å¾„ä¸­å–å‡ºåº“åéƒ¨åˆ†
         // parammeters:
-        //      strPath Â·¾¶¡£ÀıÈç"ÖĞÎÄÍ¼Êé/3"
+        //      strPath è·¯å¾„ã€‚ä¾‹å¦‚"ä¸­æ–‡å›¾ä¹¦/3"
         public static string GetDbName(string strPath)
         {
-            // ¿´¿´ÊÇ·ñÓĞ·şÎñÆ÷Ãû²¿·Ö 2015/8/12
+            // çœ‹çœ‹æ˜¯å¦æœ‰æœåŠ¡å™¨åéƒ¨åˆ† 2015/8/12
             int nRet = strPath.IndexOf("@");
             if (nRet != -1)
             {
-                return strPath; // ·µ»ØÈ«Â·¾¶
+                return strPath; // è¿”å›å…¨è·¯å¾„
             }
 
             nRet = strPath.LastIndexOf("/");
@@ -1002,17 +1002,17 @@ namespace DigitalPlatform.GUI
             return strPath.Substring(0, nRet).Trim();
         }
 #if NO
-        // ´ÓÂ·¾¶ÖĞÈ¡³ö¿âÃû²¿·Ö
+        // ä»è·¯å¾„ä¸­å–å‡ºåº“åéƒ¨åˆ†
         // parammeters:
-        //      strPath Â·¾¶¡£ÀıÈç"ÖĞÎÄÍ¼Êé/3"
+        //      strPath è·¯å¾„ã€‚ä¾‹å¦‚"ä¸­æ–‡å›¾ä¹¦/3"
         public static string GetDbName(string strPath)
         {
-            // ¿´¿´ÊÇ·ñÓĞ·şÎñÆ÷Ãû²¿·Ö 2015/8/11
+            // çœ‹çœ‹æ˜¯å¦æœ‰æœåŠ¡å™¨åéƒ¨åˆ† 2015/8/11
             string strServerName = "";
             int nRet = strPath.IndexOf("@");
             if (nRet != -1)
             {
-                strServerName = strPath.Substring(nRet).Trim(); // °üº¬×Ö·û '@'
+                strServerName = strPath.Substring(nRet).Trim(); // åŒ…å«å­—ç¬¦ '@'
                 strPath = strPath.Substring(0, nRet).Trim();
             }
 
@@ -1026,38 +1026,38 @@ namespace DigitalPlatform.GUI
     }
 
     /// <summary>
-    /// »ñµÃÀ¸Ä¿±êÌâ
+    /// è·å¾—æ ç›®æ ‡é¢˜
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetColumnTitlesEventHandler(object sender,
     GetColumnTitlesEventArgs e);
 
     // 2013/3/31
     /// <summary>
-    /// Ò»¸öÀ¸Ä¿µÄÊôĞÔ
+    /// ä¸€ä¸ªæ ç›®çš„å±æ€§
     /// </summary>
     public class ColumnProperty
     {
         /// <summary>
-        /// À¸Ä¿±êÌâ
+        /// æ ç›®æ ‡é¢˜
         /// </summary>
-        public string Title = "";   // À¸Ä¿±êÌâ
+        public string Title = "";   // æ ç›®æ ‡é¢˜
 
         /// <summary>
-        /// ÊıÖµÀàĞÍ
+        /// æ•°å€¼ç±»å‹
         /// </summary>
-        public string Type = "";    // ÊıÖµÀàĞÍ¡£ÅÅĞòÊ±ÓĞÓÃ
+        public string Type = "";    // æ•°å€¼ç±»å‹ã€‚æ’åºæ—¶æœ‰ç”¨
 
         /// <summary>
         /// XPath
         /// </summary>
-        public string XPath = "";   // XPath ×Ö·û´® 2015/8/27
+        public string XPath = "";   // XPath å­—ç¬¦ä¸² 2015/8/27
 
         /// <summary>
-        /// ×Ö·û´®×ª»»·½·¨
+        /// å­—ç¬¦ä¸²è½¬æ¢æ–¹æ³•
         /// </summary>
-        public string Convert = ""; // ×Ö·û´®×ª»»·½·¨ 2015/8/27
+        public string Convert = ""; // å­—ç¬¦ä¸²è½¬æ¢æ–¹æ³• 2015/8/27
 
         public ColumnProperty(string strTitle,
             string strType = "",
@@ -1072,15 +1072,15 @@ namespace DigitalPlatform.GUI
     }
 
     /// <summary>
-    /// À¸Ä¿ÊôĞÔ¼¯ºÏ
+    /// æ ç›®å±æ€§é›†åˆ
     /// </summary>
     public class ColumnPropertyCollection : List<ColumnProperty>
     {
         /// <summary>
-        /// ×·¼ÓÒ»¸öÀ¸Ä¿ÊôĞÔ¶ÔÏó
+        /// è¿½åŠ ä¸€ä¸ªæ ç›®å±æ€§å¯¹è±¡
         /// </summary>
-        /// <param name="strTitle">±êÌâ</param>
-        /// <param name="strType">ÀàĞÍ</param>
+        /// <param name="strTitle">æ ‡é¢˜</param>
+        /// <param name="strType">ç±»å‹</param>
         public void Add(string strTitle,
             string strType = "",
             string strXPath = "",
@@ -1091,11 +1091,11 @@ namespace DigitalPlatform.GUI
         }
 
         /// <summary>
-        /// ²åÈëÒ»¸öÀ¸Ä¿ÊôĞÔ¶ÔÏó
+        /// æ’å…¥ä¸€ä¸ªæ ç›®å±æ€§å¯¹è±¡
         /// </summary>
-        /// <param name="nIndex">²åÈëÎ»ÖÃÏÂ±ê</param>
-        /// <param name="strTitle">±êÌâ</param>
-        /// <param name="strType">ÀàĞÍ</param>
+        /// <param name="nIndex">æ’å…¥ä½ç½®ä¸‹æ ‡</param>
+        /// <param name="strTitle">æ ‡é¢˜</param>
+        /// <param name="strType">ç±»å‹</param>
         public void Insert(int nIndex, string strTitle, string strType = "")
         {
             ColumnProperty prop = new ColumnProperty(strTitle, strType);
@@ -1103,9 +1103,9 @@ namespace DigitalPlatform.GUI
         }
 
         /// <summary>
-        /// ¸ù¾İ type Öµ²éÕÒÁĞºÅ
+        /// æ ¹æ® type å€¼æŸ¥æ‰¾åˆ—å·
         /// </summary>
-        /// <returns>-1: Ã»ÓĞÕÒµ½; ÆäËû: ÁĞºÅ</returns>
+        /// <returns>-1: æ²¡æœ‰æ‰¾åˆ°; å…¶ä»–: åˆ—å·</returns>
         public int FindColumnByType(string strType)
         {
             int index = 0;
@@ -1120,33 +1120,33 @@ namespace DigitalPlatform.GUI
     }
 
     /// <summary>
-    /// »ñµÃÀ¸Ä¿±êÌâµÄ²ÎÊı
+    /// è·å¾—æ ç›®æ ‡é¢˜çš„å‚æ•°
     /// </summary>
     public class GetColumnTitlesEventArgs : EventArgs
     {
-        public string DbName = "";  // [in] Èç¹ûÖµÎª"<blank>"£¬±íÊ¾µÚÒ»ÁĞÎª¿ÕµÄÇé¿ö£¬ÀıÈçkeysµÄÇéĞÎ
+        public string DbName = "";  // [in] å¦‚æœå€¼ä¸º"<blank>"ï¼Œè¡¨ç¤ºç¬¬ä¸€åˆ—ä¸ºç©ºçš„æƒ…å†µï¼Œä¾‹å¦‚keysçš„æƒ…å½¢
         public ListViewProperty ListViewProperty = null;    // [in][out]
 
-        // public List<string> ColumnTitles = null;  // [out] null±íÊ¾not found£»¶ø.Count == 0±íÊ¾À¸Ä¿±êÌâÎª¿Õ£¬²¢ÇÒ²»ÊÇnot found
-        public ColumnPropertyCollection ColumnTitles = null;  // [out] null±íÊ¾not found£»¶ø.Count == 0±íÊ¾À¸Ä¿±êÌâÎª¿Õ£¬²¢ÇÒ²»ÊÇnot found
+        // public List<string> ColumnTitles = null;  // [out] nullè¡¨ç¤ºnot foundï¼›è€Œ.Count == 0è¡¨ç¤ºæ ç›®æ ‡é¢˜ä¸ºç©ºï¼Œå¹¶ä¸”ä¸æ˜¯not found
+        public ColumnPropertyCollection ColumnTitles = null;  // [out] nullè¡¨ç¤ºnot foundï¼›è€Œ.Count == 0è¡¨ç¤ºæ ç›®æ ‡é¢˜ä¸ºç©ºï¼Œå¹¶ä¸”ä¸æ˜¯not found
 
         // public string ErrorInfo = "";    // [out]
     }
 
     /// <summary>
-    /// ½âÊÍÂ·¾¶
+    /// è§£é‡Šè·¯å¾„
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void ParsePathEventHandler(object sender,
     ParsePathEventArgs e);
 
     /// <summary>
-    /// ½âÎöÂ·¾¶µÄ²ÎÊı
+    /// è§£æè·¯å¾„çš„å‚æ•°
     /// </summary>
     public class ParsePathEventArgs : EventArgs
     {
         public string Path = "";    // [in]
-        public string DbName = "";    // [out]  // Êı¾İ¿âÃû²¿·Ö¡£¿ÉÄÜ°üº¬·şÎñÆ÷Ãû³Æ²¿·Ö
+        public string DbName = "";    // [out]  // æ•°æ®åº“åéƒ¨åˆ†ã€‚å¯èƒ½åŒ…å«æœåŠ¡å™¨åç§°éƒ¨åˆ†
     }
 }

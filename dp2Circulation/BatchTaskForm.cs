@@ -502,7 +502,6 @@ namespace dp2Circulation
 
                         List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(paths);
 
-                        bool bAppend = false;
                         // 询问是否覆盖已有的目标下载文件。整体询问
                         // return:
                         //      -1  出错
@@ -510,7 +509,7 @@ namespace dp2Circulation
                         //      1   同意启动下载
                         int nRet = Program.MainForm.AskOverwriteFiles(infos,    // paths,
             ref strOutputFolder,
-            out bAppend,
+            out bool bAppend,
             out strError);
                         if (nRet == -1)
                             return -1;
