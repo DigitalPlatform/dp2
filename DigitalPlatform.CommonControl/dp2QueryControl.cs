@@ -155,7 +155,7 @@ namespace DigitalPlatform.CommonControl
                 return strDbNameList + ":" + strFromList;
 
             string[] dbname_list = strDbNameList.Split(new char[] { ',' });
-            StringBuilder result = new StringBuilder(4096);
+            StringBuilder result = new StringBuilder();
             foreach (string dbname in dbname_list)
             {
                 string strDbName = dbname.Trim();

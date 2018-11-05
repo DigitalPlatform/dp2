@@ -3552,24 +3552,27 @@ namespace dp2rms
             public object ControlChanged = null;
         }
 
-
         static string ConvertSinglePinyinByStyle(string strPinyin,
             PinyinStyle style)
         {
-            if (style == PinyinStyle.None)
-                return strPinyin;
+            if (strPinyin == null)
+                return "";
+
+            //if (style == PinyinStyle.None)
+            //    return strPinyin;
             if (style == PinyinStyle.Upper)
                 return strPinyin.ToUpper();
             if (style == PinyinStyle.Lower)
                 return strPinyin.ToLower();
-            if (style == PinyinStyle.UpperFirst)
+            if (style == PinyinStyle.None
+                || style == PinyinStyle.UpperFirst)
             {
                 if (strPinyin.Length > 1)
                 {
                     return strPinyin.Substring(0, 1).ToUpper() + strPinyin.Substring(1).ToLower();
                 }
 
-                return strPinyin;
+                return strPinyin.ToUpper();
             }
 
             Debug.Assert(false, "未定义的拼音风格");

@@ -857,8 +857,9 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult GetPinyin(
-string strText,
-out string strPinyinXml);
+            string strType,
+            string strText,
+            out string strPinyinXml);
 
         [OperationContract]
         LibraryServerResult SetPinyin(

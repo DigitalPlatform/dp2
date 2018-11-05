@@ -9783,6 +9783,7 @@ out string strError)
         }
 
         public long GetPinyin(
+            string strType,
 string strText,
 out string strPinyinXml,
     out string strError)
@@ -9794,6 +9795,7 @@ out string strPinyinXml,
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetPinyin(
+                    strType,
                     strText,
                     null,
                     null);

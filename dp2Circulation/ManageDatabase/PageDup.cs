@@ -226,10 +226,10 @@ namespace dp2Circulation
                 results.Add(DomUtil.GetAttr(nodes[i], "name"));
             }
 
-            results.Sort();
 
             // 去重
-            StringUtil.RemoveDup(ref results);
+            results.Sort();
+            StringUtil.RemoveDup(ref results, true);
 
             return results;
         }

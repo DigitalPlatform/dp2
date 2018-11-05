@@ -42,15 +42,15 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ToolStripMenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_option = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkBox_speak = new System.Windows.Forms.CheckBox();
-            this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_gameState = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkBox_speak = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -62,10 +62,10 @@
             // 
             this.checkBox_beep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(11, 256);
+            this.checkBox_beep.Location = new System.Drawing.Point(11, 249);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.checkBox_beep.Name = "checkBox_beep";
-            this.checkBox_beep.Size = new System.Drawing.Size(67, 21);
+            this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
             this.checkBox_beep.TabIndex = 1;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
@@ -142,11 +142,12 @@
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_file});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(451, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(451, 32);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -163,44 +164,64 @@
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.ToolStripMenuItem_file.Name = "ToolStripMenuItem_file";
-            this.ToolStripMenuItem_file.Size = new System.Drawing.Size(58, 21);
+            this.ToolStripMenuItem_file.Size = new System.Drawing.Size(80, 28);
             this.ToolStripMenuItem_file.Text = "文件(&F)";
             // 
             // ToolStripMenuItem_start
             // 
             this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_start.Text = "启动(&S)";
             this.ToolStripMenuItem_start.Click += new System.EventHandler(this.ToolStripMenuItem_start_Click);
+            // 
+            // ToolStripMenuItem_reopen
+            // 
+            this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
+            this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_option
             // 
             this.ToolStripMenuItem_option.Name = "ToolStripMenuItem_option";
-            this.ToolStripMenuItem_option.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_option.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_option.Text = "选项(&O)...";
             this.ToolStripMenuItem_option.Click += new System.EventHandler(this.ToolStripMenuItem_option_Click);
             // 
             // ToolStripMenuItem_copyright
             // 
             this.ToolStripMenuItem_copyright.Name = "ToolStripMenuItem_copyright";
-            this.ToolStripMenuItem_copyright.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_copyright.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_copyright.Text = "版权(&C)...";
             this.ToolStripMenuItem_copyright.Click += new System.EventHandler(this.ToolStripMenuItem_copyright_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
+            // 
+            // ToolStripMenuItem_gameState
+            // 
+            this.ToolStripMenuItem_gameState.Name = "ToolStripMenuItem_gameState";
+            this.ToolStripMenuItem_gameState.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_gameState.Text = "练习状态(&G)";
+            this.ToolStripMenuItem_gameState.Click += new System.EventHandler(this.ToolStripMenuItem_gameState_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator3.Click += new System.EventHandler(this.toolStripSeparator3_Click);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -208,37 +229,18 @@
             // 
             this.checkBox_speak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(11, 281);
+            this.checkBox_speak.Location = new System.Drawing.Point(11, 274);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.checkBox_speak.Name = "checkBox_speak";
-            this.checkBox_speak.Size = new System.Drawing.Size(90, 21);
+            this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
             this.checkBox_speak.TabIndex = 2;
             this.checkBox_speak.Text = "语音提示(&S)";
             this.checkBox_speak.UseVisualStyleBackColor = true;
             this.checkBox_speak.CheckedChanged += new System.EventHandler(this.checkBox_speak_CheckedChanged);
             // 
-            // ToolStripMenuItem_reopen
-            // 
-            this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(152, 22);
-            this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
-            this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
-            // 
-            // ToolStripMenuItem_gameState
-            // 
-            this.ToolStripMenuItem_gameState.Name = "ToolStripMenuItem_gameState";
-            this.ToolStripMenuItem_gameState.Size = new System.Drawing.Size(152, 22);
-            this.ToolStripMenuItem_gameState.Text = "练习状态(&G)";
-            this.ToolStripMenuItem_gameState.Click += new System.EventHandler(this.ToolStripMenuItem_gameState_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
-            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(451, 314);
             this.Controls.Add(this.checkBox_speak);

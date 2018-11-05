@@ -38,11 +38,11 @@ namespace dp2Circulation
         internal Thread threadFillSummary = null;
          * */
 
-        bool m_bStopFillAmercing = true;
+        volatile bool m_bStopFillAmercing = true;
         internal Thread threadFillAmercing = null;
         FillAmercingParam FillAmercingParam = null;
 
-        bool m_bStopFillAmerced = true;
+        volatile bool m_bStopFillAmerced = true;
         internal Thread threadFillAmerced = null;
         FillAmercedParam FillAmercedParam = null;
 

@@ -290,7 +290,6 @@ out string strError)
 #endif
 
                 //int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
-                string strPinyinXml = "";
 #if GCAT_SERVER
 
                 // return:
@@ -310,8 +309,9 @@ out string strError)
                 //      -1  出错
                 //      0   成功
                 long lRet = channel.GetPinyin(
+                    "pinyin",
                     strText,
-                    out strPinyinXml,
+                    out string strPinyinXml,
                     out strError);
 #endif
                 if (lRet == -1)
@@ -438,11 +438,10 @@ out string strError)
 #endif
 
 
-                        string strSampleText = "";
                         int nOffs = -1;
                         SelPinyinDlg.GetOffs(dom.DocumentElement,
                             nodeChar,
-                            out strSampleText,
+                            out string strSampleText,
                             out nOffs);
 
                         {	// 如果是多个拼音

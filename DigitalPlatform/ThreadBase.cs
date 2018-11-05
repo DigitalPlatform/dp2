@@ -14,7 +14,7 @@ namespace DigitalPlatform
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class ThreadBase : IDisposable
     {
-        private bool m_bStopThread = true;
+        private volatile bool m_bStopThread = true;
         protected Thread _thread = null;
 
         public AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 

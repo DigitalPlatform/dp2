@@ -168,14 +168,19 @@ function SetPhoto() {
                 fragment = "";
             else
                 fragment = "<img class='photo' src='" + photoUrl + "'/>";
-
             if (typeof (displayName) == 'undefined' || displayName == "")
-                fragment += "<div class='username'>" + userid + "</div>";
+                fragment += "<div class='username'>" + htmlEncode(userid) + "</div>";
             else
-                fragment += "<div class='username'>[" + displayName + "]</div>";
+                fragment += "<div class='username'>[" + htmlEncode(displayName) + "]</div>";
             $(this).append($(fragment));
         }
     });
+}
+
+function htmlEncode(value) {
+    // Create a in-memory div, set its inner text (which jQuery automatically encodes)
+    // Then grab the encoded contents back out. The div never exists on the page.
+    return $('<div/>').text(value).html();
 }
 
 function ParseEncrypt(text) {
@@ -383,9 +388,6 @@ function DoDelete(refid, div) {
             div.children('.delete_button').click(function () {
                 alert("已经删除了");
             });
-
-
-
         }
     });
 }
@@ -497,7 +499,6 @@ function LoadOne(interval, style) {
 
             Circle();
 
-
             if (o.ResultText.length == 0) {
                 // $('#message').append('.');
             }
@@ -550,7 +551,6 @@ function LoadOne(interval, style) {
 
             Doing--;
             RunningStyle = -1;
-
         }
     });
 }

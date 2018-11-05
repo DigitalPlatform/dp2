@@ -251,6 +251,9 @@ Stack:
             }
         }
 #endif
+
+
+#if NO
         /*
 Type: System.IO.FileNotFoundException
 Message: 无法保存快捷方式“C:\Users\Administrator\Desktop\????.lnk”。
@@ -301,6 +304,29 @@ Stack:
             {
                 Marshal.FinalReleaseComObject(shell);
             }
+        }
+#endif
+
+        // https://stackoverflow.com/questions/1501608/how-do-you-create-an-application-shortcut-lnk-file-in-c-sharp-with-command-li/1501727#1501727
+        public static void CreateShortcutToDesktop(
+    string linkName,
+    string strAppPath,
+    bool bOverwriteExist = true)
+        {
+            string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+            string strLnkFilePath = deskDir + "\\" + linkName + ".lnk";
+
+            if (bOverwriteExist == false && System.IO.File.Exists(strLnkFilePath) == true)
+                return;
+
+            IWshRuntimeLibrary.WshShell wsh = new IWshRuntimeLibrary.WshShell();
+            IWshRuntimeLibrary.IWshShortcut lnk = wsh.CreateShortcut(
+                strLnkFilePath) as IWshRuntimeLibrary.IWshShortcut;
+            lnk.TargetPath = strAppPath;
+            lnk.IconLocation = strAppPath + ", 0";
+            lnk.WorkingDirectory = Path.GetDirectoryName(strAppPath);
+            lnk.Save();
         }
 
 #if NO

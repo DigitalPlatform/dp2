@@ -307,6 +307,7 @@
   <xs:element name="GetPinyin">
     <xs:complexType>
       <xs:sequence>
+        <xs:element minOccurs="0" name="strType" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strText" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>

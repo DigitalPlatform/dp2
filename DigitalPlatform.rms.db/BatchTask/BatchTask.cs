@@ -115,10 +115,10 @@ namespace DigitalPlatform.rms
     // 批处理任务
     public class BatchTask : IDisposable
     {
-        public bool ManualStart = false;    // 本轮是否为手动启动？
+        public volatile bool ManualStart = false;    // 本轮是否为手动启动？
 
-        public bool Loop = false;
-        int m_nPrevLoop = -1;   // 3态 -1:尚未初始化 0:false 1:true
+        public volatile bool Loop = false;
+        volatile int m_nPrevLoop = -1;   // 3态 -1:尚未初始化 0:false 1:true
 
         // 启动参数
         public BatchTaskStartInfo StartInfo = null;
@@ -127,7 +127,7 @@ namespace DigitalPlatform.rms
         public string Name = "";
 
         // 任务 ID
-        public string ID = "";  
+        public string ID = "";
 
         // 进度文件
         Stream m_stream = null;
@@ -138,7 +138,7 @@ namespace DigitalPlatform.rms
 
         // //
 
-        internal bool m_bClosed = true;
+        internal volatile bool m_bClosed = true;
 
         internal KernelApplication App = null;
 
@@ -467,6 +467,7 @@ namespace DigitalPlatform.rms
                 {
                 }
 
+                // TODO: 这里可能会有问题
                 try
                 {
                     // 丢弃原来的线程。重新创建一个线程

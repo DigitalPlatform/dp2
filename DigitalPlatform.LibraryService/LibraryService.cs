@@ -2442,7 +2442,7 @@ namespace dp2Library
             string strComment,
             string strStyle)
         {
-            LibraryServerResult result = this.PrepareEnvironment("SetFriends", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetFriends", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -3689,7 +3689,7 @@ namespace dp2Library
             strOutputBiblioRecPath = "";
             baOutputTimestamp = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("SetBiblioInfo", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetBiblioInfo", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -3768,7 +3768,7 @@ namespace dp2Library
             baOutputTimestamp = null;
             strOutputBiblio = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("CopyBiblioInfo", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("CopyBiblioInfo", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -8149,7 +8149,7 @@ namespace dp2Library
             string strStyle = (string)parameters["style"];
             bool bReturnMessage = StringUtil.IsInList("returnMessage", strStyle);
 
-            LibraryServerResult result = this.PrepareEnvironment("ResetPassword", bReturnMessage, bReturnMessage);
+            LibraryServerResult result = this.PrepareEnvironment("ResetPassword", bReturnMessage, bReturnMessage, true);
             if (result.Value == -1)
                 return result;
 
@@ -8845,7 +8845,7 @@ Stack:
             string strError = "";
             resultInfo = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("BatchTask", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("BatchTask", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -10185,7 +10185,7 @@ Stack:
         {
             string strError = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("SetSystemParameter", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetSystemParameter", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -11319,7 +11319,7 @@ Stack:
         {
             strOutputNumber = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("SetOneClassTailNumber", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetOneClassTailNumber", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -11491,7 +11491,7 @@ Stack:
         {
             strOutputNumber = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("SetZhongcihaoTailNumber", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetZhongcihaoTailNumber", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -12455,6 +12455,7 @@ Stack:
             strOutputResPath = "";
             baOutputTimestamp = null;
 
+            // TODO: 这里不检查 hangup。但具体功能细节里面可以检查。在 hangup 情况下，可以专门放行修改 library.xml 的请求，而其他请求此时不允许操作
             LibraryServerResult result = this.PrepareEnvironment("WriteRes", true, true);
             if (result.Value == -1)
                 return result;
@@ -13956,7 +13957,7 @@ out strError);
             string strError = "";
             output_messages = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("SetMessage", true, true);
+            LibraryServerResult result = this.PrepareEnvironment("SetMessage", true, true, true);
             if (result.Value == -1)
                 return result;
 
@@ -14241,7 +14242,7 @@ out strError);
             Value = 0;
 
             LibraryServerResult result = this.PrepareEnvironment("HitCounter", true,
-                true);
+                true, true);
             if (result.Value == -1)
                 return result;
 
@@ -14357,6 +14358,7 @@ out strError);
             }
         }
 
+        // TODO: questions 要限制尺寸
         // parameters:
         //		strAuthor	著者字符串
         //		strNumber	返回号码
@@ -14397,7 +14399,6 @@ out strError);
                 }
 
                 // TODO: 验证身份
-                StringBuilder debug_info = null;
                 // return:
                 //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
                 //		-3	需要回答问题
@@ -14412,7 +14413,7 @@ out strError);
                     bOutputDebugInfo,
                     ref questions,
                     out strNumber,
-                    out debug_info,
+                    out StringBuilder debug_info,
                     out strError);
                 if (debug_info != null)
                     strDebugInfo = debug_info.ToString();
@@ -14432,18 +14433,21 @@ out strError);
             }
         }
 
+        // parameters:
+        //      strType 类型。如果为空或者 pinyin，表示希望获得拼音。如果为 sjhm，表示希望获得四角号码
         // return:
-        //      -2  strID验证失败
+        //      -2  strID 验证失败
         //      -1  出错
         //      0   成功
         public LibraryServerResult GetPinyin(
-string strText,
-out string strPinyinXml)
+            string strType, // 2018/10/25 增加此参数
+            string strText,
+            out string strPinyinXml)
         {
             string strError = "";
             strPinyinXml = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+            LibraryServerResult result = this.PrepareEnvironment("GetPinyin", true,
     true);
             if (result.Value == -1)
                 return result;
@@ -14454,11 +14458,26 @@ out string strPinyinXml)
                 //		-3	需要回答问题
                 //      -1  出错
                 //      0   成功
-                int nRet = app.GetPinyinInternal(
-                    sessioninfo,
-                    strText,
-                    out strPinyinXml,
-                    out strError);
+                int nRet = 0;
+
+                if (string.IsNullOrEmpty(strType) || strType == "pinyin")
+                    nRet = app.GetPinyinInternal(
+                        sessioninfo,
+                        strText,
+                        out strPinyinXml,
+                        out strError);
+                else if (strType == "sjhm")
+                    nRet = app.GetSjhmInternal(
+    sessioninfo,
+    strText,
+    out strPinyinXml,
+    out strError);
+                else
+                {
+                    nRet = -1;
+                    strError = "未知的 strType '" + strType + "'";
+                }
+
                 result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
@@ -14473,7 +14492,6 @@ out string strPinyinXml)
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // return:
@@ -14485,8 +14503,8 @@ string strPinyinXml)
         {
             string strError = "";
 
-            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
-true);
+            LibraryServerResult result = this.PrepareEnvironment("SetPinyin", true,
+true, true);
             if (result.Value == -1)
                 return result;
 
@@ -14531,7 +14549,7 @@ true);
 
             tokens = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+            LibraryServerResult result = this.PrepareEnvironment("SplitHanzi", true,
 true);
             if (result.Value == -1)
                 return result;

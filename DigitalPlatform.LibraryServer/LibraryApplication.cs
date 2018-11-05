@@ -1802,7 +1802,7 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-                    // 升级library.xml文件版本
+                    // 升级 library.xml 文件版本
                     if (bReload == false)
                     {
 #if LOG_INFO
@@ -2973,35 +2973,35 @@ namespace DigitalPlatform.LibraryServer
         }
          */
 
-
         // 检查全局配置参数是否基本正常
         public int Verify(out string strError)
         {
             strError = "";
-            bool bError = false;
-            if (this.WsUrl == "")
-            {
-                if (strError != "")
-                    strError += ", ";
 
-                strError += "<root>元素中wsurl属性未定义";
-                bError = true;
-            }
+            List<string> errors = new List<string>();
+            if (this.WsUrl == "")
+                errors.Add( "root/@wsurl 属性未定义");
 
             if (this.ManagerUserName == "")
-            {
-                if (strError != "")
-                    strError += ", ";
-                strError += "<root>元素中managerusername属性未定义";
-                bError = true;
-            }
+                errors.Add("root/@managerusername 属性未定义");
 
-            if (bError == true)
+            // 2018/10/26
+            // 检查 unique 元素是否多于一个
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique");
+            if (nodes.Count > 1)
+                errors.Add("根元素下 unique 元素定义超过一个。请删除多余的，只保留一个即可");
+
+            if (errors.Count > 0)
+            {
+                strError = "library.xml 发现下列配置错误: " + StringUtil.MakePathList(errors, "; ");
+                strError = "LibraryService 初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动";
+                this.WriteErrorLog(strError);
+                this.AddHangup("StartingError");
                 return -1;
+            }
 
             return 0;
         }
-
 
         public void RestartApplication()
         {
@@ -11462,7 +11462,7 @@ out strError);
             return 0;
         }
 
-        #region 实用功能
+#region 实用功能
 
         // 通过册条码号得知从属的种记录路径
         // parameters:
@@ -11977,7 +11977,7 @@ out strError);
             return 1;
         }
 
-        #endregion
+#endregion
 
         // 包装版本
         // 检查路径中的库名，是不是实体库名
@@ -12054,7 +12054,7 @@ out strError);
             return 0;
         }
 
-        #region APIs
+#region APIs
 
 
 
@@ -12607,7 +12607,7 @@ strLibraryCode);    // 读者所在的馆代码
             return -1;
         }
 
-        #endregion
+#endregion
 
         // 展开权限字符串为原始权限定义形态
         public static string ExpandRightString(string strOriginRight)
@@ -15292,7 +15292,7 @@ strLibraryCode);    // 读者所在的馆代码
         private bool readerDomChanged = false;
         public bool ReaderDomChanged { get => readerDomChanged; set => readerDomChanged = value; }
 
-        #region 手机短信验证码
+#region 手机短信验证码
 
         // 竖线间隔的手机号码列表
         // return:
@@ -15425,7 +15425,7 @@ strLibraryCode);    // 读者所在的馆代码
             return true;
         }
 
-        #endregion
+#endregion
 
         public Account()
         {
@@ -15572,8 +15572,8 @@ strLibraryCode);    // 读者所在的馆代码
             if (type_list2.Count == 0)
                 return results;
 
-            StringUtil.RemoveDup(ref type_list1);
-            StringUtil.RemoveDup(ref type_list2);
+            StringUtil.RemoveDupNoSort(ref type_list1);
+            StringUtil.RemoveDupNoSort(ref type_list2);
 
             foreach (string name in type_list1)
             {

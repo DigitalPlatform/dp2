@@ -2912,7 +2912,8 @@ out strError);
         //      true    希望继续处理后面记录
         public delegate bool Delegate_processBiblio(string strRecPath,
     XmlDocument dom,
-    byte[] timestamp);
+    byte[] timestamp,
+    ListViewItem item);
 
         int ProcessBiblio(
             Delegate_processBiblio func,
@@ -2989,7 +2990,7 @@ out strError);
 
                     if (func != null)
                     {
-                        if (func(info.RecPath, itemdom, info.Timestamp) == false)
+                        if (func(info.RecPath, itemdom, info.Timestamp, item.ListViewItem) == false)
                             break;
                     }
 
@@ -3420,7 +3421,7 @@ out strError);
                 string strDefaultOrderXml = "";
 
                 nRet = ProcessBiblio(
-                        (strBiblioRecPath, biblio_dom, biblio_timestamp) =>
+                        (strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
                         {
                             this.ShowMessage("正在处理书目记录 " + strBiblioRecPath);
 
@@ -3692,7 +3693,7 @@ out strError);
             {
 
                 int nRet = ProcessBiblio(
-                        (strRecPath, dom, timestamp) =>
+                        (strRecPath, dom, timestamp, item) =>
                         {
                             this.ShowMessage("正在处理书目记录 " + strRecPath);
 
@@ -4849,15 +4850,13 @@ MessageBoxDefaultButton.Button1);
                             strXml = info.OldXml;
                     }
 
-                    string strMARC = "";
-                    string strMarcSyntax = "";
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
                     nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
                         true,
                         null,
-                        out strMarcSyntax,
-                        out strMARC,
+                        out string strMarcSyntax,
+                        out string strMARC,
                         out strError);
                     if (nRet == -1)
                     {
@@ -11032,6 +11031,40 @@ MessageBoxDefaultButton.Button1);
         {
             int i = 0;
             i++;
+        }
+
+        // 智能筛选
+        private void ToolStripMenuItem_filterRecords_Click(object sender, EventArgs e)
+        {
+            int nBiblioCount = 0;
+
+            int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) => {
+                this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
+                
+                // 将XML格式转换为MARC格式
+                // 自动从数据记录中获得MARC语法
+                nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
+                    true,
+                    null,
+                    out string strMarcSyntax,
+                    out string strMARC,
+                    out string strError1);
+                if (nRet == -1)
+                    return true;
+
+                MarcRecord record = new MarcRecord(strMARC);
+
+                MarcNodeList nodes = record.select(this.textBox_queryWord.Text);
+                if (nodes.count > 0)
+                    item.Selected = true;
+                else
+                    item.Selected = false;
+
+                nBiblioCount++;
+                return true;
+            }, out string strError);
+
+            this.ClearMessage();
         }
     }
 
