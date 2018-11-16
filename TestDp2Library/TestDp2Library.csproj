@@ -59,6 +59,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestAuthorNumber.cs" />
     <Compile Include="TestBiblioTable.cs" />
     <Compile Include="TestDp2Library.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

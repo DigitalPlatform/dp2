@@ -4695,3 +4695,206 @@ out strError);
                     continue;
                 }
                 #endregion
+
+
+				~~~
+
+				        // 根据首字母查找范围属性
+        // parameters:
+        //		strPinyin	一个汉字的拼音。如果==""，表示找第一个r元素
+        // return:
+        //		-1	出错
+        //		0	没有找到
+        //		1	找到
+        public static int GetSubRange(XmlDocument dom,
+            string strPinyin,
+            bool bOutputDebugInfo,
+            out string strValue,
+            out string strFufen,
+            out string strDebugInfo,
+            out string strError)
+        {
+            strValue = "";
+            strFufen = "";
+            strError = "";
+            strDebugInfo = "";
+
+            string strLast = "A";
+
+            if (bOutputDebugInfo == true)
+            {
+                strDebugInfo += "缺省的第一个范围的起始字母为 '" + strLast + "'。\r\n";
+            }
+
+            int nElementCount = 0;
+            XmlNode nodeDefault = null;
+
+            string strHitValue = "";
+            string strHitFufen = "";
+
+            for (int i = 0; i < dom.DocumentElement.ChildNodes.Count; i++)
+            {
+                XmlNode node = dom.DocumentElement.ChildNodes[i];
+                if (node.NodeType != XmlNodeType.Element)
+                    continue;
+                if (node.Name != "r")
+                    continue;
+
+                nElementCount++;
+
+                string strRange = DomUtil.GetAttr(node, "n");
+
+                if (strRange == "")
+                    nodeDefault = node;
+
+                if (bOutputDebugInfo == true)
+                {
+                    strDebugInfo += "范围字符串 '" + strRange + "' \r\n";
+                }
+
+                if (strPinyin != "")
+                {
+                    if (strRange == "")
+                    {
+                        if (bOutputDebugInfo == true)
+                        {
+                            strDebugInfo += "用非空拼音查找，则遇空范围要越过。\r\n";
+                        }
+                        continue;
+                    }
+                }
+
+                strValue = DomUtil.GetAttr(node, "v");
+                strFufen = DomUtil.GetAttr(node, "f");
+
+                if (strPinyin == "")
+                    return 1;
+
+                string strStart = "";
+                string strTail = "";
+
+                int nRet = strRange.IndexOf("-");
+                if (nRet != -1)
+                {
+                    strStart = strRange.Substring(0, nRet).Trim();
+                    strTail = strRange.Substring(nRet + 1).Trim();
+                }
+                else
+                {
+                    strStart = strLast;
+                    strTail = strRange;
+                }
+
+                if (bOutputDebugInfo == true)
+                {
+                    strDebugInfo += "范围字符串被处理为 start='" + strStart + "' tail='" + strTail + "'\r\n";
+                }
+
+                // 做事
+
+                // return:
+                //		负数	在范围左边
+                //		0	落入范围
+                //		正数	在范围右边
+#if NO
+                if ((strStart.Length > 1 || strTail.Length > 1)
+                    && strStart.Length == strTail.Length && strPinyin.Length == strStart.Length)
+                {
+                    nRet = LocateExactRange(strStart,
+                        strTail,
+                        strPinyin);
+                }
+                else
+#endif
+                {
+                    nRet = LocateRange(strStart,
+                        strTail,
+                        strPinyin);
+                }
+                if (nRet < 0)
+                {
+                    if (strHitValue != "")
+                    {
+                        strValue = strHitValue;
+                        strFufen = strHitFufen;
+                        if (bOutputDebugInfo == true)
+                        {
+                            strDebugInfo += "当前条目范围已偏向比测试值左方。但先前条目命中过。所以返回value='" + strValue + "' fufen='" + strFufen + "'\r\n";
+                        }
+                        return 1;
+                    }
+                    strError = "拼音 '" + strPinyin + "' 没有找到对应的范围\r\n\r\n" + strDebugInfo;
+                    return 0;
+                }
+
+                if (nRet == 0)
+                {
+                    // 记下曾经命中
+                    strHitValue = strValue;
+                    strHitFufen = strFufen;
+
+                    if (bOutputDebugInfo == true)
+                    {
+                        strDebugInfo += "命中。但是继续向后探测。\r\n";
+                    }
+
+                    // 继续向后探测
+
+                }
+
+
+                // ? Debug.Assert(nRet > 0, "");
+
+
+                // 把strTail的第一字母加一
+                if (strTail.Length == 0)
+                {
+                    strError = "range '" + strRange + "' 时tail为空";
+                    return -1;
+                }
+
+#if NO
+                strLast = ((char)((int)strTail[0] + 1)).ToString();	// 为下一次准备起点
+                // strLast = strTail;   // 最后一个字母如果为 'Z'，要进位。类似十进制数字
+#endif
+                strLast = GetNextString(strTail);
+
+                if (bOutputDebugInfo == true)
+                {
+                    strDebugInfo += "为下一范围准备好起始字母 '" + strLast + "' 是根据当前tail '" + strTail + "' 首字母增量而来\r\n";
+                }
+            }
+
+            if (strHitValue != "")	// 曾经命中过
+            {
+                strValue = strHitValue;
+                strFufen = strHitFufen;
+                if (bOutputDebugInfo == true)
+                {
+                    strDebugInfo += "测试完全部条目。先前条目命中过。所以返回value='" + strValue + "' fufen='" + strFufen + "'\r\n";
+                }
+                return 1;
+            }
+
+            if (nElementCount == 1)
+            {
+                if (nodeDefault != null)
+                {
+                    strValue = DomUtil.GetAttr(nodeDefault, "v");
+                    strFufen = DomUtil.GetAttr(nodeDefault, "f");
+                    if (bOutputDebugInfo == true)
+                    {
+                        strDebugInfo += "著者号码XML记录中只有一个范围，n参数为空，那么无论什么拼音都能匹配";
+                        strDebugInfo += "命中。返回value='" + strValue + "' fufen='" + strFufen + "'\r\n";
+                    }
+                    return 1;
+                }
+            }
+
+            if (bOutputDebugInfo == true)
+            {
+                strDebugInfo += "没有找到。\r\n";
+            }
+
+            return 0;
+        }
