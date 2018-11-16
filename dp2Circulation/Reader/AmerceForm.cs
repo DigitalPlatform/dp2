@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.Threading;
-
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -19,7 +12,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -200,7 +192,6 @@ namespace dp2Circulation
             this.listView_overdues.Tag = prop_1;
             prop_1.SetSortStyle(COLUMN_AMERCING_PRICE, ColumnSortStyle.RightAlign);
             prop_1.SetSortStyle(COLUMN_AMERCING_BORROWPERIOD, ColumnSortStyle.RightAlign);
-
         }
 
         private void AmerceForm_Load(object sender, EventArgs e)
@@ -554,7 +545,7 @@ this.splitContainer_lists,
                 string strOutputRecPath = "";
                 int nRedoCount = 0;
 
-            REDO:
+                REDO:
 
                 stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
                 string[] results = null;
@@ -654,7 +645,7 @@ this.splitContainer_lists,
             }
 
             return nRecordCount;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -737,15 +728,13 @@ this.splitContainer_lists,
                     // 搜索出记录，显示在窗口中
                     ClearAllDisplay();
 
-                    string strXml = "";
-
                     // 装入读者记录
                     // return:
                     //      -1  error
                     //      0   not found
                     //      >=1 命中的读者记录条数
                     int nRet = LoadReaderHtmlRecord(ref strReaderBarcode,
-                        out strXml,
+                        out string strXml,
                         out strError);
 
                     if (this.textBox_readerBarcode.Text != strReaderBarcode)
@@ -825,7 +814,7 @@ this.splitContainer_lists,
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1177,6 +1166,7 @@ this.splitContainer_lists,
             }
         }
 
+        // 开始填充已交费信息
         // 如果有ids，则表示追加它们。否则为重新装载strReaderBaroode指明的读者的已交费记录
         void BeginFillAmerced(string strReaderBarcode,
             List<string> ids)
@@ -1194,8 +1184,6 @@ this.splitContainer_lists,
             this.threadFillAmerced.Start();
         }
 
-
-        /*public*/
         void ThreadFillAmercedMain()
         {
             string strError = "";
@@ -1238,7 +1226,7 @@ this.splitContainer_lists,
 
                 if (string.IsNullOrEmpty(this.FillAmercedParam.ReaderBarcode) == false)
                 {
-                    Safe_clearList(this.listView_amerced);
+                    ClearList(this.listView_amerced);
 
                     string strFrom = "读者证条码";
                     string strMatchStyle = "exact";
@@ -1353,7 +1341,11 @@ this.splitContainer_lists,
                         if (lRet == -1)
                         {
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            {
+                                // 2018/11/6
+                                SetError(listView_amerced, "获取记录 '" + strPath + "' 时权限不够: " + strError);
                                 continue;
+                            }
                             goto ERROR1;
                         }
 
@@ -1364,7 +1356,6 @@ this.splitContainer_lists,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-
                     }
 
                     lStart += searchresults.Length;
@@ -1376,7 +1367,7 @@ this.splitContainer_lists,
                 // 第二阶段，填充摘要
                 if (this.FillAmercedParam.FillSummary == true)
                 {
-                    List<ListViewItem> items = Safe_getItemList(this.listView_amerced);
+                    List<ListViewItem> items = GetItemList(this.listView_amerced);
 
                     for (int i = 0; i < items.Count; i++)
                     {
@@ -1423,7 +1414,7 @@ this.splitContainer_lists,
                         {
                         }
 
-                        Safe_changeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
+                        ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
                     }
                 }
                 return;
@@ -1436,8 +1427,8 @@ this.splitContainer_lists,
                 m_bStopFillAmerced = true;
             }
 
-        ERROR1:
-            Safe_setError(this.listView_amerced, strError);
+            ERROR1:
+            SetError(this.listView_amerced, strError);
             // Safe_errorBox(strError);
         }
 
@@ -1498,46 +1489,61 @@ this.splitContainer_lists,
         }
 
         // ClearList
-        delegate void Delegate_ClearList(ListView list);
+        // delegate void Delegate_ClearList(ListView list);
 
         void ClearList(ListView list)
         {
-            list.Items.Clear();
+            this.Invoke((Action)(() =>
+            {
+                list.Items.Clear();
+            }));
         }
 
+#if NO
         void Safe_clearList(ListView list)
         {
             Delegate_ClearList d = new Delegate_ClearList(ClearList);
             this.Invoke(d, new object[] { list });
         }
+#endif
 
         // ErrorBox
-        delegate void Delegate_ErrorBox(string strText);
+        // delegate void Delegate_ErrorBox(string strText);
 
         void ErrorBox(string strText)
         {
-            MessageBox.Show(this, strText);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strText);
+            }));
         }
 
+#if NO
         void Safe_errorBox(string strText)
         {
             Delegate_ErrorBox d = new Delegate_ErrorBox(ErrorBox);
             this.Invoke(d, new object[] { strText });
         }
+#endif
 
         // AddListItem
-        delegate void Delegate_AddListItem(ListView list, ListViewItem item);
+        // delegate void Delegate_AddListItem(ListView list, ListViewItem item);
 
         void AddListItem(ListView list, ListViewItem item)
         {
-            list.Items.Add(item);
+            this.Invoke((Action)(() =>
+            {
+                list.Items.Add(item);
+            }));
         }
 
+#if NO
         void Safe_addListItem(ListView list, ListViewItem item)
         {
             Delegate_AddListItem d = new Delegate_AddListItem(AddListItem);
             this.Invoke(d, new object[] { list, item });
         }
+#endif
 
         // GetBarcodeAndSummary
         delegate void Delegate_GetBarcodeAndSummary(ListView list,
@@ -1577,61 +1583,77 @@ this.splitContainer_lists,
         }
 
         // ChangeItemText
-        delegate void Delegate_ChangeItemText(ListViewItem item, int nCol, string strText);
+        // delegate void Delegate_ChangeItemText(ListViewItem item, int nCol, string strText);
 
         void ChangeItemText(ListViewItem item, int nCol, string strText)
         {
-            ListViewUtil.ChangeItemText(item, nCol, strText);
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, nCol, strText);
+            }));
         }
 
+#if NO
         void Safe_changeItemText(ListViewItem item, int nCol, string strText)
         {
             Delegate_ChangeItemText d = new Delegate_ChangeItemText(ChangeItemText);
             this.Invoke(d, new object[] { item, nCol, strText });
         }
+#endif
 
         // GetItemList
-        delegate List<ListViewItem> Delegate_GetItemList(ListView list);
+        // delegate List<ListViewItem> Delegate_GetItemList(ListView list);
 
         List<ListViewItem> GetItemList(ListView list)
         {
-            List<ListViewItem> results = new List<ListViewItem>();
-            foreach (ListViewItem item in list.Items)
+            return (List<ListViewItem>)this.Invoke((Func<List<ListViewItem>>)(() =>
             {
-                results.Add(item);
-            }
-            return results;
+                List<ListViewItem> results = new List<ListViewItem>();
+                foreach (ListViewItem item in list.Items)
+                {
+                    results.Add(item);
+                }
+                return results;
+            }));
         }
 
+#if NO
         List<ListViewItem> Safe_getItemList(ListView list)
         {
             Delegate_GetItemList d = new Delegate_GetItemList(GetItemList);
             return (List<ListViewItem>)this.Invoke(d, new object[] { list });
         }
+#endif
 
+#if NO
         // SetError
         delegate void Delegate_SetError(ListView list,
             string strError);
+#endif
 
         // 设置错误字符串显示
         static void SetError(ListView list,
             string strError)
         {
-            // list.Items.Clear();
-            ListViewItem item = new ListViewItem();
-            // item.ImageIndex = ITEMTYPE_ERROR;
-            item.Text = "";
-            item.SubItems.Add("错误: " + strError);
-            ListViewUtil.ChangeItemText(item, COLUMN_AMERCED_STATE, "error");
-            list.Items.Add(item);
+            list.Invoke((Action)(() =>
+            {
+                ListViewItem item = new ListViewItem();
+                // item.ImageIndex = ITEMTYPE_ERROR;
+                item.Text = "";
+                item.SubItems.Add("错误: " + strError);
+                ListViewUtil.ChangeItemText(item, COLUMN_AMERCED_STATE, "error");
+                list.Items.Add(item);
+            }));
         }
 
+#if NO
         void Safe_setError(ListView list,
             string strError)
         {
             Delegate_SetError d = new Delegate_SetError(SetError);
             this.Invoke(d, new object[] { list, strError });
         }
+#endif
 
         /*public*/
         void ThreadFillAmercingMain()
@@ -1646,8 +1668,7 @@ this.splitContainer_lists,
 
             try
             {
-
-                Safe_clearList(this.listView_overdues);
+                ClearList(this.listView_overdues);
 
                 XmlDocument dom = new XmlDocument();
                 try
@@ -1748,7 +1769,7 @@ this.splitContainer_lists,
                     info.Xml = node.OuterXml;
                     item.Tag = info;
 
-                    Safe_addListItem(this.listView_overdues, item);
+                    AddListItem(this.listView_overdues, item);
                 }
 
                 if (dup_ids.Count > 0)
@@ -1762,7 +1783,7 @@ this.splitContainer_lists,
                 // 第二阶段，填充摘要
                 if (this.FillAmercingParam.FillSummary == true)
                 {
-                    List<ListViewItem> items = Safe_getItemList(listView_overdues);
+                    List<ListViewItem> items = GetItemList(listView_overdues);
 
                     for (int i = 0; i < items.Count; i++)
                     {
@@ -1809,7 +1830,7 @@ this.splitContainer_lists,
                         {
                         }
 
-                        Safe_changeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
+                        ChangeItemText(item, COLUMN_AMERCING_BIBLIOSUMMARY, strSummary);
                     }
                 }
 
@@ -1823,8 +1844,8 @@ this.splitContainer_lists,
                 m_bStopFillAmercing = true;
             }
 
-        ERROR1:
-            Safe_setError(this.listView_overdues, strError);
+            ERROR1:
+            SetError(this.listView_overdues, strError);
             // Safe_errorBox(strError);
         }
 
@@ -2985,7 +3006,7 @@ this.splitContainer_lists,
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3201,7 +3222,7 @@ this.splitContainer_lists,
                 return 1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3602,7 +3623,7 @@ this.splitContainer_lists,
                 return 1;
 
             return 0;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -4246,7 +4267,7 @@ COLUMN_AMERCED_STATE);
             if (bPartialSucceed == true)
                 return 1;
             return 0;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -4441,7 +4462,7 @@ COLUMN_AMERCED_STATE);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, "DoViewOperlog() 出错: " + strError);
         }
 

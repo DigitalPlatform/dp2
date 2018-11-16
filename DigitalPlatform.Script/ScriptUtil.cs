@@ -10,6 +10,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Script
 {
@@ -244,6 +245,7 @@ namespace DigitalPlatform.Script
             HttpUrlHitCount = 0x01,     // 是否对 http:// 地址进行访问计数
             FrontCover = 0x02,   // 是否包含封面图像事项
             Template = 0x04,    // 是否利用模板机制对 $u 进行自动处理 2017/12/19
+            TemplateMultiHit = 0x08,    // 使用模板功能时候，是否允许多重匹配命中 item 元素。如果不允许，则命中第一个时候就停止了
         }
 
         // 兼容以前的版本
@@ -334,6 +336,7 @@ namespace DigitalPlatform.Script
                             strRecPath,
                             maps_container,
                             // parameters,
+                            style,
                             out u_list, // strUri,
                             out string strError);
                         //if (nRet == -1)
@@ -367,25 +370,33 @@ namespace DigitalPlatform.Script
                     string strObjectUrl = strUri;
                     string strPdfUrl = "";
                     string strThumbnailUrl = "";
-                    if (StringUtil.IsHttpUrl(strUri) == false)
+                    if (result.WrapUrl == true)
                     {
-                        // 内部对象
-                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
-                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
-                        if (s_q == "application/pdf")
+                        if (StringUtil.IsHttpUrl(strUri) == false)
                         {
-                            strPdfUrl = "./viewpdf.aspx?uri=" + HttpUtility.UrlEncode(strUri);
-                            strThumbnailUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri + "/page:1,format=jpeg,dpi:24");
+                            // 内部对象
+                            strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
+                            strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                            if (s_q == "application/pdf")
+                            {
+                                strPdfUrl = "./viewpdf.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                                strThumbnailUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri + "/page:1,format=jpeg,dpi:24");
+                            }
+                        }
+                        else
+                        {
+                            // http: 或 https: 的情形，即外部 URL
+                            if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
+                            {
+                                strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
+                                strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath) + "' alt='hitcount'></img>";
+                            }
                         }
                     }
                     else
                     {
-                        // http: 或 https: 的情形，即外部 URL
-                        if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
-                        {
-                            strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
-                            strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath) + "' alt='hitcount'></img>";
-                        }
+                        strObjectUrl = strUri;
+                        strHitCountImage = "";
                     }
 
                     string linkText = "";
@@ -504,6 +515,8 @@ namespace DigitalPlatform.Script
             // 锚点文字附加部分
             public string AnchorText { get; set; }
 
+            public bool WrapUrl { get; set; }
+
             public static string MacroAnchorText(string template, string old_text)
             {
                 if (template == null)
@@ -528,6 +541,7 @@ namespace DigitalPlatform.Script
             string strBiblioRecPath,
             XmlElement container,
             // Hashtable parameters,
+            BuildObjectHtmlTableStyle style,
             out List<Map856uResult> results,
             out string strError)
         {
@@ -596,12 +610,24 @@ namespace DigitalPlatform.Script
 
                 string object_path = MakeObjectUrl(strBiblioRecPath, uri);
 
-                string result = template.Replace("{object_path}", HttpUtility.UrlEncode(object_path));
-                result = result.Replace("{uri}", HttpUtility.UrlEncode(uri));
+                string result = template.Replace("{encoded_object_path}", HttpUtility.UrlEncode(object_path));
+                result = result.Replace("{encoded_uri}", HttpUtility.UrlEncode(uri));
+                result = result.Replace("{object_path}", object_path);
+                result = result.Replace("{uri}", uri);
                 result = result.Replace("{getobject_module}", "./getobject.aspx");
 
                 string anchorText = item.HasAttribute("anchorText") ? item.GetAttribute("anchorText") : null;
-                results.Add(new Map856uResult { Result = result, Parameters = parameters, AnchorText = anchorText });
+                bool wrapUrl = DomUtil.IsBooleanTrue(item.GetAttribute("wrapUrl"), true);
+                results.Add(new Map856uResult
+                {
+                    Result = result,
+                    Parameters = parameters,
+                    AnchorText = anchorText,
+                    WrapUrl = wrapUrl
+                });
+
+                if ((style & BuildObjectHtmlTableStyle.TemplateMultiHit) == 0)
+                    break;
             }
 
             return 1;
@@ -749,6 +775,7 @@ namespace DigitalPlatform.Script
                         int nRet = Map856u(u,
                             strRecPath,
                             maps_container,
+                            style,
                             // parameters,
                             out u_list,
                             out string strError);

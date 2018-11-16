@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class ChangeEntityActionDialog
     {
@@ -56,12 +56,11 @@ namespace dp2Circulation
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 13);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(14, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 12);
+            this.label1.Size = new System.Drawing.Size(116, 18);
             this.label1.TabIndex = 0;
-            this.label1.Text = "π›≤ÿµÿµ„(&L):";
+            this.label1.Text = "È¶ÜËóèÂú∞ÁÇπ(&L):";
             // 
             // comboBox_location
             // 
@@ -69,12 +68,11 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_location.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_location.FormattingEnabled = true;
-            this.comboBox_location.Location = new System.Drawing.Point(104, 10);
-            this.comboBox_location.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_location.Location = new System.Drawing.Point(156, 15);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_location.Size = new System.Drawing.Size(244, 26);
             this.comboBox_location.TabIndex = 1;
-            this.comboBox_location.Text = "<≤ª∏ƒ±‰>";
+            this.comboBox_location.Text = "<‰∏çÊîπÂèò>";
             this.comboBox_location.DropDown += new System.EventHandler(this.comboBox_location_DropDown);
             this.comboBox_location.SizeChanged += new System.EventHandler(this.comboBox_location_SizeChanged);
             this.comboBox_location.TextChanged += new System.EventHandler(this.comboBox_location_TextChanged);
@@ -82,12 +80,11 @@ namespace dp2Circulation
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 39);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(14, 58);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 12);
+            this.label2.Size = new System.Drawing.Size(98, 18);
             this.label2.TabIndex = 2;
-            this.label2.Text = "≤·¿‡–Õ(&B):";
+            this.label2.Text = "ÂÜåÁ±ªÂûã(&B):";
             // 
             // comboBox_bookType
             // 
@@ -95,12 +92,11 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_bookType.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_bookType.FormattingEnabled = true;
-            this.comboBox_bookType.Location = new System.Drawing.Point(104, 37);
-            this.comboBox_bookType.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_bookType.Location = new System.Drawing.Point(156, 56);
             this.comboBox_bookType.Name = "comboBox_bookType";
-            this.comboBox_bookType.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_bookType.Size = new System.Drawing.Size(244, 26);
             this.comboBox_bookType.TabIndex = 3;
-            this.comboBox_bookType.Text = "<≤ª∏ƒ±‰>";
+            this.comboBox_bookType.Text = "<‰∏çÊîπÂèò>";
             this.comboBox_bookType.DropDown += new System.EventHandler(this.comboBox_bookType_DropDown);
             this.comboBox_bookType.SelectedIndexChanged += new System.EventHandler(this.comboBox_bookType_SelectedIndexChanged);
             this.comboBox_bookType.SizeChanged += new System.EventHandler(this.comboBox_bookType_SizeChanged);
@@ -112,12 +108,11 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_state.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_state.FormattingEnabled = true;
-            this.comboBox_state.Location = new System.Drawing.Point(104, 64);
-            this.comboBox_state.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_state.Location = new System.Drawing.Point(156, 96);
             this.comboBox_state.Name = "comboBox_state";
-            this.comboBox_state.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_state.Size = new System.Drawing.Size(244, 26);
             this.comboBox_state.TabIndex = 5;
-            this.comboBox_state.Text = "<≤ª∏ƒ±‰>";
+            this.comboBox_state.Text = "<‰∏çÊîπÂèò>";
             this.comboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
             this.comboBox_state.SelectedIndexChanged += new System.EventHandler(this.comboBox_state_SelectedIndexChanged);
             this.comboBox_state.SizeChanged += new System.EventHandler(this.comboBox_state_SizeChanged);
@@ -126,22 +121,20 @@ namespace dp2Circulation
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 66);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Location = new System.Drawing.Point(14, 99);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(53, 12);
+            this.label3.Size = new System.Drawing.Size(80, 18);
             this.label3.TabIndex = 4;
-            this.label3.Text = "◊¥Ã¨(&S):";
+            this.label3.Text = "Áä∂ÊÄÅ(&S):";
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(150, 302);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Location = new System.Drawing.Point(225, 453);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(56, 22);
+            this.button_OK.Size = new System.Drawing.Size(84, 33);
             this.button_OK.TabIndex = 14;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -149,24 +142,22 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(211, 302);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Location = new System.Drawing.Point(316, 453);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(56, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
             this.button_Cancel.TabIndex = 15;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 201);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Location = new System.Drawing.Point(14, 302);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(173, 12);
+            this.label4.Size = new System.Drawing.Size(260, 18);
             this.label4.TabIndex = 12;
-            this.label4.Text = "◊∞»Î∫Û ‰»ÎΩπµ„◊‘∂Ø«–ªªµΩ(&F):";
+            this.label4.Text = "Ë£ÖÂÖ•ÂêéËæìÂÖ•ÁÑ¶ÁÇπËá™Âä®ÂàáÊç¢Âà∞(&F):";
             // 
             // comboBox_focusAction
             // 
@@ -175,17 +166,17 @@ namespace dp2Circulation
             this.comboBox_focusAction.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_focusAction.FormattingEnabled = true;
             this.comboBox_focusAction.Items.AddRange(new object[] {
-            "≤·Ãı¬Î∫≈£¨≤¢»´—°",
-            "≤·–≈œ¢±‡º≠∆˜-≤·Ãı¬Î∫≈",
-            "≤·–≈œ¢±‡º≠∆˜-◊¥Ã¨",
-            "≤·–≈œ¢±‡º≠∆˜-π›≤ÿµÿ",
-            "≤·–≈œ¢±‡º≠∆˜-Õº È¿‡–Õ"});
-            this.comboBox_focusAction.Location = new System.Drawing.Point(104, 216);
-            this.comboBox_focusAction.Margin = new System.Windows.Forms.Padding(2);
+            "ÂÜåÊù°Á†ÅÂè∑ÔºåÂπ∂ÂÖ®ÈÄâ",
+            "ÂÜå‰ø°ÊÅØÁºñËæëÂô®-ÂÜåÊù°Á†ÅÂè∑",
+            "ÂÜå‰ø°ÊÅØÁºñËæëÂô®-Áä∂ÊÄÅ",
+            "ÂÜå‰ø°ÊÅØÁºñËæëÂô®-È¶ÜËóèÂú∞",
+            "ÂÜå‰ø°ÊÅØÁºñËæëÂô®-Âõæ‰π¶Á±ªÂûã",
+            "ÂÜå‰ø°ÊÅØÁºñËæëÂô®-ÁôªÂΩïÂè∑"});
+            this.comboBox_focusAction.Location = new System.Drawing.Point(156, 324);
             this.comboBox_focusAction.Name = "comboBox_focusAction";
-            this.comboBox_focusAction.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_focusAction.Size = new System.Drawing.Size(244, 26);
             this.comboBox_focusAction.TabIndex = 13;
-            this.comboBox_focusAction.Text = "≤·Ãı¬Î∫≈£¨≤¢»´—°";
+            this.comboBox_focusAction.Text = "ÂÜåÊù°Á†ÅÂè∑ÔºåÂπ∂ÂÖ®ÈÄâ";
             this.comboBox_focusAction.SizeChanged += new System.EventHandler(this.comboBox_focusAction_SizeChanged);
             // 
             // comboBox_batchNo
@@ -195,25 +186,23 @@ namespace dp2Circulation
             this.comboBox_batchNo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_batchNo.FormattingEnabled = true;
             this.comboBox_batchNo.Items.AddRange(new object[] {
-            "<≤ª∏ƒ±‰>"});
-            this.comboBox_batchNo.Location = new System.Drawing.Point(104, 141);
-            this.comboBox_batchNo.Margin = new System.Windows.Forms.Padding(2);
+            "<‰∏çÊîπÂèò>"});
+            this.comboBox_batchNo.Location = new System.Drawing.Point(156, 212);
             this.comboBox_batchNo.Name = "comboBox_batchNo";
-            this.comboBox_batchNo.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_batchNo.Size = new System.Drawing.Size(244, 26);
             this.comboBox_batchNo.TabIndex = 11;
-            this.comboBox_batchNo.Text = "<≤ª∏ƒ±‰>";
+            this.comboBox_batchNo.Text = "<‰∏çÊîπÂèò>";
             this.comboBox_batchNo.SizeChanged += new System.EventHandler(this.comboBox_batchNo_SizeChanged);
             this.comboBox_batchNo.TextChanged += new System.EventHandler(this.comboBox_batchNo_TextChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 144);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Location = new System.Drawing.Point(14, 216);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 12);
+            this.label5.Size = new System.Drawing.Size(98, 18);
             this.label5.TabIndex = 10;
-            this.label5.Text = "≈˙¥Œ∫≈(&N):";
+            this.label5.Text = "ÊâπÊ¨°Âè∑(&N):";
             // 
             // checkedComboBox_stateRemove
             // 
@@ -221,11 +210,11 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.checkedComboBox_stateRemove.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_stateRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_stateRemove.Location = new System.Drawing.Point(147, 108);
+            this.checkedComboBox_stateRemove.Location = new System.Drawing.Point(220, 162);
             this.checkedComboBox_stateRemove.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_stateRemove.Name = "checkedComboBox_stateRemove";
             this.checkedComboBox_stateRemove.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_stateRemove.Size = new System.Drawing.Size(120, 22);
+            this.checkedComboBox_stateRemove.Size = new System.Drawing.Size(180, 29);
             this.checkedComboBox_stateRemove.TabIndex = 9;
             this.checkedComboBox_stateRemove.DropDown += new System.EventHandler(this.checkedComboBox_stateRemove_DropDown);
             this.checkedComboBox_stateRemove.TextChanged += new System.EventHandler(this.checkedComboBox_stateRemove_TextChanged);
@@ -233,12 +222,11 @@ namespace dp2Circulation
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(101, 108);
-            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label6.Location = new System.Drawing.Point(152, 162);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(41, 12);
+            this.label6.Size = new System.Drawing.Size(62, 18);
             this.label6.TabIndex = 8;
-            this.label6.Text = "ºı(&R):";
+            this.label6.Text = "Âáè(&R):";
             // 
             // checkedComboBox_stateAdd
             // 
@@ -246,11 +234,11 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.checkedComboBox_stateAdd.BackColor = System.Drawing.SystemColors.Window;
             this.checkedComboBox_stateAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_stateAdd.Location = new System.Drawing.Point(147, 86);
+            this.checkedComboBox_stateAdd.Location = new System.Drawing.Point(220, 129);
             this.checkedComboBox_stateAdd.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox_stateAdd.Name = "checkedComboBox_stateAdd";
             this.checkedComboBox_stateAdd.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_stateAdd.Size = new System.Drawing.Size(120, 22);
+            this.checkedComboBox_stateAdd.Size = new System.Drawing.Size(180, 29);
             this.checkedComboBox_stateAdd.TabIndex = 7;
             this.checkedComboBox_stateAdd.DropDown += new System.EventHandler(this.checkedComboBox_stateAdd_DropDown);
             this.checkedComboBox_stateAdd.TextChanged += new System.EventHandler(this.checkedComboBox_stateAdd_TextChanged);
@@ -258,43 +246,42 @@ namespace dp2Circulation
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(101, 86);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label7.Location = new System.Drawing.Point(152, 129);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(41, 12);
+            this.label7.Size = new System.Drawing.Size(62, 18);
             this.label7.TabIndex = 6;
-            this.label7.Text = "‘ˆ(&A):";
+            this.label7.Text = "Â¢û(&A):";
             // 
             // label_state
             // 
-            this.label_state.Location = new System.Drawing.Point(89, 64);
+            this.label_state.Location = new System.Drawing.Point(134, 96);
             this.label_state.Margin = new System.Windows.Forms.Padding(0);
             this.label_state.Name = "label_state";
-            this.label_state.Size = new System.Drawing.Size(10, 66);
+            this.label_state.Size = new System.Drawing.Size(15, 99);
             this.label_state.TabIndex = 16;
             // 
             // label_location
             // 
-            this.label_location.Location = new System.Drawing.Point(89, 10);
+            this.label_location.Location = new System.Drawing.Point(134, 15);
             this.label_location.Margin = new System.Windows.Forms.Padding(0);
             this.label_location.Name = "label_location";
-            this.label_location.Size = new System.Drawing.Size(10, 20);
+            this.label_location.Size = new System.Drawing.Size(15, 30);
             this.label_location.TabIndex = 17;
             // 
             // label_bookType
             // 
-            this.label_bookType.Location = new System.Drawing.Point(89, 37);
+            this.label_bookType.Location = new System.Drawing.Point(134, 56);
             this.label_bookType.Margin = new System.Windows.Forms.Padding(0);
             this.label_bookType.Name = "label_bookType";
-            this.label_bookType.Size = new System.Drawing.Size(10, 20);
+            this.label_bookType.Size = new System.Drawing.Size(15, 30);
             this.label_bookType.TabIndex = 18;
             // 
             // label_batchNo
             // 
-            this.label_batchNo.Location = new System.Drawing.Point(89, 141);
+            this.label_batchNo.Location = new System.Drawing.Point(134, 212);
             this.label_batchNo.Margin = new System.Windows.Forms.Padding(0);
             this.label_batchNo.Name = "label_batchNo";
-            this.label_batchNo.Size = new System.Drawing.Size(10, 20);
+            this.label_batchNo.Size = new System.Drawing.Size(15, 30);
             this.label_batchNo.TabIndex = 19;
             // 
             // comboBox_returnInEdit
@@ -304,33 +291,31 @@ namespace dp2Circulation
             this.comboBox_returnInEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_returnInEdit.FormattingEnabled = true;
             this.comboBox_returnInEdit.Items.AddRange(new object[] {
-            "<Œﬁ>",
-            "Ω´Ωπµ„«–ªªµΩÃı¬Î∫≈Œƒ±æøÚ",
-            "±£¥Êµ±«∞º«¬º"});
-            this.comboBox_returnInEdit.Location = new System.Drawing.Point(104, 268);
-            this.comboBox_returnInEdit.Margin = new System.Windows.Forms.Padding(2);
+            "<Êó†>",
+            "Â∞ÜÁÑ¶ÁÇπÂàáÊç¢Âà∞Êù°Á†ÅÂè∑ÊñáÊú¨Ê°Ü",
+            "‰øùÂ≠òÂΩìÂâçËÆ∞ÂΩï"});
+            this.comboBox_returnInEdit.Location = new System.Drawing.Point(156, 402);
             this.comboBox_returnInEdit.Name = "comboBox_returnInEdit";
-            this.comboBox_returnInEdit.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_returnInEdit.Size = new System.Drawing.Size(244, 26);
             this.comboBox_returnInEdit.TabIndex = 21;
-            this.comboBox_returnInEdit.Text = "<Œﬁ>";
+            this.comboBox_returnInEdit.Text = "<Êó†>";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 254);
-            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Location = new System.Drawing.Point(14, 381);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(113, 12);
+            this.label8.Size = new System.Drawing.Size(170, 18);
             this.label8.TabIndex = 20;
-            this.label8.Text = "‘⁄≤·–≈œ¢«¯ªÿ≥µ(&R):";
+            this.label8.Text = "Âú®ÂÜå‰ø°ÊÅØÂå∫ÂõûËΩ¶(&R):";
             // 
             // ChangeEntityActionDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(276, 334);
+            this.ClientSize = new System.Drawing.Size(414, 501);
             this.Controls.Add(this.comboBox_returnInEdit);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label_batchNo);
@@ -354,11 +339,10 @@ namespace dp2Circulation
             this.Controls.Add(this.comboBox_location);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ChangeEntityActionDialog";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "∂Ø◊˜≤Œ ˝";
+            this.Text = "Âä®‰ΩúÂèÇÊï∞";
             this.Load += new System.EventHandler(this.ChangeParamDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

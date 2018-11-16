@@ -1272,6 +1272,14 @@ namespace dp2Circulation
 
                 this.comboBox_bookType.Focus();
             }
+
+            if (name == "registerNo")
+            {
+                if (bSelectAll == true)
+                    this.textBox_registerNo.SelectAll();
+
+                this.textBox_registerNo.Focus();
+            }
         }
 
         /// <summary>

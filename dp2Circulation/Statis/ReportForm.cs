@@ -6262,14 +6262,13 @@ MessageBoxDefaultButton.Button2);
                 if (strTypeList == "*"
                     || StringUtil.IsInList("operlog", strTypeList) == true)
                 {
-                    string strFirstDate = "";
                     // return:
                     //      -1  出错
                     //      0   没有找到
                     //      1   找到
                     nRet = GetFirstOperLogDate(
                         LogType.OperLog | LogType.AccessLog,
-                        out strFirstDate,
+                        out string strFirstDate,
                         out strError);
                     if (nRet == -1)
                     {

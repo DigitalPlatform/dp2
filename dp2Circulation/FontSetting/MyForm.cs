@@ -208,6 +208,9 @@ namespace dp2Circulation
             if (Program.MainForm == null)
                 return;
 
+            this.HelpRequested -= MyForm_HelpRequested;
+            this.HelpRequested += MyForm_HelpRequested;
+
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -235,6 +238,11 @@ namespace dp2Circulation
                 if (Program.MainForm != null)
                     Program.MainForm.Move += new EventHandler(MainForm_Move);
             }
+        }
+
+        private void MyForm_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            OnHelpTriggered();
         }
 
         bool _channelDoEvents = true;
@@ -1941,6 +1949,47 @@ out strError);
         }
 
         #endregion
+
+#if NO
+        protected override bool ProcessDialogKey(
+Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                // MessageBox.Show(this, "MyForm Help");
+                OnHelpTriggered();
+                return true;
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+#endif
+
+        string _helpUrl = "";
+        public string HelpUrl
+        {
+            get
+            {
+                return _helpUrl;
+            }
+            set
+            {
+                _helpUrl = value;
+            }
+        }
+
+        public virtual void OnHelpTriggered()
+        {
+            // TODO: 如果是多个 URL，需要出现一个对话框让用户选择。每个 URL 需要跟一个小标题
+            if (string.IsNullOrEmpty(this.HelpUrl) == false)
+            {
+                // Process.Start("IExplore.exe", this.HelpUrl);
+                Process.Start(this.HelpUrl);
+                return;
+            }
+            // TODO: 最好跳转到一个帮助目录页面
+            MessageBox.Show(this, "当前没有帮助链接");
+        }
     }
 
     public class FilterHost

@@ -137,7 +137,7 @@ namespace DigitalPlatform.OPAC.Web
             // 2014/12/2
             // 兑现宏
             nRet = CacheBuilder.MacroDom(dom,
-                new List<string> { "name", "date" },
+                new List<string> { "name", "command" },
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

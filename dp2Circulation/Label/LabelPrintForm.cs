@@ -365,20 +365,81 @@ namespace dp2Circulation
                 return;
             }
 
+            int nRet = CheckBlankLabel(this.textBox_labelFile_labelFilename.Text,
+out string strError);
+            if (nRet == -1 || nRet == 1)
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strError);
+                }));
+
             // 能自动识别文件内容的编码方式的读入文本文件内容模块
             // return:
             //      -1  出错
             //      0   文件不存在
             //      1   文件存在
-            int nRet = Global.ReadTextFileContent(this.textBox_labelFile_labelFilename.Text,
+            nRet = Global.ReadTextFileContent(this.textBox_labelFile_labelFilename.Text,
                 out string strContent,
-                out string strError);
+                out strError);
             if (nRet == 1)
                 this.textBox_labelFile_content.Text = strContent;
             else
                 this.textBox_labelFile_content.Text = "";
 
             BeginWatcher();
+        }
+
+        // 检查是否有空标签
+        // return:
+        //      -1  出错
+        //      0   没有发现空标签
+        //      1   发现有空标签
+        public static int CheckBlankLabel(string strFilePath,
+    out string strError)
+        {
+            strError = "";
+
+            if (File.Exists(strFilePath) == false)
+            {
+                strError = "文件 '" + strFilePath + "' 不存在";
+                return 0;
+            }
+
+            Encoding encoding = FileUtil.DetectTextFileEncoding(strFilePath);
+
+            try
+            {
+                using (FileStream file = File.Open(
+        strFilePath,
+        FileMode.Open,
+        FileAccess.Read,
+        FileShare.ReadWrite))
+                using (StreamReader sr = new StreamReader(file, encoding))
+                {
+                    string prev_line = "";
+                    for (; ; )
+                    {
+                        string strLine = sr.ReadLine();
+                        if (strLine == null)
+                            break;
+                        strLine = strLine.Trim();
+                        if (strLine == "***" && prev_line == "***")
+                        {
+                            strError = "文件中发现有紧邻的 *** 行";
+                            return 1;
+                        }
+
+                        prev_line = strLine;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "打开或读入文件 '" + strFilePath + "' 时出错: " + ex.Message;
+                return -1;
+            }
+
+            return 0;
         }
 
         private void button_printPreview_Click(object sender, EventArgs e)
@@ -3327,7 +3388,7 @@ MessageBoxDefaultButton.Button1);
 
                 _wather.EnableRaisingEvents = true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(this, "BeginWatcher() exception: " + ExceptionUtil.GetAutoText(ex));
             }
