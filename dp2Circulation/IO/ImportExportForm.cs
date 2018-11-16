@@ -253,6 +253,10 @@ strStringTable);
                 {
                     return checkBox_target_randomItemBarcode.Checked;
                 }));
+                info.RandomItemRegisterNo = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return checkBox_target_randomItemRegisterNo.Checked;
+                }));
                 info.AddBiblioToItem = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_convert_addBiblioToItem.Checked;
@@ -361,6 +365,7 @@ strStringTable);
 
             this._locationTable.Clear();
             this._itemBarcodeTable.Clear();
+            this._itemRegisterNoTable.Clear();
 
             this.ClearHtml();
 
@@ -1072,7 +1077,7 @@ new string[] { "重试", "跳过", "中断" });
             if (strMarcSyntax == "unimarc")
             {
                 string strValue = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
-                strValue += "_" + Guid.NewGuid().ToString();
+                strValue += "_" + NewGuid().ToString();
                 record.setFirstSubfield("200", "a", strValue);
                 bChanged = true;
             }
@@ -1080,7 +1085,7 @@ new string[] { "重试", "跳过", "中断" });
             {
                 // TODO: 其实需要把子字段内容最末一个符号字符后移
                 string strValue = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
-                strValue += "_" + Guid.NewGuid().ToString();
+                strValue += "_" + NewGuid().ToString();
                 record.setFirstSubfield("245", "a", strValue);
                 bChanged = true;
             }
@@ -1292,11 +1297,16 @@ new string[] { "重试", "跳过", "中断" });
         {
             if (String.IsNullOrEmpty(strRefID) == true)
             {
-                strRefID = Guid.NewGuid().ToString();
+                strRefID = NewGuid().ToString();
                 return true;
             }
 
             return false;
+        }
+
+        static string NewGuid()
+        {
+            return ShortGuid.NewGuid();
         }
 
         static void RefreshRefID(Hashtable table, ref string strRefID)
@@ -1304,7 +1314,7 @@ new string[] { "重试", "跳过", "中断" });
 #if NO
             if (String.IsNullOrEmpty(strRefID) == true)
             {
-                strRefID = Guid.NewGuid().ToString();
+                strRefID = NewGuid().ToString();
                 return;
             }
 #endif
@@ -1322,7 +1332,7 @@ new string[] { "重试", "跳过", "中断" });
             }
             else
             {
-                strNewRefID = Guid.NewGuid().ToString();
+                strNewRefID = NewGuid().ToString();
                 table[strRefID] = strNewRefID;
                 strRefID = strNewRefID;
             }
@@ -1335,7 +1345,17 @@ new string[] { "重试", "跳过", "中断" });
             if (string.IsNullOrEmpty(strItemBarcode) == false)
                 DomUtil.SetElementText(item_dom.DocumentElement,
                     "barcode",
-                    strItemBarcode + "_" + Guid.NewGuid().ToString().ToUpper());
+                    strItemBarcode + "_" + NewGuid().ToString().ToUpper());
+        }
+
+        static void RandomItemRegisterNo(XmlDocument item_dom)
+        {
+            string strRegisterNo = DomUtil.GetElementText(item_dom.DocumentElement,
+                "registerNo");
+            if (string.IsNullOrEmpty(strRegisterNo) == false)
+                DomUtil.SetElementText(item_dom.DocumentElement,
+                    "registerNo",
+                    strRegisterNo + "_" + NewGuid().ToString().ToUpper());
         }
 
         static bool AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
@@ -1433,7 +1453,15 @@ new string[] { "重试", "跳过", "中断" });
                     else
                     {
                         // 针对册条码号进行文件空间内查重
-                        SearchDupOnFileScope(item_dom, dupInfo);
+                        SearchItemBarcodeDupOnFileScope(item_dom, dupInfo);
+                    }
+
+                    if (info.RandomItemRegisterNo)
+                        RandomItemRegisterNo(item_dom);
+                    else
+                    {
+                        // 针对登录号进行文件空间内查重
+                        SearchItemRegisterNoDupOnFileScope(item_dom, dupInfo);
                     }
 
                     string strLocation1 = DomUtil.GetElementText(item_dom.DocumentElement, "location");
@@ -1794,7 +1822,7 @@ int nCount)
 
         Hashtable _itemBarcodeTable = new Hashtable();  // itemBarcode --> count
 
-        void SearchDupOnFileScope(XmlDocument item_dom, StringBuilder errorInfo)
+        void SearchItemBarcodeDupOnFileScope(XmlDocument item_dom, StringBuilder errorInfo)
         {
             string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
             if (string.IsNullOrEmpty(strItemBarcode) == true)
@@ -1811,6 +1839,28 @@ int nCount)
             _itemBarcodeTable[strItemBarcode] = v;
 
             errorInfo.Append("册条码号 '" + strItemBarcode + "' 在源文件中发生重复(出现 " + v + " 次)");
+        }
+
+        // 2018/11/16
+        Hashtable _itemRegisterNoTable = new Hashtable();  // registerNo --> count
+
+        void SearchItemRegisterNoDupOnFileScope(XmlDocument item_dom, StringBuilder errorInfo)
+        {
+            string strRegisterNo = DomUtil.GetElementText(item_dom.DocumentElement, "registerNo");
+            if (string.IsNullOrEmpty(strRegisterNo) == true)
+                return;
+            object o = _itemRegisterNoTable[strRegisterNo];
+            if (o == null)
+            {
+                _itemRegisterNoTable[strRegisterNo] = 1;
+                return;
+            }
+
+            int v = (int)o;
+            v++;
+            _itemRegisterNoTable[strRegisterNo] = v;
+
+            errorInfo.Append("登录号 '" + strRegisterNo + "' 在源文件中发生重复(出现 " + v + " 次)");
         }
 
         static bool ConvertLocation(List<TwoString> table, ref string location)
@@ -1867,6 +1917,10 @@ new string[] { "继续", "中断" });
 
             // 是否为册条码号加上随机的后缀字符串
             public bool RandomItemBarcode = false;
+
+            // 2018/11/16
+            // 是否为登录号加上随机的后缀字符串
+            public bool RandomItemRegisterNo = false;
 
             // 是否为册记录自动添加书目元素。(注：如果册记录中本来有了这个元素就不添加了)
             public bool AddBiblioToItem = false;
@@ -2039,7 +2093,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_dontChangeOperations);
 
                 controls.Add(this.textBox_target_dbNameList);
-
+                controls.Add(this.checkBox_target_randomItemRegisterNo);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -2070,6 +2124,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_dontChangeOperations);
 
                 controls.Add(this.textBox_target_dbNameList);
+                controls.Add(this.checkBox_target_randomItemRegisterNo);
                 GuiState.SetUiState(controls, value);
             }
         }

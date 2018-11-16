@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Threading;
-using System.Xml;
-using System.Globalization;
-using System.IO;
 
-using DigitalPlatform;
-using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.LibraryClient;
 
@@ -97,7 +86,7 @@ ref sessioninfo) == false)
         {
             sessioninfo.ReturnChannel(channel);
         }
-    ERROR1:
+        ERROR1:
         this.Label_message.Text = strError;
     }
 }

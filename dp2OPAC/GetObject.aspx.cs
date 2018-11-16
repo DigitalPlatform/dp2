@@ -48,8 +48,8 @@ ref sessioninfo) == false)
         try
         {
             Uri uri = GetUri(strURI);
-            if (uri != null
-                && (uri.Scheme == "http" || uri.Scheme == "https"))
+            if ((uri != null && (uri.Scheme == "http" || uri.Scheme == "https"))
+                || strURI.StartsWith("./") == true) // 2018/11/6
             {
                 // 以下是处理 dp2 系统外部的 URL
                 if (StringUtil.IsInList("hitcount", strStyle) == true)

@@ -266,7 +266,7 @@
             this.tabControl1.Controls.Add(this.tabPage_normal);
             this.tabControl1.Controls.Add(this.tabPage_replicate);
             this.tabControl1.Location = new System.Drawing.Point(18, 18);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(442, 450);
@@ -293,9 +293,9 @@
             this.tabPage_normal.Controls.Add(this.label_marcSyntax);
             this.tabPage_normal.Controls.Add(this.comboBox_syntax);
             this.tabPage_normal.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_normal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_normal.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_normal.Name = "tabPage_normal";
-            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_normal.Size = new System.Drawing.Size(434, 418);
             this.tabPage_normal.TabIndex = 0;
             this.tabPage_normal.Text = "一般定义";
@@ -309,9 +309,9 @@
             this.tabPage_replicate.Controls.Add(this.label10);
             this.tabPage_replicate.Controls.Add(this.comboBox_replication_dbName);
             this.tabPage_replicate.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_replicate.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_replicate.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_replicate.Name = "tabPage_replicate";
-            this.tabPage_replicate.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_replicate.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_replicate.Size = new System.Drawing.Size(434, 418);
             this.tabPage_replicate.TabIndex = 1;
             this.tabPage_replicate.Text = "同步";

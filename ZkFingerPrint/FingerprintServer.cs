@@ -37,7 +37,17 @@ namespace ZkFingerprint
         Hashtable barcode_id_table = new Hashtable();  // barcode --> id 
 
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
+        internal AutoResetEvent eventFinished = new AutoResetEvent(false);  // true : initial state is signaled 
+
+        public int GetVersion(out string strVersion, 
+            out string strCfgInfo,
+            out string strError)
+        {
+            strVersion = "1.0";
+            strCfgInfo = "";
+            strError = "";
+            return 0;
+        }
 
         // return:
         //      -1  出错

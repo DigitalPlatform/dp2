@@ -11,6 +11,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Text;
+using System.Runtime.InteropServices;
 
 using FingerprintCenter.Properties;
 using libzkfpcsharp;
@@ -20,6 +21,9 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform;
+using static FingerprintCenter.FingerPrint;
+using Newtonsoft.Json;
 
 namespace FingerprintCenter
 {
@@ -86,9 +90,25 @@ namespace FingerprintCenter
             }
         }
 
-        public void ShowMessage(string text)
+        public void ShowMessage(string strMessage,
+string strColor = "",
+bool bClickClose = false)
         {
-            this._floatingMessage.Text = text;
+            if (this._floatingMessage == null)
+                return;
+
+            Color color = Color.FromArgb(80, 80, 80);
+
+            if (strColor == "red")          // 出错
+                color = Color.DarkRed;
+            else if (strColor == "yellow")  // 成功，提醒
+                color = Color.DarkGoldenrod;
+            else if (strColor == "green")   // 成功
+                color = Color.Green;
+            else if (strColor == "progress")    // 处理过程
+                color = Color.FromArgb(80, 80, 80);
+
+            this._floatingMessage.SetMessage(strMessage, color, bClickClose);
         }
 
         public void ClearMessage()
@@ -99,6 +119,11 @@ namespace FingerprintCenter
         private void Form1_Load(object sender, EventArgs e)
         {
             this.UiState = Properties.Settings.Default.ui_state;
+
+            this._repPlan = JsonConvert.DeserializeObject<ReplicationPlan>(Properties.Settings.Default.repPlan);
+            if (this._repPlan == null)
+                this._repPlan = new ReplicationPlan();
+
 
             ClearHtml();
 
@@ -113,13 +138,67 @@ namespace FingerprintCenter
             FingerPrint.Speak += FingerPrint_Speak;
             FingerPrint.ImageReady += FingerPrint_ImageReady;
 
-            FingerPrint.Init();
-            FingerPrint.OpenZK();
-
-            FingerPrint.StartCapture(_cancel.Token);
-
             StartRemotingServer();
-            Speak("指纹中心启动成功");
+
+            BeginStart();
+        }
+
+        // 指纹功能是否初始化成功
+        bool _initialized = false;
+
+        void BeginStart()
+        {
+            this.ClearMessage();
+
+            if (_initialized == true)
+                return;
+
+            Task.Run(() =>
+            {
+                NormalResult result = StartFingerPrint();
+                if (result.Value == -1)
+                {
+                    string strError = "指纹功能启动失败: " + result.ErrorInfo;
+                    Speak(strError);
+                    this.ShowMessage(strError, "red", true);
+                }
+                else
+                {
+                    _initialized = true;
+                    Speak("指纹功能启动成功");
+                }
+            });
+        }
+
+        NormalResult StartFingerPrint()
+        {
+            _cancel.Cancel();
+
+            _cancel = new CancellationTokenSource();
+
+            NormalResult result = FingerPrint.Init();
+            if (result.Value == -1)
+                return result;
+
+            result = FingerPrint.OpenZK();
+            if (result.Value == -1)
+                return result;
+
+            // 初始化指纹缓存
+            // return:
+            //      -1  出错
+            //      0   没有获得任何数据
+            //      1   获得了数据
+            int nRet = InitFingerprintCache(
+    out string strError);
+            if (nRet == -1)
+                return new NormalResult { Value = -1, ErrorInfo = strError };
+            if (nRet == 0)
+                this.ShowMessage(strError, "red", true);
+
+            // 开始捕捉指纹
+            FingerPrint.StartCapture(_cancel.Token);
+            return new NormalResult();
         }
 
         private void FingerPrint_ImageReady(object sender, ImageReadyEventArgs e)
@@ -208,6 +287,7 @@ namespace FingerprintCenter
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
 
             Properties.Settings.Default.ui_state = this.UiState;
+            Properties.Settings.Default.repPlan = JsonConvert.SerializeObject(this._repPlan);
             Properties.Settings.Default.Save();
         }
 
@@ -251,9 +331,14 @@ namespace FingerprintCenter
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+                else
+                {
+                    e.ErrorInfo = "尚未配置 dp2library 服务器用户名";
+                    e.Cancel = true;
+                }
             }
 
-            e.ErrorInfo = "尚未配置服务器参数";
+            // e.ErrorInfo = "尚未配置 dp2library 服务器用户名";
             e.Cancel = true;
         }
 
@@ -359,27 +444,44 @@ namespace FingerprintCenter
             }));
         }
 
+        FingerPrint.ReplicationPlan _repPlan = new FingerPrint.ReplicationPlan();
+
         // 注意，本函数不在界面线程执行
+        // return:
+        //      -1  出错
+        //      0   没有获得任何数据
+        //      1   获得了数据
         int InitFingerprintCache(
             out string strError)
         {
+            strError = "";
+            string strUrl = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.textBox_cfg_dp2LibraryServerUrl.Text;
+            }));
+            if (string.IsNullOrEmpty(strUrl))
+            {
+                strError = "尚未配置 dp2library 服务器 URL，无法获得读者指纹信息";
+                return 0;
+            }
+
             this.ShowMessage("正在初始化指纹信息 ...");
             EnableControls(false);
             LibraryChannel channel = this.GetChannel();
             try
             {
-                string strDir = "";
-                this.Invoke((Action)(() =>
-                {
-                    strDir = this.textBox_cfg_dp2LibraryServerUrl.Text;
-                }));
-                strDir = ClientInfo.FingerPrintCacheDir(strDir);
+                _repPlan = FingerPrint.GetReplicationPlan(channel);
+
+                string strDir = ClientInfo.FingerPrintCacheDir(strUrl);
                 PathUtil.TryCreateDir(strDir);
 
-                return FingerPrint.InitFingerprintCache(channel,
+                int nRet = FingerPrint.InitFingerprintCache(channel,
                     strDir,
                     _cancel.Token,
                     out strError);
+                if (nRet == -1)
+                    return -1;
+                return 1;
             }
             finally
             {
@@ -393,6 +495,10 @@ namespace FingerprintCenter
         {
             Task.Run(() =>
             {
+                // return:
+                //      -1  出错
+                //      0   没有获得任何数据
+                //      1   获得了数据
                 int nRet = InitFingerprintCache(
         out string strError);
                 if (nRet == -1)
@@ -742,7 +848,7 @@ string strHtml)
         void DisplayText(string text)
         {
             // AppendHtml("<div>" +HttpUtility.HtmlEncode(text)+ "</div>");
-            string html = string.Format("<html><body><div>{0}</div></body></html>", HttpUtility.HtmlEncode(text));
+            string html = string.Format("<html><body><div style='font-size:30px;'>{0}</div></body></html>", HttpUtility.HtmlEncode(text));
             SetHtmlString(this.webBrowser1, html);
         }
 
@@ -768,6 +874,81 @@ string strHtml)
                     return;
                 }
             }
+        }
+
+        protected override bool ProcessDialogKey(
+Keys keyData)
+        {
+            if (keyData == Keys.Escape)
+            {
+                if (m_fingerprintObj != null)
+                {
+                    m_fingerprintObj.CancelGetFingerprintString();
+                }
+                return true;
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+
+        #region device changed
+
+        const int WM_DEVICECHANGE = 0x0219; //see msdn site
+        const int DBT_DEVNODES_CHANGED = 0x0007;
+        const int DBT_DEVICEARRIVAL = 0x8000;
+        const int DBT_DEVICEREMOVALCOMPLETE = 0x8004;
+        const int DBT_DEVTYPVOLUME = 0x00000002;
+
+        protected override void WndProc(ref Message m)
+        {
+
+            if (m.Msg == WM_DEVICECHANGE)
+            {
+                if (m.WParam.ToInt32() == DBT_DEVNODES_CHANGED)
+                {
+                    BeginStart();
+                }
+
+                /*
+                    if (m.WParam.ToInt32() == DBT_DEVICEARRIVAL)
+                    {
+                        MessageBox.Show(this, "in");
+                    }
+                    if (m.WParam.ToInt32() == DBT_DEVICEREMOVALCOMPLETE)
+                    {
+                        MessageBox.Show(this, "usb out");
+                    }
+                 * */
+            }
+            base.WndProc(ref m);
+        }
+
+        #endregion
+
+        private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
+        {
+            BeginStart();
+        }
+
+        private void ToolStripMenuItem_reopen_Click(object sender, EventArgs e)
+        {
+            // 警告关闭
+            DialogResult result = MessageBox.Show(this,
+                "确实要重新启动 dp2-指纹中心?\r\n\r\n(会重新初始化指纹缓存)",
+                "dp2-指纹中心",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            _initialized = false;
+            BeginStart();
+        }
+
+        private void textBox_cfg_userName_TextChanged(object sender, EventArgs e)
+        {
+            _channelPool.Clear();
         }
     }
 }

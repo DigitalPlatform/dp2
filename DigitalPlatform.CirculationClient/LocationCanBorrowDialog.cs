@@ -143,7 +143,6 @@ namespace DigitalPlatform.CirculationClient
         private void toolStripButton_location_new_Click(object sender, EventArgs e)
         {
             LocationItemDialog dlg = new LocationItemDialog();
-
             dlg.CreateMode = true;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);

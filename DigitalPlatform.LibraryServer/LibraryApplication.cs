@@ -67,7 +67,7 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2018, 11, 15); // 上一个版本是 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2019, 2, 15); // 上一个版本是 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;
@@ -2980,16 +2980,77 @@ namespace DigitalPlatform.LibraryServer
 
             List<string> errors = new List<string>();
             if (this.WsUrl == "")
-                errors.Add( "root/@wsurl 属性未定义");
+                errors.Add("root/@wsurl 属性未定义");
 
             if (this.ManagerUserName == "")
                 errors.Add("root/@managerusername 属性未定义");
 
             // 2018/10/26
             // 检查 unique 元素是否多于一个
-            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique");
-            if (nodes.Count > 1)
-                errors.Add("根元素下 unique 元素定义超过一个。请删除多余的，只保留一个即可");
+            //XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique");
+            //if (nodes.Count > 1)
+            //    errors.Add("根元素下 unique 元素定义超过一个。请删除多余的，只保留一个即可");
+
+            // 2018/11/5
+            // 检查 unique 元素是否多于一个
+            // 检查 maps_856u 元素是否多于一个
+            string[] unique_containers = new string[]{
+                            "rightsTable",
+                            "locationTypes",
+                            "accounts",
+                            "browseformats",
+                            "foregift",
+                            "virtualDatabases",
+                            "valueTables",
+                            "calendars",
+                            "traceDTLP",
+                            "zhengyuan",
+                            "dkyw",
+                            "patronReplication",
+                            "clientFineInterface",
+                            "yczb",
+                            "script",
+                            "mailTemplates",
+                            "smtpServer",
+                            "externalMessageInterface",
+                            "zhongcihao",
+                            "callNumber",
+                            "monitors",
+                            "dup",
+                            "unique",
+                            "utilDb",
+                            "libraryInfo",
+                            "login",
+                            "circulation",
+                            "channel",
+                            "cataloging",
+                            "serverReplication",
+                            "authdbgroup",
+                            "maps_856u",
+                        };
+
+            foreach (string element_name in unique_containers)
+            {
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(element_name);
+                if (nodes.Count > 1)
+                    errors.Add("根元素下 " + element_name + " 元素定义超过一个。请删除多余的，只保留一个即可");
+            }
+
+            // 对 maps_856u 的特殊检查
+            // 序列号允许的功能如果不含有 maps856u，则 maps_856u/item@type 属性值不允许重复
+            if (StringUtil.IsInList("maps856u", this.Function) == false)
+            {
+                List<string> types = new List<string>();
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("maps_856u/item");
+                foreach (XmlElement item in nodes)
+                {
+                    string type = item.GetAttribute("type");
+                    if (types.IndexOf(type) != -1)
+                        errors.Add("序列号未许可 maps856u 功能的情况下，maps_856u/item@type 属性值不允许重复(出现了重复值'" + type + "')");
+
+                    types.Add(type);
+                }
+            }
 
             if (errors.Count > 0)
             {
@@ -9628,9 +9689,9 @@ out strError);
             }
             else
             {
-                if (external_interface == null)
+                if (string.IsNullOrEmpty(this.OutgoingQueue) == true && external_interface == null)
                 {
-                    strError = "当前系统尚未配置短消息 (sms) 接口，无法进行重设密码的操作";
+                    strError = "当前系统尚未配置短消息 (sms) 接口，也没有配置 MSMQ 消息队列，无法进行重设密码的操作";
                     return -1;
                 }
             }
@@ -9669,8 +9730,6 @@ out strError);
                     return -1;
                 }
 
-                List<KernelRecord> records = null;
-
                 // 获得读者记录
                 // return:
                 //      -2  当前没有配置任何读者库，或者可以操作的读者库
@@ -9684,7 +9743,7 @@ out strError);
                     strQueryWord,
                     nMaxHitCount,
                     "id,xml,timestamp",
-                    out records,
+                    out List<KernelRecord> records,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                 {
@@ -9703,7 +9762,6 @@ out strError);
                     return 0;
                 }
 #endif
-                List<KernelRecord> results = null;
 
                 // 筛选读者记录
                 // return:
@@ -9714,7 +9772,7 @@ out strError);
             strNameParam,
             strPatronBarcodeParam,
             strTelParam,
-            out results,
+            out List<KernelRecord> results,
             out strError);
                 if (nRet == -1)
                     return -1;
@@ -9736,14 +9794,13 @@ out strError);
 
                 foreach (KernelRecord record in results)
                 {
-                    string strLibraryCode = "";
                     // 获得读者库的馆代码
                     // return:
                     //      -1  出错
                     //      0   成功
                     nRet = GetLibraryCode(
                         record.RecPath,
-                        out strLibraryCode,
+                        out string strLibraryCode,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -9759,7 +9816,6 @@ out strError);
                     }
 
                     // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
-                    DateTime end;
 #if NO
                     // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
                     // parameters:
@@ -9780,7 +9836,7 @@ out strError);
                     //      1   还在重试禁止期以内
                     nRet = CheckRetryStartTime(readerdom,
     DateTime.Now,
-    out end,
+    out DateTime end,
     out strError);
                     if (nRet == -1)
                         return -1;
@@ -9833,6 +9889,45 @@ out strError);
                             );
                         // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
 
+                        if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
+                        {
+                            // 2018/11/8
+                            // 通过 MSMQ 发送手机短信
+                            // parameters:
+                            //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+                            nRet = SendSms(
+                            sessioninfo.Account == null ? "[none]" : sessioninfo.Account.UserID,
+                            strTelParam,
+                            strBody,
+                            out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "向读者 '" + strBarcode + "' 发送 SMS 时出错: " + strError;
+                                if (this.Statis != null)
+                                    this.Statis.IncreaseEntryValue(
+                                    strLibraryCode,
+                                    "重设密码通知",
+                                    "SMS message 重设密码通知消息发送错误数",
+                                    1);
+                                this.WriteErrorLog(strError);
+                                return -1;
+                            }
+                            else
+                            {
+                                if (this.Statis != null)
+                                    this.Statis.IncreaseEntryValue(
+                strLibraryCode,
+                "重设密码通知",
+                "SMS message 重设密码通知消息发送数",
+                nRet);  // 短信条数可能多于次数
+                                if (this.Statis != null)
+                                    this.Statis.IncreaseEntryValue(strLibraryCode,
+                                    "重设密码通知",
+                                    "SMS message 重设密码通知人数",
+                                    1);
+                            }
+                        }
+                        else
                         // 向手机号码发送短信
                         {
                             // 发送消息
@@ -9889,7 +9984,6 @@ out strError);
                         }
                     }
 
-                    byte[] output_timestamp = null;
                     nRet = ChangeReaderTempPassword(
             sessioninfo,
             record.RecPath,
@@ -9897,7 +9991,7 @@ out strError);
             strReaderTempPassword,
             // strExpireTime,
             record.Timestamp,
-            out output_timestamp,
+            out byte[] output_timestamp,
             out strError);
                     if (nRet == -1)
                         return -1;  // 此时短信已经发出，但临时密码并未修改成功
@@ -11462,7 +11556,7 @@ out strError);
             return 0;
         }
 
-#region 实用功能
+        #region 实用功能
 
         // 通过册条码号得知从属的种记录路径
         // parameters:
@@ -11977,7 +12071,7 @@ out strError);
             return 1;
         }
 
-#endregion
+        #endregion
 
         // 包装版本
         // 检查路径中的库名，是不是实体库名
@@ -12054,7 +12148,7 @@ out strError);
             return 0;
         }
 
-#region APIs
+        #region APIs
 
 
 
@@ -12607,7 +12701,7 @@ strLibraryCode);    // 读者所在的馆代码
             return -1;
         }
 
-#endregion
+        #endregion
 
         // 展开权限字符串为原始权限定义形态
         public static string ExpandRightString(string strOriginRight)
@@ -15292,7 +15386,7 @@ strLibraryCode);    // 读者所在的馆代码
         private bool readerDomChanged = false;
         public bool ReaderDomChanged { get => readerDomChanged; set => readerDomChanged = value; }
 
-#region 手机短信验证码
+        #region 手机短信验证码
 
         // 竖线间隔的手机号码列表
         // return:
@@ -15425,7 +15519,7 @@ strLibraryCode);    // 读者所在的馆代码
             return true;
         }
 
-#endregion
+        #endregion
 
         public Account()
         {

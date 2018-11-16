@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CommonControl;
-
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
@@ -66,6 +59,7 @@ namespace dp2Circulation
 
         private void UserForm_Load(object sender, EventArgs e)
         {
+            this.HelpUrl = "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E5%B7%A5%E4%BD%9C%E4%BA%BA%E5%91%98%E8%B4%A6%E6%88%B7";
             if (Program.MainForm != null)
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
@@ -180,7 +174,7 @@ namespace dp2Circulation
                         EnableControls(true);
                         return;
                     }
-                // break;
+                    // break;
             }
             base.DefWndProc(ref m);
         }
@@ -334,7 +328,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -410,7 +404,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -541,7 +535,7 @@ namespace dp2Circulation
 
             MessageBox.Show(this, "密码重设完成");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -588,7 +582,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -629,7 +623,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -669,7 +663,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -712,7 +706,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -810,7 +804,7 @@ namespace dp2Circulation
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -909,7 +903,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -998,7 +992,7 @@ namespace dp2Circulation
 
             MessageBox.Show(this, "用户 '" + info.UserName + "' 创建成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

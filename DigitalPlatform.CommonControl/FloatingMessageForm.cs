@@ -102,14 +102,21 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
-                this._clickable = value;
+                try
+                {
+                    this._clickable = value;
 
-                int windowLong = API.GetWindowLong(this.Handle, API.GWL_EXSTYLE);
-                if (value)
-                    windowLong &= ~0x20;
-                else
-                    windowLong |= 0x20;
-                API.SetWindowLong(this.Handle, API.GWL_EXSTYLE, windowLong);
+                    int windowLong = API.GetWindowLong(this.Handle, API.GWL_EXSTYLE);
+                    if (value)
+                        windowLong &= ~0x20;
+                    else
+                        windowLong |= 0x20;
+                    API.SetWindowLong(this.Handle, API.GWL_EXSTYLE, windowLong);
+                }
+                catch(ObjectDisposedException)
+                {
+
+                }
             }
         }
 
@@ -352,7 +359,7 @@ Stack:
             base.Text = strText;
             this._rectColor = rectColor;
             this.Closeable = bClickClose;
-
+            this.Clickable = bClickClose;   // 2018/11/6
             try
             {
                 if (bClickClose)

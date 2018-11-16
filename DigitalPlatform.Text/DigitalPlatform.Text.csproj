@@ -169,6 +169,7 @@
     <Compile Include="PriceUtil.cs" />
     <Compile Include="QuickList.cs" />
     <Compile Include="SectionPropertyString.cs" />
+    <Compile Include="ShortGuid.cs" />
     <Compile Include="StringUtil.cs" />
     <Compile Include="VolumeInfo.cs" />
   </ItemGroup>

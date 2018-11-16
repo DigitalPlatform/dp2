@@ -640,7 +640,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             nRet = CacheBuilder.MacroDom(dom,
-                new List<string> { "name", "date" },
+                new List<string> { "name", "command" },
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -1063,7 +1063,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             int nRet = CacheBuilder.MacroDom(dom,
-                new List<string> { "name", "date" },
+                new List<string> { "name", "command" },
                 out strError);
             if (nRet == -1)
                 return -1;

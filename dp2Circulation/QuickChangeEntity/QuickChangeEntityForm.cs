@@ -391,7 +391,10 @@ namespace dp2Circulation
             {
                 BeginSwitchFocus("bookType", true);
             }
-
+            else if (strFocusAction == "册信息编辑器-登录号")
+            {
+                BeginSwitchFocus("registerNo", true);
+            }
 
         }
 

@@ -5101,17 +5101,14 @@ MessageBoxDefaultButton.Button2);
             GetFingerprintStringResult result = new GetFingerprintStringResult();
             try
             {
-                string strError = "";
-                string strFingerprint = "";
-                string strVersion = "";
                 // 获得一个指纹特征字符串
                 // return:
                 //      -1  error
                 //      0   放弃输入
                 //      1   成功输入
-                int nRet = channel.Object.GetFingerprintString(out strFingerprint,
-                    out strVersion,
-                    out strError);
+                int nRet = channel.Object.GetFingerprintString(out string strFingerprint,
+                    out string strVersion,
+                    out string strError);
 
                 result.Fingerprint = strFingerprint;
                 result.Version = strVersion;
@@ -5122,6 +5119,48 @@ MessageBoxDefaultButton.Button2);
             catch (Exception ex)
             {
                 result.ErrorInfo = "GetFingerprintString() 异常: " + ex.Message;
+                result.Value = -1;
+                return result;
+            }
+        }
+
+        public class GetVersionResult : NormalResult
+        {
+            public string CfgInfo { get; set; }
+            public string Version { get; set; }
+        }
+
+        public static GetVersionResult CallGetVersion(FingerprintChannel channel)
+        {
+            GetVersionResult result = new GetVersionResult();
+            try
+            {
+                // 获得一个指纹特征字符串
+                // return:
+                //      -1  error
+                //      0   放弃输入
+                //      1   成功输入
+                int nRet = channel.Object.GetVersion(out string strVersion,
+                    out string strCfgInfo,
+                    out string strError);
+
+                result.CfgInfo = strCfgInfo;
+                result.Version = strVersion;
+                result.ErrorInfo = strError;
+                result.Value = nRet;
+                return result;
+            }
+            catch(System.Runtime.Remoting.RemotingException)
+            {
+                result.CfgInfo = "";
+                result.Version = "1.0";
+                result.ErrorInfo = "";
+                result.Value = 0;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.ErrorInfo = "CallGetVersion() 异常: " + ex.Message;
                 result.Value = -1;
                 return result;
             }

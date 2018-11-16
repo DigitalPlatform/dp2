@@ -17,6 +17,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
+using DigitalPlatform.Xml;
 
 namespace FingerprintCenter
 {
@@ -53,8 +54,10 @@ namespace FingerprintCenter
         // 注册过程完成
         static AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
 
-        public static bool Init()
+        public static NormalResult Init()
         {
+            Free();
+
             List<string> dev_list = new List<string>();
             int ret = zkfperrdef.ZKFP_ERR_OK;
             if ((ret = zkfp2.Init()) == zkfperrdef.ZKFP_ERR_OK)
@@ -72,15 +75,15 @@ namespace FingerprintCenter
                 {
                     zkfp2.Terminate();
                     // MessageBox.Show("No device connected!");
-                    return false;
+                    return new NormalResult { Value = -1, ErrorInfo = "尚未连接指纹阅读器" };
                 }
 
-                return true;
+                return new NormalResult();
             }
             else
             {
                 // MessageBox.Show("Initialize fail, ret=" + ret + " !");
-                return false;
+                return new NormalResult { Value = -1, ErrorInfo = "初始化失败，错误码: " + ret };
             }
         }
 
@@ -89,28 +92,39 @@ namespace FingerprintCenter
             zkfp2.Terminate();
         }
 
-        public static bool OpenZK()
+        public static NormalResult OpenZK()
         {
+            CloseZK();
+
             int ret = zkfp.ZKFP_ERR_OK;
             if (IntPtr.Zero == (_devHandle = zkfp2.OpenDevice(0
                 //cmbIdx.SelectedIndex
                 )))
             {
                 // MessageBox.Show("OpenDevice fail");
-                return false;
+                return new NormalResult { Value = -1, ErrorInfo = "打开设备失败" };
             }
             if (IntPtr.Zero == (_dBHandle = zkfp2.DBInit()))
             {
                 // MessageBox.Show("Init DB fail");
-                zkfp2.CloseDevice(_devHandle);
-                _devHandle = IntPtr.Zero;
-                return false;
+                //zkfp2.CloseDevice(_devHandle);
+                //_devHandle = IntPtr.Zero;
+                CloseZK();
+                return new NormalResult { Value = -1, ErrorInfo = "初始化高速缓存失败" };
             }
 
             _id_barcode_table.Clear();
             _barcode_id_table.Clear();
 
-            return true;
+#if NO
+            int old_value = GetIntParameter(3);
+
+            byte[] value = new byte[4];
+            bool bRet = zkfp2.Int2ByteArray(500, value);
+            ret = zkfp2.SetParameters(_devHandle, 3, value, 4);
+#endif
+
+            return new NormalResult();
 #if NO
             bnInit.Enabled = false;
             bnFree.Enabled = true;
@@ -152,6 +166,12 @@ namespace FingerprintCenter
                 zkfp2.DBFree(_dBHandle);
                 _dBHandle = IntPtr.Zero;
             }
+
+            if (_devHandle != IntPtr.Zero)
+            {
+                zkfp2.CloseDevice(_devHandle);
+                _devHandle = IntPtr.Zero;
+            }
         }
 
         public static void ClearDB()
@@ -183,6 +203,11 @@ namespace FingerprintCenter
                     return -1;
             }
 #endif
+            if (_dBHandle == IntPtr.Zero)
+            {
+                strError = "指纹设备尚未初始化";
+                return -1;
+            }
 
             // 清除已有的全部缓存内容
             if (items == null || items.Count == 0)
@@ -291,64 +316,73 @@ namespace FingerprintCenter
         {
             strError = "";
 
-            // 清空以前的全部缓存内容，以便重新建立
-            // return:
-            //      -2  remoting服务器连接失败。驱动程序尚未启动
-            //      -1  出错
-            //      >=0 实际发送给接口程序的事项数目
-            int nRet = CreateFingerprintCache(null,
-                out strError);
-            if (nRet == -1 || nRet == -2)
-                return nRet;
-
-            // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
-
-            List<string> readerdbnames = null;
-            nRet = GetCurrentOwnerReaderNameList(
-                channel,
-                out readerdbnames,
-                out strError);
-            if (nRet == -1)
-                return -1;
-            if (readerdbnames.Count == 0)
+            try
             {
-                strError = "因当前用户没有管辖任何读者库，初始化指纹缓存的操作无法完成";
-                return -1;
-            }
-
-            SetProgress(0, readerdbnames.Count);
-
-            int nCount = 0;
-            // 对这些读者库逐个进行高速缓存的初始化
-            // 使用 特殊的 browse 格式，以便获得读者记录中的 fingerprint timestamp字符串，或者兼获得 fingerprint string
-            // <fingerprint timestamp='XXXX'></fingerprint>
-            int i = 0;
-            foreach (string strReaderDbName in readerdbnames)
-            {
-                // 初始化一个读者库的指纹缓存
+                // 清空以前的全部缓存内容，以便重新建立
                 // return:
+                //      -2  remoting服务器连接失败。驱动程序尚未启动
                 //      -1  出错
                 //      >=0 实际发送给接口程序的事项数目
-                nRet = BuildOneDbCache(
+                int nRet = CreateFingerprintCache(null,
+                    out strError);
+                if (nRet == -1 || nRet == -2)
+                    return nRet;
+
+                // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
+
+                List<string> readerdbnames = null;
+                nRet = GetCurrentOwnerReaderNameList(
                     channel,
-                    strDir,
-                    strReaderDbName,
-                    token,
+                    out readerdbnames,
                     out strError);
                 if (nRet == -1)
                     return -1;
-                nCount += nRet;
-                i++;
-                SetProgress(i, readerdbnames.Count);
-            }
+                if (readerdbnames.Count == 0)
+                {
+                    strError = "因当前用户没有管辖任何读者库，初始化指纹缓存的操作无法完成";
+                    return -1;
+                }
 
-            if (nCount == 0)
+                SetProgress(0, readerdbnames.Count);
+
+                int nCount = 0;
+                // 对这些读者库逐个进行高速缓存的初始化
+                // 使用 特殊的 browse 格式，以便获得读者记录中的 fingerprint timestamp字符串，或者兼获得 fingerprint string
+                // <fingerprint timestamp='XXXX'></fingerprint>
+                int i = 0;
+                foreach (string strReaderDbName in readerdbnames)
+                {
+                    // 初始化一个读者库的指纹缓存
+                    // return:
+                    //      -1  出错
+                    //      >=0 实际发送给接口程序的事项数目
+                    nRet = BuildOneDbCache(
+                        channel,
+                        strDir,
+                        strReaderDbName,
+                        token,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    nCount += nRet;
+                    i++;
+                    SetProgress(i, readerdbnames.Count);
+                }
+
+                if (nCount == 0)
+                {
+                    strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
+                    return -1;
+                }
+
+                ShowMessage("指纹缓存初始化成功");
+                return 0;
+            }
+            catch (Exception ex)
             {
-                strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
+                strError = ex.Message;
                 return -1;
             }
-
-            return 0;
         }
 
 
@@ -1132,7 +1166,7 @@ out records);
             _register_template_list.Clear();
 
             Thread captureThread = new Thread(new ThreadStart(CaptureThreadMain));
-            captureThread.IsBackground = true;
+            // captureThread.IsBackground = true;
             captureThread.Start();
             _captureData._cancelToken = token;
         }
@@ -1153,7 +1187,7 @@ out records);
                 {
                     // SendMessage(FormHandle, MESSAGE_CAPTURED_OK, IntPtr.Zero, IntPtr.Zero);
                     ProcessCaptureData(image_buffer,
-                        template_buffer, 
+                        template_buffer,
                         template_buffer_length);
                 }
                 Thread.Sleep(200);
@@ -1229,7 +1263,10 @@ out records);
                 int ret = zkfp.ZKFP_ERR_OK;
                 int fid = 0, score = 0;
                 ret = zkfp2.DBIdentify(_dBHandle, template_buffer, ref fid, ref score);
-                if (zkfp.ZKFP_ERR_OK == ret)
+                Debug.WriteLine(string.Format("ret={0}, fid={1}, score={2}", ret, fid, score));
+                if (score > 10
+                    // zkfp.ZKFP_ERR_OK == ret
+                    )
                 {
                     //textRes.Text = "Identify succ, fid= " + fid + ",score=" + score + "!";
                     //return;
@@ -1256,6 +1293,7 @@ out records);
                     //return;
                     CapturedEventArgs e1 = new CapturedEventArgs
                     {
+                        Score = score,
                         ErrorInfo = "Identify fail, ret= " + ret
                     };
                     Captured(null, e1);
@@ -1311,8 +1349,423 @@ out records);
             }
         }
 
+        public class ReplicationPlan : NormalResult
+        {
+            public string StartDate { get; set; }
+        }
+
+        // 获得同步计划信息
+        // 也就是第一次同步开始的位置信息
+        public static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
+        {
+            // 开始处理时的日期
+            string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+            // 获得日志文件中记录的总数
+            // parameters:
+            //      strDate 日志文件的日期，8 字符
+            // return:
+            //      -2  此类型的日志在 dp2library 端尚未启用
+            //      -1  出错
+            //      0   日志文件不存在，或者记录数为 0
+            //      >0  记录数
+            long lCount = OperLogLoader.GetOperLogCount(
+                null,
+                channel,
+                strEndDate,
+                LogType.OperLog,
+                out string strError);
+            if (lCount < 0)
+                return new ReplicationPlan{ Value = -1, ErrorInfo = strError };
+
+            return new ReplicationPlan { StartDate = strEndDate + ":0-" + (lCount - 1).ToString() };
+        }
+
+        class ReplicationResult : NormalResult
+        {
+            public string LastDate { get; set; }
+            public long LastIndex { get; set; }
+        }
+
+        // 同步
+        // 注：中途遇到异常(例如 Loader 抛出异常)，可能会丢失 INSERT_BATCH 条以内的日志记录写入 operlog 表
+        // parameters:
+        //      strLastDate   处理中断或者结束时返回最后处理过的日期
+        //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
+        // return:
+        //      -1  出错
+        //      0   中断
+        //      1   完成
+        static ReplicationResult DoReplication(
+            LibraryChannel channel,
+            string strStartDate,
+            string strEndDate,
+            LogType logType,
+            CancellationToken token)
+        {
+            string strLastDate = "";
+            long last_index = -1;    // -1 表示尚未处理
+
+            bool bUserChanged = false;
+
+            // strStartDate 里面可能会包含 ":1-100" 这样的附加成分
+            StringUtil.ParseTwoPart(strStartDate,
+                ":",
+                out string strLeft,
+                out string strRight);
+            strStartDate = strLeft;
+
+            if (string.IsNullOrEmpty(strStartDate) == true)
+            {
+                return new ReplicationResult
+                {
+                    Value = -1,
+                    ErrorInfo = "DoReplication() 出错: strStartDate 参数值不应为空"
+                };
+            }
+
+            try
+            {
+                List<string> dates = null;
+                int nRet = OperLogLoader.MakeLogFileNames(strStartDate,
+                    strEndDate,
+                    true,  // 是否包含扩展名 ".log"
+                    out dates,
+                    out string strWarning,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    return new ReplicationResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+
+                if (dates.Count > 0 && string.IsNullOrEmpty(strRight) == false)
+                {
+                    dates[0] = dates[0] + ":" + strRight;
+                }
+
+                channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
 
+                // using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
+                {
+                    ProgressEstimate estimate = new ProgressEstimate();
+
+                    OperLogLoader loader = new OperLogLoader();
+                    loader.Channel = channel;
+                    loader.Stop = null; //  this.Progress;
+                    // loader.owner = this;
+                    loader.Estimate = estimate;
+                    loader.Dates = dates;
+                    loader.Level = 2;  // Program.MainForm.OperLogLevel;
+                    loader.AutoCache = false;
+                    loader.CacheDir = "";
+                    loader.LogType = logType;
+                    loader.Filter = "setReaderInfo";
+
+                    loader.Prompt -= Loader_Prompt;
+                    loader.Prompt += Loader_Prompt;
+
+                    int nRecCount = 0;
+
+                    string strLastItemDate = "";
+                    long lLastItemIndex = -1;
+                    foreach (OperLogItem item in loader)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        //if (stop != null)
+                        //    stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+
+                        if (string.IsNullOrEmpty(item.Xml) == true)
+                            goto CONTINUE;
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(item.Xml);
+                        }
+                        catch (Exception ex)
+                        {
+#if NO
+                            DialogResult result = System.Windows.Forms.DialogResult.No;
+                            strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                            string strText = strError;
+
+                            this.Invoke((Action)(() =>
+                            {
+                                result = MessageBox.Show(this,
+    strText + "\r\n\r\n是否跳过此条记录继续处理?",
+    "ReportForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            }));
+
+                            if (result == System.Windows.Forms.DialogResult.No)
+                                return -1;
+
+                            // 记入日志，继续处理
+                            this.GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                            continue;
+#endif
+
+                            if (Prompt != null)
+                            {
+                                strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                                MessagePromptEventArgs e = new MessagePromptEventArgs
+                                {
+                                    MessageText = strError + "\r\n\r\n是否跳过此条继续处理?",
+                                    Actions = "yes,no,cancel"
+                                };
+                                Prompt(channel, e);
+                                if (e.ResultAction == "cancel")
+                                    throw new ChannelException(channel.ErrorCode, strError);
+                                else if (e.ResultAction == "yes")
+                                    continue;
+                                else
+                                {
+                                    // no 也是抛出异常。因为继续下一批代价太大
+                                    throw new ChannelException(channel.ErrorCode, strError);
+                                }
+                            }
+                            else
+                                throw new ChannelException(channel.ErrorCode, strError);
+
+                        }
+
+                        string strOperation = dom.DocumentElement.GetAttribute("operation");
+                        if (strOperation == "setReaderInfo")
+                        {
+                            nRet = TraceSetReaderInfo(
+                                dom,
+                                out strError);
+                        }
+                        else
+                            continue;
+
+                        if (nRet == -1)
+                        {
+                            strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
+
+                            if (Prompt != null)
+                            {
+                                MessagePromptEventArgs e = new MessagePromptEventArgs
+                                {
+                                    MessageText = strError + "\r\n\r\n是否跳过此条继续处理?",
+                                    Actions = "yes,no,cancel"
+                                };
+                                Prompt(channel, e);
+                                if (e.ResultAction == "cancel")
+                                    throw new Exception(strError);
+                                else if (e.ResultAction == "yes")
+                                    continue;
+                                else
+                                {
+                                    // no 也是抛出异常。因为继续下一批代价太大
+                                    throw new Exception(strError);
+                                }
+                            }
+                            else
+                                throw new ChannelException(channel.ErrorCode, strError);
+                        }
+
+                        // lProcessCount++;
+                        CONTINUE:
+                        // 便于循环外获得这些值
+                        strLastItemDate = item.Date;
+                        lLastItemIndex = item.Index + 1;
+
+                        // index = 0;  // 第一个日志文件后面的，都从头开始了
+                    }
+
+                    // 记忆
+                    strLastDate = strLastItemDate;
+                    last_index = lLastItemIndex;
+                }
+
+                return new ReplicationResult { LastDate = strLastDate, LastIndex = last_index };
+            }
+            catch (Exception ex)
+            {
+                string strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);
+                return new ReplicationResult { Value = -1, ErrorInfo = strError };
+            }
+        }
+
+        // SetReaderInfo() API 恢复动作
+        /*
+<root>
+	<operation>setReaderInfo</operation> 操作类型
+	<action>...</action> 具体动作。有new change delete move 4种
+	<record recPath='...'>...</record> 新记录
+    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+    <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
+	<operator>test</operator> 操作者
+	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
+</root>
+
+注: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
+
+         * */
+        static int TraceSetReaderInfo(
+XmlDocument domLog,
+out string strError)
+        {
+            strError = "";
+
+            string strAction = domLog.DocumentElement.GetAttribute("action");
+
+            if (strAction == "new"
+                || strAction == "change"
+                || strAction == "move")
+            {
+                string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                    "record",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    strError = "日志记录中缺<record>元素";
+                    return -1;
+                }
+                string strNewRecPath = DomUtil.GetAttr(node, "recPath");
+
+                string strOldRecord = "";
+                string strOldRecPath = "";
+                if (strAction == "move")
+                {
+                    strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                        "oldRecord",
+                        out node);
+                    if (node == null)
+                    {
+                        strError = "日志记录中缺<oldRecord>元素";
+                        return -1;
+                    }
+
+                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                    if (string.IsNullOrEmpty(strOldRecPath) == true)
+                    {
+                        strError = "日志记录中<oldRecord>元素内缺recPath属性值";
+                        return -1;
+                    }
+
+                    // 如果移动过程中没有修改，则要用旧的记录内容写入目标
+                    if (string.IsNullOrEmpty(strRecord) == true)
+                        strRecord = strOldRecord;
+                }
+
+                // 删除旧记录对应的指纹缓存
+                if (strAction == "move"
+                    && string.IsNullOrEmpty(strOldRecord) == false)
+                {
+                    if (DeleteFingerPrint(strOldRecord, out strError) == -1)
+                        return -1;
+                }
+
+                if (AddFingerPrint(strRecord, out strError) == -1)
+                    return -1;
+            }
+            else if (strAction == "delete")
+            {
+                string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
+                    "oldRecord",
+                    out XmlNode node);
+                if (node == null)
+                {
+                    strError = "日志记录中缺<oldRecord>元素";
+                    return -1;
+                }
+                string strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                if (string.IsNullOrEmpty(strOldRecord) == false)
+                {
+                    if (DeleteFingerPrint(strOldRecord, out strError) == -1)
+                        return -1;
+                }
+            }
+            else
+            {
+                strError = "无法识别的<action>内容 '" + strAction + "'";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 写入新记录的指纹缓存
+        static int AddFingerPrint(string strRecord, out string strError)
+        {
+            strError = "";
+
+            XmlDocument new_dom = new XmlDocument();
+            new_dom.LoadXml(strRecord);
+
+            string strReaderBarcode = GetReaderBarcode(new_dom);
+            if (string.IsNullOrEmpty(strReaderBarcode))
+                return 0;
+            string strFingerPrintString = DomUtil.GetElementText(new_dom.DocumentElement, "fingerprint");
+
+            // TODO: 看新旧记录之间 fingerprint 之间的差异。有差异才需要覆盖进入高速缓存
+            FingerprintItem item = new FingerprintItem
+            {
+                FingerprintString = strFingerPrintString,
+                ReaderBarcode = strReaderBarcode
+            };
+            // return:
+            //      -1  出错
+            //      0   成功
+            int nRet = AddItems(
+                new List<FingerprintItem> { item },
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 1;
+        }
+
+        static int DeleteFingerPrint(string strOldRecord, out string strError)
+        {
+            strError = "";
+            XmlDocument old_dom = new XmlDocument();
+            old_dom.LoadXml(strOldRecord);
+
+            string strReaderBarcode = GetReaderBarcode(old_dom);
+            if (string.IsNullOrEmpty(strReaderBarcode) == false)
+            {
+                FingerprintItem item = new FingerprintItem
+                {
+                    FingerprintString = "",
+                    ReaderBarcode = strReaderBarcode
+                };
+                // return:
+                //      -1  出错
+                //      0   成功
+                int nRet = AddItems(
+                    new List<FingerprintItem> { item },
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+        static string GetReaderBarcode(XmlDocument dom)
+        {
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+    "barcode");
+            if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                return strReaderBarcode;
+
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID))
+                return "";
+            return "@refID:" + strRefID;
+        }
 #if NO
         public static bool Identify()
         {

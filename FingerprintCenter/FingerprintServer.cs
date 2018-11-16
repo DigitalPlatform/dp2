@@ -4,16 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Synthesis;
-
-using DigitalPlatform.Interfaces;
-using DigitalPlatform;
 using System.Threading;
+
+using DigitalPlatform;
+using DigitalPlatform.Interfaces;
 
 namespace FingerprintCenter
 {
     public class FingerprintServer : MarshalByRefObject, IFingerprint, IDisposable
     {
-
+        public int GetVersion(out string strVersion,
+            out string strCfgInfo,
+            out string strError)
+        {
+            strVersion = "2.0";
+            strCfgInfo = "selfInitCache";
+            strError = "";
+            return 0;
+        }
 
         // return:
         //      -1  出错
@@ -194,7 +202,7 @@ Exception rethrown at [0]:
                 strVersion = "10";
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return 0;
