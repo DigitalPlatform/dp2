@@ -7318,13 +7318,12 @@ out strError);
             form.MdiParent = this;
             form.Show();
 
-            string strError = "";
             // return:
-            //      -2  remoting服务器连接失败。驱动程序尚未启动
+            //      -2  remoting服务器连接失败。指纹接口程序尚未启动
             //      -1  出错
-            //      0   成功
-            int nRet = form.InitFingerprintCache(false, out strError);
-            if (nRet == -1 || nRet == -2)
+            //      >=0   成功
+            int nRet = form.InitFingerprintCache(false, out string strError);
+            if (nRet < 0)
                 goto ERROR1;
             form.Close();
             return;
@@ -7351,11 +7350,11 @@ out strError);
 
             // TODO: 显示正在初始化，不要关闭窗口
             // return:
-            //      -2  remoting服务器连接失败。驱动程序尚未启动
+            //      -2  remoting服务器连接失败。指纹接口程序尚未启动
             //      -1  出错
-            //      0   成功
+            //      >=0   成功
             int nRet = form.InitFingerprintCache(true, out strError);
-            if (nRet == -1 || nRet == -2)
+            if (nRet < 0)
             {
                 strError = "初始化指纹缓存失败: " + strError;
                 goto ERROR1;

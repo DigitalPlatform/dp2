@@ -850,7 +850,7 @@ FileShare.ReadWrite);
                                     Estimate.SetRange(0, lSize);
                             }
 
-                            this.Stop.SetProgressValue(lProgressValue + lHintNext);
+                            this.Stop?.SetProgressValue(lProgressValue + lHintNext);
                         }
 
                         if (lIndex % 100 == 0)

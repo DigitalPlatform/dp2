@@ -162,6 +162,9 @@ Exception rethrown at [0]:
         // 添加高速缓存事项
         // 如果items == null 或者 items.Count == 0，表示要清除当前的全部缓存内容
         // 如果一个item对象的FingerprintString为空，表示要删除这个缓存事项
+        // return:
+        //      0   成功
+        //      其他  失败。错误码
         public int AddItems(List<FingerprintItem> items,
             out string strError)
         {

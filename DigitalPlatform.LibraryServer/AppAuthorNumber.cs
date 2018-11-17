@@ -963,6 +963,7 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+        // 2018/11/16 新作此函数。XML 文件内每个范围，其尾部实际上是前方一致描述法
         // return:
         //		负数	在范围左边
         //		0	落入范围

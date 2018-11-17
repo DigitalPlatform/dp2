@@ -33,10 +33,15 @@
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearFingerprintCache = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_lightWhite = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_lightRed = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_lightGreen = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_replication = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
@@ -51,6 +56,8 @@
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_cancel = new System.Windows.Forms.Button();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.textBox_replicationStart = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.checkBox_speak = new System.Windows.Forms.CheckBox();
             this.checkBox_beep = new System.Windows.Forms.CheckBox();
             this.checkBox_cfg_savePasswordLong = new System.Windows.Forms.CheckBox();
@@ -84,7 +91,8 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_file});
+            this.MenuItem_file,
+            this.MenuItem_testing});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(851, 32);
@@ -96,7 +104,6 @@
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_start,
             this.ToolStripMenuItem_reopen,
-            this.MenuItem_test,
             this.MenuItem_clearFingerprintCache,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
@@ -118,13 +125,6 @@
             this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
             this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
             // 
-            // MenuItem_test
-            // 
-            this.MenuItem_test.Name = "MenuItem_test";
-            this.MenuItem_test.Size = new System.Drawing.Size(200, 30);
-            this.MenuItem_test.Text = "test";
-            this.MenuItem_test.Click += new System.EventHandler(this.MenuItem_test_Click);
-            // 
             // MenuItem_clearFingerprintCache
             // 
             this.MenuItem_clearFingerprintCache.Name = "MenuItem_clearFingerprintCache";
@@ -143,6 +143,53 @@
             this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(200, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
+            // 
+            // MenuItem_testing
+            // 
+            this.MenuItem_testing.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_lightWhite,
+            this.MenuItem_lightRed,
+            this.MenuItem_lightGreen,
+            this.MenuItem_replication,
+            this.MenuItem_testInitCache});
+            this.MenuItem_testing.Name = "MenuItem_testing";
+            this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_testing.Text = "测试";
+            // 
+            // MenuItem_lightWhite
+            // 
+            this.MenuItem_lightWhite.Name = "MenuItem_lightWhite";
+            this.MenuItem_lightWhite.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightWhite.Text = "白灯";
+            this.MenuItem_lightWhite.Click += new System.EventHandler(this.MenuItem_lightWhite_Click);
+            // 
+            // MenuItem_lightRed
+            // 
+            this.MenuItem_lightRed.Name = "MenuItem_lightRed";
+            this.MenuItem_lightRed.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightRed.Text = "红灯";
+            this.MenuItem_lightRed.Click += new System.EventHandler(this.MenuItem_lightRed_Click);
+            // 
+            // MenuItem_lightGreen
+            // 
+            this.MenuItem_lightGreen.Name = "MenuItem_lightGreen";
+            this.MenuItem_lightGreen.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightGreen.Text = "绿灯";
+            this.MenuItem_lightGreen.Click += new System.EventHandler(this.MenuItem_lightGreen_Click);
+            // 
+            // MenuItem_replication
+            // 
+            this.MenuItem_replication.Name = "MenuItem_replication";
+            this.MenuItem_replication.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_replication.Text = "Replication";
+            this.MenuItem_replication.Click += new System.EventHandler(this.MenuItem_replication_Click);
+            // 
+            // MenuItem_testInitCache
+            // 
+            this.MenuItem_testInitCache.Name = "MenuItem_testInitCache";
+            this.MenuItem_testInitCache.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_testInitCache.Text = "test InitCache";
+            this.MenuItem_testInitCache.Click += new System.EventHandler(this.MenuItem_testInitCache_Click);
             // 
             // toolStrip1
             // 
@@ -285,6 +332,8 @@
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.textBox_replicationStart);
+            this.tabPage_cfg.Controls.Add(this.label5);
             this.tabPage_cfg.Controls.Add(this.checkBox_speak);
             this.tabPage_cfg.Controls.Add(this.checkBox_beep);
             this.tabPage_cfg.Controls.Add(this.checkBox_cfg_savePasswordLong);
@@ -305,9 +354,26 @@
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // textBox_replicationStart
+            // 
+            this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_replicationStart.Location = new System.Drawing.Point(156, 380);
+            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_replicationStart.Name = "textBox_replicationStart";
+            this.textBox_replicationStart.Size = new System.Drawing.Size(232, 28);
+            this.textBox_replicationStart.TabIndex = 23;
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(10, 385);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(112, 27);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "同步点(&R):";
+            // 
             // checkBox_speak
             // 
-            this.checkBox_speak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_speak.AutoSize = true;
             this.checkBox_speak.Location = new System.Drawing.Point(13, 340);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
@@ -319,7 +385,6 @@
             // 
             // checkBox_beep
             // 
-            this.checkBox_beep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_beep.AutoSize = true;
             this.checkBox_beep.Location = new System.Drawing.Point(13, 315);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
@@ -474,7 +539,8 @@
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Form1";
+            this.ShowIcon = false;
+            this.Text = "指纹接口中心";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -522,7 +588,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_test;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_clearFingerprintCache;
         private System.Windows.Forms.ToolStripButton toolButton_stop;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_stopAll;
@@ -539,6 +604,14 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_exit;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_start;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_reopen;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testing;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightWhite;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightRed;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightGreen;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_replication;
+        public System.Windows.Forms.TextBox textBox_replicationStart;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testInitCache;
     }
 }
 
