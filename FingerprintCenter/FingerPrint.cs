@@ -174,6 +174,29 @@ namespace FingerprintCenter
             }
         }
 
+        public static void Light(string strColor, int duration = 500)
+        {
+            Task.Run(() =>
+            {
+                int code = 101;
+                if (strColor == "white")
+                    code = 101;
+                else if (strColor == "green")
+                    code = 102;
+                else if (strColor == "red")
+                    code = 103;
+
+                byte[] value = new byte[4];
+                bool bRet = zkfp2.Int2ByteArray(1, value);
+                int ret = zkfp2.SetParameters(_devHandle, code, value, 4);
+
+                Thread.Sleep(duration);
+
+                bRet = zkfp2.Int2ByteArray(0, value);
+                ret = zkfp2.SetParameters(_devHandle, code, value, 4);
+            });
+        }
+
         public static void ClearDB()
         {
             if (_dBHandle != IntPtr.Zero)
@@ -232,10 +255,11 @@ namespace FingerprintCenter
                 this.barcode_id_table.Clear();
             }
 #endif
+            List<string> failed_barcodes = new List<string>();
 
             foreach (FingerprintItem item in items)
             {
-                int id = _idSeed++;
+                // TODO: 这里可以尝试检查拟加入的指纹模板是否在高速缓存中已经存在
 
                 // 看看条码号以前是否已经存在?
                 if (_barcode_id_table.Contains(item.ReaderBarcode) == true)
@@ -251,6 +275,8 @@ namespace FingerprintCenter
 
                 if (string.IsNullOrEmpty(item.FingerprintString) == false)
                 {
+                    int id = _idSeed++;
+
                     _id_barcode_table[id.ToString()] = item.ReaderBarcode;
                     _barcode_id_table[item.ReaderBarcode] = id;
 
@@ -258,7 +284,15 @@ namespace FingerprintCenter
                     {
                         int ret = zkfp2.DBAdd(_dBHandle, id, zkfp2.Base64ToBlob(item.FingerprintString));
                         if (ret != 0)
-                            return ret;
+                        {
+                            _id_barcode_table.Remove(id.ToString());
+                            _barcode_id_table.Remove(item.ReaderBarcode);
+
+                            // 可能是因为加入了重复或者相似的指纹模板导致
+                            //strError = $"DBAdd() 失败，证条码号={item.ReaderBarcode}, 错误码={ret}";
+                            //return ret;
+                            failed_barcodes.Add(item.ReaderBarcode);
+                        }
                         // this.m_host.AddRegTemplateStrToFPCacheDB(this.m_handle, id, item.FingerprintString);
                     }
                     catch (Exception ex)
@@ -267,6 +301,12 @@ namespace FingerprintCenter
                         return -1;
                     }
                 }
+            }
+
+            if (failed_barcodes.Count > 0)
+            {
+                strError = "下列证条码号对应的指纹模板加入高速缓存时失败: " + StringUtil.MakePathList(failed_barcodes);
+                return -1;
             }
 
             return 0;
@@ -303,11 +343,9 @@ namespace FingerprintCenter
         }
 
         // parameters:
-        //      bDelayShow  延迟显示当前窗口。如果为 false，表示不操心显示的事儿
         // return:
-        //      -2  remoting服务器连接失败。指纹接口程序尚未启动
         //      -1  出错
-        //      0   成功
+        //      >=0   成功。返回实际初始化的事项
         public static int InitFingerprintCache(
             LibraryChannel channel,
             string strDir,
@@ -369,14 +407,21 @@ namespace FingerprintCenter
                     SetProgress(i, readerdbnames.Count);
                 }
 
+#if NO
                 if (nCount == 0)
                 {
                     strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
                     return -1;
                 }
+#endif
+                if (nCount == 0)
+                {
+                    strError = "当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，指纹缓存为空";
+                    return 0;
+                }
 
                 ShowMessage("指纹缓存初始化成功");
-                return 0;
+                return nCount;
             }
             catch (Exception ex)
             {
@@ -404,17 +449,14 @@ namespace FingerprintCenter
                 {
                     // 清空以前的全部缓存内容，以便重新建立
                     // return:
-                    //      -2  remoting服务器连接失败。驱动程序尚未启动
-                    //      -1  出错
                     //      0   成功
+                    //      其他  失败。错误码
                     nRet = AddItems(
                         //channel,
                         null,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet != 0)
                         return -1;
-                    if (nRet == -2)
-                        return -2;
 
                     return 0;
                 }
@@ -444,17 +486,14 @@ out strFingerprint);
                     if (items.Count >= 100)
                     {
                         // return:
-                        //      -2  remoting服务器连接失败。驱动程序尚未启动
-                        //      -1  出错
                         //      0   成功
+                        //      其他  失败。错误码
                         nRet = AddItems(
-                            //channel,
                             items,
                             out strError);
-                        if (nRet == -1)
+                        if (nRet != 0)
                             return -1;
-                        if (nRet == -2)
-                            return -2;
+
                         nSendCount += items.Count;
                         items.Clear();
                     }
@@ -463,17 +502,14 @@ out strFingerprint);
                 if (items.Count > 0)
                 {
                     // return:
-                    //      -2  remoting服务器连接失败。驱动程序尚未启动
-                    //      -1  出错
                     //      0   成功
+                    //      其他  失败。错误码
                     nRet = AddItems(
-                        //channel,
                         items,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet != 0)
                         return -1;
-                    if (nRet == -2)
-                        return -2;
+
                     nSendCount += items.Count;
                 }
 
@@ -1237,6 +1273,7 @@ out records);
                     int nRet = zkfp2.DBMatch(_dBHandle, template_buffer, _register_template_list[_register_template_list.Count - 1]);
                     if (nRet <= 0)
                     {
+                        Light("red");
                         Speaking("刚扫入的指纹质量不佳，请继续重新扫入");
                         return;
                     }
@@ -1251,10 +1288,12 @@ out records);
 
                 if (_register_template_list.Count >= 3)
                 {
+                    Light("green");
                     // 结束 register 轮回
                     _eventRegisterFinished.Set();
                     return;
                 }
+                Light("green");
                 Speaking("很好。还需要扫入 " + (3 - _register_template_list.Count) + " 个指纹");
                 return;
             }
@@ -1279,6 +1318,7 @@ out records);
                         Text = strBarcode,
                         Score = score
                     };
+                    Light("green");
                     Captured(null, e1);
                     // SendKeys.SendWait(strBarcode + "\r");
                     //if (this.BeepOn == false)
@@ -1296,6 +1336,7 @@ out records);
                         Score = score,
                         ErrorInfo = "Identify fail, ret= " + ret
                     };
+                    Light("red");
                     Captured(null, e1);
                 }
             }
@@ -1354,7 +1395,7 @@ out records);
             public string StartDate { get; set; }
         }
 
-        // 获得同步计划信息
+        // 整体获得读者指纹信息以前，预备获得同步计划信息
         // 也就是第一次同步开始的位置信息
         public static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
         {
@@ -1376,12 +1417,12 @@ out records);
                 LogType.OperLog,
                 out string strError);
             if (lCount < 0)
-                return new ReplicationPlan{ Value = -1, ErrorInfo = strError };
+                return new ReplicationPlan { Value = -1, ErrorInfo = strError };
 
-            return new ReplicationPlan { StartDate = strEndDate + ":0-" + (lCount - 1).ToString() };
+            return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
         }
 
-        class ReplicationResult : NormalResult
+        public class ReplicationResult : NormalResult
         {
             public string LastDate { get; set; }
             public long LastIndex { get; set; }
@@ -1396,7 +1437,7 @@ out records);
         //      -1  出错
         //      0   中断
         //      1   完成
-        static ReplicationResult DoReplication(
+        public static ReplicationResult DoReplication(
             LibraryChannel channel,
             string strStartDate,
             string strEndDate,
@@ -1406,7 +1447,7 @@ out records);
             string strLastDate = "";
             long last_index = -1;    // -1 表示尚未处理
 
-            bool bUserChanged = false;
+            // bool bUserChanged = false;
 
             // strStartDate 里面可能会包含 ":1-100" 这样的附加成分
             StringUtil.ParseTwoPart(strStartDate,
@@ -1466,30 +1507,30 @@ out records);
                     loader.LogType = logType;
                     loader.Filter = "setReaderInfo";
 
-                    loader.Prompt -= Loader_Prompt;
                     loader.Prompt += Loader_Prompt;
-
-                    int nRecCount = 0;
-
-                    string strLastItemDate = "";
-                    long lLastItemIndex = -1;
-                    foreach (OperLogItem item in loader)
+                    try
                     {
-                        token.ThrowIfCancellationRequested();
+                        // int nRecCount = 0;
 
-                        //if (stop != null)
-                        //    stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
-
-                        if (string.IsNullOrEmpty(item.Xml) == true)
-                            goto CONTINUE;
-
-                        XmlDocument dom = new XmlDocument();
-                        try
+                        string strLastItemDate = "";
+                        long lLastItemIndex = -1;
+                        foreach (OperLogItem item in loader)
                         {
-                            dom.LoadXml(item.Xml);
-                        }
-                        catch (Exception ex)
-                        {
+                            token.ThrowIfCancellationRequested();
+
+                            //if (stop != null)
+                            //    stop.SetMessage("正在同步 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+
+                            if (string.IsNullOrEmpty(item.Xml) == true)
+                                goto CONTINUE;
+
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(item.Xml);
+                            }
+                            catch (Exception ex)
+                            {
 #if NO
                             DialogResult result = System.Windows.Forms.DialogResult.No;
                             strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
@@ -1513,81 +1554,92 @@ out records);
                             continue;
 #endif
 
-                            if (Prompt != null)
-                            {
-                                strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
-                                MessagePromptEventArgs e = new MessagePromptEventArgs
+                                if (Prompt != null)
                                 {
-                                    MessageText = strError + "\r\n\r\n是否跳过此条继续处理?",
-                                    Actions = "yes,no,cancel"
-                                };
-                                Prompt(channel, e);
-                                if (e.ResultAction == "cancel")
-                                    throw new ChannelException(channel.ErrorCode, strError);
-                                else if (e.ResultAction == "yes")
-                                    continue;
-                                else
-                                {
-                                    // no 也是抛出异常。因为继续下一批代价太大
-                                    throw new ChannelException(channel.ErrorCode, strError);
+                                    strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                                    MessagePromptEventArgs e = new MessagePromptEventArgs
+                                    {
+                                        MessageText = strError + "\r\n\r\n是否跳过此条继续处理?\r\n\r\n(确定: 跳过;  取消: 停止全部操作)",
+                                        // + "\r\n\r\n是否跳过此条继续处理?",
+                                        Actions = "yes,cancel"
+                                    };
+                                    Prompt(channel, e);
+                                    if (e.ResultAction == "cancel")
+                                        throw new ChannelException(channel.ErrorCode, strError);
+                                    else if (e.ResultAction == "yes")
+                                        continue;
+                                    else
+                                    {
+                                        // no 也是抛出异常。因为继续下一批代价太大
+                                        throw new ChannelException(channel.ErrorCode, strError);
+                                    }
                                 }
+                                else
+                                    throw new ChannelException(channel.ErrorCode, strError);
+
+                            }
+
+                            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                            if (strOperation == "setReaderInfo")
+                            {
+                                nRet = TraceSetReaderInfo(
+                                    dom,
+                                    out strError);
                             }
                             else
-                                throw new ChannelException(channel.ErrorCode, strError);
+                                continue;
 
-                        }
-
-                        string strOperation = dom.DocumentElement.GetAttribute("operation");
-                        if (strOperation == "setReaderInfo")
-                        {
-                            nRet = TraceSetReaderInfo(
-                                dom,
-                                out strError);
-                        }
-                        else
-                            continue;
-
-                        if (nRet == -1)
-                        {
-                            strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
-
-                            if (Prompt != null)
+                            if (nRet == -1)
                             {
-                                MessagePromptEventArgs e = new MessagePromptEventArgs
+                                strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
+
+                                if (Prompt != null)
                                 {
-                                    MessageText = strError + "\r\n\r\n是否跳过此条继续处理?",
-                                    Actions = "yes,no,cancel"
-                                };
-                                Prompt(channel, e);
-                                if (e.ResultAction == "cancel")
-                                    throw new Exception(strError);
-                                else if (e.ResultAction == "yes")
-                                    continue;
-                                else
-                                {
-                                    // no 也是抛出异常。因为继续下一批代价太大
-                                    throw new Exception(strError);
+                                    MessagePromptEventArgs e = new MessagePromptEventArgs
+                                    {
+                                        MessageText = strError + "\r\n\r\n是否跳过此条继续处理?\r\n\r\n(确定: 跳过;  取消: 停止全部操作)",
+                                        // + "\r\n\r\n是否跳过此条继续处理?",
+                                        Actions = "yes,cancel"
+                                    };
+                                    Prompt(channel, e);
+                                    if (e.ResultAction == "cancel")
+                                        throw new Exception(strError);
+                                    else if (e.ResultAction == "yes")
+                                        continue;
+                                    else
+                                    {
+                                        // no 也是抛出异常。因为继续下一批代价太大
+                                        throw new Exception(strError);
+                                    }
                                 }
+                                else
+                                    throw new ChannelException(channel.ErrorCode, strError);
                             }
-                            else
-                                throw new ChannelException(channel.ErrorCode, strError);
+
+                            // lProcessCount++;
+                            CONTINUE:
+                            // 便于循环外获得这些值
+                            strLastItemDate = item.Date;
+                            lLastItemIndex = item.Index + 1;
+
+                            // index = 0;  // 第一个日志文件后面的，都从头开始了
                         }
-
-                        // lProcessCount++;
-                        CONTINUE:
-                        // 便于循环外获得这些值
-                        strLastItemDate = item.Date;
-                        lLastItemIndex = item.Index + 1;
-
-                        // index = 0;  // 第一个日志文件后面的，都从头开始了
+                        // 记忆
+                        strLastDate = strLastItemDate;
+                        last_index = lLastItemIndex;
                     }
-
-                    // 记忆
-                    strLastDate = strLastItemDate;
-                    last_index = lLastItemIndex;
+                    finally
+                    {
+                        loader.Prompt -= Loader_Prompt;
+                    }
                 }
 
-                return new ReplicationResult { LastDate = strLastDate, LastIndex = last_index };
+                return new ReplicationResult
+                {
+                    Value = last_index == -1 ? 0 : 1,
+                    LastDate = strLastDate,
+                    LastIndex = last_index
+                };
             }
             catch (Exception ex)
             {
@@ -1617,7 +1669,7 @@ out string strError)
         {
             strError = "";
 
-            string strAction = domLog.DocumentElement.GetAttribute("action");
+            string strAction = DomUtil.GetElementText(domLog.DocumentElement, "action");
 
             if (strAction == "new"
                 || strAction == "change"
@@ -1716,12 +1768,12 @@ out string strError)
                 ReaderBarcode = strReaderBarcode
             };
             // return:
-            //      -1  出错
             //      0   成功
+            //      其他  失败。错误码
             int nRet = AddItems(
                 new List<FingerprintItem> { item },
                 out strError);
-            if (nRet == -1)
+            if (nRet != 0)
                 return -1;
 
             return 1;
@@ -1742,12 +1794,12 @@ out string strError)
                     ReaderBarcode = strReaderBarcode
                 };
                 // return:
-                //      -1  出错
                 //      0   成功
+                //      其他  失败。错误码
                 int nRet = AddItems(
                     new List<FingerprintItem> { item },
                     out strError);
-                if (nRet == -1)
+                if (nRet != 0)
                     return -1;
             }
 

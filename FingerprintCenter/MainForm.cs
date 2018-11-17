@@ -12,9 +12,12 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Media;
 
 using FingerprintCenter.Properties;
 using libzkfpcsharp;
+using Newtonsoft.Json;
+using static FingerprintCenter.FingerPrint;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
@@ -22,8 +25,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
-using static FingerprintCenter.FingerPrint;
-using Newtonsoft.Json;
 
 namespace FingerprintCenter
 {
@@ -120,10 +121,12 @@ bool bClickClose = false)
         {
             this.UiState = Properties.Settings.Default.ui_state;
 
+#if NO
             this._repPlan = JsonConvert.DeserializeObject<ReplicationPlan>(Properties.Settings.Default.repPlan);
             if (this._repPlan == null)
                 this._repPlan = new ReplicationPlan();
-
+#endif
+            this.textBox_replicationStart.Text = Properties.Settings.Default.repPlan;
 
             ClearHtml();
 
@@ -188,16 +191,29 @@ bool bClickClose = false)
             // return:
             //      -1  出错
             //      0   没有获得任何数据
-            //      1   获得了数据
+            //      >=1 获得了数据
             int nRet = InitFingerprintCache(
     out string strError);
             if (nRet == -1)
                 return new NormalResult { Value = -1, ErrorInfo = strError };
             if (nRet == 0)
-                this.ShowMessage(strError, "red", true);
+                this.ShowMessage(strError, "yellow", true);
 
             // 开始捕捉指纹
             FingerPrint.StartCapture(_cancel.Token);
+
+            {
+                _timer = new System.Threading.Timer(
+                    new System.Threading.TimerCallback(timerCallback),
+                    null,
+                    TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
+
+#if NO
+                timer_replication.Interval = 1000 * 60 * 1; // 5 分种
+                timer_replication.Enabled = true;
+                timer_replication.Start();
+#endif
+            }
             return new NormalResult();
         }
 
@@ -214,13 +230,18 @@ bool bClickClose = false)
             Speak(e.Text);
         }
 
+        static void Beep()
+        {
+            SystemSounds.Beep.Play();
+        }
+
         private void FingerPrint_Captured(object sender, CapturedEventArgs e)
         {
             this.Invoke((Action)(() =>
             {
                 this.toolStripStatusLabel1.Text = e.Score.ToString();
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
-                    Console.Beep();
+                    Beep();
                 else
                 {
                     Speak("很好");
@@ -249,22 +270,40 @@ bool bClickClose = false)
 
         private void FingerPrint_Prompt(object sender, MessagePromptEventArgs e)
         {
-            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
-            if (e.Actions == "yes,no,cancel")
+            this.Invoke((Action)(() =>
             {
-                DialogResult result = MessageBox.Show(this,
-    e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
-    "ReportForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
-                    e.ResultAction = "yes";
-                else if (result == DialogResult.Cancel)
-                    e.ResultAction = "cancel";
-                else
-                    e.ResultAction = "no";
-            }
+                if (e.Actions == "yes,cancel")
+                {
+                    DialogResult result = MessageBox.Show(this,
+        e.MessageText,
+        "MainForm",
+        MessageBoxButtons.OKCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.OK)
+                        e.ResultAction = "yes";
+                    else // if (result == DialogResult.Cancel)
+                        e.ResultAction = "cancel";
+                    return;
+                }
+
+                // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+                if (e.Actions == "yes,no,cancel")
+                {
+                    DialogResult result = MessageBox.Show(this,
+        e.MessageText, // + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Yes)
+                        e.ResultAction = "yes";
+                    else if (result == DialogResult.Cancel)
+                        e.ResultAction = "cancel";
+                    else
+                        e.ResultAction = "no";
+                }
+            }));
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -287,7 +326,8 @@ bool bClickClose = false)
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
 
             Properties.Settings.Default.ui_state = this.UiState;
-            Properties.Settings.Default.repPlan = JsonConvert.SerializeObject(this._repPlan);
+            // Properties.Settings.Default.repPlan = JsonConvert.SerializeObject(this._repPlan);
+            Properties.Settings.Default.repPlan = this.textBox_replicationStart.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -444,13 +484,15 @@ bool bClickClose = false)
             }));
         }
 
-        FingerPrint.ReplicationPlan _repPlan = new FingerPrint.ReplicationPlan();
+        bool _inInitialCache = false;
+
+        // FingerPrint.ReplicationPlan _repPlan = new FingerPrint.ReplicationPlan();
 
         // 注意，本函数不在界面线程执行
         // return:
         //      -1  出错
         //      0   没有获得任何数据
-        //      1   获得了数据
+        //      >=1 获得了数据
         int InitFingerprintCache(
             out string strError)
         {
@@ -465,40 +507,52 @@ bool bClickClose = false)
                 return 0;
             }
 
+            // 先把正在运行的同步过程中断
+            AbortReplication(true);
+
+            this._inInitialCache = true;
             this.ShowMessage("正在初始化指纹信息 ...");
             EnableControls(false);
             LibraryChannel channel = this.GetChannel();
             try
             {
-                _repPlan = FingerPrint.GetReplicationPlan(channel);
+                ReplicationPlan plan = FingerPrint.GetReplicationPlan(channel);
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_replicationStart.Text = plan.StartDate;
+                }));
 
                 string strDir = ClientInfo.FingerPrintCacheDir(strUrl);
                 PathUtil.TryCreateDir(strDir);
 
+                // return:
+                //      -1  出错
+                //      >=0   成功。返回实际初始化的事项
                 int nRet = FingerPrint.InitFingerprintCache(channel,
                     strDir,
                     _cancel.Token,
                     out strError);
                 if (nRet == -1)
                     return -1;
-                return 1;
+                return nRet;
             }
             finally
             {
                 this.ReturnChannel(channel);
                 EnableControls(true);
                 this.ClearMessage();
+                this._inInitialCache = false;
             }
         }
 
-        private void MenuItem_test_Click(object sender, EventArgs e)
+        private void MenuItem_testInitCache_Click(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
                 // return:
                 //      -1  出错
                 //      0   没有获得任何数据
-                //      1   获得了数据
+                //      >=1 获得了数据
                 int nRet = InitFingerprintCache(
         out string strError);
                 if (nRet == -1)
@@ -561,7 +615,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -574,7 +628,7 @@ MessageBoxDefaultButton.Button2);
             // EndRemoteChannel();
 
             //Instantiate our server channel.
-#if HTTP_CHANNEL 
+#if HTTP_CHANNEL
             m_serverChannel = new HttpChannel();
 #else
             // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
@@ -612,9 +666,9 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         IpcClientChannel m_fingerprintChannel = new IpcClientChannel();
         IFingerprint m_fingerprintObj = null;
@@ -658,7 +712,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -719,7 +773,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -843,7 +897,7 @@ string strHtml)
         }
 
 
-        #endregion
+#endregion
 
         void DisplayText(string text)
         {
@@ -891,7 +945,7 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-        #region device changed
+#region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -923,7 +977,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {
@@ -946,9 +1000,137 @@ Keys keyData)
             BeginStart();
         }
 
+        // 当面板上服务器 URL、用户名、密码发生变动以后，清除以前的 ChannelPool。迫使前端重新登录
+        // 还要自动清除同步点
         private void textBox_cfg_userName_TextChanged(object sender, EventArgs e)
         {
             _channelPool.Clear();
+            this.textBox_replicationStart.Text = "";
+        }
+
+        private void MenuItem_lightWhite_Click(object sender, EventArgs e)
+        {
+            FingerPrint.Light("white");
+        }
+
+        private void MenuItem_lightRed_Click(object sender, EventArgs e)
+        {
+            FingerPrint.Light("red");
+        }
+
+        private void MenuItem_lightGreen_Click(object sender, EventArgs e)
+        {
+            FingerPrint.Light("green");
+        }
+
+        CancellationTokenSource _cancelReplication = null;
+
+        void AbortReplication(bool waitFinish)
+        {
+            if (_cancelReplication != null)
+            {
+                _cancelReplication?.Cancel();
+                if (waitFinish)
+                {
+                    // 等待信号，或者 CancellationToken 中断
+                    WaitHandle.WaitAny(new WaitHandle[] { _eventReplicationFinish, _cancel.Token.WaitHandle });
+                }
+            }
+        }
+
+        private void MenuItem_replication_Click(object sender, EventArgs e)
+        {
+            BeginReplication();
+        }
+
+        void BeginReplication()
+        {
+            // 如果当前正在进行缓存初始化，则放弃进行同步
+            if (_inInitialCache)
+                return;
+
+            Task.Run(() =>
+            {
+                // 先把正在运行的中断
+                AbortReplication(true);
+
+                // 无论是 _cancel 还是 _cancelReplication 触发 Cancel，都能停止复制过程
+                _cancelReplication = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token);
+                DpReplication(_cancelReplication.Token);
+            });
+        }
+
+        AutoResetEvent _eventReplicationFinish = new AutoResetEvent(false);
+
+        // TODO: 当大批获得指纹信息时候，本函数要禁止调用。反之本函数运行过程中，大批获得指纹信息要中断本函数?
+        void DpReplication(CancellationToken token)
+        {
+            string strError = "";
+            string strUrl = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.textBox_cfg_dp2LibraryServerUrl.Text;
+            }));
+            if (string.IsNullOrEmpty(strUrl))
+            {
+                strError = "尚未配置 dp2library 服务器 URL，无法获得读者指纹信息";
+                ShowMessage(strError);
+            }
+
+            string strStartDate = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.textBox_replicationStart.Text;
+            }));
+
+            _eventReplicationFinish.Reset();
+
+            this.ShowMessage("正在同步最新指纹信息 ...");
+            EnableControls(false);
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
+
+                ReplicationResult result = FingerPrint.DoReplication(
+channel,
+strStartDate,
+strEndDate,
+LogType.OperLog,
+token);
+                if (result.Value == -1)
+                {
+                    this.ShowMessage(result.ErrorInfo);
+                    return;
+                }
+
+                // result.Value == 0 表示本次没有获得任何新信息,即服务器的日志没有发生增长
+
+                if (result.Value == 1)
+                    this.Invoke((Action)(() =>
+                    {
+                        this.textBox_replicationStart.Text = result.LastDate + ":" + result.LastIndex;
+                    }));
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+                EnableControls(true);
+                this.ClearMessage();
+
+                _eventReplicationFinish.Set();
+                _cancelReplication = null;
+            }
+        }
+
+        System.Threading.Timer _timer = null;
+
+        void timerCallback(object o)
+        {
+            // 避免重叠启动
+            if (_cancelReplication != null
+                || _inInitialCache == true)
+                return;
+
+            BeginReplication();
         }
     }
 }

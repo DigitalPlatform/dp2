@@ -4032,9 +4032,12 @@ MessageBoxDefaultButton.Button1);
 
         private void ToolStripMenuItem_initFingerprintCache_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = InitFingerprintCache(false, out strError);
-            if (nRet == -1)
+            // return:
+            //      -2  remoting服务器连接失败。指纹接口程序尚未启动
+            //      -1  出错
+            //      >=0   成功
+            int nRet = InitFingerprintCache(false, out string strError);
+            if (nRet < 0)
                 goto ERROR1;
 
             return;
@@ -4056,7 +4059,7 @@ MessageBoxDefaultButton.Button1);
         /// <returns>
         /// <para>-2:  remoting服务器连接失败。指纹接口程序尚未启动</para>
         /// <para>-1:  出错</para>
-        /// <para>0:   成功</para>
+        /// <para>&gt;0:   成功。返回值表示初始化的事项总数</para>
         /// </returns>
         public int InitFingerprintCache(
             bool bDelayShow,
@@ -4096,9 +4099,8 @@ MessageBoxDefaultButton.Button1);
 
                 this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
 
-                List<string> readerdbnames = null;
                 nRet = GetCurrentOwnerReaderNameList(
-                    out readerdbnames,
+                    out List<string> readerdbnames,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -4126,11 +4128,14 @@ MessageBoxDefaultButton.Button1);
                     nCount += nRet;
                 }
 
+
                 if (nCount == 0)
                 {
                     strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
                     return -1;
                 }
+
+                return nCount;
             }
             finally
             {
