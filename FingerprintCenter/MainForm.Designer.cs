@@ -33,7 +33,7 @@
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_clearFingerprintCache = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_clearFingerprintCacheFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,8 +53,10 @@
             this.tabPage_start = new System.Windows.Forms.TabPage();
             this.splitContainer_start = new System.Windows.Forms.SplitContainer();
             this.pictureBox_fingerprint = new System.Windows.Forms.PictureBox();
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.label_message = new System.Windows.Forms.Label();
             this.button_cancel = new System.Windows.Forms.Button();
+            this.tabPage_operHistory = new System.Windows.Forms.TabPage();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
             this.textBox_replicationStart = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -73,6 +75,8 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
+            this.MenuItem_refresh = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -83,6 +87,7 @@
             this.splitContainer_start.Panel2.SuspendLayout();
             this.splitContainer_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_fingerprint)).BeginInit();
+            this.tabPage_operHistory.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
@@ -104,7 +109,8 @@
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_start,
             this.ToolStripMenuItem_reopen,
-            this.MenuItem_clearFingerprintCache,
+            this.MenuItem_refresh,
+            this.MenuItem_clearFingerprintCacheFile,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
@@ -114,33 +120,33 @@
             // ToolStripMenuItem_start
             // 
             this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(200, 30);
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_start.Text = "启动(&S)";
             this.ToolStripMenuItem_start.Click += new System.EventHandler(this.ToolStripMenuItem_start_Click);
             // 
             // ToolStripMenuItem_reopen
             // 
             this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(200, 30);
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
             this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
             // 
-            // MenuItem_clearFingerprintCache
+            // MenuItem_clearFingerprintCacheFile
             // 
-            this.MenuItem_clearFingerprintCache.Name = "MenuItem_clearFingerprintCache";
-            this.MenuItem_clearFingerprintCache.Size = new System.Drawing.Size(200, 30);
-            this.MenuItem_clearFingerprintCache.Text = "清除指纹缓存";
-            this.MenuItem_clearFingerprintCache.Click += new System.EventHandler(this.MenuItem_clearFingerprintCache_Click);
+            this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
+            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
+            this.MenuItem_clearFingerprintCacheFile.Click += new System.EventHandler(this.MenuItem_clearFingerprintCacheFile_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(197, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(200, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -151,7 +157,8 @@
             this.MenuItem_lightRed,
             this.MenuItem_lightGreen,
             this.MenuItem_replication,
-            this.MenuItem_testInitCache});
+            this.MenuItem_testInitCache,
+            this.MenuItem_throwException});
             this.MenuItem_testing.Name = "MenuItem_testing";
             this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_testing.Text = "测试";
@@ -256,6 +263,7 @@
             // tabControl_main
             // 
             this.tabControl_main.Controls.Add(this.tabPage_start);
+            this.tabControl_main.Controls.Add(this.tabPage_operHistory);
             this.tabControl_main.Controls.Add(this.tabPage_cfg);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 63);
@@ -291,7 +299,7 @@
             // 
             // splitContainer_start.Panel2
             // 
-            this.splitContainer_start.Panel2.Controls.Add(this.webBrowser1);
+            this.splitContainer_start.Panel2.Controls.Add(this.label_message);
             this.splitContainer_start.Size = new System.Drawing.Size(834, 374);
             this.splitContainer_start.SplitterDistance = 225;
             this.splitContainer_start.SplitterWidth = 12;
@@ -307,14 +315,16 @@
             this.pictureBox_fingerprint.TabIndex = 0;
             this.pictureBox_fingerprint.TabStop = false;
             // 
-            // webBrowser1
+            // label_message
             // 
-            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(597, 374);
-            this.webBrowser1.TabIndex = 0;
+            this.label_message.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_message.Font = new System.Drawing.Font("微软雅黑", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_message.Location = new System.Drawing.Point(0, 0);
+            this.label_message.Name = "label_message";
+            this.label_message.Size = new System.Drawing.Size(597, 374);
+            this.label_message.TabIndex = 0;
+            this.label_message.Text = "label6";
+            this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_cancel
             // 
@@ -328,6 +338,25 @@
             this.button_cancel.UseVisualStyleBackColor = true;
             this.button_cancel.Visible = false;
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
+            // 
+            // tabPage_operHistory
+            // 
+            this.tabPage_operHistory.Controls.Add(this.webBrowser1);
+            this.tabPage_operHistory.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_operHistory.Name = "tabPage_operHistory";
+            this.tabPage_operHistory.Size = new System.Drawing.Size(843, 441);
+            this.tabPage_operHistory.TabIndex = 2;
+            this.tabPage_operHistory.Text = "操作历史";
+            this.tabPage_operHistory.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(843, 441);
+            this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
             // 
@@ -528,6 +557,20 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
+            // MenuItem_refresh
+            // 
+            this.MenuItem_refresh.Name = "MenuItem_refresh";
+            this.MenuItem_refresh.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_refresh.Text = "刷新指纹信息";
+            this.MenuItem_refresh.Click += new System.EventHandler(this.MenuItem_refresh_Click);
+            // 
+            // MenuItem_throwException
+            // 
+            this.MenuItem_throwException.Name = "MenuItem_throwException";
+            this.MenuItem_throwException.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_throwException.Text = "throw exception";
+            this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -557,6 +600,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).EndInit();
             this.splitContainer_start.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_fingerprint)).EndInit();
+            this.tabPage_operHistory.ResumeLayout(false);
             this.tabPage_cfg.ResumeLayout(false);
             this.tabPage_cfg.PerformLayout();
             this.toolStrip_server.ResumeLayout(false);
@@ -588,7 +632,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearFingerprintCache;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearFingerprintCacheFile;
         private System.Windows.Forms.ToolStripButton toolButton_stop;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_stopAll;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_stopAll;
@@ -599,7 +643,6 @@
         private System.Windows.Forms.Button button_cancel;
         private System.Windows.Forms.SplitContainer splitContainer_start;
         private System.Windows.Forms.PictureBox pictureBox_fingerprint;
-        private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_exit;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_start;
@@ -612,6 +655,11 @@
         public System.Windows.Forms.TextBox textBox_replicationStart;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_testInitCache;
+        private System.Windows.Forms.TabPage tabPage_operHistory;
+        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_refresh;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_throwException;
     }
 }
 

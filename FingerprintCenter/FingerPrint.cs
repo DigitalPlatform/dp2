@@ -51,6 +51,8 @@ namespace FingerprintCenter
         static string _mode = "read";
         // 存储注册用的指纹模板
         static List<byte[]> _register_template_list = new List<byte[]>();
+        // 注册过程中，查重时，需要排除条码号
+        static List<string> _exclude = new List<string>();
         // 注册过程完成
         static AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
 
@@ -201,10 +203,17 @@ namespace FingerprintCenter
         {
             if (_dBHandle != IntPtr.Zero)
             {
-                zkfp2.DBClear(_dBHandle);
+                int ret = zkfp2.DBClear(_dBHandle);
                 _id_barcode_table.Clear();
                 _barcode_id_table.Clear();
             }
+        }
+
+        static int RemoveItem(string strReaderBarcode,
+            out string strError)
+        {
+            return AddItems(new List<FingerprintItem> { new FingerprintItem { ReaderBarcode = strReaderBarcode } },
+                out strError);
         }
 
         // 添加高速缓存事项
@@ -291,7 +300,7 @@ namespace FingerprintCenter
                             // 可能是因为加入了重复或者相似的指纹模板导致
                             //strError = $"DBAdd() 失败，证条码号={item.ReaderBarcode}, 错误码={ret}";
                             //return ret;
-                            failed_barcodes.Add(item.ReaderBarcode);
+                            failed_barcodes.Add(item.ReaderBarcode + "|" + ret);
                         }
                         // this.m_host.AddRegTemplateStrToFPCacheDB(this.m_handle, id, item.FingerprintString);
                     }
@@ -358,7 +367,6 @@ namespace FingerprintCenter
             {
                 // 清空以前的全部缓存内容，以便重新建立
                 // return:
-                //      -2  remoting服务器连接失败。驱动程序尚未启动
                 //      -1  出错
                 //      >=0 实际发送给接口程序的事项数目
                 int nRet = CreateFingerprintCache(null,
@@ -368,10 +376,9 @@ namespace FingerprintCenter
 
                 // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
 
-                List<string> readerdbnames = null;
                 nRet = GetCurrentOwnerReaderNameList(
                     channel,
-                    out readerdbnames,
+                    out List<string> readerdbnames,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -430,9 +437,11 @@ namespace FingerprintCenter
             }
         }
 
-
+        // 根据结果集文件初始化指纹高速缓存
+        // parameters:
+        //      resultset   用于初始化的结果集对象。如果为 null，表示希望清空指纹高速缓存
+        //                  一般可用 null 调用一次，然后用多个 resultset 对象逐个调用一次
         // return:
-        //      -2  remoting服务器连接失败。驱动程序尚未启动
         //      -1  出错
         //      >=0 实际发送给接口程序的事项数目
         static int CreateFingerprintCache(DpResultSet resultset,
@@ -468,19 +477,21 @@ namespace FingerprintCenter
                 {
                     DpRecord record = resultset[i];
 
-                    string strTimestamp = "";
-                    string strBarcode = "";
-                    string strFingerprint = "";
+                    //string strTimestamp = "";
+                    //string strBarcode = "";
+                    //string strFingerprint = "";
                     ParseResultItemString(record.BrowseText,
-out strTimestamp,
-out strBarcode,
-out strFingerprint);
+out string strTimestamp,
+out string strBarcode,
+out string strFingerprint);
                     // TODO: 注意读者证条码号为空的，不要发送出去
 
 
-                    FingerprintItem item = new FingerprintItem();
-                    item.ReaderBarcode = strBarcode;
-                    item.FingerprintString = strFingerprint;
+                    FingerprintItem item = new FingerprintItem
+                    {
+                        ReaderBarcode = strBarcode,
+                        FingerprintString = strFingerprint
+                    };
 
                     items.Add(item);
                     if (items.Count >= 100)
@@ -1200,6 +1211,7 @@ out records);
             // _captureData.FPBuffer = new byte[_captureData.mfpWidth * _captureData.mfpHeight];
 
             _register_template_list.Clear();
+            _exclude.Clear();
 
             Thread captureThread = new Thread(new ThreadStart(CaptureThreadMain));
             // captureThread.IsBackground = true;
@@ -1253,19 +1265,21 @@ out records);
 
             if (_mode == "register")
             {
-#if NO
                 // 查重
                 {
                     int id = 0, score = 0;
-                    int ret = zkfp2.DBIdentify(mDBHandle, template_buffer, ref id, ref score);
+                    int ret = zkfp2.DBIdentify(_dBHandle, template_buffer, ref id, ref score);
                     if (zkfp.ZKFP_ERR_OK == ret)
                     {
-                        // TODO: 需要把 id 翻译为号码字符串显示
-                        Speaking("您的指纹以前已经注册过了(id=" + id + ")，无法重复注册");
-                        return;
+                        // 根据 id 取出 barcode 字符串
+                        string strBarcode = (string)_id_barcode_table[id.ToString()];
+                        if (_exclude.IndexOf(strBarcode) == -1)
+                        {
+                            Speaking($"您的指纹以前已经被 {strBarcode} 注册过了(id={id})，无法重复注册");
+                            return;
+                        }
                     }
                 }
-#endif
 
                 // 和上一次的比对
                 if (_register_template_list.Count > 0)
@@ -1273,6 +1287,7 @@ out records);
                     int nRet = zkfp2.DBMatch(_dBHandle, template_buffer, _register_template_list[_register_template_list.Count - 1]);
                     if (nRet <= 0)
                     {
+                        _register_template_list.Clear();    // 从头来
                         Light("red");
                         Speaking("刚扫入的指纹质量不佳，请继续重新扫入");
                         return;
@@ -1334,7 +1349,7 @@ out records);
                     CapturedEventArgs e1 = new CapturedEventArgs
                     {
                         Score = score,
-                        ErrorInfo = "Identify fail, ret= " + ret
+                        ErrorInfo = $"无法识别, 错误码={ret}"
                     };
                     Light("red");
                     Captured(null, e1);
@@ -1352,7 +1367,7 @@ out records);
 
         // exception:
         //      可能会抛出异常。在 token 中断时
-        public static TextResult GetRegisterString()
+        public static TextResult GetRegisterString(string strExcludeBarcodes)
         {
             string save_mode = _mode;
             ClientInfo.MainForm?.ActivateWindow(true);
@@ -1361,6 +1376,7 @@ out records);
             {
                 _mode = "register";
                 _register_template_list.Clear();
+                _exclude = StringUtil.SplitList(strExcludeBarcodes);
                 _cancelOfRegister = new CancellationTokenSource();
                 _eventRegisterFinished.Reset();
                 Speaking("请扫入指纹。一共需要扫三遍");
@@ -1377,6 +1393,18 @@ out records);
                 {
                     Speaking("非常抱歉，合成指纹时发生错误");
                     return new TextResult { Value = -1, ErrorInfo = "合成模板时发生错误，错误码=" + nRet };
+                }
+
+                // 尝试加入高速缓存
+                {
+                    string temp_id = Guid.NewGuid().ToString();
+                    nRet = AddItems(new List<FingerprintItem> { new FingerprintItem { ReaderBarcode = temp_id,
+                FingerprintString = zkfp2.BlobToBase64(buffer, length)} },
+                        out string strError);
+                    if (nRet == -1)
+                        return new TextResult { Value = -1, ErrorInfo = "尝试加入高速缓存时失败" };
+
+                    RemoveItem(temp_id, out strError);
                 }
 
                 Speaking("获取指纹信息成功");

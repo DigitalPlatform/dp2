@@ -5026,7 +5026,7 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   放弃输入
         //      1   成功输入
-        async Task<GetFingerprintStringResult> ReadFingerprintString()
+        async Task<GetFingerprintStringResult> ReadFingerprintString(string strExcludeBarcodes)
         {
             string strError = "";
             GetFingerprintStringResult result = new GetFingerprintStringResult();
@@ -5060,7 +5060,7 @@ MessageBoxDefaultButton.Button2);
 
                     return nRet;
 #endif
-                return await GetFingerprintString(channel);
+                return await GetFingerprintString(channel, strExcludeBarcodes);
             }
             catch (Exception ex)
             {
@@ -5087,34 +5087,63 @@ MessageBoxDefaultButton.Button2);
             public string ErrorInfo { get; set; }
         }
 
-        Task<GetFingerprintStringResult> GetFingerprintString(FingerprintChannel channel)
+        Task<GetFingerprintStringResult> GetFingerprintString(FingerprintChannel channel,
+            string strExcludeBarcodes)
         {
             return Task.Factory.StartNew<GetFingerprintStringResult>(
     () =>
     {
-        return CallGetFingerprintString(channel);
+        return CallGetFingerprintString(channel, strExcludeBarcodes);
     });
         }
 
-        GetFingerprintStringResult CallGetFingerprintString(FingerprintChannel channel)
+        GetFingerprintStringResult CallGetFingerprintString(FingerprintChannel channel,
+            string strExcludeBarcodes)
         {
             GetFingerprintStringResult result = new GetFingerprintStringResult();
             try
             {
-                // 获得一个指纹特征字符串
-                // return:
-                //      -1  error
-                //      0   放弃输入
-                //      1   成功输入
-                int nRet = channel.Object.GetFingerprintString(out string strFingerprint,
+                // 先尝试 2.0 版本
+                try
+                {
+                    int nRet = channel.Object.GetFingerprintString(
+                        strExcludeBarcodes,
+                        out string strFingerprint,
+                        out string strVersion,
+                        out string strError);
+                    result.Fingerprint = strFingerprint;
+                    result.Version = strVersion;
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    if (nRet == -1)
+                    {
+                        if (strVersion != "[not support]")
+                            return result;
+                    }
+                    else
+                        return result;
+                }
+                catch (System.Runtime.Remoting.RemotingException)
+                {
+                }
+
+                // 然后尝试用 V1.0 调用方式
+                {
+                    // 获得一个指纹特征字符串
+                    // return:
+                    //      -1  error
+                    //      0   放弃输入
+                    //      1   成功输入
+                    int nRet = channel.Object.GetFingerprintString(out string strFingerprint,
                     out string strVersion,
                     out string strError);
 
-                result.Fingerprint = strFingerprint;
-                result.Version = strVersion;
-                result.ErrorInfo = strError;
-                result.Value = nRet;
-                return result;
+                    result.Fingerprint = strFingerprint;
+                    result.Version = strVersion;
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -5209,7 +5238,7 @@ MessageBoxDefaultButton.Button1);
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
 #endif
-                GetFingerprintStringResult result = await ReadFingerprintString();
+                GetFingerprintStringResult result = await ReadFingerprintString(this.readerEditControl1.Barcode);
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,

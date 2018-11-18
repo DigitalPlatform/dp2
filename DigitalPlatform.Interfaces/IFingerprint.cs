@@ -14,6 +14,7 @@ namespace DigitalPlatform.Interfaces
 
         int Close();
 
+        // 2.0 增加的函数
         int GetVersion(out string strVersion,
             out string strCfgInfo,
             out string strError);
@@ -30,6 +31,18 @@ namespace DigitalPlatform.Interfaces
         //      0   放弃输入
         //      1   成功输入
         int GetFingerprintString(out string strFingerprintString,
+            out string strVersion,
+            out string strError);
+
+        // 2.0 增加的函数
+        // 获得一个指纹特征字符串
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        int GetFingerprintString(
+            string strExcludeBarcodes,
+            out string strFingerprintString,
             out string strVersion,
             out string strError);
 

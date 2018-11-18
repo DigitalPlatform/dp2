@@ -39,6 +39,7 @@ namespace FingerprintCenter
 
         public MainForm()
         {
+            ClientInfo.ProgramName = "fingerprintcenter";
             ClientInfo.MainForm = this;
 
             InitializeComponent();
@@ -144,6 +145,8 @@ bool bClickClose = false)
             StartRemotingServer();
 
             BeginStart();
+
+            DisplayText("1");
         }
 
         // 指纹功能是否初始化成功
@@ -156,6 +159,7 @@ bool bClickClose = false)
             if (_initialized == true)
                 return;
 
+            this.OutputHistory("重新创建指纹缓存");
             Task.Run(() =>
             {
                 NormalResult result = StartFingerPrint();
@@ -175,17 +179,25 @@ bool bClickClose = false)
 
         NormalResult StartFingerPrint()
         {
+            DisplayText("StartFingerPrint ...");
+
             _cancel.Cancel();
 
             _cancel = new CancellationTokenSource();
+
+            DisplayText("正在初始化指纹环境 ...");
 
             NormalResult result = FingerPrint.Init();
             if (result.Value == -1)
                 return result;
 
+            DisplayText("正在打开指纹设备 ...");
+
             result = FingerPrint.OpenZK();
             if (result.Value == -1)
                 return result;
+
+            DisplayText("Init Cache ...");
 
             // 初始化指纹缓存
             // return:
@@ -195,7 +207,11 @@ bool bClickClose = false)
             int nRet = InitFingerprintCache(
     out string strError);
             if (nRet == -1)
+            {
+                // 开始捕捉指纹
+                FingerPrint.StartCapture(_cancel.Token);
                 return new NormalResult { Value = -1, ErrorInfo = strError };
+            }
             if (nRet == 0)
                 this.ShowMessage(strError, "yellow", true);
 
@@ -206,7 +222,7 @@ bool bClickClose = false)
                 _timer = new System.Threading.Timer(
                     new System.Threading.TimerCallback(timerCallback),
                     null,
-                    TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(1));
+                    TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(5));
 
 #if NO
                 timer_replication.Interval = 1000 * 60 * 1; // 5 分种
@@ -241,10 +257,15 @@ bool bClickClose = false)
             {
                 this.toolStripStatusLabel1.Text = e.Score.ToString();
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                {
                     Beep();
+                    Speak("无法识别");
+                    DisplayText(e.ErrorInfo, "white", "darkred");
+                }
                 else
                 {
                     Speak("很好");
+                    // TODO: 显示文字中包含 e.Text?
                     SendKeys.SendWait(e.Text + "\r");
                 }
             }));
@@ -382,8 +403,17 @@ bool bClickClose = false)
             e.Cancel = true;
         }
 
+        string _currentUserName = "";
+
+        public string ServerUID = "";
+
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
+            LibraryChannel channel = sender as LibraryChannel;
+            _currentUserName = channel.UserName;
+            //_currentUserRights = channel.Rights;
+            //_currentLibraryCodeList = channel.LibraryCodeList;
+
         }
 
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
@@ -504,7 +534,7 @@ bool bClickClose = false)
             if (string.IsNullOrEmpty(strUrl))
             {
                 strError = "尚未配置 dp2library 服务器 URL，无法获得读者指纹信息";
-                return 0;
+                return -1;
             }
 
             // 先把正在运行的同步过程中断
@@ -576,8 +606,8 @@ bool bClickClose = false)
                 }));
         }
 
-        // 清除指纹缓存
-        private void MenuItem_clearFingerprintCache_Click(object sender, EventArgs e)
+        // 删除本地缓存文件
+        private void MenuItem_clearFingerprintCacheFile_Click(object sender, EventArgs e)
         {
             string strDir = ClientInfo.FingerPrintCacheDir(this.textBox_cfg_dp2LibraryServerUrl.Text);  // PathUtil.MergePath(Program.MainForm.DataDir, "fingerprintcache");
             DialogResult result = MessageBox.Show(this,
@@ -605,6 +635,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
+            this.ShowMessage("本地缓存文件删除成功", "green", true);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
@@ -615,7 +646,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -666,9 +697,9 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         IpcClientChannel m_fingerprintChannel = new IpcClientChannel();
         IFingerprint m_fingerprintObj = null;
@@ -712,7 +743,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-#endregion
+        #endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -773,7 +804,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -896,14 +927,54 @@ string strHtml)
             webBrowser.DocumentText = strHtml;
         }
 
-
-#endregion
-
-        void DisplayText(string text)
+        /// <summary>
+        /// 向控制台输出 HTML
+        /// </summary>
+        /// <param name="strHtml">要输出的 HTML 字符串</param>
+        public void OutputHtml(string strHtml)
         {
+            AppendHtml(strHtml);
+        }
+
+        public void OutputHistory(string strText, int nWarningLevel = 0)
+        {
+            OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
+        }
+
+        // parameters:
+        //      nWarningLevel   0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+        /// <summary>
+        /// 向控制台输出纯文本
+        /// </summary>
+        /// <param name="strText">要输出的纯文本字符串</param>
+        /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
+        public void OutputText(string strText, int nWarningLevel = 0)
+        {
+            string strClass = "normal";
+            if (nWarningLevel == 1)
+                strClass = "warning";
+            else if (nWarningLevel >= 2)
+                strClass = "error";
+            AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+        }
+
+        #endregion
+
+        void DisplayText(string text,
+            string textColor = "white",
+            string backColor = "gray")
+        {
+#if NO
             // AppendHtml("<div>" +HttpUtility.HtmlEncode(text)+ "</div>");
             string html = string.Format("<html><body><div style='font-size:30px;'>{0}</div></body></html>", HttpUtility.HtmlEncode(text));
             SetHtmlString(this.webBrowser1, html);
+#endif
+            this.Invoke((Action)(() =>
+            {
+                this.label_message.Text = text;
+                this.label_message.BackColor = Color.FromName(backColor);
+                this.label_message.ForeColor = Color.FromName(textColor);
+            }));
         }
 
         private void ToolStripMenuItem_exit_Click(object sender, EventArgs e)
@@ -945,7 +1016,7 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-#region device changed
+        #region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -977,7 +1048,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {
@@ -1083,7 +1154,8 @@ Keys keyData)
 
             _eventReplicationFinish.Reset();
 
-            this.ShowMessage("正在同步最新指纹信息 ...");
+            this.OutputHistory($"增量同步指纹信息 {strStartDate}");
+            this.ShowMessage($"正在同步最新指纹信息 {strStartDate} ...");
             EnableControls(false);
             LibraryChannel channel = this.GetChannel();
             try
@@ -1131,6 +1203,32 @@ token);
                 return;
 
             BeginReplication();
+        }
+
+        // 刷新指纹信息。
+        // 指立即从服务器获取最新日志，同步指纹变动信息
+        private void MenuItem_refresh_Click(object sender, EventArgs e)
+        {
+            BeginReplication();
+        }
+
+        // 获得当前用户的用户名
+        public string GetCurrentUserName()
+        {
+#if NO
+            if (this.Channel != null && string.IsNullOrEmpty(this.Channel.UserName) == false)
+                return this.Channel.UserName;
+#endif
+            if (string.IsNullOrEmpty(this._currentUserName) == false)
+                return this._currentUserName;
+
+            // TODO: 或者迫使登录一次
+            return "";
+        }
+
+        private void MenuItem_throwException_Click(object sender, EventArgs e)
+        {
+            throw new Exception("test");
         }
     }
 }

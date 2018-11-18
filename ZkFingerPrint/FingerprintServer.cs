@@ -499,6 +499,18 @@ Exception rethrown at [0]:
         bool m_bInRegister = false;
         bool m_bCanceled = false;
 
+        public int GetFingerprintString(
+            string strExcludeBarcodes,
+            out string strFingerprintString,
+            out string strVersion,
+            out string strError)
+        {
+            strFingerprintString = "[not support]";
+            strVersion = "";
+            strError = "1.0 暂不支持此函数";
+            return -1;
+        }
+
         // TODO: 防止函数过程重入
         // 获得一个指纹特征字符串
         // return:
