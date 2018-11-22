@@ -33,6 +33,7 @@
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_refresh = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearFingerprintCacheFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,6 +43,7 @@
             this.MenuItem_lightGreen = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_replication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
@@ -75,8 +77,6 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.MenuItem_refresh = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -120,33 +120,40 @@
             // ToolStripMenuItem_start
             // 
             this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(236, 30);
             this.ToolStripMenuItem_start.Text = "启动(&S)";
             this.ToolStripMenuItem_start.Click += new System.EventHandler(this.ToolStripMenuItem_start_Click);
             // 
             // ToolStripMenuItem_reopen
             // 
             this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(236, 30);
             this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
             this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
+            // 
+            // MenuItem_refresh
+            // 
+            this.MenuItem_refresh.Name = "MenuItem_refresh";
+            this.MenuItem_refresh.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_refresh.Text = "刷新指纹信息";
+            this.MenuItem_refresh.Click += new System.EventHandler(this.MenuItem_refresh_Click);
             // 
             // MenuItem_clearFingerprintCacheFile
             // 
             this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
-            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(236, 30);
             this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
             this.MenuItem_clearFingerprintCacheFile.Click += new System.EventHandler(this.MenuItem_clearFingerprintCacheFile_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(233, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(236, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -166,37 +173,44 @@
             // MenuItem_lightWhite
             // 
             this.MenuItem_lightWhite.Name = "MenuItem_lightWhite";
-            this.MenuItem_lightWhite.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightWhite.Size = new System.Drawing.Size(231, 30);
             this.MenuItem_lightWhite.Text = "白灯";
             this.MenuItem_lightWhite.Click += new System.EventHandler(this.MenuItem_lightWhite_Click);
             // 
             // MenuItem_lightRed
             // 
             this.MenuItem_lightRed.Name = "MenuItem_lightRed";
-            this.MenuItem_lightRed.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightRed.Size = new System.Drawing.Size(231, 30);
             this.MenuItem_lightRed.Text = "红灯";
             this.MenuItem_lightRed.Click += new System.EventHandler(this.MenuItem_lightRed_Click);
             // 
             // MenuItem_lightGreen
             // 
             this.MenuItem_lightGreen.Name = "MenuItem_lightGreen";
-            this.MenuItem_lightGreen.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_lightGreen.Size = new System.Drawing.Size(231, 30);
             this.MenuItem_lightGreen.Text = "绿灯";
             this.MenuItem_lightGreen.Click += new System.EventHandler(this.MenuItem_lightGreen_Click);
             // 
             // MenuItem_replication
             // 
             this.MenuItem_replication.Name = "MenuItem_replication";
-            this.MenuItem_replication.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_replication.Size = new System.Drawing.Size(231, 30);
             this.MenuItem_replication.Text = "Replication";
             this.MenuItem_replication.Click += new System.EventHandler(this.MenuItem_replication_Click);
             // 
             // MenuItem_testInitCache
             // 
             this.MenuItem_testInitCache.Name = "MenuItem_testInitCache";
-            this.MenuItem_testInitCache.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_testInitCache.Size = new System.Drawing.Size(231, 30);
             this.MenuItem_testInitCache.Text = "test InitCache";
             this.MenuItem_testInitCache.Click += new System.EventHandler(this.MenuItem_testInitCache_Click);
+            // 
+            // MenuItem_throwException
+            // 
+            this.MenuItem_throwException.Name = "MenuItem_throwException";
+            this.MenuItem_throwException.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_throwException.Text = "throw exception";
+            this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
             // 
             // toolStrip1
             // 
@@ -557,20 +571,6 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // MenuItem_refresh
-            // 
-            this.MenuItem_refresh.Name = "MenuItem_refresh";
-            this.MenuItem_refresh.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_refresh.Text = "刷新指纹信息";
-            this.MenuItem_refresh.Click += new System.EventHandler(this.MenuItem_refresh_Click);
-            // 
-            // MenuItem_throwException
-            // 
-            this.MenuItem_throwException.Name = "MenuItem_throwException";
-            this.MenuItem_throwException.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_throwException.Text = "throw exception";
-            this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -583,7 +583,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.ShowIcon = false;
-            this.Text = "指纹接口中心";
+            this.Text = "dp2-指纹中心";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);

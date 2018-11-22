@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class DupForm
     {
@@ -51,53 +51,52 @@ namespace dp2Circulation
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.checkBox_returnSearchDetail = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_dupMessage
             // 
             this.label_dupMessage.AutoSize = true;
-            this.label_dupMessage.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_dupMessage.Location = new System.Drawing.Point(2, 283);
-            this.label_dupMessage.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_dupMessage.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_dupMessage.Location = new System.Drawing.Point(3, 425);
             this.label_dupMessage.Name = "label_dupMessage";
-            this.label_dupMessage.Size = new System.Drawing.Size(78, 12);
+            this.label_dupMessage.Size = new System.Drawing.Size(114, 18);
             this.label_dupMessage.TabIndex = 1;
-            this.label_dupMessage.Text = "…–Œ¥≤È÷ÿ...";
+            this.label_dupMessage.Text = "Â∞öÊú™Êü•Èáç...";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(2, 2);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(3, 3);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(116, 18);
             this.label2.TabIndex = 0;
-            this.label2.Text = "≤È÷ÿ∑Ω∞∏(&P):";
+            this.label2.Text = "Êü•ÈáçÊñπÊ°à(&P):";
             // 
             // textBox_recordPath
             // 
             this.textBox_recordPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_recordPath.Location = new System.Drawing.Point(95, -1);
-            this.textBox_recordPath.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_recordPath.Location = new System.Drawing.Point(142, -2);
             this.textBox_recordPath.Name = "textBox_recordPath";
-            this.textBox_recordPath.Size = new System.Drawing.Size(180, 21);
+            this.textBox_recordPath.Size = new System.Drawing.Size(268, 28);
             this.textBox_recordPath.TabIndex = 1;
             this.textBox_recordPath.TextChanged += new System.EventHandler(this.textBox_recordPath_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 2);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(3, 3);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(89, 12);
+            this.label1.Size = new System.Drawing.Size(134, 18);
             this.label1.TabIndex = 0;
-            this.label1.Text = "‘¥º«¬º¬∑æ∂(&P):";
+            this.label1.Text = "Ê∫êËÆ∞ÂΩïË∑ØÂæÑ(&P):";
             // 
             // listView_browse
             // 
@@ -108,10 +107,10 @@ namespace dp2Circulation
             this.listView_browse.FullRowSelect = true;
             this.listView_browse.HideSelection = false;
             this.listView_browse.LargeImageList = this.imageList_dupItemType;
-            this.listView_browse.Location = new System.Drawing.Point(0, 48);
+            this.listView_browse.Location = new System.Drawing.Point(0, 72);
             this.listView_browse.Margin = new System.Windows.Forms.Padding(0);
             this.listView_browse.Name = "listView_browse";
-            this.listView_browse.Size = new System.Drawing.Size(302, 214);
+            this.listView_browse.Size = new System.Drawing.Size(451, 303);
             this.listView_browse.SmallImageList = this.imageList_dupItemType;
             this.listView_browse.TabIndex = 0;
             this.listView_browse.UseCompatibleStateImageBehavior = false;
@@ -123,12 +122,12 @@ namespace dp2Circulation
             // 
             // columnHeader_path
             // 
-            this.columnHeader_path.Text = "º«¬º¬∑æ∂";
+            this.columnHeader_path.Text = "ËÆ∞ÂΩïË∑ØÂæÑ";
             this.columnHeader_path.Width = 120;
             // 
             // columnHeader_sum
             // 
-            this.columnHeader_sum.Text = "»®÷µ∫Õ";
+            this.columnHeader_sum.Text = "ÊùÉÂÄºÂíå";
             this.columnHeader_sum.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.columnHeader_sum.Width = 70;
             // 
@@ -142,22 +141,20 @@ namespace dp2Circulation
             // label_message
             // 
             this.label_message.AutoSize = true;
-            this.label_message.Location = new System.Drawing.Point(2, 295);
-            this.label_message.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_message.Location = new System.Drawing.Point(3, 443);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(11, 12);
+            this.label_message.Size = new System.Drawing.Size(17, 18);
             this.label_message.TabIndex = 2;
             this.label_message.Text = " ";
             // 
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Location = new System.Drawing.Point(279, 0);
-            this.button_search.Margin = new System.Windows.Forms.Padding(2);
+            this.button_search.Location = new System.Drawing.Point(418, 0);
             this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(75, 22);
+            this.button_search.Size = new System.Drawing.Size(112, 33);
             this.button_search.TabIndex = 2;
-            this.button_search.Text = "≤È÷ÿ(&S)";
+            this.button_search.Text = "Êü•Èáç(&S)";
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
             // comboBox_projectName
@@ -165,20 +162,18 @@ namespace dp2Circulation
             this.comboBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_projectName.FormattingEnabled = true;
-            this.comboBox_projectName.Location = new System.Drawing.Point(95, 2);
-            this.comboBox_projectName.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_projectName.Location = new System.Drawing.Point(142, 3);
             this.comboBox_projectName.Name = "comboBox_projectName";
-            this.comboBox_projectName.Size = new System.Drawing.Size(180, 20);
+            this.comboBox_projectName.Size = new System.Drawing.Size(268, 26);
             this.comboBox_projectName.TabIndex = 1;
             this.comboBox_projectName.DropDown += new System.EventHandler(this.comboBox_projectName_DropDown);
             // 
             // button_viewXmlRecord
             // 
             this.button_viewXmlRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_viewXmlRecord.Location = new System.Drawing.Point(279, 0);
-            this.button_viewXmlRecord.Margin = new System.Windows.Forms.Padding(2);
+            this.button_viewXmlRecord.Location = new System.Drawing.Point(418, 0);
             this.button_viewXmlRecord.Name = "button_viewXmlRecord";
-            this.button_viewXmlRecord.Size = new System.Drawing.Size(75, 22);
+            this.button_viewXmlRecord.Size = new System.Drawing.Size(112, 33);
             this.button_viewXmlRecord.TabIndex = 2;
             this.button_viewXmlRecord.Text = "XML...";
             this.button_viewXmlRecord.UseVisualStyleBackColor = true;
@@ -188,22 +183,24 @@ namespace dp2Circulation
             // 
             this.checkBox_includeLowCols.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_includeLowCols.AutoSize = true;
-            this.checkBox_includeLowCols.Location = new System.Drawing.Point(2, 3);
+            this.checkBox_includeLowCols.Location = new System.Drawing.Point(4, 4);
+            this.checkBox_includeLowCols.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_includeLowCols.Name = "checkBox_includeLowCols";
-            this.checkBox_includeLowCols.Size = new System.Drawing.Size(198, 16);
+            this.checkBox_includeLowCols.Size = new System.Drawing.Size(295, 22);
             this.checkBox_includeLowCols.TabIndex = 0;
-            this.checkBox_includeLowCols.Text = "∑µªÿµÕ”⁄„–÷µµƒº«¬ºµƒ‰Ø¿¿¡–(&B)";
+            this.checkBox_includeLowCols.Text = "ËøîÂõû‰Ωé‰∫éÈòàÂÄºÁöÑËÆ∞ÂΩïÁöÑÊµèËßàÂàó(&B)";
             this.checkBox_includeLowCols.UseVisualStyleBackColor = true;
             // 
             // checkBox_returnAllRecords
             // 
             this.checkBox_returnAllRecords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_returnAllRecords.AutoSize = true;
-            this.checkBox_returnAllRecords.Location = new System.Drawing.Point(206, 2);
+            this.checkBox_returnAllRecords.Location = new System.Drawing.Point(307, 4);
+            this.checkBox_returnAllRecords.Margin = new System.Windows.Forms.Padding(4);
             this.checkBox_returnAllRecords.Name = "checkBox_returnAllRecords";
-            this.checkBox_returnAllRecords.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_returnAllRecords.Size = new System.Drawing.Size(205, 22);
             this.checkBox_returnAllRecords.TabIndex = 1;
-            this.checkBox_returnAllRecords.Text = "∑µªÿ»´≤ø√¸÷–º«¬º(&A)";
+            this.checkBox_returnAllRecords.Text = "ËøîÂõûÂÖ®ÈÉ®ÂëΩ‰∏≠ËÆ∞ÂΩï(&A)";
             this.checkBox_returnAllRecords.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
@@ -213,13 +210,14 @@ namespace dp2Circulation
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label_message, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.label_dupMessage, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.panel2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.listView_browse, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label_message, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.panel3, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -228,8 +226,8 @@ namespace dp2Circulation
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 2F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(356, 309);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(534, 464);
             this.tableLayoutPanel1.TabIndex = 10;
             // 
             // panel1
@@ -242,7 +240,7 @@ namespace dp2Circulation
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(565, 24);
+            this.panel1.Size = new System.Drawing.Size(848, 36);
             this.panel1.TabIndex = 0;
             // 
             // panel2
@@ -252,32 +250,51 @@ namespace dp2Circulation
             this.panel2.Controls.Add(this.textBox_recordPath);
             this.panel2.Controls.Add(this.button_viewXmlRecord);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Left;
-            this.panel2.Location = new System.Drawing.Point(0, 24);
+            this.panel2.Location = new System.Drawing.Point(0, 36);
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(565, 24);
+            this.panel2.Size = new System.Drawing.Size(848, 36);
             this.panel2.TabIndex = 1;
             // 
             // panel3
             // 
-            this.panel3.AutoSize = true;
             this.panel3.BackColor = System.Drawing.SystemColors.Control;
-            this.panel3.Controls.Add(this.checkBox_returnAllRecords);
-            this.panel3.Controls.Add(this.checkBox_includeLowCols);
-            this.panel3.Location = new System.Drawing.Point(0, 262);
+            this.panel3.Controls.Add(this.flowLayoutPanel1);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(0, 375);
             this.panel3.Margin = new System.Windows.Forms.Padding(0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(347, 21);
+            this.panel3.Size = new System.Drawing.Size(848, 50);
             this.panel3.TabIndex = 7;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.checkBox_includeLowCols);
+            this.flowLayoutPanel1.Controls.Add(this.checkBox_returnAllRecords);
+            this.flowLayoutPanel1.Controls.Add(this.checkBox_returnSearchDetail);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(848, 50);
+            this.flowLayoutPanel1.TabIndex = 2;
+            // 
+            // checkBox_returnSearchDetail
+            // 
+            this.checkBox_returnSearchDetail.AutoSize = true;
+            this.checkBox_returnSearchDetail.Location = new System.Drawing.Point(519, 3);
+            this.checkBox_returnSearchDetail.Name = "checkBox_returnSearchDetail";
+            this.checkBox_returnSearchDetail.Size = new System.Drawing.Size(169, 22);
+            this.checkBox_returnSearchDetail.TabIndex = 2;
+            this.checkBox_returnSearchDetail.Text = "ËøîÂõûÊ£ÄÁ¥¢ËØ¶ÊÉÖ(&S)";
+            this.checkBox_returnSearchDetail.UseVisualStyleBackColor = true;
             // 
             // DupForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(356, 309);
+            this.ClientSize = new System.Drawing.Size(534, 464);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "DupForm";
             this.ShowInTaskbar = false;
             this.Text = "DupForm";
@@ -293,7 +310,8 @@ namespace dp2Circulation
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.panel3.ResumeLayout(false);
-            this.panel3.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -319,5 +337,7 @@ namespace dp2Circulation
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.CheckBox checkBox_returnSearchDetail;
     }
 }

@@ -10,6 +10,7 @@ using System.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.Marc;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -27,6 +28,13 @@ namespace DigitalPlatform.rms.Client
         public bool SafeMode { get; set; }
         public string TempDir { get; set; }
 
+        private Encoding _outputEncoding = Encoding.UTF8;
+        public Encoding OutputEncoding
+        {
+            get => _outputEncoding;
+            set => _outputEncoding = value;
+        }
+
         public ExportFileType FileType = ExportFileType.XmlFile;
 
         public FileStream outputfile = null;	// Backup和Xml格式输出都需要这个
@@ -39,11 +47,14 @@ namespace DigitalPlatform.rms.Client
         public int Begin(
             IWin32Window owner,
             string strOutputFileName,
+            Encoding outputEncoding,
             out string strError)
         {
             strError = "";
 
             this.m_owner = owner;
+
+            this.OutputEncoding = outputEncoding;
 
             if (string.IsNullOrEmpty(strOutputFileName) == true)
             {
@@ -138,9 +149,11 @@ namespace DigitalPlatform.rms.Client
                     outputfile = File.Create(
                         strOutputFileName);
 
-                    writer = new XmlTextWriter(outputfile, Encoding.UTF8);
-                    writer.Formatting = Formatting.Indented;
-                    writer.Indentation = 4;
+                    writer = new XmlTextWriter(outputfile, this.OutputEncoding)
+                    {
+                        Formatting = Formatting.Indented,
+                        Indentation = 4
+                    };
                 }
 
             }
@@ -226,6 +239,7 @@ namespace DigitalPlatform.rms.Client
 
                     // DomUtil.SetAttr(dom.DocumentElement, "xmlns:marc", null);
                     dom.DocumentElement.WriteTo(writer);
+                    return 1;
                 }
                 catch (Exception ex)
                 {
@@ -278,7 +292,40 @@ namespace DigitalPlatform.rms.Client
 
                 return nRet;
             }
-            return 1;
+
+            if (this.FileType == ExportFileType.ISO2709File)
+            {
+                // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                // parameters:
+                //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                nRet = MarcUtil.Xml2Marc(strXmlBody,
+                    false,
+                    "",
+                    out string strOutMarcSyntax,
+                    out string strMARC,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // return:
+                //      -1  出错
+                //      0   成功
+                nRet = MarcUtil.CvtJineiToISO2709(
+                    strMARC,
+                    strOutMarcSyntax,
+                    this.OutputEncoding,
+                    out byte[] baResult,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                outputfile.Write(baResult, 0, baResult.Length);
+                return 1;
+            }
+
+            strError = $"不支持的格式{this.FileType.ToString()}";
+            return -1;
         }
 
         // 得到Xml记录中所有<file>元素的id属性值
@@ -537,7 +584,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -602,7 +649,7 @@ namespace DigitalPlatform.rms.Client
                 byte[] baOutputTimeStamp = null;
                 string strOutputPath;
 
-            REDO_GETRES:
+                REDO_GETRES:
                 lRet = channel.GetRes(strResPath,
                     (Stream)null,	// 故意不获取资源体
                     stop,
@@ -680,7 +727,7 @@ namespace DigitalPlatform.rms.Client
                 if (stop != null)
                     stop.SetMessage("正在下载 " + strResPath + " 的数据体");
 
-            REDO_GETRES_1:
+                REDO_GETRES_1:
                 lRet = channel.GetRes(strResPath,
                     outputfile,
                     stop,

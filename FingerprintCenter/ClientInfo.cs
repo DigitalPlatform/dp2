@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace FingerprintCenter
 {
@@ -96,7 +97,7 @@ namespace FingerprintCenter
 
         // parameters:
         //      product_name    例如 "fingerprintcenter"
-        public static void InitialDirs(string product_name)
+        public static void Initial(string product_name)
         {
             ClientVersion = Assembly.GetAssembly(typeof(Program)).GetName().Version.ToString();
 
@@ -118,6 +119,8 @@ namespace FingerprintCenter
             UserLogDir = Path.Combine(UserDir, "log");
             PathUtil.TryCreateDir(UserLogDir);
 
+            InitialConfig();
+
             var repository = log4net.LogManager.CreateRepository("main");
             log4net.GlobalContext.Properties["LogFileName"] = Path.Combine(UserLogDir, "log_");
             log4net.Config.XmlConfigurator.Configure(repository);
@@ -128,6 +131,11 @@ namespace FingerprintCenter
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
             WriteInfoLog(Assembly.GetAssembly(typeof(ClientInfo)).FullName);
+        }
+
+        public static void Finish()
+        {
+            SaveConfig();
         }
 
         #region Log
@@ -328,5 +336,73 @@ namespace FingerprintCenter
         }
 
         #endregion
+
+        static ConfigSetting _config = null;
+
+        public static ConfigSetting Config
+        {
+            get
+            {
+                return _config;
+            }
+        }
+
+        public static void InitialConfig()
+        {
+            if (string.IsNullOrEmpty(UserDir))
+                throw new ArgumentException("UserDir 尚未初始化");
+
+            string filename = Path.Combine(UserDir, "settings.xml");
+            _config = ConfigSetting.Open(filename, true);
+        }
+
+        public static void SaveConfig()
+        {
+            // Save the configuration file.
+            if (_config != null)
+            {
+                _config.Save();
+                _config = null;
+            }
+        }
+
+        public static void AddShortcutToStartupGroup(string strProductName)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed &&
+                ApplicationDeployment.CurrentDeployment != null &&
+                ApplicationDeployment.CurrentDeployment.IsFirstRun)
+            {
+
+                string strTargetPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                strTargetPath = Path.Combine(strTargetPath, strProductName) + ".appref-ms";
+
+                string strSourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                strSourcePath = Path.Combine(strSourcePath, strProductName) + ".appref-ms";
+
+                File.Copy(strSourcePath, strTargetPath, true);
+            }
+        }
+
+        public static void RemoveShortcutFromStartupGroup(string strProductName)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed &&
+    ApplicationDeployment.CurrentDeployment != null &&
+    ApplicationDeployment.CurrentDeployment.IsFirstRun)
+            {
+
+                string strTargetPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                strTargetPath = Path.Combine(strTargetPath, strProductName) + ".appref-ms";
+
+                try
+                {
+                    File.Delete(strTargetPath);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
     }
 }

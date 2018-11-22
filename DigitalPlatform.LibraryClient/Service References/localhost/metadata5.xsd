@@ -427,6 +427,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="Answer" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Text" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Xml" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Question" nillable="true" type="tns:Question" />
@@ -2067,6 +2068,7 @@
   <xs:complexType name="DupSearchResult">
     <xs:sequence>
       <xs:element xmlns:q127="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q127:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Detail" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Path" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Threshold" type="xs:int" />
       <xs:element minOccurs="0" name="Weight" type="xs:int" />

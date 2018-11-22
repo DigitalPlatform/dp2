@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#define DETAIL
+
+using System;
 using System.Text;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
 using DigitalPlatform.IO;
 
@@ -35,6 +34,10 @@ namespace DigitalPlatform.LibraryServer
         public int Weight = 0;
         public int Threshold = 0;
 
+#if DETAIL
+        public string Detail { get; set; }
+#endif
+
         /*
         public DupLineItem(string strPath,
             int nWeight)
@@ -63,14 +66,43 @@ namespace DigitalPlatform.LibraryServer
             byte[] baPathLength = BitConverter.GetBytes((Int32)nPathBytes);
             Debug.Assert(baPathLength.Length == 4, "");
 
-            this.Length = 4/*weight*/ + 4/*threshold*/ + 4/*length of path content */ + nPathBytes;
+#if DETAIL
+            //
+            byte[] baDetail = Encoding.UTF8.GetBytes(this.Detail);
+            int nDetailBytes = baDetail.Length;
+
+            // 
+            byte[] baDetailLength = BitConverter.GetBytes((Int32)nDetailBytes);
+            Debug.Assert(baDetailLength.Length == 4, "");
+#endif
+
+            this.Length = 4/*weight*/
+                + 4/*threshold*/
+                + 4/*length of path content */
+                + nPathBytes
+#if DETAIL
+                + 4
+                + nDetailBytes
+#endif
+                ;
 
 
             m_buffer = new byte[this.Length];
+            int offs = 0;
             Array.Copy(baWeight, m_buffer, baWeight.Length);
-            Array.Copy(baThreshold, 0, m_buffer, 4, 4);
-            Array.Copy(baPathLength, 0, m_buffer, 4 + 4, 4);
-            Array.Copy(baPath, 0, m_buffer, 4 + 4 + 4, nPathBytes);
+            offs += 4;
+            Array.Copy(baThreshold, 0, m_buffer, offs, 4);
+            offs += 4;
+            Array.Copy(baPathLength, 0, m_buffer, offs, 4);
+            offs += 4;
+            Array.Copy(baPath, 0, m_buffer,offs, nPathBytes);
+            offs += nPathBytes;
+#if DETAIL
+            Array.Copy(baDetailLength, 0, m_buffer, offs, 4);
+            offs += 4;
+            Array.Copy(baDetail, 0, m_buffer, offs, nDetailBytes);
+            offs += nDetailBytes;
+#endif
         }
 
         /*
@@ -130,23 +162,44 @@ namespace DigitalPlatform.LibraryServer
             stream.Read(shresholdbuffer, 0, 4);
             this.Threshold = BitConverter.ToInt32(shresholdbuffer, 0);
 
-            // 读入path length
-            byte[] lengthbuffer = new byte[4];
-            stream.Read(lengthbuffer, 0, 4);
-            int nPathLength = BitConverter.ToInt32(lengthbuffer, 0);
-
-            // 读入path content
-            if (nPathLength > 0)
             {
-                byte[] pathbuffer = new byte[nPathLength];
-                stream.Read(pathbuffer, 0, nPathLength);
+                // 读入path length
+                byte[] lengthbuffer = new byte[4];
+                stream.Read(lengthbuffer, 0, 4);
+                int nPathLength = BitConverter.ToInt32(lengthbuffer, 0);
 
-                this.Path = Encoding.UTF8.GetString(pathbuffer);
+                // 读入path content
+                if (nPathLength > 0)
+                {
+                    byte[] pathbuffer = new byte[nPathLength];
+                    stream.Read(pathbuffer, 0, nPathLength);
+
+                    this.Path = Encoding.UTF8.GetString(pathbuffer);
+                }
+                else
+                    this.Path = "";
             }
-            else
-                this.Path = "";
-        }
 
+#if DETAIL
+            {
+                // 读入 detail length
+                byte[] lengthbuffer = new byte[4];
+                stream.Read(lengthbuffer, 0, 4);
+                int nPathLength = BitConverter.ToInt32(lengthbuffer, 0);
+
+                // 读入detail content
+                if (nPathLength > 0)
+                {
+                    byte[] pathbuffer = new byte[nPathLength];
+                    stream.Read(pathbuffer, 0, nPathLength);
+
+                    this.Detail = Encoding.UTF8.GetString(pathbuffer);
+                }
+                else
+                    this.Detail = "";
+            }
+#endif
+        }
 
         public override void ReadCompareData(Stream stream)
         {
@@ -446,6 +499,9 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 左右任意取一个就可以，但是要加上权值 2007/7/2
                         dpRecordLeft.Weight += dpRecordRight.Weight;
+#if DETAIL
+                        MergeDetail(dpRecordLeft, dpRecordRight);
+#endif
 
                         targetMiddle.Add(dpRecordLeft);
                         i++;
@@ -506,6 +562,13 @@ namespace DigitalPlatform.LibraryServer
             }
             return 0;
         }
+
+        // 合并两个事项的 Detail 部分
+        static void MergeDetail(DupLineItem left, DupLineItem right)
+        {
+            left.Detail = left.Detail + " OR " + right.Detail;
+        }
+
     }
 
     public enum DupResultSetSortStyle
