@@ -2049,6 +2049,7 @@ namespace dp2Circulation
                         this._detailWindow.Form,
                         strGcatWebServiceUrl,
                         strAuthor,
+                        "",
                         true,	// bSelectPinyin
                         true,	// bSelectEntry
                         true,	// bOutputDebugInfo
@@ -2084,6 +2085,7 @@ namespace dp2Circulation
             System.Windows.Forms.IWin32Window parent,
             string strUrl,
             string strAuthor,
+            string strPinyin,
             bool bSelectPinyin,
             bool bSelectEntry,
             bool bOutputDebugInfo,
@@ -2097,7 +2099,9 @@ namespace dp2Circulation
 
             long nRet = 0;
 
-            Question[] questions = (Question[])question_table[strAuthor];
+            Question[] questions = null;
+            if (question_table != null)
+                questions = (Question[])question_table[strAuthor];
             if (questions == null)
                 questions = new Question[0];
 
@@ -2135,12 +2139,17 @@ namespace dp2Circulation
                 string strTitle = strError;
 
                 string strQuestion = questions[questions.Length - 1].Text;
+                string strXml = questions[questions.Length - 1].Xml;
 
                 QuestionDlg dlg = new QuestionDlg();
                 GuiUtil.AutoSetDefaultFont(dlg);
                 dlg.StartPosition = FormStartPosition.CenterScreen;
-                dlg.label_messageTitle.Text = strTitle;
-                dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");
+                dlg.MessageTitle = strTitle;
+                dlg.Question = strQuestion.Replace("\n", "\r\n");
+                dlg.Xml = strXml;
+                if (string.IsNullOrEmpty(strPinyin) == false)
+                    dlg.HanziPinyinTable = QuestionDlg.BuildHanziPinyinTable(strAuthor, strPinyin);
+
                 dlg.ShowDialog(parent);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -2149,9 +2158,10 @@ namespace dp2Circulation
                     return 0;
                 }
 
-                questions[questions.Length - 1].Answer = dlg.textBox_result.Text;
+                questions[questions.Length - 1].Answer = dlg.Result;
 
-                question_table[strAuthor] = questions;  // 保存
+                if (question_table != null)
+                    question_table[strAuthor] = questions;  // 保存
             }
 
             if (nRet == -1)

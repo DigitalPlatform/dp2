@@ -1574,6 +1574,8 @@ false);
             }
         }
 
+        List<ToolStripItem> _save_menu_items = null;
+
         // 设置标签打印模式
         void SetPrintLabelMode()
         {
@@ -1581,6 +1583,18 @@ false);
             if (bEnabled == true)
             {
                 this.MainMenuStrip.Items.Clear();
+
+                if (_save_menu_items == null)
+                {
+                    _save_menu_items = new List<ToolStripItem>();
+                    foreach (ToolStripItem item in this.MenuItem_help.DropDownItems)
+                    {
+                        if (item == this.MenuItem_upgradeFromDisk
+                            || item == this.MenuItem_createGreenApplication
+                            || item == this.MenuItem_configuration)
+                            _save_menu_items.Add(item);
+                    }
+                }
 
                 ToolStripMenuItem new_menu = new ToolStripMenuItem();
                 new_menu.Text = "文件(&F)";
@@ -1592,11 +1606,19 @@ false);
                     new_menu.DropDownItems.Add(menu_item);
                 }
 
+#if NO
                 {
                     ToolStripMenuItem menu_item = new ToolStripMenuItem();
                     menu_item.Text = "参数配置(&C)";
                     menu_item.Click += new System.EventHandler(this.MenuItem_configuration_Click);
                     new_menu.DropDownItems.Add(menu_item);
+                }
+#endif
+
+
+                foreach (var item in _save_menu_items)
+                {
+                    new_menu.DropDownItems.Add(item);
                 }
 
                 {
@@ -2156,7 +2178,7 @@ false);
             }
         }
 
-        #endregion
+#endregion
 
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
@@ -3806,7 +3828,7 @@ Stack:
             return -1;
         }
 
-        #region EnsureXXXForm ...
+#region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4094,7 +4116,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-        #endregion
+#endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -7688,7 +7710,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-        #region 序列号机制
+#region 序列号机制
 
         bool _testMode = false;
 
@@ -8007,7 +8029,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
@@ -8114,7 +8136,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-        #region servers.xml
+#region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -8407,7 +8429,7 @@ Keys keyData)
             return this._currentUserRights;
         }
 
-        #endregion // servers.xml
+#endregion // servers.xml
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
@@ -8442,7 +8464,7 @@ Keys keyData)
 #endif
         }
 
-        #region 消息过滤
+#region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -8472,7 +8494,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名

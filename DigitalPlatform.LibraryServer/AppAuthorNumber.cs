@@ -216,7 +216,8 @@ namespace DigitalPlatform.LibraryServer
                             + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
                         q = NewQuestion(questions,
                             nStep,
-                            strAskText);
+                            strAskText,
+                            "");
                         Debug.Assert(q != null, "");
                         strError = "请回答问题，以便为 '" + strAuthor + "' 确定适当的号码表条目。";
                         return -3;
@@ -352,10 +353,6 @@ namespace DigitalPlatform.LibraryServer
                     debug_info.Append("取出名中第一字符 '" + strFirst + "'，\r\n");
                 }
 
-                string strPinyin = "";
-
-                string strValue = "";
-                string strFufen = "";
 
                 // return:
                 //		-1	出错
@@ -368,7 +365,7 @@ namespace DigitalPlatform.LibraryServer
                     channel,
                     strFirst,
                     bSelectPinyin,
-                    out strPinyin,
+                    out string strPinyin,
                     out strError);
                 if (nRet == -3)
                     return -3;
@@ -406,8 +403,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = GetSubRange(dom,
                     strPinyin.ToUpper(),
                     bOutputDebugInfo,
-                    out strValue,
-                    out strFufen,
+                    out string strValue,
+                    out string strFufen,
                     out strTempDebugInfo,
                     out strError);
 
@@ -667,13 +664,11 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
-
                 strResult += strOne;
             }
 
             return strResult;
         }
-
 
         // 在多个命中记录中利用预先知道的拼音选择其中一个
         // return:
@@ -911,18 +906,26 @@ namespace DigitalPlatform.LibraryServer
                 if (bSelectPinyin == false) // 强制选多音的第一个
                 {
                     strPinyin = strPinyin.Substring(0, nRet).Trim();
-
                     return 1;
                 }
                 Question q = GetQuestion(questions, nStep);
                 if (q == null)
                 {
+#if NO
                     string strAskText = "汉字 '" + strHanzi + "' 的拼音如下: \r\n---\r\n"
                         + BuildPinyinList(strPinyin)
                         + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
+#endif
+                    BuildAsk(
+    strHanzi,
+    strPinyin,
+    out string strAskText,
+    out string strAskXml);
+
                     q = NewQuestion(questions,
                         nStep,
-                        strAskText);
+                        strAskText,
+                        strAskXml);
                     Debug.Assert(q != null, "");
                     strError = "请回答问题，以便为 '" + strAuthor + "' 中的多音字确定读音。";
                     return -3;
@@ -961,6 +964,45 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 1;
+        }
+
+        // 构造问题
+        static void BuildAsk(
+            string strHanzi,
+            string strPinyin,
+            out string strAskText, 
+            out string strAskXml)
+        {
+            strAskText = "汉字 '" + strHanzi + "' 的拼音如下: \r\n---\r\n"
+    + BuildPinyinList(strPinyin)
+    + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<question />");
+            dom.DocumentElement.AppendChild(dom.CreateTextNode("汉字 '"));
+
+            XmlElement hanzi = dom.CreateElement("hanzi");
+            dom.DocumentElement.AppendChild(hanzi);
+            hanzi.InnerText = strHanzi;
+
+            dom.DocumentElement.AppendChild(dom.CreateTextNode("' 的拼音如下:\r\n---\r\n"));
+
+            int i = 0;
+            foreach (string strOnePinyin in StringUtil.SplitList(strPinyin, ';'))
+            {
+                dom.DocumentElement.AppendChild(dom.CreateTextNode($"{i + 1}) "));
+
+                XmlElement pinyin = dom.CreateElement("pinyin");
+                dom.DocumentElement.AppendChild(pinyin);
+                pinyin.InnerText = strOnePinyin;
+
+                dom.DocumentElement.AppendChild(dom.CreateTextNode("\r\n"));
+
+                i++;
+            }
+
+            dom.DocumentElement.AppendChild(dom.CreateTextNode("---\r\n\r\n请选择一个。(输入序号，从1开始计数)"));
+
+            strAskXml = dom.DocumentElement.OuterXml;
         }
 
         // 2018/11/16 新作此函数。XML 文件内每个范围，其尾部实际上是前方一致描述法
@@ -1026,7 +1068,7 @@ namespace DigitalPlatform.LibraryServer
         static int CompareTwo(string strLeft,
     string strRight)
         {
-            return String.Compare(strLeft, strRight);
+            return String.CompareOrdinal(strLeft, strRight);
 #if NO
             if (strLeft.Length < strRight.Length)
             {
@@ -1112,6 +1154,27 @@ namespace DigitalPlatform.LibraryServer
             return StringUtil.ParseTwoPart(range, "-")[0];
         }
 
+        static string GetEndOrStart(XmlElement node)
+        {
+            string range = node.GetAttribute("n");
+            List<string> parts = StringUtil.ParseTwoPart(range, "-");
+            if (string.IsNullOrEmpty(parts[1]) == false)
+                return parts[1];
+            return parts[0];
+        }
+
+        static string GetPrevText(XmlElement node)
+        {
+            string range = node.GetAttribute("n");
+            if (range.IndexOf("-") == -1)
+                return GetNextString(range);
+
+            List<string> parts = StringUtil.ParseTwoPart(range, "-");
+            if (string.IsNullOrEmpty(parts[1]) == false)
+                return GetNextString(parts[1]);
+            return GetNextString(parts[0]);
+        }
+
         // 根据首字母查找范围属性
         // parameters:
         //		strPinyin	一个汉字的拼音。如果==""，表示找第一个r元素
@@ -1185,6 +1248,7 @@ namespace DigitalPlatform.LibraryServer
                 int nRet = strRange.IndexOf("-");
                 if (nRet != -1)
                 {
+
                     range.Start = strRange.Substring(0, nRet).Trim();
                     range.IncludeStart = true;
 
@@ -1193,13 +1257,33 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
+                    // 一个号码的情况。需要转换为一个范围
+
+                    range.End = strRange;
+                    range.IncludeEnd = true;
+
+                    int index = IndexOf(nodes, node) - 1;
+                    if (index < 0)
+                    {
+                        range.Start = "A";    // 最小的一个字符
+                        if (range.Start == range.End)
+                            range.IncludeStart = range.IncludeEnd;
+                        else
+                            range.IncludeStart = false;
+                    }
+                    else
+                    {
+                        range.Start = GetPrevText(nodes[index] as XmlElement);
+                        range.IncludeStart = true;
+                    }
+#if NO
                     range.Start = strRange;
                     range.IncludeStart = true;
 
                     int index = IndexOf(nodes, node) + 1;
                     if (index >= nodes.Count)
                     {
-                        range.End = "[";    // 找到字符 'Z' 后面一个字符
+                        range.End = "[";    // 找到字符 'Z' 后面一个字符。或者 '{' 更保险
                         range.IncludeEnd = false;
                     }
                     else
@@ -1207,6 +1291,7 @@ namespace DigitalPlatform.LibraryServer
                         range.End = GetStart(nodes[index] as XmlElement);
                         range.IncludeEnd = false;
                     }
+#endif
                 }
 
                 if (bOutputDebugInfo == true)
@@ -1308,6 +1393,7 @@ namespace DigitalPlatform.LibraryServer
                 strDebugInfo += "没有找到。\r\n";
             }
 
+            strError = $"拼音 '{strPinyin}' 没有找到对应的范围。XML 定义如下: {dom.DocumentElement.OuterXml}";
             return 0;
         }
 
@@ -1560,7 +1646,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 建立供选择的多音字列表文本
-        string BuildPinyinList(string strMultiPinyin)
+        static string BuildPinyinList(string strMultiPinyin)
         {
             string strResult = "";
 
@@ -1593,7 +1679,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        #endregion
+#endregion
 
         // return:
         //      -1  出错
@@ -1845,7 +1931,7 @@ out string strError)
             return 0;
         }
 
-        #region 加拼音有关的下级函数
+#region 加拼音有关的下级函数
 
         static string BuildHanzi(XmlNode nodeWord)
         {
@@ -2474,7 +2560,7 @@ out string strError)
             return results;
         }
 
-        #endregion
+#endregion
 
         public static Question GetQuestion(List<Question> questions, int index)
         {
@@ -2485,7 +2571,8 @@ out string strError)
 
         public static Question NewQuestion(List<Question> questions,
             int index,
-            string strText)
+            string strText,
+            string strXml)
         {
             Question result = null;
 
@@ -2504,6 +2591,7 @@ out string strError)
             {
                 result = questions[index];
                 result.Text = strText;
+                result.Xml = strXml;
                 result.Answer = "";
                 return result;
             }
@@ -2560,6 +2648,11 @@ out string strError)
     {
         [DataMember]
         public string Text = "";	// 问题正文
+
+        // 2018/11/20
+        [DataMember]
+        public string Xml = "";     // 用 XML 格式描述的问题正文
+
         [DataMember]
         public string Answer = "";	// 问题答案
     }

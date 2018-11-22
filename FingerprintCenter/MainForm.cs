@@ -11,12 +11,8 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Text;
-using System.Runtime.InteropServices;
 using System.Media;
 
-using FingerprintCenter.Properties;
-using libzkfpcsharp;
-using Newtonsoft.Json;
 using static FingerprintCenter.FingerPrint;
 
 using DigitalPlatform.CommonControl;
@@ -25,6 +21,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace FingerprintCenter
 {
@@ -76,6 +73,7 @@ namespace FingerprintCenter
                 controls.Add(this.textBox_cfg_location);
                 controls.Add(new ControlWrapper(this.checkBox_speak, true));
                 controls.Add(new ControlWrapper(this.checkBox_beep, true));
+                controls.Add(new ControlWrapper(this.checkBox_cfg_savePasswordLong, true));
                 return GuiState.GetUiState(controls);
             }
             set
@@ -88,6 +86,7 @@ namespace FingerprintCenter
                 controls.Add(this.textBox_cfg_location);
                 controls.Add(new ControlWrapper(this.checkBox_speak, true));
                 controls.Add(new ControlWrapper(this.checkBox_beep, true));
+                controls.Add(new ControlWrapper(this.checkBox_cfg_savePasswordLong, true));
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -120,21 +119,26 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            this.UiState = Properties.Settings.Default.ui_state;
+            ClientInfo.Initial("fingerprintcenter");
+            this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+
+            if (StringUtil.IsDevelopMode() == false)
+                MenuItem_testing.Visible = false;
 
 #if NO
             this._repPlan = JsonConvert.DeserializeObject<ReplicationPlan>(Properties.Settings.Default.repPlan);
             if (this._repPlan == null)
                 this._repPlan = new ReplicationPlan();
 #endif
-            this.textBox_replicationStart.Text = Properties.Settings.Default.repPlan;
+            this.textBox_replicationStart.Text = ClientInfo.Config.Get("global", "replication_start", "");   //  Properties.Settings.Default.repPlan;
 
             ClearHtml();
 
+            if (StartRemotingServer() == false)
+                return;
+
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
-
-            ClientInfo.InitialDirs("fingerprintcenter");
 
             FingerPrint.Prompt += FingerPrint_Prompt;
             FingerPrint.ProgressChanged += FingerPrint_ProgressChanged;
@@ -142,11 +146,18 @@ bool bClickClose = false)
             FingerPrint.Speak += FingerPrint_Speak;
             FingerPrint.ImageReady += FingerPrint_ImageReady;
 
-            StartRemotingServer();
 
-            BeginStart();
+            if (string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text) == true)
+            {
+                Task.Run(() =>
+                {
+                    FirstSetup();
+                });
+            }
+            else
+                BeginStart();
 
-            DisplayText("1");
+            // DisplayText("1");
         }
 
         // 指纹功能是否初始化成功
@@ -159,6 +170,7 @@ bool bClickClose = false)
             if (_initialized == true)
                 return;
 
+            this.ShowMessage("开始启动");
             this.OutputHistory("重新创建指纹缓存");
             Task.Run(() =>
             {
@@ -166,7 +178,7 @@ bool bClickClose = false)
                 if (result.Value == -1)
                 {
                     string strError = "指纹功能启动失败: " + result.ErrorInfo;
-                    Speak(strError);
+                    Speak(strError, true);
                     this.ShowMessage(strError, "red", true);
                 }
                 else
@@ -331,6 +343,14 @@ bool bClickClose = false)
         {
             _cancel.Cancel();
 
+            {
+                if (this.checkBox_cfg_savePasswordLong.Checked == false)
+                    this.textBox_cfg_password.Text = "";
+                ClientInfo.Config.Set("global", "ui_state", this.UiState);
+                ClientInfo.Config.Set("global", "replication_start", this.textBox_replicationStart.Text);
+                ClientInfo.Finish();
+            }
+
             EndChannel();
             EndRemotingServer();
 
@@ -346,10 +366,11 @@ bool bClickClose = false)
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
 
-            Properties.Settings.Default.ui_state = this.UiState;
+            // Properties.Settings.Default.ui_state = this.UiState;
             // Properties.Settings.Default.repPlan = JsonConvert.SerializeObject(this._repPlan);
-            Properties.Settings.Default.repPlan = this.textBox_replicationStart.Text;
-            Properties.Settings.Default.Save();
+
+            // Properties.Settings.Default.repPlan = this.textBox_replicationStart.Text;
+            // Properties.Settings.Default.Save();
         }
 
         internal void Channel_BeforeLogin(object sender,
@@ -475,9 +496,13 @@ bool bClickClose = false)
         SpeechSynthesizer m_speech = new SpeechSynthesizer();
         string m_strSpeakContent = "";
 
-        void Speak(string strText)
+        void Speak(string strText, bool bError = false)
         {
-            DisplayText(strText);
+            string color = "gray";
+            if (bError)
+                color = "darkred";
+
+            DisplayText(strText, "white", color);
 
             if (this.m_speech == null)
                 return;
@@ -654,37 +679,46 @@ MessageBoxDefaultButton.Button2);
         IpcServerChannel m_serverChannel = null;
 #endif
 
-        void StartRemotingServer()
+        bool StartRemotingServer()
         {
-            // EndRemoteChannel();
+            try
+            {
+                // EndRemoteChannel();
 
-            //Instantiate our server channel.
+                //Instantiate our server channel.
 #if HTTP_CHANNEL
             m_serverChannel = new HttpChannel();
 #else
-            // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
-            m_serverChannel = new IpcServerChannel(
-                "FingerprintChannel");
+                // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
+                m_serverChannel = new IpcServerChannel(
+                    "FingerprintChannel");
 #endif
 
-            //Register the server channel.
-            ChannelServices.RegisterChannel(m_serverChannel, false);
+                //Register the server channel.
+                ChannelServices.RegisterChannel(m_serverChannel, false);
 
-            RemotingConfiguration.ApplicationName = "FingerprintServer";
+                RemotingConfiguration.ApplicationName = "FingerprintServer";
 
-            /*
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(ServerFactory),
-                "ServerFactory",
-                WellKnownObjectMode.Singleton);
-             * */
+                /*
+                RemotingConfiguration.RegisterWellKnownServiceType(
+                    typeof(ServerFactory),
+                    "ServerFactory",
+                    WellKnownObjectMode.Singleton);
+                 * */
 
 
-            //Register this service type.
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                typeof(FingerprintServer),
-                "FingerprintServer",
-                WellKnownObjectMode.Singleton);
+                //Register this service type.
+                RemotingConfiguration.RegisterWellKnownServiceType(
+                    typeof(FingerprintServer),
+                    "FingerprintServer",
+                    WellKnownObjectMode.Singleton);
+                return true;
+            }
+            catch(RemotingException ex)
+            {
+                this.ShowMessage(ex.Message);
+                return false;
+            }
         }
 
         void EndRemotingServer()
@@ -1229,6 +1263,44 @@ token);
         private void MenuItem_throwException_Click(object sender, EventArgs e)
         {
             throw new Exception("test");
+        }
+
+        void FirstSetup()
+        {
+            this._floatingMessage.Clicked += _floatingMessage_Clicked;
+            try
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.tabControl_main.SelectedTab = this.tabPage_cfg;
+                }));
+                this.BeginClicked();
+                this.ShowMessage("欢迎使用指纹中心！\r\n\r\n(请用鼠标点此文字继续)", "green", true);
+                this.WaitClicked();
+                this.ShowMessage("请配置参数。\r\n配置完成后，请用菜单命令“文件/启动”来开始首次运行。\r\n\r\n(请用鼠标点此文字继续)", "green", true);
+                this.WaitClicked();
+            }
+            finally
+            {
+                this._floatingMessage.Clicked -= _floatingMessage_Clicked;
+            }
+        }
+
+        AutoResetEvent _floatClicked = new AutoResetEvent(false);
+
+        private void _floatingMessage_Clicked(object sender, EventArgs e)
+        {
+            _floatClicked.Set();
+        }
+
+        void BeginClicked()
+        {
+            _floatClicked.Reset();
+        }
+
+        void WaitClicked()
+        {
+            WaitHandle.WaitAny(new WaitHandle[] { _floatClicked, _cancel.Token.WaitHandle });
         }
     }
 }

@@ -19,6 +19,7 @@ using DigitalPlatform.Drawing;
 using System.Web;
 using System.Xml;
 using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {
@@ -88,7 +89,10 @@ namespace dp2Circulation
             this.Close();
             try
             {
-                _sr = new StreamReader(strLabelFilename, Encoding.GetEncoding(936));
+                // 2018/11/22
+                Encoding encoding = FileUtil.DetectTextFileEncoding(strLabelFilename);
+
+                _sr = new StreamReader(strLabelFilename, encoding); // Encoding.GetEncoding(936)
             }
             catch (Exception ex)
             {

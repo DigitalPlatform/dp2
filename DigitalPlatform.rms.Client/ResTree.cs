@@ -1805,8 +1805,10 @@ namespace DigitalPlatform.rms.Client
                     goto ERROR1;
                 }
                 ResPath respath = new ResPath(this.SelectedNode);
-                paths = new List<string>();
-                paths.Add(respath.FullPath);   // respath.Path;
+                paths = new List<string>
+                {
+                    respath.FullPath   // respath.Path;
+                };
             }
             else
             {
@@ -1854,6 +1856,7 @@ namespace DigitalPlatform.rms.Client
 
             int nRet = export_util.Begin(this,
 dlg.FileName,
+data_range_dlg.OutputEncoding,
 out strError);
             if (nRet == -1)
                 goto ERROR1;

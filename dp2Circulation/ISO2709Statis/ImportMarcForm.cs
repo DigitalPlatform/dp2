@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using static dp2Circulation.MainForm;
 
@@ -209,6 +206,17 @@ Program.MainForm.UserDir,
                 goto ERROR1;
             }
 
+            string strRange = (string)this.Invoke(new Func<string>(() =>
+            {
+                return this.textBox_importRange.Text;
+            }));
+            RangeList range = null;
+            if (string.IsNullOrEmpty(strRange) == false)
+            {
+                range = new RangeList(strRange);
+                range.Sort();
+            }
+
             Stream file = null;
 
             try
@@ -265,7 +273,6 @@ Program.MainForm.UserDir,
                         stop.Continue(); // 继续循环
                     }
 
-                    string strMARC = "";
 
                     // 从ISO2709文件中读入一条MARC记录
                     // return:
@@ -278,7 +285,7 @@ Program.MainForm.UserDir,
                         encoding,
                         true,   // bRemoveEndCrLf,
                         true,   // bForce,
-                        out strMARC,
+                        out string strMARC,
                         out strError);
                     if (nRet == -2 || nRet == -1)
                     {
@@ -303,12 +310,18 @@ Program.MainForm.UserDir,
                     if (nRet != 0 && nRet != 1)
                         return new NormalResult();   // 结束
 
-                    stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
-
                     this.Invoke((Action)(() =>
                     {
                         this.progressBar_records.Value = (int)file.Position;
                     }));
+
+                    if (range != null && range.IsInRange(i, true) == false)
+                    {
+                        stop.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        continue;
+                    }
+                    else
+                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
 
                     // 跳过太短的记录
                     if (string.IsNullOrEmpty(strMARC) == true
@@ -465,5 +478,9 @@ Program.MainForm.UserDir,
             }));
         }
 
+        private void ImportMarcForm_Activated(object sender, EventArgs e)
+        {
+            Program.MainForm.stopManager.Active(this.stop);
+        }
     }
 }

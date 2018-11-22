@@ -97,12 +97,11 @@ namespace dp2Circulation
 #endif
 
             // http://stackoverflow.com/questions/184084/how-to-force-c-sharp-net-app-to-run-only-one-instance-in-windows
-            bool createdNew = true;
 
             context = ExecutionContext.Capture();
             mutex = new Mutex(true,
                 "{A810CFB4-D932-4821-91D4-4090C84C5C68}",
-                out createdNew);
+                out bool createdNew);
             try
             {
                 if (createdNew

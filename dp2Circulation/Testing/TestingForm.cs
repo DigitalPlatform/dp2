@@ -20,6 +20,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using Newtonsoft.Json;
 
 namespace dp2Circulation
 {
@@ -295,7 +296,7 @@ UiTest3(strBiblioDbName)
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
-        ERROR1:
+            ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -326,7 +327,7 @@ UiTest3(strBiblioDbName)
                 if (nRet == -1)
                     goto END1;
                 return;
-            END1:
+                END1:
                 return;
             }
             ));
@@ -864,7 +865,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
-        ERROR1:
+            ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -1862,7 +1863,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             else
                 MessageBox.Show(this, "没有编译任何方案");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2139,7 +2140,7 @@ strTestDbName,
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
-        ERROR1:
+            ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.ShowMessage(strError, "red", true);
         }
@@ -2722,7 +2723,7 @@ out strError);
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 结束日志和恢复的测试</div>");
             }
-        ERROR1:
+            ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             this.DisplayError(strError);
             this.ShowMessage(strError, "red", true);
@@ -3305,7 +3306,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3763,7 +3764,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4137,7 +4138,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -4420,7 +4421,7 @@ out strError);
             }
         }
 
-#endregion
+        #endregion
 
         void DisplayTitle(string strText)
         {
@@ -4515,7 +4516,7 @@ out strError);
                 }
 
                 // 最后删除测试用的本地文件
-                foreach(string filename in filenames)
+                foreach (string filename in filenames)
                 {
                     File.Delete(filename);
                 }
@@ -4539,6 +4540,144 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // 测试 GCAT 通用汉语著者号码表
+        private void ToolStripMenuItem_testGCAT_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要打开的专用测试 XML 文件名";
+            // dlg.FileName = this.RecPathFilePath;
+            // dlg.InitialDirectory = 
+            dlg.Filter = "测试文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(dlg.FileName);
+
+            Progress.Style = StopStyle.EnableHalfStop;
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在进行测试 ...");
+            Progress.BeginLoop();
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行测试 " + dlg.FileName + "</div>");
+
+            List<string> errors = new List<string>();
+            try
+            {
+                string strGcatWebServiceUrl = Program.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
+
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
+                int i = 0;
+                foreach (XmlElement item in nodes)
+                {
+                    if (Progress != null && Progress.IsStopped)
+                    {
+                        strError = "中断";
+                        break;
+                    }
+                    string strAuthor = item.GetAttribute("author");
+                    string strPinyin = item.GetAttribute("pinyin");
+                    string strRecPath = item.GetAttribute("recPath");
+                    string strNumber = item.GetAttribute("number");
+                    string strQuestions = item.GetAttribute("questions");
+
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode((i + 1).ToString() + " " + strAuthor + " " + strPinyin) + "</div>");
+
+                    Hashtable question_table = new Hashtable();
+
+                    if (string.IsNullOrEmpty(strQuestions) == false)
+                    {
+                        Question[] questions = JsonConvert.DeserializeObject<Question[]>(strQuestions);
+                        question_table[strAuthor] = questions;
+                    }
+
+                    // return:
+                    //      -4  著者字符串没有检索命中
+                    //      -2  strID验证失败
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    int nRet = BiblioItemsHost.GetAuthorNumber(
+                    ref question_table,
+                    Progress,
+                    this,
+                    strGcatWebServiceUrl,
+                    strAuthor,
+                    strPinyin,
+                    true,   // bSelectPinyin,
+                    true, // bSelectEntry,
+                    true, // bOutputDebugInfo,
+                    out string strOutputNumber,
+                    out string strDebugInfo,
+                    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "放弃选择答案";
+                        break;
+                    }
+
+                    // 把 Questions 保存起来
+                    if (question_table.Count > 0)
+                    {
+                        string value = "";
+                        foreach (string key in question_table.Keys)
+                        {
+                            Question[] questions = (Question[])question_table[key];
+                            value = JsonConvert.SerializeObject(questions);
+                            break;
+                        }
+
+                        item.SetAttribute("questions", value);
+                    }
+                    else
+                        item.RemoveAttribute("questions");
+
+                    if (strNumber != strOutputNumber)
+                    {
+                        // 输出到操作历史
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"著者 {strAuthor} 产生的著者号 {strOutputNumber} 和期望的著者号 {strNumber} 不一致") + "</div>");
+
+                        errors.Add($" '{strAuthor}'({strPinyin}) --> '{strOutputNumber}'，和 '{strNumber}' 不一致。记录路径 {strRecPath}");
+                    }
+                    else
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode($"著者 {strAuthor} 产生的著者号 {strOutputNumber} 和期望的著者号 {strNumber} 一致") + "</div>");
+
+                    i++;
+                }
+
+                dom.Save(dlg.FileName);
+                return;
+            }
+            finally
+            {
+                if (errors.Count > 0)
+                {
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode($"=== 共发现 {errors.Count} 个问题 ===") + "</div>");
+                    int i = 1;
+                    foreach (string error in errors)
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode($"{i++}) {error}") + "</div>");
+                    }
+                }
+
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                Progress.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行测试 " + dlg.FileName + "</div>");
+            }
+
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 
     // 验证异常
