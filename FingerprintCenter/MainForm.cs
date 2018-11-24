@@ -303,12 +303,14 @@ bool bClickClose = false)
 
         private void FingerPrint_Prompt(object sender, MessagePromptEventArgs e)
         {
+            // TODO: 自动延时以后重试
             this.Invoke((Action)(() =>
             {
                 if (e.Actions == "yes,cancel")
                 {
                     DialogResult result = MessageBox.Show(this,
-        e.MessageText,
+        e.MessageText +
+        (e.IncludeOperText == false ? "\r\n\r\n是否跳过本条继续后面操作?\r\n\r\n(确定: 跳过并继续; 取消: 停止全部操作)" : ""),
         "MainForm",
         MessageBoxButtons.OKCancel,
         MessageBoxIcon.Question,
@@ -324,7 +326,8 @@ bool bClickClose = false)
                 if (e.Actions == "yes,no,cancel")
                 {
                     DialogResult result = MessageBox.Show(this,
-        e.MessageText, // + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+        e.MessageText +
+        (e.IncludeOperText == false ? "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)" : ""),
         "MainForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,

@@ -241,6 +241,8 @@ Program.MainForm.UserDir,
             stop.Initial("正在获取ISO2709记录 ...");
             stop.BeginLoop();
 
+            bool dont_display_dialog = false;
+
             LibraryChannel channel = this.GetChannel();
 
             EnableControls(false);
@@ -346,6 +348,7 @@ Program.MainForm.UserDir,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+                    REDO:
                     long lRet = channel.SetBiblioInfo(
                         stop,
     "new",
@@ -359,8 +362,32 @@ Program.MainForm.UserDir,
     out strError);
                     if (lRet == -1)
                     {
+#if NO
                         strError = "创建书目记录 '" + strBiblioRecPath + "' 时出错: " + strError + "\r\n";
                         goto ERROR1;
+#endif
+
+                        // string strText = strError;
+                        DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                        {
+                            // return AutoCloseMessageBox.Show(this, strText + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
+                            return MessageDlg.Show(this,
+strError + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+"ImportMarcForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxDefaultButton.Button1,
+ref dont_display_dialog,
+new string[] { "重试", "跳过", "中断" },
+"后面不再出现此对话框，按本次选择自动处理");
+                        }));
+
+                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                            goto ERROR1;
+                        if (result == DialogResult.Yes)
+                            goto REDO;
+
+                        // 在操作历史中显示出错信息
+
                     }
 
                     nCount++;

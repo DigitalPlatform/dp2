@@ -100,7 +100,8 @@
             this.MenuItem_testing});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(851, 32);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(1040, 34);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -218,9 +219,9 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 32);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 34);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(851, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1040, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -258,21 +259,22 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 536);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 716);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(851, 29);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(1040, 37);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripProgressBar1
             // 
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 23);
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(122, 31);
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 24);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 32);
             // 
             // tabControl_main
             // 
@@ -280,20 +282,22 @@
             this.tabControl_main.Controls.Add(this.tabPage_operHistory);
             this.tabControl_main.Controls.Add(this.tabPage_cfg);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl_main.Location = new System.Drawing.Point(0, 63);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 65);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(851, 473);
+            this.tabControl_main.Size = new System.Drawing.Size(1040, 651);
             this.tabControl_main.TabIndex = 3;
             // 
             // tabPage_start
             // 
             this.tabPage_start.Controls.Add(this.splitContainer_start);
             this.tabPage_start.Controls.Add(this.button_cancel);
-            this.tabPage_start.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_start.Location = new System.Drawing.Point(4, 33);
+            this.tabPage_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_start.Name = "tabPage_start";
-            this.tabPage_start.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_start.Size = new System.Drawing.Size(843, 441);
+            this.tabPage_start.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_start.Size = new System.Drawing.Size(1032, 614);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
@@ -304,7 +308,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_start.BackColor = System.Drawing.Color.Transparent;
-            this.splitContainer_start.Location = new System.Drawing.Point(6, 6);
+            this.splitContainer_start.Location = new System.Drawing.Point(7, 8);
+            this.splitContainer_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.splitContainer_start.Name = "splitContainer_start";
             // 
             // splitContainer_start.Panel1
@@ -314,17 +319,18 @@
             // splitContainer_start.Panel2
             // 
             this.splitContainer_start.Panel2.Controls.Add(this.label_message);
-            this.splitContainer_start.Size = new System.Drawing.Size(834, 374);
-            this.splitContainer_start.SplitterDistance = 225;
-            this.splitContainer_start.SplitterWidth = 12;
+            this.splitContainer_start.Size = new System.Drawing.Size(1019, 514);
+            this.splitContainer_start.SplitterDistance = 274;
+            this.splitContainer_start.SplitterWidth = 15;
             this.splitContainer_start.TabIndex = 5;
             // 
             // pictureBox_fingerprint
             // 
             this.pictureBox_fingerprint.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_fingerprint.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox_fingerprint.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox_fingerprint.Name = "pictureBox_fingerprint";
-            this.pictureBox_fingerprint.Size = new System.Drawing.Size(225, 374);
+            this.pictureBox_fingerprint.Size = new System.Drawing.Size(274, 514);
             this.pictureBox_fingerprint.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox_fingerprint.TabIndex = 0;
             this.pictureBox_fingerprint.TabStop = false;
@@ -334,8 +340,9 @@
             this.label_message.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_message.Font = new System.Drawing.Font("微软雅黑", 22F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_message.Location = new System.Drawing.Point(0, 0);
+            this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(597, 374);
+            this.label_message.Size = new System.Drawing.Size(730, 514);
             this.label_message.TabIndex = 0;
             this.label_message.Text = "label6";
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -343,10 +350,10 @@
             // button_cancel
             // 
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancel.Location = new System.Drawing.Point(706, 387);
-            this.button_cancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.button_cancel.Location = new System.Drawing.Point(863, 531);
+            this.button_cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button_cancel.Name = "button_cancel";
-            this.button_cancel.Size = new System.Drawing.Size(131, 47);
+            this.button_cancel.Size = new System.Drawing.Size(160, 63);
             this.button_cancel.TabIndex = 4;
             this.button_cancel.Text = "取消";
             this.button_cancel.UseVisualStyleBackColor = true;
@@ -357,8 +364,9 @@
             // 
             this.tabPage_operHistory.Controls.Add(this.webBrowser1);
             this.tabPage_operHistory.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(843, 441);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(1032, 599);
             this.tabPage_operHistory.TabIndex = 2;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -367,9 +375,10 @@
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(843, 441);
+            this.webBrowser1.Size = new System.Drawing.Size(1032, 599);
             this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
@@ -390,9 +399,10 @@
             this.tabPage_cfg.Controls.Add(this.label1);
             this.tabPage_cfg.Controls.Add(this.toolStrip_server);
             this.tabPage_cfg.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_cfg.Name = "tabPage_cfg";
-            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_cfg.Size = new System.Drawing.Size(843, 441);
+            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_cfg.Size = new System.Drawing.Size(1032, 599);
             this.tabPage_cfg.TabIndex = 1;
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
@@ -400,28 +410,28 @@
             // textBox_replicationStart
             // 
             this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(156, 380);
-            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 507);
+            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_replicationStart.Name = "textBox_replicationStart";
-            this.textBox_replicationStart.Size = new System.Drawing.Size(232, 28);
+            this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
             this.textBox_replicationStart.TabIndex = 23;
             // 
             // label5
             // 
-            this.label5.Location = new System.Drawing.Point(10, 385);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(12, 513);
+            this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(112, 27);
+            this.label5.Size = new System.Drawing.Size(137, 36);
             this.label5.TabIndex = 22;
             this.label5.Text = "同步点(&R):";
             // 
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(13, 340);
-            this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.checkBox_speak.Location = new System.Drawing.Point(16, 453);
+            this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
-            this.checkBox_speak.Size = new System.Drawing.Size(133, 22);
+            this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
             this.checkBox_speak.TabIndex = 21;
             this.checkBox_speak.Text = "语音提示(&S)";
             this.checkBox_speak.UseVisualStyleBackColor = true;
@@ -429,77 +439,77 @@
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(13, 315);
-            this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.checkBox_beep.Location = new System.Drawing.Point(16, 420);
+            this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
-            this.checkBox_beep.Size = new System.Drawing.Size(97, 22);
+            this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
             this.checkBox_beep.TabIndex = 20;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
             // 
             // checkBox_cfg_savePasswordLong
             // 
-            this.checkBox_cfg_savePasswordLong.Location = new System.Drawing.Point(13, 257);
-            this.checkBox_cfg_savePasswordLong.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBox_cfg_savePasswordLong.Location = new System.Drawing.Point(16, 343);
+            this.checkBox_cfg_savePasswordLong.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.checkBox_cfg_savePasswordLong.Name = "checkBox_cfg_savePasswordLong";
-            this.checkBox_cfg_savePasswordLong.Size = new System.Drawing.Size(234, 28);
+            this.checkBox_cfg_savePasswordLong.Size = new System.Drawing.Size(286, 37);
             this.checkBox_cfg_savePasswordLong.TabIndex = 19;
             this.checkBox_cfg_savePasswordLong.Text = "保存密码(&L)";
             // 
             // textBox_cfg_location
             // 
             this.textBox_cfg_location.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_location.Location = new System.Drawing.Point(156, 204);
-            this.textBox_cfg_location.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_cfg_location.Location = new System.Drawing.Point(191, 272);
+            this.textBox_cfg_location.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_cfg_location.Name = "textBox_cfg_location";
-            this.textBox_cfg_location.Size = new System.Drawing.Size(232, 28);
+            this.textBox_cfg_location.Size = new System.Drawing.Size(283, 31);
             this.textBox_cfg_location.TabIndex = 17;
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(9, 207);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(11, 276);
+            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(136, 27);
+            this.label4.Size = new System.Drawing.Size(166, 36);
             this.label4.TabIndex = 16;
             this.label4.Text = "工作台号(&W)：";
             // 
             // textBox_cfg_password
             // 
             this.textBox_cfg_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_password.Location = new System.Drawing.Point(156, 168);
-            this.textBox_cfg_password.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_cfg_password.Location = new System.Drawing.Point(191, 224);
+            this.textBox_cfg_password.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_cfg_password.Name = "textBox_cfg_password";
             this.textBox_cfg_password.PasswordChar = '*';
-            this.textBox_cfg_password.Size = new System.Drawing.Size(232, 28);
+            this.textBox_cfg_password.Size = new System.Drawing.Size(283, 31);
             this.textBox_cfg_password.TabIndex = 14;
             this.textBox_cfg_password.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // textBox_cfg_userName
             // 
             this.textBox_cfg_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_userName.Location = new System.Drawing.Point(156, 132);
-            this.textBox_cfg_userName.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_cfg_userName.Location = new System.Drawing.Point(191, 176);
+            this.textBox_cfg_userName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_cfg_userName.Name = "textBox_cfg_userName";
-            this.textBox_cfg_userName.Size = new System.Drawing.Size(232, 28);
+            this.textBox_cfg_userName.Size = new System.Drawing.Size(283, 31);
             this.textBox_cfg_userName.TabIndex = 11;
             this.textBox_cfg_userName.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(10, 171);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(12, 228);
+            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(112, 27);
+            this.label3.Size = new System.Drawing.Size(137, 36);
             this.label3.TabIndex = 13;
             this.label3.Text = "密码(&P)：";
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(10, 137);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(12, 183);
+            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(112, 27);
+            this.label2.Size = new System.Drawing.Size(137, 36);
             this.label2.TabIndex = 10;
             this.label2.Text = "用户名(&U)：";
             // 
@@ -507,20 +517,20 @@
             // 
             this.textBox_cfg_dp2LibraryServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(13, 42);
-            this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
+            this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(754, 28);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(921, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 8;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 18);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(11, 24);
+            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(206, 18);
+            this.label1.Size = new System.Drawing.Size(207, 24);
             this.label1.TabIndex = 7;
             this.label1.Text = "dp2Library 服务器 URL:";
             // 
@@ -536,10 +546,10 @@
             this.toolStripButton_cfg_setXeServer,
             this.toolStripSeparator1,
             this.toolStripButton_cfg_setHongnibaServer});
-            this.toolStrip_server.Location = new System.Drawing.Point(13, 72);
+            this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(756, 38);
+            this.toolStrip_server.Size = new System.Drawing.Size(924, 51);
             this.toolStrip_server.TabIndex = 9;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -549,7 +559,7 @@
             this.toolStripButton_cfg_setXeServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_cfg_setXeServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_cfg_setXeServer.Name = "toolStripButton_cfg_setXeServer";
-            this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 35);
+            this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 48);
             this.toolStripButton_cfg_setXeServer.Text = "单机版服务器";
             this.toolStripButton_cfg_setXeServer.ToolTipText = "设为单机版服务器";
             this.toolStripButton_cfg_setXeServer.Click += new System.EventHandler(this.toolStripButton_cfg_setXeServer_Click);
@@ -558,7 +568,7 @@
             // 
             this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 38);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 51);
             // 
             // toolStripButton_cfg_setHongnibaServer
             // 
@@ -566,21 +576,23 @@
             this.toolStripButton_cfg_setHongnibaServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_cfg_setHongnibaServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_cfg_setHongnibaServer.Name = "toolStripButton_cfg_setHongnibaServer";
-            this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 35);
+            this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 48);
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(851, 565);
+            this.ClientSize = new System.Drawing.Size(1040, 753);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.Text = "dp2-指纹中心";
