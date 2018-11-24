@@ -14,6 +14,7 @@ using System.Text;
 using System.Media;
 using System.Net;
 using System.IO.Compression;
+using System.Diagnostics;
 
 using static FingerprintCenter.FingerPrint;
 
@@ -24,7 +25,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace FingerprintCenter
 {
@@ -68,28 +68,36 @@ namespace FingerprintCenter
         {
             get
             {
-                List<object> controls = new List<object>();
-                controls.Add(this.tabControl_main);
-                controls.Add(this.textBox_cfg_dp2LibraryServerUrl);
-                controls.Add(this.textBox_cfg_userName);
-                controls.Add(this.textBox_cfg_password);
-                controls.Add(this.textBox_cfg_location);
-                controls.Add(new ControlWrapper(this.checkBox_speak, true));
-                controls.Add(new ControlWrapper(this.checkBox_beep, true));
-                controls.Add(new ControlWrapper(this.checkBox_cfg_savePasswordLong, true));
+                List<object> controls = new List<object>
+                {
+                    this.tabControl_main,
+                    this.textBox_cfg_dp2LibraryServerUrl,
+                    this.textBox_cfg_userName,
+                    this.textBox_cfg_password,
+                    this.textBox_cfg_location,
+                    new ControlWrapper(this.checkBox_speak, true),
+                    new ControlWrapper(this.checkBox_beep, true),
+                    new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
+                    this.comboBox_deviceList,
+                    this.textBox_cfg_shreshold
+                };
                 return GuiState.GetUiState(controls);
             }
             set
             {
-                List<object> controls = new List<object>();
-                controls.Add(this.tabControl_main);
-                controls.Add(this.textBox_cfg_dp2LibraryServerUrl);
-                controls.Add(this.textBox_cfg_userName);
-                controls.Add(this.textBox_cfg_password);
-                controls.Add(this.textBox_cfg_location);
-                controls.Add(new ControlWrapper(this.checkBox_speak, true));
-                controls.Add(new ControlWrapper(this.checkBox_beep, true));
-                controls.Add(new ControlWrapper(this.checkBox_cfg_savePasswordLong, true));
+                List<object> controls = new List<object>
+                {
+                    this.tabControl_main,
+                    this.textBox_cfg_dp2LibraryServerUrl,
+                    this.textBox_cfg_userName,
+                    this.textBox_cfg_password,
+                    this.textBox_cfg_location,
+                    new ControlWrapper(this.checkBox_speak, true),
+                    new ControlWrapper(this.checkBox_beep, true),
+                    new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
+                    this.comboBox_deviceList,
+                    this.textBox_cfg_shreshold
+                };
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -186,7 +194,7 @@ bool bClickClose = false)
 
                     if (result.ErrorCode == "driver not install")
                     {
-                        Task.Run(() => { InstallDriver(); });
+                        Task.Run(() => { InstallDriver("您的电脑上尚未安装'中控'指纹仪厂家驱动。"); });
                     }
                 }
                 else
@@ -208,9 +216,11 @@ bool bClickClose = false)
             DisplayText("正在初始化指纹环境 ...");
             DisplayText("正在打开指纹设备 ...");
 
-            NormalResult result = FingerPrint.Init();
+            NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
             if (result.Value == -1)
                 return result;
+
+            UpdateDeviceList();
 #if NO
 
             result = FingerPrint.OpenZK();
@@ -1373,12 +1383,12 @@ token);
             this.ShowMessage($"正在下载文件 {e.ProgressPercentage}% ...");
         }
 
-        void InstallDriver()
+        void InstallDriver(string strMessage)
         {
             DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
             {
                 return MessageBox.Show(this,
-                    "您的电脑上尚未安装指纹仪厂家驱动。\r\n\r\n是否立即下载安装指纹仪厂家驱动?",
+                    strMessage + "\r\n\r\n是否立即下载安装'中控'指纹仪厂家驱动?",
                     "dp2-指纹中心",
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question,
@@ -1387,7 +1397,7 @@ token);
             if (result == DialogResult.Cancel)
                 return;
 
-            this.DisplayText("安装指纹仪厂家驱动 ...");
+            this.DisplayText("安装'中控'指纹仪厂家驱动 ...");
 
             // 从 http 服务器下载一个文件
             string temp_filename = Path.Combine(ClientInfo.UserTempDir, "setup.zip");
@@ -1402,7 +1412,7 @@ token);
             string exe_filename = Path.Combine(ClientInfo.UserTempDir, "setup.exe");
             using (var zip = ZipFile.OpenRead(temp_filename))
             {
-                foreach(var entry in zip.Entries)
+                foreach (var entry in zip.Entries)
                 {
                     entry.ExtractToFile(exe_filename, true);
                     break;
@@ -1410,6 +1420,61 @@ token);
             }
 
             Process.Start(exe_filename);
+        }
+
+        void UpdateDeviceList()
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.comboBox_deviceList.Items.Clear();
+                foreach (string s in FingerPrint.DeviceList)
+                {
+                    this.comboBox_deviceList.Items.Add(s);
+                }
+            }));
+        }
+
+        int CurrentDeviceIndex
+        {
+            get
+            {
+                string index = this.comboBox_deviceList.Text;
+                if (string.IsNullOrEmpty(index))
+                    return 0;
+                if (Int32.TryParse(index, out int v) == false)
+                {
+                    // return -1;
+                    throw new ArgumentException($"指纹设备序号 {index} 不合法。应为纯数字");
+                }
+                return v;
+            }
+        }
+
+        private void MenuItem_setupDriver_Click(object sender, EventArgs e)
+        {
+            Task.Run(() => { InstallDriver("本功能将重新安装'中控'指纹仪厂家驱动。"); });
+        }
+
+        private void button_setDefaultThreshold_Click(object sender, EventArgs e)
+        {
+            this.textBox_cfg_shreshold.Text = FingerPrint.DefaultThreshold.ToString();
+        }
+
+        private void textBox_cfg_shreshold_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                FingerPrint.Shreshold = Convert.ToInt32(this.textBox_cfg_shreshold.Text);
+            }
+            catch
+            {
+                FingerPrint.Shreshold = FingerPrint.DefaultThreshold;
+            }
+        }
+
+        private void MenuItem_about_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/tree/master/FingerprintCenter");
         }
     }
 

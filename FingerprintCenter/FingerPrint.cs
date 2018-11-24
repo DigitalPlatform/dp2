@@ -56,14 +56,29 @@ namespace FingerprintCenter
         // 注册过程完成
         static AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
 
-        public static NormalResult Init()
+        public const int DefaultThreshold = 10;
+
+        static int _shreshold = DefaultThreshold;
+        public static int Shreshold
+        {
+            get
+            {
+                return _shreshold;
+            }
+            set
+            {
+                _shreshold = value;
+            }
+        }
+
+        public static NormalResult Init(int dev_index)
         {
             try
             {
                 NormalResult result = _init();
                 if (result.Value == -1)
                     return result;
-                return OpenZK();
+                return OpenZK(dev_index);
             }
             catch(Exception ex)
             {
@@ -72,7 +87,7 @@ namespace FingerprintCenter
                 {
                     return new NormalResult { Value = -1,
                         ErrorCode = "driver not install",
-                        ErrorInfo = "尚未安装厂家驱动程序" };
+                        ErrorInfo = "尚未安装'中控'指纹仪厂家驱动程序" };
                 }
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
@@ -91,11 +106,21 @@ namespace FingerprintCenter
             }
         }
 
+        // 设备列表
+        static List<string> _dev_list = new List<string>();
+        public static List<string> DeviceList
+        {
+            get
+            {
+                return new List<string>(_dev_list);
+            }
+        }
+
         static NormalResult _init()
         {
             _free();
 
-            List<string> dev_list = new List<string>();
+            _dev_list.Clear();
             int ret = zkfperrdef.ZKFP_ERR_OK;
             if ((ret = zkfp2.Init()) == zkfperrdef.ZKFP_ERR_OK)
             {
@@ -105,7 +130,7 @@ namespace FingerprintCenter
                 {
                     for (int i = 0; i < nCount; i++)
                     {
-                        dev_list.Add(i.ToString());
+                        _dev_list.Add(i.ToString());
                     }
                 }
                 else
@@ -120,7 +145,13 @@ namespace FingerprintCenter
             else
             {
                 // MessageBox.Show("Initialize fail, ret=" + ret + " !");
-                return new NormalResult { Value = -1, ErrorInfo = "初始化失败，错误码: " + ret };
+                string message = $"初始化失败，错误码: {ret}";
+                if (ret == -1)
+                    message = "尚未连接指纹阅读器";
+
+                return new NormalResult { Value = -1,
+                    ErrorCode = "fingerprint:" + ret.ToString(),
+                    ErrorInfo = message };
             }
         }
 
@@ -129,12 +160,12 @@ namespace FingerprintCenter
             zkfp2.Terminate();
         }
 
-        static NormalResult OpenZK()
+        static NormalResult OpenZK(int dev_index)
         {
             CloseZK();
 
             int ret = zkfp.ZKFP_ERR_OK;
-            if (IntPtr.Zero == (_devHandle = zkfp2.OpenDevice(0
+            if (IntPtr.Zero == (_devHandle = zkfp2.OpenDevice(dev_index
                 //cmbIdx.SelectedIndex
                 )))
             {
@@ -1353,7 +1384,7 @@ out records);
                 int fid = 0, score = 0;
                 ret = zkfp2.DBIdentify(_dBHandle, template_buffer, ref fid, ref score);
                 Debug.WriteLine(string.Format("ret={0}, fid={1}, score={2}", ret, fid, score));
-                if (score > 10
+                if (score >= _shreshold
                     // zkfp.ZKFP_ERR_OK == ret
                     )
                 {
