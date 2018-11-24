@@ -198,16 +198,17 @@ bool bClickClose = false)
             _cancel = new CancellationTokenSource();
 
             DisplayText("正在初始化指纹环境 ...");
+            DisplayText("正在打开指纹设备 ...");
 
             NormalResult result = FingerPrint.Init();
             if (result.Value == -1)
                 return result;
-
-            DisplayText("正在打开指纹设备 ...");
+#if NO
 
             result = FingerPrint.OpenZK();
             if (result.Value == -1)
                 return result;
+#endif
 
             DisplayText("Init Cache ...");
 
@@ -357,7 +358,7 @@ bool bClickClose = false)
             EndChannel();
             EndRemotingServer();
 
-            FingerPrint.CloseZK();
+            // FingerPrint.CloseZK();
             FingerPrint.Free();
 
             FingerPrint.Prompt -= FingerPrint_Prompt;
@@ -674,7 +675,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -734,9 +735,9 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         IpcClientChannel m_fingerprintChannel = new IpcClientChannel();
         IFingerprint m_fingerprintObj = null;
@@ -780,7 +781,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -841,7 +842,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -995,7 +996,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         void DisplayText(string text,
             string textColor = "white",
@@ -1053,7 +1054,7 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-        #region device changed
+#region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -1085,7 +1086,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {

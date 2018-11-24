@@ -58,7 +58,35 @@ namespace FingerprintCenter
 
         public static NormalResult Init()
         {
-            Free();
+            try
+            {
+                NormalResult result = _init();
+                if (result.Value == -1)
+                    return result;
+                return OpenZK();
+            }
+            catch(Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult Free()
+        {
+            try
+            {
+                _free();
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        static NormalResult _init()
+        {
+            _free();
 
             List<string> dev_list = new List<string>();
             int ret = zkfperrdef.ZKFP_ERR_OK;
@@ -89,12 +117,12 @@ namespace FingerprintCenter
             }
         }
 
-        public static void Free()
+        static void _free()
         {
             zkfp2.Terminate();
         }
 
-        public static NormalResult OpenZK()
+        static NormalResult OpenZK()
         {
             CloseZK();
 
@@ -161,7 +189,7 @@ namespace FingerprintCenter
 #endif
         }
 
-        public static void CloseZK()
+        static void CloseZK()
         {
             if (_dBHandle != IntPtr.Zero)
             {
