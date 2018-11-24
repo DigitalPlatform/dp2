@@ -46,6 +46,11 @@ namespace FingerprintCenter
         /// </summary>
         public static string UserLogDir = "";
 
+        /// <summary>
+        /// 临时文件目录
+        /// </summary>
+        public static string UserTempDir = "";
+
         // 附加的一些文件名非法字符。比如 XP 下 Path.GetInvalidPathChars() 不知何故会遗漏 '*'
         static string spec_invalid_chars = "*?:";
 
@@ -115,6 +120,9 @@ namespace FingerprintCenter
     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
     product_name);
             PathUtil.TryCreateDir(UserDir);
+
+            UserTempDir = Path.Combine(UserDir, "temp");
+            PathUtil.TryCreateDir(UserTempDir);
 
             UserLogDir = Path.Combine(UserDir, "log");
             PathUtil.TryCreateDir(UserLogDir);
