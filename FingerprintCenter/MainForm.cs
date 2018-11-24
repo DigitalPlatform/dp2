@@ -12,6 +12,8 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Text;
 using System.Media;
+using System.Net;
+using System.IO.Compression;
 
 using static FingerprintCenter.FingerPrint;
 
@@ -22,6 +24,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace FingerprintCenter
 {
@@ -180,6 +183,11 @@ bool bClickClose = false)
                     string strError = "指纹功能启动失败: " + result.ErrorInfo;
                     Speak(strError, true);
                     this.ShowMessage(strError, "red", true);
+
+                    if (result.ErrorCode == "driver not install")
+                    {
+                        Task.Run(() => { InstallDriver(); });
+                    }
                 }
                 else
                 {
@@ -284,7 +292,8 @@ bool bClickClose = false)
             }));
         }
 
-        private void FingerPrint_ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        private void FingerPrint_ProgressChanged(object sender,
+            DigitalPlatform.LibraryClient.DownloadProgressChangedEventArgs e)
         {
             this.Invoke((Action)(() =>
             {
@@ -675,7 +684,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -718,7 +727,7 @@ MessageBoxDefaultButton.Button2);
                     WellKnownObjectMode.Singleton);
                 return true;
             }
-            catch(RemotingException ex)
+            catch (RemotingException ex)
             {
                 this.ShowMessage(ex.Message);
                 return false;
@@ -735,9 +744,9 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         IpcClientChannel m_fingerprintChannel = new IpcClientChannel();
         IFingerprint m_fingerprintObj = null;
@@ -781,7 +790,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-#endregion
+        #endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -842,7 +851,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -996,7 +1005,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         void DisplayText(string text,
             string textColor = "white",
@@ -1054,7 +1063,7 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-#region device changed
+        #region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -1086,7 +1095,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {
@@ -1306,5 +1315,131 @@ token);
         {
             WaitHandle.WaitAny(new WaitHandle[] { _floatClicked, _cancel.Token.WaitHandle });
         }
+
+        // 从 http 服务器下载一个文件
+        async Task<NormalResult> DownloadFile(string strUrl,
+    string strLocalFileName)
+        {
+            using (MyWebClient webClient = new MyWebClient())
+            {
+                webClient.ReadWriteTimeout = 30 * 1000; // 30 秒，在读写之前 - 2015/12/3
+                webClient.Timeout = 30 * 60 * 1000; // 30 分钟，整个下载过程 - 2015/12/3
+                webClient.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+
+                webClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
+                string strTempFileName = strLocalFileName + ".temp";
+                // TODO: 先下载到临时文件，然后复制到目标文件
+                try
+                {
+                    await webClient.DownloadFileTaskAsync(new Uri(strUrl, UriKind.Absolute), strTempFileName).ConfigureAwait(false);
+
+                    this.ClearMessage();
+                    File.Delete(strLocalFileName);
+                    File.Move(strTempFileName, strLocalFileName);
+                    return new NormalResult();
+                }
+                catch (WebException ex)
+                {
+                    if (ex.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        if (ex.Response is HttpWebResponse response)
+                        {
+                            if (response.StatusCode == HttpStatusCode.NotFound)
+                            {
+                                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                            }
+                        }
+                    }
+
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = ExceptionUtil.GetDebugText(ex)
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = ExceptionUtil.GetDebugText(ex)
+                    };
+                }
+            }
+        }
+
+        private void WebClient_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
+        {
+            this.ShowMessage($"正在下载文件 {e.ProgressPercentage}% ...");
+        }
+
+        void InstallDriver()
+        {
+            DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+            {
+                return MessageBox.Show(this,
+                    "您的电脑上尚未安装指纹仪厂家驱动。\r\n\r\n是否立即下载安装指纹仪厂家驱动?",
+                    "dp2-指纹中心",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+            }));
+            if (result == DialogResult.Cancel)
+                return;
+
+            this.DisplayText("安装指纹仪厂家驱动 ...");
+
+            // 从 http 服务器下载一个文件
+            string temp_filename = Path.Combine(ClientInfo.UserTempDir, "setup.zip");
+            NormalResult download_result = DownloadFile("http://dp2003.com/fingerprintcenter/setup_driver.zip",
+                temp_filename).Result;
+            if (download_result.Value == -1)
+            {
+                this.ShowMessage(download_result.ErrorInfo);
+                return;
+            }
+
+            string exe_filename = Path.Combine(ClientInfo.UserTempDir, "setup.exe");
+            using (var zip = ZipFile.OpenRead(temp_filename))
+            {
+                foreach(var entry in zip.Entries)
+                {
+                    entry.ExtractToFile(exe_filename, true);
+                    break;
+                }
+            }
+
+            Process.Start(exe_filename);
+        }
     }
+
+    class MyWebClient : WebClient
+    {
+        public int Timeout = -1;
+        public int ReadWriteTimeout = -1;
+
+        HttpWebRequest _request = null;
+
+        protected override WebRequest GetWebRequest(Uri address)
+        {
+            _request = (HttpWebRequest)base.GetWebRequest(address);
+
+#if NO
+            this.CachePolicy = new System.Net.Cache.HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+            request.CachePolicy = new System.Net.Cache.HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+#endif
+            if (this.Timeout != -1)
+                _request.Timeout = this.Timeout;
+            if (this.ReadWriteTimeout != -1)
+                _request.ReadWriteTimeout = this.ReadWriteTimeout;
+            return _request;
+        }
+
+        public void Cancel()
+        {
+            if (this._request != null)
+                this._request.Abort();
+        }
+    }
+
 }
