@@ -44,6 +44,8 @@
             this.MenuItem_replication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
@@ -60,6 +62,11 @@
             this.tabPage_operHistory = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.button_setDefaultThreshold = new System.Windows.Forms.Button();
+            this.textBox_cfg_shreshold = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.comboBox_deviceList = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.textBox_replicationStart = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.checkBox_speak = new System.Windows.Forms.CheckBox();
@@ -77,6 +84,8 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -97,7 +106,8 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
-            this.MenuItem_testing});
+            this.MenuItem_testing,
+            this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
@@ -213,6 +223,23 @@
             this.MenuItem_throwException.Text = "throw exception";
             this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
             // 
+            // MenuItem_help
+            // 
+            this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_setupDriver,
+            this.toolStripSeparator2,
+            this.MenuItem_about});
+            this.MenuItem_help.Name = "MenuItem_help";
+            this.MenuItem_help.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_help.Text = "帮助";
+            // 
+            // MenuItem_setupDriver
+            // 
+            this.MenuItem_setupDriver.Name = "MenuItem_setupDriver";
+            this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
+            this.MenuItem_setupDriver.Click += new System.EventHandler(this.MenuItem_setupDriver_Click);
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -283,7 +310,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_cfg);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 65);
-            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(1040, 651);
@@ -294,9 +321,9 @@
             this.tabPage_start.Controls.Add(this.splitContainer_start);
             this.tabPage_start.Controls.Add(this.button_cancel);
             this.tabPage_start.Location = new System.Drawing.Point(4, 33);
-            this.tabPage_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_start.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Name = "tabPage_start";
-            this.tabPage_start.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_start.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Size = new System.Drawing.Size(1032, 614);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
@@ -309,7 +336,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_start.BackColor = System.Drawing.Color.Transparent;
             this.splitContainer_start.Location = new System.Drawing.Point(7, 8);
-            this.splitContainer_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer_start.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer_start.Name = "splitContainer_start";
             // 
             // splitContainer_start.Panel1
@@ -328,7 +355,7 @@
             // 
             this.pictureBox_fingerprint.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_fingerprint.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox_fingerprint.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox_fingerprint.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_fingerprint.Name = "pictureBox_fingerprint";
             this.pictureBox_fingerprint.Size = new System.Drawing.Size(274, 514);
             this.pictureBox_fingerprint.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -363,10 +390,10 @@
             // tabPage_operHistory
             // 
             this.tabPage_operHistory.Controls.Add(this.webBrowser1);
-            this.tabPage_operHistory.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_operHistory.Location = new System.Drawing.Point(4, 33);
+            this.tabPage_operHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operHistory.Name = "tabPage_operHistory";
-            this.tabPage_operHistory.Size = new System.Drawing.Size(1032, 599);
+            this.tabPage_operHistory.Size = new System.Drawing.Size(1032, 614);
             this.tabPage_operHistory.TabIndex = 2;
             this.tabPage_operHistory.Text = "操作历史";
             this.tabPage_operHistory.UseVisualStyleBackColor = true;
@@ -375,15 +402,20 @@
             // 
             this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser1.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(24, 27);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(1032, 599);
+            this.webBrowser1.Size = new System.Drawing.Size(1032, 614);
             this.webBrowser1.TabIndex = 1;
             // 
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.button_setDefaultThreshold);
+            this.tabPage_cfg.Controls.Add(this.textBox_cfg_shreshold);
+            this.tabPage_cfg.Controls.Add(this.label7);
+            this.tabPage_cfg.Controls.Add(this.comboBox_deviceList);
+            this.tabPage_cfg.Controls.Add(this.label6);
             this.tabPage_cfg.Controls.Add(this.textBox_replicationStart);
             this.tabPage_cfg.Controls.Add(this.label5);
             this.tabPage_cfg.Controls.Add(this.checkBox_speak);
@@ -398,119 +430,168 @@
             this.tabPage_cfg.Controls.Add(this.textBox_cfg_dp2LibraryServerUrl);
             this.tabPage_cfg.Controls.Add(this.label1);
             this.tabPage_cfg.Controls.Add(this.toolStrip_server);
-            this.tabPage_cfg.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_cfg.Location = new System.Drawing.Point(4, 33);
+            this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cfg.Name = "tabPage_cfg";
-            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage_cfg.Size = new System.Drawing.Size(1032, 599);
+            this.tabPage_cfg.Padding = new System.Windows.Forms.Padding(4);
+            this.tabPage_cfg.Size = new System.Drawing.Size(1032, 614);
             this.tabPage_cfg.TabIndex = 1;
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // button_setDefaultThreshold
+            // 
+            this.button_setDefaultThreshold.Location = new System.Drawing.Point(297, 430);
+            this.button_setDefaultThreshold.Name = "button_setDefaultThreshold";
+            this.button_setDefaultThreshold.Size = new System.Drawing.Size(177, 31);
+            this.button_setDefaultThreshold.TabIndex = 14;
+            this.button_setDefaultThreshold.Text = "恢复默认值";
+            this.button_setDefaultThreshold.UseVisualStyleBackColor = true;
+            this.button_setDefaultThreshold.Click += new System.EventHandler(this.button_setDefaultThreshold_Click);
+            // 
+            // textBox_cfg_shreshold
+            // 
+            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(191, 430);
+            this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
+            this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
+            this.textBox_cfg_shreshold.TabIndex = 13;
+            this.textBox_cfg_shreshold.TextChanged += new System.EventHandler(this.textBox_cfg_shreshold_TextChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(11, 433);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(144, 24);
+            this.label7.TabIndex = 12;
+            this.label7.Text = "指纹识别阈值(&T):";
+            // 
+            // comboBox_deviceList
+            // 
+            this.comboBox_deviceList.FormattingEnabled = true;
+            this.comboBox_deviceList.Location = new System.Drawing.Point(191, 392);
+            this.comboBox_deviceList.Name = "comboBox_deviceList";
+            this.comboBox_deviceList.Size = new System.Drawing.Size(283, 32);
+            this.comboBox_deviceList.TabIndex = 11;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(11, 395);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(121, 24);
+            this.label6.TabIndex = 10;
+            this.label6.Text = "当前指纹仪(&I):";
+            // 
             // textBox_replicationStart
             // 
             this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 507);
-            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 528);
+            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_replicationStart.Name = "textBox_replicationStart";
             this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
-            this.textBox_replicationStart.TabIndex = 23;
+            this.textBox_replicationStart.TabIndex = 18;
             // 
             // label5
             // 
-            this.label5.Location = new System.Drawing.Point(12, 513);
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 531);
             this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(137, 36);
-            this.label5.TabIndex = 22;
-            this.label5.Text = "同步点(&R):";
+            this.label5.Size = new System.Drawing.Size(164, 24);
+            this.label5.TabIndex = 17;
+            this.label5.Text = "指纹信息同步点(&R):";
             // 
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(16, 453);
+            this.checkBox_speak.Location = new System.Drawing.Point(135, 468);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
-            this.checkBox_speak.TabIndex = 21;
+            this.checkBox_speak.TabIndex = 16;
             this.checkBox_speak.Text = "语音提示(&S)";
             this.checkBox_speak.UseVisualStyleBackColor = true;
             // 
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(16, 420);
+            this.checkBox_beep.Location = new System.Drawing.Point(15, 468);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
-            this.checkBox_beep.TabIndex = 20;
+            this.checkBox_beep.TabIndex = 15;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
             // 
             // checkBox_cfg_savePasswordLong
             // 
-            this.checkBox_cfg_savePasswordLong.Location = new System.Drawing.Point(16, 343);
-            this.checkBox_cfg_savePasswordLong.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.checkBox_cfg_savePasswordLong.AutoSize = true;
+            this.checkBox_cfg_savePasswordLong.Location = new System.Drawing.Point(15, 317);
+            this.checkBox_cfg_savePasswordLong.Margin = new System.Windows.Forms.Padding(5);
             this.checkBox_cfg_savePasswordLong.Name = "checkBox_cfg_savePasswordLong";
-            this.checkBox_cfg_savePasswordLong.Size = new System.Drawing.Size(286, 37);
-            this.checkBox_cfg_savePasswordLong.TabIndex = 19;
+            this.checkBox_cfg_savePasswordLong.Size = new System.Drawing.Size(129, 28);
+            this.checkBox_cfg_savePasswordLong.TabIndex = 9;
             this.checkBox_cfg_savePasswordLong.Text = "保存密码(&L)";
             // 
             // textBox_cfg_location
             // 
             this.textBox_cfg_location.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_cfg_location.Location = new System.Drawing.Point(191, 272);
-            this.textBox_cfg_location.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cfg_location.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_location.Name = "textBox_cfg_location";
             this.textBox_cfg_location.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_location.TabIndex = 17;
+            this.textBox_cfg_location.TabIndex = 8;
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(11, 276);
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(12, 275);
             this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(166, 36);
-            this.label4.TabIndex = 16;
+            this.label4.Size = new System.Drawing.Size(130, 24);
+            this.label4.TabIndex = 7;
             this.label4.Text = "工作台号(&W)：";
             // 
             // textBox_cfg_password
             // 
             this.textBox_cfg_password.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_cfg_password.Location = new System.Drawing.Point(191, 224);
-            this.textBox_cfg_password.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cfg_password.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_password.Name = "textBox_cfg_password";
             this.textBox_cfg_password.PasswordChar = '*';
             this.textBox_cfg_password.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_password.TabIndex = 14;
+            this.textBox_cfg_password.TabIndex = 6;
             this.textBox_cfg_password.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // textBox_cfg_userName
             // 
             this.textBox_cfg_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.textBox_cfg_userName.Location = new System.Drawing.Point(191, 176);
-            this.textBox_cfg_userName.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cfg_userName.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_userName.Name = "textBox_cfg_userName";
             this.textBox_cfg_userName.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_userName.TabIndex = 11;
+            this.textBox_cfg_userName.TabIndex = 4;
             this.textBox_cfg_userName.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(12, 228);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 227);
             this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(137, 36);
-            this.label3.TabIndex = 13;
+            this.label3.Size = new System.Drawing.Size(87, 24);
+            this.label3.TabIndex = 5;
             this.label3.Text = "密码(&P)：";
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(12, 183);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 179);
             this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(137, 36);
-            this.label2.TabIndex = 10;
+            this.label2.Size = new System.Drawing.Size(107, 24);
+            this.label2.TabIndex = 3;
             this.label2.Text = "用户名(&U)：";
             // 
             // textBox_cfg_dp2LibraryServerUrl
@@ -518,10 +599,10 @@
             this.textBox_cfg_dp2LibraryServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
-            this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
             this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(921, 31);
-            this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 8;
+            this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label1
@@ -531,7 +612,7 @@
             this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(207, 24);
-            this.label1.TabIndex = 7;
+            this.label1.TabIndex = 0;
             this.label1.Text = "dp2Library 服务器 URL:";
             // 
             // toolStrip_server
@@ -550,7 +631,7 @@
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_server.Size = new System.Drawing.Size(924, 51);
-            this.toolStrip_server.TabIndex = 9;
+            this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
             // toolStripButton_cfg_setXeServer
@@ -581,6 +662,18 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
+            // 
+            // MenuItem_about
+            // 
+            this.MenuItem_about.Name = "MenuItem_about";
+            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_about.Text = "关于本软件 ...";
+            this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -592,7 +685,7 @@
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.Text = "dp2-指纹中心";
@@ -672,6 +765,15 @@
         private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refresh;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_throwException;
+        private System.Windows.Forms.ComboBox comboBox_deviceList;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_help;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_setupDriver;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox_cfg_shreshold;
+        private System.Windows.Forms.Button button_setDefaultThreshold;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_about;
     }
 }
 
