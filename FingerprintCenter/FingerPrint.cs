@@ -67,6 +67,13 @@ namespace FingerprintCenter
             }
             catch(Exception ex)
             {
+                if (ex.Source == "libzkfpcsharp"
+                    && ex.Message.IndexOf("libzkfp.dll") != -1)
+                {
+                    return new NormalResult { Value = -1,
+                        ErrorCode = "driver not install",
+                        ErrorInfo = "尚未安装厂家驱动程序" };
+                }
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
