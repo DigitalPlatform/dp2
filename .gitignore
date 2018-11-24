@@ -219,4 +219,5 @@ ModelManifest.xml
 !/dp2Kernel/gsdll32.dll
 !/dp2LibraryXE/gsdll32.dll
 
-
+!/fingerprintcenter/lib/x86/libzkfpcsharp.dll
+!/fingerprintcenter/lib/x64/libzkfpcsharp.dll
