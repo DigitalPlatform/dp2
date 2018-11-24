@@ -1523,17 +1523,19 @@ out records);
                 {
                     ProgressEstimate estimate = new ProgressEstimate();
 
-                    OperLogLoader loader = new OperLogLoader();
-                    loader.Channel = channel;
-                    loader.Stop = null; //  this.Progress;
-                    // loader.owner = this;
-                    loader.Estimate = estimate;
-                    loader.Dates = dates;
-                    loader.Level = 2;  // Program.MainForm.OperLogLevel;
-                    loader.AutoCache = false;
-                    loader.CacheDir = "";
-                    loader.LogType = logType;
-                    loader.Filter = "setReaderInfo";
+                    OperLogLoader loader = new OperLogLoader
+                    {
+                        Channel = channel,
+                        Stop = null, //  this.Progress;
+                                     // loader.owner = this;
+                        Estimate = estimate,
+                        Dates = dates,
+                        Level = 2,  // Program.MainForm.OperLogLevel;
+                        AutoCache = false,
+                        CacheDir = "",
+                        LogType = logType,
+                        Filter = "setReaderInfo"
+                    };
 
                     loader.Prompt += Loader_Prompt;
                     try
@@ -1588,6 +1590,7 @@ out records);
                                     MessagePromptEventArgs e = new MessagePromptEventArgs
                                     {
                                         MessageText = strError + "\r\n\r\n是否跳过此条继续处理?\r\n\r\n(确定: 跳过;  取消: 停止全部操作)",
+                                        IncludeOperText = true,
                                         // + "\r\n\r\n是否跳过此条继续处理?",
                                         Actions = "yes,cancel"
                                     };
@@ -1626,6 +1629,7 @@ out records);
                                     MessagePromptEventArgs e = new MessagePromptEventArgs
                                     {
                                         MessageText = strError + "\r\n\r\n是否跳过此条继续处理?\r\n\r\n(确定: 跳过;  取消: 停止全部操作)",
+                                        IncludeOperText = true,
                                         // + "\r\n\r\n是否跳过此条继续处理?",
                                         Actions = "yes,cancel"
                                     };

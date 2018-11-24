@@ -4566,6 +4566,7 @@ out strError);
 
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行测试 " + dlg.FileName + "</div>");
 
+            List<string> skips = new List<string>();
             List<string> errors = new List<string>();
             try
             {
@@ -4616,7 +4617,11 @@ out strError);
                     out string strDebugInfo,
                     out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"著者 {strAuthor} 取著者号过程出错: {strError}") + "</div>");
+                        continue;
+                        // goto ERROR1;
+                    }
                     if (nRet == 0)
                     {
                         strError = "放弃选择答案";
@@ -4644,7 +4649,13 @@ out strError);
                         // 输出到操作历史
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"著者 {strAuthor} 产生的著者号 {strOutputNumber} 和期望的著者号 {strNumber} 不一致") + "</div>");
 
-                        errors.Add($" '{strAuthor}'({strPinyin}) --> '{strOutputNumber}'，和 '{strNumber}' 不一致。记录路径 {strRecPath}");
+                        // 为节省精力，只显示首个字母相同(其他字符不同)的情况
+                        if (string.IsNullOrEmpty(strOutputNumber) == false
+                            && string.IsNullOrEmpty(strNumber) == false
+                            && strOutputNumber.Substring(0, 1) == strNumber.Substring(0, 1))
+                            errors.Add($" '{strAuthor}'({strPinyin}) --> '{strOutputNumber}'，和 '{strNumber}' 不一致。记录路径 {strRecPath}");
+                        else
+                            skips.Add($" '{strAuthor}'({strPinyin}) --> '{strOutputNumber}'，和 '{strNumber}' 不一致。记录路径 {strRecPath}");
                     }
                     else
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode($"著者 {strAuthor} 产生的著者号 {strOutputNumber} 和期望的著者号 {strNumber} 一致") + "</div>");
