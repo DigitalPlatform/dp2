@@ -46,6 +46,9 @@
             this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
@@ -84,8 +87,6 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -228,6 +229,7 @@
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_setupDriver,
             this.toolStripSeparator2,
+            this.MenuItem_manual,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
             this.MenuItem_help.Size = new System.Drawing.Size(58, 28);
@@ -239,6 +241,25 @@
             this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
             this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
             this.MenuItem_setupDriver.Click += new System.EventHandler(this.MenuItem_setupDriver_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
+            // 
+            // MenuItem_manual
+            // 
+            this.MenuItem_manual.Name = "MenuItem_manual";
+            this.MenuItem_manual.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_manual.Text = "使用帮助 ...";
+            this.MenuItem_manual.Click += new System.EventHandler(this.MenuItem_manual_Click);
+            // 
+            // MenuItem_about
+            // 
+            this.MenuItem_about.Name = "MenuItem_about";
+            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_about.Text = "关于本软件 ...";
+            this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
             // 
             // toolStrip1
             // 
@@ -441,9 +462,9 @@
             // 
             // button_setDefaultThreshold
             // 
-            this.button_setDefaultThreshold.Location = new System.Drawing.Point(297, 430);
+            this.button_setDefaultThreshold.Location = new System.Drawing.Point(297, 433);
             this.button_setDefaultThreshold.Name = "button_setDefaultThreshold";
-            this.button_setDefaultThreshold.Size = new System.Drawing.Size(177, 31);
+            this.button_setDefaultThreshold.Size = new System.Drawing.Size(177, 47);
             this.button_setDefaultThreshold.TabIndex = 14;
             this.button_setDefaultThreshold.Text = "恢复默认值";
             this.button_setDefaultThreshold.UseVisualStyleBackColor = true;
@@ -451,7 +472,7 @@
             // 
             // textBox_cfg_shreshold
             // 
-            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(191, 430);
+            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(191, 441);
             this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
             this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_shreshold.TabIndex = 13;
@@ -460,7 +481,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(11, 433);
+            this.label7.Location = new System.Drawing.Point(12, 444);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(144, 24);
             this.label7.TabIndex = 12;
@@ -486,7 +507,7 @@
             // textBox_replicationStart
             // 
             this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 528);
+            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 544);
             this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_replicationStart.Name = "textBox_replicationStart";
             this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
@@ -495,17 +516,17 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 531);
+            this.label5.Location = new System.Drawing.Point(11, 547);
             this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(164, 24);
+            this.label5.Size = new System.Drawing.Size(146, 24);
             this.label5.TabIndex = 17;
-            this.label5.Text = "指纹信息同步点(&R):";
+            this.label5.Text = "日志同步起点(&R):";
             // 
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(135, 468);
+            this.checkBox_speak.Location = new System.Drawing.Point(135, 491);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
@@ -516,7 +537,7 @@
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(15, 468);
+            this.checkBox_beep.Location = new System.Drawing.Point(15, 491);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
@@ -662,18 +683,6 @@
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
-            // 
-            // MenuItem_about
-            // 
-            this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
-            this.MenuItem_about.Text = "关于本软件 ...";
-            this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -774,6 +783,7 @@
         private System.Windows.Forms.Button button_setDefaultThreshold;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_about;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_manual;
     }
 }
 

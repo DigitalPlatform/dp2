@@ -169,6 +169,18 @@ bool bClickClose = false)
                 BeginStart();
 
             // DisplayText("1");
+
+            // 后台自动检查更新
+            Task.Run(() =>
+            {
+                NormalResult result = ClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                else if (result.Value == 1)
+                    OutputHistory(result.ErrorInfo, 1);
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    OutputHistory(result.ErrorInfo, 0);
+            });
         }
 
         // 指纹功能是否初始化成功
@@ -1475,6 +1487,11 @@ token);
         private void MenuItem_about_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/DigitalPlatform/dp2/tree/master/FingerprintCenter");
+        }
+
+        private void MenuItem_manual_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/issues/222");
         }
     }
 
