@@ -396,7 +396,7 @@ namespace DigitalPlatform.LibraryServer
         public RecordLockCollection BiblioLocks = new RecordLockCollection();
 
         // 本地结果集锁。避免多线程改写同一结果集
-        public RecordLockCollection ResultsetLocks = new RecordLockCollection();
+        // public RecordLockCollection ResultsetLocks = new RecordLockCollection();
 
         public Hashtable StopTable = new Hashtable();
 
@@ -1001,11 +1001,10 @@ namespace DigitalPlatform.LibraryServer
                     node = dom.DocumentElement.SelectSingleNode("channel") as XmlElement;
                     if (node != null)
                     {
-                        int v = 0;
                         nRet = DomUtil.GetIntegerParam(node,
                             "maxChannelsPerIP",
                             50,
-                            out v,
+                            out int v,
                             out strError);
                         if (nRet == -1)
                             app.WriteErrorLog(strError);
@@ -1095,11 +1094,10 @@ namespace DigitalPlatform.LibraryServer
                     node = dom.DocumentElement.SelectSingleNode("log") as XmlElement;
                     if (node != null)
                     {
-                        int nValue = 0;
                         DomUtil.GetIntegerParam(node,
                             "accessLogMaxCountPerDay",
                             10000,
-                            out nValue,
+                            out int nValue,
                             out strError);
                         this.AccessLogMaxCountPerDay = nValue;
                     }
@@ -3480,6 +3478,7 @@ namespace DigitalPlatform.LibraryServer
                             "serverReplication",
                             "authdbgroup",  // 2018/9/2
                             "maps_856u",    // 2018/10/24
+                            "globalResults",    // 2018/12/3
                         };
 
                         RestoreElements(writer, elements);
@@ -14596,7 +14595,7 @@ strLibraryCode);    // 读者所在的馆代码
                     // 只到记录ID这一层
                     if (strPath == "")
                     {
-                        strError = "不允许使用WriteRes()写入评注库记录";
+                        strError = "不允许使用WriteRes()写入评注库(等类型的书目下级)记录";
                         return 0;
                     }
 

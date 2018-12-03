@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>77</ApplicationRevision>
+    <ApplicationRevision>85</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2272,6 +2272,9 @@
     <EmbeddedResource Include="SearchForms\OpenBiblioDumpFileDialog.resx">
       <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\RunScriptDialog.resx">
+      <DependentUpon>RunScriptDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\VerifyEntityDialog.resx">
       <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -2487,6 +2490,12 @@
     </Compile>
     <Compile Include="SearchForms\OrderSearchForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\RunScriptDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\RunScriptDialog.Designer.cs">
+      <DependentUpon>RunScriptDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SearchForms\SearchFormBase.cs">
       <SubType>Form</SubType>

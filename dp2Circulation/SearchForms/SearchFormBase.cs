@@ -1043,7 +1043,7 @@ namespace dp2Circulation
         /// 保存对指定事项的修改
         /// </summary>
         /// <param name="items">事项集合</param>
-        /// <param name="strStyle">处理风格。force/空</param>
+        /// <param name="strStyle">处理风格。force/auto_retry/dont_enablecontrol/空。可能组合使用。force 意思是强制保存；auto_retry 是自动延时重试保存; dont_enablecontrol 是不调用 EnableControls()</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int SaveChangedRecords(List<ListViewItem> items,
@@ -1061,24 +1061,32 @@ namespace dp2Circulation
 
             bool bHideMessageBox = false;
 
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+            bool dont_enablecontrol = StringUtil.IsInList("dont_enablecontrol", strStyle);
+
+            if (dont_enablecontrol == false)
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
 + " 开始保存</div>");
 
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
-            stop.BeginLoop();
+                stop.Style = StopStyle.EnableHalfStop;
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
+                stop.BeginLoop();
+
+                this.EnableControls(false);
+            }
 
             {
                 LibraryChannel channel = this.GetChannel();
                 TimeSpan old_timeout = channel.Timeout;
                 channel.Timeout = TimeSpan.FromMinutes(1);
 
-                this.EnableControls(false);
                 // this._listviewRecords.Enabled = false;
                 try
                 {
-                    stop.SetProgressRange(0, items.Count);
+                    if (dont_enablecontrol == false)
+                        stop.SetProgressRange(0, items.Count);
+
                     for (int i = 0; i < items.Count; i++)
                     {
                         if (stop != null && stop.State != 0)
@@ -1091,7 +1099,8 @@ namespace dp2Circulation
                         string strRecPath = item.Text;
                         if (string.IsNullOrEmpty(strRecPath) == true)
                         {
-                            stop.SetProgressValue(i);
+                            if (dont_enablecontrol == false)
+                                stop.SetProgressValue(i);
                             goto CONTINUE;
                         }
 
@@ -1153,7 +1162,8 @@ namespace dp2Circulation
                 MessageBoxDefaultButton.Button1,
                 "下次遇到同类情况不再出现本对话框",
                 ref bHideMessageBox,
-                new string[] { "重试", "跳过", "取消" });
+                new string[] { "重试", "跳过", "取消" },
+                StringUtil.IsInList("auto_retry", strStyle) ? 20 : 0);
                             }
                             /*
                             DialogResult result = MessageBox.Show(this,
@@ -1202,7 +1212,6 @@ namespace dp2Circulation
 
                             // 重新装载书目记录到 OldXml
 
-                            string strXml = "";
                             // 获得一条记录
                             //return:
                             //      -1  出错
@@ -1211,7 +1220,7 @@ namespace dp2Circulation
                             nRet = GetRecord(
                                 channel,
                                 strRecPath,
-                                out strXml,
+                                out string strXml,
                                 out baNewTimestamp,
                                 out strError);
                             if (nRet == 0)
@@ -1242,28 +1251,33 @@ namespace dp2Circulation
                         Debug.Assert(this.m_nChangedCount >= 0, "");
 
                         CONTINUE:
-                        stop.SetProgressValue(i);
+                        if (dont_enablecontrol == false)
+                            stop.SetProgressValue(i);
                     }
                 }
                 finally
                 {
-                    this.EnableControls(true);
-
                     channel.Timeout = old_timeout;
                     this.ReturnChannel(channel);
 
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                    stop.HideProgress();
-                    stop.Style = StopStyle.None;
+                    if (dont_enablecontrol == false)
+                    {
+                        this.EnableControls(true);
 
-                    Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-+ " 结束保存</div>");
-                    // this._listviewRecords.Enabled = true;
+                        stop.EndLoop();
+                        stop.OnStop -= new StopEventHandler(this.DoStop);
+                        stop.Initial("");
+                        stop.HideProgress();
+                        stop.Style = StopStyle.None;
+
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 结束保存</div>");
+                        // this._listviewRecords.Enabled = true;
+                    }
                 }
             }
 
+            if (StringUtil.IsInList("dont_refresh", strStyle) == false)
             {
                 // 从 items 中去掉那些已经报错的
                 foreach (ListViewItem item in error_items)
@@ -1283,9 +1297,8 @@ namespace dp2Circulation
                     if (nRet == -1)
                         return -1;
                 }
+                DoViewComment(false);
             }
-
-            DoViewComment(false);
 
             strError = "";
             if (nSavedCount > 0)

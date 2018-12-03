@@ -615,9 +615,6 @@ namespace dp2Circulation
                             }
                         }
 
-
-                        string strMARC = "";
-
                         // 从ISO2709文件中读入一条MARC记录
                         // return:
                         //	-2	MARC格式错
@@ -629,7 +626,7 @@ namespace dp2Circulation
                             encoding,
                             true,	// bRemoveEndCrLf,
                             true,	// bForce,
-                            out strMARC,
+                            out string strMARC,
                             out strError);
                         if (nRet == -2 || nRet == -1)
                         {

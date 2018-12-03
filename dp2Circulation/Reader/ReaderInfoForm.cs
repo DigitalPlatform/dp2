@@ -5179,7 +5179,7 @@ MessageBoxDefaultButton.Button2);
                 result.Value = nRet;
                 return result;
             }
-            catch(System.Runtime.Remoting.RemotingException)
+            catch (System.Runtime.Remoting.RemotingException)
             {
                 result.CfgInfo = "";
                 result.Version = "1.0";
@@ -6280,5 +6280,37 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // 编辑读者记录 XML
+        private void toolStripMenuItem_editXML_Click(object sender, EventArgs e)
+        {
+            int nRet = this.readerEditControl1.GetData(out string strXml,
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            strXml = DomUtil.GetIndentXml(strXml);
+            string result = EditDialog.GetInput(this,
+                "readerInfoForm",
+                "读者记录 XML",
+                strXml,
+                this.Font);
+            if (result == null)
+                return;
+
+            nRet = this.readerEditControl1.SetData(result,
+                this.readerEditControl1.RecPath,
+                this.readerEditControl1.Timestamp,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            Global.SetXmlToWebbrowser(this.webBrowser_xml,
+    Program.MainForm.DataDir,
+    "xml",
+    result);
+
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

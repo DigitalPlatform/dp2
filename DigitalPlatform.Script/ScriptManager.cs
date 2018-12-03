@@ -2307,7 +2307,6 @@ namespace DigitalPlatform.Script
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;
             compilerParams = new CompilerParameters();
-
             compilerParams.GenerateInMemory = true; //Assembly is created in memory
             compilerParams.IncludeDebugInformation = true;
 
@@ -2326,7 +2325,8 @@ namespace DigitalPlatform.Script
 
             compilerParams.ReferencedAssemblies.AddRange(refs);
 
-
+            // Microsoft.CSharp.CSharpCodeProvider provider;
+            // Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider provider;
             CSharpCodeProvider provider;
 
             System.CodeDom.Compiler.CompilerResults results = null;
@@ -2334,7 +2334,7 @@ namespace DigitalPlatform.Script
             {
                 Dictionary<string, string> options = new Dictionary<string, string>
                 {
-                {"CompilerVersion","v3.5"}
+                {"CompilerVersion","v3.5"}  // "v3.5"
                 };
                 provider = new CSharpCodeProvider();
                 // compiler = provider.CreateCompiler();

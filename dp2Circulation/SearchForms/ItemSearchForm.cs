@@ -11357,7 +11357,7 @@ out strError);
         // 保存一条记录
         // 保存成功后， info.Timestamp 会被更新
         // parameters:
-        //      strStyle force/空
+        //      strStyle force/auto_retry/空。可能组合使用
         // return:
         //      -2  时间戳不匹配
         //      -1  出错
@@ -11577,6 +11577,7 @@ out strError);
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
 
+#if NO
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.Title = "请指定 C# 脚本文件";
@@ -11586,15 +11587,38 @@ out strError);
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
+#endif
+            RunScriptDialog dlg = new RunScriptDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+            dlg.ScriptFileName = this.m_strUsedMarcQueryFilename;
 
-            this.m_strUsedMarcQueryFilename = dlg.FileName;
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+    "ItemSearchForm",
+    "RunScriptDialog_uiState",
+    "");
+            Program.MainForm.AppInfo.LinkFormState(dlg,
+                "ItemSearchForm_RunScriptDialog_state");
 
-            ItemHost host = null;
-            Assembly assembly = null;
+            dlg.ShowDialog(this);
+
+            Program.MainForm.AppInfo.SetString(
+    "ItemSearchForm",
+    "RunScriptDialog_uiState",
+    dlg.UiState);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            // string save_style = Control.ModifierKeys == Keys.Control ? "force" : "";
+            string save_style = "dont_enablecontrol,dont_refresh,auto_retry";
+            if (dlg.ForceSave)
+                save_style += ",force";
+
+            this.m_strUsedMarcQueryFilename = dlg.ScriptFileName;
 
             nRet = PrepareMarcQuery(this.m_strUsedMarcQueryFilename,
-                out assembly,
-                out host,
+                out Assembly assembly,
+                out ItemHost host,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -11620,7 +11644,7 @@ out strError);
                 }
             }
 
-            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.ScriptFileName + "</div>");
 
             if (stop.IsInLoop == true)
             {
@@ -11633,6 +11657,9 @@ out strError);
             stop.BeginLoop();
 
             LibraryChannel channel = this.GetChannel();
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             this.EnableControls(false);
 
@@ -11700,6 +11727,7 @@ out strError);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
+                List<ListViewItem> changed_items = new List<ListViewItem>();
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -11768,6 +11796,37 @@ out strError);
 
                     // 显示为工作单形式
                     i++;
+
+                    if (host.Changed && dlg.AutoSaveChanges)
+                    {
+                        changed_items.Add(item.ListViewItem);
+
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode($"{info.RecPath} 修改后立即保存") + "</div>");
+
+                            // REDO_SAVE:
+                            nRet = SaveChangedRecords(new List<ListViewItem> { item.ListViewItem },
+    save_style,
+    out strError);
+                            if (nRet == -1)
+                            {
+#if NO
+                                // TODO: 检查事件处理过程里面，是否有自动延时重试机制
+                                // 也可以考虑给 SaveChangedRecords 函数内部增加重试机制
+                                MessagePromptEventArgs e1 = new MessagePromptEventArgs();
+                                e1.MessageText = "保存修改内容时发生错误： " + strError;
+                                e1.Actions = "yes,no,cancel";
+                                loader_Prompt(this, e1);
+                                if (e1.ResultAction == "cancel")
+                                    goto ERROR1;
+                                else if (e1.ResultAction == "yes")
+                                    goto REDO_SAVE;
+                                continue;
+#endif
+                                goto ERROR1;
+                            }
+                        }
+                    }
                 }
 
                 {
@@ -11786,6 +11845,20 @@ out strError);
                         goto ERROR1;
                     }
                 }
+
+                if (dlg.AutoSaveChanges)
+                {
+                    // 刷新保存过的事项显示
+                    nRet = RefreshListViewLines(
+                        null,
+                        changed_items,
+                        "",
+                        true,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
             }
             catch (Exception ex)
             {
@@ -11800,6 +11873,7 @@ out strError);
                 this.listView_records.Enabled = true;
                 this.EnableControls(true);
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 stop.EndLoop();
@@ -11808,7 +11882,7 @@ out strError);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.ScriptFileName + "</div>");
             }
 
             DoViewComment(false);

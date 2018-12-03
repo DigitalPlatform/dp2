@@ -5292,7 +5292,7 @@ long value,
             XLAlignmentHorizontalValues align = XLAlignmentHorizontalValues.Left
             )
         {
-            Debug.Assert(strValue != "0", "");
+            // Debug.Assert(strValue != "0", "");
 
             IXLCell cell = sheet.Cell(nLineIndex + 1, nColIndex + 1).SetValue(DomUtil.ReplaceControlCharsButCrLf(strValue, '*'));
             cell.Style.Alignment.Horizontal = align; // XLAlignmentHorizontalValues.Center;
@@ -5591,6 +5591,9 @@ strContent);
                     }
                     else
                     {
+                        // 2018/11/29
+                        // TODO: 这里的 strContent 可能为 '0'，会引起函数 Assertion 报错。
+                        // 彻底解决的方法，是要有方法能确知这一列是不是数值类型。如果是数值类型则要调用另外一个版本的函数，从而避免写入 text 类型
                         WriteExcelCell(sheet,
 TABLE_TOP_BLANK_LINES + nLineIndex + nTopBlankLines,
 TABLE_LEFT_BLANK_COLUMS + col_index,

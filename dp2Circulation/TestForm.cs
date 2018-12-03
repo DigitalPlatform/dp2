@@ -1952,5 +1952,11 @@ this,
             PathUtil.TryCreateDir(strDirectory);
             MessageBox.Show(this, "OK");
         }
+
+        private void button_testStop_Click(object sender, EventArgs e)
+        {
+            // 启动若干线程，每个线程都在运行进度显示
+
+        }
     }
 }
