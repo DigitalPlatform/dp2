@@ -282,6 +282,10 @@ strStringTable);
                 {
                     return this.checkBox_target_dontSearchDup.Checked;
                 }));
+                info.AutoPostfix = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_autoPostfix.Checked;
+                }));
                 info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_convert_refreshRefID.Checked;
@@ -782,8 +786,6 @@ Program.MainForm.ActivateFixPage("history")
                 REDO:
                 // 创建或者覆盖书目记录
                 string strError = "";
-                string strOutputPath = "";
-                byte[] baNewTimestamp = null;
                 long lRet = info.Channel.SetBiblioInfo(
         info.stop,
         info.Simulate ? "simulate_" + strAction : strAction,
@@ -793,8 +795,8 @@ Program.MainForm.ActivateFixPage("history")
         ByteArray.GetTimeStampByteArray(strTimestamp),
         "",
         strStyle,
-        out strOutputPath,
-        out baNewTimestamp,
+        out string strOutputPath,
+        out byte[] baNewTimestamp,
         out strError);
                 if (lRet == -1)
                 {
@@ -803,7 +805,8 @@ Program.MainForm.ActivateFixPage("history")
                         // 提示是否强行覆盖?
                     }
 
-                    info.MergeAction = "";
+                    StringBuilder dup_message = new StringBuilder();
+                    // info.MergeAction = "";
                     if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
                     {
                         string strDialogAction = "";
@@ -811,30 +814,38 @@ Program.MainForm.ActivateFixPage("history")
                         byte[] baTargetTimestamp = null;
 
                         this.Invoke((Action)(() =>
-{
-    using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
-    {
-        MainForm.SetControlFont(dup_dialog, this.Font, false);
-        dup_dialog.MergeStyle = info.UsedMergeStyle;    // 这个值会被持久存储
+                        {
+                            using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
+                            {
+                                MainForm.SetControlFont(dup_dialog, this.Font, false);
+                                dup_dialog.MergeStyle = info.UsedMergeStyle;    // 这个值会被持久存储
 
-        dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
-        dup_dialog.AutoSelectMode = info.AutoSelectMode;
-        dup_dialog.TempDir = Program.MainForm.UserTempDir;
-        dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
-        dup_dialog.OriginXml = info.BiblioXml;
-        dup_dialog.DupBiblioRecPathList = strOutputPath;
-        Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
-        dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
-        dup_dialog.ShowDialog(this);
-        Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
-        info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
-        info.UsedMergeStyle = dup_dialog.MergeStyle;
+                                dup_dialog.Action = info.MergeAction;
+                                dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
+                                dup_dialog.AutoSelectMode = info.AutoSelectMode;
+                                dup_dialog.TempDir = Program.MainForm.UserTempDir;
+                                dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
+                                dup_dialog.OriginXml = info.BiblioXml;
+                                dup_dialog.DupBiblioRecPathList = strOutputPath;
 
-        strDialogAction = dup_dialog.Action;
-        strTargetRecPath = dup_dialog.SelectedRecPath;
-        baTargetTimestamp = dup_dialog.SelectedTimestamp;
-    }
-}));
+                                Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
+                                dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
+                                dup_dialog.ShowDialog(this);
+                                Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
+
+                                info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
+                                info.UsedMergeStyle = dup_dialog.MergeStyle;
+                                info.MergeAction = dup_dialog.Action;
+
+                                strDialogAction = dup_dialog.Action;
+                                strTargetRecPath = dup_dialog.SelectedRecPath;
+                                baTargetTimestamp = dup_dialog.SelectedTimestamp;
+
+                                dup_message.Append($"尝试导入书目记录({strOldPath}-->{strPath})时出现重复，然后经对话框选择合并策略:\r\n动作={strDialogAction}\r\n如何合并={info.UsedMergeStyle}\r\n目标记录路径={strTargetRecPath}\r\n自动选择={info.AutoSelectMode}");
+                                this.OutputText(dup_message.ToString(), 1);
+                            }
+                        }));
+
                         if (string.IsNullOrEmpty(strDialogAction) == true
                             || strDialogAction == "stop")
                         {
@@ -854,7 +865,11 @@ Program.MainForm.ActivateFixPage("history")
                         }
 
                         if (strDialogAction == "skip")
+                        {
+                            string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + " 被跳过";
+                            this.OutputText(strMessage, 0);
                             return false;
+                        }
                         if (strDialogAction == "mergeTo")
                         {
                             // 合并源文件中的册到目标位置
@@ -914,15 +929,16 @@ out strError);
                     {
                         DialogResult result = System.Windows.Forms.DialogResult.Yes;
                         this.Invoke((Action)(() =>
-{
-    result = MessageDialog.Show(this,
-strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
-MessageBoxButtons.YesNoCancel,
-info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
-"此后不再出现本对话框",
-ref info.HideBiblioMessageBox,
-new string[] { "重试", "跳过", "中断" });
-}));
+                        {
+                            result = MessageDialog.Show(this,
+                        strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+                        MessageBoxButtons.YesNoCancel,
+                        info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+                        "此后不再出现本对话框",
+                        ref info.HideBiblioMessageBox,
+                        new string[] { "重试", "跳过", "中断" });
+                        }));
+
                         info.LastBiblioDialogResult = result;
                         if (result == DialogResult.Yes)
                         {
@@ -955,12 +971,14 @@ new string[] { "重试", "跳过", "中断" });
                 CONTINUE:
                 info.BiblioRecPath = strOutputPath;
 
-                string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
-                if (info.Simulate)
-                    strMessage = "模拟导入 " + (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
+                {
+                    string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
+                    if (info.Simulate)
+                        strMessage = "模拟导入 " + (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
 
-                this.ShowMessage(strMessage);
-                this.OutputText(strMessage, 0);
+                    this.ShowMessage(strMessage);
+                    this.OutputText(strMessage, 0);
+                }
             }
 
             // 上传书目记录的数字对象
@@ -1297,7 +1315,7 @@ new string[] { "重试", "跳过", "中断" });
         {
             if (String.IsNullOrEmpty(strRefID) == true)
             {
-                strRefID = NewGuid().ToString();
+                strRefID = NewRefID().ToString();
                 return true;
             }
 
@@ -1307,6 +1325,11 @@ new string[] { "重试", "跳过", "中断" });
         static string NewGuid()
         {
             return ShortGuid.NewGuid();
+        }
+
+        static string NewRefID()
+        {
+            return Guid.NewGuid().ToString();
         }
 
         static void RefreshRefID(Hashtable table, ref string strRefID)
@@ -1322,7 +1345,10 @@ new string[] { "重试", "跳过", "中断" });
                 return;
 
             if (table == null)
+            {
+                strRefID = NewRefID().ToString();    // 2018/12/1
                 return;
+            }
 
             // 参考 ID 要替换
             string strNewRefID = (string)table[strRefID];
@@ -1332,7 +1358,7 @@ new string[] { "重试", "跳过", "中断" });
             }
             else
             {
-                strNewRefID = NewGuid().ToString();
+                strNewRefID = NewRefID().ToString();
                 table[strRefID] = strNewRefID;
                 strRefID = strNewRefID;
             }
@@ -1386,6 +1412,7 @@ new string[] { "重试", "跳过", "中断" });
 
             // 2016/12/22
             List<string> styles = new List<string>();
+            // 要在这些 checkbox 可见的情况下，才起作用
             if (this.SpecialState)
             {
                 if (info.DontChangeOperations)
@@ -1399,6 +1426,10 @@ new string[] { "重试", "跳过", "中断" });
             // 2017/1/4
             if (info.Simulate)
                 styles.Add("simulate");
+
+            // 2018/12/1
+            if (info.AutoPostfix)
+                styles.Add("autopostfix");
 
             string strStyle = StringUtil.MakePathList(styles);
 
@@ -1606,77 +1637,6 @@ new string[] { "重试", "跳过", "中断" });
             if (info.Collect == false
                 && entityArray.Count > 0)
             {
-#if NO
-                EntityInfo[] errorinfos = null;
-
-                // TODO: entityArray 中元素太多一次发送不完怎么办? 是否需要循环处理？
-
-                long lRet = 0;
-
-                if (strRootElementName == "item")
-                    lRet = info.Channel.SetEntities(
-                         info.stop,
-                         info.BiblioRecPath,
-                         entityArray.ToArray(),
-                         out errorinfos,
-                         out strError);
-                else if (strRootElementName == "order")
-                    lRet = info.Channel.SetOrders(
-                         info.stop,
-                         info.BiblioRecPath,
-                         entityArray.ToArray(),
-                         out errorinfos,
-                         out strError);
-                else if (strRootElementName == "issue")
-                    lRet = info.Channel.SetIssues(
-                         info.stop,
-                         info.BiblioRecPath,
-                         entityArray.ToArray(),
-                         out errorinfos,
-                         out strError);
-                else if (strRootElementName == "comment")
-                    lRet = info.Channel.SetComments(
-                         info.stop,
-                         info.BiblioRecPath,
-                         entityArray.ToArray(),
-                         out errorinfos,
-                         out strError);
-                else
-                {
-                    strError = "未知的 strRootElementName '" + strRootElementName + "'";
-                    throw new Exception(strError);
-                }
-                if (lRet == -1)
-                    throw new Exception(strError);
-
-                if (errorinfos == null || errorinfos.Length == 0)
-                    return;
-
-                StringBuilder text = new StringBuilder();
-                foreach (EntityInfo error in errorinfos)
-                {
-                    if (String.IsNullOrEmpty(error.RefID) == true)
-                        throw new Exception("服务器返回的EntityInfo结构中RefID为空");
-
-                    // 正常信息处理
-                    if (error.ErrorCode == ErrorCodeValue.NoError)
-                        continue;
-
-                    text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
-                    info.ItemErrorCount++;
-                }
-
-                if (text.Length > 0)
-                {
-                    strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
-
-                    this.OutputText(strError, 2);
-
-                    // 询问是否忽略错误继续向后处理? 此后全部忽略?
-                    if (AskContinue(info, strError) == false)
-                        throw new Exception(strError);
-                }
-#endif
                 WriteEntities(
     info,
     strRootElementName,
@@ -1935,6 +1895,7 @@ new string[] { "继续", "中断" });
             public bool DontChangeOperations = false;
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
+            public bool AutoPostfix = false;
 
             public bool IncludeSubItems = true;
             public bool IncludeSubOrders = true;
@@ -1994,7 +1955,7 @@ new string[] { "继续", "中断" });
                 this.IssueRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
-                this.MergeAction = "";
+                // this.MergeAction = "";
             }
         }
 
@@ -2094,6 +2055,8 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.textBox_target_dbNameList);
                 controls.Add(this.checkBox_target_randomItemRegisterNo);
+
+                controls.Add(this.checkBox_target_autoPostfix);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -2125,6 +2088,8 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.textBox_target_dbNameList);
                 controls.Add(this.checkBox_target_randomItemRegisterNo);
+
+                controls.Add(this.checkBox_target_autoPostfix);
                 GuiState.SetUiState(controls, value);
             }
         }

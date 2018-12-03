@@ -26,7 +26,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 获得当前所有积压的请求
         // return
-        //      null    没有挤压的请求
+        //      null    没有积压的请求
         //      其他  汇总后的 location_list
         string GetPendingLocationList()
         {
@@ -77,6 +77,8 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 创建馆藏地结果集
+        // 馆藏地结果集的特点是，针对实体库进行检索，然后变换为书目记录路径。所以需要在 dp2library 一端运算和构造检索结果，然后写回 dp2kernel 形成永久结果集，供以后使用
         void CreateLocationResultset(string location_list)
         {
             try
@@ -161,7 +163,6 @@ namespace DigitalPlatform.LibraryServer
 #if DETAIL_LOG
                 this.WriteErrorLog("开始探测结果集 " + strLocation);
 #endif
-                Record[] searchresults = null;
 
                 // 获得检索结果的浏览格式
                 // 浅包装版本
@@ -172,7 +173,7 @@ namespace DigitalPlatform.LibraryServer
                     "id",
                     "zh",
                     null,
-                    out searchresults,
+                    out Record[] searchresults,
                     out strError);
                 if (lHitCount == -1)
                 {
@@ -311,11 +312,10 @@ namespace DigitalPlatform.LibraryServer
             // 结果集为空，也要在 dp2kernel 端创建一个结果集对象
             if (resultset.Count == 0)
             {
-                RecordBody[] results = null;
                 long lRet = channel.DoWriteRecords(null,
 records.ToArray(),
 "createResultset,name:#" + strResultsetName + ",clear,permanent",
-out results,
+out RecordBody[] results,
 out strError);
                 if (lRet == -1)
                     return -1;
@@ -375,11 +375,10 @@ out strError);
 
             // 最后一次执行改名、排序
             {
-                RecordBody[] results = null;
                 long lRet = channel.DoWriteRecords(null,
 null,
 "renameResultset,oldname:#~" + strResultsetName + ",newname:#" + strResultsetName + ",permanent,sort",
-out results,
+out RecordBody[] results,
 out strError);
                 if (lRet == -1)
                     return -1;
@@ -494,7 +493,6 @@ out strError);
                             continue;
                         }
 
-                        string strBiblioRecPath = "";
 
 #if NO
                             // 从册记录XML中获得书目记录路径
@@ -524,7 +522,7 @@ out strError);
                         int nRet = GetBiblioRecPathByParentID(
                             rec.Path,
                             rec.Cols[0],
-                            out strBiblioRecPath,
+                            out string strBiblioRecPath,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -626,5 +624,264 @@ out strError);
             }
         }
 #endif
+
+        #region 书目结果集
+
+        List<string> _biblio_requests = new List<string>();
+        internal Task _taskCreateBiblioResultset = null;
+
+        // parameters:
+        //      location_list   馆藏地列表。如果为 "" 表示全部馆藏地。如果为 null，表示只执行积压的请求(本次没有新请求)
+        public void StartCreateBiblioResultset(string name_list)
+        {
+            lock (syncRoot_location)
+            {
+                // 观察是否已经有任务在运行。如果有了，就把请求加入队列
+                if (_taskCreateBiblioResultset != null)
+                {
+                    if (name_list != null && _biblio_requests.Count < 1000)
+                        _biblio_requests.Add(name_list);
+                    return;
+                }
+
+                // 每次启动，都是把前面积压的任务汇总后启动
+                if (name_list != null && _biblio_requests.Count < 1000)
+                    _biblio_requests.Add(name_list);
+                string list = GetPendingNameList();
+                if (list != null)
+                {
+                    _biblio_requests.Clear();
+                    _taskCreateBiblioResultset = Task.Factory.StartNew(() => CreateBiblioFilterResultsets(list));
+                }
+            }
+        }
+
+        // 获得当前所有积压的请求
+        // return
+        //      null    没有积压的请求
+        //      其他  汇总后的 name_list
+        string GetPendingNameList()
+        {
+            if (_biblio_requests.Count == 0)
+                return null;
+
+            List<string> locations = new List<string>();
+            foreach (string s in _biblio_requests)
+            {
+                if (string.IsNullOrEmpty(s))
+                    locations.Add("");
+                else
+                    locations.AddRange(StringUtil.SplitList(s));
+            }
+
+            // 去重
+            locations.Sort();
+            StringUtil.RemoveDup(ref locations, true);
+            // 只要包含一个空字符串，就表示全部都需要刷新
+            if (locations.IndexOf("") != -1)
+                return "";
+            return StringUtil.MakePathList(locations);
+        }
+
+        void CreateBiblioFilterResultsets(string name_list)
+        {
+            try
+            {
+                List<string> names = new List<string>();
+                if (string.IsNullOrEmpty(name_list))
+                {
+                    XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("globalResults/item");
+                    foreach (XmlElement item in nodes)
+                    {
+                        names.Add(item.GetAttribute("name"));
+                    }
+                }
+                else
+                {
+                    names = StringUtil.SplitList(name_list);
+                }
+
+                foreach (string name in names)
+                {
+                    XmlElement item = this.LibraryCfgDom.DocumentElement.SelectSingleNode($"globalResults/item[@name='{name}']") as XmlElement;
+                    if (item == null)
+                    {
+                        this.WriteErrorLog($"名为 '{name}' 的 globalResults/item 元素没有找到");
+                        continue;
+                    }
+                    string strType = item.GetAttribute("type");
+                    string strParameters = item.GetAttribute("parameters");
+                    string strResultsetName = item.GetAttribute("resultsetName");
+
+                    this.WriteErrorLog("--- 书目结果集创建 " + name);
+
+                    CreateBiblioFilterResultset(strType, strParameters, strResultsetName);
+                }
+
+                this.WriteErrorLog("书目结果集创建结束 " + name_list);
+            }
+            finally
+            {
+                lock (syncRoot_location)
+                {
+                    _taskCreateBiblioResultset = null;
+                }
+            }
+        }
+
+        void CreateBiblioFilterResultset(
+            string strType,
+            string strParameters,
+            string strResultsetName)
+        {
+            string strError = "";
+            string strQueryXml = "";
+            if (strType == "state")
+            {
+#if NO
+                // 构造检索书目库的 XML 检索式
+                // return:
+                //      -2  没有找到指定风格的检索途径
+                //      -1  出错
+                //      0   没有发现任何书目库定义
+                //      1   成功
+                int nRet = this.BuildSearchBiblioQuery(
+            "<全部书目>",
+            "",
+            -1,
+            "recid",
+            "left",
+            "zh",
+            "", // strSearchStyle,
+            out List<string> dbTypes,
+            out string strQueryXml1,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+
+                nRet = this.BuildSearchBiblioQuery(
+            "<全部书目>",
+            strParameters,  // "内部"
+            -1,
+            "state",
+            "exact",
+            "zh",
+            "", // strSearchStyle,
+            out dbTypes,
+            out string strQueryXml2,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+
+                strQueryXml = $"<group>{strQueryXml1}<operator value='SUB'/>{strQueryXml2}</group>";
+#endif
+
+                // 检索出所有“内部”状态的书目记录
+                int nRet = this.BuildSearchBiblioQuery(
+"<全部书目>",
+strParameters,  // "内部"
+-1,
+"state",
+"exact",
+"zh",
+"", // strSearchStyle,
+out List<string> dbTypes,
+out strQueryXml,
+    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+            }
+            else
+            {
+                strError = $"无法识别的 strType {strType}";
+                goto ERROR1;
+            }
+
+            CreateBiblioFilterResultset(strQueryXml, strResultsetName);
+            return;
+            ERROR1:
+            this.WriteErrorLog($"类型为 '{strType}' 参数为 '{strParameters}' 的书目结果集创建出错: {strError}");
+        }
+
+        // 创建书目过滤结果集
+        // 书目过滤结果集的特点是，直接针对书目库进行检索，在 dp2kernel 一端就成为永久结果集
+        void CreateBiblioFilterResultset(string strQueryXml,
+            string strResultsetName)
+        {
+            string strError = "";
+
+            // TODO: 要设法把临时的 Session 对象管理起来。在 Application down 的时候，主动对这些 session 的 Channels 执行 stop
+            // 临时的 SessionInfo 对象
+            SessionInfo session = new SessionInfo(this);
+            try
+            {
+                this._app_down.Token.ThrowIfCancellationRequested();
+
+                // RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                RmsChannel channel = _slowChannelList.GetChannel(session.Channels, this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel null error";
+                    goto ERROR1;
+                }
+
+                try
+                {
+#if DETAIL_LOG
+                this.WriteErrorLog("开始检索");
+#endif
+                    long lHitCount = channel.DoSearch(strQueryXml,
+        "#~" + strResultsetName,
+        "", // strOutputStyle,
+        out strError);
+                    if (lHitCount == -1)
+                        goto ERROR1;
+
+                    if (lHitCount == 0)
+                    {
+                        // 没有命中任何记录，也要继续后面的处理
+
+                        // 结果集为空，也要在 dp2kernel 端创建一个结果集对象
+                        long lRet = channel.DoWriteRecords(null,
+        new RecordBody[0],
+        "createResultset,name:#" + strResultsetName + ",clear,permanent",
+        out RecordBody[] results,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                        return;
+                    }
+
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
+                    // 最后一次执行改名、排序
+                    {
+                        long lRet = channel.DoWriteRecords(null,
+        null,
+        "renameResultset,oldname:#~" + strResultsetName + ",newname:#" + strResultsetName + ",permanent,sort",
+        out RecordBody[] results,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+
+                    return;
+                }
+                finally
+                {
+                    _slowChannelList.ReturnChannel(session.Channels, channel);
+                }
+            }
+            finally
+            {
+                session.CloseSession();
+                session = null;
+            }
+
+            ERROR1:
+            this.WriteErrorLog("书目 '" + strResultsetName + "' 结果集创建出错: " + strError);
+        }
+
+        #endregion
     }
 }

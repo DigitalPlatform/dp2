@@ -145,9 +145,12 @@ namespace DigitalPlatform.Drawing
 
             this.qrRecognitionControl1.DisplayText("正在探测边沿 ...");
             Shoot();
-            DetectEdge();
+            if (this.toolStripButton_autoDetectEdge.Checked)
+                DetectEdge();
             this.qrRecognitionControl1.DisplayImage(true);
         }
+
+        bool _pointsInitialized = false;
 
         void Shoot()
         {
@@ -155,8 +158,11 @@ namespace DigitalPlatform.Drawing
 
             // this.pictureBox_clip.Image = new Bitmap(temp);
             ImageUtil.SetImage(this.pictureBox_clip, new Bitmap(temp)); // 2012/12/28
-
-            this.pictureBox_clip.InitialPoints(temp);
+            if (this._pointsInitialized == false)
+            {
+                this.pictureBox_clip.InitialPoints(temp);
+                _pointsInitialized = true;
+            }
 
             this.tabControl_main.SelectedTab = this.tabPage_clip;
         }
@@ -444,7 +450,11 @@ namespace DigitalPlatform.Drawing
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
                 ImageUtil.SetImage(this.pictureBox_clip, image);   // 2016/12/28
-                this.pictureBox_clip.InitialPoints(image);
+                if (this._pointsInitialized == false)
+                {
+                    this.pictureBox_clip.InitialPoints(image);
+                    _pointsInitialized = true;
+                }
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {

@@ -68,10 +68,6 @@ namespace dp2Circulation
 
         static int Count6XX(string strXml)
         {
-            string strError = "";
-
-            string strMarc = "";
-            string strOutMarcSyntax = "";
             // 将MARCXML格式的xml记录转换为marc机内格式字符串
             // parameters:
             //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
@@ -80,9 +76,9 @@ namespace dp2Circulation
             int nRet = MarcUtil.Xml2Marc(strXml,
                 true,   // 2013/1/12 修改为true
                 "", // strMarcSyntax
-                out strOutMarcSyntax,
-                out strMarc,
-                out strError);
+                out string strOutMarcSyntax,
+                out string strMarc,
+                out string strError);
             if (nRet == -1)
                 return 0;
 
@@ -106,10 +102,6 @@ namespace dp2Circulation
 
         static int GetMarcLength(string strXml)
         {
-            string strError = "";
-
-            string strMarc = "";
-            string strOutMarcSyntax = "";
             // 将MARCXML格式的xml记录转换为marc机内格式字符串
             // parameters:
             //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
@@ -118,9 +110,9 @@ namespace dp2Circulation
             int nRet = MarcUtil.Xml2Marc(strXml,
                 true,   // 2013/1/12 修改为true
                 "", // strMarcSyntax
-                out strOutMarcSyntax,
-                out strMarc,
-                out strError);
+                out string strOutMarcSyntax,
+                out string strMarc,
+                out string strError);
             if (nRet == -1)
                 return 0;
 

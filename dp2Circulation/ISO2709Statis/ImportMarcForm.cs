@@ -341,10 +341,9 @@ Program.MainForm.UserDir,
                     // 处理
                     string strBiblioRecPath = strTargetDbName + "/?";
 
-                    XmlDocument domMarc = null;
                     nRet = MarcUtil.Marc2Xml(strMARC,
                         strBiblioSyntax,
-                        out domMarc,
+                        out XmlDocument domMarc,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
