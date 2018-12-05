@@ -878,7 +878,6 @@ namespace DigitalPlatform.OPAC.Web
             int nUsed = 0;
             for (int i = 0; i < ((bSimple == true || bSimplest == true) ? 1 : this.LineCount); i++)
             {
-
                 DropDownList list = null;
 
                 // 数据库名
@@ -1131,6 +1130,21 @@ namespace DigitalPlatform.OPAC.Web
             {
                 string strLocationQueryXml = "<item resultset='#" + strLocationFilter + "' />";
                 strXml = "<group>" + strXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";
+            }
+
+            // 2018/12/5
+            // 对书目检索的额外过滤
+            if (string.IsNullOrEmpty(app.BiblioFilter) == false)
+            {
+                string strOperator = "AND";
+                string strFilter = app.BiblioFilter;
+                if (strFilter.StartsWith("-"))
+                {
+                    strFilter = strFilter.Substring(1);
+                    strOperator = "SUB";
+                }
+                string strSubQueryXml = "<item resultset='#" + strFilter + "' />";
+                strXml = $"<group>{strXml}<operator value='{strOperator}'/>{strSubQueryXml}</group>";
             }
 
             return 0;
