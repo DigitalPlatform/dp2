@@ -30,6 +30,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
+using System.Linq;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -12522,6 +12523,262 @@ string strFileName)
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void button_test_Click(object sender, EventArgs e)
+        {
+#if NO
+            var results = this.listView_merged.Items.Cast<ListViewItem>()
+                            .Where(x => { return x.Text.StartsWith(""); }).
+                            GroupBy(p => ListViewUtil.GetItemText(p, 2), (key, g) => new { Text = key, Count = g.Count<ListViewItem>() });
+            int i = 0;
+            StringBuilder text = new StringBuilder();
+#if NO
+            foreach (ListViewItem item in results)
+            {
+                text.Append($"i={i} item.Text={ToString(item)}\r\n");
+                i++;
+            }
+#endif
+            foreach (var item in results)
+            {
+                text.Append($"i={i} item.Text={item.Text} count={item.Count}\r\n");
+                i++;
+            }
+            MessageDialog.Show(this, text.ToString());
+#endif
+
+#if NO
+            var results = this.listView_merged.Items.Cast<ListViewItem>()
+                .Sum( o=> Convert.ToDecimal(PriceUtil.GetPurePrice(ListViewUtil.GetItemText(o, MERGED_COLUMN_PRICE))));
+            MessageDialog.Show(this, results.ToString());
+#endif
+
+#if NO
+            List<ResultLine> results = this.listView_merged.Items.Cast<ListViewItem>()
+                .Where(x => { return x.Text.StartsWith(""); }).
+                GroupBy(p => ListViewUtil.GetItemText(p, 2)).
+                Select(cl => new ResultLine
+                {
+                    ProductName = cl.First().Name,
+                    Quantity = cl.Count().ToString(),
+                    Price = cl.Sum(c => Convert.ToDecimal(PriceUtil.GetPurePrice(ListViewUtil.GetItemText(c, MERGED_COLUMN_PRICE)))).ToString(),
+                }).ToList();
+            int i = 0;
+            StringBuilder text = new StringBuilder();
+            foreach (var item in results)
+            {
+                text.Append($"i={i} item.Text={item.ProductName} count={item.Quantity} price={item.Price}\r\n");
+                i++;
+            }
+            MessageDialog.Show(this, text.ToString());
+#endif
+
+#if NO
+            List<ResultLine> results = this.listView_merged.Items.Cast<ListViewItem>()
+    .Where(x => { return x.Text.StartsWith(""); }).
+    GroupBy(p => ListViewUtil.GetItemText(p, 2)).
+    Select(cl => new ResultLine
+    {
+        ProductName = cl.First().Text,
+        Quantity = cl.Count().ToString(),
+        Price = ListViewUtil.GetItemText(cl.Aggregate((current, next) =>
+        {
+            string s1 = ListViewUtil.GetItemText(current, MERGED_COLUMN_PRICE);
+            string s2 = ListViewUtil.GetItemText(next, MERGED_COLUMN_PRICE);
+            var r = new ListViewItem();
+            ListViewUtil.ChangeItemText(r, MERGED_COLUMN_PRICE, s1 + "," + s2);
+            return r;
+        }), MERGED_COLUMN_PRICE),
+    }).ToList();
+            int i = 0;
+            StringBuilder text = new StringBuilder();
+            foreach (var item in results)
+            {
+                text.Append($"i={i} item.Text={item.ProductName} count={item.Quantity} price={item.Price}\r\n");
+                i++;
+            }
+            MessageDialog.Show(this, text.ToString());
+#endif
+            string strError = "";
+
+            bool bLaunchExcel = true;
+            XLWorkbook doc = null;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = this.ExportExcelFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.ExportExcelFilename = dlg.FileName;
+
+            try
+            {
+                // doc = ExcelDocument.Create(this.ExportExcelFilename);
+
+                using (doc = new XLWorkbook(XLEventTracking.Disabled))
+                {
+                    File.Delete(this.ExportExcelFilename);
+
+                    var sheet = doc.Worksheets.Add("渠道统计");
+
+                    BuildSellerReport(sheet);
+
+                    doc.SaveAs(this.ExportExcelFilename);
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(this.ExportExcelFilename);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "test ExcelDocument.Create() {41833E03-BE49-47A6-8DD6-22BB3D6ED007} exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 订购渠道分类的订购价，订购册数，验收价，验收册数 统计
+        // 还可以考虑增加码洋价和册价格
+        class SellerStatisLine
+        {
+            public string Seller { get; set; }
+
+            public long OrderCopies { get; set; }
+            public string OrderPrice { get; set; }
+
+            public long AcceptCopies { get; set; }
+            public string AcceptPrice { get; set; }
+        }
+
+        void BuildSellerReport(IXLWorksheet sheet)
+        {
+            List<SellerStatisLine> results = this.listView_merged.Items
+                .Cast<ListViewItem>()
+                .GroupBy(p => ListViewUtil.GetItemText(p, MERGED_COLUMN_SELLER))
+                .Select(cl => new SellerStatisLine
+                {
+                    Seller = ListViewUtil.GetItemText(cl.First(), MERGED_COLUMN_SELLER),
+                    OrderCopies = cl.Sum(o => Convert.ToInt32(ListViewUtil.GetItemText(o, MERGED_COLUMN_COPY))),
+                    OrderPrice = ConcatPrice(cl, MERGED_COLUMN_PRICE),
+                }).ToList();
+            int line = 0;
+            // 栏目标题行
+            {
+                int column = 0;
+                // Seller
+                IXLCell start = WriteExcelCell(
+        sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+"渠道");
+                // OrderCopies
+                WriteExcelCell(
+sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+"订购套数");
+                // OrderPrice
+                IXLCell end = WriteExcelCell(
+sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+"订购价");
+                IXLRange range = sheet.Range(start, end);
+                range.Style.Font.Bold = true;
+                range.Style.Fill.BackgroundColor = XLColor.LightGray;
+                range.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+
+                line++;
+            }
+            // 内容行
+            foreach (var item in results)
+            {
+                int column = 0;
+                // Seller
+                WriteExcelCell(
+        sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+item.Seller);
+                // OrderCopies
+                WriteExcelCell(
+sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+item.OrderCopies);
+                // OrderPrice
+                WriteExcelCell(
+sheet,
+TABLE_TOP_BLANK_LINES + line,
+TABLE_LEFT_BLANK_COLUMS + column++,
+item.OrderPrice);
+                // text.Append($"i={i} Seller='{item.Seller}' OrderCopies={item.OrderCopies} OrderPrice={item.OrderPrice}\r\n");
+                line++;
+            }
+        }
+
+        static string ConcatPrice(
+            IGrouping<string, ListViewItem> cl,
+            int column_index)
+        {
+            string strList = ListViewUtil.GetItemText(cl.Aggregate((current, next) =>
+            {
+                string s1 = ListViewUtil.GetItemText(current, column_index);
+                string s2 = ListViewUtil.GetItemText(next, column_index);
+                var r = new ListViewItem();
+                ListViewUtil.ChangeItemText(r, column_index, s1 + "," + s2);
+                return r;
+            }), column_index);
+            return PriceUtil.TotalPrice(StringUtil.SplitList(strList));
+        }
+
+        // 按照经费来源的 统计
+
+        // 册类型的统计。订购里面似乎只有简单的订购类型。验收了才有册类型
+
+        class ResultLine
+        {
+            public string ProductName { get; set; }
+            public string Quantity { get; set; }
+            public string Price { get; set; }
+        }
+
+        static string ToString(ListViewItem item)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (string s in item.SubItems)
+            {
+                if (text.Length > 0)
+                    text.Append("\t");
+                text.Append(s);
+            }
+
+            return text.ToString();
+        }
+
     }
 
     internal class OutputProjectData

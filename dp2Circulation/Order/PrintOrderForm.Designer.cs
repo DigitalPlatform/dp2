@@ -60,6 +60,7 @@
             this.tabPage_mergedItems = new System.Windows.Forms.TabPage();
             this.listView_merged = new DigitalPlatform.GUI.ListViewNF();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.button_test = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_saveChange.SuspendLayout();
@@ -172,7 +173,7 @@
             this.tabPage_saveChange.Controls.Add(this.button_saveChange_saveChange);
             this.tabPage_saveChange.Location = new System.Drawing.Point(4, 28);
             this.tabPage_saveChange.Name = "tabPage_saveChange";
-            this.tabPage_saveChange.Size = new System.Drawing.Size(688, 204);
+            this.tabPage_saveChange.Size = new System.Drawing.Size(682, 204);
             this.tabPage_saveChange.TabIndex = 3;
             this.tabPage_saveChange.Text = "保存修改";
             this.tabPage_saveChange.UseVisualStyleBackColor = true;
@@ -204,6 +205,7 @@
             // tabPage_print
             // 
             this.tabPage_print.AutoScroll = true;
+            this.tabPage_print.Controls.Add(this.button_test);
             this.tabPage_print.Controls.Add(this.button_print_arriveRatioStatis);
             this.tabPage_print.Controls.Add(this.button_print_outputOrderOption);
             this.tabPage_print.Controls.Add(this.button_print_outputOrder);
@@ -213,7 +215,7 @@
             this.tabPage_print.Controls.Add(this.button_print_printOrderList);
             this.tabPage_print.Location = new System.Drawing.Point(4, 28);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(688, 204);
+            this.tabPage_print.Size = new System.Drawing.Size(682, 204);
             this.tabPage_print.TabIndex = 2;
             this.tabPage_print.Text = "打印 / 输出";
             this.tabPage_print.UseVisualStyleBackColor = true;
@@ -378,7 +380,7 @@
             this.tabPage_mergedItems.Location = new System.Drawing.Point(4, 28);
             this.tabPage_mergedItems.Name = "tabPage_mergedItems";
             this.tabPage_mergedItems.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_mergedItems.Size = new System.Drawing.Size(688, 121);
+            this.tabPage_mergedItems.Size = new System.Drawing.Size(682, 146);
             this.tabPage_mergedItems.TabIndex = 1;
             this.tabPage_mergedItems.Text = "合并后";
             this.tabPage_mergedItems.UseVisualStyleBackColor = true;
@@ -391,7 +393,7 @@
             this.listView_merged.LargeImageList = this.imageList_lineType;
             this.listView_merged.Location = new System.Drawing.Point(3, 3);
             this.listView_merged.Name = "listView_merged";
-            this.listView_merged.Size = new System.Drawing.Size(682, 115);
+            this.listView_merged.Size = new System.Drawing.Size(676, 140);
             this.listView_merged.SmallImageList = this.imageList_lineType;
             this.listView_merged.TabIndex = 5;
             this.listView_merged.UseCompatibleStateImageBehavior = false;
@@ -415,6 +417,16 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(696, 465);
             this.tableLayoutPanel_main.TabIndex = 6;
+            // 
+            // button_test
+            // 
+            this.button_test.Location = new System.Drawing.Point(345, 148);
+            this.button_test.Name = "button_test";
+            this.button_test.Size = new System.Drawing.Size(228, 33);
+            this.button_test.TabIndex = 8;
+            this.button_test.Text = "test";
+            this.button_test.UseVisualStyleBackColor = true;
+            this.button_test.Click += new System.EventHandler(this.button_test_Click);
             // 
             // PrintOrderForm
             // 
@@ -477,5 +489,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_arriveRatio;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_arriveRatio_outputExcel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
+        private System.Windows.Forms.Button button_test;
     }
 }

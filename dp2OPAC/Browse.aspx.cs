@@ -1,31 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using System.Threading;
 using System.Xml;
-using System.Globalization;
 using System.IO;
-using System.Diagnostics;
 using System.Web.UI.HtmlControls;
 
-using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-// using DigitalPlatform.CirculationClient;
 
 public partial class Browse2 : MyWebPage
 {
-    //OpacApplication app = null;
-    //SessionInfo sessioninfo = null;
-
     string SelectingNodePath = "";
-    // string SelectedNodeCaption = "";
 
 #if NO
     protected override void InitializeCulture()
@@ -133,11 +122,10 @@ ref sessioninfo) == false)
 
         if (strAction.ToLower() == "rss")
         {
-            string strError = "";
             int nRet = BuildRssOutput(
                 strDataFileName,
                 strNode,
-                out strError);
+                out string strError);
             if (nRet == -1)
             {
                 this.app.WriteErrorLog(strError);
@@ -275,7 +263,6 @@ ref sessioninfo) == false)
             bCommand = false;
 
         ///
-
         string strSideBarFileName = Path.GetFileName(this.SideBarControl1.CfgFile).ToLower();
         string strDataFile = Path.GetFileName(this.TreeView1.XmlFileName).ToLower();
         string strNodePath = CacheBuilder.MakeNodePath(e.Node);
@@ -309,7 +296,6 @@ ref sessioninfo) == false)
         else
             e.Name = strName;
 
-
         if (strNodePath == this.SelectingNodePath)
         {
             e.Seletected = true;
@@ -331,7 +317,6 @@ ref sessioninfo) == false)
             strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.CurrentFormat);
         else if (string.IsNullOrEmpty(this.BrowseSearchResultControl1.FormatName) == false)
             strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.FormatName);
-
 
         e.Url = "./browse.aspx?datafile=" + HttpUtility.UrlEncode(strDataFile) + strSideBarParam + "&node=" + strNodePath + strFormatParam;
 
