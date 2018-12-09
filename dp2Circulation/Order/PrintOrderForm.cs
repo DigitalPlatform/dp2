@@ -9,10 +9,7 @@ using System.Xml;
 using System.Diagnostics;
 using System.Reflection;
 using System.Web;   // HttpUtility
-
-//using DocumentFormat.OpenXml;
-//using DocumentFormat.OpenXml.Packaging;
-//using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
 
 using ClosedXML.Excel;
 
@@ -30,7 +27,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
-using System.Linq;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -7390,7 +7386,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 原始行的一行信息
-        class LineInfo
+        internal class LineInfo
         {
             // 书商
             public string Seller { get; set; }
@@ -7413,12 +7409,140 @@ MessageBoxDefaultButton.Button2);
             public string TotalPrice { get; set; }
             public string Comment { get; set; }
             public string Distribute { get; set; }
+            public string Class { get; set; }
             // public string Summary { get; set; }
 
             public OldNewValue Discount { get; set; }
             public OldNewValue Price { get; set; }
             public OldNewValue FixedPrice { get; set; }
             public OldNewCopy Copy { get; set; }
+
+            #region 扩展的属性
+
+            public string OrderPrice
+            {
+                get
+                {
+                    return Price.OldValue;
+                }
+                set
+                {
+                    if (this.Price == null)
+                        this.Price = new OldNewValue();
+
+                    FixedPrice.OldValue = value;
+                }
+            }
+            public string AcceptPrice
+            {
+                get
+                {
+                    return Price.NewValue;
+                }
+                set
+                {
+                    if (this.Price == null)
+                        this.Price = new OldNewValue();
+
+                    Price.NewValue = value;
+                }
+            }
+
+            string _acceptTotalPrice = null;
+
+            // 验收总价
+            public string AcceptTotalPrice
+            {
+                get
+                {
+                    if (_acceptTotalPrice != null)
+                        return _acceptTotalPrice;
+
+                    string acceptPrice = this.AcceptPrice;
+                    if (string.IsNullOrEmpty(acceptPrice))
+                        return "";
+                    int acceptCopy = this.Copy.NewCopy.Copy;
+                    if (acceptCopy == 0)
+                        return "";
+                    int nRet = PriceUtil.MultiPrice(acceptPrice,
+                        acceptCopy,
+                        out string strResult,
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    return strResult;
+                }
+                set
+                {
+                    _acceptTotalPrice = value;
+                }
+            }
+
+            public string OrderFixedPrice
+            {
+                get
+                {
+                    return FixedPrice.OldValue;
+                }
+                set
+                {
+                    if (this.FixedPrice == null)
+                        this.FixedPrice = new OldNewValue();
+
+                    FixedPrice.OldValue = value;
+                }
+            }
+            public string AcceptFixedPrice
+            {
+                get
+                {
+                    return FixedPrice.NewValue;
+                }
+                set
+                {
+                    if (this.FixedPrice == null)
+                        this.FixedPrice = new OldNewValue();
+
+                    FixedPrice.NewValue = value;
+                }
+            }
+
+            public decimal OrderDiscount
+            {
+                get
+                {
+                    string v = this.Discount?.OldValue;
+                    if (string.IsNullOrEmpty(v))
+                        v = "1.0";
+                    return Convert.ToDecimal(v);
+                }
+                set
+                {
+                    if (this.Discount == null)
+                        this.Discount = new OldNewValue();
+
+                    this.Discount.OldValue = value.ToString();
+                }
+            }
+            public decimal AcceptDiscount
+            {
+                get
+                {
+                    string v = this.Discount?.NewValue;
+                    if (string.IsNullOrEmpty(v))
+                        v = "1.0";
+                    return Convert.ToDecimal(v);
+                }
+                set
+                {
+                    if (this.Discount == null)
+                        this.Discount = new OldNewValue();
+
+                    this.Discount.NewValue = value.ToString();
+                }
+            }
+
+            #endregion
 
             // 对一些值进行填充和调整
             // 返回 LineInfo 类型是为了便于链式调用
@@ -7508,7 +7632,7 @@ ORIGIN_COLUMN_ORDERTIME));   // 已经是本地时间格式
                 string strComment = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_COMMENT);
                 string strDistribute = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_DISTRIBUTE);
                 string strSummary = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_SUMMARY);
-
+                string strClass = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_CLASS);
 
                 // 折扣
                 string strDiscount = ListViewUtil.GetItemText(source,
@@ -7538,13 +7662,13 @@ ORIGIN_COLUMN_COPY);
                     TotalPrice = strTotalPrice,
                     Comment = strComment,
                     Distribute = strDistribute,
+                    Class = strClass,
                     // Summary = strSummary,
 
                     Discount = OldNewValue.Parse(strDiscount),
                     Price = OldNewValue.Parse(strPrice),
                     FixedPrice = OldNewValue.Parse(strFixedPrice),
                     Copy = OldNewCopy.Parse(strTempCopy, strPosition),
-
                 };
             }
         }
@@ -12524,7 +12648,7 @@ string strFileName)
             MessageBox.Show(this, strError);
         }
 
-        private void button_test_Click(object sender, EventArgs e)
+        private void button_report_Click(object sender, EventArgs e)
         {
 #if NO
             var results = this.listView_merged.Items.Cast<ListViewItem>()
@@ -12629,9 +12753,35 @@ string strFileName)
                 {
                     File.Delete(this.ExportExcelFilename);
 
-                    var sheet = doc.Worksheets.Add("渠道统计");
+                    {
+                        var sheet = doc.Worksheets.Add("渠道统计");
+                        OrderReport.BuildOriginReport(
+                            this.comboBox_load_type.Text == "连续出版物",
+                            this.listView_origin.Items.Cast<ListViewItem>(),
+                            "Seller",
+                            "渠道",
+                            sheet);
+                    }
 
-                    BuildSellerReport(sheet);
+                    {
+                        var sheet = doc.Worksheets.Add("经费来源统计");
+                        OrderReport.BuildOriginReport(
+                            this.comboBox_load_type.Text == "连续出版物",
+                            this.listView_origin.Items.Cast<ListViewItem>(),
+                            "Source",
+                            "经费来源",
+                            sheet);
+                    }
+
+                    {
+                        var sheet = doc.Worksheets.Add("类目统计");
+                        OrderReport.BuildOriginReport(
+                            this.comboBox_load_type.Text == "连续出版物",
+                            this.listView_origin.Items.Cast<ListViewItem>(),
+                            "Class",
+                            "类目",
+                            sheet);
+                    }
 
                     doc.SaveAs(this.ExportExcelFilename);
                 }
@@ -12660,124 +12810,6 @@ string strFileName)
             MessageBox.Show(this, strError);
         }
 
-        // 订购渠道分类的订购价，订购册数，验收价，验收册数 统计
-        // 还可以考虑增加码洋价和册价格
-        class SellerStatisLine
-        {
-            public string Seller { get; set; }
-
-            public long OrderCopies { get; set; }
-            public string OrderPrice { get; set; }
-
-            public long AcceptCopies { get; set; }
-            public string AcceptPrice { get; set; }
-        }
-
-        void BuildSellerReport(IXLWorksheet sheet)
-        {
-            List<SellerStatisLine> results = this.listView_merged.Items
-                .Cast<ListViewItem>()
-                .GroupBy(p => ListViewUtil.GetItemText(p, MERGED_COLUMN_SELLER))
-                .Select(cl => new SellerStatisLine
-                {
-                    Seller = ListViewUtil.GetItemText(cl.First(), MERGED_COLUMN_SELLER),
-                    OrderCopies = cl.Sum(o => Convert.ToInt32(ListViewUtil.GetItemText(o, MERGED_COLUMN_COPY))),
-                    OrderPrice = ConcatPrice(cl, MERGED_COLUMN_PRICE),
-                }).ToList();
-            int line = 0;
-            // 栏目标题行
-            {
-                int column = 0;
-                // Seller
-                IXLCell start = WriteExcelCell(
-        sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-"渠道");
-                // OrderCopies
-                WriteExcelCell(
-sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-"订购套数");
-                // OrderPrice
-                IXLCell end = WriteExcelCell(
-sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-"订购价");
-                IXLRange range = sheet.Range(start, end);
-                range.Style.Font.Bold = true;
-                range.Style.Fill.BackgroundColor = XLColor.LightGray;
-                range.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-
-                line++;
-            }
-            // 内容行
-            foreach (var item in results)
-            {
-                int column = 0;
-                // Seller
-                WriteExcelCell(
-        sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-item.Seller);
-                // OrderCopies
-                WriteExcelCell(
-sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-item.OrderCopies);
-                // OrderPrice
-                WriteExcelCell(
-sheet,
-TABLE_TOP_BLANK_LINES + line,
-TABLE_LEFT_BLANK_COLUMS + column++,
-item.OrderPrice);
-                // text.Append($"i={i} Seller='{item.Seller}' OrderCopies={item.OrderCopies} OrderPrice={item.OrderPrice}\r\n");
-                line++;
-            }
-        }
-
-        static string ConcatPrice(
-            IGrouping<string, ListViewItem> cl,
-            int column_index)
-        {
-            string strList = ListViewUtil.GetItemText(cl.Aggregate((current, next) =>
-            {
-                string s1 = ListViewUtil.GetItemText(current, column_index);
-                string s2 = ListViewUtil.GetItemText(next, column_index);
-                var r = new ListViewItem();
-                ListViewUtil.ChangeItemText(r, column_index, s1 + "," + s2);
-                return r;
-            }), column_index);
-            return PriceUtil.TotalPrice(StringUtil.SplitList(strList));
-        }
-
-        // 按照经费来源的 统计
-
-        // 册类型的统计。订购里面似乎只有简单的订购类型。验收了才有册类型
-
-        class ResultLine
-        {
-            public string ProductName { get; set; }
-            public string Quantity { get; set; }
-            public string Price { get; set; }
-        }
-
-        static string ToString(ListViewItem item)
-        {
-            StringBuilder text = new StringBuilder();
-            foreach (string s in item.SubItems)
-            {
-                if (text.Length > 0)
-                    text.Append("\t");
-                text.Append(s);
-            }
-
-            return text.ToString();
-        }
 
     }
 

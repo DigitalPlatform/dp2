@@ -583,6 +583,7 @@
     </Compile>
     <Compile Include="Order\BatchOrder\OrderList.cs" />
     <Compile Include="Order\DistributeExcelFile.cs" />
+    <Compile Include="Order\OrderReport.cs" />
     <Compile Include="Order\SaveDistributeExcelFileDialog.cs">
       <SubType>Form</SubType>
     </Compile>
