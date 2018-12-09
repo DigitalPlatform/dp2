@@ -42,6 +42,7 @@
             this.textBox_saveChange_info = new System.Windows.Forms.TextBox();
             this.button_saveChange_saveChange = new System.Windows.Forms.Button();
             this.tabPage_print = new System.Windows.Forms.TabPage();
+            this.button_report = new System.Windows.Forms.Button();
             this.button_print_arriveRatioStatis = new System.Windows.Forms.Button();
             this.contextMenuStrip_arriveRatio = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem_arriveRatio_outputExcel = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,7 +61,6 @@
             this.tabPage_mergedItems = new System.Windows.Forms.TabPage();
             this.listView_merged = new DigitalPlatform.GUI.ListViewNF();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.button_test = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_saveChange.SuspendLayout();
@@ -205,7 +205,7 @@
             // tabPage_print
             // 
             this.tabPage_print.AutoScroll = true;
-            this.tabPage_print.Controls.Add(this.button_test);
+            this.tabPage_print.Controls.Add(this.button_report);
             this.tabPage_print.Controls.Add(this.button_print_arriveRatioStatis);
             this.tabPage_print.Controls.Add(this.button_print_outputOrderOption);
             this.tabPage_print.Controls.Add(this.button_print_outputOrder);
@@ -219,6 +219,16 @@
             this.tabPage_print.TabIndex = 2;
             this.tabPage_print.Text = "打印 / 输出";
             this.tabPage_print.UseVisualStyleBackColor = true;
+            // 
+            // button_report
+            // 
+            this.button_report.Location = new System.Drawing.Point(345, 148);
+            this.button_report.Name = "button_report";
+            this.button_report.Size = new System.Drawing.Size(228, 33);
+            this.button_report.TabIndex = 8;
+            this.button_report.Text = "统计报表(&R)...";
+            this.button_report.UseVisualStyleBackColor = true;
+            this.button_report.Click += new System.EventHandler(this.button_report_Click);
             // 
             // button_print_arriveRatioStatis
             // 
@@ -418,16 +428,6 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(696, 465);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
-            // button_test
-            // 
-            this.button_test.Location = new System.Drawing.Point(345, 148);
-            this.button_test.Name = "button_test";
-            this.button_test.Size = new System.Drawing.Size(228, 33);
-            this.button_test.TabIndex = 8;
-            this.button_test.Text = "test";
-            this.button_test.UseVisualStyleBackColor = true;
-            this.button_test.Click += new System.EventHandler(this.button_test_Click);
-            // 
             // PrintOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -489,6 +489,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_arriveRatio;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_arriveRatio_outputExcel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
-        private System.Windows.Forms.Button button_test;
+        private System.Windows.Forms.Button button_report;
     }
 }
