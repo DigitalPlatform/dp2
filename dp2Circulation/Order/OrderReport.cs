@@ -38,13 +38,19 @@ namespace dp2Circulation
             public string AcceptDiscount { get; set; }
 
 
-            // 种数
-            public long BiblioCount { get; set; }
+            // 订购种数
+            public long OrderBiblioCount { get; set; }
+            // 验收种数
+            public long AcceptBiblioCount { get; set; }
 
-            // 期数
-            public long IssueCount { get; set; }
+            // 订购期数
+            public long OrderIssueCount { get; set; }
+            // 验收期数
+            public long AcceptIssueCount { get; set; }
+
         }
 
+#if NO
         // 根据 Merged ListView 和指定的 Key 列创建报表
         // parameters:
         //      nKeyColumn  用于 Key 的列 index 值。例如 MERGED_COLUMN_SELLER
@@ -137,6 +143,8 @@ item.OrderPrice);
             return PriceUtil.TotalPrice(StringUtil.SplitList(strList));
         }
 
+#endif
+
         // 按照经费来源的 统计
 
         // 册类型的统计。订购里面似乎只有简单的订购类型。验收了才有册类型
@@ -187,11 +195,17 @@ item.OrderPrice);
 
             List<KeyStatisLine> results =
                 lines
+                .Where(o => bSeries || string.IsNullOrEmpty(o.State) == false)
                 .GroupBy(p => (string)GetPropertyValue(p, strKeyName))
                 .Select(cl => new KeyStatisLine
                 {
                     Key = (string)GetPropertyValue(cl.First(), strKeyName),
-                    IssueCount = cl.Sum(o => Convert.ToInt32(o.IssueCount)),
+
+                    OrderIssueCount = cl.Where(a => a.Copy?.OldCopy?.Copy > 0)
+                    .Sum(o => Convert.ToInt32(o.IssueCount)),
+
+                    AcceptIssueCount = cl.Where(a => a.Copy?.NewCopy?.Copy > 0)
+                    .Sum(o => Convert.ToInt32(o.IssueCount)),
 
                     OrderCopies = cl.Sum(o => Convert.ToInt32(o.Copy.OldCopy.Copy)),
                     OrderPrice = ConcatLinePrice(cl, "TotalPrice"),
@@ -199,22 +213,30 @@ item.OrderPrice);
                     AcceptCopies = cl.Sum(o => Convert.ToInt32(o.Copy.NewCopy.Copy)),
                     AcceptPrice = ConcatLinePrice(cl, "AcceptTotalPrice"),
 
-                    BiblioCount = cl.GroupBy(p => p.BiblioRecPath).LongCount(),
+                    OrderBiblioCount = cl.Where(a => a.Copy?.OldCopy?.Copy > 0)
+                    .GroupBy(p => p.BiblioRecPath).LongCount(),
+                    // cl.GroupBy(p => p.BiblioRecPath).LongCount(),
 
-                    OrderFixedPrice = ConcatLinePrice(cl, "OrderFixedPrice"),    // 可能要乘以套数
-                    OrderDiscount = cl.Average(o => o.OrderDiscount).ToString(),
+                    AcceptBiblioCount = cl.Where(a => a.Copy?.NewCopy?.Copy > 0)
+                    .GroupBy(p => p.BiblioRecPath).LongCount(),
 
-                    AcceptFixedPrice = ConcatLinePrice(cl, "AcceptFixedPrice"),    // 可能要乘以套数
-                    AcceptDiscount = cl.Average(o => o.AcceptDiscount).ToString(),
+                    OrderFixedPrice = ConcatLinePrice(cl, "OrderTotalFixedPrice"),    // 可能要乘以套数
+                    OrderDiscount = cl.Where(a => a.Copy?.OldCopy?.Copy > 0)
+                    .DefaultIfEmpty(new PrintOrderForm.LineInfo()).Average(o => o.OrderDiscount).ToString(),
+
+                    AcceptFixedPrice = ConcatLinePrice(cl, "AcceptTotalFixedPrice"),    // 可能要乘以套数
+                    AcceptDiscount = cl.Where(a => a.Copy?.NewCopy?.Copy > 0)
+                    .DefaultIfEmpty(new PrintOrderForm.LineInfo()).Average(o => o.AcceptDiscount).ToString(),
 
                 }).ToList();
             int line = 0;
             // 栏目标题行
             string[] titles = new string[] {
                 strKeyCaption,
-                "种数", "*期数",
+                "订购种数", "*订购期数",
                 "订购套数", "订购价",
                 "订购码洋", "平均订购折扣",
+                "验收种数", "*验收期数",
                 "验收套数", "验收价",
                 "验收码洋", "平均验收折扣",
             };
@@ -263,7 +285,8 @@ text);
             // 内容行
             foreach (var item in results)
             {
-                SetCellInfo info = new SetCellInfo {
+                SetCellInfo info = new SetCellInfo
+                {
                     ColumnMaxChars = column_max_chars,
                     Line = line,
                     Column = 0,
@@ -273,13 +296,13 @@ text);
                 // Seller
                 info.SetCellText(item.Key);
 
-                // BiblioCount
-                info.SetCellText(item.BiblioCount);
+                // OrderBiblioCount
+                info.SetCellText(item.OrderBiblioCount);
 
                 if (bSeries)
                 {
-                    // IssueCount
-                    info.SetCellText(item.IssueCount);
+                    // OrderIssueCount
+                    info.SetCellText(item.OrderIssueCount);
                 }
 
                 // OrderCopies
@@ -293,6 +316,15 @@ text);
 
                 // OrderDiscount
                 info.SetCellText(item.OrderDiscount);
+
+                // AcceptBiblioCount
+                info.SetCellText(item.AcceptBiblioCount);
+
+                if (bSeries)
+                {
+                    // AcceptIssueCount
+                    info.SetCellText(item.AcceptIssueCount);
+                }
 
                 // AcceptCopies
                 info.SetCellText(item.AcceptCopies);
@@ -351,7 +383,6 @@ text);
     value);
                 this.Column++;
             }
-
         }
 
         static void SetCellText(
@@ -406,6 +437,7 @@ text);
             // PrintOrderForm.RemoveChangedChar()
             string strList = (string)GetPropertyValue(cl.Aggregate((current, next) =>
             {
+                // TODO：单价应该乘以套数。或者还有期数也要乘上
                 string s1 = (string)GetPropertyValue(current, strFieldName);
                 string s2 = (string)GetPropertyValue(next, strFieldName);
                 var r = new PrintOrderForm.LineInfo();

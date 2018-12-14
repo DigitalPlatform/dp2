@@ -1916,6 +1916,8 @@ out string strError)
                 return "";
             return "@refID:" + strRefID;
         }
+
+
 #if NO
         public static bool Identify()
         {

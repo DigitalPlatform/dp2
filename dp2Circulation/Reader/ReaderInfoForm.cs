@@ -1820,8 +1820,10 @@ strNewDefault);
                 goto ERROR1;
             }
 
+            bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
+
             // 校验证条码号
-            if (this.NeedVerifyBarcode == true
+            if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
                 && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
             {
                 // 形式校验条码号
@@ -1852,11 +1854,12 @@ strNewDefault);
                     goto ERROR1;
                 }
 
-                /*
                 // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                if (nRet == -2)
+                if (nRet == -2 
+                    && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
+                {
                     MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
-                 * */
+                }
             }
 
             // TODO: 保存时候的选项
@@ -3566,7 +3569,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveRecord("displaysuccess,verifybarcode");
+                            this.SaveRecord("displaysuccess");  // ,verifybarcode
                         }
                     }
                     finally
@@ -3582,7 +3585,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveRecord("displaysuccess,verifybarcode,changereaderbarcode");
+                            this.SaveRecord("displaysuccess,changereaderbarcode");  // verifybarcode,
                         }
                     }
                     finally

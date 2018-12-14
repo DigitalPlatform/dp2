@@ -7388,12 +7388,15 @@ MessageBoxDefaultButton.Button2);
         // 原始行的一行信息
         internal class LineInfo
         {
+            public string State { get; set; }
+
             // 书商
             public string Seller { get; set; }
             public string SellerAddress { get; set; }
 
             // 经费来源
-            public string Source { get; set; }
+            // public string Source { get; set; }
+            public OldNewValue Source { get; set; }
 
             public string IssueCount { get; set; }
             public int IssueCountValue { get; set; }
@@ -7406,6 +7409,7 @@ MessageBoxDefaultButton.Button2);
             public string CatalogNo { get; set; }
             public string OrderTime { get; set; }   // 订购时间。本地时间格式
 
+            // TotalPrice 是实有的数据
             public string TotalPrice { get; set; }
             public string Comment { get; set; }
             public string Distribute { get; set; }
@@ -7419,6 +7423,7 @@ MessageBoxDefaultButton.Button2);
 
             #region 扩展的属性
 
+            // 订购单价
             public string OrderPrice
             {
                 get
@@ -7433,6 +7438,7 @@ MessageBoxDefaultButton.Button2);
                     FixedPrice.OldValue = value;
                 }
             }
+            // 验收单价
             public string AcceptPrice
             {
                 get
@@ -7478,6 +7484,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+            // 订购码洋单价
             public string OrderFixedPrice
             {
                 get
@@ -7492,6 +7499,8 @@ MessageBoxDefaultButton.Button2);
                     FixedPrice.OldValue = value;
                 }
             }
+
+            // 验收码洋单价
             public string AcceptFixedPrice
             {
                 get
@@ -7504,6 +7513,66 @@ MessageBoxDefaultButton.Button2);
                         this.FixedPrice = new OldNewValue();
 
                     FixedPrice.NewValue = value;
+                }
+            }
+
+            string _orderTotalFixedPrice = null;
+
+            // 订购总码洋
+            public string OrderTotalFixedPrice
+            {
+                get
+                {
+                    if (_orderTotalFixedPrice != null)
+                        return _orderTotalFixedPrice;
+
+                    string price = this.OrderFixedPrice;
+                    if (string.IsNullOrEmpty(price))
+                        return "";
+                    int copy = this.Copy.OldCopy.Copy;
+                    if (copy == 0)
+                        return "";
+                    int nRet = PriceUtil.MultiPrice(price,
+                        copy,
+                        out string strResult,
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    return strResult;
+                }
+                set
+                {
+                    _orderTotalFixedPrice = value;
+                }
+            }
+
+            string _acceptTotalFixedPrice = null;
+
+            // 验收总码洋
+            public string AcceptTotalFixedPrice
+            {
+                get
+                {
+                    if (_acceptTotalFixedPrice != null)
+                        return _acceptTotalFixedPrice;
+
+                    string price = this.AcceptFixedPrice;
+                    if (string.IsNullOrEmpty(price))
+                        return "";
+                    int copy = this.Copy.NewCopy.Copy;
+                    if (copy == 0)
+                        return "";
+                    int nRet = PriceUtil.MultiPrice(price,
+                        copy,
+                        out string strResult,
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);
+                    return strResult;
+                }
+                set
+                {
+                    _acceptTotalFixedPrice = value;
                 }
             }
 
@@ -7541,6 +7610,36 @@ MessageBoxDefaultButton.Button2);
                     this.Discount.NewValue = value.ToString();
                 }
             }
+
+            public string OrderSource
+            {
+                get
+                {
+                    return Source.OldValue;
+                }
+                set
+                {
+                    if (this.Source == null)
+                        this.Source = new OldNewValue();
+
+                    Source.OldValue = value;
+                }
+            }
+            public string AcceptSource
+            {
+                get
+                {
+                    return Source.NewValue;
+                }
+                set
+                {
+                    if (this.Source == null)
+                        this.Source = new OldNewValue();
+
+                    Source.NewValue = value;
+                }
+            }
+
 
             #endregion
 
@@ -7590,6 +7689,8 @@ out string strError);
 
             public static LineInfo Build(ListViewItem source, string strPosition)
             {
+                string strState = ListViewUtil.GetItemText(source,
+                    ORIGIN_COLUMN_STATE);
                 // 渠道
                 string strSeller = ListViewUtil.GetItemText(source,
                     ORIGIN_COLUMN_SELLER);
@@ -7649,9 +7750,10 @@ ORIGIN_COLUMN_COPY);
 
                 return new LineInfo
                 {
+                    State = strState,
                     Seller = strSeller,
                     SellerAddress = strSellerAddress,
-                    Source = strSource,
+                    Source = OldNewValue.Parse(strSource),
                     IssueCount = strIssueCount,
                     IssueCountValue = nIssueCount,
                     Range = strRange,
@@ -8748,7 +8850,10 @@ ORIGIN_COLUMN_COPY);
                         nCopy += current_line.Copy.OldCopy.Copy; // nCurCopy;
 
                         // 汇总合并注释
-                        string strSource = current_line.Source; // ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_SOURCE);
+                        string strSource = current_line.Source.NewValue; // ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_SOURCE);
+                        if (string.IsNullOrEmpty(strSource))
+                            strSource = current_line.Source.OldValue;
+
                         string strRecPath = current_line.RecPath; // ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_RECPATH);
                         if (String.IsNullOrEmpty(strMergeComment) == false)
                             strMergeComment += "; ";
@@ -12768,7 +12873,7 @@ string strFileName)
                         OrderReport.BuildOriginReport(
                             this.comboBox_load_type.Text == "连续出版物",
                             this.listView_origin.Items.Cast<ListViewItem>(),
-                            "Source",
+                            "OrderSource",
                             "经费来源",
                             sheet);
                     }
@@ -12802,7 +12907,7 @@ string strFileName)
             }
             catch (Exception ex)
             {
-                strError = "test ExcelDocument.Create() {41833E03-BE49-47A6-8DD6-22BB3D6ED007} exception: " + ExceptionUtil.GetAutoText(ex);
+                strError = "button_report_Click() exception: " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
 
@@ -12810,6 +12915,178 @@ string strFileName)
             MessageBox.Show(this, strError);
         }
 
+        // 根据订购时间范围装载
+        private void button_load_loadFromOrderTime_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            DateSliceDialog dlg = new DateSliceDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Text = "请指定订购时间范围";
+            dlg.TimeRangeMode = true;
+            dlg.uTimeRange = Program.MainForm.AppInfo.GetString("print_order_form", "order_time_dlg", "");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.SetString("print_order_form", "order_time_dlg", dlg.uTimeRange);
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+                return;
+
+            int nRet = SearchAndFill(dlg.Rfc1123TimeRange,
+                "订购时间",
+                "exact",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int SearchAndFill(string strQueryWord,
+            string strFrom,
+            string strMatchStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
+            {
+            }
+            else
+            {
+                if (this.Changed == true)
+                {
+                    // 警告尚未保存
+                    DialogResult result = MessageBox.Show(this,
+                        "当前窗口内有原始信息被修改后尚未保存。若此时为装载新内容而清除原有信息，则未保存信息将丢失。\r\n\r\n确实要装载新内容? ",
+                        "PrintOrderForm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result != DialogResult.Yes)
+                    {
+                        return 0; // 放弃
+                    }
+                }
+
+                this.listView_origin.Items.Clear();
+                this.SortColumns_origin.Clear();
+                SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
+            }
+
+            _changed_recpaths = Program.MainForm.GetChangedRecords("order");
+
+            EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在检索 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                stop.SetProgressRange(0, 100);
+
+                long lRet = 0;
+
+                // 2013/3/25
+                lRet = channel.SearchOrder(
+    stop,
+    this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
+    strQueryWord,   // "", // dlg.BatchNo,
+    -1,
+    strFrom,    // "__id",
+    strMatchStyle,  // "left",
+    this.Lang,
+    "batchno",   // strResultSetName
+    "",    // strSearchStyle
+    "", // strOutputStyle
+    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                {
+                    strError = $"检索词 '{strQueryWord}' 没有命中记录";
+                    return -1;
+                }
+
+                ResultSetLoader loader = new ResultSetLoader(channel,
+                    stop,
+                    "batchno",
+                    "id"); // "id,cols"
+
+                int nDupCount = 0;
+
+                long lHitCount = lRet;
+
+                stop.SetProgressRange(0, lHitCount);
+
+                // DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
+
+                // 装入浏览格式
+                int i = 0;
+                foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    // 处理浏览结果
+                    // for (int i = 0; i < searchresults.Length; i++)
+                    {
+                        string strRecPath = searchresult.Path;
+                        // 根据记录路径，装入订购记录
+                        // return: 
+                        //      -2  路径已经在list中存在了
+                        //      -1  出错
+                        //      1   成功
+                        nRet = LoadOneItem(
+                            channel,
+                            strRecPath,
+                            this.listView_origin,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == -2)
+                            nDupCount++;
+
+                        stop.SetProgressValue(i + 1);
+                    }
+
+                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + (i + 1).ToString() + " 条");
+                    i++;
+                }
+
+                // 填充合并后数据列表
+                stop.SetMessage("正在合并数据...");
+                nRet = FillMergedList(out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
+                EnableControls(true);
+            }
+
+            return 1;
+        }
 
     }
 
