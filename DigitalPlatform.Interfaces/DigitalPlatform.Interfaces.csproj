@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="ExternalMessageHost.cs" />
     <Compile Include="ExternalSsoHost.cs" />
+    <Compile Include="IBioRecognition.cs" />
     <Compile Include="ICardCenter.cs" />
     <Compile Include="IFingerprint.cs" />
     <Compile Include="IIdcard.cs" />

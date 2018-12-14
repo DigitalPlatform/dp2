@@ -61,6 +61,7 @@
             this.tabPage_mergedItems = new System.Windows.Forms.TabPage();
             this.listView_merged = new DigitalPlatform.GUI.ListViewNF();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.button_load_loadFromOrderTime = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_saveChange.SuspendLayout();
@@ -100,6 +101,7 @@
             // 
             // tabPage_load
             // 
+            this.tabPage_load.Controls.Add(this.button_load_loadFromOrderTime);
             this.tabPage_load.Controls.Add(this.checkBox_print_accepted);
             this.tabPage_load.Controls.Add(this.label3);
             this.tabPage_load.Controls.Add(this.comboBox_load_type);
@@ -153,7 +155,7 @@
             this.button_load_loadFromBatchNo.Name = "button_load_loadFromBatchNo";
             this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(357, 33);
             this.button_load_loadFromBatchNo.TabIndex = 4;
-            this.button_load_loadFromBatchNo.Text = "根据[订购]批次号检索装载(&B)...";
+            this.button_load_loadFromBatchNo.Text = "根据[订购]批次号装载(&B)...";
             this.button_load_loadFromBatchNo.UseVisualStyleBackColor = true;
             this.button_load_loadFromBatchNo.Click += new System.EventHandler(this.button_load_loadFromBatchNo_Click);
             // 
@@ -428,6 +430,16 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(696, 465);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
+            // button_load_loadFromOrderTime
+            // 
+            this.button_load_loadFromOrderTime.Location = new System.Drawing.Point(180, 165);
+            this.button_load_loadFromOrderTime.Name = "button_load_loadFromOrderTime";
+            this.button_load_loadFromOrderTime.Size = new System.Drawing.Size(357, 33);
+            this.button_load_loadFromOrderTime.TabIndex = 5;
+            this.button_load_loadFromOrderTime.Text = "根据订购时间范围装载(&T)...";
+            this.button_load_loadFromOrderTime.UseVisualStyleBackColor = true;
+            this.button_load_loadFromOrderTime.Click += new System.EventHandler(this.button_load_loadFromOrderTime_Click);
+            // 
             // PrintOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -490,5 +502,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_arriveRatio_outputExcel;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.Button button_report;
+        private System.Windows.Forms.Button button_load_loadFromOrderTime;
     }
 }

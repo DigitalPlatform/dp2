@@ -133,6 +133,7 @@
     <Compile Include="BinaryResControl.Designer.cs">
       <DependentUpon>BinaryResControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="BioUtil.cs" />
     <Compile Include="CfgCache.cs" />
     <Compile Include="dp2ResStream.cs" />
     <Compile Include="dp2ResTree.cs">
@@ -302,6 +303,10 @@
     <ProjectReference Include="..\DigitalPlatform.CommonDialog\DigitalPlatform.CommonDialog.csproj">
       <Project>{3dcfca4d-0205-4684-a9a6-1db8640cd579}</Project>
       <Name>DigitalPlatform.CommonDialog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
