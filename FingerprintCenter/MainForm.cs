@@ -25,6 +25,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Text;
+using static DigitalPlatform.CirculationClient.BioUtil;
 
 namespace FingerprintCenter
 {
@@ -128,6 +129,8 @@ bool bClickClose = false)
             this.ShowMessage("");
         }
 
+        FingerPrint FingerPrint = null;
+
         private void Form1_Load(object sender, EventArgs e)
         {
             ClientInfo.Initial("fingerprintcenter");
@@ -151,12 +154,14 @@ bool bClickClose = false)
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
+            this.FingerPrint = new FingerPrint();
+            Program.FingerPrint = this.FingerPrint;
+
             FingerPrint.Prompt += FingerPrint_Prompt;
             FingerPrint.ProgressChanged += FingerPrint_ProgressChanged;
             FingerPrint.Captured += FingerPrint_Captured;
             FingerPrint.Speak += FingerPrint_Speak;
             FingerPrint.ImageReady += FingerPrint_ImageReady;
-
 
             if (string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text) == true)
             {
@@ -606,7 +611,7 @@ bool bClickClose = false)
             LibraryChannel channel = this.GetChannel();
             try
             {
-                ReplicationPlan plan = FingerPrint.GetReplicationPlan(channel);
+                ReplicationPlan plan = BioUtil.GetReplicationPlan(channel);
                 this.Invoke((Action)(() =>
                 {
                     this.textBox_replicationStart.Text = plan.StartDate;

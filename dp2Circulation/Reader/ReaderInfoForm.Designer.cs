@@ -57,6 +57,8 @@
             this.toolStripMenuItem_loadBlankFromLocal = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_loadBlankFromServer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_webCamera = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_registerFace = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_pasteCardPhoto = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_pasteCardPhoto = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_registerFingerprint = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -78,6 +80,7 @@
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_editXML = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportDetailToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_exportBorrowingBarcode = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,7 +94,6 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.toolStripMenuItem_editXML = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -140,6 +142,8 @@
             this.readerEditControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.readerEditControl1.Email = "";
             this.readerEditControl1.ExpireDate = "";
+            this.readerEditControl1.FaceFeature = "";
+            this.readerEditControl1.FaceFeatureVersion = "";
             this.readerEditControl1.Fingerprint = "";
             this.readerEditControl1.FingerprintVersion = "";
             this.readerEditControl1.Foregift = "";
@@ -200,7 +204,7 @@
             this.tabPage_normal.Controls.Add(this.splitContainer_normal);
             this.tabPage_normal.Location = new System.Drawing.Point(4, 28);
             this.tabPage_normal.Name = "tabPage_normal";
-            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_normal.Size = new System.Drawing.Size(901, 406);
             this.tabPage_normal.TabIndex = 0;
             this.tabPage_normal.Text = "常规";
@@ -210,9 +214,9 @@
             // 
             this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
             this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_borrowHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_borrowHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
-            this.tabPage_borrowHistory.Size = new System.Drawing.Size(901, 374);
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(901, 406);
             this.tabPage_borrowHistory.TabIndex = 3;
             this.tabPage_borrowHistory.Text = "借阅历史";
             this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
@@ -221,10 +225,10 @@
             // 
             this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_borrowHistory.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.webBrowser_borrowHistory.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
-            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(901, 374);
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(901, 406);
             this.webBrowser_borrowHistory.TabIndex = 0;
             // 
             // tabPage_xml
@@ -232,8 +236,8 @@
             this.tabPage_xml.Controls.Add(this.webBrowser_xml);
             this.tabPage_xml.Location = new System.Drawing.Point(4, 28);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_xml.Size = new System.Drawing.Size(901, 374);
+            this.tabPage_xml.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_xml.Size = new System.Drawing.Size(901, 406);
             this.tabPage_xml.TabIndex = 1;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -244,16 +248,16 @@
             this.webBrowser_xml.Location = new System.Drawing.Point(3, 3);
             this.webBrowser_xml.MinimumSize = new System.Drawing.Size(22, 24);
             this.webBrowser_xml.Name = "webBrowser_xml";
-            this.webBrowser_xml.Size = new System.Drawing.Size(895, 368);
+            this.webBrowser_xml.Size = new System.Drawing.Size(895, 400);
             this.webBrowser_xml.TabIndex = 0;
             // 
             // tabPage_objects
             // 
             this.tabPage_objects.Controls.Add(this.binaryResControl1);
             this.tabPage_objects.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_objects.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_objects.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_objects.Name = "tabPage_objects";
-            this.tabPage_objects.Size = new System.Drawing.Size(901, 374);
+            this.tabPage_objects.Size = new System.Drawing.Size(901, 406);
             this.tabPage_objects.TabIndex = 2;
             this.tabPage_objects.Text = "对象";
             this.tabPage_objects.UseVisualStyleBackColor = true;
@@ -268,7 +272,7 @@
             this.binaryResControl1.Location = new System.Drawing.Point(0, 0);
             this.binaryResControl1.Name = "binaryResControl1";
             this.binaryResControl1.RightsCfgFileName = null;
-            this.binaryResControl1.Size = new System.Drawing.Size(901, 374);
+            this.binaryResControl1.Size = new System.Drawing.Size(901, 406);
             this.binaryResControl1.TabIndex = 1;
             this.binaryResControl1.TempDir = null;
             // 
@@ -277,9 +281,9 @@
             this.tabPage_qrCode.Controls.Add(this.textBox_pqr);
             this.tabPage_qrCode.Controls.Add(this.pictureBox_qrCode);
             this.tabPage_qrCode.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_qrCode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_qrCode.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_qrCode.Name = "tabPage_qrCode";
-            this.tabPage_qrCode.Size = new System.Drawing.Size(901, 374);
+            this.tabPage_qrCode.Size = new System.Drawing.Size(901, 406);
             this.tabPage_qrCode.TabIndex = 4;
             this.tabPage_qrCode.Text = "二维码";
             this.tabPage_qrCode.UseVisualStyleBackColor = true;
@@ -288,7 +292,7 @@
             // 
             this.textBox_pqr.Dock = System.Windows.Forms.DockStyle.Top;
             this.textBox_pqr.Location = new System.Drawing.Point(0, 0);
-            this.textBox_pqr.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_pqr.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_pqr.Name = "textBox_pqr";
             this.textBox_pqr.ReadOnly = true;
             this.textBox_pqr.Size = new System.Drawing.Size(901, 28);
@@ -298,10 +302,10 @@
             // 
             this.pictureBox_qrCode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_qrCode.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox_qrCode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox_qrCode.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_qrCode.Name = "pictureBox_qrCode";
-            this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(30, 30, 30, 30);
-            this.pictureBox_qrCode.Size = new System.Drawing.Size(901, 374);
+            this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(30);
+            this.pictureBox_qrCode.Size = new System.Drawing.Size(901, 406);
             this.pictureBox_qrCode.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_qrCode.TabIndex = 0;
             this.pictureBox_qrCode.TabStop = false;
@@ -317,6 +321,7 @@
             this.toolStripButton_loadBlank,
             this.toolStripDropDownButton_loadBlank,
             this.toolStripButton_webCamera,
+            this.toolStripSplitButton_registerFace,
             this.toolStripButton_pasteCardPhoto,
             this.toolStripButton_registerFingerprint,
             this.toolStripSeparator1,
@@ -410,6 +415,25 @@
             this.toolStripButton_webCamera.Size = new System.Drawing.Size(28, 28);
             this.toolStripButton_webCamera.Text = "从摄像头获取图像";
             this.toolStripButton_webCamera.Click += new System.EventHandler(this.toolStripButton_webCamera_Click);
+            // 
+            // toolStripSplitButton_registerFace
+            // 
+            this.toolStripSplitButton_registerFace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_registerFace.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_pasteCardPhoto});
+            this.toolStripSplitButton_registerFace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFace.Image")));
+            this.toolStripSplitButton_registerFace.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_registerFace.Name = "toolStripSplitButton_registerFace";
+            this.toolStripSplitButton_registerFace.Size = new System.Drawing.Size(45, 28);
+            this.toolStripSplitButton_registerFace.Text = "toolStripSplitButton1";
+            this.toolStripSplitButton_registerFace.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFace_ButtonClick);
+            // 
+            // ToolStripMenuItem_pasteCardPhoto
+            // 
+            this.ToolStripMenuItem_pasteCardPhoto.Name = "ToolStripMenuItem_pasteCardPhoto";
+            this.ToolStripMenuItem_pasteCardPhoto.Size = new System.Drawing.Size(266, 30);
+            this.ToolStripMenuItem_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照";
+            this.ToolStripMenuItem_pasteCardPhoto.Click += new System.EventHandler(this.ToolStripMenuItem_pasteCardPhoto_Click);
             // 
             // toolStripButton_pasteCardPhoto
             // 
@@ -600,6 +624,13 @@
             this.toolStripSeparator8.Name = "toolStripSeparator8";
             this.toolStripSeparator8.Size = new System.Drawing.Size(357, 6);
             // 
+            // toolStripMenuItem_editXML
+            // 
+            this.toolStripMenuItem_editXML.Name = "toolStripMenuItem_editXML";
+            this.toolStripMenuItem_editXML.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_editXML.Text = "编辑读者记录 XML ...";
+            this.toolStripMenuItem_editXML.Click += new System.EventHandler(this.toolStripMenuItem_editXML_Click);
+            // 
             // toolStripMenuItem_exportDetailToExcelFile
             // 
             this.toolStripMenuItem_exportDetailToExcelFile.Name = "toolStripMenuItem_exportDetailToExcelFile";
@@ -706,7 +737,7 @@
             this.tableLayoutPanel_main.Controls.Add(this.tabControl_readerInfo, 0, 1);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 3;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -714,13 +745,6 @@
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(915, 506);
             this.tableLayoutPanel_main.TabIndex = 6;
-            // 
-            // toolStripMenuItem_editXML
-            // 
-            this.toolStripMenuItem_editXML.Name = "toolStripMenuItem_editXML";
-            this.toolStripMenuItem_editXML.Size = new System.Drawing.Size(360, 30);
-            this.toolStripMenuItem_editXML.Text = "编辑读者记录 XML ...";
-            this.toolStripMenuItem_editXML.Click += new System.EventHandler(this.toolStripMenuItem_editXML_Click);
             // 
             // ReaderInfoForm
             // 
@@ -730,7 +754,7 @@
             this.ClientSize = new System.Drawing.Size(915, 506);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ReaderInfoForm";
             this.ShowInTaskbar = false;
             this.Text = "读者";
@@ -824,5 +848,7 @@
         private System.Windows.Forms.PictureBox pictureBox_qrCode;
         private System.Windows.Forms.TextBox textBox_pqr;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_editXML;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_registerFace;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_pasteCardPhoto;
     }
 }

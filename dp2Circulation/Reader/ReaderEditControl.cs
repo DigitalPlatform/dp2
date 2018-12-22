@@ -189,6 +189,80 @@ namespace dp2Circulation
             }
         }
 
+
+        /// <summary>
+        /// 人脸特征字符串。
+        /// base64编码方式
+        /// </summary>
+        public string FaceFeature
+        {
+            get
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                return DomUtil.GetElementText(this._dataDom.DocumentElement, "face");
+            }
+            set
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                DomUtil.SetElementText(this._dataDom.DocumentElement, "face", value);
+
+                // 清除<face>元素
+                if (string.IsNullOrEmpty(value) == true)
+                {
+                    XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("face");
+                    if (node != null)
+                    {
+                        node.ParentNode.RemoveChild(node);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 人脸特征字符串的版本号
+        /// </summary>
+        public string FaceFeatureVersion
+        {
+            get
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("face");
+                if (node == null)
+                    return "";
+                return DomUtil.GetAttr(node, "version");
+            }
+            set
+            {
+                if (this._dataDom == null)
+                {
+                    this._dataDom = new XmlDocument();
+                    this._dataDom.LoadXml("<root />");
+                }
+                XmlNode node = this._dataDom.DocumentElement.SelectSingleNode("face");
+                if (node == null)
+                {
+                    if (string.IsNullOrEmpty(value) == true)
+                        return; // 正好,既然元素不存在, 就不用删除了
+                    node = this._dataDom.CreateElement("face");
+                    this._dataDom.DocumentElement.AppendChild(node);
+                }
+
+                DomUtil.SetAttr(node, "version", value);
+            }
+        }
+
         /// <summary>
         /// 读者记录状态
         /// </summary>

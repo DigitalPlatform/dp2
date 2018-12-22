@@ -14,7 +14,6 @@ public class MyKeysHost : KeysHost
 
 	public void getNameAndBirthdate()
 	{
-
 		XmlNode node = this.DataDom.SelectSingleNode("//name");
 		if (node == null)
 			return;
@@ -40,7 +39,6 @@ public class MyKeysHost : KeysHost
 		}
 
 		this.ResultString = strName + "|" + strBirthdate;
-
 	}
 
 }
@@ -271,6 +269,22 @@ public class MyKeysHost : KeysHost
   <table name="refID" id="14">
     <caption lang="zh-CN">参考ID</caption>
     <caption lang="en">Reference ID</caption>
+  </table>
+
+  <key>
+    <xpath>*/face/@timestamp</xpath>
+    <from>faceTimestamp</from>
+    <table ref="faceTimestamp" />
+  </key>
+  <table name="faceTimestamp" id="15">
+    <convert>
+      <number style="utime" />
+    </convert>
+    <convertquery>
+      <number style="utime" />
+    </convertquery>
+    <caption lang="zh-CN">人脸时间戳</caption>
+    <caption lang="en">Face Timestamp</caption>
   </table>
 
 </root>

@@ -1720,6 +1720,59 @@ out string strError)
                 }));
         }
 
+        #region 人脸识别有关功能
+
+        public class FaceChannel
+        {
+            public IpcClientChannel Channel { get; set; }
+            public IBioRecognition Object { get; set; }
+        }
+
+        internal int _inFaceCall = 0; // >0 表示正在调用人脸识别 API 尚未返回
+
+        public FaceChannel StartFaceChannel(
+    string strUrl,
+    out string strError)
+        {
+            strError = "";
+
+            FaceChannel result = new FaceChannel();
+
+            result.Channel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
+                    new BinaryClientFormatterSinkProvider());
+
+            ChannelServices.RegisterChannel(result.Channel, true);
+            bool bDone = false;
+            try
+            {
+                result.Object = (IBioRecognition)Activator.GetObject(typeof(IBioRecognition),
+                    strUrl);
+                if (result.Object == null)
+                {
+                    strError = "无法连接到服务器 " + strUrl;
+                    return null;
+                }
+                bDone = true;
+                return result;
+            }
+            finally
+            {
+                if (bDone == false)
+                    EndFaceChannel(result);
+            }
+        }
+
+        public void EndFaceChannel(FaceChannel channel)
+        {
+            if (channel != null && channel.Channel != null)
+            {
+                ChannelServices.UnregisterChannel(channel.Channel);
+                channel.Channel = null;
+            }
+        }
+
+        #endregion
+
         #region 指纹有关功能
 
         public class FingerprintChannel

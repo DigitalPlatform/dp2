@@ -131,8 +131,11 @@ namespace DigitalPlatform.Drawing
                 System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                 // create instance of skew checker
                 DocumentSkewChecker skewChecker = new DocumentSkewChecker();
+                skewChecker.MaxSkewToDetect = 20F;
                 // get documents skew angle
                 angle = skewChecker.GetSkewAngle(grayImage);
+                if (angle >= 90 || angle <= -90)
+                    angle = 0; // testing
                 // create rotation filter
                 RotateBilinear rotationFilter = new RotateBilinear(-angle);
                 rotationFilter.FillColor = Color.Black; // .White;
@@ -307,7 +310,7 @@ namespace DigitalPlatform.Drawing
 
             // 1 --> 2
             double x = corners[1].X - corners[0].X;
-            double y = corners[1].Y- corners[0].Y;
+            double y = corners[1].Y - corners[0].Y;
 
             int width1 = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
 
@@ -368,7 +371,7 @@ namespace DigitalPlatform.Drawing
         {
             // 宽除以 5， 或者高除以 4
             int nShorter = Math.Min(image.Width, image.Height);
-            MinObjectWidth = nShorter / 4;
+            MinObjectWidth = nShorter / 4;  // 4
             MinObjectHeight = MinObjectWidth;
         }
     }

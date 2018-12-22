@@ -7402,7 +7402,6 @@ out strError);
             }
         }
 
-        // 
         /// <summary>
         /// 指纹阅读器 URL
         /// </summary>
@@ -7413,6 +7412,19 @@ out strError);
                 return this.AppInfo.GetString("fingerprint",
                     "fingerPrintReaderUrl",
                     "");  // 常用值 "ipc://FingerprintChannel/FingerprintServer"
+            }
+        }
+
+        /// <summary>
+        /// 人脸识别接口 URL
+        /// </summary>
+        public string FaceReaderUrl
+        {
+            get
+            {
+                return this.AppInfo.GetString("face",
+                    "faceReaderUrl",
+                    "");  // 常用值 "ipc://FaceChannel/FaceServer"
             }
         }
 

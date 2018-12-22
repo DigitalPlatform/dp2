@@ -1261,7 +1261,7 @@ out strError);
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2,
-                0, 
+                0,
                 "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");  // 最好是一个笼统介绍如何删除各种数据库的页面
             if (result != DialogResult.Yes)
                 return;
@@ -2623,7 +2623,7 @@ out strError);
 
             try
             {
-
+                List<string> initialized_databases = new List<string>();
                 for (int i = this.listView_databases.SelectedIndices.Count - 1;
                     i >= 0;
                     i--)
@@ -2632,13 +2632,17 @@ out strError);
 
                     string strDatabaseName = this.listView_databases.Items[index].Text;
 
-                    string strOutputInfo = "";
                     nRet = InitializeDatabase(strDatabaseName,
-                        out strOutputInfo,
+                        out string strOutputInfo,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    initialized_databases.Add(strDatabaseName);
                 }
+
+                if (initialized_databases.Count > 0)
+                    this.ShowMessage($"初始化数据库 {StringUtil.MakePathList(initialized_databases)} 成功", "green", true);
             }
             finally
             {
@@ -2650,9 +2654,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-
         #region OPAC数据库配置管理
-
 
         // 在listview中列出所有参与OPAC的数据库
         int ListAllOpacDatabases(out string strError)

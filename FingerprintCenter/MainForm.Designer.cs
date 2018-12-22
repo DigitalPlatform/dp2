@@ -112,7 +112,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1040, 34);
+            this.menuStrip1.Size = new System.Drawing.Size(960, 34);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -269,7 +269,7 @@
             this.toolStripDropDownButton_stopAll});
             this.toolStrip1.Location = new System.Drawing.Point(0, 34);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1040, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(960, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -307,10 +307,10 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 716);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 508);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1040, 37);
+            this.statusStrip1.Size = new System.Drawing.Size(960, 37);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -334,7 +334,7 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(1040, 651);
+            this.tabControl_main.Size = new System.Drawing.Size(960, 443);
             this.tabControl_main.TabIndex = 3;
             // 
             // tabPage_start
@@ -345,7 +345,7 @@
             this.tabPage_start.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_start.Name = "tabPage_start";
             this.tabPage_start.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_start.Size = new System.Drawing.Size(1032, 614);
+            this.tabPage_start.Size = new System.Drawing.Size(952, 406);
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
@@ -367,8 +367,8 @@
             // splitContainer_start.Panel2
             // 
             this.splitContainer_start.Panel2.Controls.Add(this.label_message);
-            this.splitContainer_start.Size = new System.Drawing.Size(1019, 514);
-            this.splitContainer_start.SplitterDistance = 274;
+            this.splitContainer_start.Size = new System.Drawing.Size(939, 306);
+            this.splitContainer_start.SplitterDistance = 252;
             this.splitContainer_start.SplitterWidth = 15;
             this.splitContainer_start.TabIndex = 5;
             // 
@@ -378,7 +378,7 @@
             this.pictureBox_fingerprint.Location = new System.Drawing.Point(0, 0);
             this.pictureBox_fingerprint.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_fingerprint.Name = "pictureBox_fingerprint";
-            this.pictureBox_fingerprint.Size = new System.Drawing.Size(274, 514);
+            this.pictureBox_fingerprint.Size = new System.Drawing.Size(252, 306);
             this.pictureBox_fingerprint.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox_fingerprint.TabIndex = 0;
             this.pictureBox_fingerprint.TabStop = false;
@@ -390,7 +390,7 @@
             this.label_message.Location = new System.Drawing.Point(0, 0);
             this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(730, 514);
+            this.label_message.Size = new System.Drawing.Size(672, 306);
             this.label_message.TabIndex = 0;
             this.label_message.Text = "label6";
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -398,7 +398,7 @@
             // button_cancel
             // 
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cancel.Location = new System.Drawing.Point(863, 531);
+            this.button_cancel.Location = new System.Drawing.Point(783, 323);
             this.button_cancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(160, 63);
@@ -687,7 +687,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1040, 753);
+            this.ClientSize = new System.Drawing.Size(960, 545);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);

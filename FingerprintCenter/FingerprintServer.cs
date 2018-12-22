@@ -168,13 +168,13 @@ Exception rethrown at [0]:
         public int AddItems(List<FingerprintItem> items,
             out string strError)
         {
-            return FingerPrint.AddItems(items,
+            return Program.FingerPrint.AddItems(items,
     out strError);
         }
 
         public int CancelGetFingerprintString()
         {
-            FingerPrint.CancelRegisterString();
+            Program.FingerPrint.CancelRegisterString();
             return 0;
         }
 
@@ -215,7 +215,7 @@ Exception rethrown at [0]:
 #endif
             return GetFingerprintString("",
                 out strFingerprintString,
-                out strVersion, 
+                out strVersion,
                 out strError);
         }
 
@@ -236,9 +236,11 @@ Exception rethrown at [0]:
             strFingerprintString = "";
             strVersion = "";
 
+            Program.MainForm?.ActivateWindow(true);
+            Program.MainForm?.DisplayCancelButton(true);
             try
             {
-                TextResult result = FingerPrint.GetRegisterString(strExcludeBarcodes);
+                TextResult result = Program.FingerPrint.GetRegisterString(strExcludeBarcodes);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -253,6 +255,11 @@ Exception rethrown at [0]:
             {
                 strError = ex.Message;
                 return 0;
+            }
+            finally
+            {
+                Program.MainForm?.ActivateWindow(false);
+                Program.MainForm?.DisplayCancelButton(false);
             }
         }
 
@@ -297,7 +304,7 @@ Exception rethrown at [0]:
 
         public void Dispose()
         {
-            FingerPrint.CancelRegisterString();
+            Program.FingerPrint?.CancelRegisterString();
         }
     }
 }

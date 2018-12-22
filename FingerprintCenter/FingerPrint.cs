@@ -18,14 +18,17 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
+using static DigitalPlatform.CirculationClient.BioUtil;
+using DigitalPlatform.CirculationClient;
 
 namespace FingerprintCenter
 {
     /// <summary>
     /// 指纹功能类
     /// </summary>
-    public static class FingerPrint
+    public class FingerPrint : BioUtil
     {
+#if NO
         public static event SpeakEventHandler Speak = null;
         public static event CapturedEventHandler Captured = null;
         public static event ImageReadyEventHandler ImageReady = null;
@@ -36,30 +39,30 @@ namespace FingerprintCenter
         /// 提示框事件
         /// </summary>
         public static event MessagePromptEventHandler Prompt = null;
+#endif
+        int _idSeed = 10;
 
-        static int _idSeed = 10;
+        Hashtable _id_barcode_table = new Hashtable();  // id --> barcode
+        Hashtable _barcode_id_table = new Hashtable();  // barcode --> id 
 
-        static Hashtable _id_barcode_table = new Hashtable();  // id --> barcode
-        static Hashtable _barcode_id_table = new Hashtable();  // barcode --> id 
-
-        static IntPtr _dBHandle = IntPtr.Zero;
-        static IntPtr _devHandle = IntPtr.Zero;
+        IntPtr _dBHandle = IntPtr.Zero;
+        IntPtr _devHandle = IntPtr.Zero;
 
         // 当前的运行模式
         // read: 读取模式。每次扫入一个指纹，识别出证条码号以后触发事件
         // register: 注册模式。要求读完三个指纹，API 才返回
-        static string _mode = "read";
+        string _mode = "read";
         // 存储注册用的指纹模板
-        static List<byte[]> _register_template_list = new List<byte[]>();
+        List<byte[]> _register_template_list = new List<byte[]>();
         // 注册过程中，查重时，需要排除条码号
-        static List<string> _exclude = new List<string>();
+        List<string> _exclude = new List<string>();
         // 注册过程完成
-        static AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
+        AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
 
         public const int DefaultThreshold = 10;
 
-        static int _shreshold = DefaultThreshold;
-        public static int Shreshold
+        int _shreshold = DefaultThreshold;
+        public int Shreshold
         {
             get
             {
@@ -71,7 +74,14 @@ namespace FingerprintCenter
             }
         }
 
-        public static NormalResult Init(int dev_index)
+        public FingerPrint()
+        {
+            BrowseStyle = "fingerprint";
+            SearchFrom = "指纹时间戳";
+            ElementName = "fingerprint";
+        }
+
+        public override NormalResult Init(int dev_index)
         {
             try
             {
@@ -93,7 +103,7 @@ namespace FingerprintCenter
             }
         }
 
-        public static NormalResult Free()
+        public override NormalResult Free()
         {
             try
             {
@@ -107,8 +117,8 @@ namespace FingerprintCenter
         }
 
         // 设备列表
-        static List<string> _dev_list = new List<string>();
-        public static List<string> DeviceList
+        List<string> _dev_list = new List<string>();
+        public List<string> DeviceList
         {
             get
             {
@@ -116,7 +126,7 @@ namespace FingerprintCenter
             }
         }
 
-        static NormalResult _init()
+        NormalResult _init()
         {
             _free();
 
@@ -155,12 +165,12 @@ namespace FingerprintCenter
             }
         }
 
-        static void _free()
+        void _free()
         {
             zkfp2.Terminate();
         }
 
-        static NormalResult OpenZK(int dev_index)
+        NormalResult OpenZK(int dev_index)
         {
             CloseZK();
 
@@ -227,7 +237,7 @@ namespace FingerprintCenter
 #endif
         }
 
-        static void CloseZK()
+        void CloseZK()
         {
             if (_dBHandle != IntPtr.Zero)
             {
@@ -242,7 +252,7 @@ namespace FingerprintCenter
             }
         }
 
-        public static void Light(string strColor, int duration = 500)
+        public void Light(string strColor, int duration = 500)
         {
             Task.Run(() =>
             {
@@ -265,7 +275,7 @@ namespace FingerprintCenter
             });
         }
 
-        public static void ClearDB()
+        public void ClearDB()
         {
             if (_dBHandle != IntPtr.Zero)
             {
@@ -275,7 +285,7 @@ namespace FingerprintCenter
             }
         }
 
-        static int RemoveItem(string strReaderBarcode,
+        int RemoveItem(string strReaderBarcode,
             out string strError)
         {
             return AddItems(new List<FingerprintItem> { new FingerprintItem { ReaderBarcode = strReaderBarcode } },
@@ -288,7 +298,7 @@ namespace FingerprintCenter
         // return:
         //      0   成功
         //      其他  失败。错误码
-        public static int AddItems(
+        public override int AddItems(
             List<FingerprintItem> items,
             out string strError)
         {
@@ -387,755 +397,7 @@ namespace FingerprintCenter
             return 0;
         }
 
-        public static void SetProgress(long current, long total)
-        {
-            if (ProgressChanged != null)
-            {
-                DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(current, total);
-                ProgressChanged(null, e);
-            }
-        }
 
-        public static void Speaking(string text)
-        {
-            if (Speak != null)
-            {
-                Speak(null, new SpeakEventArgs { Text = text });
-            }
-        }
-
-        public static void ShowMessage(string text)
-        {
-            if (ProgressChanged != null)
-            {
-                DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(text)
-                {
-                    BytesReceived = -1,
-                    TotalBytesToReceive = -1
-                };
-                ProgressChanged(null, e);
-            }
-        }
-
-        // parameters:
-        // return:
-        //      -1  出错
-        //      >=0   成功。返回实际初始化的事项
-        public static int InitFingerprintCache(
-            LibraryChannel channel,
-            string strDir,
-            CancellationToken token,
-            out string strError)
-        {
-            strError = "";
-
-            try
-            {
-                // 清空以前的全部缓存内容，以便重新建立
-                // return:
-                //      -1  出错
-                //      >=0 实际发送给接口程序的事项数目
-                int nRet = CreateFingerprintCache(null,
-                    out strError);
-                if (nRet == -1 || nRet == -2)
-                    return nRet;
-
-                // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
-
-                nRet = GetCurrentOwnerReaderNameList(
-                    channel,
-                    out List<string> readerdbnames,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                if (readerdbnames.Count == 0)
-                {
-                    strError = "因当前用户没有管辖任何读者库，初始化指纹缓存的操作无法完成";
-                    return -1;
-                }
-
-                SetProgress(0, readerdbnames.Count);
-
-                int nCount = 0;
-                // 对这些读者库逐个进行高速缓存的初始化
-                // 使用 特殊的 browse 格式，以便获得读者记录中的 fingerprint timestamp字符串，或者兼获得 fingerprint string
-                // <fingerprint timestamp='XXXX'></fingerprint>
-                int i = 0;
-                foreach (string strReaderDbName in readerdbnames)
-                {
-                    // 初始化一个读者库的指纹缓存
-                    // return:
-                    //      -1  出错
-                    //      >=0 实际发送给接口程序的事项数目
-                    nRet = BuildOneDbCache(
-                        channel,
-                        strDir,
-                        strReaderDbName,
-                        token,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                    nCount += nRet;
-                    i++;
-                    SetProgress(i, readerdbnames.Count);
-                }
-
-#if NO
-                if (nCount == 0)
-                {
-                    strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
-                    return -1;
-                }
-#endif
-                if (nCount == 0)
-                {
-                    strError = "当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，指纹缓存为空";
-                    return 0;
-                }
-
-                ShowMessage("指纹缓存初始化成功");
-                return nCount;
-            }
-            catch (Exception ex)
-            {
-                strError = ex.Message;
-                return -1;
-            }
-        }
-
-        // 根据结果集文件初始化指纹高速缓存
-        // parameters:
-        //      resultset   用于初始化的结果集对象。如果为 null，表示希望清空指纹高速缓存
-        //                  一般可用 null 调用一次，然后用多个 resultset 对象逐个调用一次
-        // return:
-        //      -1  出错
-        //      >=0 实际发送给接口程序的事项数目
-        static int CreateFingerprintCache(DpResultSet resultset,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            ShowMessage("加入高速缓存");
-
-            try
-            {
-                if (resultset == null)
-                {
-                    // 清空以前的全部缓存内容，以便重新建立
-                    // return:
-                    //      0   成功
-                    //      其他  失败。错误码
-                    nRet = AddItems(
-                        //channel,
-                        null,
-                        out strError);
-                    if (nRet != 0)
-                        return -1;
-
-                    return 0;
-                }
-
-                int nSendCount = 0;
-                long nCount = resultset.Count;
-                List<FingerprintItem> items = new List<FingerprintItem>();
-                for (long i = 0; i < nCount; i++)
-                {
-                    DpRecord record = resultset[i];
-
-                    //string strTimestamp = "";
-                    //string strBarcode = "";
-                    //string strFingerprint = "";
-                    ParseResultItemString(record.BrowseText,
-out string strTimestamp,
-out string strBarcode,
-out string strFingerprint);
-                    // TODO: 注意读者证条码号为空的，不要发送出去
-
-
-                    FingerprintItem item = new FingerprintItem
-                    {
-                        ReaderBarcode = strBarcode,
-                        FingerprintString = strFingerprint
-                    };
-
-                    items.Add(item);
-                    if (items.Count >= 100)
-                    {
-                        // return:
-                        //      0   成功
-                        //      其他  失败。错误码
-                        nRet = AddItems(
-                            items,
-                            out strError);
-                        if (nRet != 0)
-                            return -1;
-
-                        nSendCount += items.Count;
-                        items.Clear();
-                    }
-                }
-
-                if (items.Count > 0)
-                {
-                    // return:
-                    //      0   成功
-                    //      其他  失败。错误码
-                    nRet = AddItems(
-                        items,
-                        out strError);
-                    if (nRet != 0)
-                        return -1;
-
-                    nSendCount += items.Count;
-                }
-
-                // Console.Beep(); // 表示读取成功
-                return nSendCount;
-            }
-            finally
-            {
-            }
-        }
-
-
-        // 获得当前帐户所管辖的读者库名字
-        static int GetCurrentOwnerReaderNameList(
-            LibraryChannel channel,
-            out List<string> readerdbnames,
-            out string strError)
-        {
-            strError = "";
-            readerdbnames = new List<string>();
-            // int nRet = 0;
-
-            long lRet = channel.GetSystemParameter(null,
-    "system",
-    "readerDbGroup",
-    out string strValue,
-    out strError);
-            if (lRet == -1)
-                return -1;
-
-            // 新方法
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<root />");
-
-            try
-            {
-                dom.DocumentElement.InnerXml = strValue;
-            }
-            catch (Exception ex)
-            {
-                strError = "category=system,name=readerDbGroup所返回的XML片段在装入InnerXml时出错: " + ex.Message;
-                return -1;
-            }
-
-            string strLibraryCodeList = channel.LibraryCodeList;
-
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-            foreach (XmlElement node in nodes)
-            {
-                string strLibraryCode = node.GetAttribute("libraryCode");
-
-                if (IsGlobalUser(strLibraryCodeList) == false)
-                {
-                    if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
-                        continue;
-                }
-
-                string strDbName = node.GetAttribute("name");
-                readerdbnames.Add(strDbName);
-            }
-
-            return 0;
-        }
-
-        // 初始化一个读者库的指纹缓存
-        // return:
-        //      -1  出错
-        //      >=0 实际发送给接口程序的事项数目
-        static int BuildOneDbCache(
-            LibraryChannel channel,
-            string strDir,
-            string strReaderDbName,
-            CancellationToken token,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            DpResultSet resultset = null;
-            bool bCreate = false;
-
-            Hashtable timestamp_table = new Hashtable();    // recpath --> fingerprint timestamp
-
-            ShowMessage(strReaderDbName);
-
-            // 结果集文件名
-            string strResultsetFilename = Path.Combine(strDir, strReaderDbName);
-
-            if (File.Exists(strResultsetFilename) == false)
-            {
-                resultset = new DpResultSet(false, false);
-                resultset.Create(strResultsetFilename,
-                    strResultsetFilename + ".index");
-                bCreate = true;
-            }
-            else
-                bCreate = false;
-
-            // *** 第一阶段， 创建新的结果集文件；或者获取全部读者记录中的指纹时间戳
-
-            bool bDone = false;    // 创建情形下 是否完成了写入操作
-            try
-            {
-                /*
-                long lRet = Channel.SearchReader(stop,
-        strReaderDbName,
-        "1-9999999999",
-        -1,
-        "__id",
-        "left",
-        this.Lang,
-        null,   // strResultSetName
-        "", // strOutputStyle
-        out strError);
-                */
-                long lRet = channel.SearchReader(null,  // stop,
-strReaderDbName,
-"",
--1,
-"指纹时间戳",
-"left",
-ClientInfo.Lang,
-null,   // strResultSetName
-"", // strOutputStyle
-out strError);
-                if (lRet == -1)
-                {
-                    if (channel.ErrorCode == ErrorCode.AccessDenied)
-                        strError = "用户 " + channel.UserName + " 权限不足: " + strError;
-                    return -1;
-                }
-
-                if (lRet == 0)
-                {
-                    // TODO: 这时候如果以前有结果集文件还会残留，但不会影响功能正确性，可以改进为把残留的结果集文件删除
-                    return 0;
-                }
-
-                long lHitCount = lRet;
-
-                ResultSetLoader loader = new ResultSetLoader(channel,
-                    null,
-                    null,
-                    bCreate == true ? "id,cols,format:cfgs/browse_fingerprint" : "id,cols,format:cfgs/browse_fingerprinttimestamp",
-                    ClientInfo.Lang);
-                loader.Prompt += Loader_Prompt;
-
-                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
-                {
-                    token.ThrowIfCancellationRequested();
-
-                    ShowMessage("正在处理读者记录 " + record.Path);
-
-                    if (bCreate == true)
-                    {
-                        if (record.Cols == null || record.Cols.Length < 3)
-                        {
-                            strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprint";
-                            return -1;
-                        }
-                        if (string.IsNullOrEmpty(record.Cols[0]) == true)
-                            continue;   // 读者记录中没有指纹信息
-                        DpRecord item = new DpRecord(record.Path);
-                        // timestamp | barcode | fingerprint
-                        item.BrowseText = record.Cols[0] + "|" + record.Cols[1] + "|" + record.Cols[2];
-                        resultset.Add(item);
-                    }
-                    else
-                    {
-                        if (record.Cols == null || record.Cols.Length < 1)
-                        {
-                            strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprinttimestamp";
-                            return -1;
-                        }
-                        if (record.Cols.Length < 2)
-                        {
-                            strError = "record.Cols error ... 需要刷新配置文件 cfgs/browse_fingerprinttimestamp 到最新版本";
-                            return -1;
-                        }
-                        if (string.IsNullOrEmpty(record.Cols[0]) == true)
-                            continue;   // 读者记录中没有指纹信息
-
-                        // 记载时间戳
-                        // timestamp | barcode 
-                        timestamp_table[record.Path] = record.Cols[0] + "|" + record.Cols[1];
-                    }
-                }
-
-#if NO
-                // stop.SetProgressRange(0, lHitCount);
-
-                long lStart = 0;
-                long lCount = lHitCount;
-                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    token.ThrowIfCancellationRequested();
-
-
-                    lRet = channel.GetSearchResult(
-                        null,
-                        null,   // strResultSetName
-                        lStart,
-                        lCount,
-                        bCreate == true ? "id,cols,format:cfgs/browse_fingerprint" : "id,cols,format:cfgs/browse_fingerprinttimestamp",
-                        ClientInfo.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        return -1;
-
-                    if (lRet == 0)
-                    {
-                        strError = "GetSearchResult() return 0";
-                        return -1;
-                    }
-
-                    Debug.Assert(searchresults != null, "");
-                    Debug.Assert(searchresults.Length > 0, "");
-
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
-                        if (bCreate == true)
-                        {
-                            if (record.Cols == null || record.Cols.Length < 3)
-                            {
-                                strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprint";
-                                return -1;
-                            }
-                            if (string.IsNullOrEmpty(record.Cols[0]) == true)
-                                continue;   // 读者记录中没有指纹信息
-                            DpRecord item = new DpRecord(record.Path);
-                            // timestamp | barcode | fingerprint
-                            item.BrowseText = record.Cols[0] + "|" + record.Cols[1] + "|" + record.Cols[2];
-                            resultset.Add(item);
-                        }
-                        else
-                        {
-                            if (record.Cols == null || record.Cols.Length < 1)
-                            {
-                                strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprinttimestamp";
-                                return -1;
-                            }
-                            if (record.Cols.Length < 2)
-                            {
-                                strError = "record.Cols error ... 需要刷新配置文件 cfgs/browse_fingerprinttimestamp 到最新版本";
-                                return -1;
-                            }
-                            if (string.IsNullOrEmpty(record.Cols[0]) == true)
-                                continue;   // 读者记录中没有指纹信息
-
-                            // 记载时间戳
-                            // timestamp | barcode 
-                            timestamp_table[record.Path] = record.Cols[0] + "|" + record.Cols[1];
-                        }
-                    }
-
-                    lStart += searchresults.Length;
-                    lCount -= searchresults.Length;
-
-                    //stop.SetMessage(strReaderDbName + " 包含记录 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
-
-                    if (lStart >= lHitCount || lCount <= 0)
-                        break;
-                    //stop.SetProgressValue(lStart);
-                }
-
-#endif
-
-                if (bCreate == true)
-                    bDone = true;
-
-                if (bCreate == true)
-                {
-                    // return:
-                    //      -2  remoting服务器连接失败。驱动程序尚未启动
-                    //      -1  出错
-                    //      >=0 实际发送给接口程序的事项数目
-                    nRet = CreateFingerprintCache(resultset,
-    out strError);
-                    if (nRet == -1 || nRet == -2)
-                        return -1;
-
-                    return nRet;
-                }
-            }
-            finally
-            {
-                if (bCreate == true)
-                {
-                    Debug.Assert(resultset != null, "");
-                    if (bDone == true)
-                    {
-                        resultset.Detach(out string strTemp1,
-                            out string strTemp2);
-                    }
-                    else
-                    {
-                        // 否则文件会被删除
-                        resultset.Close();
-                    }
-                }
-            }
-
-            // 比对时间戳，更新结果集文件
-            Hashtable update_table = new Hashtable();   // 需要更新的事项。recpath --> 1
-            resultset = new DpResultSet(false, false);
-            resultset.Attach(strResultsetFilename,
-    strResultsetFilename + ".index");
-            try
-            {
-                long nCount = resultset.Count;
-                for (long i = 0; i < nCount; i++)
-                {
-                    token.ThrowIfCancellationRequested();
-
-
-                    DpRecord record = resultset[i];
-
-                    string strRecPath = record.ID;
-
-                    ShowMessage("比对 " + strRecPath);
-
-                    // timestamp | barcode 
-                    string strNewTimestamp = (string)timestamp_table[strRecPath];
-                    if (strNewTimestamp == null)
-                    {
-                        // 最新状态下，读者记录已经不存在，需要从结果集中删除
-                        resultset.RemoveAt((int)i);
-                        i--;
-                        nCount--;
-                        continue;
-                    }
-
-                    // 拆分出证条码号 2013/1/28
-                    string strNewBarcode = "";
-                    nRet = strNewTimestamp.IndexOf("|");
-                    if (nRet != -1)
-                    {
-                        strNewBarcode = strNewTimestamp.Substring(nRet + 1);
-                        strNewTimestamp = strNewTimestamp.Substring(0, nRet);
-                    }
-
-                    // 最新读者记录中已经没有指纹信息。例如读者记录中的指纹元素被删除了
-                    if (string.IsNullOrEmpty(strNewTimestamp) == true)
-                    {
-                        // 删除现有事项
-                        resultset.RemoveAt((int)i);
-                        i--;
-                        nCount--;
-
-                        timestamp_table.Remove(strRecPath);
-                        continue;
-                    }
-
-                    // 取得结果集文件中的原有时间戳字符串
-                    string strText = record.BrowseText; // timestamp | barcode | fingerprint
-                    nRet = strText.IndexOf("|");
-                    if (nRet == -1)
-                    {
-                        strError = "browsetext 错误，没有 '|' 字符";
-                        return -1;
-                    }
-                    string strOldTimestamp = strText.Substring(0, nRet);
-                    // timestamp | barcode | fingerprint
-                    string strOldBarcode = strText.Substring(nRet + 1);
-                    nRet = strOldBarcode.IndexOf("|");
-                    if (nRet != -1)
-                    {
-                        strOldBarcode = strOldBarcode.Substring(0, nRet);
-                    }
-
-                    // 时间戳发生变化，需要更新事项
-                    if (strNewTimestamp != strOldTimestamp
-                        || strNewBarcode != strOldBarcode)
-                    {
-                        // 如果证条码号为空，无法建立对照关系，要跳过
-                        if (string.IsNullOrEmpty(strNewBarcode) == false)
-                            update_table[strRecPath] = 1;
-
-                        // 删除现有事项
-                        resultset.RemoveAt((int)i);
-                        i--;
-                        nCount--;
-                    }
-                    timestamp_table.Remove(strRecPath);
-                }
-
-                // 循环结束后，timestamp_table中剩余的是当前结果集文件中没有包含的那些读者记录路径
-
-                if (update_table.Count > 0)
-                {
-                    // 获取指纹信息，追加到结果集文件的尾部
-                    // parameters:
-                    //      update_table   key为读者记录路径
-                    AppendFingerprintInfo(
-                        channel,
-                        resultset,
-                        update_table,
-                        token);
-                }
-
-                // 如果服务器端新增了指纹信息,需要获取后追加到结果集文件尾部
-                if (timestamp_table.Count > 0)
-                {
-                    // 获取指纹信息，追加到结果集文件的尾部
-                    // parameters:
-                    //      update_table   key为读者记录路径
-                    AppendFingerprintInfo(
-                        channel,
-                        resultset,
-                        timestamp_table,
-                        token);
-                }
-
-                // return:
-                //      -2  remoting服务器连接失败。驱动程序尚未启动
-                //      -1  出错
-                //      >=0 实际发送给接口程序的事项数目
-                nRet = CreateFingerprintCache(resultset,
-            out strError);
-                if (nRet == -1 || nRet == -2)
-                    return -1;
-
-                return nRet;
-            }
-            finally
-            {
-                resultset.Detach(out string strTemp1, out string strTemp2);
-            }
-        }
-
-        private static void Loader_Prompt(object sender, MessagePromptEventArgs e)
-        {
-            if (Prompt != null)
-                Prompt(sender, e);
-        }
-
-        // 获取指纹信息，追加到结果集文件的尾部
-        // parameters:
-        //      update_table   key为读者记录路径
-        static void AppendFingerprintInfo(
-            LibraryChannel channel,
-            DpResultSet resultset,
-            Hashtable update_table,
-            CancellationToken token)
-        {
-            List<string> lines = new List<string>();
-            foreach (string recpath in update_table.Keys)
-            {
-                lines.Add(recpath);
-            }
-
-            BrowseLoader loader = new BrowseLoader();
-            loader.RecPaths = lines;
-            loader.Channel = channel;
-            loader.Format = "id,cols,format:cfgs/browse_fingerprint";
-            loader.Prompt += Loader_Prompt;
-
-            foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
-            {
-                token.ThrowIfCancellationRequested();
-
-                ShowMessage("追加 " + record.Path);
-
-                if (record.Cols == null || record.Cols.Length < 3)
-                {
-                    string strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprint";
-                    // TODO: 并发操作的情况下，会在中途出现读者记录被别的前端修改的情况，这里似乎可以continue
-                    throw new Exception(strError);
-                }
-
-                // 如果证条码号为空，无法建立对照关系，要跳过
-                if (string.IsNullOrEmpty(record.Cols[1]) == true)
-                    continue;
-
-                DpRecord item = new DpRecord(record.Path);
-                // timestamp | barcode | fingerprint
-                item.BrowseText = record.Cols[0] + "|" + record.Cols[1] + "|" + record.Cols[2];
-                resultset.Add(item);
-            }
-#if NO
-            // 需要获得更新的事项，然后追加到结果集文件的尾部
-            // 注意，需要定期彻底重建结果集文件，以便回收多余空间
-            List<string> lines = new List<string>();
-            foreach (string recpath in update_table.Keys)
-            {
-                lines.Add(recpath);
-                if (lines.Count >= 100)
-                {
-                    List<DigitalPlatform.LibraryClient.localhost.Record> records = null;
-                    GetSomeFingerprintData(
-                        channel,
-                        lines,
-                        token,
-    out records);
-
-                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in records)
-                    {
-                        if (record.Cols == null || record.Cols.Length < 3)
-                        {
-                            strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprint";
-                            // TODO: 并发操作的情况下，会在中途出现读者记录被别的前端修改的情况，这里似乎可以continue
-                            return -1;
-                        }
-
-                        // 如果证条码号为空，无法建立对照关系，要跳过
-                        if (string.IsNullOrEmpty(record.Cols[1]) == true)
-                            continue;
-
-                        DpRecord item = new DpRecord(record.Path);
-                        // timestamp | barcode | fingerprint
-                        item.BrowseText = record.Cols[0] + "|" + record.Cols[1] + "|" + record.Cols[2];
-                        resultset.Add(item);
-                    }
-                    lines.Clear();
-                }
-            }
-
-            if (lines.Count > 0)
-            {
-                List<DigitalPlatform.LibraryClient.localhost.Record> records = null;
-                GetSomeFingerprintData(
-                    channel,
-                    lines,
-                    token,
-out records);
-
-                foreach (DigitalPlatform.LibraryClient.localhost.Record record in records)
-                {
-                    if (record.Cols == null || record.Cols.Length < 3)
-                    {
-                        strError = "record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_fingerprint";
-                        // TODO: 并发操作的情况下，会在中途出现读者记录被别的前端修改的情况，这里似乎可以continue
-                        return -1;
-                    }
-                    DpRecord item = new DpRecord(record.Path);
-                    // timestamp | barcode | fingerprint
-                    item.BrowseText = record.Cols[0] + "|" + record.Cols[1] + "|" + record.Cols[2];
-                    resultset.Add(item);
-                }
-            }
-
-            return 0;
-#endif
-        }
 
 #if NO
         // 处理一小批指纹数据的装入
@@ -1213,30 +475,28 @@ out records);
             }
         }
 #endif
-        public static bool IsGlobalUser(string strLibraryCodeList)
-        {
-            if (strLibraryCodeList == "*" || string.IsNullOrEmpty(strLibraryCodeList) == true)
-                return true;
-            return false;
-        }
 
-        static void ParseResultItemString(string strText,
-    out string strTimestamp,
-    out string strBarcode,
-    out string strFingerprint)
+#if NO
+        public static int InitFingerprintCache(
+    LibraryChannel channel,
+    string strDir,
+    CancellationToken token,
+    out string strError)
         {
-            strTimestamp = "";
-            strBarcode = "";
-            strFingerprint = "";
-
-            string[] parts = strText.Split(new char[] { '|' });
-            if (parts.Length > 0)
-                strTimestamp = parts[0];
-            if (parts.Length > 1)
-                strBarcode = parts[1];
-            if (parts.Length > 2)
-                strFingerprint = parts[2];
+            BioEnv env = new BioEnv {
+                AddItems = AddItems,
+                SetProgress = SetProgress,
+                ShowMessage = ShowMessage,
+                LoaderPrompt = Loader_Prompt,
+            };
+            return BioUtil.InitFingerprintCache(
+            channel,
+            strDir,
+            token,
+            env,
+            out strError);
         }
+#endif
 
         // Capture 过程中用到的变量
         class CaptureData
@@ -1259,7 +519,7 @@ out records);
         // index:
         //      1   图像宽
         //      2   图像高
-        static int GetIntParameter(int index)
+        int GetIntParameter(int index)
         {
             int value = 0;
             byte[] paramValue = new byte[4];
@@ -1269,7 +529,7 @@ out records);
             return value;
         }
 
-        public static void StartCapture(CancellationToken token)
+        public override void StartCapture(CancellationToken token)
         {
             _captureData.mfpWidth = GetIntParameter(PARAMETER_PICTURE_WIDTH);
             _captureData.mfpHeight = GetIntParameter(PARAMETER_PICTURE_HEIGHT);
@@ -1285,7 +545,7 @@ out records);
             _captureData._cancelToken = token;
         }
 
-        static void CaptureThreadMain()
+        void CaptureThreadMain()
         {
             while (!_captureData._cancelToken.IsCancellationRequested)
             {
@@ -1311,12 +571,12 @@ out records);
         // parameters:
         //      template_buffer 指纹模板数据
         //      length  template_buffer 数组内有效数据长度
-        static void ProcessCaptureData(
+        void ProcessCaptureData(
             byte[] image_buffer,
             byte[] template_buffer,
             int length)
         {
-            if (ImageReady != null)
+            if (this.HasImageReady())
             {
                 Task.Run(() =>
                 {
@@ -1325,7 +585,7 @@ out records);
                         _captureData.mfpWidth,
                         _captureData.mfpHeight,
                         ref ms);
-                    ImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms) });
+                    TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms) });
                 });
             }
 
@@ -1400,7 +660,7 @@ out records);
                         Score = score
                     };
                     Light("green");
-                    Captured(null, e1);
+                    TriggerCaptured(null, e1);
                     // SendKeys.SendWait(strBarcode + "\r");
                     //if (this.BeepOn == false)
                     //    Speak("很好");
@@ -1418,26 +678,18 @@ out records);
                         ErrorInfo = $"无法识别, 错误码={ret}"
                     };
                     Light("red");
-                    Captured(null, e1);
+                    TriggerCaptured(null, e1);
                 }
             }
         }
 
-        // GetRegisterString() 过程中所使用的 CancellationTokenSource 对象
-        static CancellationTokenSource _cancelOfRegister = new CancellationTokenSource();
 
-        public static void CancelRegisterString()
-        {
-            _cancelOfRegister.Cancel();
-        }
 
         // exception:
         //      可能会抛出异常。在 token 中断时
-        public static TextResult GetRegisterString(string strExcludeBarcodes)
+        public override TextResult GetRegisterString(string strExcludeBarcodes)
         {
             string save_mode = _mode;
-            ClientInfo.MainForm?.ActivateWindow(true);
-            ClientInfo.MainForm?.DisplayCancelButton(true);
             try
             {
                 _mode = "register";
@@ -1478,44 +730,38 @@ out records);
             }
             finally
             {
-                ClientInfo.MainForm?.ActivateWindow(false);
-                ClientInfo.MainForm?.DisplayCancelButton(false);
                 _mode = save_mode;
             }
         }
 
-        public class ReplicationPlan : NormalResult
+#if NO
+        // 同步
+        // 注：中途遇到异常(例如 Loader 抛出异常)，可能会丢失 INSERT_BATCH 条以内的日志记录写入 operlog 表
+        // parameters:
+        //      strLastDate   处理中断或者结束时返回最后处理过的日期
+        //      last_index  处理或中断返回时最后处理过的位置。以后继续处理的时候可以从这个偏移开始
+        // return:
+        //      -1  出错
+        //      0   中断
+        //      1   完成
+        public static ReplicationResult DoReplication(
+            LibraryChannel channel,
+            string strStartDate,
+            string strEndDate,
+            LogType logType,
+            CancellationToken token)
         {
-            public string StartDate { get; set; }
-        }
-
-        // 整体获得读者指纹信息以前，预备获得同步计划信息
-        // 也就是第一次同步开始的位置信息
-        public static ReplicationPlan GetReplicationPlan(LibraryChannel channel)
-        {
-            // 开始处理时的日期
-            string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
-
-            // 获得日志文件中记录的总数
-            // parameters:
-            //      strDate 日志文件的日期，8 字符
-            // return:
-            //      -2  此类型的日志在 dp2library 端尚未启用
-            //      -1  出错
-            //      0   日志文件不存在，或者记录数为 0
-            //      >0  记录数
-            long lCount = OperLogLoader.GetOperLogCount(
-                null,
-                channel,
+            return BioUtil.DoReplication(channel,
+                strStartDate,
                 strEndDate,
-                LogType.OperLog,
-                out string strError);
-            if (lCount < 0)
-                return new ReplicationPlan { Value = -1, ErrorInfo = strError };
-
-            return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
+                logType,
+                token,
+                Prompt,
+                AddItems);
         }
+#endif
 
+#if NO
         public class ReplicationResult : NormalResult
         {
             public string LastDate { get; set; }
@@ -1917,74 +1163,9 @@ out string strError)
             return "@refID:" + strRefID;
         }
 
-
-#if NO
-        public static bool Identify()
-        {
-
-            int ret = zkfp.ZKFP_ERR_OK;
-            int fid = 0, score = 0;
-            ret = zkfp2.DBIdentify(mDBHandle, CapTmp, ref fid, ref score);
-            if (zkfp.ZKFP_ERR_OK == ret)
-            {
-                textRes.Text = "Identify succ, fid= " + fid + ",score=" + score + "!";
-                return;
-            }
-            else
-            {
-                textRes.Text = "Identify fail, ret= " + ret;
-                return;
-            }
-        }
 #endif
     }
 
-#if NO
-    public class FingerprintItem
-    {
-        // 指纹特征字符串
-        public string FingerprintString = "";
-        // 读者证条码号
-        public string ReaderBarcode = "";
-    }
-#endif
 
-    /// <summary>
-    /// 捕获完成提示事件
-    /// </summary>
-    /// <param name="sender">发送者</param>
-    /// <param name="e">事件参数</param>
-    public delegate void CapturedEventHandler(object sender,
-        CapturedEventArgs e);
-
-    /// <summary>
-    /// 捕获完成事件的参数
-    /// </summary>
-    public class CapturedEventArgs : EventArgs
-    {
-        // 识别出的号码文字
-        public string Text { get; set; }
-        public int Score { get; set; }
-        public string ErrorInfo { get; set; }
-    }
-
-    public delegate void ImageReadyEventHandler(object sender,
-    ImageReadyEventArgs e);
-
-    /// <summary>
-    /// 捕获完成事件的参数
-    /// </summary>
-    public class ImageReadyEventArgs : EventArgs
-    {
-        public Image Image { get; set; }    // 注意，使用者要负责 Dispose() 这个 Image 对象
-    }
-
-    public delegate void SpeakEventHandler(object sender,
-    SpeakEventArgs e);
-
-    public class SpeakEventArgs : EventArgs
-    {
-        public string Text { get; set; }
-    }
 
 }
