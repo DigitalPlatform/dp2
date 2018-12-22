@@ -4859,12 +4859,11 @@ this.Volume);
                     type.Image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
 
                     // TODO: clip 指令存储在何处?
-                    string strID = "";
                     int nRet = this._objects.SetObjectByUsage(
                         strTempFilePath,
                         strType,    // "coverimage",
                         type.ProcessCommand,
-                        out strID,
+                        out string strID,
                         out strError);
                     if (nRet == -1)
                         return -1;

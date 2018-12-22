@@ -434,7 +434,7 @@ namespace DigitalPlatform.Drawing
                     else
                         this.Invoke(new Action<Color>(PaintColor), Color.Yellow);
 
-                    if (motionDetector != null 
+                    if (motionDetector != null
                         && (_iFrameCount % 2) == 0)
                     {
                         motionLevel = motionDetector.ProcessFrame(_currentBitmapForDecoding);
@@ -555,7 +555,6 @@ namespace DigitalPlatform.Drawing
 
         private void Current_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-
             if (IsDisposed)
             {
                 return;
@@ -575,7 +574,7 @@ namespace DigitalPlatform.Drawing
                     if (motionLevel < 0.5)
                         Thread.Sleep(100);
                  * */
-                Application.DoEvents();
+                // Application.DoEvents();
             }
             catch (ObjectDisposedException)
             {

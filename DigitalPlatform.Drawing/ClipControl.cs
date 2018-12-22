@@ -21,7 +21,7 @@ namespace DigitalPlatform.Drawing
 
         // 顺序为 左上 右上 右下 左下
         List<Point> _points = new List<Point>() { new Point(10,10),
-            new Point(100,10), 
+            new Point(100,10),
             new Point(100,100),
             new Point(10,100)};
 
@@ -111,7 +111,7 @@ namespace DigitalPlatform.Drawing
 
             return new PointF(
                 (float)p.X / x_ratio
-            - (float)display_rect.X / x_ratio, 
+            - (float)display_rect.X / x_ratio,
             (float)p.Y / y_ratio
             - (float)display_rect.Y / y_ratio);
         }
@@ -177,7 +177,7 @@ namespace DigitalPlatform.Drawing
                 p1.X,
                 p1.Y);
 
-        END1:
+            END1:
             base.OnMouseDown(e);
         }
 
@@ -319,7 +319,7 @@ namespace DigitalPlatform.Drawing
             List<Point> source_points = new List<Point>();
             source_points.Add(new Point(rect.X, rect.Y));
             source_points.Add(new Point(rect.X + rect.Width, rect.Y));
-            source_points.Add(new Point(rect.X +rect.Width, rect.Y + rect.Height));
+            source_points.Add(new Point(rect.X + rect.Width, rect.Y + rect.Height));
             source_points.Add(new Point(rect.X, rect.Y + rect.Height));
             Point[] pts = source_points.ToArray();
 
@@ -327,13 +327,15 @@ namespace DigitalPlatform.Drawing
             float x_ratio = (float)display_rect.Width / (float)this.Image.Width;
             float y_ratio = (float)display_rect.Height / (float)this.Image.Height;
 
-            System.Drawing.Drawing2D.Matrix rotateMatrix =
-    new System.Drawing.Drawing2D.Matrix();
-            // Set the rotation angle and starting point for the text.
-            rotateMatrix.RotateAt(angle, new PointF(this.Image.Width / 2, this.Image.Height / 2));
-            //rotateMatrix.RotateAt(angle, new PointF(0, 0));
+            {
+                System.Drawing.Drawing2D.Matrix rotateMatrix =
+        new System.Drawing.Drawing2D.Matrix();
+                // Set the rotation angle and starting point for the text.
+                rotateMatrix.RotateAt(angle, new PointF(this.Image.Width / 2, this.Image.Height / 2));
+                //rotateMatrix.RotateAt(angle, new PointF(0, 0));
 
-            g.MultiplyTransform(rotateMatrix);
+                g.MultiplyTransform(rotateMatrix);
+            }
 
             // g.ScaleTransform(x_ratio, y_ratio);
             // g.ScaleTransform((float)1.1, (float)1.1);
@@ -448,7 +450,7 @@ namespace DigitalPlatform.Drawing
 
                 StringBuilder text = new StringBuilder();
                 text.Append(string.Format("s:({0},{1});c:", this.Image.Width, this.Image.Height));
-                foreach(Point p in _points)
+                foreach (Point p in _points)
                 {
                     text.Append(string.Format("({0},{1})", p.X, p.Y));
                 }

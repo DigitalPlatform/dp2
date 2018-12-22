@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 
@@ -15,6 +16,8 @@ namespace FingerprintCenter
 {
     static class Program
     {
+        public static FingerPrint FingerPrint { get; set; }
+
         static ExecutionContext context = null;
         static Mutex mutex = null;
 
@@ -24,6 +27,8 @@ namespace FingerprintCenter
         [STAThread]
         static void Main()
         {
+            ClientInfo.TypeOfProgram = typeof(Program);
+
             if (StringUtil.IsDevelopMode() == false)
                 ClientInfo.PrepareCatchException();
 

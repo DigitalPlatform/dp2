@@ -11,11 +11,13 @@ namespace DigitalPlatform.Interfaces
     /// </summary>
     public interface IBioRecognition
     {
+#if NO
         int Open(
             ref string strVersion,
             out string strError);
 
         int Close();
+#endif
 
         // 添加高速缓存事项
         // 如果items == null 或者 items.Count == 0，表示要清除当前的全部缓存内容
@@ -51,7 +53,7 @@ namespace DigitalPlatform.Interfaces
             out string strError);
 
         // 设置参数
-        bool SetParameter(string strName, object value);
+        // bool SetParameter(string strName, object value);
     }
 
     [Serializable()]
