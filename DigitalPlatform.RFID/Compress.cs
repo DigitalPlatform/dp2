@@ -437,6 +437,18 @@ namespace DigitalPlatform.RFID
                 return results;
             }
 
+            public string GetBitsString(int bits)
+            {
+                List<bool> result = GetBits(bits);
+                StringBuilder text = new StringBuilder();
+                foreach (bool b in result)
+                {
+                    text.Append(b ? "1" : "0");
+                }
+
+                return text.ToString();
+            }
+
             // 当前 bits 个数
             public int Count
             {
@@ -483,6 +495,22 @@ namespace DigitalPlatform.RFID
                 }
 
                 return result;
+            }
+
+            public static List<bool> ToList(string bits)
+            {
+                List<bool> results = new List<bool>();
+
+                foreach (char c in bits)
+                {
+                    results.Add(c == '1' ? true : false);
+                }
+                return results;
+            }
+
+            public static byte ToByte(string bits, int count)
+            {
+                return ToByte(ToList(bits), count);
             }
 
             // 是否全为 0
@@ -682,6 +710,8 @@ namespace DigitalPlatform.RFID
 
         #region ISIL
 
+#if NO
+
         public static byte[] IsilCompress(string text)
         {
             // 检查
@@ -689,8 +719,10 @@ namespace DigitalPlatform.RFID
 
             BitPackage package = new BitPackage();
             char current_charset = 'u'; // u(大写) l(小写) d(数字)
-            foreach (char ch in text)
+            for (int index = 0; index < text.Length; index++)
             {
+                char ch = text[index];
+
                 if (ch == '-')
                 {
                     if (current_charset == 'u' || current_charset == 'l')
@@ -785,6 +817,136 @@ namespace DigitalPlatform.RFID
             return package.Bytes;
         }
 
+#endif
+
+        public static byte[] IsilCompress(string text,
+            StringBuilder debugInfo = null)
+        {
+            // 检查
+            CheckIsil(text);
+
+            BitPackage package = new BitPackage();
+            char prev_charset = 'u'; // u(大写) l(小写) d(数字)
+            for (int index = 0; index < text.Length; index++)
+            {
+                char ch = text[index];
+
+                if (debugInfo != null)
+                    debugInfo.Append($"{ch}");
+
+                char next_ch = (char)0;
+                if (index + 1 <= text.Length - 1)
+                    next_ch = text[index + 1];
+
+                // 获得当前字符可能处于的字符集
+                string current_charsets = GetCharsets(ch);
+
+                string action = "";
+                string targets = "";
+                // 如果当前字符的字符集和 prev_charset 不同
+                // 就必须 switch 或者 shift
+                if (current_charsets.IndexOf(prev_charset) == -1)
+                {
+                    // 1) 如果 next_ch 在 prev_charset 以内，则用 shift
+                    if (next_ch == 0
+                        || GetCharsets(next_ch).IndexOf(prev_charset) != -1)
+                    {
+                        action = "shift";
+                        targets = current_charsets[0].ToString();
+                    }
+                    else
+                    {
+                        action = "switch";
+                        targets = GetCharsets(ch);
+                    }
+
+                    if (debugInfo != null)
+                        debugInfo.Append($" {action}:{prev_charset}-{targets}");
+
+                    string output = "";
+                    if (action == "switch")
+                    {
+                        output = GetSwitchBits(prev_charset, targets[0]);
+                        package.AddRange(output);
+                        prev_charset = targets[0];
+                        output += "," + AddToPackage(ch, prev_charset, package);
+                    }
+                    else
+                    {
+                        Debug.Assert(action == "shift");
+                        output = GetShiftBits(prev_charset, targets[0]);
+                        package.AddRange(output);
+                        output += "," + AddToPackage(ch, targets[0], package);
+                    }
+
+                    if (debugInfo != null)
+                        debugInfo.Append($" output:{output}\r\n");
+                }
+                else
+                {
+
+                    // 直接输出字符
+                    string output = AddToPackage(ch, prev_charset, package);
+                    if (debugInfo != null)
+                        debugInfo.Append($" output:{output}\r\n");
+                }
+            }
+
+            // 尾部 bits 补齐 BIN 1111111
+            if (package.Index != 0)
+            {
+                int count = 8 - package.Index;
+                for (int i = 0; i < count; i++)
+                {
+                    package.Add(true);
+                }
+            }
+
+            package.Flush();
+            return package.Bytes;
+        }
+
+        // 获得一个字符可能处于的字符集。可能不止一个
+        static string GetCharsets(char ch)
+        {
+            if (ch == '-')
+                return "uld";
+            if (ch == ':')
+                return "ud";
+            if (ch == '/')
+                return "l";
+            if (ch >= 'a' && ch <= 'z')
+                return "l";
+            if (ch >= 'A' && ch <= 'Z')
+                return "u";
+            if (ch >= '0' && ch <= '9')
+                return "d";
+            throw new Exception($"出现非法字符 '{ch}'");
+        }
+
+        // 检测两个字符是否可以处于同一个字符集
+        static bool InSameCharset(char ch1, char ch2, out string charsets)
+        {
+            charsets = "";
+            string charsets1 = GetCharsets(ch1);
+            string charsets2 = GetCharsets(ch2);
+            foreach (char charset1 in charsets1)
+            {
+                foreach (char charset2 in charsets2)
+                {
+                    if (charset1 == charset2
+                        && charsets.IndexOf(charset1) == -1)
+                        charsets += charset1.ToString();
+                }
+            }
+
+            if (string.IsNullOrEmpty(charsets) == false)
+                return true;
+
+            return false;
+        }
+
+        // 获得 switch bits
         static string GetSwitchBits(char prev_charset, char next_charset)
         {
             if (prev_charset == next_charset)
@@ -823,16 +985,58 @@ namespace DigitalPlatform.RFID
             throw new Exception($"出现了不可能的组合 {prev_charset} --> {next_charset}");
         }
 
-        static void AddToPackage(char ch, char charset, BitPackage package)
+        // 获得 shift bits
+        static string GetShiftBits(char prev_charset, char next_charset)
         {
+            if (prev_charset == next_charset)
+                throw new ArgumentException("prev_charset 和 next_charset 不应该相同");
+
+            if (prev_charset == 'u')
+            {
+                // upper --> lower
+                if (next_charset == 'l')
+                    return "11101";
+                // upper --> digit
+                if (next_charset == 'd')
+                    return "11111";
+            }
+
+            if (prev_charset == 'l')
+            {
+                // lower --> upper
+                if (next_charset == 'u')
+                    return "11101";
+                // lower --> digit
+                if (next_charset == 'd')
+                    return "11111";
+            }
+
+            if (prev_charset == 'd')
+            {
+                // digit --> upper
+                if (next_charset == 'u')
+                    return "1101";
+                // digit --> lower
+                if (next_charset == 'l')
+                    return "1111";
+            }
+
+            throw new Exception($"出现了不可能的组合 {prev_charset} --> {next_charset}");
+        }
+
+        static string AddToPackage(char ch, char charset, BitPackage package)
+        {
+            string bits = "";
             if (charset == 'u')
-                package.AddRange(GetUpperSetBits(ch));
+                bits = GetUpperSetBits(ch);
             else if (charset == 'l')
-                package.AddRange(GetLowerSetBits(ch));
+                bits = GetLowerSetBits(ch);
             else if (charset == 'd')
-                package.AddRange(GetDigiSetBits(ch));
+                bits = GetDigiSetBits(ch);
             else
                 throw new ArgumentException($"无法识别的 charset '{charset}'");
+            package.AddRange(bits);
+            return bits;
         }
 
         static string GetUpperSetBits(char ch)
@@ -937,38 +1141,37 @@ namespace DigitalPlatform.RFID
             StringBuilder result = new StringBuilder();
             while (true)
             {
-                List<bool> bits = extract.GetBits(5);
-                if (bits.Count < 5)
+                int bit_count = char.ToLower(current_charset) == 'd' ? 4 : 5;
+                string bits = extract.GetBitsString(bit_count);
+                if (bits.Length < bit_count)
                     break;
-
-                char ch = (char)BitExtract.ToByte(bits, 5);
 
                 // 切换命令
                 if (current_charset == 'u' || current_charset == 'U')
                 {
                     // 小写锁定
-                    if (ch == 0x1c)
+                    if (bits == "11100")
                     {
                         current_charset = 'l';
                         continue;
                     }
 
                     // 小写 shift
-                    if (ch == 0x1d)
+                    if (bits == "11101")
                     {
                         current_charset = 'L';
                         continue;
                     }
 
                     // 数字锁定
-                    if (ch == 0x1e)
+                    if (bits == "11110")
                     {
                         current_charset = 'd';
                         continue;
                     }
 
                     // 数字 shift
-                    if (ch == 0x1f)
+                    if (bits == "11111")
                     {
                         current_charset = 'D';
                         continue;
@@ -976,31 +1179,31 @@ namespace DigitalPlatform.RFID
                 }
 
                 // 切换命令
-                if (current_charset == 'l' || current_charset == 'l')
+                if (current_charset == 'l' || current_charset == 'L')
                 {
                     // 大写锁定
-                    if (ch == 0x1c)
+                    if (bits == "11100")
                     {
                         current_charset = 'u';
                         continue;
                     }
 
                     // 大写 shift
-                    if (ch == 0x1d)
+                    if (bits == "11101")
                     {
                         current_charset = 'U';
                         continue;
                     }
 
                     // 数字锁定
-                    if (ch == 0x1e)
+                    if (bits == "11110")
                     {
                         current_charset = 'd';
                         continue;
                     }
 
                     // 数字 shift
-                    if (ch == 0x1f)
+                    if (bits == "11111")
                     {
                         current_charset = 'D';
                         continue;
@@ -1011,39 +1214,41 @@ namespace DigitalPlatform.RFID
                 if (current_charset == 'd' || current_charset == 'D')
                 {
                     // 大写锁定
-                    if (ch == 0x0c)
+                    if (bits == "1100")
                     {
                         current_charset = 'u';
                         continue;
                     }
 
                     // 大写 shift
-                    if (ch == 0x0d)
+                    if (bits == "1101")
                     {
                         current_charset = 'U';
                         continue;
                     }
 
                     // 小写锁定
-                    if (ch == 0x0e)
+                    if (bits == "1110")
                     {
                         current_charset = 'l';
                         continue;
                     }
 
                     // 小写 shift
-                    if (ch == 0x0f)
+                    if (bits == "1111")
                     {
                         current_charset = 'L';
                         continue;
                     }
                 }
 
+                char ch = (char)BitExtract.ToByte(bits, bit_count);
+
                 if (current_charset == 'u' || current_charset == 'U')
                 {
-                    if (ch == 0)
+                    if (bits == "00000")
                         result.Append('-');
-                    else if (ch == 0x1b)
+                    else if (bits == "11011")
                         result.Append(':');
                     else if (ch >= 0x01 && ch <= 0x1a)
                     {
@@ -1060,9 +1265,9 @@ namespace DigitalPlatform.RFID
 
                 if (current_charset == 'l' || current_charset == 'L')
                 {
-                    if (ch == 0)
+                    if (bits == "00000")
                         result.Append('-');
-                    else if (ch == 0x1b)
+                    else if (bits == "11011")
                         result.Append('/');
                     else if (ch >= 0x01 && ch <= 0x1a)
                     {
@@ -1079,13 +1284,13 @@ namespace DigitalPlatform.RFID
 
                 if (current_charset == 'd' || current_charset == 'D')
                 {
-                    if (ch == 0x0a)
+                    if (bits == "1010")
                         result.Append('-');
-                    else if (ch == 0x0b)
+                    else if (bits == "1011")
                         result.Append(':');
                     else if (ch >= 0 && ch <= 0x09)
                     {
-                        result.Append((char)(ch - 1 + '0'));
+                        result.Append((char)('0' + ch));
                         continue;
                     }
                     else

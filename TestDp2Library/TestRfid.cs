@@ -221,6 +221,68 @@ namespace TestDp2Library
         #region ISIL
 
         [TestMethod]
+        public void Test_isil_process_1()
+        {
+            TestIsilProcess("DE-Heu1",
+                @"D output:00100
+E output:00101
+- output:00000
+H output:01000
+e switch:u-l output:11100,00101
+u output:10101
+1 shift:l-d output:11111,0001");
+        }
+
+        [TestMethod]
+        public void Test_isil_process_2()
+        {
+            TestIsilProcess("-",
+@"- output:00000");
+
+            TestIsilProcess("A",
+                @"A output:00001");
+
+            TestIsilProcess("B",
+    @"B output:00010");
+
+            TestIsilProcess("Z",
+@"Z output:11010");
+
+            TestIsilProcess(":",
+@": output:11011");
+        }
+
+        [TestMethod]
+        public void Test_isil_process_3()
+        {
+            TestIsilProcess("-",
+@"- output:00000");
+
+            TestIsilProcess("a",
+                @"a shift:u-l output:11101,00001");
+
+            TestIsilProcess("b",
+    @"b shift:u-l output:11101,00010");
+
+            TestIsilProcess("z",
+@"z shift:u-l output:11101,11010");
+
+            TestIsilProcess("/",
+@"/ shift:u-l output:11101,11011");
+        }
+
+        void TestIsilProcess(string text, string process_info)
+        {
+            StringBuilder debugInfo = new StringBuilder();
+            Compress.IsilCompress(text, debugInfo);
+
+            // 去掉末尾的回行
+            process_info = process_info.TrimEnd(new char[] { '\r', '\n' });
+            string result = debugInfo.ToString().TrimEnd(new char[] { '\r', '\n' });
+            Assert.AreEqual(result, process_info);
+        }
+
+        [TestMethod]
         public void Test_isil_1()
         {
             TestIsil("DE-Heu1", new byte[] {
