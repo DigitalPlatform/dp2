@@ -18,14 +18,34 @@ namespace TestDp2Library
         #region integer
 
         [TestMethod]
-        public void Test_rfid_1()
+        public void Test_integer_1()
         {
             TestInteger("999999",
                 MakeBytes(999999));
 
             // ‭DE0B6B3A763FFFF‬
 
+        }
+
+        [TestMethod]
+        public void Test_integer_2()
+        {
             TestInteger("10", new byte[] { (byte)10 });
+        }
+
+        [TestMethod]
+        public void Test_integer_3()
+        {
+            // GB/T 35660.2-2017 page 31 例子
+            TestInteger("123456789012",
+                new byte[] { 0x1c, 0xbe, 0x99, 0x1a, 0x14 });
+        }
+
+        [TestMethod]
+        public void Test_integer_4()
+        {
+            // GB/T 35660.2-2017 page 32 例子
+            TestInteger("1203", new byte[] { 0x04, 0xb3 });
         }
 
         // 测试一些较小的数值
@@ -165,6 +185,15 @@ namespace TestDp2Library
             });
         }
 
+        [TestMethod]
+        public void Test_bit6_3()
+        {
+            // GB/T 35660.2-2017 page 32 例子
+            TestBit6("QA268.L55", new byte[] {
+                0x44, 0x1c, 0xb6, 0xe2, 0xe3, 0x35, 0xd6
+            });
+        }
+
         void TestBit6(string text, byte[] correct)
         {
             byte[] result = Compress.Bit6Compress(text);
@@ -293,6 +322,12 @@ u output:10101
         [TestMethod]
         public void Test_isil_2()
         {
+            //StringBuilder debugInfo = new StringBuilder();
+            //Compress.IsilCompress("US-InU-Mu", debugInfo);
+
+            TestIsil("US-InU-Mu", new byte[] {
+                0xac,0xc0,0x9e,0xba,0xa0,0x6f,0x6b
+            });
         }
 
         void TestIsil(string text, byte[] correct)
@@ -304,6 +339,35 @@ u output:10101
             Assert.AreEqual(text, Compress.IsilExtract(result));
         }
 
+        #endregion
+
+        #region AutoSelectCompressMethod()
+
+        [TestMethod]
+        public void Test_autoSelect_1()
+        {
+            // page 31 例子
+            Assert.AreEqual(
+                "integer",
+                Compress.AutoSelectCompressMethod("123456789012"));
+        }
+
+        [TestMethod]
+        public void Test_autoSelect_2()
+        {
+            // page 32 例子
+            Assert.AreEqual(
+                "integer",
+                Compress.AutoSelectCompressMethod("1203"));
+        }
+
+        [TestMethod]
+        public void Test_autoSelect_5()
+        {
+            Assert.AreEqual(
+                "bit6",
+                Compress.AutoSelectCompressMethod("QA268.L55"));
+        }
 
         #endregion
     }

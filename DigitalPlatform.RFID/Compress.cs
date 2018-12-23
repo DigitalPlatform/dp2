@@ -10,6 +10,22 @@ namespace DigitalPlatform.RFID
 {
     public class Compress
     {
+
+        public static string AutoSelectCompressMethod(string text)
+        {
+            if (CheckInteger(text, false))
+                return "integer";
+            if (CheckDigit(text, false))
+                return "digit";
+            if (CheckBit5(text, false))
+                return "bit5";
+            if (CheckBit6(text, false))
+                return "bit6";
+            if (CheckBit7(text, false))
+                return "bit7";
+            return "";
+        }
+
         #region Integer
 
         public const UInt64 MaxInteger = 9999999999999999999;   // 19 位
@@ -108,7 +124,7 @@ namespace DigitalPlatform.RFID
                 if (ch < '0' || ch > '9')
                 {
                     if (throwException)
-                        throw new ArgumentException("整型数压缩内容中不应包含非数字字符");
+                        throw new ArgumentException($"用于整型数压缩的内容中出现了非数字字符 '{ch}'");
                     return false;
                 }
             }
@@ -150,7 +166,6 @@ namespace DigitalPlatform.RFID
                 i++;
             }
 
-
             return bytes.ToArray();
         }
 
@@ -175,6 +190,16 @@ namespace DigitalPlatform.RFID
         // 检查字符串是否符合数字压缩的要求
         static bool CheckDigit(string text, bool throwException = true)
         {
+            foreach (char ch in text)
+            {
+                if (ch < '0' || ch > '9')
+                {
+                    if (throwException)
+                        throw new ArgumentException($"用于数字压缩的内容中出现了非法字符 '{ch}'");
+                    return false;
+                }
+            }
+
             if (text.Length < 2)
             {
                 if (throwException)
@@ -270,12 +295,13 @@ namespace DigitalPlatform.RFID
                 return false;
             }
 
+            // A-_ 之间是合法字符
             foreach (char ch in text)
             {
                 if (ch < 0x41 || ch > 0x5f)
                 {
                     if (throwException)
-                        throw new ArgumentException("5 bit 压缩内容字符应该在 x41 和 x5f 之间");
+                        throw new ArgumentException($"用于 5 bit 压缩的内容字符出现了 0x41 和 0x5f 之外的字符 '{ch}'");
                     return false;
                 }
             }
@@ -568,12 +594,13 @@ namespace DigitalPlatform.RFID
                 return false;
             }
 
+            // 空-_ 之间为合法字符
             foreach (char ch in text)
             {
                 if (ch < 0x20 || ch > 0x5f)
                 {
                     if (throwException)
-                        throw new ArgumentException("用于 6 bit 压缩的内容字符应该在 x20 和 x5f 之间");
+                        throw new ArgumentException($"用于 6 bit 压缩的内容字符出现了在 0x20 和 0x5f 之外的字符 '{ch}'");
                     return false;
                 }
             }
@@ -591,7 +618,7 @@ namespace DigitalPlatform.RFID
             if (count > 0)
             {
                 if (throwException)
-                    throw new ArgumentException("用于 6 bit 压缩的内容字符的尾部不应出现 x20 字符");
+                    throw new ArgumentException("用于 6 bit 压缩的内容字符的尾部不应出现 0x20 字符");
                 return false;
             }
 
@@ -1136,6 +1163,7 @@ namespace DigitalPlatform.RFID
 
         public static string IsilExtract(byte[] data)
         {
+            char save_charset = 'u';
             char current_charset = 'u';
             BitExtract extract = new BitExtract(data);
             StringBuilder result = new StringBuilder();
@@ -1159,6 +1187,7 @@ namespace DigitalPlatform.RFID
                     // 小写 shift
                     if (bits == "11101")
                     {
+                        save_charset = current_charset;
                         current_charset = 'L';
                         continue;
                     }
@@ -1173,6 +1202,7 @@ namespace DigitalPlatform.RFID
                     // 数字 shift
                     if (bits == "11111")
                     {
+                        save_charset = current_charset;
                         current_charset = 'D';
                         continue;
                     }
@@ -1191,6 +1221,7 @@ namespace DigitalPlatform.RFID
                     // 大写 shift
                     if (bits == "11101")
                     {
+                        save_charset = current_charset;
                         current_charset = 'U';
                         continue;
                     }
@@ -1205,6 +1236,7 @@ namespace DigitalPlatform.RFID
                     // 数字 shift
                     if (bits == "11111")
                     {
+                        save_charset = current_charset;
                         current_charset = 'D';
                         continue;
                     }
@@ -1223,6 +1255,7 @@ namespace DigitalPlatform.RFID
                     // 大写 shift
                     if (bits == "1101")
                     {
+                        save_charset = current_charset;
                         current_charset = 'U';
                         continue;
                     }
@@ -1237,6 +1270,7 @@ namespace DigitalPlatform.RFID
                     // 小写 shift
                     if (bits == "1111")
                     {
+                        save_charset = current_charset;
                         current_charset = 'L';
                         continue;
                     }
@@ -1253,13 +1287,12 @@ namespace DigitalPlatform.RFID
                     else if (ch >= 0x01 && ch <= 0x1a)
                     {
                         result.Append((char)(ch - 1 + 'A'));
-                        continue;
                     }
                     else
                         throw new Exception("error 1");
 
                     if (current_charset == 'U')
-                        current_charset = 'u';
+                        current_charset = save_charset;
                     continue;
                 }
 
@@ -1272,13 +1305,12 @@ namespace DigitalPlatform.RFID
                     else if (ch >= 0x01 && ch <= 0x1a)
                     {
                         result.Append((char)(ch - 1 + 'a'));
-                        continue;
                     }
                     else
                         throw new Exception("error 2");
 
                     if (current_charset == 'L')
-                        current_charset = 'l';
+                        current_charset = save_charset;
                     continue;
                 }
 
@@ -1297,7 +1329,7 @@ namespace DigitalPlatform.RFID
                         throw new Exception("error 3");
 
                     if (current_charset == 'D')
-                        current_charset = 'd';
+                        current_charset = save_charset;
                     continue;
                 }
 
