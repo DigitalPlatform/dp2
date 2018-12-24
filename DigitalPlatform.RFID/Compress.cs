@@ -11,19 +11,19 @@ namespace DigitalPlatform.RFID
     public class Compress
     {
 
-        public static string AutoSelectCompressMethod(string text)
+        public static CompactionScheme AutoSelectCompressMethod(string text)
         {
             if (CheckInteger(text, false))
-                return "integer";
-            if (CheckDigit(text, false))
-                return "digit";
+                return CompactionScheme.Integer;
+            if (CheckNumeric(text, false))
+                return CompactionScheme.Numeric;
             if (CheckBit5(text, false))
-                return "bit5";
+                return CompactionScheme.FivebitCode;
             if (CheckBit6(text, false))
-                return "bit6";
+                return CompactionScheme.SixBitCode;
             if (CheckBit7(text, false))
-                return "bit7";
-            return "";
+                return CompactionScheme.SevenBitCode;
+            return CompactionScheme.Null;
         }
 
         #region Integer
@@ -134,13 +134,13 @@ namespace DigitalPlatform.RFID
 
         #endregion
 
-        #region digit
+        #region numeric
 
         // 数字
-        public static byte[] DigitCompress(string text)
+        public static byte[] NumericCompress(string text)
         {
             // 检查
-            CheckDigit(text);
+            CheckNumeric(text);
 
             List<byte> bytes = new List<byte>();
             byte temp = 0;
@@ -169,7 +169,7 @@ namespace DigitalPlatform.RFID
             return bytes.ToArray();
         }
 
-        public static string DigitExtract(byte[] data)
+        public static string NumericExtract(byte[] data)
         {
             // TODO: 检查补齐字符是否连续，是否从右端开始
             StringBuilder result = new StringBuilder();
@@ -188,7 +188,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 检查字符串是否符合数字压缩的要求
-        static bool CheckDigit(string text, bool throwException = true)
+        static bool CheckNumeric(string text, bool throwException = true)
         {
             foreach (char ch in text)
             {

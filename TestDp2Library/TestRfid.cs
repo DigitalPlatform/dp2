@@ -108,11 +108,11 @@ namespace TestDp2Library
 
         void TestDigit(string text, byte[] correct)
         {
-            byte[] result = Compress.DigitCompress(text);
+            byte[] result = Compress.NumericCompress(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.DigitExtract(result));
+            Assert.AreEqual(text, Compress.NumericExtract(result));
         }
 
         #endregion
@@ -300,6 +300,8 @@ u output:10101
 @"/ shift:u-l output:11101,11011");
         }
 
+        // 测试 ISIL 基本逻辑处理是否正确。
+        // 注意，本测试并未验证 Compress 生成的 byte[] 是否正确，也未验证 Extract 部分功能
         void TestIsilProcess(string text, string process_info)
         {
             StringBuilder debugInfo = new StringBuilder();
@@ -348,7 +350,7 @@ u output:10101
         {
             // page 31 例子
             Assert.AreEqual(
-                "integer",
+                CompactionScheme.Integer,
                 Compress.AutoSelectCompressMethod("123456789012"));
         }
 
@@ -357,7 +359,7 @@ u output:10101
         {
             // page 32 例子
             Assert.AreEqual(
-                "integer",
+                CompactionScheme.Integer,
                 Compress.AutoSelectCompressMethod("1203"));
         }
 
@@ -365,8 +367,40 @@ u output:10101
         public void Test_autoSelect_5()
         {
             Assert.AreEqual(
-                "bit6",
+                CompactionScheme.SixBitCode,
                 Compress.AutoSelectCompressMethod("QA268.L55"));
+        }
+
+        #endregion
+
+        #region Element
+
+        [TestMethod]
+        public void Test_element_parse_1()
+        {
+            byte[] data = new byte[] {
+                0x91, 0x00, 0x05, 0x1c,
+                0xbe, 0x99, 0x1a, 0x14,
+            };
+            var element = Element.Parse(data, 0, out int bytes);
+            Assert.AreEqual(element.OID, 1);
+            Assert.AreEqual(element.Text, "123456789012");
+            Assert.AreEqual(element.PrecursorOffset, true); // Precursor 后面会有 1 byte 的填充字符数
+            Assert.AreEqual(element.Paddings, 0);   // 填充 byte 没有使用
+        }
+
+        [TestMethod]
+        public void Test_element_compact_1()
+        {
+            byte [] result = Element.Compact(1, 
+                "123456789012",
+                CompactionScheme.Null,
+                true);
+            byte[] correct = new byte[] {
+                0x91, 0x00, 0x05, 0x1c,
+                0xbe, 0x99, 0x1a, 0x14,
+            };
+            Assert.IsTrue(result.SequenceEqual(correct));
         }
 
         #endregion
