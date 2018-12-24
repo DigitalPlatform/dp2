@@ -106,7 +106,7 @@ ref sessioninfo) == false)
                     this.Panel_debuginfo.Visible = false;
 
                     this.question_frame.Visible = true;
-
+                    RemoveXml(questions);   // 2018/12/11
                     this.hidden_questions.Value = JsonConvert.SerializeObject(questions);
 
                     Question question = questions[questions.Length - 1];
@@ -122,6 +122,17 @@ ref sessioninfo) == false)
             finally
             {
                 sessioninfo.ReturnChannel(channel);
+            }
+        }
+
+        // 清除 Question.Xml，避免被 ASP.NET 认为是攻击性的数据
+        static void RemoveXml(Question [] questions)
+        {
+            if (questions == null)
+                return;
+            foreach(Question question in questions)
+            {
+                question.Xml = "";
             }
         }
 

@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Text;
 using System.Windows.Forms;
-using System.Xml;
 using System.Diagnostics;
-using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -444,7 +440,7 @@ namespace dp2Circulation
             SetMouseWheelSimulateEvent();
         }
 
-        /*public*/ void SetMouseWheelSimulateEvent()
+        void SetMouseWheelSimulateEvent()
         {
             foreach (Control child in this.tableLayoutPanel_main.Controls)
             {
@@ -470,7 +466,7 @@ namespace dp2Circulation
         void textBox_comment_MouseWheel(object sender, MouseEventArgs e)
         {
             int nValue = this.tableLayoutPanel_main.VerticalScroll.Value;
-            nValue  -= e.Delta;
+            nValue -= e.Delta;
             if (nValue > this.tableLayoutPanel_main.VerticalScroll.Maximum)
                 nValue = this.tableLayoutPanel_main.VerticalScroll.Maximum;
             if (nValue < this.tableLayoutPanel_main.VerticalScroll.Minimum)
@@ -590,7 +586,7 @@ namespace dp2Circulation
             get
             {
                 if (this.label_errorInfo == null)
-                    CreateErrorInfoLabel(null); 
+                    CreateErrorInfoLabel(null);
                 return this.label_errorInfo;
             }
         }
@@ -642,7 +638,7 @@ namespace dp2Circulation
             table.RowCount++;
 
             // 2015/5/30
-                List<int> column_indices = new List<int>();
+            List<int> column_indices = new List<int>();
             {
                 for (int j = 0; j < table.ColumnStyles.Count; j++)
                 {
@@ -737,6 +733,7 @@ namespace dp2Circulation
                 if (strMode == "simple" || strMode == "simple_register")
                 {
                     controls.Add(this.textBox_barcode);
+                    controls.Add(this.textBox_registerNo);  // 2018/12/10
                     controls.Add(this.comboBox_location);
                     controls.Add(this.textBox_price);
                     controls.Add(this.textBox_accessNo);
@@ -1164,7 +1161,8 @@ namespace dp2Circulation
         /// <summary>
         /// 刷新 记录 XMLDOM。即把控件中的内容更新到 XMLDOM 中
         /// </summary>
-        /*public*/ internal override void RefreshDom()
+        /*public*/
+        internal override void RefreshDom()
         {
             DomUtil.SetElementText(this._dataDom.DocumentElement, "parent", this.ParentId);
 
@@ -1271,6 +1269,14 @@ namespace dp2Circulation
                     this.comboBox_bookType.SelectAll();
 
                 this.comboBox_bookType.Focus();
+            }
+
+            if (name == "registerNo")
+            {
+                if (bSelectAll == true)
+                    this.textBox_registerNo.SelectAll();
+
+                this.textBox_registerNo.Focus();
             }
         }
 
@@ -2086,7 +2092,7 @@ namespace dp2Circulation
                     e1.Name = "Binding";
                 else if (sender == (object)this.textBox_operations)
                     e1.Name = "Operations";
-                else 
+                else
                 {
                     Debug.Assert(false, "未知的部件");
                     return;
@@ -2289,7 +2295,7 @@ namespace dp2Circulation
                 e1.ContextMenu = contextMenu;
                 this.AppendMenu(this, e1);
 
-                contextMenu.Show(sender as Control, new Point(e.X, e.Y));		
+                contextMenu.Show(sender as Control, new Point(e.X, e.Y));
             }
         }
 

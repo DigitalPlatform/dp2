@@ -105,6 +105,9 @@
     <Reference Include="Ionic.Zip">
       <HintPath>..\Ionic.Zip.dll</HintPath>
     </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -114,6 +117,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.IdentityModel" />
@@ -133,7 +137,10 @@
     <Compile Include="BinaryResControl.Designer.cs">
       <DependentUpon>BinaryResControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="BioBase.cs" />
+    <Compile Include="BioUtil.cs" />
     <Compile Include="CfgCache.cs" />
+    <Compile Include="ClientInfo.cs" />
     <Compile Include="dp2ResStream.cs" />
     <Compile Include="dp2ResTree.cs">
       <SubType>Component</SubType>
@@ -148,6 +155,7 @@
     <Compile Include="GetDp2ResDlg.Designer.cs">
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="IUi.cs" />
     <Compile Include="LoginDialog\CirculationLoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -303,6 +311,10 @@
       <Project>{3dcfca4d-0205-4684-a9a6-1db8640cd579}</Project>
       <Name>DigitalPlatform.CommonDialog</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
@@ -319,6 +331,10 @@
       <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
       <Name>DigitalPlatform.Range</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
+      <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
       <Project>{1a7544ab-30d7-4920-928e-26925b86274d}</Project>
       <Name>DigitalPlatform.rms</Name>
@@ -334,6 +350,10 @@
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
       <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{fe846fac-d4cb-4013-ad69-39e72e31d204}</Project>
+      <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

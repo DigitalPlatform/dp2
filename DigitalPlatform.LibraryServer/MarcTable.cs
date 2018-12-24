@@ -429,7 +429,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 
                 string objectTable = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template : BuildObjectHtmlTableStyle.None,
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit: BuildObjectHtmlTableStyle.None,
                     "unimarc",
                     strRecPath,
                     maps_container);
@@ -1535,7 +1535,7 @@ namespace DigitalPlatform.LibraryServer
             if (fields.count > 0)
             {
                 string strXml = ScriptUtil.BuildObjectXmlTable(strMARC,
-                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template : BuildObjectHtmlTableStyle.None,
+                    StringUtil.IsInList("object_template", strStyle) ? BuildObjectHtmlTableStyle.Template | BuildObjectHtmlTableStyle.TemplateMultiHit: BuildObjectHtmlTableStyle.None,
                     "usmarc",
                     strRecPath,
                     maps_container);

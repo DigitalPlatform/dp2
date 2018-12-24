@@ -1266,7 +1266,7 @@ Keys keyData)
             LibraryChannel channel = this.GetChannel(".",
                 ",",
                 GetChannelStyle.GUI,
-                "test:127.0.0.1");
+                "test:127.0.0.1");  // ?
 
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -3042,6 +3042,9 @@ out strError);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行校验书目记录的操作 ...");
@@ -3152,6 +3155,7 @@ out strError);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -4038,6 +4042,9 @@ out strError);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存书目记录 ...");
@@ -4206,6 +4213,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
@@ -4248,6 +4256,9 @@ MessageBoxDefaultButton.Button1);
                 return 0;
 
             LibraryChannel channel = this.GetChannel();
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4342,6 +4353,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
@@ -4695,12 +4707,13 @@ MessageBoxDefaultButton.Button1);
 
             // this.m_biblioTable.Clear();
 
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.Title = "请指定 MarcQuery 脚本文件";
-            dlg.FileName = this.m_strUsedMarcQueryFilename;
-            dlg.Filter = "MarcQuery 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                Title = "请指定 MarcQuery 脚本文件",
+                FileName = this.m_strUsedMarcQueryFilename,
+                Filter = "MarcQuery 脚本文件 (*.cs)|*.cs|All files (*.*)|*.*",
+                RestoreDirectory = true
+            };
 
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
@@ -4741,6 +4754,9 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
             LibraryChannel channel = this.GetChannel();
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4944,6 +4960,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -5400,6 +5417,9 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在针对书目记录执行 .fltx 脚本 ...");
@@ -5548,6 +5568,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -5671,6 +5692,9 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在修改书目记录 ...");
@@ -5778,6 +5802,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -7749,8 +7774,9 @@ dlg.UiState);
             this.EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
+
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出到 XML 文件 ...");
@@ -8509,6 +8535,9 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出到 XML 文件 ...");
             stop.BeginLoop();
@@ -8654,6 +8683,7 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -9124,8 +9154,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             LibraryChannel channel = this.GetChannel();
+
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 1, 0);
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             this.EnableControls(false);
 
@@ -9930,6 +9961,9 @@ MessageBoxDefaultButton.Button1);
 
             LibraryChannel channel = this.GetChannel();
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -10088,6 +10122,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControlsInSearching(true);
@@ -10422,16 +10457,14 @@ out strError);
                 LibraryChannel channel = this.GetChannel();
                 try
                 {
-                    string[] results = null;
-                    byte[] baTimestamp = null;
                     // 获得书目记录
                     long lRet = channel.GetBiblioInfos(
                         stop,
                         strRecPath,
                         "",
                         new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
+                        out string[] results,
+                        out byte[] baTimestamp,
                         out strError);
                     if (lRet == 0)
                         return -1;  // 是否设定为特殊状态?

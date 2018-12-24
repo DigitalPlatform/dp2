@@ -168,6 +168,7 @@ namespace GcatLite
                         goto REDO;
                     }
 
+                    strError = result.ErrorInfo;
                     goto ERROR1;
                 }
 

@@ -1495,6 +1495,7 @@ MessageBoxDefaultButton.Button2);
                         this,
                         strGcatWebServiceUrl,
                         strLine,
+                        "",
                         true,	// bSelectPinyin
                         true,	// bSelectEntry
                         false,	// bOutputDebugInfo

@@ -1468,6 +1468,7 @@ namespace dp2Circulation
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,
+                        "",
                         true,	// bSelectPinyin
                         true,	// bSelectEntry
                         true,	// bOutputDebugInfo
@@ -3054,6 +3055,7 @@ namespace dp2Circulation
 
         #region 石头汤著者号
 
+        // TODO: 可以考虑用 MarcQuery 的 MarcNodeList.FirstContent
         static string FirstContent(MarcNodeList nodes)
         {
             if (nodes.count == 0)
@@ -3250,7 +3252,7 @@ namespace dp2Circulation
         //      -1  出错
         //      0   没有找到
         //      1   找到
-        int GetAuthorAndPinyin(MarcRecord record,
+        public static int GetAuthorAndPinyin(MarcRecord record,
             out string strAuthor,
             out string strPinyin,
             out string strError)
@@ -3274,8 +3276,13 @@ namespace dp2Circulation
                 if (ContainHanzi(a) == false)
                     continue;
 
-                // 看看是否有 &9
+                // 看看是否有 $9
                 string sub_9 = FirstContent(field.select("subfield[@name='9']"));
+
+                // 2018/11/19
+                // 如果没有 $9，则尝试找 $A
+                if (string.IsNullOrEmpty(sub_9))
+                    sub_9 = field.select("subfield[@name='A']").FirstContent;
 #if NO
                 if (string.IsNullOrEmpty(sub_9) == false)
                 {

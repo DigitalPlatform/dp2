@@ -313,6 +313,8 @@ out strError);
             {
                 MessageBox.Show(this, strError);
             }
+
+            ActivateHelpUrl();
         }
 
 #if NO
@@ -880,7 +882,7 @@ out strError);
         {
             BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-
+            dlg.HelpRequested += Dlg_createBiblioDatabase_HelpRequested;
             dlg.Text = "创建新书目库";
             dlg.ManagerForm = this;
             dlg.CreateMode = true;
@@ -904,6 +906,11 @@ out strError);
 
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
+        }
+
+        private void Dlg_createBiblioDatabase_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
         }
 
         // 创建规范库
@@ -1253,7 +1260,9 @@ out strError);
                 "ManagerForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+                MessageBoxDefaultButton.Button2,
+                0,
+                "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");  // 最好是一个笼统介绍如何删除各种数据库的页面
             if (result != DialogResult.Yes)
                 return;
 
@@ -1271,22 +1280,7 @@ out strError);
                 goto ERROR1;
             }
 
-            /*
-            // 为更新AllDatabaseInfoXml
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.LoadXml(this.AllDatabaseInfoXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "AllDatabaseInfoXml装入XMLDOM时出错: " + ex.Message;
-                goto ERROR1;
-            }
-             * */
-
             EnableControls(false);
-
             try
             {
 
@@ -1298,9 +1292,8 @@ out strError);
 
                     string strDatabaseName = this.listView_databases.Items[index].Text;
 
-                    string strOutputInfo = "";
                     nRet = DeleteDatabase(strDatabaseName,
-                        out strOutputInfo,
+                        out string strOutputInfo,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1498,7 +1491,7 @@ out strError);
             {
                 BiblioDatabaseDialog dlg = new BiblioDatabaseDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
-
+                dlg.HelpRequested += Dlg_recreateBiblioDatabase_HelpRequested;
                 dlg.Text = "重新创建书目库";
                 dlg.ManagerForm = this;
                 dlg.CreateMode = true;
@@ -1535,7 +1528,7 @@ out strError);
             {
                 ReaderDatabaseDialog dlg = new ReaderDatabaseDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
-
+                dlg.HelpRequested += ReaderDatabaseDialog_HelpRequested;
                 dlg.Text = "重新创建读者库";
                 dlg.ManagerForm = this;
                 dlg.LibraryCodeList = this.GetLibraryCodeList();
@@ -1622,6 +1615,11 @@ out strError);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void Dlg_recreateBiblioDatabase_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93");
         }
 
         // 修改数据库特性
@@ -1726,7 +1724,7 @@ out strError);
             {
                 ReaderDatabaseDialog dlg = new ReaderDatabaseDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
-
+                dlg.HelpRequested += ReaderDatabaseDialog_HelpRequested;
                 dlg.Text = "修改读者库特性";
                 dlg.ManagerForm = this;
                 dlg.LibraryCodeList = this.GetLibraryCodeList();
@@ -2073,7 +2071,7 @@ out strError);
 
             ReaderDatabaseDialog dlg = new ReaderDatabaseDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-
+            dlg.HelpRequested += ReaderDatabaseDialog_HelpRequested;
             dlg.Text = "创建新读者库";
             dlg.ManagerForm = this;
             dlg.LibraryCodeList = this.GetLibraryCodeList();
@@ -2105,6 +2103,11 @@ out strError);
 
         }
 
+        private void ReaderDatabaseDialog_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E8%AF%BB%E8%80%85%E5%BA%93");
+        }
+
         // 创建违约金库
         private void ToolStripMenuItem_createAmerceDatabase_Click(object sender, EventArgs e)
         {
@@ -2129,7 +2132,7 @@ out strError);
         {
             SimpleDatabaseDialog dlg = new SimpleDatabaseDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-
+            dlg.HelpRequested += SimpleDatabaseDialog_HelpRequested;
             string strTypeName = GetTypeName(strType);
             if (strTypeName == null)
                 strTypeName = strType;
@@ -2168,6 +2171,18 @@ out strError);
             // 重新获得各种库名、列表
             Program.MainForm.StartPrepareNames(false, false);
             return 1;
+        }
+
+        private void SimpleDatabaseDialog_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            SimpleDatabaseDialog dialog = (SimpleDatabaseDialog)sender;
+            switch (dialog.DatabaseType)
+            {
+                case "":
+                    break;
+            }
+
+            // Process.Start("");
         }
 
         // 创建预约到书库
@@ -2608,7 +2623,7 @@ out strError);
 
             try
             {
-
+                List<string> initialized_databases = new List<string>();
                 for (int i = this.listView_databases.SelectedIndices.Count - 1;
                     i >= 0;
                     i--)
@@ -2617,13 +2632,17 @@ out strError);
 
                     string strDatabaseName = this.listView_databases.Items[index].Text;
 
-                    string strOutputInfo = "";
                     nRet = InitializeDatabase(strDatabaseName,
-                        out strOutputInfo,
+                        out string strOutputInfo,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
+                    initialized_databases.Add(strDatabaseName);
                 }
+
+                if (initialized_databases.Count > 0)
+                    this.ShowMessage($"初始化数据库 {StringUtil.MakePathList(initialized_databases)} 成功", "green", true);
             }
             finally
             {
@@ -2635,9 +2654,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-
         #region OPAC数据库配置管理
-
 
         // 在listview中列出所有参与OPAC的数据库
         int ListAllOpacDatabases(out string strError)
@@ -5485,7 +5502,7 @@ out strError);
         {
             LocationItemDialog dlg = new LocationItemDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-
+            dlg.HelpRequested += DlgNewLocation_HelpRequested;
             dlg.CreateMode = true;
             dlg.LibraryCodeList = this.GetLibraryCodeList();
             dlg.ItemBarcodeNullable = true;
@@ -5525,6 +5542,11 @@ out strError);
             this.LocationTypesDefChanged = true;
         }
 
+        private void DlgNewLocation_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
+        }
+
         // 修改馆藏地点事项
         private void toolStripButton_location_modify_Click(object sender, EventArgs e)
         {
@@ -5538,7 +5560,7 @@ out strError);
 
             LocationItemDialog dlg = new LocationItemDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-
+            dlg.HelpRequested += DlgModifyLocation_HelpRequested;
             dlg.LibraryCodeList = this.GetLibraryCodeList();
             dlg.LibraryCode = ListViewUtil.GetItemText(item, LOCATION_COLUMN_LIBRARYCODE);
             dlg.LocationString = ListViewUtil.GetItemText(item, LOCATION_COLUMN_ROOM);
@@ -5578,6 +5600,11 @@ out strError);
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void DlgModifyLocation_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            Process.Start("https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
         }
 
         const int LOCATION_COLUMN_LIBRARYCODE = 0;
@@ -5630,7 +5657,8 @@ out strError);
                 "ManagerForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+                MessageBoxDefaultButton.Button2,
+                0, "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A");
             if (result != DialogResult.Yes)
                 return;
 
@@ -5901,9 +5929,9 @@ out strError);
             MoveLocationItemUpDown(false);
         }
 
-#endregion
+        #endregion
 
-#region 值列表
+        #region 值列表
 
         int ListValueTables(out string strError)
         {
@@ -6134,9 +6162,9 @@ out strError);
             this.ValueTableChanged = true;
         }
 
-#endregion
+        #endregion
 
-#region 脚本
+        #region 脚本
 
         int ListScript(out string strError)
         {
@@ -6437,9 +6465,9 @@ out strError);
 
         }
 
-#endregion
+        #endregion
 
-#region 种次号
+        #region 种次号
 
         private void treeView_zhongcihao_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -7399,9 +7427,9 @@ out strError);
         }
 
 
-#endregion // 种次号
+        #endregion // 种次号
 
-#region 排架体系
+        #region 排架体系
 
 
         private void treeView_arrangement_AfterSelect(object sender, TreeViewEventArgs e)
@@ -8097,10 +8125,10 @@ out strError);
 
         }
 
-#endregion // 排架体系
+        #endregion // 排架体系
 
 
-#region 查重
+        #region 查重
 
         private void listView_dup_projects_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -8684,7 +8712,7 @@ out strError);
             }
         }
 
-#region 日历有关功能
+        #region 日历有关功能
 
         private void listView_calendar_MouseUp(object sender, MouseEventArgs e)
         {
@@ -9016,6 +9044,8 @@ out strError);
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
         {
+            ActivateHelpUrl();
+
             if (this.tabControl_main.SelectedTab == this.tabPage_kernel
                 && _kernelInitialized == false)
             {
@@ -9050,6 +9080,20 @@ out strError);
             }
         }
 
+        void ActivateHelpUrl()
+        {
+            if (this.tabControl_main.SelectedTab == this.tabPage_databases)
+                this.HelpUrl = "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA%E6%88%96%E5%88%A0%E9%99%A4%E4%B9%A6%E7%9B%AE%E5%BA%93";
+            else if (this.tabControl_main.SelectedTab == this.tabPage_locations)
+                this.HelpUrl = "https://github.com/DigitalPlatform/dp2/wiki/%E5%A6%82%E4%BD%95%E6%96%B0%E5%A2%9E%E9%A6%86%E8%97%8F%E5%9C%B0%E5%B9%B6%E8%AE%BE%E7%BD%AE%E6%98%AF%E5%90%A6%E5%8F%82%E4%B8%8E%E6%B5%81%E9%80%9A";
+            else if (this.tabControl_main.SelectedTab == this.tabPage_bookshelf)
+                this.HelpUrl = "https://github.com/DigitalPlatform/dp2/wiki/%E5%9B%BE%E4%B9%A6%E9%A6%86%E6%8E%92%E6%9E%B6%E4%BD%93%E7%B3%BB";
+            else if (this.tabControl_main.SelectedTab == this.tabPage_script)
+                this.HelpUrl = "https://github.com/DigitalPlatform/dp2/wiki/%E9%85%8D%E7%BD%AE%E6%9D%A1%E7%A0%81%E6%A0%A1%E9%AA%8C%E5%8A%9F%E8%83%BD";
+            else
+                this.HelpUrl = "";
+        }
+
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
 
@@ -9077,7 +9121,7 @@ out strError);
             ListViewUtil.OnColumnClick(this.listView_calendar, e, false);
         }
 
-#endregion
+        #endregion
 
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
@@ -9109,5 +9153,5 @@ out strError);
 
     }
 
-#endregion // 查重
+    #endregion // 查重
 }

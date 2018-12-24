@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.8.*")]
-[assembly: AssemblyFileVersion("3.8.0.0")]
+[assembly: AssemblyVersion("3.10.*")]
+[assembly: AssemblyFileVersion("3.10.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -186,5 +186,6 @@ ItemCanReturn()
 //      脚本通过 result 变量返回 'yes' 或 'no' 表示是否允许外借。如果脚本中没有定义这个变量，默认 'no' 的效果。
 //      此外，脚本返回前，可以设置变量 message 的值，这是一个字符串，宿主会用于向前端提示。
 //      注意脚本函数可能会被 GetEntities() API 调用(当 strStyle 中包含 'opac' 时)，但此种情况下 readerRecord 变量值为 null，注意在 javascript 代码中用 if (readerRecord == null) 来甄别判断处理
-//      3.8 （2018/10/14）对象权限开始支持 download:group2,level-2;preview:group1,level-1 这样的形态。原来的 group1,level-1 形态也继续兼容
-
+//      3.8 (2018/10/14）对象权限开始支持 download:group2,level-2;preview:group1,level-1 这样的形态。原来的 group1,level-1 形态也继续兼容
+//      3.9 (2018/11/23) GetDupSearchResult() API 的 DupSearchResult 类增加了一个成员 Detail，描述检索过程，也就是权值是如何加起来的
+//      3.10 (2018/12/1) SetEntities() API 中的 info.Style 可以使用 autopostfix 风格，用途是当 info.Action 为 'new' 或 'forcenew' 时，当册条码号或者登录号发生重复的时候，自动给这两类号码后面增加随机的后缀字符串，以保证册记录创建成功

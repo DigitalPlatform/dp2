@@ -360,6 +360,7 @@ string parameters)
     {
         public string Text { get; set; }   // 问题正文
         public string Answer { get; set; }  // 问题答案
+        public string Xml { get; set; }     // 问题的 XML 形态
     }
 
     // API 函数返回值

@@ -73,12 +73,12 @@ namespace DigitalPlatform
             // 
             // label_message
             // 
-            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(9, 7);
+            this.label_message.Location = new System.Drawing.Point(15, 10);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(382, 124);
+            this.label_message.Size = new System.Drawing.Size(370, 97);
             this.label_message.TabIndex = 0;
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -87,9 +87,9 @@ namespace DigitalPlatform
             this.button_OK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button_OK.AutoSize = true;
             this.button_OK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_OK.Location = new System.Drawing.Point(172, 142);
+            this.button_OK.Location = new System.Drawing.Point(154, 113);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(57, 27);
+            this.button_OK.Size = new System.Drawing.Size(95, 52);
             this.button_OK.TabIndex = 1;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -97,7 +97,7 @@ namespace DigitalPlatform
             // AutoCloseMessageBox
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
+            this.AutoScaleBaseSize = new System.Drawing.Size(10, 24);
             this.BackColor = System.Drawing.SystemColors.Window;
             this.CancelButton = this.button_OK;
             this.ClientSize = new System.Drawing.Size(400, 178);

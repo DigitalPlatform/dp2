@@ -4973,6 +4973,19 @@ out strError);
                     if (strLine == "***")
                         break;
 
+#if NO
+                    // 2018/11/19
+                    {
+                        // 遇到全是空格的行，也当作记录结束
+                        if (string.IsNullOrEmpty(strLine.Trim())
+                            && i > 0)
+                            break;
+
+                        if (string.IsNullOrEmpty(strLine.Trim()) && lines.Count == 0)
+                            continue;
+                    }
+#endif
+
                     if (IsContinueLine(ref strLine) == false)
                     {
                         if (string.IsNullOrEmpty(strLine) == true)
@@ -5045,7 +5058,7 @@ out strError);
             return false;
         }
 
-        #endregion
+#endregion
     }
 
 

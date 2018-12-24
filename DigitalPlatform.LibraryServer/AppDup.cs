@@ -5,11 +5,11 @@ using System.Text;
 using System.Xml;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.IO;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
-using System.IO;
 
 // using DigitalPlatform.rms.Client.rmsws_localhost;   // Record
 
@@ -79,6 +79,8 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            bool bDetail = (StringUtil.IsInList("detail", strBrowseInfoStyle));
+
             bool bExcludeCols = (StringUtil.IsInList("excludecolsoflowthreshold", strBrowseInfoStyle) == true);
 
             bool bCols = (StringUtil.IsInList("cols", strBrowseInfoStyle) == true);
@@ -96,6 +98,8 @@ namespace DigitalPlatform.LibraryServer
                 result_item.Path = item.Path;
                 result_item.Weight = item.Weight;
                 result_item.Threshold = item.Threshold;
+                if (bDetail)
+                    result_item.Detail = item.Detail;
 
                 // paths[i] = item.Path;
                 if (bCols == true)
@@ -113,11 +117,9 @@ namespace DigitalPlatform.LibraryServer
                 // string[] paths = new string[pathlist.Count];
                 string[] paths = StringUtil.FromListString(pathlist);
 
-                ArrayList aRecord = null;
-
                 nRet = channel.GetBrowseRecords(paths,
                     "cols",
-                    out aRecord,
+                    out ArrayList aRecord,
                     out strError);
                 if (nRet == -1)
                 {
@@ -146,7 +148,7 @@ namespace DigitalPlatform.LibraryServer
 
             result.Value = searchresults.Length;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -506,7 +508,7 @@ namespace DigitalPlatform.LibraryServer
             else
                 result.Value = 0;
             return result;
-        ERROR1:
+            ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -617,12 +619,18 @@ namespace DigitalPlatform.LibraryServer
                     if (strPath == strExcludeBiblioRecPath)
                         continue;
 
-                    DupLineItem item = new DupLineItem();
-                    item.Path = strPath;
-                    item.Weight = nWeight;
-                    item.Threshold = nThreshold;
+                    DupLineItem item = new DupLineItem
+                    {
+                        Path = strPath,
+                        Weight = nWeight,
+                        Threshold = nThreshold,
+                        Detail = BuildDetail(strDbName,
+            strFrom,
+            strKey,
+            strSearchStyle,
+            nWeight)
+                    };
                     dupset.Add(item);
-
                 }
 
                 lStart += aPath.Count;
@@ -631,8 +639,19 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
+        }
+
+        static string BuildDetail(string strDbName,
+            string strFrom,
+            string strKey,
+            string strSearchStyle,
+            int nWeight)
+        {
+            return strDbName + "/" + strFrom + "/" + strKey
+                + (strSearchStyle == "exact" ? "" : "," + strSearchStyle)
+                + ":" + nWeight.ToString();
         }
 
         // 从模拟keys中根据from获得对应的key
@@ -678,8 +697,8 @@ namespace DigitalPlatform.LibraryServer
             long lRet = channel.DoGetKeys(
                 strPath,
                 strXml,
-                "zh",	// strLang
-                // "",	// strStyle
+                "zh",   // strLang
+                        // "",	// strStyle
                 null,	// this.stop,
                 out aLine,
                 out strError);
@@ -744,5 +763,10 @@ namespace DigitalPlatform.LibraryServer
         public int Threshold = 0;   // 阈值
         [DataMember]
         public string[] Cols = null;    // 其余的列。一般为题名、作者，或者书目摘要
+
+        // 2018/11/22
+        [DataMember]
+        public string Detail { get; set; }
+
     }
 }

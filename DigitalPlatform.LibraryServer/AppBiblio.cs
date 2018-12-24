@@ -2490,9 +2490,9 @@ out strError);
                         if (string.IsNullOrEmpty(strComment) == false)
                             strComment += "; ";
                         if (string.IsNullOrEmpty(strAcceptedFragments) && string.IsNullOrEmpty(strRequstFragments) == false)
-                            strComment += "创建 dprms:file (数字对象)元素被拒绝";
+                            strComment += "因不具备 writeobject 权限, 创建 dprms:file (数字对象)元素被拒绝";
                         else
-                            strComment += "修改 dprms:file (数字对象)元素被拒绝";
+                            strComment += "因不具备 writeobject 权限, 修改 dprms:file (数字对象)元素被拒绝";
                     }
 
                 }

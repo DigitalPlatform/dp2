@@ -179,5 +179,17 @@ namespace DigitalPlatform.rms.Client
         {
             this.textBox_endNo.Text = "9999999999";
         }
+
+        public Encoding OutputEncoding
+        {
+            get
+            {
+                return Encoding.GetEncoding(this.comboBox_outputEncoding.Text);
+            }
+            set
+            {
+                this.comboBox_outputEncoding.Text = value.ToString();
+            }
+        }
     }
 }

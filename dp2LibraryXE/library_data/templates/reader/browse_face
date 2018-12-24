@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <col title="人脸时间戳">
+    <xpath>*/face/@timestamp</xpath>
+  </col>
+  <col title="证条码号">
+    <xpath>*/barcode</xpath>
+  </col>
+  <col title="人脸数据">
+    <xpath>*/face</xpath>
+  </col>
+</root>

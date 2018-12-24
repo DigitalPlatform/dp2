@@ -372,8 +372,6 @@ namespace DigitalPlatform.LibraryClient
 
             if (bAutoCache == true)
             {
-                long lServerFileSize = 0;
-                long lCacheFileSize = 0;
                 // 象征性获得一个日志文件的尺寸，主要目的是为了触发一次通道登录
                 // return:
                 //      -2  此类型的日志尚未启用
@@ -386,8 +384,8 @@ namespace DigitalPlatform.LibraryClient
                     this.CacheDir,
                     "20121001.log",
                     this.LogType,
-                    out lServerFileSize,
-                    out lCacheFileSize,
+                    out long lServerFileSize,
+                    out long lCacheFileSize,
                     out strError);
                 if (nRet == -1)
                     throw new ChannelException(this.Channel.ErrorCode, strError);

@@ -268,7 +268,6 @@ namespace DigitalPlatform.Range
             return lValue;
         }
 
-
         // bIsOrdered	true表示RangeList是排序过的，算法更优化
         public bool IsInRange(long lNumber,
             bool bIsOrdered)

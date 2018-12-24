@@ -403,7 +403,7 @@
             this.textBox_comment.Multiline = true;
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(348, 24);
+            this.textBox_comment.Size = new System.Drawing.Size(402, 24);
             this.textBox_comment.TabIndex = 36;
             this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -429,7 +429,7 @@
             this.textBox_borrowDate.Location = new System.Drawing.Point(137, 512);
             this.textBox_borrowDate.MinimumSize = new System.Drawing.Size(180, 0);
             this.textBox_borrowDate.Name = "textBox_borrowDate";
-            this.textBox_borrowDate.Size = new System.Drawing.Size(348, 21);
+            this.textBox_borrowDate.Size = new System.Drawing.Size(402, 21);
             this.textBox_borrowDate.TabIndex = 48;
             this.textBox_borrowDate.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_borrowDate.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -464,9 +464,9 @@
             this.textBox_registerNo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_registerNo.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_registerNo.Location = new System.Drawing.Point(137, 371);
-            this.textBox_registerNo.MinimumSize = new System.Drawing.Size(135, 0);
+            this.textBox_registerNo.MinimumSize = new System.Drawing.Size(180, 0);
             this.textBox_registerNo.Name = "textBox_registerNo";
-            this.textBox_registerNo.Size = new System.Drawing.Size(348, 21);
+            this.textBox_registerNo.Size = new System.Drawing.Size(402, 21);
             this.textBox_registerNo.TabIndex = 33;
             this.textBox_registerNo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_registerNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -492,7 +492,7 @@
             this.textBox_mergeComment.Multiline = true;
             this.textBox_mergeComment.Name = "textBox_mergeComment";
             this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_mergeComment.Size = new System.Drawing.Size(348, 24);
+            this.textBox_mergeComment.Size = new System.Drawing.Size(402, 24);
             this.textBox_mergeComment.TabIndex = 39;
             this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -541,7 +541,7 @@
             this.comboBox_location.Location = new System.Drawing.Point(137, 114);
             this.comboBox_location.MinimumSize = new System.Drawing.Size(178, 0);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(348, 26);
+            this.comboBox_location.Size = new System.Drawing.Size(402, 26);
             this.comboBox_location.TabIndex = 11;
             this.comboBox_location.DropDown += new System.EventHandler(this.comboBox_location_DropDown);
             this.comboBox_location.TextUpdate += new System.EventHandler(this.comboBox_location_TextUpdate);
@@ -557,7 +557,7 @@
             this.comboBox_bookType.Location = new System.Drawing.Point(137, 339);
             this.comboBox_bookType.MinimumSize = new System.Drawing.Size(178, 0);
             this.comboBox_bookType.Name = "comboBox_bookType";
-            this.comboBox_bookType.Size = new System.Drawing.Size(348, 26);
+            this.comboBox_bookType.Size = new System.Drawing.Size(402, 26);
             this.comboBox_bookType.TabIndex = 30;
             this.comboBox_bookType.DropDown += new System.EventHandler(this.comboBox_bookType_DropDown);
             this.comboBox_bookType.SelectedIndexChanged += new System.EventHandler(this.comboBox_bookType_SelectedIndexChanged);
@@ -756,7 +756,7 @@
             this.comboBox_seller.Location = new System.Drawing.Point(137, 146);
             this.comboBox_seller.MinimumSize = new System.Drawing.Size(133, 0);
             this.comboBox_seller.Name = "comboBox_seller";
-            this.comboBox_seller.Size = new System.Drawing.Size(348, 26);
+            this.comboBox_seller.Size = new System.Drawing.Size(402, 26);
             this.comboBox_seller.TabIndex = 14;
             this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
             this.comboBox_seller.SelectedIndexChanged += new System.EventHandler(this.comboBox_seller_SelectedIndexChanged);
@@ -804,7 +804,7 @@
             this.comboBox_source.Location = new System.Drawing.Point(137, 178);
             this.comboBox_source.MinimumSize = new System.Drawing.Size(133, 0);
             this.comboBox_source.Name = "comboBox_source";
-            this.comboBox_source.Size = new System.Drawing.Size(348, 26);
+            this.comboBox_source.Size = new System.Drawing.Size(402, 26);
             this.comboBox_source.TabIndex = 17;
             this.comboBox_source.DropDown += new System.EventHandler(this.comboBox_source_DropDown);
             this.comboBox_source.SelectedIndexChanged += new System.EventHandler(this.comboBox_source_SelectedIndexChanged);
@@ -848,7 +848,7 @@
             this.textBox_refID.Location = new System.Drawing.Point(137, 707);
             this.textBox_refID.MinimumSize = new System.Drawing.Size(180, 0);
             this.textBox_refID.Name = "textBox_refID";
-            this.textBox_refID.Size = new System.Drawing.Size(348, 21);
+            this.textBox_refID.Size = new System.Drawing.Size(402, 21);
             this.textBox_refID.TabIndex = 66;
             this.textBox_refID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_refID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -890,10 +890,10 @@
             // 
             this.button_getAccessNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_getAccessNo.AutoSize = true;
-            this.button_getAccessNo.Location = new System.Drawing.Point(491, 237);
-            this.button_getAccessNo.MinimumSize = new System.Drawing.Size(22, 0);
+            this.button_getAccessNo.Location = new System.Drawing.Point(545, 237);
+            this.button_getAccessNo.MinimumSize = new System.Drawing.Size(10, 0);
             this.button_getAccessNo.Name = "button_getAccessNo";
-            this.button_getAccessNo.Size = new System.Drawing.Size(162, 42);
+            this.button_getAccessNo.Size = new System.Drawing.Size(108, 42);
             this.button_getAccessNo.TabIndex = 24;
             this.button_getAccessNo.Text = "创建索取号";
             this.button_getAccessNo.UseVisualStyleBackColor = true;
@@ -962,7 +962,7 @@
             this.textBox_binding.Multiline = true;
             this.textBox_binding.Name = "textBox_binding";
             this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_binding.Size = new System.Drawing.Size(348, 24);
+            this.textBox_binding.Size = new System.Drawing.Size(402, 24);
             this.textBox_binding.TabIndex = 57;
             this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -977,7 +977,7 @@
             this.checkedComboBox_state.MinimumSize = new System.Drawing.Size(135, 0);
             this.checkedComboBox_state.Name = "checkedComboBox_state";
             this.checkedComboBox_state.Padding = new System.Windows.Forms.Padding(6);
-            this.checkedComboBox_state.Size = new System.Drawing.Size(350, 33);
+            this.checkedComboBox_state.Size = new System.Drawing.Size(404, 33);
             this.checkedComboBox_state.TabIndex = 5;
             this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
             this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
@@ -1015,7 +1015,7 @@
             this.textBox_operations.Multiline = true;
             this.textBox_operations.Name = "textBox_operations";
             this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_operations.Size = new System.Drawing.Size(348, 24);
+            this.textBox_operations.Size = new System.Drawing.Size(402, 24);
             this.textBox_operations.TabIndex = 60;
             this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);

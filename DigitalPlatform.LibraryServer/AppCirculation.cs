@@ -18348,14 +18348,15 @@ strBookPrice);    // 图书价格
 
             if (String.IsNullOrEmpty(strReaderBarcode) == true)
             {
-                strError = "读者证条码号不能为空。";
+                strError = "strReaderBarcode 参数不能为空";
                 goto ERROR1;
             }
             if (String.IsNullOrEmpty(strItemBarcode) == true)
             {
-                strError = "册条码号不能为空。";
+                strError = "strItemBarcode 参数不能为空";
                 goto ERROR1;
             }
+
             REDO_REPAIR:
 
             /*
@@ -18378,16 +18379,15 @@ strBookPrice);    // 图书价格
             try // 读者记录锁定范围开始
             {
                 // 读入读者记录
-                string strReaderXml = "";
-                string strOutputReaderRecPath = "";
-                byte[] reader_timestamp = null;
+
+                // 注意：strReaderBarcode 内容可以使用 @refID: 前缀
                 nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
                     strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
+                    out string strReaderXml,
+                    out string strOutputReaderRecPath,
+                    out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
@@ -18400,11 +18400,10 @@ strBookPrice);    // 图书价格
                     goto ERROR1;
                 }
 
-                string strLibraryCode = "";
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
                     sessioninfo.LibraryCodeList,
-                    out strLibraryCode) == false)
+                    out string strLibraryCode) == false)
                 {
                     strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +24,7 @@ namespace dp2Catalog
     {
         bool m_bInSearch = false;
 
-        // µ±Ç°È±Ê¡µÄ±àÂë·½Ê½
+        // å½“å‰ç¼ºçœçš„ç¼–ç æ–¹å¼
         Encoding CurrentEncoding = Encoding.UTF8;
 
         public LibraryChannelCollection Channels = null;
@@ -35,13 +35,13 @@ namespace dp2Catalog
         public MainForm MainForm = null;
         DigitalPlatform.Stop stop = null;
 
-        // ²ÎÓëÅÅĞòµÄÁĞºÅÊı×é
+        // å‚ä¸æ’åºçš„åˆ—å·æ•°ç»„
         SortColumns SortColumns = new SortColumns();
 
         string m_strXmlRecord = "";
 
         /// <summary>
-        /// ¼ìË÷½áÊøĞÅºÅ
+        /// æ£€ç´¢ç»“æŸä¿¡å·
         /// </summary>
         public AutoResetEvent EventFinish = new AutoResetEvent(false);
 
@@ -49,13 +49,13 @@ namespace dp2Catalog
 
         const int WM_INITIAL = API.WM_USER + 201;
 
-        const int ITEMTYPE_NORMAL = 0;  // ÆÕÍ¨ÊÂÏî
-        const int ITEMTYPE_OVERTHRESHOLD = 1; // È¨Öµ³¬¹ıãĞÖµµÄÊÂÏî
+        const int ITEMTYPE_NORMAL = 0;  // æ™®é€šäº‹é¡¹
+        const int ITEMTYPE_OVERTHRESHOLD = 1; // æƒå€¼è¶…è¿‡é˜ˆå€¼çš„äº‹é¡¹
 
-        #region Íâ²¿½Ó¿Ú
+        #region å¤–éƒ¨æ¥å£
 
         /// <summary>
-        /// ²éÖØ·½°¸Ãû
+        /// æŸ¥é‡æ–¹æ¡ˆå
         /// </summary>
         public string ProjectName
         {
@@ -70,7 +70,7 @@ namespace dp2Catalog
         }
 
         /// <summary>
-        /// ·¢Æğ²éÖØµÄ¼ÇÂ¼Â·¾¶¡£id¿ÉÒÔÎª?¡£Ö÷ÒªÓÃÀ´Ä£Äâ³ökeys
+        /// å‘èµ·æŸ¥é‡çš„è®°å½•è·¯å¾„ã€‚idå¯ä»¥ä¸º?ã€‚ä¸»è¦ç”¨æ¥æ¨¡æ‹Ÿå‡ºkeys
         /// </summary>
         public string RecordPath
         {
@@ -81,12 +81,12 @@ namespace dp2Catalog
             set
             {
                 this.textBox_recordPath.Text = value;
-                this.Text = "²éÖØ: " + value;
+                this.Text = "æŸ¥é‡: " + value;
             }
         }
 
         /// <summary>
-        /// ·¢Æğ²éÖØµÄXML¼ÇÂ¼
+        /// å‘èµ·æŸ¥é‡çš„XMLè®°å½•
         /// </summary>
         public string XmlRecord
         {
@@ -101,7 +101,7 @@ namespace dp2Catalog
         }
 
         /// <summary>
-        /// »ñµÃ²éÖØ½á¹û£ºËùÃüÖĞµÄÈ¨Öµ³¬¹ıãĞÖµµÄ¼ÇÂ¼Â·¾¶µÄ¼¯ºÏ
+        /// è·å¾—æŸ¥é‡ç»“æœï¼šæ‰€å‘½ä¸­çš„æƒå€¼è¶…è¿‡é˜ˆå€¼çš„è®°å½•è·¯å¾„çš„é›†åˆ
         /// </summary>
         public string[] DupPaths
         {
@@ -118,7 +118,7 @@ namespace dp2Catalog
                         aPath.Add(item.Text);
                     }
                     else
-                        break;  // ¼Ù¶¨³¬¹ıãĞÖµµÄÊÂÏî¶¼ÔÚÇ°²¿£¬ÕâÀï¿ÉÒÔÓÅ»¯ÖĞ¶Ï
+                        break;  // å‡å®šè¶…è¿‡é˜ˆå€¼çš„äº‹é¡¹éƒ½åœ¨å‰éƒ¨ï¼Œè¿™é‡Œå¯ä»¥ä¼˜åŒ–ä¸­æ–­
                 }
 
                 if (aPath.Count == 0)
@@ -133,9 +133,9 @@ namespace dp2Catalog
 
         #endregion
 
-        #region ISearchForm ½Ó¿Úº¯Êı
+        #region ISearchForm æ¥å£å‡½æ•°
 
-        // ¶ÔÏó¡¢´°¿ÚÊÇ·ñ»¹ÓĞĞ§?
+        // å¯¹è±¡ã€çª—å£æ˜¯å¦è¿˜æœ‰æ•ˆ?
         public bool IsValid()
         {
             if (this.IsDisposed == true)
@@ -163,27 +163,27 @@ namespace dp2Catalog
             }
         }
 
-        // Ë¢ĞÂÒ»ÌõMARC¼ÇÂ¼
+        // åˆ·æ–°ä¸€æ¡MARCè®°å½•
         // return:
-        //      -2  ²»Ö§³Ö
+        //      -2  ä¸æ”¯æŒ
         //      -1  error
-        //      0   Ïà¹Ø´°¿ÚÒÑ¾­Ïú»Ù£¬Ã»ÓĞ±ØÒªË¢ĞÂ
-        //      1   ÒÑ¾­Ë¢ĞÂ
-        //      2   ÔÚ½á¹û¼¯ÖĞÃ»ÓĞÕÒµ½ÒªË¢ĞÂµÄ¼ÇÂ¼
+        //      0   ç›¸å…³çª—å£å·²ç»é”€æ¯ï¼Œæ²¡æœ‰å¿…è¦åˆ·æ–°
+        //      1   å·²ç»åˆ·æ–°
+        //      2   åœ¨ç»“æœé›†ä¸­æ²¡æœ‰æ‰¾åˆ°è¦åˆ·æ–°çš„è®°å½•
         public int RefreshOneRecord(
             string strPathParam,
             string strAction,
             out string strError)
         {
-            strError = "ÉĞÎ´ÊµÏÖ";
+            strError = "å°šæœªå®ç°";
 
             return -2;
         }
 
 
-        // É¾³ıÒ»ÌõMARC/XML¼ÇÂ¼
+        // åˆ é™¤ä¸€æ¡MARC/XMLè®°å½•
         // parameters:
-        //      strSavePath ÄÚÈİÎª"ÖĞÎÄÍ¼Êé/1@±¾µØ·şÎñÆ÷"¡£Ã»ÓĞĞ­ÒéÃû²¿·Ö¡£
+        //      strSavePath å†…å®¹ä¸º"ä¸­æ–‡å›¾ä¹¦/1@æœ¬åœ°æœåŠ¡å™¨"ã€‚æ²¡æœ‰åè®®åéƒ¨åˆ†ã€‚
         // return:
         //      -1  error
         //      0   suceed
@@ -194,7 +194,7 @@ namespace dp2Catalog
             out string strError)
         {
             baOutputTimestamp = null;
-            strError = "ÉĞÎ´ÊµÏÖ";
+            strError = "å°šæœªå®ç°";
 
             return -1;
 
@@ -210,11 +210,11 @@ namespace dp2Catalog
             return 0;
         }
 
-        // »ñµÃÒ»ÌõMARC/XML¼ÇÂ¼
+        // è·å¾—ä¸€æ¡MARC/XMLè®°å½•
         // return:
-        //      -1  error °üÀ¨not found
+        //      -1  error åŒ…æ‹¬not found
         //      0   found
-        //      1   ÎªÕï¶Ï¼ÇÂ¼
+        //      1   ä¸ºè¯Šæ–­è®°å½•
         public int GetOneRecord(
             string strStyle,
             int nTest,
@@ -242,16 +242,16 @@ namespace dp2Catalog
             logininfo = new LoginInfo();
             lVersion = 0;
 
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (m_bInSearch == true)
             {
-                strError = "µ±Ç°´°¿ÚÕıÔÚ±»Ò»¸öÎ´½áÊøµÄ³¤²Ù×÷Ê¹ÓÃ£¬ÎŞ·¨»ñµÃ¼ÇÂ¼¡£ÇëÉÔºóÔÙÊÔ¡£";
+                strError = "å½“å‰çª—å£æ­£åœ¨è¢«ä¸€ä¸ªæœªç»“æŸçš„é•¿æ“ä½œä½¿ç”¨ï¼Œæ— æ³•è·å¾—è®°å½•ã€‚è¯·ç¨åå†è¯•ã€‚";
                 return -1;
             }
 
             if (strStyle != "marc" && strStyle != "xml")
             {
-                strError = "DupFormÖ»Ö§³Ö»ñÈ¡MARC¸ñÊ½¼ÇÂ¼ºÍxml¸ñÊ½¼ÇÂ¼£¬²»Ö§³Ö '" + strStyle + "' ¸ñÊ½µÄ¼ÇÂ¼";
+                strError = "DupFormåªæ”¯æŒè·å–MARCæ ¼å¼è®°å½•å’Œxmlæ ¼å¼è®°å½•ï¼Œä¸æ”¯æŒ '" + strStyle + "' æ ¼å¼çš„è®°å½•";
                 return -1;
             }
             int nRet = 0;
@@ -269,7 +269,7 @@ namespace dp2Catalog
 
             if (index == -1)
             {
-                strError = "ÔİÊ±²»Ö§³ÖÃ»ÓĞ index µÄÓÃ·¨";
+                strError = "æš‚æ—¶ä¸æ”¯æŒæ²¡æœ‰ index çš„ç”¨æ³•";
                 return -1;
             }
 
@@ -277,14 +277,14 @@ namespace dp2Catalog
 
             if (index >= this.listView_browse.Items.Count)
             {
-                strError = "Ô½¹ı½á¹û¼¯Î²²¿";
+                strError = "è¶Šè¿‡ç»“æœé›†å°¾éƒ¨";
                 return -1;
             }
             ListViewItem curItem = this.listView_browse.Items[index];
 
             if (bHilightBrowseLine == true)
             {
-                // ĞŞ¸ÄlistviewÖĞÊÂÏîµÄÑ¡¶¨×´Ì¬
+                // ä¿®æ”¹listviewä¸­äº‹é¡¹çš„é€‰å®šçŠ¶æ€
                 for (int i = 0; i < this.listView_browse.SelectedItems.Count; i++)
                 {
                     this.listView_browse.SelectedItems[i].Selected = false;
@@ -301,27 +301,27 @@ namespace dp2Catalog
 
             strSavePath = this.CurrentProtocol + ":" + strPath;
 
-            // À­ÉÏÒ»¸ödp2¼ìË÷´°£¬ºÃ°ìÊÂ
+            // æ‹‰ä¸Šä¸€ä¸ªdp2æ£€ç´¢çª—ï¼Œå¥½åŠäº‹
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
             if (dp2_searchform == null)
             {
-                strError = "Ã»ÓĞ´ò¿ªµÄdp2¼ìË÷´°£¬ÎŞ·¨GetOneRecordSyntax()";
+                strError = "æ²¡æœ‰æ‰“å¼€çš„dp2æ£€ç´¢çª—ï¼Œæ— æ³•GetOneRecordSyntax()";
                 return -1;
             }
 
-            // »ñµÃserver url
+            // è·å¾—server url
             string strServerUrl = dp2_searchform.GetServerUrl(strServerName);
             if (strServerUrl == null)
             {
-                strError = "Ã»ÓĞÕÒµ½·şÎñÆ÷Ãû '" + strServerName + "' ¶ÔÓ¦µÄURL";
+                strError = "æ²¡æœ‰æ‰¾åˆ°æœåŠ¡å™¨å '" + strServerName + "' å¯¹åº”çš„URL";
                 return -1;
             }
 
             this.Channel = this.Channels.GetChannel(strServerUrl);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -329,7 +329,7 @@ namespace dp2Catalog
 
             try
             {
-                stop.SetMessage("ÕıÔÚ×°ÈëÊéÄ¿¼ÇÂ¼ " + strPath + " ...");
+                stop.SetMessage("æ­£åœ¨è£…å…¥ä¹¦ç›®è®°å½• " + strPath + " ...");
 
                 string[] formats = null;
                 formats = new string[1];
@@ -347,7 +347,7 @@ namespace dp2Catalog
                     out strError);
                 if (lRet == 0)
                 {
-                    strError = "Â·¾¶Îª '" + strPath + "' µÄÊéÄ¿¼ÇÂ¼Ã»ÓĞÕÒµ½ ...";
+                    strError = "è·¯å¾„ä¸º '" + strPath + "' çš„ä¹¦ç›®è®°å½•æ²¡æœ‰æ‰¾åˆ° ...";
                     goto ERROR1;   // not found
                 }
 
@@ -373,7 +373,7 @@ namespace dp2Catalog
                 {
                     string strMarcSyntax = "";
                     string strOutMarcSyntax = "";
-                    // ´ÓÊı¾İ¼ÇÂ¼ÖĞ»ñµÃMARC¸ñÊ½
+                    // ä»æ•°æ®è®°å½•ä¸­è·å¾—MARCæ ¼å¼
                     nRet = MarcUtil.Xml2Marc(strXml,
                         true,
                         strMarcSyntax,
@@ -382,12 +382,12 @@ namespace dp2Catalog
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                        strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                         goto ERROR1;
                     }
 
 
-                    // »ñµÃÊéÄ¿ÒÔÍâµÄÆäËüXMLÆ¬¶Ï
+                    // è·å¾—ä¹¦ç›®ä»¥å¤–çš„å…¶å®ƒXMLç‰‡æ–­
                     nRet = dp2SearchForm.GetXmlFragment(strXml,
             out strXmlFragment,
             out strError);
@@ -408,7 +408,7 @@ namespace dp2Catalog
                 stop.Initial("");
             }
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -426,7 +426,7 @@ namespace dp2Catalog
             this.Channels.AfterLogin += new AfterLoginEventHandle(Channels_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             this.checkBox_includeLowCols.Checked = this.MainForm.AppInfo.GetBoolean(
     "dup_form",
@@ -455,7 +455,7 @@ namespace dp2Catalog
                     true);
             }
 
-            // ×Ô¶¯Æô¶¯²éÖØ
+            // è‡ªåŠ¨å¯åŠ¨æŸ¥é‡
             if (this.AutoBeginSearch == true)
             {
                 API.PostMessage(this.Handle, WM_INITIAL, 0, 0);
@@ -469,7 +469,7 @@ namespace dp2Catalog
             dp2Server server = this.MainForm.Servers[channel.Url];
             if (server == null)
             {
-                // e.ErrorInfo = "Ã»ÓĞÕÒµ½ URL Îª " + channel.Url + " µÄ·şÎñÆ÷¶ÔÏó";
+                // e.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ° URL ä¸º " + channel.Url + " çš„æœåŠ¡å™¨å¯¹è±¡";
                 return;
             }
 
@@ -477,9 +477,9 @@ namespace dp2Catalog
             if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
             {
                 string strError = "";
-                string strTitle = "²éÖØ´°ĞèÒªÏÈÉèÖÃĞòÁĞºÅ²ÅÄÜ·ÃÎÊ·şÎñÆ÷ " + server.Name + " " + server.Url;
+                string strTitle = "æŸ¥é‡çª—éœ€è¦å…ˆè®¾ç½®åºåˆ—å·æ‰èƒ½è®¿é—®æœåŠ¡å™¨ " + server.Name + " " + server.Url;
                 int nRet = this.MainForm.VerifySerialCode(strTitle,
-                    "", 
+                    "",
                     true,
                     out strError);
                 if (nRet == -1)
@@ -487,7 +487,7 @@ namespace dp2Catalog
                     channel.Close();
                     e.ErrorInfo = strTitle;
 #if NO
-                    MessageBox.Show(this.MainForm, "²éÖØ´°ĞèÒªÏÈÉèÖÃĞòÁĞºÅ²ÅÄÜÊ¹ÓÃ");
+                    MessageBox.Show(this.MainForm, "æŸ¥é‡çª—éœ€è¦å…ˆè®¾ç½®åºåˆ—å·æ‰èƒ½ä½¿ç”¨");
                     API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
 #endif
                     return;
@@ -505,7 +505,7 @@ namespace dp2Catalog
             dp2Server server = this.MainForm.Servers[channel.Url];
             if (server == null)
             {
-                e.ErrorInfo = "Ã»ÓĞÕÒµ½ URL Îª " + channel.Url + " µÄ·şÎñÆ÷¶ÔÏó";
+                e.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ° URL ä¸º " + channel.Url + " çš„æœåŠ¡å™¨å¯¹è±¡";
                 e.Failed = true;
                 e.Cancel = true;
                 return;
@@ -524,7 +524,7 @@ namespace dp2Catalog
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
 
 #if SN
-                // ´ÓĞòÁĞºÅÖĞ»ñµÃ expire= ²ÎÊıÖµ
+                // ä»åºåˆ—å·ä¸­è·å¾— expire= å‚æ•°å€¼
                 string strExpire = this.MainForm.GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
@@ -533,7 +533,7 @@ namespace dp2Catalog
                 e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // Á¢¼´·µ»Ø, ÒÔ±ã×÷µÚÒ»´Î ²»³öÏÖ ¶Ô»°¿òµÄ×Ô¶¯µÇÂ¼
+                    return; // ç«‹å³è¿”å›, ä»¥ä¾¿ä½œç¬¬ä¸€æ¬¡ ä¸å‡ºç° å¯¹è¯æ¡†çš„è‡ªåŠ¨ç™»å½•
             }
 
             // 
@@ -629,9 +629,9 @@ namespace dp2Catalog
         {
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -640,9 +640,9 @@ namespace dp2Catalog
 
         private void DupForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -697,7 +697,6 @@ namespace dp2Catalog
             this.m_bInSearch = true;
             try
             {
-
                 int nRet = DoSearch(this.comboBox_projectName.Text,
                     this.textBox_recordPath.Text,
                     this.XmlRecord,
@@ -737,7 +736,7 @@ namespace dp2Catalog
             this.textBox_serverName.Enabled = bEnable;
         }
 
-        // Í¼Êé¹İ·şÎñÆ÷Ãû
+        // å›¾ä¹¦é¦†æœåŠ¡å™¨å
         public string LibraryServerName
         {
             get
@@ -750,7 +749,7 @@ namespace dp2Catalog
             }
         }
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // return:
         //      -1  error
         //      0   succeed
@@ -763,7 +762,7 @@ namespace dp2Catalog
             strError = "";
             strUsedProjectName = "";
 
-            if (strProjectName == "<Ä¬ÈÏ>"
+            if (strProjectName == "<é»˜è®¤>"
                 || strProjectName == "<default>")
                 strProjectName = "";
 
@@ -772,7 +771,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ½øĞĞ²éÖØ ...");
+            stop.Initial("æ­£åœ¨è¿›è¡ŒæŸ¥é‡ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -783,16 +782,16 @@ namespace dp2Catalog
                 this.ClearDupState(true);
                 this.listView_browse.Items.Clear();
 
-                // »ñµÃserver url
+                // è·å¾—server url
                 if (String.IsNullOrEmpty(this.LibraryServerName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                    strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                     goto ERROR1;
                 }
                 dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
                 if (server == null)
                 {
-                    strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                    strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                     goto ERROR1;
                 }
 
@@ -821,35 +820,32 @@ namespace dp2Catalog
                 long lHitCount = lRet;
 
                 if (lHitCount == 0)
-                    goto END1;   // ²éÖØ·¢ÏÖÃ»ÓĞÃüÖĞ
-
+                    goto END1;   // æŸ¥é‡å‘ç°æ²¡æœ‰å‘½ä¸­
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (ÃüÖĞ " + lHitCount.ToString() + " Ìõ¼ÇÂ¼) ...");
-
-                    DupSearchResult[] searchresults = null;
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (å‘½ä¸­ " + lHitCount.ToString() + " æ¡è®°å½•) ...");
 
                     lRet = Channel.GetDupSearchResult(
                         stop,
                         lStart,
                         lPerCount,
                         strBrowseStyle, // "cols,excludecolsoflowthreshold",
-                        out searchresults,
+                        out DupSearchResult[] searchresults,
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
@@ -859,7 +855,7 @@ namespace dp2Catalog
 
                     Debug.Assert(searchresults != null, "");
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DupSearchResult result = searchresults[i];
@@ -870,7 +866,7 @@ namespace dp2Catalog
 
                         if (this.checkBox_returnAllRecords.Checked == false)
                         {
-                            // Óöµ½µÚÒ»¸öÈ¨Öµ½ÏµÍµÄ£¬¾ÍÖĞ¶ÏÈ«²¿»ñÈ¡ä¯ÀÀ¹ı³Ì
+                            // é‡åˆ°ç¬¬ä¸€ä¸ªæƒå€¼è¾ƒä½çš„ï¼Œå°±ä¸­æ–­å…¨éƒ¨è·å–æµè§ˆè¿‡ç¨‹
                             if (result.Weight < result.Threshold)
                                 goto END1;
                         }
@@ -878,7 +874,7 @@ namespace dp2Catalog
                         /*
                         if (result.Cols == null)
                         {
-                            strError = "·µ»ØµÄ½á¹ûĞĞ´íÎó result.Cols == null";
+                            strError = "è¿”å›çš„ç»“æœè¡Œé”™è¯¯ result.Cols == null";
                             goto ERROR1;
                         }
 
@@ -889,6 +885,7 @@ namespace dp2Catalog
 
                         ListViewItem item = new ListViewItem();
                         item.Text = result.Path;
+                        item.Tag = result;
                         item.SubItems.Add(result.Weight.ToString());
                         if (result.Cols != null)
                         {
@@ -901,10 +898,10 @@ namespace dp2Catalog
 
                         if (item.Text == this.RecordPath)
                         {
-                            // Èç¹û¾ÍÊÇ·¢Æğ¼ÇÂ¼×Ô¼º  2008/2/29
+                            // å¦‚æœå°±æ˜¯å‘èµ·è®°å½•è‡ªå·±  2008/2/29
                             item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
                             item.BackColor = Color.LightGoldenrodYellow;
-                            item.ForeColor = SystemColors.GrayText; // ±íÊ¾¾ÍÊÇ·¢Æğ¼ÇÂ¼×Ô¼º
+                            item.ForeColor = SystemColors.GrayText; // è¡¨ç¤ºå°±æ˜¯å‘èµ·è®°å½•è‡ªå·±
                         }
                         else if (result.Weight >= result.Threshold)
                         {
@@ -925,7 +922,7 @@ namespace dp2Catalog
 
                 }
 
-            END1:
+                END1:
                 this.SetDupState();
 
                 return (int)lHitCount;
@@ -942,7 +939,7 @@ namespace dp2Catalog
             }
 
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -955,7 +952,7 @@ namespace dp2Catalog
             int nRet = 0;
 
             string[] projectnames = null;
-            // ÁĞ³ö¿ÉÓÃµÄ²éÖØ·½°¸Ãû
+            // åˆ—å‡ºå¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå
             nRet = ListProjectNames(this.RecordPath,
                 out projectnames,
                 out strError);
@@ -968,11 +965,11 @@ namespace dp2Catalog
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // ÁĞ³ö¿ÉÓÃµÄ²éÖØ·½°¸Ãû
+        // åˆ—å‡ºå¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå
         public int ListProjectNames(string strPureRecPath,
             out string[] projectnames,
             out string strError)
@@ -983,22 +980,22 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡¿ÉÓÃµÄ²éÖØ·½°¸Ãû ...");
+            stop.Initial("æ­£åœ¨è·å–å¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå ...");
             stop.BeginLoop();
 
             try
             {
 
-                // »ñµÃserver url
+                // è·å¾—server url
                 if (String.IsNullOrEmpty(this.LibraryServerName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                    strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                     goto ERROR1;
                 }
                 dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
                 if (server == null)
                 {
-                    strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                    strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                     goto ERROR1;
                 }
 
@@ -1038,20 +1035,19 @@ namespace dp2Catalog
             }
 
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
         private void textBox_recordPath_TextChanged(object sender, EventArgs e)
         {
-            // ¼ÇÂ¼Â·¾¶»áÓ°Ïìµ½·½°¸ÃûÁĞ±í
-            // ĞŞ¸Ä¼ÇÂ¼Â·¾¶µÄÊ±ºò£¬ÆÈÊ¹·½°¸ÃûÏÂÀ­ÁĞ±íÇå¿Õ£¬ÕâÑùµ±ÓÃµ½ÏÂÀ­ÁĞ±íµÄÊ±ºò»á×Ô¶¯È¥»ñÈ¡ĞÂÄÚÈİ
+            // è®°å½•è·¯å¾„ä¼šå½±å“åˆ°æ–¹æ¡ˆååˆ—è¡¨
+            // ä¿®æ”¹è®°å½•è·¯å¾„çš„æ—¶å€™ï¼Œè¿«ä½¿æ–¹æ¡ˆåä¸‹æ‹‰åˆ—è¡¨æ¸…ç©ºï¼Œè¿™æ ·å½“ç”¨åˆ°ä¸‹æ‹‰åˆ—è¡¨çš„æ—¶å€™ä¼šè‡ªåŠ¨å»è·å–æ–°å†…å®¹
             this.comboBox_projectName.Items.Clear();
-
         }
 
         /// <summary>
-        /// µÈ´ı¼ìË÷½áÊø
+        /// ç­‰å¾…æ£€ç´¢ç»“æŸ
         /// </summary>
         public void WaitSearchFinish()
         {
@@ -1069,7 +1065,7 @@ namespace dp2Catalog
             XmlViewerForm dlg = new XmlViewerForm();
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Text = "µ±Ç°XMLÊı¾İ";
+            dlg.Text = "å½“å‰XMLæ•°æ®";
             dlg.MainForm = this.MainForm;
             dlg.XmlString = this.XmlRecord;
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -1080,12 +1076,12 @@ namespace dp2Catalog
         void ClearDupState(bool bSearching)
         {
             if (bSearching == true)
-                this.label_dupMessage.Text = "ÕıÔÚ²éÖØ...";
+                this.label_dupMessage.Text = "æ­£åœ¨æŸ¥é‡...";
             else
-                this.label_dupMessage.Text = "ÉĞÎ´²éÖØ";
+                this.label_dupMessage.Text = "å°šæœªæŸ¥é‡";
         }
 
-        // ÉèÖÃ²éÖØ×´Ì¬
+        // è®¾ç½®æŸ¥é‡çŠ¶æ€
         void SetDupState()
         {
             int nCount = 0;
@@ -1094,19 +1090,19 @@ namespace dp2Catalog
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == this.RecordPath)
-                    continue;   // ²»°üº¬·¢Æğ¼ÇÂ¼×Ô¼º 2008/2/29
+                    continue;   // ä¸åŒ…å«å‘èµ·è®°å½•è‡ªå·± 2008/2/29
 
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
                 else
-                    break;  // ¼Ù¶¨³¬¹ıÈ¨ÖµµÄÊÂÏî¶¼ÔÚÇ°²¿£¬Ò»µ©·¢ÏÖÒ»¸ö²»ÊÇµÄÊÂÏî£¬Ñ­»·¾Í½áÊø
+                    break;  // å‡å®šè¶…è¿‡æƒå€¼çš„äº‹é¡¹éƒ½åœ¨å‰éƒ¨ï¼Œä¸€æ—¦å‘ç°ä¸€ä¸ªä¸æ˜¯çš„äº‹é¡¹ï¼Œå¾ªç¯å°±ç»“æŸ
             }
 
             if (nCount > 0)
-                this.label_dupMessage.Text = "ÓĞ " + Convert.ToString(nCount) + " ÌõÖØ¸´¼ÇÂ¼¡£";
+                this.label_dupMessage.Text = "æœ‰ " + Convert.ToString(nCount) + " æ¡é‡å¤è®°å½•ã€‚";
             else
-                this.label_dupMessage.Text = "Ã»ÓĞÖØ¸´¼ÇÂ¼¡£";
+                this.label_dupMessage.Text = "æ²¡æœ‰é‡å¤è®°å½•ã€‚";
 
         }
 
@@ -1130,7 +1126,7 @@ namespace dp2Catalog
             {
                 if (this.listView_browse.FocusedItem == null)
                 {
-                    MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÏêÏ¸´°µÄÊÂÏî");
+                    MessageBox.Show(this, "å°šæœªé€‰å®šè¦è£…å…¥è¯¦ç»†çª—çš„äº‹é¡¹");
                     return;
                 }
                 nIndex = this.listView_browse.Items.IndexOf(this.listView_browse.FocusedItem);
@@ -1141,14 +1137,14 @@ namespace dp2Catalog
 
         void LoadDetail(int index)
         {
-            // È¡³ö¼ÇÂ¼Â·¾¶£¬Îö³öÊéÄ¿¿âÃû£¬È»ºó¿´Õâ¸öÊéÄ¿¿âµÄsyntax
-            // ¿ÉÄÜ×°ÈëMARCºÍDCÁ½ÖÖ²»Í¬µÄ´°¿Ú
+            // å–å‡ºè®°å½•è·¯å¾„ï¼Œæå‡ºä¹¦ç›®åº“åï¼Œç„¶åçœ‹è¿™ä¸ªä¹¦ç›®åº“çš„syntax
+            // å¯èƒ½è£…å…¥MARCå’ŒDCä¸¤ç§ä¸åŒçš„çª—å£
             string strError = "";
 
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (m_bInSearch == true)
             {
-                strError = "µ±Ç°´°¿ÚÕıÔÚ±»Ò»¸öÎ´½áÊøµÄ³¤²Ù×÷Ê¹ÓÃ£¬ÎŞ·¨×°ÔØ¼ÇÂ¼¡£ÇëÉÔºóÔÙÊÔ¡£";
+                strError = "å½“å‰çª—å£æ­£åœ¨è¢«ä¸€ä¸ªæœªç»“æŸçš„é•¿æ“ä½œä½¿ç”¨ï¼Œæ— æ³•è£…è½½è®°å½•ã€‚è¯·ç¨åå†è¯•ã€‚";
                 goto ERROR1;
             }
 
@@ -1170,7 +1166,7 @@ namespace dp2Catalog
                 form.MainForm = this.MainForm;
 
                 // MARC Syntax OID
-                // ĞèÒª½¨Á¢Êı¾İ¿âÅäÖÃ²ÎÊı£¬´ÓÖĞµÃµ½MARC¸ñÊ½
+                // éœ€è¦å»ºç«‹æ•°æ®åº“é…ç½®å‚æ•°ï¼Œä»ä¸­å¾—åˆ°MARCæ ¼å¼
                 //// form.AutoDetectedMarcSyntaxOID = "1.2.840.10003.5.1";   // UNIMARC
 
                 form.Show();
@@ -1191,12 +1187,12 @@ namespace dp2Catalog
             }
             else
             {
-                strError = "Î´ÖªµÄsyntax '" + strSyntax + "'";
+                strError = "æœªçŸ¥çš„syntax '" + strSyntax + "'";
                 goto ERROR1;
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1206,7 +1202,7 @@ namespace dp2Catalog
 
             if (dp2_searchform == null)
             {
-                // ĞÂ¿ªÒ»¸ödp2¼ìË÷´°
+                // æ–°å¼€ä¸€ä¸ªdp2æ£€ç´¢çª—
                 dp2_searchform = new dp2SearchForm();
                 dp2_searchform.MainForm = this.MainForm;
                 dp2_searchform.MdiParent = this.MainForm;
@@ -1231,7 +1227,7 @@ namespace dp2Catalog
 
             if (index >= this.listView_browse.Items.Count)
             {
-                strError = "Ô½¹ı½á¹û¼¯Î²²¿";
+                strError = "è¶Šè¿‡ç»“æœé›†å°¾éƒ¨";
                 return -1;
             }
 
@@ -1240,26 +1236,26 @@ namespace dp2Catalog
             string strServerName = this.LibraryServerName;
             string strPurePath = curItem.Text;
 
-            // À­ÉÏÒ»¸ödp2¼ìË÷´°£¬ºÃ°ìÊÂ
+            // æ‹‰ä¸Šä¸€ä¸ªdp2æ£€ç´¢çª—ï¼Œå¥½åŠäº‹
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
             if (dp2_searchform == null)
             {
-                strError = "Ã»ÓĞ´ò¿ªµÄdp2¼ìË÷´°£¬ÎŞ·¨GetOneRecordSyntax()";
+                strError = "æ²¡æœ‰æ‰“å¼€çš„dp2æ£€ç´¢çª—ï¼Œæ— æ³•GetOneRecordSyntax()";
                 return -1;
             }
 
             /*
-            // »ñµÃserver url
+            // è·å¾—server url
             dp2Server server = this.dp2ResTree1.Servers.GetServerByName(strServerName);
             string strServerUrl = server.Url;
              * */
             string strBiblioDbName = dp2SearchForm.GetDbName(strPurePath);
 
-            // »ñµÃÒ»¸öÊı¾İ¿âµÄÊı¾İsyntax
+            // è·å¾—ä¸€ä¸ªæ•°æ®åº“çš„æ•°æ®syntax
             // parameters:
-            //      stop    Èç¹û!=null£¬±íÊ¾Ê¹ÓÃÕâ¸östop£¬ËüÒÑ¾­OnStop +=
-            //              Èç¹û==null£¬±íÊ¾»á×Ô¶¯Ê¹ÓÃthis.stop£¬²¢×Ô¶¯OnStop+=
+            //      stop    å¦‚æœ!=nullï¼Œè¡¨ç¤ºä½¿ç”¨è¿™ä¸ªstopï¼Œå®ƒå·²ç»OnStop +=
+            //              å¦‚æœ==nullï¼Œè¡¨ç¤ºä¼šè‡ªåŠ¨ä½¿ç”¨this.stopï¼Œå¹¶è‡ªåŠ¨OnStop+=
             // return:
             //      -1  error
             //      0   not found
@@ -1283,7 +1279,7 @@ namespace dp2Catalog
 
             ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
 
-            // µÚÒ»ÁĞÎª¼ÇÂ¼Â·¾¶£¬ÅÅĞò·ç¸ñÌØÊâ
+            // ç¬¬ä¸€åˆ—ä¸ºè®°å½•è·¯å¾„ï¼Œæ’åºé£æ ¼ç‰¹æ®Š
             if (nClickColumn == 0)
                 sortStyle = ColumnSortStyle.RecPath;
 
@@ -1292,7 +1288,7 @@ namespace dp2Catalog
                 this.listView_browse.Columns,
                 true);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_browse.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_browse.ListViewItemSorter = null;
@@ -1303,7 +1299,7 @@ namespace dp2Catalog
             GetDp2ResDlg dlg = new GetDp2ResDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
-            dlg.Text = "ÇëÖ¸¶¨Ò»¸ö×÷Îª²éÖØÄ¿±êµÄ dp2library ·şÎñÆ÷";
+            dlg.Text = "è¯·æŒ‡å®šä¸€ä¸ªä½œä¸ºæŸ¥é‡ç›®æ ‡çš„ dp2library æœåŠ¡å™¨";
 #if OLD_CHANNEL
             dlg.dp2Channels = this.Channels;
 #endif
@@ -1329,11 +1325,11 @@ namespace dp2Catalog
             MainForm.SetMenuItemState();
 
             /*
-            // ²Ëµ¥
+            // èœå•
             MainForm.MenuItem_saveOriginRecordToIso2709.Enabled = true;
             MainForm.MenuItem_font.Enabled = true;
 
-            // ¹¤¾ßÌõ°´Å¥
+            // å·¥å…·æ¡æŒ‰é’®
             MainForm.toolButton_search.Enabled = false;
             MainForm.toolButton_prev.Enabled = true;
             MainForm.toolButton_next.Enabled = true;
@@ -1361,16 +1357,16 @@ namespace dp2Catalog
                 {
                     if (item.Text == this.RecordPath)
                     {
-                        this.label_message.Text = "ĞòºÅ " + nLineNo.ToString() + ": ·¢Æğ²éÖØµÄ¼ÇÂ¼(×Ô¼º)";
+                        this.label_message.Text = "åºå· " + nLineNo.ToString() + ": å‘èµ·æŸ¥é‡çš„è®°å½•(è‡ªå·±)";
                     }
                     else
                     {
-                        this.label_message.Text = "ĞòºÅ " + nLineNo.ToString() + ": ÖØ¸´µÄ¼ÇÂ¼";
+                        this.label_message.Text = "åºå· " + nLineNo.ToString() + ": é‡å¤çš„è®°å½•";
                     }
                 }
                 else
                 {
-                    this.label_message.Text = "ĞòºÅ " + nLineNo.ToString();
+                    this.label_message.Text = "åºå· " + nLineNo.ToString();
                 }
             }
             else
@@ -1378,7 +1374,7 @@ namespace dp2Catalog
                 this.label_message.Text = "";
             }
 
-            // ×°Èë(Î´×°ÈëµÄ)ä¯ÀÀÁĞ
+            // è£…å…¥(æœªè£…å…¥çš„)æµè§ˆåˆ—
             if (this.listView_browse.SelectedItems.Count > 0)
             {
                 List<string> pathlist = new List<string>();
@@ -1414,7 +1410,7 @@ namespace dp2Catalog
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("Ìî³äÈ«²¿ä¯ÀÀÁĞ(&F)");
+            menuItem = new MenuItem("å¡«å……å…¨éƒ¨æµè§ˆåˆ—(&F)");
             menuItem.Click += new System.EventHandler(this.menu_fillBrowseCols_Click);
             /*
             if (this.listView_browse.SelectedItems.Count == 0)
@@ -1456,16 +1452,16 @@ namespace dp2Catalog
         {
             strError = "";
 
-            // »ñµÃserver url
+            // è·å¾—server url
             if (String.IsNullOrEmpty(this.LibraryServerName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷Ãû";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨å";
                 return -1;
             }
             dp2Server server = this.MainForm.Servers.GetServerByName(this.LibraryServerName);
             if (server == null)
             {
-                strError = "·şÎñÆ÷ÃûÎª '" + this.LibraryServerName + "' µÄ·şÎñÆ÷²»´æÔÚ...";
+                strError = "æœåŠ¡å™¨åä¸º '" + this.LibraryServerName + "' çš„æœåŠ¡å™¨ä¸å­˜åœ¨...";
                 return -1;
             }
 
@@ -1476,7 +1472,7 @@ namespace dp2Catalog
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÌî³ää¯ÀÀÁĞ ...");
+            stop.Initial("æ­£åœ¨å¡«å……æµè§ˆåˆ— ...");
             stop.BeginLoop();
 
             this.Update();
@@ -1494,18 +1490,18 @@ namespace dp2Catalog
                     if (nCount <= 0)
                         break;
 
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             return -1;
                         }
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
 
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);

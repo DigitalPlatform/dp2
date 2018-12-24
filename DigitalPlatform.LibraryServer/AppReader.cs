@@ -64,6 +64,7 @@ namespace DigitalPlatform.LibraryServer
                 "friends", // 2014/9/9
                 "access",   // 2014/9/10
                 "refID", // 2015/9/12
+                "face", // 2018/12/16
             };
 
         // 读者记录中 读者自己能修改的元素名列表
@@ -296,7 +297,8 @@ namespace DigitalPlatform.LibraryServer
                         strElementName);
 
                     // 2013/1/15 <fingerprint>元素单独处理
-                    if (strElementName == "fingerprint")
+                    if (strElementName == "fingerprint"
+                        || strElementName == "face")
                     {
                         string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
                             strElementName);
@@ -459,13 +461,23 @@ namespace DigitalPlatform.LibraryServer
                     bChanged = true;
             }
 
-            // 如果有已经有了<fingerprint>元素，则修正其timestamp属性
-            // 刷新timestamp属性
-            XmlNode node = dom.DocumentElement.SelectSingleNode("fingerprint");
-            if (node != null)
-                DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+            {
+                // 如果有已经有了<fingerprint>元素，则修正其timestamp属性
+                // 刷新timestamp属性
+                XmlNode node = dom.DocumentElement.SelectSingleNode("fingerprint");
+                if (node != null)
+                    DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+            }
 
-            // TODO: 设置首次密码
+            {
+                // 如果有已经有了<face>元素，则修正其timestamp属性
+                // 刷新timestamp属性
+                XmlNode node = dom.DocumentElement.SelectSingleNode("face");
+                if (node != null)
+                    DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+            }
+
+            // 设置首次密码
             string strBirthDate = DomUtil.GetElementText(dom.DocumentElement, "dateOfBirth");
             string strNewPassword = "";
             try
@@ -5785,6 +5797,7 @@ out strError);
                 DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
+                DomUtil.DeleteElement(readerdom.DocumentElement, "face");
                 DomUtil.DeleteElement(readerdom.DocumentElement, "borrows");
 
                 nRet = BuildReaderResults(

@@ -10,6 +10,7 @@ namespace DigitalPlatform
     {
         public int Value { get; set; }
         public string ErrorInfo { get; set; }
+        public string ErrorCode { get; set; }
 
         public NormalResult(int value, string error)
         {

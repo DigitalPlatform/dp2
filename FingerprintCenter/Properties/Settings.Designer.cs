@@ -34,5 +34,17 @@ namespace FingerprintCenter.Properties {
                 this["ui_state"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string repPlan {
+            get {
+                return ((string)(this["repPlan"]));
+            }
+            set {
+                this["repPlan"] = value;
+            }
+        }
     }
 }

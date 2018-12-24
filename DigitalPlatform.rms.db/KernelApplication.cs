@@ -864,6 +864,7 @@ namespace DigitalPlatform.rms
 
         [EnumMember]
         AlreadyExist = 17,	//已经存在	-8
+
         [EnumMember]
         AlreadyExistOtherType = 18,		// 存在不同类型的项 -9
 

@@ -63,7 +63,7 @@ namespace FingerprintCenter
                     RowLoop = RowLoop + width;
                 }
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 //ZKCE.SysException.ZKCELogger logger = new ZKCE.SysException.ZKCELogger(ex);
                 //logger.Append();
@@ -112,7 +112,7 @@ namespace FingerprintCenter
                     return GetBytes;
                 }
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 //ZKCE.SysException.ZKCELogger logger = new ZKCE.SysException.ZKCELogger(ex);
                 //logger.Append();
@@ -196,7 +196,7 @@ namespace FingerprintCenter
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 // ZKCE.SysException.ZKCELogger logger = new ZKCE.SysException.ZKCELogger(ex);
                 // logger.Append();
@@ -221,7 +221,6 @@ namespace FingerprintCenter
 
             try
             {
-
                 BITMAPFILEHEADER BmpHeader = new BITMAPFILEHEADER();
                 BITMAPINFOHEADER BmpInfoHeader = new BITMAPINFOHEADER();
                 MASK[] ColorMask = new MASK[m_nColorTableEntries];
@@ -285,7 +284,7 @@ namespace FingerprintCenter
                 FileStream.Close();
                 TmpBinaryWriter.Close();
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 //ZKCE.SysException.ZKCELogger logger = new ZKCE.SysException.ZKCELogger(ex);
                 //logger.Append();

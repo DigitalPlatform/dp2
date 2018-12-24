@@ -195,6 +195,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3c4f8133-8652-40b6-b37b-200b25c2b043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Range\DigitalPlatform.Range.csproj">
       <Project>{aa6c5e6a-252b-4e2a-a883-0e4e739f8701}</Project>
       <Name>DigitalPlatform.Range</Name>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoIt.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -570,6 +571,22 @@ UTF-32 little-endian byte order: FF FE 00 00
                         if (buffer[0] == 0xff && buffer[1] == 0xfe && buffer[2] == 0x00 && buffer[3] == 0x00)
                         {
                             return Encoding.GetEncoding(65006);    // UTF-32 big-endian
+                        }
+                    }
+
+                    // 2018/11/6
+                    // 检测是不是没有 BOM 的 UTF-8
+                    {
+                        byte[] temp_buffer = new byte[4096];
+                        file.Seek(0, SeekOrigin.Begin);
+                        int length = file.Read(temp_buffer, 0, temp_buffer.Length);
+                        TextEncodingDetect detector = new TextEncodingDetect();
+                        TextEncodingDetect.Encoding encoding = detector.DetectEncoding(temp_buffer, length);
+                        switch(encoding)
+                        {
+                            case TextEncodingDetect.Encoding.Utf8Bom:
+                            case TextEncodingDetect.Encoding.Utf8Nobom:
+                                return Encoding.UTF8;
                         }
                     }
                 }

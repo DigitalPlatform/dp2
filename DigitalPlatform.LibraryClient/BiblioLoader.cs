@@ -359,6 +359,9 @@ namespace DigitalPlatform.LibraryClient
     public class MessagePromptEventArgs : EventArgs
     {
         public string MessageText = ""; // [in] 提示文字
+
+        public bool IncludeOperText = false;   // [in] MessageText 提示文字中是否包含了操作说明部分？如果没有包含，则显示对话框时候要补上通用的操作说明语句
+
         public string Actions = ""; // [in] 可选的动作。例如 "yes,no,cancel"
         public string ResultAction = "";  // [out] 返回希望采取的动作
     }

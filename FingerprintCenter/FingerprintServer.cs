@@ -4,16 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Synthesis;
-
-using DigitalPlatform.Interfaces;
-using DigitalPlatform;
 using System.Threading;
+
+using DigitalPlatform;
+using DigitalPlatform.Interfaces;
 
 namespace FingerprintCenter
 {
     public class FingerprintServer : MarshalByRefObject, IFingerprint, IDisposable
     {
-
+        public int GetVersion(out string strVersion,
+            out string strCfgInfo,
+            out string strError)
+        {
+            strVersion = "2.0";
+            strCfgInfo = "selfInitCache";
+            strError = "";
+            return 0;
+        }
 
         // return:
         //      -1  出错
@@ -154,19 +162,23 @@ Exception rethrown at [0]:
         // 添加高速缓存事项
         // 如果items == null 或者 items.Count == 0，表示要清除当前的全部缓存内容
         // 如果一个item对象的FingerprintString为空，表示要删除这个缓存事项
+        // return:
+        //      0   成功
+        //      其他  失败。错误码
         public int AddItems(List<FingerprintItem> items,
             out string strError)
         {
-            return FingerPrint.AddItems(items,
+            return Program.FingerPrint.AddItems(items,
     out strError);
         }
 
         public int CancelGetFingerprintString()
         {
-            FingerPrint.CancelRegisterString();
+            Program.FingerPrint.CancelRegisterString();
             return 0;
         }
 
+        // 1.0 版函数
         // TODO: 防止函数过程重入
         // 获得一个指纹特征字符串
         // return:
@@ -177,13 +189,14 @@ Exception rethrown at [0]:
             out string strVersion,
             out string strError)
         {
+#if NO
             strError = "";
             strFingerprintString = "";
             strVersion = "";
 
             try
             {
-                TextResult result = FingerPrint.GetRegisterString();
+                TextResult result = FingerPrint.GetRegisterString("");
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -191,104 +204,73 @@ Exception rethrown at [0]:
                 }
 
                 strFingerprintString = result.Text;
-                strVersion = "10";
+                strVersion = "zk-10";
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return 0;
             }
+#endif
+            return GetFingerprintString("",
+                out strFingerprintString,
+                out strVersion,
+                out strError);
+        }
 
-#if NO
-            if (this.m_host == null)
-            {
-                if (Open(out strError) == -1)
-                    return -1;
-            }
+        // 2.0 增加的函数
+        // TODO: 防止函数过程重入
+        // 获得一个指纹特征字符串
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        public int GetFingerprintString(
+            string strExcludeBarcodes,
+            out string strFingerprintString,
+            out string strVersion,
+            out string strError)
+        {
+            strError = "";
+            strFingerprintString = "";
+            strVersion = "";
 
-            // this.m_host.CancelCapture();
-
-            m_bInRegister = true;
-            ActivateMainForm(true);
-            DisplayCancelButton(true);
+            Program.MainForm?.ActivateWindow(true);
+            Program.MainForm?.DisplayCancelButton(true);
             try
             {
-                strVersion = "zk-" + this.m_host.FPEngineVersion;
-
-                this.m_host.EnrollCount = 1;
-
-                this.m_host.OnEnroll -= new IZKFPEngXEvents_OnEnrollEventHandler(m_host_OnEnroll);
-                this.m_host.OnEnroll += new IZKFPEngXEvents_OnEnrollEventHandler(m_host_OnEnroll);
-
-                eventFinished.Reset();
-                m_bActionResult = false;
-                m_bCanceled = false;
-
-                this.m_host.BeginEnroll();
-
-                string strText = "请扫描指纹。\r\n\r\n总共需要扫描 " + this.m_host.EnrollCount.ToString() + " 次";
-                DisplayInfo(strText);
-
-                Speak("请扫描指纹。一共需要按 " + this.m_host.EnrollCount.ToString() + " 次");
-
-                WaitHandle[] events = new WaitHandle[2];
-
-                events[0] = eventClose;
-                events[1] = eventFinished;
-
-                int index = WaitHandle.WaitAny(events, -1, false);
-
-                if (index == WaitHandle.WaitTimeout)
+                TextResult result = Program.FingerPrint.GetRegisterString(strExcludeBarcodes);
+                if (result.Value == -1)
                 {
-                    strError = "超时";
-                    DisplayInfo(strError);
-                    return -1;
-                }
-                else if (index == 0)
-                {
-                    strError = "接口被关闭";
-                    DisplayInfo(strError);
+                    strError = result.ErrorInfo;
                     return -1;
                 }
 
-                // 取消
-                if (m_bCanceled == true)
-                {
-                    strError = "获取指纹信息的操作被取消";
-                    DisplayInfo(strError);
-                    Speak(strError);
-                    return 0;
-                }
-
-                // 正常结束
-                if (m_bActionResult == false)
-                {
-                    strError = "获取指纹信息失败";
-                    DisplayInfo("非常抱歉，本轮获取指纹信息操作失败");
-                    if (this.SpeakOn == false)
-                        SafeBeep(3);
-                    Speak("非常抱歉，本轮获取指纹信息操作失败");
-                    return -1;
-                }
-
-                // strFingerprintString = this.m_host.GetTemplateAsStringEx("10");
-                strFingerprintString = this.m_host.GetTemplateAsString();
-                if (this.SpeakOn == false)
-                    SafeBeep(1);
-
-                DisplayInfo("获取指纹信息成功");
-                Speak("指纹扫描完成。谢谢");
+                strFingerprintString = result.Text;
+                strVersion = "zk-10";
                 return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return 0;
             }
             finally
             {
-                // this.m_host.BeginCapture();
-                DisplayCancelButton(false);
-                ActivateMainForm(false);
-                m_bInRegister = false;
+                Program.MainForm?.ActivateWindow(false);
+                Program.MainForm?.DisplayCancelButton(false);
             }
-#endif
+        }
+
+        // 2.0 拟增加的函数
+        int ServerFingerPrintChanged(
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+
+            return 0;
         }
 
         // 验证读者指纹. 1:1比对
@@ -322,7 +304,7 @@ Exception rethrown at [0]:
 
         public void Dispose()
         {
-            FingerPrint.CancelRegisterString();
+            Program.FingerPrint?.CancelRegisterString();
         }
     }
 }

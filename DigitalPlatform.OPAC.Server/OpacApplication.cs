@@ -49,6 +49,15 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         /// <summary>
+        /// 用于限制 SearchBiblio() API 命中范围的过滤条件。
+        /// 例如，"-内部"。注意需要和 dp2library 的 library.xml 中的 globalResults 元素配合使用
+        /// </summary>
+        public string BiblioFilter
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// 借还历史数据库类型。空表示没有启用。其他表示启用了，例如 enabled
         /// </summary>
         public string ChargingHistoryType
@@ -540,10 +549,15 @@ namespace DigitalPlatform.OPAC.Server
                 // databaseFilter
                 {
                     if (this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter") is XmlElement nodeDatabaseFilter)
+                    {
                         this.HideDbNames = nodeDatabaseFilter.GetAttribute("hide");
+                        this.BiblioFilter = nodeDatabaseFilter.GetAttribute("biblioFilter");
+                    }
                     else
+                    {
                         this.HideDbNames = null;
-
+                        this.BiblioFilter = "";
+                    }
                 }
 
                 // //
@@ -1949,15 +1963,34 @@ System.Text.Encoding.UTF8))
                     // 没有进入内存属性的其他XML片断
                     if (this.OpacCfgDom != null)
                     {
+                        string[] elements = new string[]{
+                            "yczb",
+                            "monitors",
+                            "libraryInfo",
+                            "biblioDbGroup",
+                            "arrived",
+                            "browseformats",
+                            "virtualDatabases",
+                            "externalSsoInterface",
+                            "dp2sso",
+                            "searchLog",
+                            "databaseFilter",
+                        };
+
+                        RestoreElements(writer, elements);
+
+#if NO
                         // 2009/9/23
-                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
+                        XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "//yczb");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <monitors>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "monitors");
                         if (node != null)
                         {
                             node.WriteTo(writer);
@@ -1966,56 +1999,54 @@ System.Text.Encoding.UTF8))
                         // TODO: 暂时没有任何地方用到这个信息
                         // <libraryInfo>
                         // 注: <libraryName>元素在此里面
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "libraryInfo");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <biblioDbGroup>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "biblioDbGroup");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <arrived>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "arrived");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <browseformats>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "browseformats");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <virtualDatabases>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "//virtualDatabases");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
                         // <externalSsoInterface>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "externalSsoInterface");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
 
-                        // chat room
-                        if (this.ChatRooms != null)
-                        {
-                            string strError = "";
-                            string strXml = "";
-                            this.ChatRooms.GetDef(out strXml, out strError);
-                            if (string.IsNullOrEmpty(strXml) == false)
-                                writer.WriteRaw("\r\n" + strXml + "\r\n");
-                        }
+
 
                         // 2012/5/23
                         // <dp2sso>
@@ -2024,7 +2055,8 @@ System.Text.Encoding.UTF8))
             <domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
         </dp2sso>
                          * */
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "//dp2sso");
                         if (node != null)
                         {
                             node.WriteTo(writer);
@@ -2040,7 +2072,8 @@ System.Text.Encoding.UTF8))
 #endif
 
                         // <searchLog>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "searchLog");
                         if (node != null)
                         {
                             node.WriteTo(writer);
@@ -2048,11 +2081,25 @@ System.Text.Encoding.UTF8))
 
                         // 2017/12/12
                         // <databaseFilter>
-                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode("databaseFilter");
+                        node = this.OpacCfgDom.DocumentElement.SelectSingleNode(
+                            "databaseFilter");
                         if (node != null)
                         {
                             node.WriteTo(writer);
                         }
+
+#endif
+
+                        // chat room
+                        if (this.ChatRooms != null)
+                        {
+                            string strError = "";
+                            string strXml = "";
+                            this.ChatRooms.GetDef(out strXml, out strError);
+                            if (string.IsNullOrEmpty(strXml) == false)
+                                writer.WriteRaw("\r\n" + strXml + "\r\n");
+                        }
+
                     }
 
                     writer.WriteEndElement();
@@ -2076,6 +2123,17 @@ System.Text.Encoding.UTF8))
             }
 
         }
+
+        void RestoreElements(XmlTextWriter writer, string[] elements)
+        {
+            foreach (string element in elements)
+            {
+                XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode(element);
+                if (node != null)
+                    node.WriteTo(writer);
+            }
+        }
+
 
         public static bool ToBoolean(string strText,
     bool bDefaultValue)
@@ -2827,6 +2885,21 @@ System.Text.Encoding.UTF8))
 
             // TODO: 增加 strLocationFilter 功能
 
+            // 2018/12/5
+            // 对书目检索的额外过滤
+            if (string.IsNullOrEmpty(app.BiblioFilter) == false)
+            {
+                string strOperator = "AND";
+                string strFilter = app.BiblioFilter;
+                if (strFilter.StartsWith("-"))
+                {
+                    strFilter = strFilter.Substring(1);
+                    strOperator = "SUB";
+                }
+                string strSubQueryXml = "<item resultset='#" + strFilter + "' />";
+                strXml = $"<group>{strXml}<operator value='{strOperator}'/>{strSubQueryXml}</group>";
+            }
+
             return 1;
         }
 
@@ -2896,7 +2969,6 @@ System.Text.Encoding.UTF8))
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
-
                 // 全部数据库是指<virutualDatabases>里面定义的数据库。可能比<biblioDbGroup>里面定义的范围要窄
                 if (String.IsNullOrEmpty(strDbName) == true
                     || strDbName.ToLower() == "<all>"
@@ -2964,7 +3036,6 @@ System.Text.Encoding.UTF8))
                     {
                         Debug.Assert(false, "");
                     }
-
 
                     for (int j = 0; j < app.ItemDbs.Count; j++)
                     {

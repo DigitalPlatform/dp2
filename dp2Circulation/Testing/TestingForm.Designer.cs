@@ -36,13 +36,14 @@
             this.ToolStripMenuItem_parsePriceUnit = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_objectWriteRead = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_logAndRecover = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_getPdfSinglePage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
-            this.ToolStripMenuItem_getPdfSinglePage = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_testGCAT = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,7 +73,8 @@
             this.ToolStripMenuItem_parsePriceUnit,
             this.ToolStripMenuItem_objectWriteRead,
             this.ToolStripMenuItem_logAndRecover,
-            this.ToolStripMenuItem_getPdfSinglePage});
+            this.ToolStripMenuItem_getPdfSinglePage,
+            this.ToolStripMenuItem_testGCAT});
             this.ToolStripMenuItem_test.Name = "ToolStripMenuItem_test";
             this.ToolStripMenuItem_test.Size = new System.Drawing.Size(170, 28);
             this.ToolStripMenuItem_test.Text = "测试";
@@ -118,6 +120,13 @@
             this.ToolStripMenuItem_logAndRecover.Size = new System.Drawing.Size(308, 30);
             this.ToolStripMenuItem_logAndRecover.Text = "测试日志和恢复";
             this.ToolStripMenuItem_logAndRecover.Click += new System.EventHandler(this.ToolStripMenuItem_logAndRecover_Click);
+            // 
+            // ToolStripMenuItem_getPdfSinglePage
+            // 
+            this.ToolStripMenuItem_getPdfSinglePage.Name = "ToolStripMenuItem_getPdfSinglePage";
+            this.ToolStripMenuItem_getPdfSinglePage.Size = new System.Drawing.Size(308, 30);
+            this.ToolStripMenuItem_getPdfSinglePage.Text = "测试获取 PDF 单页";
+            this.ToolStripMenuItem_getPdfSinglePage.Click += new System.EventHandler(this.ToolStripMenuItem_getPdfSinglePage_Click);
             // 
             // toolStripMenuItem1
             // 
@@ -172,12 +181,12 @@
             this.menuStrip2.Text = "menuStrip2";
             this.menuStrip2.Visible = false;
             // 
-            // ToolStripMenuItem_getPdfSinglePage
+            // ToolStripMenuItem_testGCAT
             // 
-            this.ToolStripMenuItem_getPdfSinglePage.Name = "ToolStripMenuItem_getPdfSinglePage";
-            this.ToolStripMenuItem_getPdfSinglePage.Size = new System.Drawing.Size(308, 30);
-            this.ToolStripMenuItem_getPdfSinglePage.Text = "测试获取 PDF 单页";
-            this.ToolStripMenuItem_getPdfSinglePage.Click += new System.EventHandler(this.ToolStripMenuItem_getPdfSinglePage_Click);
+            this.ToolStripMenuItem_testGCAT.Name = "ToolStripMenuItem_testGCAT";
+            this.ToolStripMenuItem_testGCAT.Size = new System.Drawing.Size(308, 30);
+            this.ToolStripMenuItem_testGCAT.Text = "测试 GCAT";
+            this.ToolStripMenuItem_testGCAT.Click += new System.EventHandler(this.ToolStripMenuItem_testGCAT_Click);
             // 
             // TestingForm
             // 
@@ -220,5 +229,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_getPdfSinglePage;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_testGCAT;
     }
 }
