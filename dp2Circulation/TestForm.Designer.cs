@@ -32,6 +32,7 @@
             DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
+            this.button_createDirectory = new System.Windows.Forms.Button();
             this.button_test = new System.Windows.Forms.Button();
             this.button_testMessageDialog = new System.Windows.Forms.Button();
             this.button_testDouble = new System.Windows.Forms.Button();
@@ -227,7 +228,7 @@
             this.label36 = new System.Windows.Forms.Label();
             this.textBox_login_userName = new System.Windows.Forms.TextBox();
             this.label35 = new System.Windows.Forms.Label();
-            this.button_createDirectory = new System.Windows.Forms.Button();
+            this.button_testStop = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -323,16 +324,26 @@
             this.tabPage_diskSpace.Controls.Add(this.label1);
             this.tabPage_diskSpace.Location = new System.Drawing.Point(4, 28);
             this.tabPage_diskSpace.Name = "tabPage_diskSpace";
-            this.tabPage_diskSpace.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_diskSpace.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_diskSpace.Size = new System.Drawing.Size(582, 421);
             this.tabPage_diskSpace.TabIndex = 0;
             this.tabPage_diskSpace.Text = "磁盘空间";
             this.tabPage_diskSpace.UseVisualStyleBackColor = true;
             // 
+            // button_createDirectory
+            // 
+            this.button_createDirectory.Location = new System.Drawing.Point(10, 334);
+            this.button_createDirectory.Name = "button_createDirectory";
+            this.button_createDirectory.Size = new System.Drawing.Size(233, 34);
+            this.button_createDirectory.TabIndex = 21;
+            this.button_createDirectory.Text = "创建目录 ...";
+            this.button_createDirectory.UseVisualStyleBackColor = true;
+            this.button_createDirectory.Click += new System.EventHandler(this.button_createDirectory_Click);
+            // 
             // button_test
             // 
             this.button_test.Location = new System.Drawing.Point(352, 130);
-            this.button_test.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_test.Margin = new System.Windows.Forms.Padding(4);
             this.button_test.Name = "button_test";
             this.button_test.Size = new System.Drawing.Size(112, 34);
             this.button_test.TabIndex = 20;
@@ -343,7 +354,7 @@
             // button_testMessageDialog
             // 
             this.button_testMessageDialog.Location = new System.Drawing.Point(10, 292);
-            this.button_testMessageDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_testMessageDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_testMessageDialog.Name = "button_testMessageDialog";
             this.button_testMessageDialog.Size = new System.Drawing.Size(150, 34);
             this.button_testMessageDialog.TabIndex = 19;
@@ -438,8 +449,8 @@
             this.tabPage_windowsEventLog.Controls.Add(this.label2);
             this.tabPage_windowsEventLog.Location = new System.Drawing.Point(4, 28);
             this.tabPage_windowsEventLog.Name = "tabPage_windowsEventLog";
-            this.tabPage_windowsEventLog.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            this.tabPage_windowsEventLog.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_windowsEventLog.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_windowsEventLog.Size = new System.Drawing.Size(582, 421);
             this.tabPage_windowsEventLog.TabIndex = 1;
             this.tabPage_windowsEventLog.Text = "Windows日志";
             this.tabPage_windowsEventLog.UseVisualStyleBackColor = true;
@@ -499,7 +510,7 @@
             this.tabPage_webBrowser.Controls.Add(this.extendedWebBrowser1);
             this.tabPage_webBrowser.Location = new System.Drawing.Point(4, 28);
             this.tabPage_webBrowser.Name = "tabPage_webBrowser";
-            this.tabPage_webBrowser.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_webBrowser.Size = new System.Drawing.Size(582, 421);
             this.tabPage_webBrowser.TabIndex = 2;
             this.tabPage_webBrowser.Text = "WebBrowser";
             this.tabPage_webBrowser.UseVisualStyleBackColor = true;
@@ -553,7 +564,7 @@
             this.tabPage_webClient.Controls.Add(this.label5);
             this.tabPage_webClient.Location = new System.Drawing.Point(4, 28);
             this.tabPage_webClient.Name = "tabPage_webClient";
-            this.tabPage_webClient.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_webClient.Size = new System.Drawing.Size(582, 421);
             this.tabPage_webClient.TabIndex = 3;
             this.tabPage_webClient.Text = "WebClient";
             this.tabPage_webClient.UseVisualStyleBackColor = true;
@@ -606,7 +617,7 @@
             this.tabPage_locationEditControl.Controls.Add(this.locationEditControl1);
             this.tabPage_locationEditControl.Location = new System.Drawing.Point(4, 28);
             this.tabPage_locationEditControl.Name = "tabPage_locationEditControl";
-            this.tabPage_locationEditControl.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_locationEditControl.Size = new System.Drawing.Size(582, 421);
             this.tabPage_locationEditControl.TabIndex = 4;
             this.tabPage_locationEditControl.Text = "LocationEditControl";
             this.tabPage_locationEditControl.UseVisualStyleBackColor = true;
@@ -673,6 +684,7 @@
             this.locationEditControl1.Count = 0;
             this.locationEditControl1.HideSelection = true;
             this.locationEditControl1.Location = new System.Drawing.Point(16, 162);
+            this.locationEditControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.locationEditControl1.MaximumSize = new System.Drawing.Size(0, 36);
             this.locationEditControl1.MinimumSize = new System.Drawing.Size(414, 43);
             this.locationEditControl1.Name = "locationEditControl1";
@@ -690,7 +702,7 @@
             this.tabPage_captionEditControl.Controls.Add(this.captionEditControl1);
             this.tabPage_captionEditControl.Location = new System.Drawing.Point(4, 28);
             this.tabPage_captionEditControl.Name = "tabPage_captionEditControl";
-            this.tabPage_captionEditControl.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_captionEditControl.Size = new System.Drawing.Size(582, 421);
             this.tabPage_captionEditControl.TabIndex = 5;
             this.tabPage_captionEditControl.Text = "CaptionEditControl";
             this.tabPage_captionEditControl.UseVisualStyleBackColor = true;
@@ -757,7 +769,7 @@
             this.tabPage_fromEditCOntrol.Controls.Add(this.fromEditControl1);
             this.tabPage_fromEditCOntrol.Location = new System.Drawing.Point(4, 28);
             this.tabPage_fromEditCOntrol.Name = "tabPage_fromEditCOntrol";
-            this.tabPage_fromEditCOntrol.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_fromEditCOntrol.Size = new System.Drawing.Size(582, 421);
             this.tabPage_fromEditCOntrol.TabIndex = 6;
             this.tabPage_fromEditCOntrol.Text = "FromEditControl";
             this.tabPage_fromEditCOntrol.UseVisualStyleBackColor = true;
@@ -822,6 +834,7 @@
             this.fromEditControl1.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.None;
             this.fromEditControl1.Changed = false;
             this.fromEditControl1.Location = new System.Drawing.Point(4, 188);
+            this.fromEditControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.fromEditControl1.Name = "fromEditControl1";
             this.fromEditControl1.Size = new System.Drawing.Size(504, 146);
             this.fromEditControl1.TabIndex = 9;
@@ -835,7 +848,7 @@
             this.tabPage_checkedComboBox.Controls.Add(this.checkedComboBox1);
             this.tabPage_checkedComboBox.Location = new System.Drawing.Point(4, 28);
             this.tabPage_checkedComboBox.Name = "tabPage_checkedComboBox";
-            this.tabPage_checkedComboBox.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_checkedComboBox.Size = new System.Drawing.Size(582, 421);
             this.tabPage_checkedComboBox.TabIndex = 7;
             this.tabPage_checkedComboBox.Text = "CheckedComboBox";
             this.tabPage_checkedComboBox.UseVisualStyleBackColor = true;
@@ -905,7 +918,7 @@
             this.tabPage_time.Controls.Add(this.dateControl1);
             this.tabPage_time.Location = new System.Drawing.Point(4, 28);
             this.tabPage_time.Name = "tabPage_time";
-            this.tabPage_time.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_time.Size = new System.Drawing.Size(582, 421);
             this.tabPage_time.TabIndex = 8;
             this.tabPage_time.Text = "Times";
             this.tabPage_time.UseVisualStyleBackColor = true;
@@ -1034,7 +1047,7 @@
             this.tabPage_string.Controls.Add(this.label12);
             this.tabPage_string.Location = new System.Drawing.Point(4, 28);
             this.tabPage_string.Name = "tabPage_string";
-            this.tabPage_string.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_string.Size = new System.Drawing.Size(582, 421);
             this.tabPage_string.TabIndex = 9;
             this.tabPage_string.Text = "String";
             this.tabPage_string.UseVisualStyleBackColor = true;
@@ -1062,7 +1075,7 @@
             // button_string_CompareAccessNo
             // 
             this.button_string_CompareAccessNo.Location = new System.Drawing.Point(300, 291);
-            this.button_string_CompareAccessNo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_string_CompareAccessNo.Margin = new System.Windows.Forms.Padding(4);
             this.button_string_CompareAccessNo.Name = "button_string_CompareAccessNo";
             this.button_string_CompareAccessNo.Size = new System.Drawing.Size(183, 34);
             this.button_string_CompareAccessNo.TabIndex = 10;
@@ -1142,9 +1155,9 @@
             this.tabPage_font.Controls.Add(this.label13);
             this.tabPage_font.Controls.Add(this.textBox_fontName);
             this.tabPage_font.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_font.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_font.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_font.Name = "tabPage_font";
-            this.tabPage_font.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_font.Size = new System.Drawing.Size(582, 421);
             this.tabPage_font.TabIndex = 10;
             this.tabPage_font.Text = "Font";
             this.tabPage_font.UseVisualStyleBackColor = true;
@@ -1152,7 +1165,7 @@
             // button_font_htmlInputDialog
             // 
             this.button_font_htmlInputDialog.Location = new System.Drawing.Point(9, 198);
-            this.button_font_htmlInputDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_font_htmlInputDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_font_htmlInputDialog.Name = "button_font_htmlInputDialog";
             this.button_font_htmlInputDialog.Size = new System.Drawing.Size(225, 34);
             this.button_font_htmlInputDialog.TabIndex = 3;
@@ -1163,7 +1176,7 @@
             // button_font_createFont
             // 
             this.button_font_createFont.Location = new System.Drawing.Point(357, 32);
-            this.button_font_createFont.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_font_createFont.Margin = new System.Windows.Forms.Padding(4);
             this.button_font_createFont.Name = "button_font_createFont";
             this.button_font_createFont.Size = new System.Drawing.Size(106, 34);
             this.button_font_createFont.TabIndex = 2;
@@ -1184,7 +1197,7 @@
             // textBox_fontName
             // 
             this.textBox_fontName.Location = new System.Drawing.Point(134, 32);
-            this.textBox_fontName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_fontName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_fontName.Name = "textBox_fontName";
             this.textBox_fontName.Size = new System.Drawing.Size(212, 28);
             this.textBox_fontName.TabIndex = 0;
@@ -1202,9 +1215,9 @@
             this.tabPage_gcatClient.Controls.Add(this.label14);
             this.tabPage_gcatClient.Controls.Add(this.textBox_gcatClient_author);
             this.tabPage_gcatClient.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_gcatClient.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_gcatClient.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_gcatClient.Name = "tabPage_gcatClient";
-            this.tabPage_gcatClient.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_gcatClient.Size = new System.Drawing.Size(582, 421);
             this.tabPage_gcatClient.TabIndex = 11;
             this.tabPage_gcatClient.Text = "GcatClient";
             this.tabPage_gcatClient.UseVisualStyleBackColor = true;
@@ -1224,7 +1237,7 @@
             this.textBox_gcatClient_hanzi.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_gcatClient_hanzi.Location = new System.Drawing.Point(105, 108);
-            this.textBox_gcatClient_hanzi.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_gcatClient_hanzi.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_gcatClient_hanzi.Name = "textBox_gcatClient_hanzi";
             this.textBox_gcatClient_hanzi.Size = new System.Drawing.Size(232, 28);
             this.textBox_gcatClient_hanzi.TabIndex = 9;
@@ -1233,7 +1246,7 @@
             // 
             this.button_gcatClient_getPinyin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_gcatClient_getPinyin.Location = new System.Drawing.Point(348, 105);
-            this.button_gcatClient_getPinyin.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_gcatClient_getPinyin.Margin = new System.Windows.Forms.Padding(4);
             this.button_gcatClient_getPinyin.Name = "button_gcatClient_getPinyin";
             this.button_gcatClient_getPinyin.Size = new System.Drawing.Size(156, 34);
             this.button_gcatClient_getPinyin.TabIndex = 7;
@@ -1257,7 +1270,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_gcatClient_debugInfo.Location = new System.Drawing.Point(9, 186);
-            this.textBox_gcatClient_debugInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_gcatClient_debugInfo.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_gcatClient_debugInfo.Multiline = true;
             this.textBox_gcatClient_debugInfo.Name = "textBox_gcatClient_debugInfo";
             this.textBox_gcatClient_debugInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -1279,7 +1292,7 @@
             this.textBox_gcatClient_url.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_gcatClient_url.Location = new System.Drawing.Point(105, 21);
-            this.textBox_gcatClient_url.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_gcatClient_url.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_gcatClient_url.Name = "textBox_gcatClient_url";
             this.textBox_gcatClient_url.Size = new System.Drawing.Size(397, 28);
             this.textBox_gcatClient_url.TabIndex = 1;
@@ -1289,7 +1302,7 @@
             // 
             this.button_gcatClient_getNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_gcatClient_getNumber.Location = new System.Drawing.Point(348, 62);
-            this.button_gcatClient_getNumber.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_gcatClient_getNumber.Margin = new System.Windows.Forms.Padding(4);
             this.button_gcatClient_getNumber.Name = "button_gcatClient_getNumber";
             this.button_gcatClient_getNumber.Size = new System.Drawing.Size(156, 34);
             this.button_gcatClient_getNumber.TabIndex = 4;
@@ -1312,7 +1325,7 @@
             this.textBox_gcatClient_author.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_gcatClient_author.Location = new System.Drawing.Point(105, 62);
-            this.textBox_gcatClient_author.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_gcatClient_author.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_gcatClient_author.Name = "textBox_gcatClient_author";
             this.textBox_gcatClient_author.Size = new System.Drawing.Size(232, 28);
             this.textBox_gcatClient_author.TabIndex = 3;
@@ -1326,9 +1339,9 @@
             this.tabPage_marcformat.Controls.Add(this.textBox_marcFormat_sourceXml);
             this.tabPage_marcformat.Controls.Add(this.label17);
             this.tabPage_marcformat.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_marcformat.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_marcformat.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_marcformat.Name = "tabPage_marcformat";
-            this.tabPage_marcformat.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_marcformat.Size = new System.Drawing.Size(582, 421);
             this.tabPage_marcformat.TabIndex = 12;
             this.tabPage_marcformat.Text = "MarcFormat";
             this.tabPage_marcformat.UseVisualStyleBackColor = true;
@@ -1337,7 +1350,7 @@
             // 
             this.button_marcFormat_convertKtoX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_marcFormat_convertKtoX.Location = new System.Drawing.Point(232, 159);
-            this.button_marcFormat_convertKtoX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_marcFormat_convertKtoX.Margin = new System.Windows.Forms.Padding(4);
             this.button_marcFormat_convertKtoX.Name = "button_marcFormat_convertKtoX";
             this.button_marcFormat_convertKtoX.Size = new System.Drawing.Size(112, 34);
             this.button_marcFormat_convertKtoX.TabIndex = 11;
@@ -1349,7 +1362,7 @@
             // 
             this.button_marcFormat_convertXtoK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_marcFormat_convertXtoK.Location = new System.Drawing.Point(387, 159);
-            this.button_marcFormat_convertXtoK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_marcFormat_convertXtoK.Margin = new System.Windows.Forms.Padding(4);
             this.button_marcFormat_convertXtoK.Name = "button_marcFormat_convertXtoK";
             this.button_marcFormat_convertXtoK.Size = new System.Drawing.Size(112, 34);
             this.button_marcFormat_convertXtoK.TabIndex = 10;
@@ -1363,7 +1376,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_marcFormat_targetXml.Location = new System.Drawing.Point(4, 214);
-            this.textBox_marcFormat_targetXml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_marcFormat_targetXml.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_marcFormat_targetXml.Multiline = true;
             this.textBox_marcFormat_targetXml.Name = "textBox_marcFormat_targetXml";
             this.textBox_marcFormat_targetXml.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -1385,7 +1398,7 @@
             this.textBox_marcFormat_sourceXml.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_marcFormat_sourceXml.Location = new System.Drawing.Point(4, 46);
-            this.textBox_marcFormat_sourceXml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_marcFormat_sourceXml.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_marcFormat_sourceXml.Multiline = true;
             this.textBox_marcFormat_sourceXml.Name = "textBox_marcFormat_sourceXml";
             this.textBox_marcFormat_sourceXml.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -1408,9 +1421,9 @@
             this.tabPage_dpTable.Controls.Add(this.button_dpTable_fill);
             this.tabPage_dpTable.Controls.Add(this.dpTable1);
             this.tabPage_dpTable.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_dpTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_dpTable.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_dpTable.Name = "tabPage_dpTable";
-            this.tabPage_dpTable.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_dpTable.Size = new System.Drawing.Size(582, 421);
             this.tabPage_dpTable.TabIndex = 13;
             this.tabPage_dpTable.Text = "DpTable";
             this.tabPage_dpTable.UseVisualStyleBackColor = true;
@@ -1419,7 +1432,7 @@
             // 
             this.button_dpTable_change.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_dpTable_change.Location = new System.Drawing.Point(372, 24);
-            this.button_dpTable_change.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_dpTable_change.Margin = new System.Windows.Forms.Padding(4);
             this.button_dpTable_change.Name = "button_dpTable_change";
             this.button_dpTable_change.Size = new System.Drawing.Size(112, 34);
             this.button_dpTable_change.TabIndex = 2;
@@ -1430,7 +1443,7 @@
             // button_dpTable_fill
             // 
             this.button_dpTable_fill.Location = new System.Drawing.Point(6, 24);
-            this.button_dpTable_fill.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_dpTable_fill.Margin = new System.Windows.Forms.Padding(4);
             this.button_dpTable_fill.Name = "button_dpTable_fill";
             this.button_dpTable_fill.Size = new System.Drawing.Size(112, 34);
             this.button_dpTable_fill.TabIndex = 1;
@@ -1461,10 +1474,10 @@
             this.dpTable1.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable1.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable1.Location = new System.Drawing.Point(4, 68);
-            this.dpTable1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dpTable1.Margin = new System.Windows.Forms.Padding(4);
             this.dpTable1.MaxTextHeight = 67;
             this.dpTable1.Name = "dpTable1";
-            this.dpTable1.Padding = new System.Windows.Forms.Padding(90, 90, 90, 90);
+            this.dpTable1.Padding = new System.Windows.Forms.Padding(90);
             this.dpTable1.Size = new System.Drawing.Size(498, 288);
             this.dpTable1.TabIndex = 0;
             this.dpTable1.Text = "dpTable1";
@@ -1495,9 +1508,9 @@
             this.tabPage_xml.Controls.Add(this.textBox_xml_xmlFilename);
             this.tabPage_xml.Controls.Add(this.label21);
             this.tabPage_xml.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_xml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_xml.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_xml.Size = new System.Drawing.Size(582, 421);
             this.tabPage_xml.TabIndex = 14;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -1518,7 +1531,7 @@
             // 
             this.button_xml_loadToDom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_xml_loadToDom.Location = new System.Drawing.Point(346, 58);
-            this.button_xml_loadToDom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_xml_loadToDom.Margin = new System.Windows.Forms.Padding(4);
             this.button_xml_loadToDom.Name = "button_xml_loadToDom";
             this.button_xml_loadToDom.Size = new System.Drawing.Size(158, 34);
             this.button_xml_loadToDom.TabIndex = 8;
@@ -1530,7 +1543,7 @@
             // 
             this.button_xml_getXmlFilename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_xml_getXmlFilename.Location = new System.Drawing.Point(432, 15);
-            this.button_xml_getXmlFilename.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_xml_getXmlFilename.Margin = new System.Windows.Forms.Padding(4);
             this.button_xml_getXmlFilename.Name = "button_xml_getXmlFilename";
             this.button_xml_getXmlFilename.Size = new System.Drawing.Size(72, 34);
             this.button_xml_getXmlFilename.TabIndex = 7;
@@ -1565,9 +1578,9 @@
             this.tabPage_camera.Controls.Add(this.button_start);
             this.tabPage_camera.Controls.Add(this.panel_camera_preview);
             this.tabPage_camera.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_camera.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_camera.Size = new System.Drawing.Size(582, 421);
             this.tabPage_camera.TabIndex = 15;
             this.tabPage_camera.Text = "Camera";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1586,7 +1599,7 @@
             // 
             this.button_camera_capture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_camera_capture.Location = new System.Drawing.Point(392, 136);
-            this.button_camera_capture.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_camera_capture.Margin = new System.Windows.Forms.Padding(4);
             this.button_camera_capture.Name = "button_camera_capture";
             this.button_camera_capture.Size = new System.Drawing.Size(112, 34);
             this.button_camera_capture.TabIndex = 3;
@@ -1598,7 +1611,7 @@
             // 
             this.button_stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_stop.Location = new System.Drawing.Point(392, 62);
-            this.button_stop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_stop.Margin = new System.Windows.Forms.Padding(4);
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(112, 34);
             this.button_stop.TabIndex = 2;
@@ -1610,7 +1623,7 @@
             // 
             this.button_start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_start.Location = new System.Drawing.Point(392, 18);
-            this.button_start.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_start.Margin = new System.Windows.Forms.Padding(4);
             this.button_start.Name = "button_start";
             this.button_start.Size = new System.Drawing.Size(112, 34);
             this.button_start.TabIndex = 1;
@@ -1624,7 +1637,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_camera_preview.Location = new System.Drawing.Point(4, 4);
-            this.panel_camera_preview.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel_camera_preview.Margin = new System.Windows.Forms.Padding(4);
             this.panel_camera_preview.Name = "panel_camera_preview";
             this.panel_camera_preview.Size = new System.Drawing.Size(378, 352);
             this.panel_camera_preview.TabIndex = 0;
@@ -1637,9 +1650,9 @@
             this.tabPage_idcardReader.Controls.Add(this.textBox_idcardReader_serverUrl);
             this.tabPage_idcardReader.Controls.Add(this.label22);
             this.tabPage_idcardReader.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_idcardReader.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_idcardReader.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_idcardReader.Name = "tabPage_idcardReader";
-            this.tabPage_idcardReader.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_idcardReader.Size = new System.Drawing.Size(582, 421);
             this.tabPage_idcardReader.TabIndex = 16;
             this.tabPage_idcardReader.Text = "IdcardReader";
             this.tabPage_idcardReader.UseVisualStyleBackColor = true;
@@ -1648,7 +1661,7 @@
             // 
             this.button_idcardReader_messageBeep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_idcardReader_messageBeep.Location = new System.Drawing.Point(314, 222);
-            this.button_idcardReader_messageBeep.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_idcardReader_messageBeep.Margin = new System.Windows.Forms.Padding(4);
             this.button_idcardReader_messageBeep.Name = "button_idcardReader_messageBeep";
             this.button_idcardReader_messageBeep.Size = new System.Drawing.Size(190, 34);
             this.button_idcardReader_messageBeep.TabIndex = 4;
@@ -1659,7 +1672,7 @@
             // pictureBox_idCard
             // 
             this.pictureBox_idCard.Location = new System.Drawing.Point(9, 96);
-            this.pictureBox_idCard.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox_idCard.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_idCard.Name = "pictureBox_idCard";
             this.pictureBox_idCard.Size = new System.Drawing.Size(100, 107);
             this.pictureBox_idCard.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -1670,7 +1683,7 @@
             // 
             this.button_idcardReader_read.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_idcardReader_read.Location = new System.Drawing.Point(392, 74);
-            this.button_idcardReader_read.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_idcardReader_read.Margin = new System.Windows.Forms.Padding(4);
             this.button_idcardReader_read.Name = "button_idcardReader_read";
             this.button_idcardReader_read.Size = new System.Drawing.Size(112, 34);
             this.button_idcardReader_read.TabIndex = 2;
@@ -1683,7 +1696,7 @@
             this.textBox_idcardReader_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_idcardReader_serverUrl.Location = new System.Drawing.Point(122, 33);
-            this.textBox_idcardReader_serverUrl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_idcardReader_serverUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_idcardReader_serverUrl.Name = "textBox_idcardReader_serverUrl";
             this.textBox_idcardReader_serverUrl.Size = new System.Drawing.Size(380, 28);
             this.textBox_idcardReader_serverUrl.TabIndex = 1;
@@ -1710,9 +1723,9 @@
             this.tabPage_cutter.Controls.Add(this.label23);
             this.tabPage_cutter.Controls.Add(this.button_cutter_convertTextToXml);
             this.tabPage_cutter.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_cutter.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_cutter.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cutter.Name = "tabPage_cutter";
-            this.tabPage_cutter.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_cutter.Size = new System.Drawing.Size(582, 421);
             this.tabPage_cutter.TabIndex = 17;
             this.tabPage_cutter.Text = "Cutter";
             this.tabPage_cutter.UseVisualStyleBackColor = true;
@@ -1720,7 +1733,7 @@
             // button_cutter_exchange
             // 
             this.button_cutter_exchange.Location = new System.Drawing.Point(20, 302);
-            this.button_cutter_exchange.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_cutter_exchange.Margin = new System.Windows.Forms.Padding(4);
             this.button_cutter_exchange.Name = "button_cutter_exchange";
             this.button_cutter_exchange.Size = new System.Drawing.Size(303, 34);
             this.button_cutter_exchange.TabIndex = 7;
@@ -1732,7 +1745,7 @@
             // button_cutter_verify
             // 
             this.button_cutter_verify.Location = new System.Drawing.Point(20, 264);
-            this.button_cutter_verify.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_cutter_verify.Margin = new System.Windows.Forms.Padding(4);
             this.button_cutter_verify.Name = "button_cutter_verify";
             this.button_cutter_verify.Size = new System.Drawing.Size(303, 34);
             this.button_cutter_verify.TabIndex = 6;
@@ -1743,7 +1756,7 @@
             // button_cutter_getEntry
             // 
             this.button_cutter_getEntry.Location = new System.Drawing.Point(162, 135);
-            this.button_cutter_getEntry.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_cutter_getEntry.Margin = new System.Windows.Forms.Padding(4);
             this.button_cutter_getEntry.Name = "button_cutter_getEntry";
             this.button_cutter_getEntry.Size = new System.Drawing.Size(244, 34);
             this.button_cutter_getEntry.TabIndex = 5;
@@ -1754,7 +1767,7 @@
             // textBox_cutter_resultString
             // 
             this.textBox_cutter_resultString.Location = new System.Drawing.Point(162, 178);
-            this.textBox_cutter_resultString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_cutter_resultString.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_cutter_resultString.Name = "textBox_cutter_resultString";
             this.textBox_cutter_resultString.Size = new System.Drawing.Size(242, 28);
             this.textBox_cutter_resultString.TabIndex = 4;
@@ -1772,7 +1785,7 @@
             // textBox_cutter_authorString
             // 
             this.textBox_cutter_authorString.Location = new System.Drawing.Point(162, 96);
-            this.textBox_cutter_authorString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_cutter_authorString.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_cutter_authorString.Name = "textBox_cutter_authorString";
             this.textBox_cutter_authorString.Size = new System.Drawing.Size(242, 28);
             this.textBox_cutter_authorString.TabIndex = 2;
@@ -1790,7 +1803,7 @@
             // button_cutter_convertTextToXml
             // 
             this.button_cutter_convertTextToXml.Location = new System.Drawing.Point(20, 24);
-            this.button_cutter_convertTextToXml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_cutter_convertTextToXml.Margin = new System.Windows.Forms.Padding(4);
             this.button_cutter_convertTextToXml.Name = "button_cutter_convertTextToXml";
             this.button_cutter_convertTextToXml.Size = new System.Drawing.Size(303, 34);
             this.button_cutter_convertTextToXml.TabIndex = 0;
@@ -1807,9 +1820,9 @@
             this.tabPage_optimize.Controls.Add(this.button_test_channelAttack);
             this.tabPage_optimize.Controls.Add(this.button_test_innerTextAndXPath);
             this.tabPage_optimize.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_optimize.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_optimize.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_optimize.Name = "tabPage_optimize";
-            this.tabPage_optimize.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_optimize.Size = new System.Drawing.Size(582, 421);
             this.tabPage_optimize.TabIndex = 18;
             this.tabPage_optimize.Text = "速度优化";
             this.tabPage_optimize.UseVisualStyleBackColor = true;
@@ -1817,7 +1830,7 @@
             // button_test_loginAttack
             // 
             this.button_test_loginAttack.Location = new System.Drawing.Point(6, 142);
-            this.button_test_loginAttack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_test_loginAttack.Margin = new System.Windows.Forms.Padding(4);
             this.button_test_loginAttack.Name = "button_test_loginAttack";
             this.button_test_loginAttack.Size = new System.Drawing.Size(152, 34);
             this.button_test_loginAttack.TabIndex = 4;
@@ -1828,7 +1841,7 @@
             // numericUpDown_test_tryChannelCount
             // 
             this.numericUpDown_test_tryChannelCount.Location = new System.Drawing.Point(285, 80);
-            this.numericUpDown_test_tryChannelCount.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.numericUpDown_test_tryChannelCount.Margin = new System.Windows.Forms.Padding(4);
             this.numericUpDown_test_tryChannelCount.Maximum = new decimal(new int[] {
             3000,
             0,
@@ -1856,7 +1869,7 @@
             // button_test_channelAttack
             // 
             this.button_test_channelAttack.Location = new System.Drawing.Point(6, 75);
-            this.button_test_channelAttack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_test_channelAttack.Margin = new System.Windows.Forms.Padding(4);
             this.button_test_channelAttack.Name = "button_test_channelAttack";
             this.button_test_channelAttack.Size = new System.Drawing.Size(152, 34);
             this.button_test_channelAttack.TabIndex = 1;
@@ -1867,7 +1880,7 @@
             // button_test_innerTextAndXPath
             // 
             this.button_test_innerTextAndXPath.Location = new System.Drawing.Point(6, 6);
-            this.button_test_innerTextAndXPath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_test_innerTextAndXPath.Margin = new System.Windows.Forms.Padding(4);
             this.button_test_innerTextAndXPath.Name = "button_test_innerTextAndXPath";
             this.button_test_innerTextAndXPath.Size = new System.Drawing.Size(472, 34);
             this.button_test_innerTextAndXPath.TabIndex = 0;
@@ -1879,9 +1892,9 @@
             // 
             this.tabPage_excel.Controls.Add(this.button_excel_test);
             this.tabPage_excel.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_excel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_excel.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_excel.Name = "tabPage_excel";
-            this.tabPage_excel.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_excel.Size = new System.Drawing.Size(582, 421);
             this.tabPage_excel.TabIndex = 19;
             this.tabPage_excel.Text = "Excel";
             this.tabPage_excel.UseVisualStyleBackColor = true;
@@ -1889,7 +1902,7 @@
             // button_excel_test
             // 
             this.button_excel_test.Location = new System.Drawing.Point(6, 27);
-            this.button_excel_test.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_excel_test.Margin = new System.Windows.Forms.Padding(4);
             this.button_excel_test.Name = "button_excel_test";
             this.button_excel_test.Size = new System.Drawing.Size(112, 34);
             this.button_excel_test.TabIndex = 0;
@@ -1901,9 +1914,9 @@
             // 
             this.tabPage_encoding.Controls.Add(this.button_encoding_detectEncoding);
             this.tabPage_encoding.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_encoding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_encoding.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_encoding.Name = "tabPage_encoding";
-            this.tabPage_encoding.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_encoding.Size = new System.Drawing.Size(582, 421);
             this.tabPage_encoding.TabIndex = 20;
             this.tabPage_encoding.Text = "Encoding";
             this.tabPage_encoding.UseVisualStyleBackColor = true;
@@ -1911,7 +1924,7 @@
             // button_encoding_detectEncoding
             // 
             this.button_encoding_detectEncoding.Location = new System.Drawing.Point(6, 22);
-            this.button_encoding_detectEncoding.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_encoding_detectEncoding.Margin = new System.Windows.Forms.Padding(4);
             this.button_encoding_detectEncoding.Name = "button_encoding_detectEncoding";
             this.button_encoding_detectEncoding.Size = new System.Drawing.Size(214, 34);
             this.button_encoding_detectEncoding.TabIndex = 0;
@@ -1924,9 +1937,9 @@
             this.tabPage_patronCardControl.Controls.Add(this.button_patronCardControl_setData);
             this.tabPage_patronCardControl.Controls.Add(this.patronCardControl1);
             this.tabPage_patronCardControl.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_patronCardControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_patronCardControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_patronCardControl.Name = "tabPage_patronCardControl";
-            this.tabPage_patronCardControl.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_patronCardControl.Size = new System.Drawing.Size(582, 421);
             this.tabPage_patronCardControl.TabIndex = 21;
             this.tabPage_patronCardControl.Text = "PatronCardControl";
             this.tabPage_patronCardControl.UseVisualStyleBackColor = true;
@@ -1934,7 +1947,7 @@
             // button_patronCardControl_setData
             // 
             this.button_patronCardControl_setData.Location = new System.Drawing.Point(6, 24);
-            this.button_patronCardControl_setData.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_patronCardControl_setData.Margin = new System.Windows.Forms.Padding(4);
             this.button_patronCardControl_setData.Name = "button_patronCardControl_setData";
             this.button_patronCardControl_setData.Size = new System.Drawing.Size(194, 34);
             this.button_patronCardControl_setData.TabIndex = 1;
@@ -1948,7 +1961,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.patronCardControl1.Location = new System.Drawing.Point(6, 68);
-            this.patronCardControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.patronCardControl1.Margin = new System.Windows.Forms.Padding(4);
             this.patronCardControl1.Name = "patronCardControl1";
             this.patronCardControl1.PatronCardStyle = patronCardStyle1;
             this.patronCardControl1.Size = new System.Drawing.Size(234, 178);
@@ -1960,9 +1973,9 @@
             // 
             this.tabPage_javascript.Controls.Add(this.button_javascript_run);
             this.tabPage_javascript.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_javascript.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_javascript.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_javascript.Name = "tabPage_javascript";
-            this.tabPage_javascript.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_javascript.Size = new System.Drawing.Size(582, 421);
             this.tabPage_javascript.TabIndex = 22;
             this.tabPage_javascript.Text = "javascript";
             this.tabPage_javascript.UseVisualStyleBackColor = true;
@@ -1970,7 +1983,7 @@
             // button_javascript_run
             // 
             this.button_javascript_run.Location = new System.Drawing.Point(6, 36);
-            this.button_javascript_run.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_javascript_run.Margin = new System.Windows.Forms.Padding(4);
             this.button_javascript_run.Name = "button_javascript_run";
             this.button_javascript_run.Size = new System.Drawing.Size(112, 34);
             this.button_javascript_run.TabIndex = 0;
@@ -1989,9 +2002,9 @@
             this.tabPage_ftp.Controls.Add(this.textBox_serverFilePath);
             this.tabPage_ftp.Controls.Add(this.label30);
             this.tabPage_ftp.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_ftp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_ftp.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_ftp.Name = "tabPage_ftp";
-            this.tabPage_ftp.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_ftp.Size = new System.Drawing.Size(582, 421);
             this.tabPage_ftp.TabIndex = 23;
             this.tabPage_ftp.Text = "FTP upload";
             this.tabPage_ftp.UseVisualStyleBackColor = true;
@@ -1999,7 +2012,7 @@
             // button_ftp_createDir
             // 
             this.button_ftp_createDir.Location = new System.Drawing.Point(394, 93);
-            this.button_ftp_createDir.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_ftp_createDir.Margin = new System.Windows.Forms.Padding(4);
             this.button_ftp_createDir.Name = "button_ftp_createDir";
             this.button_ftp_createDir.Size = new System.Drawing.Size(184, 34);
             this.button_ftp_createDir.TabIndex = 14;
@@ -2010,7 +2023,7 @@
             // button_download
             // 
             this.button_download.Location = new System.Drawing.Point(8, 93);
-            this.button_download.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_download.Margin = new System.Windows.Forms.Padding(4);
             this.button_download.Name = "button_download";
             this.button_download.Size = new System.Drawing.Size(184, 34);
             this.button_download.TabIndex = 13;
@@ -2020,7 +2033,7 @@
             // button_ftp_upload
             // 
             this.button_ftp_upload.Location = new System.Drawing.Point(201, 93);
-            this.button_ftp_upload.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_ftp_upload.Margin = new System.Windows.Forms.Padding(4);
             this.button_ftp_upload.Name = "button_ftp_upload";
             this.button_ftp_upload.Size = new System.Drawing.Size(184, 34);
             this.button_ftp_upload.TabIndex = 12;
@@ -2032,7 +2045,7 @@
             // 
             this.button_ftp_findClientFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_ftp_findClientFilePath.Location = new System.Drawing.Point(418, 164);
-            this.button_ftp_findClientFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_ftp_findClientFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.button_ftp_findClientFilePath.Name = "button_ftp_findClientFilePath";
             this.button_ftp_findClientFilePath.Size = new System.Drawing.Size(74, 34);
             this.button_ftp_findClientFilePath.TabIndex = 11;
@@ -2045,7 +2058,7 @@
             this.textBox_clientFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_clientFilePath.Location = new System.Drawing.Point(8, 166);
-            this.textBox_clientFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_clientFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_clientFilePath.Name = "textBox_clientFilePath";
             this.textBox_clientFilePath.Size = new System.Drawing.Size(400, 28);
             this.textBox_clientFilePath.TabIndex = 10;
@@ -2065,7 +2078,7 @@
             this.textBox_serverFilePath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverFilePath.Location = new System.Drawing.Point(8, 52);
-            this.textBox_serverFilePath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_serverFilePath.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_serverFilePath.Name = "textBox_serverFilePath";
             this.textBox_serverFilePath.Size = new System.Drawing.Size(482, 28);
             this.textBox_serverFilePath.TabIndex = 8;
@@ -2087,9 +2100,9 @@
             this.tabPage_marcTemplate.Controls.Add(this.easyMarcControl1);
             this.tabPage_marcTemplate.Controls.Add(this.button_marcTemplate_addLine);
             this.tabPage_marcTemplate.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_marcTemplate.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_marcTemplate.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_marcTemplate.Name = "tabPage_marcTemplate";
-            this.tabPage_marcTemplate.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_marcTemplate.Size = new System.Drawing.Size(582, 421);
             this.tabPage_marcTemplate.TabIndex = 24;
             this.tabPage_marcTemplate.Text = "MarcTemplate";
             this.tabPage_marcTemplate.UseVisualStyleBackColor = true;
@@ -2098,7 +2111,7 @@
             // 
             this.button_marcTemplate_getMarc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_marcTemplate_getMarc.Location = new System.Drawing.Point(128, 315);
-            this.button_marcTemplate_getMarc.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_marcTemplate_getMarc.Margin = new System.Windows.Forms.Padding(4);
             this.button_marcTemplate_getMarc.Name = "button_marcTemplate_getMarc";
             this.button_marcTemplate_getMarc.Size = new System.Drawing.Size(112, 34);
             this.button_marcTemplate_getMarc.TabIndex = 4;
@@ -2111,7 +2124,7 @@
             this.textBox_marcTemplate_marc.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_marcTemplate_marc.Location = new System.Drawing.Point(6, 21);
-            this.textBox_marcTemplate_marc.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_marcTemplate_marc.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_marcTemplate_marc.Multiline = true;
             this.textBox_marcTemplate_marc.Name = "textBox_marcTemplate_marc";
             this.textBox_marcTemplate_marc.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -2129,7 +2142,7 @@
             this.easyMarcControl1.IncludeNumber = false;
             this.easyMarcControl1.Location = new System.Drawing.Point(6, 112);
             this.easyMarcControl1.MarcDefDom = null;
-            this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(6);
             this.easyMarcControl1.Name = "easyMarcControl1";
             this.easyMarcControl1.Size = new System.Drawing.Size(498, 194);
             this.easyMarcControl1.TabIndex = 2;
@@ -2139,7 +2152,7 @@
             // 
             this.button_marcTemplate_addLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_marcTemplate_addLine.Location = new System.Drawing.Point(6, 315);
-            this.button_marcTemplate_addLine.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_marcTemplate_addLine.Margin = new System.Windows.Forms.Padding(4);
             this.button_marcTemplate_addLine.Name = "button_marcTemplate_addLine";
             this.button_marcTemplate_addLine.Size = new System.Drawing.Size(112, 34);
             this.button_marcTemplate_addLine.TabIndex = 1;
@@ -2151,9 +2164,9 @@
             // 
             this.tabPage_entitiesControl.Controls.Add(this.button_entitiesControl_addLine);
             this.tabPage_entitiesControl.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_entitiesControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_entitiesControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_entitiesControl.Name = "tabPage_entitiesControl";
-            this.tabPage_entitiesControl.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_entitiesControl.Size = new System.Drawing.Size(582, 421);
             this.tabPage_entitiesControl.TabIndex = 25;
             this.tabPage_entitiesControl.Text = "EntitiesControl";
             this.tabPage_entitiesControl.UseVisualStyleBackColor = true;
@@ -2162,7 +2175,7 @@
             // 
             this.button_entitiesControl_addLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_entitiesControl_addLine.Location = new System.Drawing.Point(4, 321);
-            this.button_entitiesControl_addLine.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_entitiesControl_addLine.Margin = new System.Windows.Forms.Padding(4);
             this.button_entitiesControl_addLine.Name = "button_entitiesControl_addLine";
             this.button_entitiesControl_addLine.Size = new System.Drawing.Size(112, 34);
             this.button_entitiesControl_addLine.TabIndex = 2;
@@ -2174,9 +2187,9 @@
             // 
             this.tabPage_entityRegisterControl.Controls.Add(this.button_entityRegisterControl_addLine);
             this.tabPage_entityRegisterControl.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_entityRegisterControl.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_entityRegisterControl.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_entityRegisterControl.Name = "tabPage_entityRegisterControl";
-            this.tabPage_entityRegisterControl.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_entityRegisterControl.Size = new System.Drawing.Size(582, 421);
             this.tabPage_entityRegisterControl.TabIndex = 26;
             this.tabPage_entityRegisterControl.Text = "EntityRegisterControl";
             this.tabPage_entityRegisterControl.UseVisualStyleBackColor = true;
@@ -2185,7 +2198,7 @@
             // 
             this.button_entityRegisterControl_addLine.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_entityRegisterControl_addLine.Location = new System.Drawing.Point(6, 322);
-            this.button_entityRegisterControl_addLine.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_entityRegisterControl_addLine.Margin = new System.Windows.Forms.Padding(4);
             this.button_entityRegisterControl_addLine.Name = "button_entityRegisterControl_addLine";
             this.button_entityRegisterControl_addLine.Size = new System.Drawing.Size(112, 34);
             this.button_entityRegisterControl_addLine.TabIndex = 3;
@@ -2197,9 +2210,9 @@
             // 
             this.tabPage_amazonSearch.Controls.Add(this.button_amazonSearch_openDialog);
             this.tabPage_amazonSearch.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_amazonSearch.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_amazonSearch.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_amazonSearch.Name = "tabPage_amazonSearch";
-            this.tabPage_amazonSearch.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_amazonSearch.Size = new System.Drawing.Size(582, 421);
             this.tabPage_amazonSearch.TabIndex = 27;
             this.tabPage_amazonSearch.Text = "Amazon Search";
             this.tabPage_amazonSearch.UseVisualStyleBackColor = true;
@@ -2207,7 +2220,7 @@
             // button_amazonSearch_openDialog
             // 
             this.button_amazonSearch_openDialog.Location = new System.Drawing.Point(6, 36);
-            this.button_amazonSearch_openDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_amazonSearch_openDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_amazonSearch_openDialog.Name = "button_amazonSearch_openDialog";
             this.button_amazonSearch_openDialog.Size = new System.Drawing.Size(218, 34);
             this.button_amazonSearch_openDialog.TabIndex = 0;
@@ -2217,15 +2230,16 @@
             // 
             // tabPage_test
             // 
+            this.tabPage_test.Controls.Add(this.button_testStop);
             this.tabPage_test.Controls.Add(this.button_testListProcess);
             this.tabPage_test.Controls.Add(this.button_testRelationDialog);
             this.tabPage_test.Controls.Add(this.button_openWindowsUpdateDialog);
             this.tabPage_test.Controls.Add(this.button_testGetMergeStyleDialog);
             this.tabPage_test.Controls.Add(this.button_test_detectInstallation);
             this.tabPage_test.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_test.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_test.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_test.Name = "tabPage_test";
-            this.tabPage_test.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_test.Size = new System.Drawing.Size(582, 421);
             this.tabPage_test.TabIndex = 28;
             this.tabPage_test.Text = "杂项";
             this.tabPage_test.UseVisualStyleBackColor = true;
@@ -2233,7 +2247,7 @@
             // button_testListProcess
             // 
             this.button_testListProcess.Location = new System.Drawing.Point(6, 249);
-            this.button_testListProcess.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_testListProcess.Margin = new System.Windows.Forms.Padding(4);
             this.button_testListProcess.Name = "button_testListProcess";
             this.button_testListProcess.Size = new System.Drawing.Size(330, 34);
             this.button_testListProcess.TabIndex = 4;
@@ -2244,7 +2258,7 @@
             // button_testRelationDialog
             // 
             this.button_testRelationDialog.Location = new System.Drawing.Point(6, 184);
-            this.button_testRelationDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_testRelationDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_testRelationDialog.Name = "button_testRelationDialog";
             this.button_testRelationDialog.Size = new System.Drawing.Size(330, 34);
             this.button_testRelationDialog.TabIndex = 3;
@@ -2255,7 +2269,7 @@
             // button_openWindowsUpdateDialog
             // 
             this.button_openWindowsUpdateDialog.Location = new System.Drawing.Point(6, 126);
-            this.button_openWindowsUpdateDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_openWindowsUpdateDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_openWindowsUpdateDialog.Name = "button_openWindowsUpdateDialog";
             this.button_openWindowsUpdateDialog.Size = new System.Drawing.Size(330, 34);
             this.button_openWindowsUpdateDialog.TabIndex = 2;
@@ -2266,7 +2280,7 @@
             // button_testGetMergeStyleDialog
             // 
             this.button_testGetMergeStyleDialog.Location = new System.Drawing.Point(6, 69);
-            this.button_testGetMergeStyleDialog.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_testGetMergeStyleDialog.Margin = new System.Windows.Forms.Padding(4);
             this.button_testGetMergeStyleDialog.Name = "button_testGetMergeStyleDialog";
             this.button_testGetMergeStyleDialog.Size = new System.Drawing.Size(330, 34);
             this.button_testGetMergeStyleDialog.TabIndex = 1;
@@ -2277,7 +2291,7 @@
             // button_test_detectInstallation
             // 
             this.button_test_detectInstallation.Location = new System.Drawing.Point(6, 24);
-            this.button_test_detectInstallation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_test_detectInstallation.Margin = new System.Windows.Forms.Padding(4);
             this.button_test_detectInstallation.Name = "button_test_detectInstallation";
             this.button_test_detectInstallation.Size = new System.Drawing.Size(330, 34);
             this.button_test_detectInstallation.TabIndex = 0;
@@ -2290,9 +2304,9 @@
             this.tabPage_kernelResTree.Controls.Add(this.button_kernelResTree_fill);
             this.tabPage_kernelResTree.Controls.Add(this.kernelResTree1);
             this.tabPage_kernelResTree.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_kernelResTree.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_kernelResTree.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_kernelResTree.Name = "tabPage_kernelResTree";
-            this.tabPage_kernelResTree.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_kernelResTree.Size = new System.Drawing.Size(582, 421);
             this.tabPage_kernelResTree.TabIndex = 29;
             this.tabPage_kernelResTree.Text = "KernelResTree";
             this.tabPage_kernelResTree.UseVisualStyleBackColor = true;
@@ -2301,7 +2315,7 @@
             // 
             this.button_kernelResTree_fill.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button_kernelResTree_fill.Location = new System.Drawing.Point(4, 298);
-            this.button_kernelResTree_fill.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_kernelResTree_fill.Margin = new System.Windows.Forms.Padding(4);
             this.button_kernelResTree_fill.Name = "button_kernelResTree_fill";
             this.button_kernelResTree_fill.Size = new System.Drawing.Size(196, 34);
             this.button_kernelResTree_fill.TabIndex = 1;
@@ -2317,7 +2331,7 @@
             this.kernelResTree1.ImageIndex = 0;
             this.kernelResTree1.Lang = null;
             this.kernelResTree1.Location = new System.Drawing.Point(4, 4);
-            this.kernelResTree1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.kernelResTree1.Margin = new System.Windows.Forms.Padding(4);
             this.kernelResTree1.Name = "kernelResTree1";
             this.kernelResTree1.SelectedImageIndex = 0;
             this.kernelResTree1.Size = new System.Drawing.Size(498, 288);
@@ -2338,9 +2352,9 @@
             this.tabPage_setBiblioInfo.Controls.Add(this.textBox_setBiblioInfo_action);
             this.tabPage_setBiblioInfo.Controls.Add(this.label31);
             this.tabPage_setBiblioInfo.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_setBiblioInfo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_setBiblioInfo.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_setBiblioInfo.Name = "tabPage_setBiblioInfo";
-            this.tabPage_setBiblioInfo.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_setBiblioInfo.Size = new System.Drawing.Size(582, 421);
             this.tabPage_setBiblioInfo.TabIndex = 30;
             this.tabPage_setBiblioInfo.Text = "SetBibilioInfo()";
             this.tabPage_setBiblioInfo.UseVisualStyleBackColor = true;
@@ -2348,7 +2362,7 @@
             // button_setBiblioInfo_request
             // 
             this.button_setBiblioInfo_request.Location = new System.Drawing.Point(9, 340);
-            this.button_setBiblioInfo_request.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_setBiblioInfo_request.Margin = new System.Windows.Forms.Padding(4);
             this.button_setBiblioInfo_request.Name = "button_setBiblioInfo_request";
             this.button_setBiblioInfo_request.Size = new System.Drawing.Size(130, 34);
             this.button_setBiblioInfo_request.TabIndex = 9;
@@ -2359,7 +2373,7 @@
             // button_setBiblioInfo_getContentFromIso2709
             // 
             this.button_setBiblioInfo_getContentFromIso2709.Location = new System.Drawing.Point(150, 297);
-            this.button_setBiblioInfo_getContentFromIso2709.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_setBiblioInfo_getContentFromIso2709.Margin = new System.Windows.Forms.Padding(4);
             this.button_setBiblioInfo_getContentFromIso2709.Name = "button_setBiblioInfo_getContentFromIso2709";
             this.button_setBiblioInfo_getContentFromIso2709.Size = new System.Drawing.Size(354, 34);
             this.button_setBiblioInfo_getContentFromIso2709.TabIndex = 8;
@@ -2372,7 +2386,7 @@
             this.textBox_setBiblioInfo_content.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_setBiblioInfo_content.Location = new System.Drawing.Point(150, 154);
-            this.textBox_setBiblioInfo_content.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_setBiblioInfo_content.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_setBiblioInfo_content.Multiline = true;
             this.textBox_setBiblioInfo_content.Name = "textBox_setBiblioInfo_content";
             this.textBox_setBiblioInfo_content.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -2392,7 +2406,7 @@
             // textBox_setBiblioInfo_biblioType
             // 
             this.textBox_setBiblioInfo_biblioType.Location = new System.Drawing.Point(150, 114);
-            this.textBox_setBiblioInfo_biblioType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_setBiblioInfo_biblioType.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_setBiblioInfo_biblioType.Name = "textBox_setBiblioInfo_biblioType";
             this.textBox_setBiblioInfo_biblioType.Size = new System.Drawing.Size(244, 28);
             this.textBox_setBiblioInfo_biblioType.TabIndex = 5;
@@ -2410,7 +2424,7 @@
             // textBox_setBiblioInfo_biblioRecPath
             // 
             this.textBox_setBiblioInfo_biblioRecPath.Location = new System.Drawing.Point(150, 74);
-            this.textBox_setBiblioInfo_biblioRecPath.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_setBiblioInfo_biblioRecPath.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_setBiblioInfo_biblioRecPath.Name = "textBox_setBiblioInfo_biblioRecPath";
             this.textBox_setBiblioInfo_biblioRecPath.Size = new System.Drawing.Size(244, 28);
             this.textBox_setBiblioInfo_biblioRecPath.TabIndex = 3;
@@ -2428,7 +2442,7 @@
             // textBox_setBiblioInfo_action
             // 
             this.textBox_setBiblioInfo_action.Location = new System.Drawing.Point(150, 33);
-            this.textBox_setBiblioInfo_action.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_setBiblioInfo_action.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_setBiblioInfo_action.Name = "textBox_setBiblioInfo_action";
             this.textBox_setBiblioInfo_action.Size = new System.Drawing.Size(244, 28);
             this.textBox_setBiblioInfo_action.TabIndex = 1;
@@ -2453,9 +2467,9 @@
             this.tabPage_login.Controls.Add(this.textBox_login_userName);
             this.tabPage_login.Controls.Add(this.label35);
             this.tabPage_login.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_login.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_login.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_login.Name = "tabPage_login";
-            this.tabPage_login.Size = new System.Drawing.Size(512, 390);
+            this.tabPage_login.Size = new System.Drawing.Size(582, 421);
             this.tabPage_login.TabIndex = 31;
             this.tabPage_login.Text = "Login()";
             this.tabPage_login.UseVisualStyleBackColor = true;
@@ -2463,7 +2477,7 @@
             // button_login_login
             // 
             this.button_login_login.Location = new System.Drawing.Point(138, 147);
-            this.button_login_login.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_login_login.Margin = new System.Windows.Forms.Padding(4);
             this.button_login_login.Name = "button_login_login";
             this.button_login_login.Size = new System.Drawing.Size(112, 34);
             this.button_login_login.TabIndex = 6;
@@ -2474,7 +2488,7 @@
             // textBox_login_parameters
             // 
             this.textBox_login_parameters.Location = new System.Drawing.Point(138, 105);
-            this.textBox_login_parameters.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_login_parameters.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_login_parameters.Name = "textBox_login_parameters";
             this.textBox_login_parameters.Size = new System.Drawing.Size(289, 28);
             this.textBox_login_parameters.TabIndex = 5;
@@ -2492,7 +2506,7 @@
             // textBox_login_password
             // 
             this.textBox_login_password.Location = new System.Drawing.Point(138, 64);
-            this.textBox_login_password.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_login_password.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_login_password.Name = "textBox_login_password";
             this.textBox_login_password.Size = new System.Drawing.Size(289, 28);
             this.textBox_login_password.TabIndex = 3;
@@ -2510,7 +2524,7 @@
             // textBox_login_userName
             // 
             this.textBox_login_userName.Location = new System.Drawing.Point(138, 24);
-            this.textBox_login_userName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.textBox_login_userName.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_login_userName.Name = "textBox_login_userName";
             this.textBox_login_userName.Size = new System.Drawing.Size(289, 28);
             this.textBox_login_userName.TabIndex = 1;
@@ -2525,15 +2539,15 @@
             this.label35.TabIndex = 0;
             this.label35.Text = "user name";
             // 
-            // button_createDirectory
+            // button_testStop
             // 
-            this.button_createDirectory.Location = new System.Drawing.Point(10, 334);
-            this.button_createDirectory.Name = "button_createDirectory";
-            this.button_createDirectory.Size = new System.Drawing.Size(233, 34);
-            this.button_createDirectory.TabIndex = 21;
-            this.button_createDirectory.Text = "创建目录 ...";
-            this.button_createDirectory.UseVisualStyleBackColor = true;
-            this.button_createDirectory.Click += new System.EventHandler(this.button_createDirectory_Click);
+            this.button_testStop.Location = new System.Drawing.Point(6, 304);
+            this.button_testStop.Name = "button_testStop";
+            this.button_testStop.Size = new System.Drawing.Size(330, 29);
+            this.button_testStop.TabIndex = 5;
+            this.button_testStop.Text = "测试 Stop 类 ...";
+            this.button_testStop.UseVisualStyleBackColor = true;
+            this.button_testStop.Click += new System.EventHandler(this.button_testStop_Click);
             // 
             // TestForm
             // 
@@ -2805,5 +2819,6 @@
         private System.Windows.Forms.Button button_login_login;
         private System.Windows.Forms.Button button_testListProcess;
         private System.Windows.Forms.Button button_createDirectory;
+        private System.Windows.Forms.Button button_testStop;
     }
 }

@@ -1492,6 +1492,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string TextField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string XmlField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -1524,6 +1527,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.TextField, value) != true)) {
                     this.TextField = value;
                     this.RaisePropertyChanged("Text");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Xml {
+            get {
+                return this.XmlField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.XmlField, value) != true)) {
+                    this.XmlField = value;
+                    this.RaisePropertyChanged("Xml");
                 }
             }
         }
@@ -3407,6 +3423,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string[] ColsField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string DetailField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string PathField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -3434,6 +3453,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.ColsField, value) != true)) {
                     this.ColsField = value;
                     this.RaisePropertyChanged("Cols");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Detail {
+            get {
+                return this.DetailField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.DetailField, value) != true)) {
+                    this.DetailField = value;
+                    this.RaisePropertyChanged("Detail");
                 }
             }
         }

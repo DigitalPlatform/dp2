@@ -208,6 +208,9 @@ namespace dp2Circulation
             if (Program.MainForm == null)
                 return;
 
+            this.HelpRequested -= MyForm_HelpRequested;
+            this.HelpRequested += MyForm_HelpRequested;
+
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -235,6 +238,11 @@ namespace dp2Circulation
                 if (Program.MainForm != null)
                     Program.MainForm.Move += new EventHandler(MainForm_Move);
             }
+        }
+
+        private void MyForm_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            OnHelpTriggered();
         }
 
         bool _channelDoEvents = true;
@@ -1712,6 +1720,59 @@ out string strError)
                 }));
         }
 
+        #region 人脸识别有关功能
+
+        public class FaceChannel
+        {
+            public IpcClientChannel Channel { get; set; }
+            public IBioRecognition Object { get; set; }
+        }
+
+        internal int _inFaceCall = 0; // >0 表示正在调用人脸识别 API 尚未返回
+
+        public FaceChannel StartFaceChannel(
+    string strUrl,
+    out string strError)
+        {
+            strError = "";
+
+            FaceChannel result = new FaceChannel();
+
+            result.Channel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
+                    new BinaryClientFormatterSinkProvider());
+
+            ChannelServices.RegisterChannel(result.Channel, true);
+            bool bDone = false;
+            try
+            {
+                result.Object = (IBioRecognition)Activator.GetObject(typeof(IBioRecognition),
+                    strUrl);
+                if (result.Object == null)
+                {
+                    strError = "无法连接到服务器 " + strUrl;
+                    return null;
+                }
+                bDone = true;
+                return result;
+            }
+            finally
+            {
+                if (bDone == false)
+                    EndFaceChannel(result);
+            }
+        }
+
+        public void EndFaceChannel(FaceChannel channel)
+        {
+            if (channel != null && channel.Channel != null)
+            {
+                ChannelServices.UnregisterChannel(channel.Channel);
+                channel.Channel = null;
+            }
+        }
+
+        #endregion
+
         #region 指纹有关功能
 
         public class FingerprintChannel
@@ -1941,6 +2002,47 @@ out strError);
         }
 
         #endregion
+
+#if NO
+        protected override bool ProcessDialogKey(
+Keys keyData)
+        {
+            if (keyData == Keys.F1)
+            {
+                // MessageBox.Show(this, "MyForm Help");
+                OnHelpTriggered();
+                return true;
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+#endif
+
+        string _helpUrl = "";
+        public string HelpUrl
+        {
+            get
+            {
+                return _helpUrl;
+            }
+            set
+            {
+                _helpUrl = value;
+            }
+        }
+
+        public virtual void OnHelpTriggered()
+        {
+            // TODO: 如果是多个 URL，需要出现一个对话框让用户选择。每个 URL 需要跟一个小标题
+            if (string.IsNullOrEmpty(this.HelpUrl) == false)
+            {
+                // Process.Start("IExplore.exe", this.HelpUrl);
+                Process.Start(this.HelpUrl);
+                return;
+            }
+            // TODO: 最好跳转到一个帮助目录页面
+            MessageBox.Show(this, "当前没有帮助链接");
+        }
     }
 
     public class FilterHost

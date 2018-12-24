@@ -44,6 +44,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <Choose>
@@ -59,9 +60,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestAuthorNumber.cs" />
     <Compile Include="TestBiblioTable.cs" />
     <Compile Include="TestDp2Library.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestRfid.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.LibraryServer\DigitalPlatform.LibraryServer.csproj">
@@ -71,6 +74,10 @@
     <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
       <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
+      <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
+      <Name>DigitalPlatform.RFID</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>

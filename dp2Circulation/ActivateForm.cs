@@ -414,13 +414,11 @@ MessageBoxDefaultButton.Button2);
             REDO:
                 stop.SetMessage("正在装入读者记录 " + strBarcode + " ...");
 
-                string[] results = null;
-
                 long lRet = Channel.GetReaderInfo(
                     stop,
                     strBarcode,
                     "xml,html",
-                    out results,
+                    out string[] results,
                     out strRecPath,
                     out baTimestamp,
                     out strError);

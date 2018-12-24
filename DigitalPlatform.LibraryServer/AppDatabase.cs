@@ -3113,7 +3113,11 @@ out strError);
                 string strDbType = GetDbTypeByDbName(strName);
                 if (string.IsNullOrEmpty(strDbType))
                 {
-                    strError = "数据库 '" + strName + "' 不存在";
+                    // 进一步看看是不是 mongodb 库
+                    if (string.IsNullOrEmpty(GetMongoDbTypeByDbName(strName)))
+                        strError = "数据库 '" + strName + "' 不存在";
+                    else
+                        strError = "数据库 '" + strName + "' 属于 mongodb 类型的特殊数据库，不允许直接删除";
                     return 0;
                 }
 
@@ -8379,6 +8383,20 @@ out strError);
             if (bChanged)
                 return 1;
             return 0;
+        }
+
+        // 通过数据库名获得 mongodb 数据库的具体类型
+        string GetMongoDbTypeByDbName(string strDbName)
+        {
+            if (this.IsAccessLogDbName(strDbName))
+                return "accessLog";
+            if (this.IsHitCountDbName(strDbName))
+                return "hitcount";
+            if (this.IsChargingHistoryDbName(strDbName))
+                return "chargingOper";
+            if (this.IsBiblioSummaryDbName(strDbName))
+                return "biblioSummary";
+            return null;
         }
 
         // 根据数据库名字探测出数据库类型

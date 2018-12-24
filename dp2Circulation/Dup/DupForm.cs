@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -10,12 +8,10 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Xml;
-using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -190,6 +186,10 @@ namespace dp2Circulation
     "dup_form",
     "return_all_records",
     true);
+            this.checkBox_returnSearchDetail.Checked = Program.MainForm.AppInfo.GetBoolean(
+"dup_form",
+"return_search_detail",
+false);
 
             if (String.IsNullOrEmpty(this.comboBox_projectName.Text) == true)
             {
@@ -278,6 +278,10 @@ namespace dp2Circulation
         "dup_form",
         "return_all_records",
         this.checkBox_returnAllRecords.Checked);
+                Program.MainForm.AppInfo.SetBoolean(
+"dup_form",
+"return_search_detail",
+this.checkBox_returnSearchDetail.Checked);
 
                 Program.MainForm.AppInfo.SetString(
                     "dup_form",
@@ -404,6 +408,8 @@ namespace dp2Circulation
                 string strBrowseStyle = "cols";
                 if (this.checkBox_includeLowCols.Checked == false)
                     strBrowseStyle += ",excludecolsoflowthreshold";
+                if (this.checkBox_returnSearchDetail.Checked == true)
+                    strBrowseStyle += ",detail";
 
                 long lRet = channel.SearchDup(
                     stop,
@@ -474,6 +480,7 @@ namespace dp2Circulation
 
                         ListViewItem item = new ListViewItem();
                         item.Text = result.Path;
+                        item.Tag = result;
                         item.SubItems.Add(result.Weight.ToString());
                         if (result.Cols != null)
                         {
@@ -511,7 +518,7 @@ namespace dp2Circulation
 
                 }
 
-            END1:
+                END1:
                 this.SetDupState();
 
                 return (int)lHitCount;
@@ -532,7 +539,7 @@ namespace dp2Circulation
             }
 
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -558,7 +565,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -620,7 +627,7 @@ namespace dp2Circulation
             }
 
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -861,7 +868,32 @@ namespace dp2Circulation
              * */
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("查看检索过程(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_viewSearchDetail_Click);
+            if (this.listView_browse.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             contextMenu.Show(this.listView_browse, new Point(e.X, e.Y));
+        }
+
+        void menu_viewSearchDetail_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+
+            foreach (ListViewItem item in this.listView_browse.SelectedItems)
+            {
+                DupSearchResult result = (DupSearchResult)item.Tag;
+                if (result == null)
+                    text.Append("(null)");
+                text.Append($"{result.Path}\t{(result == null ? "(null)" : result.Detail)}\r\n");
+            }
+
+            MessageDialog.Show(this, text.ToString());
         }
 
         void menu_loadToNewDetailWindow_Click(object sender, EventArgs e)

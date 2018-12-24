@@ -3322,7 +3322,8 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
-                // TODO: 是否包含 librryCode 元素?
+                DomUtil.DeleteElement(record, "face");
+                // TODO: 是否包含 libraryCode 元素?
             }
 
             strBody = output_dom.DocumentElement.OuterXml;

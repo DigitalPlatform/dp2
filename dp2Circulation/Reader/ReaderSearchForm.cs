@@ -27,6 +27,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
+using static dp2Circulation.ReaderInfoForm;
 
 namespace dp2Circulation
 {
@@ -574,7 +575,7 @@ namespace dp2Circulation
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1478,7 +1479,7 @@ MessageBoxDefaultButton.Button2);
 
             MessageBox.Show(this, "成功删除读者记录 " + nDeleteCount + " 条");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1525,7 +1526,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1742,7 +1743,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1934,7 +1935,7 @@ MessageBoxDefaultButton.Button2);
 
             this.ShowMessage("完成", "green", true);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2018,7 +2019,7 @@ MessageBoxDefaultButton.Button2);
 
             // MessageBox.Show(this, "导出完成");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2284,7 +2285,7 @@ MessageBoxDefaultButton.Button2);
                     sr.Close();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2584,7 +2585,7 @@ MessageBoxDefaultButton.Button2);
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -2959,7 +2960,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 0)
                 MessageBox.Show(this, strError);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3571,7 +3572,7 @@ MessageBoxDefaultButton.Button1);
             }
             MessageBox.Show(this, "成功移动读者记录 " + nCount.ToString() + " 条");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3603,7 +3604,7 @@ MessageBoxDefaultButton.Button1);
 
             // MessageBox.Show(this, "导出完成");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -3630,7 +3631,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4031,13 +4032,16 @@ MessageBoxDefaultButton.Button1);
 
         private void ToolStripMenuItem_initFingerprintCache_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = InitFingerprintCache(false, out strError);
-            if (nRet == -1)
+            // return:
+            //      -2  remoting服务器连接失败。指纹接口程序尚未启动
+            //      -1  出错
+            //      >=0   成功
+            int nRet = InitFingerprintCache(false, out string strError);
+            if (nRet < 0)
                 goto ERROR1;
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4055,7 +4059,7 @@ MessageBoxDefaultButton.Button1);
         /// <returns>
         /// <para>-2:  remoting服务器连接失败。指纹接口程序尚未启动</para>
         /// <para>-1:  出错</para>
-        /// <para>0:   成功</para>
+        /// <para>&gt;0:   成功。返回值表示初始化的事项总数</para>
         /// </returns>
         public int InitFingerprintCache(
             bool bDelayShow,
@@ -4095,9 +4099,8 @@ MessageBoxDefaultButton.Button1);
 
                 this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
 
-                List<string> readerdbnames = null;
                 nRet = GetCurrentOwnerReaderNameList(
-                    out readerdbnames,
+                    out List<string> readerdbnames,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -4125,11 +4128,14 @@ MessageBoxDefaultButton.Button1);
                     nCount += nRet;
                 }
 
+
                 if (nCount == 0)
                 {
                     strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
                     return -1;
                 }
+
+                return nCount;
             }
             finally
             {
@@ -4562,7 +4568,7 @@ out strError);
 
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
-            REDO_GETRECORDS:
+                REDO_GETRECORDS:
                 long lRet = this.Channel.GetBrowseRecords(
                     this.stop,
                     paths,
@@ -4702,6 +4708,16 @@ out strError);
 
             try
             {
+                GetVersionResult result = CallGetVersion(channel);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+
+                if (StringUtil.IsInList("selfInitCache", result.CfgInfo) == true)
+                    return 0;
+
                 if (resultset == null)
                 {
                     // 清空以前的全部缓存内容，以便重新建立
@@ -5247,7 +5263,7 @@ out strFingerprint);
 
             DoViewComment(false);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5368,15 +5384,15 @@ out strFingerprint);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-   									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                       Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.libraryclient.dll",
 
                                     Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 新增
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
@@ -5420,7 +5436,7 @@ out strFingerprint);
                 null);
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5601,7 +5617,7 @@ dlg.UiState);
                             OutputBorrowHistory(sheet,
                     dom,
                     history_loader,
-                                // Program.MainForm.GetBiblioSummary,
+                    // Program.MainForm.GetBiblioSummary,
                     summary_loader,
                     ref nRowIndex,
                     ref column_max_chars);
@@ -6954,7 +6970,7 @@ dlg.UiState);
                                 OutputBorrowHistory(sheet,
                         dom,
                         history_loader,
-                                    // Program.MainForm.GetBiblioSummary,
+                        // Program.MainForm.GetBiblioSummary,
                         summary_loader,
                         ref nRowIndex,
                         ref column_max_chars);

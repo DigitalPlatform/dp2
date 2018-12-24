@@ -1820,8 +1820,10 @@ strNewDefault);
                 goto ERROR1;
             }
 
+            bool bVerifyBarcode = StringUtil.IsInList("verifybarcode", strStyle);
+
             // 校验证条码号
-            if (this.NeedVerifyBarcode == true
+            if ((this.NeedVerifyBarcode == true || bVerifyBarcode)
                 && StringUtil.IsIdcardNumber(this.readerEditControl1.Barcode) == false)
             {
                 // 形式校验条码号
@@ -1852,11 +1854,12 @@ strNewDefault);
                     goto ERROR1;
                 }
 
-                /*
                 // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                if (nRet == -2)
+                if (nRet == -2
+                    && (this.NeedVerifyBarcode == true && bVerifyBarcode == false))
+                {
                     MessageBox.Show(this, "警告：前端开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端校验功能");
-                 * */
+                }
             }
 
             // TODO: 保存时候的选项
@@ -3566,7 +3569,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveRecord("displaysuccess,verifybarcode");
+                            this.SaveRecord("displaysuccess");  // ,verifybarcode
                         }
                     }
                     finally
@@ -3582,7 +3585,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveRecord("displaysuccess,verifybarcode,changereaderbarcode");
+                            this.SaveRecord("displaysuccess,changereaderbarcode");  // verifybarcode,
                         }
                     }
                     finally
@@ -4901,6 +4904,165 @@ MessageBoxDefaultButton.Button2);
             e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
+        #region 人脸登记功能
+
+        async Task<GetFeatureStringResult> CancelReadFeatureString()
+        {
+            string strError = "";
+            GetFeatureStringResult result = new GetFeatureStringResult();
+
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                strError = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息";
+                goto ERROR1;
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFaceCall++;
+            try
+            {
+                try
+                {
+                    return await Task.Factory.StartNew<GetFeatureStringResult>(
+                        () =>
+                        {
+                            GetFeatureStringResult temp_result = new GetFeatureStringResult();
+                            try
+                            {
+                                temp_result.Value = channel.Object.CancelGetFeatureString();
+                                if (temp_result.Value == -1)
+                                    temp_result.ErrorInfo = "API cancel return error";
+                                return temp_result;
+                            }
+                            catch (RemotingException ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = 0;  // 让调主认为没有出错
+                                return temp_result;
+                            }
+                            catch (Exception ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = -1;
+                                return temp_result;
+                            }
+                        });
+                }
+                catch (Exception ex)
+                {
+                    strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetFeatureString() 操作失败: " + ex.Message;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
+            }
+            ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
+        }
+
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        async Task<GetFeatureStringResult> ReadFeatureString(string strExcludeBarcodes)
+        {
+            string strError = "";
+            GetFeatureStringResult result = new GetFeatureStringResult();
+
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                strError = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息";
+                goto ERROR1;
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFaceCall++;
+            try
+            {
+                return await GetFeatureString(channel, strExcludeBarcodes);
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetFeatureString() 操作失败: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
+            }
+            ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
+        }
+
+        class GetFeatureStringResult
+        {
+            public string Feature { get; set; }
+            public string Version { get; set; }
+
+            public int Value { get; set; }
+            public string ErrorInfo { get; set; }
+        }
+
+        Task<GetFeatureStringResult> GetFeatureString(FaceChannel channel,
+            string strExcludeBarcodes)
+        {
+            return Task.Factory.StartNew<GetFeatureStringResult>(
+    () =>
+    {
+        return CallGetFeatureString(channel, strExcludeBarcodes);
+    });
+        }
+
+        GetFeatureStringResult CallGetFeatureString(FaceChannel channel,
+    string strExcludeBarcodes)
+        {
+            GetFeatureStringResult result = new GetFeatureStringResult();
+            try
+            {
+                    // 获得一个指纹特征字符串
+                    // return:
+                    //      -1  error
+                    //      0   放弃输入
+                    //      1   成功输入
+                    int nRet = channel.Object.GetFeatureString(
+                        strExcludeBarcodes,
+                        out string strFingerprint,
+                        out string strVersion,
+                        out string strError);
+                    result.Feature = strFingerprint;
+                    result.Version = strVersion;
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    return result;
+            }
+            catch (Exception ex)
+            {
+                result.ErrorInfo = "GetFeatureString() 异常: " + ex.Message;
+                result.Value = -1;
+                return result;
+            }
+        }
+
+        #endregion
+
         #region 指纹登记功能
 
         // 局部更新指纹信息高速缓存
@@ -5026,7 +5188,7 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   放弃输入
         //      1   成功输入
-        async Task<GetFingerprintStringResult> ReadFingerprintString()
+        async Task<GetFingerprintStringResult> ReadFingerprintString(string strExcludeBarcodes)
         {
             string strError = "";
             GetFingerprintStringResult result = new GetFingerprintStringResult();
@@ -5060,7 +5222,7 @@ MessageBoxDefaultButton.Button2);
 
                     return nRet;
 #endif
-                return await GetFingerprintString(channel);
+                return await GetFingerprintString(channel, strExcludeBarcodes);
             }
             catch (Exception ex)
             {
@@ -5087,41 +5249,109 @@ MessageBoxDefaultButton.Button2);
             public string ErrorInfo { get; set; }
         }
 
-        Task<GetFingerprintStringResult> GetFingerprintString(FingerprintChannel channel)
+        Task<GetFingerprintStringResult> GetFingerprintString(FingerprintChannel channel,
+            string strExcludeBarcodes)
         {
             return Task.Factory.StartNew<GetFingerprintStringResult>(
     () =>
     {
-        return CallGetFingerprintString(channel);
+        return CallGetFingerprintString(channel, strExcludeBarcodes);
     });
         }
 
-        GetFingerprintStringResult CallGetFingerprintString(FingerprintChannel channel)
+        GetFingerprintStringResult CallGetFingerprintString(FingerprintChannel channel,
+            string strExcludeBarcodes)
         {
             GetFingerprintStringResult result = new GetFingerprintStringResult();
             try
             {
-                string strError = "";
-                string strFingerprint = "";
-                string strVersion = "";
+                // 先尝试 2.0 版本
+                try
+                {
+                    int nRet = channel.Object.GetFingerprintString(
+                        strExcludeBarcodes,
+                        out string strFingerprint,
+                        out string strVersion,
+                        out string strError);
+                    result.Fingerprint = strFingerprint;
+                    result.Version = strVersion;
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    if (nRet == -1)
+                    {
+                        if (strVersion != "[not support]")
+                            return result;
+                    }
+                    else
+                        return result;
+                }
+                catch (System.Runtime.Remoting.RemotingException)
+                {
+                }
+
+                // 然后尝试用 V1.0 调用方式
+                {
+                    // 获得一个指纹特征字符串
+                    // return:
+                    //      -1  error
+                    //      0   放弃输入
+                    //      1   成功输入
+                    int nRet = channel.Object.GetFingerprintString(out string strFingerprint,
+                    out string strVersion,
+                    out string strError);
+
+                    result.Fingerprint = strFingerprint;
+                    result.Version = strVersion;
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ErrorInfo = "GetFingerprintString() 异常: " + ex.Message;
+                result.Value = -1;
+                return result;
+            }
+        }
+
+        public class GetVersionResult : NormalResult
+        {
+            public string CfgInfo { get; set; }
+            public string Version { get; set; }
+        }
+
+        public static GetVersionResult CallGetVersion(FingerprintChannel channel)
+        {
+            GetVersionResult result = new GetVersionResult();
+            try
+            {
                 // 获得一个指纹特征字符串
                 // return:
                 //      -1  error
                 //      0   放弃输入
                 //      1   成功输入
-                int nRet = channel.Object.GetFingerprintString(out strFingerprint,
-                    out strVersion,
-                    out strError);
+                int nRet = channel.Object.GetVersion(out string strVersion,
+                    out string strCfgInfo,
+                    out string strError);
 
-                result.Fingerprint = strFingerprint;
+                result.CfgInfo = strCfgInfo;
                 result.Version = strVersion;
                 result.ErrorInfo = strError;
                 result.Value = nRet;
                 return result;
             }
+            catch (System.Runtime.Remoting.RemotingException)
+            {
+                result.CfgInfo = "";
+                result.Version = "1.0";
+                result.ErrorInfo = "";
+                result.Value = 0;
+                return result;
+            }
             catch (Exception ex)
             {
-                result.ErrorInfo = "GetFingerprintString() 异常: " + ex.Message;
+                result.ErrorInfo = "CallGetVersion() 异常: " + ex.Message;
                 result.Value = -1;
                 return result;
             }
@@ -5170,7 +5400,7 @@ MessageBoxDefaultButton.Button1);
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
 #endif
-                GetFingerprintStringResult result = await ReadFingerprintString();
+                GetFingerprintStringResult result = await ReadFingerprintString(this.readerEditControl1.Barcode);
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
@@ -6212,5 +6442,119 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // 编辑读者记录 XML
+        private void toolStripMenuItem_editXML_Click(object sender, EventArgs e)
+        {
+            int nRet = this.readerEditControl1.GetData(out string strXml,
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            strXml = DomUtil.GetIndentXml(strXml);
+            string result = EditDialog.GetInput(this,
+                "readerInfoForm",
+                "读者记录 XML",
+                strXml,
+                this.Font);
+            if (result == null)
+                return;
+
+            nRet = this.readerEditControl1.SetData(result,
+                this.readerEditControl1.RecPath,
+                this.readerEditControl1.Timestamp,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            Global.SetXmlToWebbrowser(this.webBrowser_xml,
+    Program.MainForm.DataDir,
+    "xml",
+    result);
+
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 登记人脸。用于人脸识别
+        private async void toolStripSplitButton_registerFace_ButtonClick(object sender, EventArgs e)
+        {
+            string strError = "";
+            this.ShowMessage("等待登记人脸 ...");
+            this.EnableControls(false);
+            try
+            {
+                REDO:
+                GetFeatureStringResult result = await ReadFeatureString(this.readerEditControl1.Barcode);
+                if (result.Value == -1)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+result.ErrorInfo + "\r\n\r\n是否重试?",
+"ReaderInfoForm",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO;
+                }
+
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                this.readerEditControl1.FaceFeature = result.Feature; 
+                this.readerEditControl1.FaceFeatureVersion = result.Version;
+                this.readerEditControl1.Changed = true;
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.ClearMessage();
+            }
+
+            // MessageBox.Show(this, strFingerprint);
+            Program.MainForm.StatusBarMessage = "指纹信息获取成功";
+            return;
+            ERROR1:
+            Program.MainForm.StatusBarMessage = strError;
+            ShowMessageBox(strError);
+        }
+
+        private void ToolStripMenuItem_pasteCardPhoto_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建证件照片";
+                goto ERROR1;
+            }
+            Image image = images[0];
+
+            string strShrinkComment = "";
+            using (image)
+            {
+                // 自动缩小图像
+                nRet = SetCardPhoto(image,
+                out strShrinkComment,
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // 切换到对象属性页，以便操作者能看到刚刚创建的对象行
+            this.tabControl_readerInfo.SelectedTab = this.tabPage_objects;
+
+            MessageBox.Show(this, "证件照片已经成功创建。\r\n"
+                + strShrinkComment
+                + "\r\n\r\n(但因当前读者记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前读者记录。");
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

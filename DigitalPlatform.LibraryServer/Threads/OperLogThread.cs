@@ -324,6 +324,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.DeleteElement(record, "face");
                 DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
             }
 
@@ -442,6 +443,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.DeleteElement(record, "face");
                 DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
             }
 
@@ -597,6 +599,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.DeleteElement(record, "face");
 
                 XmlElement library_code = record.SelectSingleNode("libraryCode") as XmlElement;
                 if (library_code == null)
@@ -613,6 +616,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.DeleteElement(record, "borrowHistory");
                 DomUtil.DeleteElement(record, "password");
                 DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.DeleteElement(record, "face");
             }
 #endif
 

@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.IO;
@@ -16,6 +11,10 @@ namespace dp2Circulation
     /// </summary>
     internal partial class DateSliceDialog : Form
     {
+        // 是否为时间范围状态。
+        // 在时间范围状态下，切片有关的界面要素会被隐藏
+        public bool TimeRangeMode { get; set; }
+
         public DateSliceDialog()
         {
             InitializeComponent();
@@ -46,6 +45,91 @@ namespace dp2Circulation
                 this.dateControl_end.Value = value;
             }
         }
+
+        public string uTimeRange
+        {
+            get
+            {
+                string strStart = "";
+                if (this.StartTime != DateTimePicker.MinimumDateTime)
+                    strStart = this.StartTime.ToString("u");
+
+                string strEnd = "";
+                if (this.EndTime != DateTimePicker.MaximumDateTime)
+                    strEnd = this.EndTime.ToString("u");
+
+                return strStart
+                    + "~"
+                    + strEnd;
+            }
+            set
+            {
+                string strStart = "";
+                string strEnd = "";
+
+                int nRet = value.IndexOf("~");
+                if (nRet == -1)
+                    strStart = value.Trim();
+                else
+                {
+                    strStart = value.Substring(0, nRet).Trim();
+                    strEnd = value.Substring(nRet + 1).Trim();
+                }
+
+                if (string.IsNullOrEmpty(strStart) == true)
+                    this.StartTime = DateTimePicker.MinimumDateTime;
+                else
+                    this.StartTime = DateTimeUtil.FromUTimeString(strStart);
+
+                if (string.IsNullOrEmpty(strEnd) == true)
+                    this.EndTime = DateTimePicker.MaximumDateTime;
+                else
+                    this.EndTime = DateTimeUtil.FromUTimeString(strEnd);
+            }
+        }
+
+        public string Rfc1123TimeRange
+        {
+            get
+            {
+                string strStart = "";
+                if (this.StartTime != DateTimePicker.MinimumDateTime)
+                    strStart = DateTimeUtil.Rfc1123DateTimeStringEx(this.StartTime);
+
+                string strEnd = "";
+                if (this.EndTime != DateTimePicker.MaximumDateTime)
+                    strEnd = DateTimeUtil.Rfc1123DateTimeStringEx(this.EndTime);
+
+                return strStart
+                    + "~"
+                    + strEnd;
+            }
+            set
+            {
+                string strStart = "";
+                string strEnd = "";
+
+                int nRet = value.IndexOf("~");
+                if (nRet == -1)
+                    strStart = value.Trim();
+                else
+                {
+                    strStart = value.Substring(0, nRet).Trim();
+                    strEnd = value.Substring(nRet + 1).Trim();
+                }
+
+                if (string.IsNullOrEmpty(strStart) == true)
+                    this.StartTime = DateTimePicker.MinimumDateTime;
+                else
+                    this.StartTime = DateTimeUtil.FromRfc1123DateTimeString(strStart).ToLocalTime();
+
+                if (string.IsNullOrEmpty(strEnd) == true)
+                    this.EndTime = DateTimePicker.MaximumDateTime;
+                else
+                    this.EndTime = DateTimeUtil.FromRfc1123DateTimeString(strEnd).ToLocalTime();
+            }
+        }
+
 
         public string Slice
         {
@@ -83,12 +167,14 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = BuildSlices(out strError);
-            if (nRet == -1)
+            if (this.TimeRangeMode == false)
             {
-                MessageBox.Show(this, strError);
-                return;
+                int nRet = BuildSlices(out string strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
             }
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -327,6 +413,14 @@ namespace dp2Circulation
 
         delegate void Delegate_QuickSetTimeRange(Control control);
 
+        private void DateSliceDialog_Load(object sender, EventArgs e)
+        {
+            if (this.TimeRangeMode)
+            {
+                this.label_slice.Visible = false;
+                this.comboBox_slice.Visible = false;
+            }
+        }
     }
 
     // 

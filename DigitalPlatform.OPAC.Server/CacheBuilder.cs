@@ -640,7 +640,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             nRet = CacheBuilder.MacroDom(dom,
-                new List<string> { "name", "date" },
+                new List<string> { "name", "command" },
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -800,9 +800,8 @@ namespace DigitalPlatform.OPAC.Server
                     }
                      * */
 
-                    string strXml = "";
                     nRet = BuildXmlQuery(node,
-                        out strXml,
+                        out string strXml,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -1063,7 +1062,7 @@ namespace DigitalPlatform.OPAC.Server
             // 2014/12/2
             // 兑现宏
             int nRet = CacheBuilder.MacroDom(dom,
-                new List<string> { "name", "date" },
+                new List<string> { "name", "command" },
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -1257,7 +1256,6 @@ namespace DigitalPlatform.OPAC.Server
 
             string strCommand = DomUtil.GetAttr(node, "command");
 
-
             if (String.IsNullOrEmpty(strCommand) == true)
             {
                 string strName = DomUtil.GetAttr(node, "name");
@@ -1323,7 +1321,6 @@ namespace DigitalPlatform.OPAC.Server
                 strDbName = strDbName.Replace("|", ",");
 
                 // 构造单个检索式
-                string strSingle = "";
                 // 根据检索参数创建XML检索式
                 // return:
                 //      -1  出错
@@ -1339,7 +1336,7 @@ namespace DigitalPlatform.OPAC.Server
                     (string)result["datatype"],
                     result["maxcount"] == null ? -1 : Convert.ToInt32((string)result["maxcount"]),
                     "", // strSearchStyle
-                    out strSingle,
+                    out string strSingle,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -1591,7 +1588,6 @@ namespace DigitalPlatform.OPAC.Server
                                 continue;
                             }
 
-                            string strBiblioRecPath = "";
 
 #if NO
                             // 从册记录XML中获得书目记录路径
@@ -1619,7 +1615,7 @@ namespace DigitalPlatform.OPAC.Server
                             int nRet = GetBiblioRecPathByParentID(
                                 rec.Path,
                                 rec.Cols[0],
-                                out strBiblioRecPath,
+                                out string strBiblioRecPath,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
@@ -1748,6 +1744,23 @@ namespace DigitalPlatform.OPAC.Server
                     }
                 }
 
+                // 要从 dp2library 获得 “内部”结果集，然后从当前结果集中减去这个部分
+                if (string.IsNullOrEmpty(this.App.BiblioFilter) == false
+                    && resultset.Count > 0)
+                {
+                    this.AppendResultText("开始过滤。事项数 " + resultset.Count + "\r\n");
+
+                    int nRet = FilterResultset(this.App.BiblioFilter,
+                        channel,
+                        resultset,
+                        strResultsetFilename,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    this.AppendResultText("结束过滤。事项数 " + resultset.Count + "\r\n");
+                }
+
                 this.SetProgressText("输出结果集完成");
                 bDone = true;
             }
@@ -1768,6 +1781,109 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             return 0;
+        }
+
+        int FilterResultset(string strBiblioFilter,
+            LibraryChannel channel,
+            DpResultSet resultset,
+            string strResultsetFilename,
+            out string strError)
+        {
+            strError = "";
+
+            string strOperator = "AND";
+            string strFilter = strBiblioFilter;
+            if (strFilter.StartsWith("-"))
+            {
+                strFilter = strFilter.Substring(1);
+                strOperator = "SUB";
+            }
+            string strGlobalFilename = Path.Combine(Path.GetDirectoryName(strResultsetFilename), "_global_" + strFilter);
+            DpResultSet global = GetGlobalResultset(
+channel,
+"#" + strFilter,
+strGlobalFilename);
+
+            global.QuickSort();
+            global.Sorted = true;
+
+            string strTargetFilename = strResultsetFilename + "_target";
+
+            DpResultSet target = new DpResultSet(false, false);
+            target.Create(strTargetFilename,
+    strTargetFilename + ".index");
+
+            StringBuilder debugInfo = null;
+            int nRet = DpResultSetManager.Merge(strOperator == "AND" ? LogicOper.AND : LogicOper.SUB,
+                resultset,
+                global,
+                "", // strOutputStyle,
+                target,
+                null,
+                null,
+                null,   // stop
+                null,   // param
+                ref debugInfo,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            resultset.Detach(out string strDataFileName, out string strIndexFileName);
+            if (string.IsNullOrEmpty(strDataFileName) == false)
+                File.Delete(strDataFileName);
+            if (string.IsNullOrEmpty(strIndexFileName) == false)
+                File.Delete(strIndexFileName);
+
+            target.Detach(out string strDataFileName1, out string strIndexFileName1);
+            if (string.IsNullOrEmpty(strDataFileName1) == false
+                && string.IsNullOrEmpty(strDataFileName) == false)
+                File.Move(strDataFileName1, strDataFileName);
+            if (string.IsNullOrEmpty(strIndexFileName1) == false
+                && string.IsNullOrEmpty(strIndexFileName) == false)
+                File.Move(strIndexFileName1, strIndexFileName);
+
+            resultset = new DpResultSet(false, false);
+            resultset.Attach(strDataFileName, strIndexFileName);
+            resultset.Sorted = true;
+            return 0;
+        }
+
+        // name --> DpResultSet
+        Hashtable _globalResultsets = new Hashtable();
+
+        DpResultSet GetGlobalResultset(
+            LibraryChannel channel,
+            string strResultsetName,
+            string strResultsetFilename)
+        {
+            DpResultSet resultset = (DpResultSet)_globalResultsets[strResultsetName];
+            if (resultset != null)
+                return resultset;
+
+            resultset = new DpResultSet(false, false);
+            resultset.Create(strResultsetFilename,
+                strResultsetFilename + ".index");
+            try
+            {
+                ResultSetLoader loader = new ResultSetLoader(
+                    channel,
+                    null,
+                    strResultsetName,
+                    "id");
+
+                foreach (Record record in loader)
+                {
+                    DpRecord item = new DpRecord(record.Path);
+                    resultset.Add(item);
+                }
+
+                _globalResultsets[strResultsetName] = resultset;
+                return resultset;
+            }
+            catch (Exception ex)
+            {
+                resultset.Close();
+                throw ex;
+            }
         }
 
         // 实体库名 --> 书目库名 对照表

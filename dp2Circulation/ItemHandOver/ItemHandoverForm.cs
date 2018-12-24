@@ -6898,6 +6898,12 @@ MessageBoxDefaultButton.Button2);
 
             foreach (ListViewItem item in this.listView_in.Items)
             {
+                // 2018/11/6
+                // 已经有了出错信息的，不再列入
+                string strErrorInfo = ListViewUtil.GetItemText(item, COLUMN_ERRORINFO);
+                if (string.IsNullOrEmpty(strErrorInfo) == false)
+                    continue;
+
                 string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
                 if (string.IsNullOrEmpty(strRecPath) == false)
                     continue;
@@ -6981,7 +6987,21 @@ MessageBoxDefaultButton.Button2);
                             out recpaths,
                             out strError);
                         if (nRet == -1)
+                        {
+                            // 为每一行加入错误信息，避免线程重复报错
+                            int i = 0;
+                            foreach(ListViewItem item in items)
+                            {
+                                string barcode = barcodes[i];
+                                ListViewItem temp = item;
+                                this.Container.SetError(item.ListView,
+    ref temp,
+    barcode,
+    strError);
+                                i++;
+                            }
                             goto ERROR1;
+                        }
 
                         Debug.Assert(barcodes.Count == recpaths.Count, "");
 
@@ -7004,6 +7024,8 @@ MessageBoxDefaultButton.Button2);
 
                 ERROR1:
                 // Safe_setError(this.Container.listView_in, strError);
+                // 2018/11/6
+                this.Container.ShowMessage(strError, "red", true);
                 return;
             }
 

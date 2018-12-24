@@ -40,6 +40,7 @@ namespace DigitalPlatform.LibraryServer
             if (_createLocationResultsetCount == 0)
             {
                 this.App.StartCreateLocationResultset("");
+                this.App.StartCreateBiblioResultset("");
                 _locationResultsetLastTime = DateTime.Now;
                 _createLocationResultsetCount++;
             }
@@ -53,11 +54,13 @@ namespace DigitalPlatform.LibraryServer
                     || this.App.NeedRebuildResultset() == true)
                 {
                     this.App.StartCreateLocationResultset("");
+                    this.App.StartCreateBiblioResultset("");
                     _locationResultsetLastTime = DateTime.Now;
                 }
 
                 // 促使累积的请求执行
                 this.App.StartCreateLocationResultset(null);
+                this.App.StartCreateBiblioResultset(null);
                 _createLocationResultsetCount++;
             }
 

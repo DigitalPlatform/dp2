@@ -45,6 +45,9 @@
   <col title="借阅期限">
     <xpath>*/borrowPeriod</xpath>
   </col>
+  <col title="渠道(书商)" type="item_seller">
+    <xpath>*/seller</xpath>
+  </col>
   <col title="参考ID" type="item_refid">
     <xpath>*/refID</xpath>
   </col>

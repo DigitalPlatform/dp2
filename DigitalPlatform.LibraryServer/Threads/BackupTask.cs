@@ -641,6 +641,7 @@ out strError);
                 export_util.TempDir = this.App.TempDir;
                 int nRet = export_util.Begin(null,
     strBackupFileName,
+    Encoding.UTF8,
     out strError);
                 if (nRet == -1)
                     return -1;

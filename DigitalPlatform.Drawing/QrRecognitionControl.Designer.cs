@@ -47,29 +47,33 @@
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(318, 287);
+            this.pictureBox1.Size = new System.Drawing.Size(477, 430);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
             // 
             // cmbDevice
             // 
+            this.cmbDevice.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbDevice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDevice.FormattingEnabled = true;
-            this.cmbDevice.Location = new System.Drawing.Point(66, 0);
-            this.cmbDevice.MaximumSize = new System.Drawing.Size(200, 0);
+            this.cmbDevice.Location = new System.Drawing.Point(99, 0);
+            this.cmbDevice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cmbDevice.Name = "cmbDevice";
-            this.cmbDevice.Size = new System.Drawing.Size(200, 20);
+            this.cmbDevice.Size = new System.Drawing.Size(345, 26);
             this.cmbDevice.TabIndex = 4;
             this.cmbDevice.SelectedIndexChanged += new System.EventHandler(this.cmbDevice_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(-2, 3);
+            this.label1.Location = new System.Drawing.Point(-3, 4);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 12);
+            this.label1.Size = new System.Drawing.Size(98, 18);
             this.label1.TabIndex = 3;
             this.label1.Text = "摄像头(&C):";
             // 
@@ -80,16 +84,19 @@
             this.panel_camera.Controls.Add(this.progressBar1);
             this.panel_camera.Controls.Add(this.cmbDevice);
             this.panel_camera.Controls.Add(this.label1);
-            this.panel_camera.Location = new System.Drawing.Point(3, 4);
+            this.panel_camera.Location = new System.Drawing.Point(4, 6);
+            this.panel_camera.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel_camera.Name = "panel_camera";
-            this.panel_camera.Size = new System.Drawing.Size(318, 23);
+            this.panel_camera.Size = new System.Drawing.Size(477, 34);
             this.panel_camera.TabIndex = 6;
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(272, 0);
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar1.Location = new System.Drawing.Point(452, 0);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(14, 20);
+            this.progressBar1.Size = new System.Drawing.Size(21, 30);
             this.progressBar1.TabIndex = 5;
             this.progressBar1.Visible = false;
             // 
@@ -100,8 +107,9 @@
             this.label_message.Font = new System.Drawing.Font("微软雅黑", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_message.ForeColor = System.Drawing.SystemColors.GrayText;
             this.label_message.Location = new System.Drawing.Point(0, 0);
+            this.label_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(318, 287);
+            this.label_message.Size = new System.Drawing.Size(477, 430);
             this.label_message.TabIndex = 7;
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.label_message.Visible = false;
@@ -114,20 +122,22 @@
             this.panel1.AutoScroll = true;
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Controls.Add(this.label_message);
-            this.panel1.Location = new System.Drawing.Point(3, 30);
+            this.panel1.Location = new System.Drawing.Point(4, 45);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(318, 287);
+            this.panel1.Size = new System.Drawing.Size(477, 430);
             this.panel1.TabIndex = 8;
             // 
             // QrRecognitionControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel_camera);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "QrRecognitionControl";
-            this.Size = new System.Drawing.Size(324, 317);
+            this.Size = new System.Drawing.Size(486, 476);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel_camera.ResumeLayout(false);
             this.panel_camera.PerformLayout();

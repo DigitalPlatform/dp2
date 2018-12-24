@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using static dp2Circulation.MainForm;
 
@@ -209,6 +206,17 @@ Program.MainForm.UserDir,
                 goto ERROR1;
             }
 
+            string strRange = (string)this.Invoke(new Func<string>(() =>
+            {
+                return this.textBox_importRange.Text;
+            }));
+            RangeList range = null;
+            if (string.IsNullOrEmpty(strRange) == false)
+            {
+                range = new RangeList(strRange);
+                range.Sort();
+            }
+
             Stream file = null;
 
             try
@@ -232,6 +240,8 @@ Program.MainForm.UserDir,
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取ISO2709记录 ...");
             stop.BeginLoop();
+
+            bool dont_display_dialog = false;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -265,7 +275,6 @@ Program.MainForm.UserDir,
                         stop.Continue(); // 继续循环
                     }
 
-                    string strMARC = "";
 
                     // 从ISO2709文件中读入一条MARC记录
                     // return:
@@ -278,7 +287,7 @@ Program.MainForm.UserDir,
                         encoding,
                         true,   // bRemoveEndCrLf,
                         true,   // bForce,
-                        out strMARC,
+                        out string strMARC,
                         out strError);
                     if (nRet == -2 || nRet == -1)
                     {
@@ -303,12 +312,18 @@ Program.MainForm.UserDir,
                     if (nRet != 0 && nRet != 1)
                         return new NormalResult();   // 结束
 
-                    stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
-
                     this.Invoke((Action)(() =>
                     {
                         this.progressBar_records.Value = (int)file.Position;
                     }));
+
+                    if (range != null && range.IsInRange(i, true) == false)
+                    {
+                        stop.SetMessage("跳过第 " + (i + 1).ToString() + " 个 ISO2709 记录");
+                        continue;
+                    }
+                    else
+                        stop.SetMessage("正在获取第 " + (i + 1).ToString() + " 个 ISO2709 记录");
 
                     // 跳过太短的记录
                     if (string.IsNullOrEmpty(strMARC) == true
@@ -326,13 +341,13 @@ Program.MainForm.UserDir,
                     // 处理
                     string strBiblioRecPath = strTargetDbName + "/?";
 
-                    XmlDocument domMarc = null;
                     nRet = MarcUtil.Marc2Xml(strMARC,
                         strBiblioSyntax,
-                        out domMarc,
+                        out XmlDocument domMarc,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+                    REDO:
                     long lRet = channel.SetBiblioInfo(
                         stop,
     "new",
@@ -346,8 +361,32 @@ Program.MainForm.UserDir,
     out strError);
                     if (lRet == -1)
                     {
+#if NO
                         strError = "创建书目记录 '" + strBiblioRecPath + "' 时出错: " + strError + "\r\n";
                         goto ERROR1;
+#endif
+
+                        // string strText = strError;
+                        DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                        {
+                            // return AutoCloseMessageBox.Show(this, strText + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
+                            return MessageDlg.Show(this,
+strError + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+"ImportMarcForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxDefaultButton.Button1,
+ref dont_display_dialog,
+new string[] { "重试", "跳过", "中断" },
+"后面不再出现此对话框，按本次选择自动处理");
+                        }));
+
+                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                            goto ERROR1;
+                        if (result == DialogResult.Yes)
+                            goto REDO;
+
+                        // 在操作历史中显示出错信息
+
                     }
 
                     nCount++;
@@ -465,5 +504,9 @@ Program.MainForm.UserDir,
             }));
         }
 
+        private void ImportMarcForm_Activated(object sender, EventArgs e)
+        {
+            Program.MainForm.stopManager.Active(this.stop);
+        }
     }
 }

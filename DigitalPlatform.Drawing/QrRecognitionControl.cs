@@ -62,7 +62,7 @@ namespace DigitalPlatform.Drawing
                 if (resultRectPen != null)
                     resultRectPen.Dispose();
 
-                decodingThread.Abort();
+                decodingThread?.Abort();
                 if (camDevices.Current != null)
                 {
                     if (camDevices.Current.IsRunning)
@@ -81,7 +81,7 @@ namespace DigitalPlatform.Drawing
             base.OnLoad(e);
 
             if (this.PhotoMode == false)
-                decodingThread.Start();
+                decodingThread?.Start();
             ////
             LoadDevicesToCombobox();
         }
@@ -407,7 +407,14 @@ namespace DigitalPlatform.Drawing
 
         void DisplayMotionLevel(float level)
         {
-            this.progressBar1.Value = (int)((float)100 * level);
+            try
+            {
+                this.progressBar1.Value = (int)((float)100 * level);
+            }
+            catch
+            {
+
+            }
         }
 
         static float AWAKE_LEVEL = 0.3F;
@@ -427,7 +434,8 @@ namespace DigitalPlatform.Drawing
                     else
                         this.Invoke(new Action<Color>(PaintColor), Color.Yellow);
 
-                    if ((_iFrameCount % 2) == 0)
+                    if (motionDetector != null
+                        && (_iFrameCount % 2) == 0)
                     {
                         motionLevel = motionDetector.ProcessFrame(_currentBitmapForDecoding);
                         // Debug.WriteLine("level=" + motionLevel.ToString());
@@ -476,10 +484,17 @@ namespace DigitalPlatform.Drawing
         // 看看是否超时，如果超时则清空 m_strLastText
         void RefreshLastText()
         {
-            DateTime now = DateTime.Now;
-            if (string.IsNullOrEmpty(this.m_strLastText) == false
-                && now - this.m_lastTextTime > new TimeSpan(0, 0, 5))
-                this.LastText = "";
+            try
+            {
+                DateTime now = DateTime.Now;
+                if (string.IsNullOrEmpty(this.m_strLastText) == false
+                    && now - this.m_lastTextTime > new TimeSpan(0, 0, 5))
+                    this.LastText = "";
+            }
+            catch
+            {
+
+            }
         }
 
         int _colorPosIndex = 0;
@@ -540,7 +555,6 @@ namespace DigitalPlatform.Drawing
 
         private void Current_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-
             if (IsDisposed)
             {
                 return;
@@ -560,7 +574,7 @@ namespace DigitalPlatform.Drawing
                     if (motionLevel < 0.5)
                         Thread.Sleep(100);
                  * */
-                Application.DoEvents();
+                // Application.DoEvents();
             }
             catch (ObjectDisposedException)
             {
@@ -580,17 +594,19 @@ namespace DigitalPlatform.Drawing
 
         private void ShowFrame(Bitmap frame)
         {
-            int _frameWidth = frame.Width;
-            int _frameHeight = frame.Height;
-            if (pictureBox1.Width < _frameWidth)
-                pictureBox1.Width = _frameWidth;
+            try
+            {
+                int _frameWidth = frame.Width;
+                int _frameHeight = frame.Height;
+                if (pictureBox1.Width < _frameWidth)
+                    pictureBox1.Width = _frameWidth;
 
-            if (pictureBox1.Height < _frameHeight)
-                pictureBox1.Height = _frameHeight;
+                if (pictureBox1.Height < _frameHeight)
+                    pictureBox1.Height = _frameHeight;
 
-            // pictureBox1.Image = frame;
-            // 2018/10/23
-            ImageUtil.SetImage(pictureBox1, frame);
+                // pictureBox1.Image = frame;
+                // 2018/10/23
+                ImageUtil.SetImage(pictureBox1, frame);
 
 #if NO
             if (_bFirstImageFilled == false)
@@ -600,7 +616,7 @@ namespace DigitalPlatform.Drawing
                 _bFirstImageFilled = true;
             }
 #endif
-            OnFirstImageFilled(false);
+                OnFirstImageFilled(false);
 
 #if NO
             if ((_iFrameCount % 20) == 0)
@@ -614,7 +630,11 @@ namespace DigitalPlatform.Drawing
             }
             _iFrameCount++;
 #endif
+            }
+            catch
+            {
 
+            }
         }
 
         void OnFirstImageFilled(bool bError)

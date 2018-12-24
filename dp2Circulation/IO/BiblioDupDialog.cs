@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Web;
 using System.Collections;
@@ -118,9 +113,19 @@ namespace dp2Circulation
                 Program.MainForm.ReturnChannel(channel);
             }
 
+            SortItems();
+
             if (this.AutoSelectMode == true)
             {
-                SortItems();
+                // 只要不是合并类型的动作，都要静默进行
+                if (this.Action.StartsWith("merge") == false)
+                {
+                    this.Close();
+                    return;
+                }
+
+                // 而合并类型的动作，需要一个优选合并时保留什么记录的过程，所以需要先自动排序
+                // SortItems();
                 if (this.listView_browse.Items.Count > 0)
                 {
                     ListViewUtil.SelectLine(this.listView_browse.Items[0], true);
@@ -376,7 +381,7 @@ strHtml2 +
 
         public byte[] SelectedTimestamp { get; set; }
 
-        public string Action { get; set; }
+        public string Action { get; set; }  // mergeTo/MergeToUseSourceBiblio/createNew/skip/stop
 
         public MergeStyle MergeStyle = MergeStyle.None;
 

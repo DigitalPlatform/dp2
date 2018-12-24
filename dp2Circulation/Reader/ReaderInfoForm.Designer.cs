@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class ReaderInfoForm
     {
@@ -47,6 +47,7 @@ namespace dp2Circulation
             this.tabPage_objects = new System.Windows.Forms.TabPage();
             this.binaryResControl1 = new DigitalPlatform.CirculationClient.BinaryResControl();
             this.tabPage_qrCode = new System.Windows.Forms.TabPage();
+            this.textBox_pqr = new System.Windows.Forms.TextBox();
             this.pictureBox_qrCode = new System.Windows.Forms.PictureBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
@@ -56,6 +57,8 @@ namespace dp2Circulation
             this.toolStripMenuItem_loadBlankFromLocal = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_loadBlankFromServer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_webCamera = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_registerFace = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_pasteCardPhoto = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_pasteCardPhoto = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_registerFingerprint = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -77,6 +80,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_editXML = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportDetailToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_exportBorrowingBarcode = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,7 +94,6 @@ namespace dp2Circulation
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.textBox_pqr = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -110,8 +113,7 @@ namespace dp2Circulation
             // splitContainer_normal
             // 
             this.splitContainer_normal.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_normal.Location = new System.Drawing.Point(2, 2);
-            this.splitContainer_normal.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer_normal.Location = new System.Drawing.Point(3, 3);
             this.splitContainer_normal.Name = "splitContainer_normal";
             // 
             // splitContainer_normal.Panel1
@@ -121,9 +123,8 @@ namespace dp2Circulation
             // splitContainer_normal.Panel2
             // 
             this.splitContainer_normal.Panel2.Controls.Add(this.webBrowser_readerInfo);
-            this.splitContainer_normal.Size = new System.Drawing.Size(594, 253);
-            this.splitContainer_normal.SplitterDistance = 318;
-            this.splitContainer_normal.SplitterWidth = 3;
+            this.splitContainer_normal.Size = new System.Drawing.Size(895, 400);
+            this.splitContainer_normal.SplitterDistance = 479;
             this.splitContainer_normal.TabIndex = 5;
             // 
             // readerEditControl1
@@ -141,6 +142,8 @@ namespace dp2Circulation
             this.readerEditControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.readerEditControl1.Email = "";
             this.readerEditControl1.ExpireDate = "";
+            this.readerEditControl1.FaceFeature = "";
+            this.readerEditControl1.FaceFeatureVersion = "";
             this.readerEditControl1.Fingerprint = "";
             this.readerEditControl1.FingerprintVersion = "";
             this.readerEditControl1.Foregift = "";
@@ -151,7 +154,6 @@ namespace dp2Circulation
             this.readerEditControl1.IdCardNumber = "";
             this.readerEditControl1.Initializing = true;
             this.readerEditControl1.Location = new System.Drawing.Point(0, 0);
-            this.readerEditControl1.Margin = new System.Windows.Forms.Padding(2);
             this.readerEditControl1.Name = "readerEditControl1";
             this.readerEditControl1.NamePinyin = "";
             this.readerEditControl1.NameString = "";
@@ -162,7 +164,7 @@ namespace dp2Circulation
             this.readerEditControl1.RecPath = "";
             this.readerEditControl1.RefID = "";
             this.readerEditControl1.Rights = "";
-            this.readerEditControl1.Size = new System.Drawing.Size(318, 253);
+            this.readerEditControl1.Size = new System.Drawing.Size(479, 400);
             this.readerEditControl1.State = "";
             this.readerEditControl1.TabIndex = 0;
             this.readerEditControl1.Tel = "";
@@ -174,10 +176,9 @@ namespace dp2Circulation
             // 
             this.webBrowser_readerInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_readerInfo.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_readerInfo.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowser_readerInfo.MinimumSize = new System.Drawing.Size(22, 24);
             this.webBrowser_readerInfo.Name = "webBrowser_readerInfo";
-            this.webBrowser_readerInfo.Size = new System.Drawing.Size(273, 253);
+            this.webBrowser_readerInfo.Size = new System.Drawing.Size(412, 400);
             this.webBrowser_readerInfo.TabIndex = 0;
             this.webBrowser_readerInfo.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_readerInfo_DocumentCompleted);
             // 
@@ -191,53 +192,52 @@ namespace dp2Circulation
             this.tabControl_readerInfo.Controls.Add(this.tabPage_xml);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_objects);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_qrCode);
-            this.tabControl_readerInfo.Location = new System.Drawing.Point(2, 27);
-            this.tabControl_readerInfo.Margin = new System.Windows.Forms.Padding(2);
+            this.tabControl_readerInfo.Location = new System.Drawing.Point(3, 34);
             this.tabControl_readerInfo.Name = "tabControl_readerInfo";
             this.tabControl_readerInfo.SelectedIndex = 0;
-            this.tabControl_readerInfo.Size = new System.Drawing.Size(606, 283);
+            this.tabControl_readerInfo.Size = new System.Drawing.Size(909, 438);
             this.tabControl_readerInfo.TabIndex = 0;
             this.tabControl_readerInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_readerInfo_SelectedIndexChanged);
             // 
             // tabPage_normal
             // 
             this.tabPage_normal.Controls.Add(this.splitContainer_normal);
-            this.tabPage_normal.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_normal.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_normal.Location = new System.Drawing.Point(4, 28);
             this.tabPage_normal.Name = "tabPage_normal";
-            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_normal.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_normal.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_normal.Size = new System.Drawing.Size(901, 406);
             this.tabPage_normal.TabIndex = 0;
-            this.tabPage_normal.Text = "≥£πÊ";
+            this.tabPage_normal.Text = "Â∏∏ËßÑ";
             this.tabPage_normal.UseVisualStyleBackColor = true;
             // 
             // tabPage_borrowHistory
             // 
             this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
-            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_borrowHistory.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
-            this.tabPage_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(901, 406);
             this.tabPage_borrowHistory.TabIndex = 3;
-            this.tabPage_borrowHistory.Text = "ΩË‘ƒ¿˙ ∑";
+            this.tabPage_borrowHistory.Text = "ÂÄüÈòÖÂéÜÂè≤";
             this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
             // 
             // webBrowser_borrowHistory
             // 
             this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_borrowHistory.Margin = new System.Windows.Forms.Padding(4);
+            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
-            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(598, 257);
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(901, 406);
             this.webBrowser_borrowHistory.TabIndex = 0;
             // 
             // tabPage_xml
             // 
             this.tabPage_xml.Controls.Add(this.webBrowser_xml);
-            this.tabPage_xml.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_xml.Margin = new System.Windows.Forms.Padding(2);
+            this.tabPage_xml.Location = new System.Drawing.Point(4, 28);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_xml.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_xml.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_xml.Size = new System.Drawing.Size(901, 406);
             this.tabPage_xml.TabIndex = 1;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -245,21 +245,21 @@ namespace dp2Circulation
             // webBrowser_xml
             // 
             this.webBrowser_xml.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_xml.Location = new System.Drawing.Point(2, 2);
-            this.webBrowser_xml.Margin = new System.Windows.Forms.Padding(2);
-            this.webBrowser_xml.MinimumSize = new System.Drawing.Size(15, 16);
+            this.webBrowser_xml.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser_xml.MinimumSize = new System.Drawing.Size(22, 24);
             this.webBrowser_xml.Name = "webBrowser_xml";
-            this.webBrowser_xml.Size = new System.Drawing.Size(594, 253);
+            this.webBrowser_xml.Size = new System.Drawing.Size(895, 400);
             this.webBrowser_xml.TabIndex = 0;
             // 
             // tabPage_objects
             // 
             this.tabPage_objects.Controls.Add(this.binaryResControl1);
-            this.tabPage_objects.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_objects.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_objects.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_objects.Name = "tabPage_objects";
-            this.tabPage_objects.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_objects.Size = new System.Drawing.Size(901, 406);
             this.tabPage_objects.TabIndex = 2;
-            this.tabPage_objects.Text = "∂‘œÛ";
+            this.tabPage_objects.Text = "ÂØπË±°";
             this.tabPage_objects.UseVisualStyleBackColor = true;
             // 
             // binaryResControl1
@@ -270,10 +270,9 @@ namespace dp2Circulation
             this.binaryResControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.binaryResControl1.ErrorInfo = "";
             this.binaryResControl1.Location = new System.Drawing.Point(0, 0);
-            this.binaryResControl1.Margin = new System.Windows.Forms.Padding(2);
             this.binaryResControl1.Name = "binaryResControl1";
             this.binaryResControl1.RightsCfgFileName = null;
-            this.binaryResControl1.Size = new System.Drawing.Size(598, 257);
+            this.binaryResControl1.Size = new System.Drawing.Size(901, 406);
             this.binaryResControl1.TabIndex = 1;
             this.binaryResControl1.TempDir = null;
             // 
@@ -281,20 +280,32 @@ namespace dp2Circulation
             // 
             this.tabPage_qrCode.Controls.Add(this.textBox_pqr);
             this.tabPage_qrCode.Controls.Add(this.pictureBox_qrCode);
-            this.tabPage_qrCode.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_qrCode.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_qrCode.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_qrCode.Name = "tabPage_qrCode";
-            this.tabPage_qrCode.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_qrCode.Size = new System.Drawing.Size(901, 406);
             this.tabPage_qrCode.TabIndex = 4;
-            this.tabPage_qrCode.Text = "∂˛Œ¨¬Î";
+            this.tabPage_qrCode.Text = "‰∫åÁª¥Á†Å";
             this.tabPage_qrCode.UseVisualStyleBackColor = true;
+            // 
+            // textBox_pqr
+            // 
+            this.textBox_pqr.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBox_pqr.Location = new System.Drawing.Point(0, 0);
+            this.textBox_pqr.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_pqr.Name = "textBox_pqr";
+            this.textBox_pqr.ReadOnly = true;
+            this.textBox_pqr.Size = new System.Drawing.Size(901, 28);
+            this.textBox_pqr.TabIndex = 0;
             // 
             // pictureBox_qrCode
             // 
             this.pictureBox_qrCode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_qrCode.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox_qrCode.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_qrCode.Name = "pictureBox_qrCode";
-            this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(20);
-            this.pictureBox_qrCode.Size = new System.Drawing.Size(598, 257);
+            this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(30);
+            this.pictureBox_qrCode.Size = new System.Drawing.Size(901, 406);
             this.pictureBox_qrCode.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_qrCode.TabIndex = 0;
             this.pictureBox_qrCode.TabStop = false;
@@ -303,12 +314,14 @@ namespace dp2Circulation
             // 
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_delete,
             this.toolStripButton_loadFromIdcard,
             this.toolStripButton_loadBlank,
             this.toolStripDropDownButton_loadBlank,
             this.toolStripButton_webCamera,
+            this.toolStripSplitButton_registerFace,
             this.toolStripButton_pasteCardPhoto,
             this.toolStripButton_registerFingerprint,
             this.toolStripSeparator1,
@@ -326,9 +339,10 @@ namespace dp2Circulation
             this.toolStripSeparator2,
             this.toolStripDropDownButton_otherFunc});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.toolStrip1.Location = new System.Drawing.Point(0, 312);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 475);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(610, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(915, 31);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -337,8 +351,8 @@ namespace dp2Circulation
             this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
             this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_delete.Name = "toolStripButton_delete";
-            this.toolStripButton_delete.Size = new System.Drawing.Size(52, 22);
-            this.toolStripButton_delete.Text = "…æ≥˝";
+            this.toolStripButton_delete.Size = new System.Drawing.Size(74, 28);
+            this.toolStripButton_delete.Text = "Âà†Èô§";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
             // 
             // toolStripButton_loadFromIdcard
@@ -347,9 +361,9 @@ namespace dp2Circulation
             this.toolStripButton_loadFromIdcard.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadFromIdcard.Image")));
             this.toolStripButton_loadFromIdcard.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadFromIdcard.Name = "toolStripButton_loadFromIdcard";
-            this.toolStripButton_loadFromIdcard.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_loadFromIdcard.Text = "¥”…Ì∑›÷§µº»Î–≈œ¢";
-            this.toolStripButton_loadFromIdcard.ToolTipText = "¥”…Ì∑›÷§µº»Î–≈œ¢ (∞¥◊° Ctrl º¸≤ª«Âø’‘≠”–ƒ⁄»›)";
+            this.toolStripButton_loadFromIdcard.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_loadFromIdcard.Text = "‰ªéË∫´‰ªΩËØÅÂØºÂÖ•‰ø°ÊÅØ";
+            this.toolStripButton_loadFromIdcard.ToolTipText = "‰ªéË∫´‰ªΩËØÅÂØºÂÖ•‰ø°ÊÅØ (Êåâ‰Ωè Ctrl ÈîÆ‰∏çÊ∏ÖÁ©∫ÂéüÊúâÂÜÖÂÆπ)";
             this.toolStripButton_loadFromIdcard.Click += new System.EventHandler(this.toolStripButton_loadFromIdcard_Click);
             // 
             // toolStripButton_loadBlank
@@ -358,8 +372,8 @@ namespace dp2Circulation
             this.toolStripButton_loadBlank.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadBlank.Image")));
             this.toolStripButton_loadBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadBlank.Name = "toolStripButton_loadBlank";
-            this.toolStripButton_loadBlank.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_loadBlank.Text = "¥”±æµÿ◊∞»Îø’∞◊º«¬º";
+            this.toolStripButton_loadBlank.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_loadBlank.Text = "‰ªéÊú¨Âú∞Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
             this.toolStripButton_loadBlank.Click += new System.EventHandler(this.toolStripButton_loadBlank_Click);
             // 
             // toolStripDropDownButton_loadBlank
@@ -371,25 +385,25 @@ namespace dp2Circulation
             this.toolStripDropDownButton_loadBlank.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_loadBlank.Image")));
             this.toolStripDropDownButton_loadBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_loadBlank.Name = "toolStripDropDownButton_loadBlank";
-            this.toolStripDropDownButton_loadBlank.Size = new System.Drawing.Size(13, 22);
-            this.toolStripDropDownButton_loadBlank.Text = "◊∞»Îø’∞◊º«¬º";
+            this.toolStripDropDownButton_loadBlank.Size = new System.Drawing.Size(18, 28);
+            this.toolStripDropDownButton_loadBlank.Text = "Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
             // 
             // toolStripMenuItem_loadBlankFromLocal
             // 
             this.toolStripMenuItem_loadBlankFromLocal.Image = ((System.Drawing.Image)(resources.GetObject("toolStripMenuItem_loadBlankFromLocal.Image")));
             this.toolStripMenuItem_loadBlankFromLocal.Name = "toolStripMenuItem_loadBlankFromLocal";
-            this.toolStripMenuItem_loadBlankFromLocal.Size = new System.Drawing.Size(196, 22);
-            this.toolStripMenuItem_loadBlankFromLocal.Text = "¥”±æµÿ◊∞»Îø’∞◊º«¬º";
-            this.toolStripMenuItem_loadBlankFromLocal.ToolTipText = "¥”±æµÿ◊∞»Îø’∞◊º«¬º";
+            this.toolStripMenuItem_loadBlankFromLocal.Size = new System.Drawing.Size(272, 30);
+            this.toolStripMenuItem_loadBlankFromLocal.Text = "‰ªéÊú¨Âú∞Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
+            this.toolStripMenuItem_loadBlankFromLocal.ToolTipText = "‰ªéÊú¨Âú∞Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
             this.toolStripMenuItem_loadBlankFromLocal.Click += new System.EventHandler(this.toolStripMenuItem_loadBlankFromLocal_Click);
             // 
             // ToolStripMenuItem_loadBlankFromServer
             // 
             this.ToolStripMenuItem_loadBlankFromServer.Image = ((System.Drawing.Image)(resources.GetObject("ToolStripMenuItem_loadBlankFromServer.Image")));
             this.ToolStripMenuItem_loadBlankFromServer.Name = "ToolStripMenuItem_loadBlankFromServer";
-            this.ToolStripMenuItem_loadBlankFromServer.Size = new System.Drawing.Size(196, 22);
-            this.ToolStripMenuItem_loadBlankFromServer.Text = "¥”∑˛ŒÒ∆˜◊∞»Îø’∞◊º«¬º";
-            this.ToolStripMenuItem_loadBlankFromServer.ToolTipText = "¥”∑˛ŒÒ∆˜◊∞»Îø’∞◊º«¬º";
+            this.ToolStripMenuItem_loadBlankFromServer.Size = new System.Drawing.Size(272, 30);
+            this.ToolStripMenuItem_loadBlankFromServer.Text = "‰ªéÊúçÂä°Âô®Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
+            this.ToolStripMenuItem_loadBlankFromServer.ToolTipText = "‰ªéÊúçÂä°Âô®Ë£ÖÂÖ•Á©∫ÁôΩËÆ∞ÂΩï";
             this.ToolStripMenuItem_loadBlankFromServer.Click += new System.EventHandler(this.ToolStripMenuItem_loadBlankFromServer_Click);
             // 
             // toolStripButton_webCamera
@@ -398,9 +412,28 @@ namespace dp2Circulation
             this.toolStripButton_webCamera.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_webCamera.Image")));
             this.toolStripButton_webCamera.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_webCamera.Name = "toolStripButton_webCamera";
-            this.toolStripButton_webCamera.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_webCamera.Text = "¥”…„œÒÕ∑ªÒ»°ÕºœÒ";
+            this.toolStripButton_webCamera.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_webCamera.Text = "‰ªéÊëÑÂÉèÂ§¥Ëé∑ÂèñÂõæÂÉè";
             this.toolStripButton_webCamera.Click += new System.EventHandler(this.toolStripButton_webCamera_Click);
+            // 
+            // toolStripSplitButton_registerFace
+            // 
+            this.toolStripSplitButton_registerFace.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_registerFace.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_pasteCardPhoto});
+            this.toolStripSplitButton_registerFace.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFace.Image")));
+            this.toolStripSplitButton_registerFace.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_registerFace.Name = "toolStripSplitButton_registerFace";
+            this.toolStripSplitButton_registerFace.Size = new System.Drawing.Size(45, 28);
+            this.toolStripSplitButton_registerFace.Text = "toolStripSplitButton1";
+            this.toolStripSplitButton_registerFace.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFace_ButtonClick);
+            // 
+            // ToolStripMenuItem_pasteCardPhoto
+            // 
+            this.ToolStripMenuItem_pasteCardPhoto.Name = "ToolStripMenuItem_pasteCardPhoto";
+            this.ToolStripMenuItem_pasteCardPhoto.Size = new System.Drawing.Size(266, 30);
+            this.ToolStripMenuItem_pasteCardPhoto.Text = "(‰ªéÂâ™Ë¥¥Êùø)Á≤òË¥¥ËØÅ‰ª∂ÁÖß";
+            this.ToolStripMenuItem_pasteCardPhoto.Click += new System.EventHandler(this.ToolStripMenuItem_pasteCardPhoto_Click);
             // 
             // toolStripButton_pasteCardPhoto
             // 
@@ -408,8 +441,8 @@ namespace dp2Circulation
             this.toolStripButton_pasteCardPhoto.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_pasteCardPhoto.Image")));
             this.toolStripButton_pasteCardPhoto.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_pasteCardPhoto.Name = "toolStripButton_pasteCardPhoto";
-            this.toolStripButton_pasteCardPhoto.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_pasteCardPhoto.Text = "(¥”ºÙÃ˘∞Â)’≥Ã˘÷§º˛’’";
+            this.toolStripButton_pasteCardPhoto.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_pasteCardPhoto.Text = "(‰ªéÂâ™Ë¥¥Êùø)Á≤òË¥¥ËØÅ‰ª∂ÁÖß";
             this.toolStripButton_pasteCardPhoto.Click += new System.EventHandler(this.toolStripButton_pasteCardPhoto_Click);
             // 
             // toolStripButton_registerFingerprint
@@ -418,14 +451,14 @@ namespace dp2Circulation
             this.toolStripButton_registerFingerprint.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_registerFingerprint.Image")));
             this.toolStripButton_registerFingerprint.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_registerFingerprint.Name = "toolStripButton_registerFingerprint";
-            this.toolStripButton_registerFingerprint.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_registerFingerprint.Text = "µ«º«÷∏Œ∆";
+            this.toolStripButton_registerFingerprint.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_registerFingerprint.Text = "ÁôªËÆ∞ÊåáÁ∫π";
             this.toolStripButton_registerFingerprint.Click += new System.EventHandler(this.toolStripButton_registerFingerprint_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_createMoneyRecord
             // 
@@ -436,43 +469,43 @@ namespace dp2Circulation
             this.toolStripButton_createMoneyRecord.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_createMoneyRecord.Image")));
             this.toolStripButton_createMoneyRecord.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_createMoneyRecord.Name = "toolStripButton_createMoneyRecord";
-            this.toolStripButton_createMoneyRecord.Size = new System.Drawing.Size(109, 22);
-            this.toolStripButton_createMoneyRecord.Text = "¥¥Ω®Ωª∑—«Î«Û";
+            this.toolStripButton_createMoneyRecord.Size = new System.Drawing.Size(160, 28);
+            this.toolStripButton_createMoneyRecord.Text = "ÂàõÂª∫‰∫§Ë¥πËØ∑Ê±Ç";
             // 
             // ToolStripMenuItem_hire
             // 
             this.ToolStripMenuItem_hire.Name = "ToolStripMenuItem_hire";
-            this.ToolStripMenuItem_hire.Size = new System.Drawing.Size(112, 22);
-            this.ToolStripMenuItem_hire.Text = "Ωª◊‚Ω";
+            this.ToolStripMenuItem_hire.Size = new System.Drawing.Size(146, 30);
+            this.ToolStripMenuItem_hire.Text = "‰∫§ÁßüÈáë";
             this.ToolStripMenuItem_hire.Click += new System.EventHandler(this.ToolStripMenuItem_hire_Click);
             // 
             // ToolStripMenuItem_foregift
             // 
             this.ToolStripMenuItem_foregift.Name = "ToolStripMenuItem_foregift";
-            this.ToolStripMenuItem_foregift.Size = new System.Drawing.Size(112, 22);
-            this.ToolStripMenuItem_foregift.Text = "Ωª—∫Ω";
+            this.ToolStripMenuItem_foregift.Size = new System.Drawing.Size(146, 30);
+            this.ToolStripMenuItem_foregift.Text = "‰∫§ÊäºÈáë";
             this.ToolStripMenuItem_foregift.Click += new System.EventHandler(this.ToolStripMenuItem_foregift_Click);
             // 
             // ToolStripMenuItem_returnForegift
             // 
             this.ToolStripMenuItem_returnForegift.Name = "ToolStripMenuItem_returnForegift";
-            this.ToolStripMenuItem_returnForegift.Size = new System.Drawing.Size(112, 22);
-            this.ToolStripMenuItem_returnForegift.Text = "ÕÀ—∫Ω";
+            this.ToolStripMenuItem_returnForegift.Size = new System.Drawing.Size(146, 30);
+            this.ToolStripMenuItem_returnForegift.Text = "ÈÄÄÊäºÈáë";
             this.ToolStripMenuItem_returnForegift.Click += new System.EventHandler(this.ToolStripMenuItem_returnForegift_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_saveTo
             // 
             this.toolStripButton_saveTo.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveTo.Image")));
             this.toolStripButton_saveTo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveTo.Name = "toolStripButton_saveTo";
-            this.toolStripButton_saveTo.Size = new System.Drawing.Size(52, 22);
-            this.toolStripButton_saveTo.Text = "–¬‘ˆ";
-            this.toolStripButton_saveTo.ToolTipText = "Ω´º«¬º±£¥ÊŒ™“ªÃı–¬µƒº«¬º";
+            this.toolStripButton_saveTo.Size = new System.Drawing.Size(74, 28);
+            this.toolStripButton_saveTo.Text = "Êñ∞Â¢û";
+            this.toolStripButton_saveTo.ToolTipText = "Â∞ÜËÆ∞ÂΩï‰øùÂ≠ò‰∏∫‰∏ÄÊù°Êñ∞ÁöÑËÆ∞ÂΩï";
             this.toolStripButton_saveTo.Click += new System.EventHandler(this.toolStripButton_saveTo_Click);
             // 
             // toolStripButton_save
@@ -480,9 +513,9 @@ namespace dp2Circulation
             this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
             this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_save.Name = "toolStripButton_save";
-            this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
-            this.toolStripButton_save.Text = "±£¥Ê";
-            this.toolStripButton_save.ToolTipText = "Ω´µ±«∞–ﬁ∏ƒ∏≤∏«±£¥ÊµΩ ˝æ›ø‚";
+            this.toolStripButton_save.Size = new System.Drawing.Size(74, 28);
+            this.toolStripButton_save.Text = "‰øùÂ≠ò";
+            this.toolStripButton_save.ToolTipText = "Â∞ÜÂΩìÂâç‰øÆÊîπË¶ÜÁõñ‰øùÂ≠òÂà∞Êï∞ÊçÆÂ∫ì";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
             // toolStripButton_next
@@ -492,8 +525,8 @@ namespace dp2Circulation
             this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
             this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_next.Name = "toolStripButton_next";
-            this.toolStripButton_next.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_next.Text = "∫Û“ªº«¬º";
+            this.toolStripButton_next.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_next.Text = "Âêé‰∏ÄËÆ∞ÂΩï";
             this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
             // 
             // toolStripButton_prev
@@ -503,15 +536,15 @@ namespace dp2Circulation
             this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
             this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_prev.Name = "toolStripButton_prev";
-            this.toolStripButton_prev.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_prev.Text = "«∞“ªº«¬º";
+            this.toolStripButton_prev.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_prev.Text = "Ââç‰∏ÄËÆ∞ÂΩï";
             this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_stopSummaryLoop
             // 
@@ -520,14 +553,14 @@ namespace dp2Circulation
             this.toolStripButton_stopSummaryLoop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stopSummaryLoop.Image")));
             this.toolStripButton_stopSummaryLoop.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_stopSummaryLoop.Name = "toolStripButton_stopSummaryLoop";
-            this.toolStripButton_stopSummaryLoop.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_stopSummaryLoop.Text = "Õ£÷π◊∞‘ÿ Èƒø’™“™";
+            this.toolStripButton_stopSummaryLoop.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_stopSummaryLoop.Text = "ÂÅúÊ≠¢Ë£ÖËΩΩ‰π¶ÁõÆÊëòË¶Å";
             this.toolStripButton_stopSummaryLoop.Click += new System.EventHandler(this.toolStripButton_stopSummaryLoop_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_addFriends
             // 
@@ -535,8 +568,8 @@ namespace dp2Circulation
             this.toolStripButton_addFriends.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_addFriends.Image")));
             this.toolStripButton_addFriends.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_addFriends.Name = "toolStripButton_addFriends";
-            this.toolStripButton_addFriends.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_addFriends.Text = "º”∫√”—";
+            this.toolStripButton_addFriends.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_addFriends.Text = "Âä†Â•ΩÂèã";
             this.toolStripButton_addFriends.Click += new System.EventHandler(this.toolStripButton_addFriends_Click);
             // 
             // toolStripButton_clearOutofReservationCount
@@ -545,14 +578,14 @@ namespace dp2Circulation
             this.toolStripButton_clearOutofReservationCount.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clearOutofReservationCount.Image")));
             this.toolStripButton_clearOutofReservationCount.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_clearOutofReservationCount.Name = "toolStripButton_clearOutofReservationCount";
-            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_clearOutofReservationCount.Text = "«Â≥˝‘§‘ºµΩ È∫ÛŒ¥»°¥Œ ˝";
+            this.toolStripButton_clearOutofReservationCount.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_clearOutofReservationCount.Text = "Ê∏ÖÈô§È¢ÑÁ∫¶Âà∞‰π¶ÂêéÊú™ÂèñÊ¨°Êï∞";
             this.toolStripButton_clearOutofReservationCount.Click += new System.EventHandler(this.toolStripButton_clearOutofReservationCount_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripDropDownButton_otherFunc
             // 
@@ -560,6 +593,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
             this.toolStripSeparator8,
+            this.toolStripMenuItem_editXML,
             this.toolStripMenuItem_exportDetailToExcelFile,
             this.toolStripMenuItem_exportExcel,
             this.ToolStripMenuItem_exportBorrowingBarcode,
@@ -571,9 +605,9 @@ namespace dp2Circulation
             this.toolStripDropDownButton_otherFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_otherFunc.Image")));
             this.toolStripDropDownButton_otherFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_otherFunc.Name = "toolStripDropDownButton_otherFunc";
-            this.toolStripDropDownButton_otherFunc.Size = new System.Drawing.Size(30, 22);
+            this.toolStripDropDownButton_otherFunc.Size = new System.Drawing.Size(40, 28);
             this.toolStripDropDownButton_otherFunc.Text = "...";
-            this.toolStripDropDownButton_otherFunc.ToolTipText = "∏¸∂‡√¸¡Ó...";
+            this.toolStripDropDownButton_otherFunc.ToolTipText = "Êõ¥Â§öÂëΩ‰ª§...";
             // 
             // toolStripButton_saveTemplate
             // 
@@ -581,95 +615,104 @@ namespace dp2Circulation
             this.toolStripButton_saveTemplate.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripButton_saveTemplate.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolStripButton_saveTemplate.Name = "toolStripButton_saveTemplate";
-            this.toolStripButton_saveTemplate.Size = new System.Drawing.Size(142, 26);
-            this.toolStripButton_saveTemplate.Text = "±£¥Ê∂¡’ﬂº«¬ºµΩƒ£∞Â";
+            this.toolStripButton_saveTemplate.Size = new System.Drawing.Size(198, 28);
+            this.toolStripButton_saveTemplate.Text = "‰øùÂ≠òËØªËÄÖËÆ∞ÂΩïÂà∞Ê®°Êùø";
             this.toolStripButton_saveTemplate.Click += new System.EventHandler(this.toolStripButton_saveTemplate_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(253, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(357, 6);
+            // 
+            // toolStripMenuItem_editXML
+            // 
+            this.toolStripMenuItem_editXML.Name = "toolStripMenuItem_editXML";
+            this.toolStripMenuItem_editXML.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_editXML.Text = "ÁºñËæëËØªËÄÖËÆ∞ÂΩï XML ...";
+            this.toolStripMenuItem_editXML.Click += new System.EventHandler(this.toolStripMenuItem_editXML_Click);
             // 
             // toolStripMenuItem_exportDetailToExcelFile
             // 
             this.toolStripMenuItem_exportDetailToExcelFile.Name = "toolStripMenuItem_exportDetailToExcelFile";
-            this.toolStripMenuItem_exportDetailToExcelFile.Size = new System.Drawing.Size(256, 22);
-            this.toolStripMenuItem_exportDetailToExcelFile.Text = "µº≥ˆ∂¡’ﬂ–≈œ¢µΩ Excel Œƒº˛(&E)...";
+            this.toolStripMenuItem_exportDetailToExcelFile.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_exportDetailToExcelFile.Text = "ÂØºÂá∫ËØªËÄÖ‰ø°ÊÅØÂà∞ Excel Êñá‰ª∂(&E)...";
             this.toolStripMenuItem_exportDetailToExcelFile.Click += new System.EventHandler(this.toolStripMenuItem_exportDetailToExcelFile_Click);
             // 
             // toolStripMenuItem_exportExcel
             // 
             this.toolStripMenuItem_exportExcel.Name = "toolStripMenuItem_exportExcel";
-            this.toolStripMenuItem_exportExcel.Size = new System.Drawing.Size(256, 22);
-            this.toolStripMenuItem_exportExcel.Text = "µº≥ˆµΩ Excel Œƒº˛(&X)...";
+            this.toolStripMenuItem_exportExcel.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_exportExcel.Text = "ÂØºÂá∫Âà∞ Excel Êñá‰ª∂(&X)...";
             this.toolStripMenuItem_exportExcel.Visible = false;
             this.toolStripMenuItem_exportExcel.Click += new System.EventHandler(this.toolStripMenuItem_exportExcel_Click);
             // 
             // ToolStripMenuItem_exportBorrowingBarcode
             // 
             this.ToolStripMenuItem_exportBorrowingBarcode.Name = "ToolStripMenuItem_exportBorrowingBarcode";
-            this.ToolStripMenuItem_exportBorrowingBarcode.Size = new System.Drawing.Size(256, 22);
-            this.ToolStripMenuItem_exportBorrowingBarcode.Text = "µº≥ˆ‘⁄ΩË≤·Ãı¬Î∫≈µΩŒƒ±æŒƒº˛(&E)...";
+            this.ToolStripMenuItem_exportBorrowingBarcode.Size = new System.Drawing.Size(360, 30);
+            this.ToolStripMenuItem_exportBorrowingBarcode.Text = "ÂØºÂá∫Âú®ÂÄüÂÜåÊù°Á†ÅÂè∑Âà∞ÊñáÊú¨Êñá‰ª∂(&E)...";
             this.ToolStripMenuItem_exportBorrowingBarcode.Click += new System.EventHandler(this.ToolStripMenuItem_exportBorrowingBarcode_Click);
             // 
             // toolStripSeparator7
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
-            this.toolStripSeparator7.Size = new System.Drawing.Size(253, 6);
+            this.toolStripSeparator7.Size = new System.Drawing.Size(357, 6);
             // 
             // toolStripMenuItem_moveRecord
             // 
             this.toolStripMenuItem_moveRecord.Name = "toolStripMenuItem_moveRecord";
-            this.toolStripMenuItem_moveRecord.Size = new System.Drawing.Size(256, 22);
-            this.toolStripMenuItem_moveRecord.Text = "“∆∂Ø∂¡’ﬂº«¬º(&M)";
-            this.toolStripMenuItem_moveRecord.ToolTipText = "‘⁄∂¡’ﬂø‚÷Æº‰“∆∂Øº«¬º";
+            this.toolStripMenuItem_moveRecord.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_moveRecord.Text = "ÁßªÂä®ËØªËÄÖËÆ∞ÂΩï(&M)";
+            this.toolStripMenuItem_moveRecord.ToolTipText = "Âú®ËØªËÄÖÂ∫ì‰πãÈó¥ÁßªÂä®ËÆ∞ÂΩï";
             this.toolStripMenuItem_moveRecord.Click += new System.EventHandler(this.toolStripMenuItem_moveRecord_Click);
             // 
             // toolStripMenuItem_clearFingerprint
             // 
             this.toolStripMenuItem_clearFingerprint.Name = "toolStripMenuItem_clearFingerprint";
-            this.toolStripMenuItem_clearFingerprint.Size = new System.Drawing.Size(256, 22);
-            this.toolStripMenuItem_clearFingerprint.Text = "«Â≥˝÷∏Œ∆–≈œ¢(&C)";
+            this.toolStripMenuItem_clearFingerprint.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_clearFingerprint.Text = "Ê∏ÖÈô§ÊåáÁ∫π‰ø°ÊÅØ(&C)";
             this.toolStripMenuItem_clearFingerprint.Click += new System.EventHandler(this.toolStripMenuItem_clearFingerprint_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(253, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(357, 6);
             // 
             // toolStripButton_option
             // 
             this.toolStripButton_option.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_option.Image")));
             this.toolStripButton_option.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_option.Name = "toolStripButton_option";
-            this.toolStripButton_option.Size = new System.Drawing.Size(52, 21);
-            this.toolStripButton_option.Text = "—°œÓ";
+            this.toolStripButton_option.Size = new System.Drawing.Size(74, 28);
+            this.toolStripButton_option.Text = "ÈÄâÈ°π";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
             // 
             // toolStrip_load
             // 
             this.toolStrip_load.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip_load.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_load.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_load.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripTextBox_barcode,
             this.toolStripButton_load});
             this.toolStrip_load.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_load.Name = "toolStrip_load";
-            this.toolStrip_load.Size = new System.Drawing.Size(250, 25);
+            this.toolStrip_load.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_load.Size = new System.Drawing.Size(365, 31);
             this.toolStrip_load.TabIndex = 5;
             this.toolStrip_load.Text = "toolStrip2";
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(59, 22);
-            this.toolStripLabel1.Text = "÷§Ãı¬Î∫≈:";
+            this.toolStripLabel1.Size = new System.Drawing.Size(86, 28);
+            this.toolStripLabel1.Text = "ËØÅÊù°Á†ÅÂè∑:";
             // 
             // toolStripTextBox_barcode
             // 
             this.toolStripTextBox_barcode.Name = "toolStripTextBox_barcode";
-            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(150, 25);
+            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(223, 31);
             this.toolStripTextBox_barcode.Enter += new System.EventHandler(this.toolStripTextBox_barcode_Enter);
             this.toolStripTextBox_barcode.Leave += new System.EventHandler(this.toolStripTextBox_barcode_Leave);
             this.toolStripTextBox_barcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBox_barcode_KeyDown);
@@ -681,8 +724,8 @@ namespace dp2Circulation
             this.toolStripButton_load.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_load.Image")));
             this.toolStripButton_load.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_load.Name = "toolStripButton_load";
-            this.toolStripButton_load.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_load.Text = "◊∞‘ÿ";
+            this.toolStripButton_load.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_load.Text = "Ë£ÖËΩΩ";
             this.toolStripButton_load.Click += new System.EventHandler(this.toolStripButton_load_Click);
             // 
             // tableLayoutPanel_main
@@ -694,34 +737,27 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.tabControl_readerInfo, 0, 1);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 3;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(610, 337);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(915, 506);
             this.tableLayoutPanel_main.TabIndex = 6;
-            // 
-            // textBox_pqr
-            // 
-            this.textBox_pqr.Dock = System.Windows.Forms.DockStyle.Top;
-            this.textBox_pqr.Location = new System.Drawing.Point(0, 0);
-            this.textBox_pqr.Name = "textBox_pqr";
-            this.textBox_pqr.ReadOnly = true;
-            this.textBox_pqr.Size = new System.Drawing.Size(598, 21);
-            this.textBox_pqr.TabIndex = 0;
             // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(610, 337);
+            this.ClientSize = new System.Drawing.Size(915, 506);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ReaderInfoForm";
             this.ShowInTaskbar = false;
-            this.Text = "∂¡’ﬂ";
+            this.Text = "ËØªËÄÖ";
             this.Activated += new System.EventHandler(this.ReaderInfoForm_Activated);
             this.Deactivate += new System.EventHandler(this.ReaderInfoForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ReaderInfoForm_FormClosing);
@@ -811,6 +847,8 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_qrCode;
         private System.Windows.Forms.PictureBox pictureBox_qrCode;
         private System.Windows.Forms.TextBox textBox_pqr;
-
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_editXML;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_registerFace;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_pasteCardPhoto;
     }
 }

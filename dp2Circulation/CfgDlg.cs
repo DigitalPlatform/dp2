@@ -537,11 +537,17 @@ false);
 
             // *** 指纹
 
-            // 指纹阅读器URL
+            // 指纹阅读器接口URL
             this.textBox_fingerprint_readerUrl.Text =
                 ap.GetString("fingerprint",
                 "fingerPrintReaderUrl",
                 "");    // 常用值 "ipc://FingerprintChannel/FingerprintServer"
+
+            // 人脸识别接口URL
+            this.textBox_face_readerUrl.Text =
+                ap.GetString("face",
+                "faceReaderUrl",
+                "");    // 常用值 "ipc://FaceChannel/FaceServer"
 
             // 指纹代理帐户 用户名
             this.textBox_fingerprint_userName.Text =
@@ -1155,6 +1161,11 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "fingerPrintReaderUrl",
                 this.textBox_fingerprint_readerUrl.Text);
 
+            // 人脸识别接口URL
+            ap.SetString("face",
+            "faceReaderUrl",
+            this.textBox_face_readerUrl.Text);
+
             // 指纹代理帐户 用户名
             ap.SetString("fingerprint",
                 "userName",
@@ -1685,7 +1696,21 @@ MessageBoxDefaultButton.Button2);
             this.textBox_message_dp2MServerUrl.Text = default_dp2mserver_url;
         }
 
+        private void button_face_setDefaultValue_Click(object sender, EventArgs e)
+        {
+            string strDefaultValue = "ipc://FaceChannel/FaceServer";
 
+            DialogResult result = MessageBox.Show(this,
+    "确实要将 人脸识别接口URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
+    "CfgDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            this.textBox_face_readerUrl.Text = strDefaultValue;
+        }
     }
 
     // 调用数据加工模块

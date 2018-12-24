@@ -15,7 +15,6 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
@@ -304,34 +303,41 @@ namespace dp2Circulation
         /// 合并后数据列号: 实体(册)单价
         /// </summary>
         public static int MERGED_COLUMN_ITEMPRICE = 21;             // 实体(册)单价
+
+        // 2018/11/7
+        /// <summary>
+        /// 合并后数据列号: 实体(册)总价
+        /// </summary>
+        public static int MERGED_COLUMN_TOTAL_ITEMPRICE = 22;             // 实体(册)单价
+
         /// <summary>
         /// 合并后数据列号: 订购时间
         /// </summary>
-        public static int MERGED_COLUMN_ORDERTIME = 22;        // 订购时间
+        public static int MERGED_COLUMN_ORDERTIME = 23;        // 订购时间
         /// <summary>
         /// 合并后数据列号: 订单号
         /// </summary>
-        public static int MERGED_COLUMN_ORDERID = 23;          // 订单号
+        public static int MERGED_COLUMN_ORDERID = 24;          // 订单号
         /// <summary>
         /// 合并后数据列号: 馆藏分配
         /// </summary>
-        public static int MERGED_COLUMN_DISTRIBUTE = 24;       // 馆藏分配
+        public static int MERGED_COLUMN_DISTRIBUTE = 25;       // 馆藏分配
         /// <summary>
         /// 合并后数据列号: 类别
         /// </summary>
-        public static int MERGED_COLUMN_CLASS = 25;             // 类别
+        public static int MERGED_COLUMN_CLASS = 26;             // 类别
         /// <summary>
         /// 合并后数据列号: 附注
         /// </summary>
-        public static int MERGED_COLUMN_COMMENT = 26;          // 附注
+        public static int MERGED_COLUMN_COMMENT = 27;          // 附注
         /// <summary>
         /// 合并后数据列号: 渠道地址
         /// </summary>
-        public static int MERGED_COLUMN_SELLERADDRESS = 27;          // 渠道地址
+        public static int MERGED_COLUMN_SELLERADDRESS = 28;          // 渠道地址
         /// <summary>
         /// 合并后数据列号: 种记录路径
         /// </summary>
-        public static int MERGED_COLUMN_BIBLIORECPATH = 28;    // 种记录路径
+        public static int MERGED_COLUMN_BIBLIORECPATH = 29;    // 种记录路径
 
         #endregion
 
@@ -1277,11 +1283,20 @@ namespace dp2Circulation
             // 如果期刊缺乏到书价
             if (bSeries == true && string.IsNullOrEmpty(price.NewValue) == true)
             {
+#if NO
                 // 先取册价格
                 price.NewValue = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ITEMPRICE);
                 // 然后取订购价
                 if (String.IsNullOrEmpty(price.NewValue) == true)
                     price.NewValue = price.OldValue;
+#endif
+                // 2018/11/7 改变取值顺序
+                // 先取订购价格
+                price.NewValue = price.OldValue;
+                // 然后取册价格
+                if (String.IsNullOrEmpty(price.NewValue) == true)
+                    price.NewValue = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_ITEMPRICE);
+
             }
 
             try
@@ -2373,6 +2388,7 @@ namespace dp2Circulation
             ColumnHeader columnHeader_acceptTotalFixedPrice = new ColumnHeader();
 
             ColumnHeader columnHeader_itemPrice = new ColumnHeader();
+            ColumnHeader columnHeader_totalItemPrice = new ColumnHeader();
             ColumnHeader columnHeader_orderTime = new ColumnHeader();
             ColumnHeader columnHeader_orderID = new ColumnHeader();
             ColumnHeader columnHeader_distribute = new ColumnHeader();
@@ -2409,6 +2425,7 @@ namespace dp2Circulation
             columnHeader_acceptTotalFixedPrice,
 
             columnHeader_itemPrice,
+            columnHeader_totalItemPrice,
             columnHeader_orderTime,
             columnHeader_orderID,
             columnHeader_distribute,
@@ -2542,6 +2559,12 @@ namespace dp2Circulation
             columnHeader_itemPrice.Text = "实体单价";
             columnHeader_itemPrice.Width = 150;
             columnHeader_itemPrice.TextAlign = HorizontalAlignment.Right;
+            // 
+            // columnHeader_totalItemPrice
+            // 
+            columnHeader_totalItemPrice.Text = "实体总价";
+            columnHeader_totalItemPrice.Width = 150;
+            columnHeader_totalItemPrice.TextAlign = HorizontalAlignment.Right;
             // 
             // columnHeader_orderTime
             // 
@@ -2702,9 +2725,8 @@ namespace dp2Circulation
             {
                 for (int i = 0; i < lists.Count; i++)
                 {
-                    List<string> temp_filenames = null;
                     int nRet = PrintMergedList(lists[i],
-                        out temp_filenames,
+                        out List<string> temp_filenames,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2815,6 +2837,7 @@ namespace dp2Circulation
                 "acceptTotalFixedPrice -- 验收总码洋",
 
                 "itemPrice -- 实体单价",
+                "totalItemPrice -- 实体总价",
                 "orderTime -- 订购时间",
                 "orderID -- 订单号",
                 "distribute -- 馆藏分配",
@@ -2992,6 +3015,7 @@ namespace dp2Circulation
                 string strAcceptTotalPrice = GetMergedTotalPrice("acceptPrice", items);
                 string strAcceptTotalFixedPrice = GetMergedTotalPrice("acceptFixedPrice", items);
                 // TODO: 还可以计算出平均折扣。不过要注意验收总价和码洋总价中包含多种货币的时候，除法会无法完成，需要在平均折扣位置显示警告语
+                string strTotalItemPrice = GetMergedTotalPrice("itemPrice", items);
 
                 macro_table["%itemcount%"] = nItemCount.ToString(); // 事项数
                 macro_table["%totalcopies%"] = nTotalCopies.ToString(); // 总册数(注意每套可以有多册)
@@ -2999,6 +3023,7 @@ namespace dp2Circulation
                 macro_table["%bibliocount%"] = nBiblioCount.ToString(); // 种数
                 macro_table["%totalprice%"] = strAcceptTotalPrice;    // 验收总价格 可能为多个币种的价格串联形态
                 macro_table["%totalfixedprice%"] = strAcceptTotalPrice;      // 验收总码洋
+                macro_table["%totalitemprice%"] = strTotalItemPrice;      // 总册价格
 
                 macro_table["%pageno%"] = "1";
 
@@ -3029,6 +3054,7 @@ namespace dp2Circulation
     <div class='bibliocount'>种数: %bibliocount%</div>
     <div class='totalprice'>总价: %totalprice%</div>
     <div class='totalprice'>总码洋: %totalfixedprice%</div>
+    <div class='totalitemprice'>总册价: %totalitemprice%</div>
     <div class='sepline'><hr/></div>
     <div class='batchno'>批次号: %batchno%</div>
     <div class='location'>记录路径文件: %recpathfilepath%</div>
@@ -3074,9 +3100,11 @@ namespace dp2Circulation
                     StreamUtil.WriteText(strFileName,
                         "<div class='copies'>册数: " + nTotalCopies.ToString() + "</div>");
                     StreamUtil.WriteText(strFileName,
-                        "<div class='totalprice'>总价: " + strAcceptTotalPrice + "</div>");
+                        "<div class='totalprice'>总验收价: " + strAcceptTotalPrice + "</div>");
                     StreamUtil.WriteText(strFileName,
     "<div class='totalfixedprice'>总码洋: " + strAcceptTotalFixedPrice + "</div>");
+                    StreamUtil.WriteText(strFileName,
+"<div class='totalitemprice'>总册价: " + strTotalItemPrice + "</div>");
 
                     BuildMergedPageBottom(option,
                         macro_table,
@@ -3473,6 +3501,7 @@ namespace dp2Circulation
                     case "acceptTotalPrice":
                     case "总价格":
                     case "验收总价":
+                    case "验收总价格":
                         return ListViewUtil.GetItemText(item, MERGED_COLUMN_ACCEPT_TOTALPRICE);
 
                     case "acceptTotalFixedPrice":
@@ -3484,6 +3513,10 @@ namespace dp2Circulation
                     case "实体单价":
                         return ListViewUtil.GetItemText(item, MERGED_COLUMN_ITEMPRICE);
 
+                    // 2018/11/7
+                    case "totalItemPrice":
+                    case "实体总价":
+                        return ListViewUtil.GetItemText(item, MERGED_COLUMN_TOTAL_ITEMPRICE);
 
                     case "orderTime":
                     case "订购时间":
@@ -3745,14 +3778,22 @@ namespace dp2Circulation
             return total;
         }
 
-
+        // 汇总各种价格
+        // parameters:
+        //      strFieldName    字段名称
+        //                      acceptPrice 验收价
+        //                      acceptFixedPrice 验收码洋
+        //                      orderPrice 订购价
+        //                      orderFiexedPrice 订购码洋
+        //                      itemPrice 实体价(册记录价格)
         static string GetMergedTotalPrice(string strFieldName,
             NamedListViewItems items)
         {
             Debug.Assert(strFieldName == "acceptPrice"
                 || strFieldName == "acceptFixedPrice"
                 || strFieldName == "orderPrice"
-                || strFieldName == "orderFixedPrice",
+                || strFieldName == "orderFixedPrice"
+                || strFieldName == "itemPrice",
                 "");
             int nColumnIndex = 0;
             if (strFieldName == "acceptPrice")
@@ -3763,6 +3804,8 @@ namespace dp2Circulation
                 nColumnIndex = MERGED_COLUMN_ORDER_TOTALPRICE;
             else if (strFieldName == "orderFixedPrice")
                 nColumnIndex = MERGED_COLUMN_ORDER_TOTALFIXEDPRICE;
+            else if (strFieldName == "itemPrice")
+                nColumnIndex = MERGED_COLUMN_TOTAL_ITEMPRICE;
             else
                 throw new ArgumentException("strFieldName 参数值必须为 acceptPrice/acceptFieldPrice/orderPrice/prderFieldPrice 之一");
 
@@ -4430,6 +4473,8 @@ out strError);
                             ref nOrderRecCount,
                             ref nItemRecCount,
                             out strError);
+                        if (nRet == -1)
+                            goto ERROR1;    // 2018/11/6
                         if (nRet == -2)
                             nDupCount++;
 
@@ -5541,7 +5586,6 @@ out strError);
                 // 先将原始数据列表按照 bibliorecpath/seller/price 列排序
                 SortOriginListForMerge();
 
-
                 // 只提取一套一册的，和一套的第一册
                 List<ListViewItem> items = new List<ListViewItem>();
                 for (int i = 0; i < this.listView_origin.Items.Count; i++)
@@ -5592,11 +5636,9 @@ out strError);
                     string strSubCopy = "";
                     if (String.IsNullOrEmpty(strSubCopyDetail) == false)
                     {
-                        string strNo = "";
-                        string strIndex = "";
                         nRet = ParseSubCopy(strSubCopyDetail,
-                out strNo,
-                out strIndex,
+                out string strNo,
+                out string strIndex,
                 out strSubCopy,
                 out strError);
                         if (nRet == -1)
@@ -5681,6 +5723,8 @@ out strError);
 
                     List<string> total_acceptprices = new List<string>();  // 累积的验收价格字符串
                     List<string> total_acceptfixedprices = new List<string>();  // 累积的验收码洋价格字符串
+
+                    List<string> total_itemprices = new List<string>(); // 累计的册价格
 
                     List<ListViewItem> origin_items = new List<ListViewItem>();
 
@@ -5837,6 +5881,8 @@ out strError);
                             total_orderfixedprices.Add(strCurrentOrderFixedPrice);
                         if (String.IsNullOrEmpty(strCurrentOrderPrice) == false)
                             total_orderprices.Add(strCurrentOrderPrice);
+                        if (String.IsNullOrEmpty(strItemPrice) == false)
+                            total_itemprices.Add(strItemPrice);
 
                         // 汇总注释
                         string strComment = ListViewUtil.GetItemText(current_source, ORIGIN_COLUMN_COMMENT);
@@ -5855,11 +5901,10 @@ out strError);
                                 strDistributes = strCurDistribute;
                             else
                             {
-                                string strLocationString = "";
                                 nRet = LocationCollection.MergeTwoLocationString(strDistributes,
                                     strCurDistribute,
                                     false,
-                                    out strLocationString,
+                                    out string strLocationString,
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
@@ -5994,6 +6039,14 @@ out strError);
                             "累计订购码洋字符串 '" + StringUtil.MakePathList(total_orderfixedprices) + "' 时");
                         // 订购总码洋
                         ListViewUtil.ChangeItemText(target, MERGED_COLUMN_ORDER_TOTALFIXEDPRICE,
+                            strSumPrice);
+                    }
+
+                    {
+                        string strSumPrice = GetTotalPrice(total_itemprices,
+                            "累计册价格字符串 '" + StringUtil.MakePathList(total_itemprices) + "' 时");
+                        // 总册价格
+                        ListViewUtil.ChangeItemText(target, MERGED_COLUMN_TOTAL_ITEMPRICE,
                             strSumPrice);
                     }
 
@@ -6642,7 +6695,7 @@ out strError);
     <div class='tabletitle'>%date% 原始验收数据</div>
     <div class='copies'>册数: %totalcopies%</div>
     <div class='bibliocount'>种数: %bibliocount%</div>
-    <div class='totalprice'>总价: %totalprice%</div>
+    <div class='totalprice'>验收总价: %totalprice%</div>
     <div class='sepline'><hr/></div>
     <div class='batchno'>批次号: %batchno%</div>
     <div class='location'>记录路径文件: %recpathfilepath%</div>
@@ -8427,10 +8480,10 @@ false);
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "totalPrice -- 总价格"
+            // "totalPrice -- 验收总价格"
             column = new Column();
-            column.Name = "totalPrice -- 总价格";
-            column.Caption = "总价格";
+            column.Name = "totalPrice -- 验收总价格";
+            column.Caption = "验收总价格";
             column.MaxChars = -1;
             this.Columns.Add(column);
         }

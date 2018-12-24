@@ -3673,6 +3673,7 @@ handle.CancelTokenSource.Token).Result;
                     }
                     command.CommandTimeout = 20 * 60;  // 把检索时间变大
 
+#if NO
                     DbDataReader reader = null;
                     if (handle != null && handle.CancelTokenSource != null)
                         reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection
@@ -3681,12 +3682,11 @@ handle.CancelTokenSource.Token).Result;
                     else
                         reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection
 ).Result;
+#endif
 
-#if NO
                     // 尝试一下不用 CancellationToken。因为怀疑这样用会导致触发 Cancel 的时候让 MySQL Driver 代码死锁
                     DbDataReader reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection
 ).Result;
-#endif
 
                     // 从 DbDataReader 中获取和填入记录到一个结果集对象中
                     // return:

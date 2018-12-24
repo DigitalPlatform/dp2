@@ -704,7 +704,7 @@ namespace DigitalPlatform.LibraryServer
                     // 复制的情况，要避免出现操作后的条码号重复现象
                     if (strAction == "copy")
                     {
-                        string strNewGuid = Guid.NewGuid().ToString();
+                        string strNewGuid = ShortGuid.NewGuid().ToString().ToUpper();
                         // 修改册条码号，避免发生条码号重复
                         string strOldItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                             "barcode");
@@ -2532,9 +2532,8 @@ out strError);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
             // 获得书目库对应的实体库名
-            string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
-                 out strItemDbName,
+                 out string strItemDbName,
                  out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -2565,11 +2564,10 @@ out strError);
 
                 if (strAction == "verify")
                 {
-                    EntityInfo verify_result = null;
                     nRet = VerifyEntity(
                         sessioninfo,
                         info,
-                        out verify_result,
+                        out EntityInfo verify_result,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2588,8 +2586,13 @@ out strError);
                 bool bNoEventLog = false;   // 是否为不记入事件日志?
                 bool bNoOperations = false; // 是否为不要覆盖<operations>内容
                 bool bSimulate = StringUtil.IsInList("simulate", info.Style);     // 是否为模拟操作? 2015/6/9
+                bool bAutoPostfix = StringUtil.IsInList("autopostfix", info.Style); // 是否为自动加入后缀模式。指为发生重复的册条码号，登录号，自动添加后缀字符串
 
                 string strStyle = info.Style;
+
+                // 加工 style 字符串，便于写入日志
+                //if (bAutoPostfix)
+                //    StringUtil.SetInList(ref strStyle, "autopostfix", true);
 
                 if (info.Action == "forcenew"
                     || info.Action == "forcechange"
@@ -2617,7 +2620,7 @@ out strError);
                         return result;
                     }
 
-                    // 加工style字符串，便于写入日志
+                    // 加工 style 字符串，便于写入日志
                     if (StringUtil.IsInList("force", strStyle) == false)
                         StringUtil.SetInList(ref strStyle, "force", true);
 
@@ -2643,6 +2646,12 @@ out strError);
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
+                }
+
+                if (bAutoPostfix && info.Action != "new")
+                {
+                    strError = "Style 'autopostfix' 只能在当 Action 为 'new' 或 'forcenew' 时使用";
+                    goto ERROR1;
                 }
 
                 // 2008/10/6 
@@ -2700,11 +2709,11 @@ out strError);
                     }
                 }
 
-                // 对info内的参数进行检查。
+                // 对 info 内的参数进行检查。
                 strError = "";
 
                 // 2008/2/17 
-                if (entityinfos.Length > 1  // 2013/9/26 只有一个记录的时候，不必依靠 refid 定位返回信息，因而也就不需要明显给出这个 RefID 成员了
+                if (entityinfos.Length > 1  // 2013/9/26 只有一个记录的时候，不必依靠 refid 定位返回信息，因而也就不需要调用者明显给出这个 RefID 成员了
                     && String.IsNullOrEmpty(info.RefID) == true)
                 {
                     strError = "info.RefID 没有给出";
@@ -2766,9 +2775,11 @@ out strError);
 
                 if (string.IsNullOrEmpty(strError) == false)
                 {
-                    EntityInfo error = new EntityInfo(info);
-                    error.ErrorInfo = strError;
-                    error.ErrorCode = ErrorCodeValue.CommonError;
+                    EntityInfo error = new EntityInfo(info)
+                    {
+                        ErrorInfo = strError,
+                        ErrorCode = ErrorCodeValue.CommonError
+                    };
                     ErrorInfos.Add(error);
                     continue;
                 }
@@ -2843,6 +2854,9 @@ out strError);
                     ErrorInfos.Add(error);
                     continue;
                 }
+
+
+                // REDO_ENTITY:
 
                 // 把要保存的新记录装载到 DOM
                 XmlDocument domNewRec = new XmlDocument();
@@ -2948,7 +2962,6 @@ out strError);
                             )
                         {
                             {
-                                string strLibraryCode = "";
                                 // 2012/12/31 先检查一次册记录中的馆藏地字段
                                 // return:
                                 //      -1  检查过程出错
@@ -2957,13 +2970,15 @@ out strError);
                                 nRet = CheckItemLibraryCode(domNewRec,
                                     sessioninfo,
                                     // sessioninfo.LibraryCodeList,
-                                    out strLibraryCode,
+                                    out string strLibraryCode,
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    EntityInfo error = new EntityInfo(info);
-                                    error.ErrorInfo = "检查分馆代码时出错: " + strError;
-                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    EntityInfo error = new EntityInfo(info)
+                                    {
+                                        ErrorInfo = "检查分馆代码时出错: " + strError,
+                                        ErrorCode = ErrorCodeValue.CommonError
+                                    };
                                     ErrorInfos.Add(error);
                                     // domOperLog = null;  // 表示不必写入日志
                                     continue;
@@ -2971,9 +2986,11 @@ out strError);
                                 // 对全局用户也要检查，唯独 restore 时候不检查
                                 if (bForce == false && nRet != 0)
                                 {
-                                    EntityInfo error = new EntityInfo(info);
-                                    error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
-                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    EntityInfo error = new EntityInfo(info)
+                                    {
+                                        ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError,
+                                        ErrorCode = ErrorCodeValue.CommonError
+                                    };
                                     ErrorInfos.Add(error);
                                     // domOperLog = null;  // 表示不必写入日志
                                     continue;
@@ -3097,21 +3114,37 @@ out strError);
 
 #endif
 
-                            // return:
-                            //      -1  出错
-                            //      0   正常
-                            //      1   出现问题，需要立即 continue 处理下一个 item
-                            nRet = SearchDup(
-            channel,
-            info,
-            strNewBarcode,
-            "册条码号",
-            ref ErrorInfos,
-            out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                            if (nRet == 1)
-                                continue;
+                            {
+                                int old_count = ErrorInfos.Count;
+                                // return:
+                                //      -1  出错
+                                //      0   正常
+                                //      1   出现问题，需要立即 continue 处理下一个 item
+                                nRet = SearchDup(
+                channel,
+                info,
+                strNewBarcode,
+                "册条码号",
+                ref ErrorInfos,
+                out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 1)
+                                {
+                                    if (bAutoPostfix && info.Action == "new")
+                                    {
+                                        strNewBarcode += "_" + ShortGuid.NewGuid().ToString().ToUpper();
+                                        // domNewRec 修改 册条码号
+                                        DomUtil.SetElementText(domNewRec.DocumentElement, "barcode", strNewBarcode);
+                                        ModifyState(domNewRec, "数据错误");
+                                        info.NewRecord = domNewRec.OuterXml;
+                                        if (ErrorInfos.Count == old_count + 1)
+                                            ErrorInfos.RemoveAt(ErrorInfos.Count - 1);
+                                    }
+                                    else
+                                        continue;
+                                }
+                            }
 
                             // 2017/9/29
                             string strNewRefID = DomUtil.GetElementText(domNewRec.DocumentElement, "refID");
@@ -3127,7 +3160,9 @@ out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
                                 if (nRet == 1)
+                                {
                                     continue;
+                                }
                             }
 
                             if (this.VerifyRegisterNoDup)
@@ -3136,6 +3171,7 @@ out strError);
                                 string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
                                 if (string.IsNullOrEmpty(strRegisterNo) == false)
                                 {
+                                    int old_count = ErrorInfos.Count;
                                     nRet = SearchDup(
         channel,
         info,
@@ -3146,7 +3182,20 @@ out strError);
                                     if (nRet == -1)
                                         goto ERROR1;
                                     if (nRet == 1)
-                                        continue;
+                                    {
+                                        if (bAutoPostfix && info.Action == "new")
+                                        {
+                                            strRegisterNo += "_" + ShortGuid.NewGuid().ToString();
+                                            // domNewRec 修改 登录号
+                                            DomUtil.SetElementText(domNewRec.DocumentElement, "registerNo", strRegisterNo);
+                                            ModifyState(domNewRec, "数据错误");
+                                            info.NewRecord = domNewRec.OuterXml;
+                                            if (ErrorInfos.Count == old_count + 1)
+                                                ErrorInfos.RemoveAt(ErrorInfos.Count - 1);
+                                        }
+                                        else
+                                            continue;
+                                    }
                                 }
                             }
                         }
@@ -3178,9 +3227,11 @@ out strError);
 
                             if (strError != "")
                             {
-                                EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = strError;
-                                error.ErrorCode = ErrorCodeValue.CommonError;
+                                EntityInfo error = new EntityInfo(info)
+                                {
+                                    ErrorInfo = strError,
+                                    ErrorCode = ErrorCodeValue.CommonError
+                                };
                                 ErrorInfos.Add(error);
                                 continue;
                             }
@@ -3198,9 +3249,11 @@ out strError);
                                 out strError);
                             if (nRet == -1)
                             {
-                                EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = strError;
-                                error.ErrorCode = ErrorCodeValue.CommonError;
+                                EntityInfo error = new EntityInfo(info)
+                                {
+                                    ErrorInfo = strError,
+                                    ErrorCode = ErrorCodeValue.CommonError
+                                };
                                 ErrorInfos.Add(error);
                                 continue;
                             }
@@ -3219,9 +3272,11 @@ out strError);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    EntityInfo error = new EntityInfo(info);
-                                    error.ErrorInfo = strError;
-                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    EntityInfo error = new EntityInfo(info)
+                                    {
+                                        ErrorInfo = strError,
+                                        ErrorCode = ErrorCodeValue.CommonError
+                                    };
                                     ErrorInfos.Add(error);
                                     continue;
                                 }
@@ -3240,7 +3295,6 @@ out strError);
                         }
 
                         {
-                            string strLibraryCode = "";
 
                             // 注意：即便是全局用户，也要用函数 CheckItemLibraryCode() 获得馆代码
 
@@ -3253,7 +3307,7 @@ out strError);
                             nRet = CheckItemLibraryCode(strNewXml,
                                 sessioninfo,
                                 // sessioninfo.LibraryCodeList,
-                                out strLibraryCode,
+                                out string strLibraryCode,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -3353,6 +3407,7 @@ out strError);
         strLibraryCode);    // 册所在的馆代码
 
                                     DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
+
                                     if (String.IsNullOrEmpty(strStyle) == false)
                                         DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
@@ -3507,12 +3562,22 @@ out strError);
             return result;
         }
 
-#region SetEntities() 下级函数
+        #region SetEntities() 下级函数
+
+        // 为 state 元素增加一个子串
+        static void ModifyState(XmlDocument dom, string one)
+        {
+            string old_value = DomUtil.GetElementText(dom.DocumentElement, "state");
+            string new_value = old_value;
+            StringUtil.SetInList(ref new_value, one, true);
+            if (old_value != new_value)
+                DomUtil.SetElementText(dom.DocumentElement, "state", new_value);
+        }
 
         // return:
         //      -1  出错
         //      0   正常
-        //      1   出现问题，需要立即 continue 处理下一个 item
+        //      1   出现重复，ErrorInfos 中已经加入了新元素
         int SearchDup(
             RmsChannel channel,
             EntityInfo info,
@@ -3560,12 +3625,16 @@ out strError);
                     if (info.NewRecPath != info.OldRecPath)
                     {
                         strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('" + info.NewRecPath + "') 应当和 info.OldRecPath('" + info.OldRecPath + "') 值相同";
-
-                        EntityInfo error = new EntityInfo(info);
-                        error.ErrorInfo = strError;
-                        error.ErrorCode = ErrorCodeValue.CommonError;
+#if NO
+                        EntityInfo error = new EntityInfo(info)
+                        {
+                            ErrorInfo = strError,
+                            ErrorCode = ErrorCodeValue.CommonError
+                        };
                         ErrorInfos.Add(error);
                         return 1;   // continue
+#endif
+                        return -1;
                     }
 
                     Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
@@ -3598,9 +3667,11 @@ out strError);
             // 报错
             if (bDup == true)
             {
-                EntityInfo error = new EntityInfo(info);
-                error.ErrorInfo = strCaption + " '" + strNewBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath);
-                error.ErrorCode = ErrorCodeValue.CommonError;
+                EntityInfo error = new EntityInfo(info)
+                {
+                    ErrorInfo = strCaption + " '" + strNewBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath),
+                    ErrorCode = ErrorCodeValue.AlreadyExist
+                };
                 ErrorInfos.Add(error);
                 return 1;   // continue
             }
@@ -4046,6 +4117,7 @@ out strError);
 
         // 构造出适合保存的新册记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
+        // parameters:
         static int BuildNewEntityRecord(string strOriginXml,
             out string strXml,
             out string strError)
@@ -4081,18 +4153,18 @@ out strError);
                 "borrowHistory",
             };
 
-            for (int i = 0; i < element_names.Length; i++)
+            // 删除流通元素
+            foreach (string name in element_names)
             {
 #if NO
                 DomUtil.SetElementText(dom.DocumentElement,
                     element_names[i], "");
 #endif
-                DomUtil.DeleteElement(dom.DocumentElement, element_names[i]);
+                DomUtil.DeleteElement(dom.DocumentElement, name);
             }
 
             // 2017/1/13
             DomUtil.RemoveEmptyElements(dom.DocumentElement);
-
             strXml = dom.OuterXml;
             return 0;
         }
@@ -4538,9 +4610,11 @@ out strError);
                 }
                 else
                 {
-                    error = new EntityInfo(info);
-                    error.ErrorInfo = "保存操作发生错误, 在读入原有记录阶段:" + strError;
-                    error.ErrorCode = channel.OriginErrorCode;
+                    error = new EntityInfo(info)
+                    {
+                        ErrorInfo = "保存操作发生错误, 在读入原有记录阶段:" + strError,
+                        ErrorCode = channel.OriginErrorCode
+                    };
                     ErrorInfos.Add(error);
                     return -1;
                 }
@@ -4587,8 +4661,6 @@ out strError);
                         goto ERROR1;
                     }
 
-                    string strBiblioDbName = "";
-
                     // 根据实体库名, 找到对应的书目库名
                     // 注意，返回1的时候，strBiblioDbName也有可能为空
                     // return:
@@ -4596,7 +4668,7 @@ out strError);
                     //      0   没有找到
                     //      1   找到
                     nRet = GetBiblioDbNameByItemDbName(strEntityDbName,
-                    out strBiblioDbName,
+                    out string strBiblioDbName,
                     out strError);
                     if (nRet == 0 || nRet == -1)
                     {
@@ -4613,7 +4685,7 @@ out strError);
                             "state");
                         if (IncludeStateProcessing(strState) == false)
                         {
-                            strError = "当前帐户只有order权限而没有setiteminfo(或setentities)权限，不能用change功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'";
+                            strError = "当前帐户只有 order 权限而没有 setiteminfo (或setentities)权限，不能用 change 功能修改从属于非工作库的、状态不包含“加工中”的实体记录 '" + info.OldRecPath + "'(此种记录的状态要包含“加工中”才能允许修改)";
                             goto ERROR1;
                         }
                     }
@@ -4685,8 +4757,6 @@ out strError);
 
                 if (bHasCirculationInfo == true)
                 {
-                    string strOldLocation = "";
-                    string strNewLocation = "";
                     // 比较新旧记录中的馆藏地点是否有改变
                     // return:
                     //      -1  出错
@@ -4696,8 +4766,8 @@ out strError);
                         "location",
                         domExist,
                         domNew,
-                        out strOldLocation,
-                        out strNewLocation,
+                        out string strOldLocation,
+                        out string strNewLocation,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4713,8 +4783,6 @@ out strError);
                 }
 
                 // 比较新旧记录的状态是否有改变，如果从其他状态修改为“注销”状态，则应引起注意，后面要进行必要的检查
-                string strOldState = "";
-                string strNewState = "";
 
                 // parameters:
                 //      strOldState   顺便返回旧记录中的状态字符串
@@ -4725,8 +4793,8 @@ out strError);
                 //      1   不相等
                 nRet = CompareTwoState(domExist,
                     domNew,
-                    out strOldState,
-                    out strNewState,
+                    out string strOldState,
+                    out string strNewState,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4759,8 +4827,6 @@ out strError);
                     if (bHasCirculationInfo == false
                         && IncludeStateProcessing(strOldState) == true && IncludeStateProcessing(strNewState) == false)
                     {
-                        string strReservationReaderBarcode = "";
-                        string strNotifyID = "";
 
                         // 察看本册预约情况, 并进行初步处理
                         // TODO: 如果为注销处理，需要通知等待者，书已经注销了，不用再等待
@@ -4771,8 +4837,8 @@ out strError);
                         nRet = DoItemReturnReservationCheck(
                             false,
                             ref domNew,
-                            out strReservationReaderBarcode,
-                            out strNotifyID,
+                            out string strReservationReaderBarcode,
+                            out string strNotifyID,
                             out strError);
                         if (nRet == -1)
                         {
@@ -4783,7 +4849,7 @@ out strError);
                         if (String.IsNullOrEmpty(strReservationReaderBarcode) == false
                             && bSimulate == false)
                         {
-                            List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
+                            // 被删除的通知记录。不用。
                             // 通知预约到书的操作
                             // 出于对读者库加锁方面的便利考虑, 单独做了此函数
                             // return:
@@ -4798,7 +4864,7 @@ out strError);
                                 false,  // 不在大架
                                 false,  // 不需要再修改当前册记录，因为前面已经修改过了
                                 strNotifyID,
-                                out DeletedNotifyRecPaths,
+                                out List<string> DeletedNotifyRecPaths,
                                 out strError);
                             if (nRet == -1)
                             {
@@ -5669,7 +5735,7 @@ out strError);
             return true;
         }
 
-#endregion
+        #endregion
 
 #if NO
         // 根据册条码号列表，得到记录路径列表

@@ -18,11 +18,11 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Message;
+using DigitalPlatform.LibraryServer.Common;
 
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2Library
 {
@@ -3595,8 +3595,14 @@ namespace dp2Library
                 // strLocationFilter = "海淀分馆"; // testing
                 if (string.IsNullOrEmpty(strLocationFilter) == false)
                 {
+                    string strOperator = "AND";
+                    if (strLocationFilter.StartsWith("-"))
+                    {
+                        strLocationFilter = strLocationFilter.Substring(1);
+                        strOperator = "SUB";
+                    }
                     string strLocationQueryXml = "<item resultset='#" + strLocationFilter + "' />";
-                    strQueryXml = "<group>" + strQueryXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";    // !!!
+                    strQueryXml = $"<group>{strQueryXml}<operator value='{strOperator}'/>{strLocationQueryXml}</group>";    // !!!
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);

@@ -39,6 +39,8 @@
             this.webBrowser1_running = new System.Windows.Forms.WebBrowser();
             this.tabPage_print = new System.Windows.Forms.TabPage();
             this.button_print = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox_importRange = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_selectTarget.SuspendLayout();
             this.tabPage_runImport.SuspendLayout();
@@ -82,6 +84,8 @@
             // 
             // tabPage_selectTarget
             // 
+            this.tabPage_selectTarget.Controls.Add(this.textBox_importRange);
+            this.tabPage_selectTarget.Controls.Add(this.label1);
             this.tabPage_selectTarget.Controls.Add(this.comboBox_targetDbName);
             this.tabPage_selectTarget.Controls.Add(this.label3);
             this.tabPage_selectTarget.Location = new System.Drawing.Point(4, 28);
@@ -96,7 +100,7 @@
             // 
             this.comboBox_targetDbName.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.comboBox_targetDbName.FormattingEnabled = true;
-            this.comboBox_targetDbName.Location = new System.Drawing.Point(143, 16);
+            this.comboBox_targetDbName.Location = new System.Drawing.Point(180, 16);
             this.comboBox_targetDbName.Name = "comboBox_targetDbName";
             this.comboBox_targetDbName.Size = new System.Drawing.Size(274, 29);
             this.comboBox_targetDbName.TabIndex = 1;
@@ -161,6 +165,24 @@
             this.button_print.Text = "打印统计结果(&P)";
             this.button_print.UseVisualStyleBackColor = true;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(9, 101);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(152, 18);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "导入记录范围(&R):";
+            // 
+            // textBox_importRange
+            // 
+            this.textBox_importRange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_importRange.Location = new System.Drawing.Point(180, 98);
+            this.textBox_importRange.Name = "textBox_importRange";
+            this.textBox_importRange.Size = new System.Drawing.Size(353, 28);
+            this.textBox_importRange.TabIndex = 3;
+            // 
             // ImportMarcForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -170,6 +192,7 @@
             this.Controls.Add(this.tabControl_main);
             this.Name = "ImportMarcForm";
             this.Text = "导入 MARC";
+            this.Activated += new System.EventHandler(this.ImportMarcForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportMarcForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImportMarcForm_FormClosed);
             this.Load += new System.EventHandler(this.ImportMarcForm_Load);
@@ -194,5 +217,7 @@
         private System.Windows.Forms.TabPage tabPage_print;
         private System.Windows.Forms.Button button_print;
         private DigitalPlatform.CommonControl.TabComboBox comboBox_targetDbName;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_importRange;
     }
 }
