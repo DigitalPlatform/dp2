@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform.RFID
 {
-    public class Compress
+    public class Compact
     {
 
-        public static CompactionScheme AutoSelectCompressMethod(string text)
+        public static CompactionScheme AutoSelectCompactMethod(string text)
         {
             if (CheckInteger(text, false))
                 return CompactionScheme.Integer;
@@ -31,7 +31,7 @@ namespace DigitalPlatform.RFID
         public const UInt64 MaxInteger = 9999999999999999999;   // 19 位
 
         // 整型数
-        public static byte[] IntegerCompress(string text)
+        public static byte[] IntegerCompact(string text)
         {
             // 检查
             CheckInteger(text);
@@ -91,11 +91,11 @@ namespace DigitalPlatform.RFID
             }
 
             return v.ToString();
-            // return BitConverter.ToInt64(data, 0).ToString();
+            // return TrimLeft(BitConverter.ToUInt64(data, 0)).ToString();
         }
 
         // 检查字符串是否符合整型压缩的要求
-        static bool CheckInteger(string text, bool throwException = true)
+        public static bool CheckInteger(string text, bool throwException = true)
         {
             // 首字符不能为 '0'
             if (text[0] == '0')
@@ -137,7 +137,7 @@ namespace DigitalPlatform.RFID
         #region numeric
 
         // 数字
-        public static byte[] NumericCompress(string text)
+        public static byte[] NumericCompact(string text)
         {
             // 检查
             CheckNumeric(text);
@@ -188,7 +188,7 @@ namespace DigitalPlatform.RFID
         }
 
         // 检查字符串是否符合数字压缩的要求
-        static bool CheckNumeric(string text, bool throwException = true)
+        public static bool CheckNumeric(string text, bool throwException = true)
         {
             foreach (char ch in text)
             {
@@ -215,7 +215,7 @@ namespace DigitalPlatform.RFID
         #region bit5
 
         // 整型数
-        public static byte[] Bit5Compress(string text)
+        public static byte[] Bit5Compact(string text)
         {
             // 检查
             CheckBit5(text);
@@ -286,7 +286,7 @@ namespace DigitalPlatform.RFID
             return results.ToArray();
         }
 #endif
-        static bool CheckBit5(string text, bool throwException = true)
+        public static bool CheckBit5(string text, bool throwException = true)
         {
             if (text.Length < 3)
             {
@@ -557,7 +557,7 @@ namespace DigitalPlatform.RFID
         #region bit6
 
         // 整型数
-        public static byte[] Bit6Compress(string text)
+        public static byte[] Bit6Compact(string text)
         {
             // 检查
             CheckBit6(text);
@@ -585,7 +585,7 @@ namespace DigitalPlatform.RFID
             return package.Bytes;
         }
 
-        static bool CheckBit6(string text, bool throwException = true)
+        public static bool CheckBit6(string text, bool throwException = true)
         {
             if (text.Length < 4)
             {
@@ -654,7 +654,7 @@ namespace DigitalPlatform.RFID
         #region bit7
 
         // 整型数
-        public static byte[] Bit7Compress(string text)
+        public static byte[] Bit7Compact(string text)
         {
             // 检查
             CheckBit7(text);
@@ -688,7 +688,7 @@ namespace DigitalPlatform.RFID
             return package.Bytes;
         }
 
-        static bool CheckBit7(string text, bool throwException = true)
+        public static bool CheckBit7(string text, bool throwException = true)
         {
             if (text.Length < 8)
             {
@@ -846,7 +846,7 @@ namespace DigitalPlatform.RFID
 
 #endif
 
-        public static byte[] IsilCompress(string text,
+        public static byte[] IsilCompact(string text,
             StringBuilder debugInfo = null)
         {
             // 检查
@@ -1145,7 +1145,7 @@ namespace DigitalPlatform.RFID
             return false;
         }
 
-        static bool CheckIsil(string text, bool throwException = true)
+        public static bool CheckIsil(string text, bool throwException = true)
         {
 
             foreach (char ch in text)

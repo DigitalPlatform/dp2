@@ -119,6 +119,42 @@ namespace DigitalPlatform.RFID
             return null;
         }
 
+        // 对元素进行排序
+        // 排序原则：
+        // 1) PII 在第一个;
+        // 2) Content Parameter 在第二个; 
+        // 2.1) 如果元素里面至少有一个锁定元素，Content Parameter 元素要对齐 block 边界(便于锁定元素锁定)
+        // 3) 其余拟锁定元素聚集在一起，最后给必要的 padding
+        // 4) 所有非锁定的元素聚集在一起
+        // 5) 锁定的元素，和非锁定元素区域内部，可以按照 OID 号码排序
+        // 上述算法有个优势，就是所有锁定元素中间不一定要 block 边界对齐，这样可以节省一点空间
+        // 但存在一个小问题： Content Parameter 要占用多少 byte? 如果以后元素数量增多，(因为它后面就是锁定区域)它无法变大怎么办？
+        public void Sort()
+        {
+
+        }
+
+        // 打包为 byte[] 形态
+        public byte[] Compact(bool alignment)
+        {
+            List<byte> results = new List<byte>();
+            // TODO: 先对 elements 排序。确保 PII 和 OID 元素 index 在前两个
+            foreach (Element element in this._elements)
+            {
+                CompactionScheme compact_method = CompactionScheme.Null;
+                if (element.OID == (int)ElementOID.ContentParameter)
+                    compact_method = CompactionScheme.Base64;
+                else if (element.OID == (int)ElementOID.OwnerInstitution
+                    || element.OID == (int)ElementOID.IllBorrowingInstitution)
+                    compact_method = CompactionScheme.ISIL;
+                results.AddRange(Element.Compact(element.OID,
+                    element.Text,
+                    compact_method, alignment));
+            }
+
+            return results.ToArray();
+        }
+
 
         // 输出为物理数据格式 (打包)
         public ChipMemory ToChipMemory()
@@ -315,6 +351,7 @@ namespace DigitalPlatform.RFID
         public int OID { get; set; }
         public string Text { get; set; }
         public byte[] Content { get; set; }
+        public bool Locked { get; set; }
 
         // 根据 OID 和字符内容，构造一个 element 的原始数据
         // parameters:
@@ -331,7 +368,7 @@ namespace DigitalPlatform.RFID
             // 自动选定压缩方案
             if (compact_method == CompactionScheme.Null)
             {
-                compact_method = Compress.AutoSelectCompressMethod(text);
+                compact_method = RFID.Compact.AutoSelectCompactMethod(text);
                 if (compact_method == CompactionScheme.Null)
                     throw new Exception($"无法为字符串 '{text}' 自动选定压缩方案");
             }
@@ -343,23 +380,23 @@ namespace DigitalPlatform.RFID
 
             byte[] data = null;
             if (compact_method == CompactionScheme.Integer)
-                data = Compress.IntegerCompress(text);
+                data = RFID.Compact.IntegerCompact(text);
             else if (compact_method == CompactionScheme.Numeric)
-                data = Compress.NumericCompress(text);
+                data = RFID.Compact.NumericCompact(text);
             else if (compact_method == CompactionScheme.FivebitCode)
-                data = Compress.Bit5Compress(text);
+                data = RFID.Compact.Bit5Compact(text);
             else if (compact_method == CompactionScheme.SixBitCode)
-                data = Compress.Bit6Compress(text);
+                data = RFID.Compact.Bit6Compact(text);
             else if (compact_method == CompactionScheme.Integer)
-                data = Compress.IntegerCompress(text);
+                data = RFID.Compact.IntegerCompact(text);
             else if (compact_method == CompactionScheme.SevenBitCode)
-                data = Compress.Bit7Compress(text);
+                data = RFID.Compact.Bit7Compact(text);
             else if (compact_method == CompactionScheme.OctectString)
                 data = Encoding.ASCII.GetBytes(text);
             else if (compact_method == CompactionScheme.Utf8String)
                 data = Encoding.UTF8.GetBytes(text);
             else if (compact_method == CompactionScheme.ISIL)
-                data = Compress.IsilCompress(text);
+                data = RFID.Compact.IsilCompact(text);
             else if (compact_method == CompactionScheme.Base64)
                 data = Convert.FromBase64String(text);
 
@@ -473,7 +510,7 @@ namespace DigitalPlatform.RFID
                     || element.OID == (int)ElementOID.IllBorrowingInstitution
                     )
                 {
-                    element.Text = Compress.IsilExtract(element._compactedData);
+                    element.Text = RFID.Compact.IsilExtract(element._compactedData);
                 }
                 else
                 {
@@ -485,17 +522,17 @@ namespace DigitalPlatform.RFID
             else
             {
                 if (element._precursor.CompactionCode == (int)CompactionScheme.Integer)
-                    element.Text = Compress.IntegerExtract(element._compactedData);
+                    element.Text = RFID.Compact.IntegerExtract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.Integer)
-                    element.Text = Compress.IntegerExtract(element._compactedData);
+                    element.Text = RFID.Compact.IntegerExtract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.Numeric)
-                    element.Text = Compress.NumericExtract(element._compactedData);
+                    element.Text = RFID.Compact.NumericExtract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.FivebitCode)
-                    element.Text = Compress.Bit5Extract(element._compactedData);
+                    element.Text = RFID.Compact.Bit5Extract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.SixBitCode)
-                    element.Text = Compress.Bit6Extract(element._compactedData);
+                    element.Text = RFID.Compact.Bit6Extract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.SevenBitCode)
-                    element.Text = Compress.Bit7Extract(element._compactedData);
+                    element.Text = RFID.Compact.Bit7Extract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.OctectString)
                     element.Text = Encoding.ASCII.GetString(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.Utf8String)
@@ -505,6 +542,187 @@ namespace DigitalPlatform.RFID
             }
 
             return element;
+        }
+
+        // 调整 padding bytes。
+        // 如果 data 包含超过一个元素的内容，则第一个元素后面的内容操作后不会被损坏
+        // 注：
+        // 当 OID 为 1-14 时:
+        // Precursor (+Padding length) + Length of data + Compacted data (+padding bytes)
+        // 当 OID 为 15-127 时
+        // Precursor (+Padding length) + Additioal OID value + Length of data + Compacted data (+padding bytes)
+        // parameters:
+        //      data    待加工的数据
+        //      delta   变化数。可以是负数。表示增加或者减少这么多个 bytes 的 padding 字符
+        public static byte[] AdjustPaddingBytes(byte[] data, int delta)
+        {
+            if (delta == 0)
+                throw new ArgumentException("不允许以 delta 为 0 进行调用");
+
+            Precursor precursor = new Precursor(data[0]);
+
+            int padding_length_count = 0;   // “填充字节数”位，的字节个数。0 或 1
+            int additional_oid_count = 0;   // 附加的 OID 字节个数。0 或 1
+            int padding_count = 0;  // padding byte 个数。注意这个值没有包含 padding length byte 本身的 1
+            int compacted_data_length = 0;
+            int total_length = 0;
+
+            if (precursor.Offset)
+            {
+                padding_length_count = 1;
+                padding_count = data[1];
+            }
+
+            if (precursor.ObjectIdentifier >= 15)
+                additional_oid_count = 1;
+
+            compacted_data_length = data[1 + padding_length_count + additional_oid_count];
+
+            total_length = 1 // (precursor) byte
+                + padding_length_count // (padding length) byte
+                + additional_oid_count // (additional oid value) byte
+                + 1 // (length of data) byte
+                + compacted_data_length
+                + padding_count;
+
+            if (data.Length < total_length)
+                throw new Exception($"调用时给出的 data 长度为 {data.Length}, 不足 {total_length}。数据不完整");
+
+            List<byte> result = new List<byte>();
+            List<byte> more = new List<byte>();
+            {
+                int i = 0;
+                // 确保没有多余的数据
+                for (i = 0; i < total_length; i++)
+                {
+                    result.Add(data[i]);
+                }
+
+                // 多余的部分暂存起来
+                for (; i < data.Length; i++)
+                {
+                    more.Add(data[i]);
+                }
+            }
+
+            // 开始腾挪
+
+            // *** padding 增多的情况
+            if (delta > 0)
+            {
+                // 加工前已经有 padding 的情况
+                if (precursor.Offset)
+                {
+                    // 在末尾增加 delta 个填充 byte
+                    for (int i = 0; i < delta; i++)
+                    {
+                        result.Add(0);
+                    }
+                    // TODO: 检查 byte 值是否溢出
+                    // TODO: 是否有办法预先知道多大的 delta 值会溢出?
+                    if (result[1] + delta > byte.MaxValue)
+                        throw new Exception($"Padding Length 原值为 {result[1]}，加上 {delta} 以后发生了溢出");
+                    // 修改 Padding Length 位
+                    result[1] = (byte)(result[1] + delta);
+                    result.AddRange(more);
+                    return result.ToArray();
+                }
+
+                // 加工前没有 padding 的情况
+                // 1) 先插入一个 Padding length 位
+                result.Insert(1, (byte)(delta - 1));
+                if (delta - 1 > 0)
+                {
+                    for (int i = 0; i < delta - 1; i++)
+                    {
+                        result.Add(0);
+                    }
+                }
+                result.AddRange(more);
+                return result.ToArray();
+            }
+
+            // *** delta 减少的情况
+            Debug.Assert(delta < 0);
+            // 加工前已经有 padding 的情况
+            if (precursor.Offset)
+            {
+                if (padding_count + delta < -1)
+                    throw new Exception($"delta 值 {delta} 太小以至于超过可用范围");
+                // 去掉尾部 padding 字节就可以满足的情况
+                if (padding_count + delta >= 0)
+                {
+                    for (int i = 0; i < -delta; i++)
+                    {
+                        result.RemoveAt(result.Count - 1);
+                    }
+                }
+                else
+                {
+                    Debug.Assert(padding_count + delta == -1);
+                    for (int i = 0; i < -delta - 1; i++)
+                    {
+                        result.RemoveAt(result.Count - 1);
+                    }
+                    // 还要去掉 padding length 位
+                    result.RemoveAt(1);
+                    // Offset 变为 false
+                    precursor.Offset = false;
+                    result[0] = precursor.ToByte();
+                }
+
+                result.AddRange(more);
+                return result.ToArray();
+            }
+
+            // 加工前没有 padding 的情况
+            throw new Exception($"delta 值为 {delta} 但原始数据中并没有 padding 可以去除");
+        }
+
+        // 获得 element 用到的填充 byte 个数
+        public static int GetPaddingCount(byte[] data)
+        {
+            Precursor precursor = new Precursor(data[0]);
+
+            int padding_length_count = 0;   // “填充字节数”位，的字节个数。0 或 1
+            int padding_count = 0;  // padding byte 个数。注意这个值没有包含 padding length byte 本身的 1
+
+            if (precursor.Offset)
+            {
+                padding_length_count = 1;
+                padding_count = data[1];
+            }
+
+            return padding_count + padding_length_count;
+        }
+
+        // 获得 element 占用的总 byte 数
+        public static int GetTotalLength(byte[] data)
+        {
+            Precursor precursor = new Precursor(data[0]);
+
+            int padding_length_count = 0;   // “填充字节数”位，的字节个数。0 或 1
+            int additional_oid_count = 0;   // 附加的 OID 字节个数。0 或 1
+            int padding_count = 0;  // padding byte 个数。注意这个值没有包含 padding length byte 本身的 1
+            int compacted_data_length = 0;
+
+            if (precursor.Offset)
+            {
+                padding_length_count = 1;
+                padding_count = data[1];
+            }
+
+            if (precursor.ObjectIdentifier >= 15)
+                additional_oid_count = 1;
+
+            compacted_data_length = data[1 + padding_length_count + additional_oid_count];
+
+            return  1 // (precursor) byte
+                + padding_length_count // (padding length) byte
+                + additional_oid_count // (additional oid value) byte
+                + 1 // (length of data) byte
+                + compacted_data_length
+                + padding_count;
         }
 
     }
