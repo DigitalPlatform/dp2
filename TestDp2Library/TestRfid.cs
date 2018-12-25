@@ -62,8 +62,8 @@ namespace TestDp2Library
         [TestMethod]
         public void Test_loop_integer_2()
         {
-            Debug.Assert(Compress.MaxInteger < UInt64.MaxValue);
-            for (UInt64 i = Compress.MaxInteger; i > Compress.MaxInteger - 65535; i--)
+            Debug.Assert(Compact.MaxInteger < UInt64.MaxValue);
+            for (UInt64 i = Compact.MaxInteger; i > Compact.MaxInteger - 65535; i--)
             {
                 TestInteger(i.ToString(), MakeBytes(i));
             }
@@ -71,17 +71,17 @@ namespace TestDp2Library
 
         void TestInteger(string text, byte[] correct)
         {
-            byte[] result = Compress.IntegerCompress(text);
+            byte[] result = Compact.IntegerCompact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.IntegerExtract(result));
+            Assert.AreEqual(text, Compact.IntegerExtract(result));
         }
 
         // 构造用于判断结果的 byte []
         byte[] MakeBytes(UInt64 v)
         {
-            return Compress.TrimLeft(Compress.ReverseBytes(BitConverter.GetBytes(v)));
+            return Compact.TrimLeft(Compact.ReverseBytes(BitConverter.GetBytes(v)));
         }
 
         #endregion
@@ -108,11 +108,11 @@ namespace TestDp2Library
 
         void TestDigit(string text, byte[] correct)
         {
-            byte[] result = Compress.NumericCompress(text);
+            byte[] result = Compact.NumericCompact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.NumericExtract(result));
+            Assert.AreEqual(text, Compact.NumericExtract(result));
         }
 
         #endregion
@@ -141,11 +141,11 @@ namespace TestDp2Library
 
         void TestBit5(string text, byte[] correct)
         {
-            byte[] result = Compress.Bit5Compress(text);
+            byte[] result = Compact.Bit5Compact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.Bit5Extract(result));
+            Assert.AreEqual(text, Compact.Bit5Extract(result));
         }
 
         #endregion
@@ -196,11 +196,11 @@ namespace TestDp2Library
 
         void TestBit6(string text, byte[] correct)
         {
-            byte[] result = Compress.Bit6Compress(text);
+            byte[] result = Compact.Bit6Compact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.Bit6Extract(result));
+            Assert.AreEqual(text, Compact.Bit6Extract(result));
         }
 
         #endregion
@@ -237,11 +237,11 @@ namespace TestDp2Library
 
         void TestBit7(string text, byte[] correct)
         {
-            byte[] result = Compress.Bit7Compress(text);
+            byte[] result = Compact.Bit7Compact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.Bit7Extract(result));
+            Assert.AreEqual(text, Compact.Bit7Extract(result));
         }
 
         #endregion
@@ -301,11 +301,11 @@ u output:10101
         }
 
         // 测试 ISIL 基本逻辑处理是否正确。
-        // 注意，本测试并未验证 Compress 生成的 byte[] 是否正确，也未验证 Extract 部分功能
+        // 注意，本测试并未验证 Compact 生成的 byte[] 是否正确，也未验证 Extract 部分功能
         void TestIsilProcess(string text, string process_info)
         {
             StringBuilder debugInfo = new StringBuilder();
-            Compress.IsilCompress(text, debugInfo);
+            Compact.IsilCompact(text, debugInfo);
 
             // 去掉末尾的回行
             process_info = process_info.TrimEnd(new char[] { '\r', '\n' });
@@ -334,16 +334,16 @@ u output:10101
 
         void TestIsil(string text, byte[] correct)
         {
-            byte[] result = Compress.IsilCompress(text);
+            byte[] result = Compact.IsilCompact(text);
 
             Assert.IsTrue(result.SequenceEqual(correct));
 
-            Assert.AreEqual(text, Compress.IsilExtract(result));
+            Assert.AreEqual(text, Compact.IsilExtract(result));
         }
 
         #endregion
 
-        #region AutoSelectCompressMethod()
+        #region AutoSelectCompactMethod()
 
         [TestMethod]
         public void Test_autoSelect_1()
@@ -351,7 +351,7 @@ u output:10101
             // page 31 例子
             Assert.AreEqual(
                 CompactionScheme.Integer,
-                Compress.AutoSelectCompressMethod("123456789012"));
+                Compact.AutoSelectCompactMethod("123456789012"));
         }
 
         [TestMethod]
@@ -360,7 +360,7 @@ u output:10101
             // page 32 例子
             Assert.AreEqual(
                 CompactionScheme.Integer,
-                Compress.AutoSelectCompressMethod("1203"));
+                Compact.AutoSelectCompactMethod("1203"));
         }
 
         [TestMethod]
@@ -368,7 +368,7 @@ u output:10101
         {
             Assert.AreEqual(
                 CompactionScheme.SixBitCode,
-                Compress.AutoSelectCompressMethod("QA268.L55"));
+                Compact.AutoSelectCompactMethod("QA268.L55"));
         }
 
         #endregion
