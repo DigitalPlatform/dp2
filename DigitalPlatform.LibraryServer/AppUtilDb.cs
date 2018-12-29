@@ -18,6 +18,8 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+
+        // TODO: 这里要检查一下 strDbName，是否为合法的实用库名
         // 设置实用库信息
         //      strRootElementName  根元素名。如果为空，系统自会用<r>作为根元素
         //      strKeyAttrName  key属性名。如果为空，系统自动会用k

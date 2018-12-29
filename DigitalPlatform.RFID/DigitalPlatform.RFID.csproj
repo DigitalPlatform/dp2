@@ -44,6 +44,8 @@
   <ItemGroup>
     <Compile Include="ChipMemory.cs" />
     <Compile Include="Compact.cs" />
+    <Compile Include="Element.cs" />
+    <Compile Include="Permutation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

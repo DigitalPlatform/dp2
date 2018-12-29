@@ -173,17 +173,10 @@ ref sessioninfo) == false)
         if (String.IsNullOrEmpty(strWord) == false
             && this.IsPostBack == false)
         {
-            string strXml = "";
-
-            // string strWord = "";
-            string strDbName = "";
-            string strFrom = "";
-            string strMatchStyle = "";
-
             GetSearchParams(out strWord,
-                out strDbName,
-                out strFrom,
-                out strMatchStyle);
+                out string strDbName,
+                out string strFrom,
+                out string strMatchStyle);
 
             // 根据检索参数创建XML检索式
             nRet = OpacApplication.BuildQueryXml(
@@ -196,7 +189,7 @@ ref sessioninfo) == false)
                 null,
                 app.SearchMaxResultCount,
                 this.BiblioSearchControl1.SearchStyle, // strSearchStyle
-                out strXml,
+                out string strXml,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -433,7 +426,6 @@ ref sessioninfo) == false)
         strDbName = HttpUtility.UrlDecode((string)table["dbname"], encoding);
         strFrom = HttpUtility.UrlDecode((string)table["from"], encoding);
         strMatchStyle = HttpUtility.UrlDecode((string)table["matchstyle"], encoding);
-
     }
 
     static string MakeSelectedPath(string strResultsetName, string strOffset)
