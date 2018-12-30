@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using DigitalPlatform.RFID;
+using DigitalPlatform;
 
 namespace TestDp2Library
 {
@@ -383,7 +384,7 @@ u output:10101
                 0xbe, 0x99, 0x1a, 0x14,
             };
             var element = Element.Parse(data, 0, out int bytes);
-            Assert.AreEqual(element.OID, 1);
+            Assert.AreEqual((int)element.OID, 1);
             Assert.AreEqual(element.Text, "123456789012");
             Assert.AreEqual(element.PrecursorOffset, true); // Precursor 后面会有 1 byte 的填充字符数
             Assert.AreEqual(element.Paddings, 0);   // 填充 byte 没有使用
@@ -401,6 +402,103 @@ u output:10101
                 0xbe, 0x99, 0x1a, 0x14,
             };
             Assert.IsTrue(result.SequenceEqual(correct));
+        }
+
+        #endregion
+
+
+        #region LogicChip
+
+        [TestMethod]
+        public void test_logicChip_1()
+        {
+            // zhiyan 1
+            byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30CA00000203A80008830203D6593F0000250110370210405F080599A713063F");
+            LogicChip chip = LogicChip.From(data);
+            Debug.Write(chip.ToString());
+        }
+
+        [TestMethod]
+        public void test_logicChip_2()
+        {
+            // zhiyan 2
+            byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30D600000203A80008830203D6593F0000250110370210405F080599A713063F");
+            LogicChip chip = LogicChip.From(data);
+
+        }
+
+        [TestMethod]
+        public void test_logicChip_3()
+        {
+            // jiangxi jingyuan 1
+            byte[] data = ByteArray.GetTimeStampByteArray("11030AA8AE0000000000000000000000000000000000000000000000000000000000000000000000");
+            LogicChip chip = LogicChip.From(data);
+        }
+
+        [TestMethod]
+        public void test_logicChip_4()
+        {
+            // jiangxi jingyuan 2
+            byte[] data = ByteArray.GetTimeStampByteArray("11030AA9770000000000000000000000000000000000000000000000000000000000000000000000");
+            LogicChip chip = LogicChip.From(data);
+        }
+
+        [TestMethod]
+        public void test_logicChip_5()
+        {
+            // 
+            byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30C600000203A80008830203D6593F0000250110370210405F080599A713063F");
+            LogicChip chip = LogicChip.From(data);
+        }
+
+        [TestMethod]
+        public void test_logicChip_6()
+        {
+            // ganchuang 1
+            byte[] data = ByteArray.GetTimeStampByteArray("9101040142214B000201B80300650110660100670100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+            LogicChip chip = LogicChip.From(data);
+            Debug.Write(chip.ToString());
+
+        }
+
+        [TestMethod]
+        public void test_logicChip_7()
+        {
+            // ganchuang 2
+            byte[] data = ByteArray.GetTimeStampByteArray("91020312D68700000201B80300650110660100670100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+            LogicChip chip = LogicChip.From(data);
+            Debug.Write(chip.ToString());
+
+        }
+
+        #endregion
+
+        #region layout
+
+        [TestMethod]
+        public void Test_chip_layout_1()
+        {
+            byte[] data = ByteArray.GetTimeStampByteArray(
+                @"91 00 05 1c
+be 99 1a 14
+02 01 d0 04
+02 04 b3 46
+07 44 1c b6
+e2 e3 35 d6
+83 02 07 ac
+c0 9e ba a0
+6f 6b 00 00".Replace(" ", "").Replace("\r\n", "").ToUpper()
+);
+
+
+            LogicChip chip = LogicChip.From(data);
+            Debug.Write(chip.ToString());
+
+            chip.Elements[0].SetLocked(true);
+            chip.Elements[4].SetLocked(true);
+
+            chip.SetIsNew(false);
+            chip.Sort(4 * 9, 4);
         }
 
         #endregion

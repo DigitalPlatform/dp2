@@ -10,7 +10,6 @@ namespace DigitalPlatform.RFID
 {
     public class Compact
     {
-
         public static CompactionScheme AutoSelectCompactMethod(string text)
         {
             if (CheckInteger(text, false))
@@ -80,6 +79,21 @@ namespace DigitalPlatform.RFID
             return results.ToArray();
         }
 
+
+        // 去掉右边的连续全 0 的 byte
+        public static byte[] TrimRight(byte[] source)
+        {
+            List<byte> results = new List<byte>(source);
+            while(results.Count > 0)
+            {
+                if (results[results.Count - 1] == 0)
+                    results.RemoveAt(results.Count - 1);
+                else
+                    break;
+            }
+
+            return results.ToArray();
+        }
 
         public static string IntegerExtract(byte[] data)
         {
@@ -1342,5 +1356,23 @@ namespace DigitalPlatform.RFID
         #endregion
     }
 
+    // 数据压缩方案
+    // ISO 28560-2:2014(E), page 17
+    public enum CompactionScheme
+    {
+        ApplicationDefined = 0,
+        Integer = 1,
+        Numeric = 2,
+        FivebitCode = 3,
+        SixBitCode = 4,
+        SevenBitCode = 5,
+        OctectString = 6,
+        Utf8String = 7,
+
+        // 以下是扩展的几个值
+        Null = -1,  // 表示希望自动选择
+        ISIL = -2,  // 特殊地 ISIL 压缩方案
+        Base64 = -3,    // base64 方式给出 byte[] 内容
+    }
 
 }
