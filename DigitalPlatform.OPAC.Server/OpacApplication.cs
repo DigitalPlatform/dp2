@@ -2707,7 +2707,6 @@ System.Text.Encoding.UTF8))
             int nTotalUsed = 0;
 
             // *** 第一步 把虚拟库名和普通库名分离
-
             int nRet = SeperateVirtualDbs(
             app,
             strDbName,
@@ -2738,7 +2737,6 @@ System.Text.Encoding.UTF8))
             // *** 第三步：把普通库名创建成检索式
             if (string.IsNullOrEmpty(strNormalDbNameList) == false)
             {
-                string strTargetList = "";
 #if NO
                 if (String.IsNullOrEmpty(strDbName) == true
                     || strDbName.ToLower() == "<all>"
@@ -2837,7 +2835,7 @@ System.Text.Encoding.UTF8))
             app,
             strNormalDbNameList,
             strFrom,
-            out strTargetList,
+            out string strTargetList,
             out strError);
                 if (nRet == -1)
                     return -1;
