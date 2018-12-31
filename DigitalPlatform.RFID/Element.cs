@@ -304,11 +304,6 @@ namespace DigitalPlatform.RFID
                     throw new Exception($"无法为字符串 '{text}' 自动选定压缩方案");
             }
 
-            if (compact_method == CompactionScheme.ISIL)
-                precursor.CompactionCode = (int)CompactionScheme.ApplicationDefined;
-            else
-                precursor.CompactionCode = (int)compact_method;
-
             byte[] data = null;
             if (compact_method == CompactionScheme.Integer)
                 data = RFID.Compact.IntegerCompact(text);
@@ -331,6 +326,14 @@ namespace DigitalPlatform.RFID
             else if (compact_method == CompactionScheme.Base64)
                 data = Convert.FromBase64String(text);
 
+            if (oid == (int)ElementOID.ContentParameter)
+                compact_method = 0;
+
+            if (compact_method == CompactionScheme.ISIL)
+                compact_method = (int)CompactionScheme.ApplicationDefined;
+
+            precursor.CompactionCode = (int)compact_method;
+
             // 通过 data 计算出是否需要 padding bytes
             int total_bytes = 1 // precursor
                 + 1 // length of data
@@ -339,9 +342,12 @@ namespace DigitalPlatform.RFID
                 total_bytes++;  // relative-OID 需要多占一个 byte
 
             int paddings = 0;
-            if ((total_bytes % 4) != 0)
+            if (alignment)
             {
-                paddings = 4 - (total_bytes % 4);
+                if ((total_bytes % 4) != 0)
+                {
+                    paddings = 4 - (total_bytes % 4);
+                }
             }
 
             // 组装最终数据
@@ -573,6 +579,9 @@ namespace DigitalPlatform.RFID
                         result.Add(0);
                     }
                 }
+                // 2) Offset bit 设置为 1
+                result[0] |= 0x80;
+
                 result.AddRange(more);
                 return result.ToArray();
             }
@@ -662,7 +671,9 @@ namespace DigitalPlatform.RFID
 
         public override string ToString()
         {
-            string compacted = Convert.ToString(this._precursor.CompactionCode, 2).PadLeft(3, '0');
+            string compacted = "";
+            if (this._precursor != null)
+                compacted = Convert.ToString(this._precursor.CompactionCode, 2).PadLeft(3, '0');
             string bin = GetHexString(this.Content);
             if (this.OID == ElementOID.ContentParameter)
             {
@@ -691,20 +702,44 @@ namespace DigitalPlatform.RFID
             return string.Join(",", names.ToArray());
         }
 
+
+
         // 得到用16进制字符串表示的 bin 内容
-        public static string GetHexString(byte[] baTimeStamp)
+        public static string GetHexString(byte[] baTimeStamp, string format = "")
         {
             if (baTimeStamp == null)
                 return "";
-            StringBuilder text = new StringBuilder();
-            for (int i = 0; i < baTimeStamp.Length; i++)
+            if (string.IsNullOrEmpty(format))
             {
-                //string strHex = String.Format("{0,2:X}",baTimeStamp[i]);
-                string strHex = Convert.ToString(baTimeStamp[i], 16);
-                text.Append(strHex.PadLeft(2, '0'));
+                StringBuilder text = new StringBuilder();
+                for (int i = 0; i < baTimeStamp.Length; i++)
+                {
+                    //string strHex = String.Format("{0,2:X}",baTimeStamp[i]);
+                    string strHex = Convert.ToString(baTimeStamp[i], 16);
+                    text.Append(strHex.PadLeft(2, '0'));
+                }
+
+                return text.ToString();
             }
 
-            return text.ToString();
+            // 每行四个 byte
+            if (format == "4")
+            {
+                StringBuilder text = new StringBuilder();
+                for (int i = 0; i < baTimeStamp.Length; i++)
+                {
+                    string strHex = Convert.ToString(baTimeStamp[i], 16);
+                    text.Append(strHex.PadLeft(2, '0'));
+                    if ((i % 4) <= 2)
+                        text.Append(" ");
+                    if ((i % 4) == 3)
+                        text.Append("\r\n");
+                }
+
+                return text.ToString();
+            }
+            else
+                throw new Exception($"未知的风格 '{format}'");
         }
 
         // 得到 byte[]类型 内容
@@ -712,6 +747,8 @@ namespace DigitalPlatform.RFID
         {
             if (string.IsNullOrEmpty(strHexTimeStamp) == true)
                 return null;
+
+            strHexTimeStamp = strHexTimeStamp.Replace(" ", "").Replace("\r\n", "").ToUpper();
 
             byte[] result = new byte[strHexTimeStamp.Length / 2];
 
