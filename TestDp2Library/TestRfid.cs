@@ -393,7 +393,7 @@ u output:10101
         [TestMethod]
         public void Test_element_compact_1()
         {
-            byte [] result = Element.Compact(1, 
+            byte[] result = Element.Compact(1,
                 "123456789012",
                 CompactionScheme.Null,
                 true);
@@ -475,6 +475,7 @@ u output:10101
 
         #region layout
 
+        // 测试重组含有 Locked 元素的已有标签内容
         [TestMethod]
         public void Test_chip_layout_1()
         {
@@ -501,6 +502,32 @@ c0 9e ba a0
             chip.Sort(4 * 9, 4);
         }
 
+        // 测试写入新标签
+        [TestMethod]
+        public void Test_chip_layout_2()
+        {
+            LogicChip chip = new LogicChip();
+            chip.NewElement(ElementOID.PII, "123456789012").WillLock = true;
+            chip.NewElement(ElementOID.SetInformation, "1203");
+            chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
+            chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").WillLock = true;
+            Debug.Write(chip.ToString());
+
+            var result = chip.GetBytes(4 * 9, 4);
+            string result_string = Element.GetHexString(result, "4");
+            byte[] correct = Element.FromHexString(
+    @"91 00 05 1c
+be 99 1a 14
+02 01 d0 14
+02 04 b3 46
+07 44 1c b6
+e2 e3 35 d6
+83 02 07 ac
+c0 9e ba a0
+6f 6b 00 00"
+);
+            Assert.IsTrue(result.SequenceEqual(correct));
+        }
         #endregion
     }
 }
