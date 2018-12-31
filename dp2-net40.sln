@@ -188,6 +188,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceCenter", "FaceCenter\Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.RFID", "DigitalPlatform.RFID\DigitalPlatform.RFID.csproj", "{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestRFID", "UnitTestRFID\UnitTestRFID.csproj", "{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1468,6 +1470,24 @@ Global
 		{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}.Test|x86.ActiveCfg = Release|Any CPU
 		{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}.Test|x86.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Debug|x86.Build.0 = Debug|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|x86.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Release|x86.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|Any CPU.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|x86.ActiveCfg = Release|Any CPU
+		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

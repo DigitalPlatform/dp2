@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform.RFID
 {
+#if NO
     /// <summary>
     /// 模拟 RFID 芯片内存物理结构
     /// </summary>
@@ -26,7 +27,7 @@ namespace DigitalPlatform.RFID
             return results.ToArray();
         }
     }
-
+#endif
     /// <summary>
     /// 模拟 RFID 芯片内的逻辑结构。便于执行整体压缩，解压缩的操作
     /// </summary>
@@ -127,15 +128,21 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据物理数据构造 (拆包)
-        public static LogicChip From(byte[] data)
+        // parameters:
+        //      block_map   每个 char 表示一个 block 的锁定状态。'l' 表示锁定, '.' 表示没有锁定
+        public static LogicChip From(byte[] data,
+            int block_size,
+            string block_map = "")
         {
             LogicChip chip = new LogicChip();
-            chip.Parse(data);
+            chip.Parse(data, block_size, block_map);
             return chip;
         }
 
         // 解析 data 内容，初始化本对象
-        public void Parse(byte[] data)
+        public void Parse(byte[] data,
+            int block_size,
+            string block_map)
         {
             this._isNew = false;
             this._elements.Clear();
@@ -146,7 +153,31 @@ namespace DigitalPlatform.RFID
                 if (data[start] == 0)
                     break;  // 有时候用 0 填充了余下的全部 bytes
                 Element element = Element.Parse(data, start, out int bytes);
+                Debug.Assert(element.StartOffs == start);
                 this._elements.Add(element);
+
+                for (int i = start / block_size; i < (start + bytes) / block_size; i++)
+                {
+                    if (GetBlockStatus(block_map, i) == 'l')
+                        element.SetLocked(true);
+                }
+
+                // 检查整个 element 占用的每个 block 的 Locked 状态是否一致
+                for (int i = start / block_size; i < (start + bytes) / block_size; i++)
+                {
+                    char ch = GetBlockStatus(block_map, i);
+                    if (element.Locked)
+                    {
+                        if (ch != 'l')
+                            throw new Exception($"元素 {element.ToString()} 内发现锁定状态不一致的块");
+                    }
+                    else
+                    {
+                        if (ch != '.')
+                            throw new Exception($"元素 {element.ToString()} 内发现锁定状态不一致的块");
+                    }
+                }
+
                 start += bytes;
             }
 
@@ -165,7 +196,7 @@ namespace DigitalPlatform.RFID
         // 5) 锁定的元素，和非锁定元素区域内部，可以按照 OID 号码排序
         // 上述算法有个优势，就是所有锁定元素中间不一定要 block 边界对齐，这样可以节省一点空间
         // 但存在一个小问题： Content Parameter 要占用多少 byte? 如果以后元素数量增多，(因为它后面就是锁定区域)它无法变大怎么办？
-        public void Sort(int total_bytes, int block_size)
+        public void Sort(int max_bytes, int block_size)
         {
             SetContentParameter();
             if (this.IsNew == true)
@@ -180,7 +211,7 @@ namespace DigitalPlatform.RFID
                         return -1;
                     }
                     if ((int)b.OID == 1)
-                        return -1;
+                        return 1;
 
                     // 比较 WillLock。拟锁定的位置靠后
                     int lock_a = a.WillLock ? 1 : 0;
@@ -193,9 +224,86 @@ namespace DigitalPlatform.RFID
                     delta = a.OID - b.OID;
                     return delta;
                 });
+
+                // 更新 element.OriginData
+                // 对 WillLock 切换的情形，和最后一个 WillLock 元素进行 padding 调整
+                Element prev_element = null;
+                string prev_type = "";   // free or will_lock
+                string current_type = "";
+                int start = 0;
+                int i = 0;
+                foreach (Element element in this._elements)
+                {
+                    if (element.WillLock == false)
+                        current_type = "free";
+                    else
+                        current_type = "will_lock";
+
+                    // 如果切换了类型(类型指“普通”还是 WillLock)
+                    // 需要把 prev_element 尾部对齐 block 边界
+                    if (current_type != prev_type
+                        && prev_element != null)
+                    {
+                        int result = AdjustCount(block_size, start);
+                        int delta = result - start;
+
+                        // 调整 prev_element 的 padding
+                        if (delta != 0)
+                            prev_element.OriginData = Element.AdjustPaddingBytes(prev_element.OriginData, delta);
+
+                        start = result;
+                    }
+
+#if NO
+                    CompactionScheme compact_method = CompactionScheme.Null;
+                    if (element.OID == ElementOID.ContentParameter)
+                        compact_method = CompactionScheme.OctectString;
+                    else if (element.OID == ElementOID.OwnerInstitution
+                        || element.OID == ElementOID.IllBorrowingInstitution)
+                        compact_method = CompactionScheme.ISIL;
+#endif
+                    element.OriginData = Element.Compact((int)element.OID,
+                        element.Text,
+                        CompactionScheme.Null,
+                        false);
+                    //if (start != element.StartOffs)
+                    //    throw new Exception($"element {element.ToString()} 的 StartOffs {element.StartOffs} 不符合预期值 {start}");
+
+
+                    start += element.OriginData.Length;
+                    prev_type = current_type;
+                    prev_element = element;
+                    i++;
+                }
+
+                // 如果是最后一个 element(并且它是 WillLock 类型)
+                // 需要把尾部对齐 block 边界
+                if (prev_element != null && prev_element.WillLock)
+                {
+                    int result = AdjustCount(block_size, start);
+                    int delta = result - start;
+
+                    // 调整 prev_element 的 padding
+                    if (delta != 0)
+                        prev_element.OriginData = Element.AdjustPaddingBytes(prev_element.OriginData, delta);
+
+                    start = result;
+                }
             }
             else
             {
+                foreach (Element element in this._elements)
+                {
+                    if (element.Locked)
+                        continue;
+
+                    element.OriginData = Element.Compact((int)element.OID,
+                        element.Text,
+                        CompactionScheme.Null,
+                        false);
+                }
+
+
                 // 改写状态。Locked 的元素不能动。只能在余下空挡位置，见缝插针组合排列非 Lock 元素
                 // 组合算法是：每当得到一个区间尺寸，就去查询余下的元素中尺寸组合起来最适合的那些元素
                 // 可以用一种利用率指标来评价组合好坏。也就是余下的空挡越小，越好
@@ -203,7 +311,7 @@ namespace DigitalPlatform.RFID
                 if (elements.Count == 0)
                     return; // 没有必要进行排序
 
-                bool bRet = GetFreeSegments(total_bytes,
+                bool bRet = GetFreeSegments(max_bytes,
                     out List<int> free_segments,
                     out List<object> anchor_list);
 
@@ -229,6 +337,8 @@ namespace DigitalPlatform.RFID
                     anchor_list);
             }
         }
+
+        #region Sort() 的下级函数
 
         // parameters:
         //      layout  自由元素的布局方式。负数表示 WillLock 类型的元素
@@ -290,6 +400,7 @@ namespace DigitalPlatform.RFID
                 // 填充字节。调整 WillLock 结束点在 block 边界
                 // area 末尾要调整到 volume 边界
                 AdjustPadding(
+                    IsTail(area, free_element_layout),
     block_size,
     area.Volume,
     elements);
@@ -304,7 +415,25 @@ namespace DigitalPlatform.RFID
             this._elements.AddRange(results);
         }
 
+        // 观察一个 OneArea 对象是否在数组中为非 0 Volume 的最后一个
+        static bool IsTail(OneArea area, List<OneArea> areas)
+        {
+#if NO
+            for (int i = areas.IndexOf(area) + 1; i < areas.Count; i++)
+            {
+                OneArea current = areas[i];
+                if (current.Volume == 0)
+                    continue;
+                return false;
+            }
+
+            return true;
+#endif
+            return areas.IndexOf(area) == areas.Count - 1;
+        }
+
         static void AdjustPadding(
+            bool is_tail,
             int block_size,
             int segment_volume,
             List<Element> elements)
@@ -341,13 +470,27 @@ namespace DigitalPlatform.RFID
                 prev_type = current_type;
             }
 
-            if (total < segment_volume)
+            if (is_tail == false)
             {
-                int delta = segment_volume - total;
-                Debug.Assert(delta > 0);
+                if (total < segment_volume)
+                {
+                    int delta = segment_volume - total;
+                    Debug.Assert(delta > 0);
+                    Element element = elements[elements.Count - 1];
+                    // TODO: 注意调整可能导致溢出
+                    element.OriginData = Element.AdjustPaddingBytes(element.OriginData, delta);
+                }
+            }
+            else
+            {
                 Element element = elements[elements.Count - 1];
-                // TODO: 注意调整可能导致溢出
-                element.OriginData = Element.AdjustPaddingBytes(element.OriginData, delta);
+                if (element.WillLock)
+                {
+                    int result = AdjustCount(block_size, total);
+                    int delta = result - total;
+                    if (delta > 0)
+                        element.OriginData = Element.AdjustPaddingBytes(element.OriginData, delta);
+                }
             }
         }
 
@@ -363,7 +506,7 @@ namespace DigitalPlatform.RFID
                     return -1;
                 }
                 if ((int)b.OID == 1)
-                    return -1;
+                    return 1;
 
                 // 比较 WillLock。拟锁定的位置靠后
                 int lock_a = a.WillLock ? 1 : 0;
@@ -400,12 +543,13 @@ namespace DigitalPlatform.RFID
         }
 
         // 通过 原始尺寸 找到一个元素。返回前会在 elements 中去掉已经找到的元素
-        static Element FindElementByCount(ref List<Element> elements, int count)
+        static Element FindElementByCount(ref List<Element> elements,
+            int count)
         {
             Element found = null;
             foreach (Element element in elements)
             {
-                if (count < 0 && element.Locked)
+                if (count < 0 && element.WillLock)
                 {
                     if (element.OriginData.Length == -count)
                     {
@@ -450,13 +594,13 @@ namespace DigitalPlatform.RFID
         // 获得当前没有锁定的区段的容量列表
         // 返回的数组中，每个整数表示一个区段长度(byte数)
         // parameters:
-        //      total_bytes 这是整个芯片的 byte 容量
+        //      max_bytes 这是整个芯片的 byte 容量
         //      results 返回数值集合。每个元素是一个数值，表示 segment 内可用空间 bytes 数
         //      anchor_list 便于后期插入操作的锚定列表。里面是所有 locked 类型的元素，还有 null 对象。null 对象位置代表可用的空白区间
         // return:
         //      true    成功
         //      false   失败
-        bool GetFreeSegments(int total_bytes,
+        bool GetFreeSegments(int max_bytes,
             out List<int> results,
             out List<object> anchor_list)
         {
@@ -473,7 +617,7 @@ namespace DigitalPlatform.RFID
 
             if (locked_elements.Count == 0)
             {
-                results.Add(total_bytes);   // 没有任何 locked elements。全部都是可用空间
+                results.Add(max_bytes);   // 没有任何 locked elements。全部都是可用空间
                 return true;
             }
 
@@ -512,9 +656,9 @@ namespace DigitalPlatform.RFID
                 anchor_list.Add(prev_element);
             }
             // 最后一段空白区
-            if (start < total_bytes)
+            if (start < max_bytes)
             {
-                results.Add(total_bytes - start);
+                results.Add(max_bytes - start);
             }
 
             return true;
@@ -678,8 +822,12 @@ start);
         {
             if ((value % block_size) == 0)
                 return value;
-            return block_size * ((value % block_size) + 1);
+            int result = block_size * ((value / block_size) + 1);
+            Debug.Assert(result >= value);
+            return result;
         }
+
+#endregion
 
         // 根据当前的所有元素，设置 Content parameter 元素内容
         public void SetContentParameter()
@@ -695,40 +843,83 @@ start);
                 if (oid >= 3)
                 {
                     // TODO: 测试 0x80000000 >> 0 会不会有问题
-                    value |= 0x80000000 >> (oid - 3);
+                    value |= 0x8000000000000000 >> (oid - 3);
                 }
             }
 
             content_parameter.Content = Compact.TrimRight(Compact.ReverseBytes(BitConverter.GetBytes(value)));
+            content_parameter.Text = Element.GetHexString(content_parameter.Content);
         }
+
+        static char NormalMapChar = '.';
 
         // 打包为 byte[] 形态
         // TODO: 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
-        public byte[] GetBytes(bool alignment)
+        // parameters:
+        //      block_map   块地图。用 
+        //                  字符 'l' 表示原来就是锁定状态的块
+        //                  字符 'w' 表示需要新锁定的块
+        public byte[] GetBytes(int max_bytes,
+            int block_size,
+            out string block_map)
         {
+            block_map = "";
+
+            // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
+            this.Sort(max_bytes, block_size);
+
+            List<char> map = new List<char>();
+            int start = 0;
             List<byte> results = new List<byte>();
-            // TODO: 先对 elements 排序。确保 PII 和 OID 元素 index 在前两个
             foreach (Element element in this._elements)
             {
-                CompactionScheme compact_method = CompactionScheme.Null;
-                if (element.OID == ElementOID.ContentParameter)
-                    compact_method = CompactionScheme.Base64;
-                else if (element.OID == ElementOID.OwnerInstitution
-                    || element.OID == ElementOID.IllBorrowingInstitution)
-                    compact_method = CompactionScheme.ISIL;
-                results.AddRange(Element.Compact((int)element.OID,
-                    element.Text,
-                    compact_method, alignment));
+                if (element.Locked)
+                {
+                    if (start != element.StartOffs)
+                        throw new Exception($"element {element.ToString()} 的 StartOffs {element.StartOffs} 不符合预期值 {start}");
+                }
+
+                var bytes = element.OriginData;
+                results.AddRange(bytes);
+
+                // 设置 block map
+                if (element.WillLock || element.Locked)
+                {
+                    char ch = NormalMapChar;
+                    if (element.Locked)
+                        ch = 'l';
+                    else if (element.WillLock)
+                        ch = 'w';
+                    for (int i = start / block_size; i < (start + bytes.Length) / block_size; i++)
+                    {
+                        SetBlockStatus(ref map, i, ch);
+                    }
+                }
+
+                start += bytes.Length;
             }
 
+            if (start > max_bytes)
+                throw new Exception($"实际产生的 byte 数 {start} 超过限制数 {max_bytes}");
+
+            block_map = new string(map.ToArray());
             return results.ToArray();
         }
 
-
-        // 输出为物理数据格式 (打包)
-        public ChipMemory ToChipMemory()
+        static void SetBlockStatus(ref List<char> map, int index, char ch)
         {
-            return null;
+            while (map.Count < index + 1)
+            {
+                map.Add(NormalMapChar);
+            }
+            map[index] = ch;
+        }
+
+        static char GetBlockStatus(string map, int index)
+        {
+            if (index >= map.Length)
+                return '.';
+            return map[index];
         }
 
         // 根据 XML 数据构造
