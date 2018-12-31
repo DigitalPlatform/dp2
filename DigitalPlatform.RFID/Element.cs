@@ -296,12 +296,18 @@ namespace DigitalPlatform.RFID
             Precursor precursor = new Precursor();
             precursor.ObjectIdentifier = oid;
 
+            if (oid == (int)ElementOID.ContentParameter)
+                compact_method = CompactionScheme.OctectString;
+            else if (oid == (int)ElementOID.OwnerInstitution
+                || oid == (int)ElementOID.IllBorrowingInstitution)
+                compact_method = CompactionScheme.ISIL;
+
             // 自动选定压缩方案
             if (compact_method == CompactionScheme.Null)
             {
-                compact_method = RFID.Compact.AutoSelectCompactMethod(text);
+                compact_method = RFID.Compact.AutoSelectCompactMethod((ElementOID)oid, text);
                 if (compact_method == CompactionScheme.Null)
-                    throw new Exception($"无法为字符串 '{text}' 自动选定压缩方案");
+                    throw new Exception($"无法为字符串 '{text}' (oid='{(ElementOID)oid}') 自动选定压缩方案");
             }
 
             byte[] data = null;
@@ -495,6 +501,8 @@ namespace DigitalPlatform.RFID
         // parameters:
         //      data    待加工的数据
         //      delta   变化数。可以是负数。表示增加或者减少这么多个 bytes 的 padding 字符
+        // exception:
+        //      可能会抛出 Exception 或 PaddingOverflowException
         public static byte[] AdjustPaddingBytes(byte[] data, int delta)
         {
             if (delta == 0)
@@ -559,10 +567,11 @@ namespace DigitalPlatform.RFID
                     {
                         result.Add(0);
                     }
-                    // TODO: 检查 byte 值是否溢出
-                    // TODO: 是否有办法预先知道多大的 delta 值会溢出?
+                    // 检查 byte 值是否溢出
+                    // 有办法预先知道多大的 delta 值会溢出
                     if (result[1] + delta > byte.MaxValue)
-                        throw new Exception($"Padding Length 原值为 {result[1]}，加上 {delta} 以后发生了溢出");
+                        throw new PaddingOverflowException($"Padding Length 原值为 {result[1]}，加上 {delta} 以后发生了溢出",
+                            byte.MaxValue - result[1]);
                     // 修改 Padding Length 位
                     result[1] = (byte)(result[1] + delta);
                     result.AddRange(more);
@@ -620,7 +629,8 @@ namespace DigitalPlatform.RFID
             }
 
             // 加工前没有 padding 的情况
-            throw new Exception($"delta 值为 {delta} 但原始数据中并没有 padding 可以去除");
+            throw new PaddingOverflowException($"delta 值为 {delta} 但原始数据中并没有 padding 可以去除",
+                0);
         }
 
         // 获得 element 用到的填充 byte 个数
@@ -825,4 +835,14 @@ namespace DigitalPlatform.RFID
         }
     }
 
+    // 填充字节溢出异常
+    public class PaddingOverflowException : Exception
+    {
+        public int MaxDelta { get; set; }
+
+        public PaddingOverflowException(string message, int max_delta) : base(message)
+        {
+            this.MaxDelta = max_delta;
+        }
+    }
 }

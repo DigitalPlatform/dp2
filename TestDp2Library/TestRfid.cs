@@ -414,7 +414,7 @@ u output:10101
         {
             // zhiyan 1
             byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30CA00000203A80008830203D6593F0000250110370210405F080599A713063F");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
             Debug.Write(chip.ToString());
         }
 
@@ -423,7 +423,7 @@ u output:10101
         {
             // zhiyan 2
             byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30D600000203A80008830203D6593F0000250110370210405F080599A713063F");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
 
         }
 
@@ -432,7 +432,7 @@ u output:10101
         {
             // jiangxi jingyuan 1
             byte[] data = ByteArray.GetTimeStampByteArray("11030AA8AE0000000000000000000000000000000000000000000000000000000000000000000000");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
         }
 
         [TestMethod]
@@ -440,7 +440,7 @@ u output:10101
         {
             // jiangxi jingyuan 2
             byte[] data = ByteArray.GetTimeStampByteArray("11030AA9770000000000000000000000000000000000000000000000000000000000000000000000");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
         }
 
         [TestMethod]
@@ -448,7 +448,7 @@ u output:10101
         {
             // 
             byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30C600000203A80008830203D6593F0000250110370210405F080599A713063F");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
         }
 
         [TestMethod]
@@ -456,7 +456,7 @@ u output:10101
         {
             // ganchuang 1
             byte[] data = ByteArray.GetTimeStampByteArray("9101040142214B000201B80300650110660100670100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
             Debug.Write(chip.ToString());
 
         }
@@ -466,68 +466,12 @@ u output:10101
         {
             // ganchuang 2
             byte[] data = ByteArray.GetTimeStampByteArray("91020312D68700000201B80300650110660100670100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-            LogicChip chip = LogicChip.From(data);
+            LogicChip chip = LogicChip.From(data, 4);
             Debug.Write(chip.ToString());
 
         }
 
         #endregion
 
-        #region layout
-
-        // 测试重组含有 Locked 元素的已有标签内容
-        [TestMethod]
-        public void Test_chip_layout_1()
-        {
-            byte[] data = ByteArray.GetTimeStampByteArray(
-                @"91 00 05 1c
-be 99 1a 14
-02 01 d0 04
-02 04 b3 46
-07 44 1c b6
-e2 e3 35 d6
-83 02 07 ac
-c0 9e ba a0
-6f 6b 00 00".Replace(" ", "").Replace("\r\n", "").ToUpper()
-);
-
-
-            LogicChip chip = LogicChip.From(data);
-            Debug.Write(chip.ToString());
-
-            chip.Elements[0].SetLocked(true);
-            chip.Elements[4].SetLocked(true);
-
-            chip.SetIsNew(false);
-            chip.Sort(4 * 9, 4);
-        }
-
-        // 测试写入新标签
-        [TestMethod]
-        public void Test_chip_layout_2()
-        {
-            LogicChip chip = new LogicChip();
-            chip.NewElement(ElementOID.PII, "123456789012").WillLock = true;
-            chip.NewElement(ElementOID.SetInformation, "1203");
-            chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
-            chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu").WillLock = true;
-            Debug.Write(chip.ToString());
-
-            var result = chip.GetBytes(4 * 9, 4);
-            string result_string = Element.GetHexString(result, "4");
-            byte[] correct = Element.FromHexString(
-    @"91 00 05 1c
-be 99 1a 14
-02 01 d0 14
-02 04 b3 46
-07 44 1c b6
-e2 e3 35 d6
-83 02 07 ac
-c0 9e ba a0
-6f 6b 00 00"
-);
-            Assert.IsTrue(result.SequenceEqual(correct));
-        }
-        #endregion
     }
 }

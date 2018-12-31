@@ -10,6 +10,27 @@ namespace DigitalPlatform.RFID
 {
     public class Compact
     {
+        public static CompactionScheme AutoSelectCompactMethod(
+            ElementOID oid,
+            string text)
+        {
+            if (oid == ElementOID.Title)
+                return CompactionScheme.Utf8String;
+
+            if (CheckInteger(text, false))
+                return CompactionScheme.Integer;
+            if (CheckNumeric(text, false))
+                return CompactionScheme.Numeric;
+            if (CheckBit5(text, false))
+                return CompactionScheme.FivebitCode;
+            if (CheckBit6(text, false))
+                return CompactionScheme.SixBitCode;
+            if (CheckBit7(text, false))
+                return CompactionScheme.SevenBitCode;
+
+            return CompactionScheme.Null;   // 无法自动选择
+        }
+
         public static CompactionScheme AutoSelectCompactMethod(string text)
         {
             if (CheckInteger(text, false))
@@ -22,7 +43,8 @@ namespace DigitalPlatform.RFID
                 return CompactionScheme.SixBitCode;
             if (CheckBit7(text, false))
                 return CompactionScheme.SevenBitCode;
-            return CompactionScheme.Null;
+
+            return CompactionScheme.Null;   // 无法自动选择
         }
 
         #region Integer
