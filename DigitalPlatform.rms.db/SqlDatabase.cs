@@ -12565,14 +12565,13 @@ handle.CancelTokenSource.Token).Result;
 
                         if (results != null && results.Count > 0)
                         {
-                            List<WriteInfo> temp = null;
                             // 更新 Keys
                             nRet = UpdateKeysRows(
                                 connection,
                                 true,   // 始终要立即删除旧的 keys
                                 bFastMode,
                                 results,
-                                out temp,
+                                out List<WriteInfo> temp,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
@@ -12594,7 +12593,8 @@ handle.CancelTokenSource.Token).Result;
                     }
                     catch (Exception ex)
                     {
-                        strError = "4 WriteRecords() 在给'" + this.GetCaption("zh-CN") + "'库写入记录 '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' 时出错,原因:" + ex.Message;
+                        // TODO: 注意确保前端能用 MessageDlg 显示很长的报错信息
+                        strError = "4 WriteRecords() 在给'" + this.GetCaption("zh-CN") + "'库写入记录 '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' 时出错,原因:" + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
                     finally
