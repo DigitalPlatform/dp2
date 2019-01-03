@@ -258,6 +258,7 @@ namespace DigitalPlatform.RFID
                 _willLock = value;
             }
         }
+
         public Element(int start)
         {
             this._startOffs = start;
@@ -284,6 +285,111 @@ namespace DigitalPlatform.RFID
             return oid;
         }
 
+        // 验证输入的元素文本是否合法
+        // return:
+        //      null    合法
+        //      其他  返回不合法的文字解释
+        public static string VerifyElementText(ElementOID oid, string text)
+        {
+            if (oid == ElementOID.SetInformation)
+                return VerifySetInformation(text);
+            if (oid == ElementOID.TypeOfUsage)
+                return VerifyTypeOfUsage(text);
+            if (oid == ElementOID.Gs1ProductIndentifier)
+                return VerifyGs1ProductIndentifier(text);
+            if (oid == ElementOID.MediaFormat)
+                return VerifyMediaFormat(text);
+            if (oid == ElementOID.SupplyChainStage)
+                return VerifySupplyChainStage(text);
+            return null;
+        }
+
+        #region 校验各种元素的输入文本合法性
+
+        // GB/T 35660.2-2017 page 9
+        // 编码到芯片的时候，根据 text 自动选定编码方式。由于它形态的特点，一般会自动选定 Integer 编码方式
+        // 可参见 GB/T 35660.2-2017 page 32 具体例子
+        public static string VerifySetInformation(string text)
+        {
+            if (text.Length != 2 && text.Length != 4 && text.Length != 6)
+                return "SetInformation 元素内容必须是 2 4 6 个数字字符";
+            foreach (char ch in text)
+            {
+                if (ch < '0' || ch > '9')
+                    return "SetInformation 元素内容不允许出现非数字字符";
+            }
+            return null;
+        }
+
+        // GB/T 35660.1-2017 page 21
+        // 两个字符。分别为主次两个限定符。每个字符范围是 0-9 A-F。实际上意思是当作 0-16 的数值来理解
+        // 编码到芯片的时候，要用 OctectString 方式编码为一个 byte
+        public static string VerifyTypeOfUsage(string text)
+        {
+            if (text.Length != 2)
+                return "TypeOfUsage(应用类别) 元素内容必须是 2 字符";
+            foreach (char ch in text)
+            {
+                if ((ch >= '0' && ch <= '9')
+                    || (ch >= 'A' && ch <= 'F'))
+                {
+
+                }
+                else
+                    return "TypeOfUsage(应用类别) 元素内容必须是 0-9 或 A-F 范围的字符";
+            }
+            return null;
+        }
+
+        public static string VerifyGs1ProductIndentifier(string text)
+        {
+            if (text.Length != 13)
+                return "Gs1ProductIndentifier(GS1产品标识符) 元素内容必须是 13 字符";
+            return null;
+        }
+
+        // 这里采用十六进制表示法
+        // GB/T 35660.1-2017 page 10
+        // 编码到芯片时候，是 OctectString 方式，编码为一个 byte
+        public static string VerifyMediaFormat(string text)
+        {
+            if (text.Length != 2)
+                return "MediaFormat(媒体格式(其他)) 元素内容必须是 2 字符";
+            foreach (char ch in text)
+            {
+                if ((ch >= '0' && ch <= '9')
+                    || (ch >= 'A' && ch <= 'F'))
+                {
+
+                }
+                else
+                    return "MediaFormat(媒体格式(其他)) 元素内容必须是 0-9 或 A-F 范围的字符";
+            }
+            return null;
+        }
+
+        // 这里采用十六进制表示法
+        // GB/T 35660.1-2017 page 11
+        // 编码到芯片时候，是 OctectString 方式，编码为一个 byte
+        public static string VerifySupplyChainStage(string text)
+        {
+            if (text.Length != 2)
+                return "SupplyChainStage(供应链阶段) 元素内容必须是 2 字符";
+            foreach (char ch in text)
+            {
+                if ((ch >= '0' && ch <= '9')
+                    || (ch >= 'A' && ch <= 'F'))
+                {
+
+                }
+                else
+                    return "SupplyChainStage(供应链阶段) 元素内容必须是 0-9 或 A-F 范围的字符";
+            }
+            return null;
+        }
+
+        #endregion
+
         // 根据 OID 和字符内容，构造一个 element 的原始数据
         // parameters:
         //      text    内容文字。如果是给 ISIL 类型的, 要明确用 compact_method 指明
@@ -295,6 +401,8 @@ namespace DigitalPlatform.RFID
         {
             Precursor precursor = new Precursor();
             precursor.ObjectIdentifier = oid;
+
+            // 注: SetInformation 的编码方式是根据字符串来自动选定的 (GB/T 35660.2-2017 page 32 例子)
 
             if (oid == (int)ElementOID.ContentParameter)
                 compact_method = CompactionScheme.OctectString;

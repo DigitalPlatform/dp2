@@ -94,6 +94,10 @@ namespace DigitalPlatform.RFID
                 }
             }
 
+            string verify_result = Element.VerifyElementText(oid, content);
+            if (verify_result != null)
+                throw new Exception($"创建元素 oid={oid},content={content} 时数据不合法: {verify_result}");
+
             {
                 Element element = new Element(-1)
                 {

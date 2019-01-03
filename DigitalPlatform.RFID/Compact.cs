@@ -22,7 +22,7 @@ namespace DigitalPlatform.RFID
             return AutoSelectCompactMethod(text);
         }
 
-        // 注意：不会自动选择 OctecString
+        // 注意：不会自动选择 OctectString
         public static CompactionScheme AutoSelectCompactMethod(string text)
         {
             if (CheckInteger(text, false))
