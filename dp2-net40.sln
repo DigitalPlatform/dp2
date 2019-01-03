@@ -190,6 +190,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.RFID", "Dig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestRFID", "UnitTestRFID\UnitTestRFID.csproj", "{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfidCenter", "RfidCenter\RfidCenter.csproj", "{03A2E9C6-5513-4211-9028-AF6F69941039}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RfidDrivers.First", "RfidDrivers.First\RfidDrivers.First.csproj", "{DFADB438-EBFF-47FB-ACF6-586224CEF771}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1488,6 +1492,42 @@ Global
 		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|x86.ActiveCfg = Release|Any CPU
 		{4755B20F-D9AF-4CCF-8B85-1A9B7313008E}.Test|x86.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Debug|x86.Build.0 = Debug|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|x86.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Release|x86.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|Any CPU.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|x86.ActiveCfg = Release|Any CPU
+		{03A2E9C6-5513-4211-9028-AF6F69941039}.Test|x86.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Debug|x86.Build.0 = Debug|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|x86.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Release|x86.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|Any CPU.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|x86.ActiveCfg = Release|Any CPU
+		{DFADB438-EBFF-47FB-ACF6-586224CEF771}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

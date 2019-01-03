@@ -151,7 +151,10 @@ namespace DigitalPlatform.RFID
             while (start < data.Length)
             {
                 if (data[start] == 0)
-                    break;  // 有时候用 0 填充了余下的全部 bytes
+                {
+                    start++;
+                    continue;  // 有时候用 0 填充了余下的部分 bytes
+                }
                 Element element = Element.Parse(data, start, out int bytes);
                 Debug.Assert(element.StartOffs == start);
                 this._elements.Add(element);
@@ -196,9 +199,11 @@ namespace DigitalPlatform.RFID
         // 5) 锁定的元素，和非锁定元素区域内部，可以按照 OID 号码排序
         // 上述算法有个优势，就是所有锁定元素中间不一定要 block 边界对齐，这样可以节省一点空间
         // 但存在一个小问题： Content Parameter 要占用多少 byte? 如果以后元素数量增多，(因为它后面就是锁定区域)它无法变大怎么办？
-        public void Sort(int max_bytes, int block_size)
+        public void Sort(int max_bytes, 
+            int block_size,
+            bool trim_cp_right)
         {
-            SetContentParameter();
+            SetContentParameter(trim_cp_right);
             if (this.IsNew == true)
             {
                 this._elements.Sort((a, b) =>
@@ -830,7 +835,9 @@ start);
 #endregion
 
         // 根据当前的所有元素，设置 Content parameter 元素内容
-        public void SetContentParameter()
+        // parameters:
+        //      trim_right  是否要截掉右侧多余的连续 0？
+        public void SetContentParameter(bool trim_right)
         {
             var content_parameter = this.FindElement(ElementOID.ContentParameter);
             if (content_parameter == null)
@@ -847,11 +854,21 @@ start);
                 }
             }
 
-            content_parameter.Content = Compact.TrimRight(Compact.ReverseBytes(BitConverter.GetBytes(value)));
+            var bytes = Compact.ReverseBytes(BitConverter.GetBytes(value));
+            if (trim_right)
+                bytes = Compact.TrimRight(bytes);
+            content_parameter.Content = bytes;
             content_parameter.Text = Element.GetHexString(content_parameter.Content);
         }
 
         static char NormalMapChar = '.';
+
+        [Flags]
+        public enum GetBytesStyle
+        {
+            None = 0x00,
+            ContentParameterFullLength = 0x01,
+        }
 
         // 打包为 byte[] 形态
         // TODO: 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
@@ -861,12 +878,15 @@ start);
         //                  字符 'w' 表示需要新锁定的块
         public byte[] GetBytes(int max_bytes,
             int block_size,
+            GetBytesStyle style,
             out string block_map)
         {
             block_map = "";
 
             // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
-            this.Sort(max_bytes, block_size);
+            this.Sort(max_bytes, 
+                block_size,
+                (style & GetBytesStyle.ContentParameterFullLength) == 0);
 
             List<char> map = new List<char>();
             int start = 0;
