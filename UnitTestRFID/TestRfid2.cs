@@ -936,15 +936,15 @@ L output:01100");
         public void Test_autoSelect_3()
         {
             Assert.AreEqual(
-                CompactionScheme.SixBitCode,
-                Compact.AutoSelectCompactMethod("a bcde"));
+                CompactionScheme.Utf8String,
+                Compact.AutoSelectCompactMethod("a bcde")); // 注意：6 bit 压缩方式不允许小写字母
         }
 
         [TestMethod]
         public void Test_autoSelect_4()
         {
             Assert.AreEqual(
-                CompactionScheme.OctectString,
+                CompactionScheme.Utf8String,
                 Compact.AutoSelectCompactMethod("BA"));  // 拓抽标签中写的OMF元素值为BA
         }
 

@@ -16,21 +16,13 @@ namespace DigitalPlatform.RFID
         {
             if (oid == ElementOID.Title)
                 return CompactionScheme.Utf8String;
+            if (oid == ElementOID.OMF)
+                return CompactionScheme.Utf8String;
 
-            if (CheckInteger(text, false))
-                return CompactionScheme.Integer;
-            if (CheckNumeric(text, false))
-                return CompactionScheme.Numeric;
-            if (CheckBit5(text, false))
-                return CompactionScheme.FivebitCode;
-            if (CheckBit6(text, false))
-                return CompactionScheme.SixBitCode;
-            if (CheckBit7(text, false))
-                return CompactionScheme.SevenBitCode;
-
-            return CompactionScheme.Null;   // 无法自动选择
+            return AutoSelectCompactMethod(text);
         }
 
+        // 注意：不会自动选择 OctecString
         public static CompactionScheme AutoSelectCompactMethod(string text)
         {
             if (CheckInteger(text, false))
@@ -44,7 +36,8 @@ namespace DigitalPlatform.RFID
             if (CheckBit7(text, false))
                 return CompactionScheme.SevenBitCode;
 
-            return CompactionScheme.Null;   // 无法自动选择
+            return CompactionScheme.Utf8String;
+            // return CompactionScheme.Null;   // 无法自动选择
         }
 
         #region Integer
