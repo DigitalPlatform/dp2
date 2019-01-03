@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="TestChip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestChip2.cs" />
+    <Compile Include="TestRfid2.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
