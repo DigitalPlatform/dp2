@@ -1,6 +1,6 @@
-﻿namespace FingerprintCenter
+﻿namespace RfidCenter
 {
-    partial class MainForm
+    partial class Form1
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -28,34 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_refresh = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_clearFingerprintCacheFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_lightWhite = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_lightRed = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_lightGreen = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_replication = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
-            this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
             this.splitContainer_start = new System.Windows.Forms.SplitContainer();
@@ -87,9 +60,33 @@
             this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.menuStrip1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolButton_stop = new System.Windows.Forms.ToolStripButton();
+            this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
+            this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_start = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_reopen = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_refresh = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_clearFingerprintCacheFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_closeReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_inventory = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_connectTag = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_closeTag = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -100,229 +97,10 @@
             this.tabPage_operHistory.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_file,
-            this.MenuItem_testing,
-            this.MenuItem_help});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(960, 34);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // MenuItem_file
-            // 
-            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_start,
-            this.ToolStripMenuItem_reopen,
-            this.MenuItem_refresh,
-            this.MenuItem_clearFingerprintCacheFile,
-            this.toolStripSeparator3,
-            this.ToolStripMenuItem_exit});
-            this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_file.Text = "文件";
-            // 
-            // ToolStripMenuItem_start
-            // 
-            this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(236, 30);
-            this.ToolStripMenuItem_start.Text = "启动(&S)";
-            this.ToolStripMenuItem_start.Click += new System.EventHandler(this.ToolStripMenuItem_start_Click);
-            // 
-            // ToolStripMenuItem_reopen
-            // 
-            this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(236, 30);
-            this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
-            this.ToolStripMenuItem_reopen.Click += new System.EventHandler(this.ToolStripMenuItem_reopen_Click);
-            // 
-            // MenuItem_refresh
-            // 
-            this.MenuItem_refresh.Name = "MenuItem_refresh";
-            this.MenuItem_refresh.Size = new System.Drawing.Size(236, 30);
-            this.MenuItem_refresh.Text = "刷新指纹信息";
-            this.MenuItem_refresh.Click += new System.EventHandler(this.MenuItem_refresh_Click);
-            // 
-            // MenuItem_clearFingerprintCacheFile
-            // 
-            this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
-            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(236, 30);
-            this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
-            this.MenuItem_clearFingerprintCacheFile.Click += new System.EventHandler(this.MenuItem_clearFingerprintCacheFile_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(233, 6);
-            // 
-            // ToolStripMenuItem_exit
-            // 
-            this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(236, 30);
-            this.ToolStripMenuItem_exit.Text = "退出(&X)";
-            this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
-            // 
-            // MenuItem_testing
-            // 
-            this.MenuItem_testing.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_lightWhite,
-            this.MenuItem_lightRed,
-            this.MenuItem_lightGreen,
-            this.MenuItem_replication,
-            this.MenuItem_testInitCache,
-            this.MenuItem_throwException});
-            this.MenuItem_testing.Name = "MenuItem_testing";
-            this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_testing.Text = "测试";
-            // 
-            // MenuItem_lightWhite
-            // 
-            this.MenuItem_lightWhite.Name = "MenuItem_lightWhite";
-            this.MenuItem_lightWhite.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_lightWhite.Text = "白灯";
-            this.MenuItem_lightWhite.Click += new System.EventHandler(this.MenuItem_lightWhite_Click);
-            // 
-            // MenuItem_lightRed
-            // 
-            this.MenuItem_lightRed.Name = "MenuItem_lightRed";
-            this.MenuItem_lightRed.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_lightRed.Text = "红灯";
-            this.MenuItem_lightRed.Click += new System.EventHandler(this.MenuItem_lightRed_Click);
-            // 
-            // MenuItem_lightGreen
-            // 
-            this.MenuItem_lightGreen.Name = "MenuItem_lightGreen";
-            this.MenuItem_lightGreen.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_lightGreen.Text = "绿灯";
-            this.MenuItem_lightGreen.Click += new System.EventHandler(this.MenuItem_lightGreen_Click);
-            // 
-            // MenuItem_replication
-            // 
-            this.MenuItem_replication.Name = "MenuItem_replication";
-            this.MenuItem_replication.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_replication.Text = "Replication";
-            this.MenuItem_replication.Click += new System.EventHandler(this.MenuItem_replication_Click);
-            // 
-            // MenuItem_testInitCache
-            // 
-            this.MenuItem_testInitCache.Name = "MenuItem_testInitCache";
-            this.MenuItem_testInitCache.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_testInitCache.Text = "test InitCache";
-            this.MenuItem_testInitCache.Click += new System.EventHandler(this.MenuItem_testInitCache_Click);
-            // 
-            // MenuItem_throwException
-            // 
-            this.MenuItem_throwException.Name = "MenuItem_throwException";
-            this.MenuItem_throwException.Size = new System.Drawing.Size(231, 30);
-            this.MenuItem_throwException.Text = "throw exception";
-            this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
-            // 
-            // MenuItem_help
-            // 
-            this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_setupDriver,
-            this.toolStripSeparator2,
-            this.MenuItem_manual,
-            this.MenuItem_about});
-            this.MenuItem_help.Name = "MenuItem_help";
-            this.MenuItem_help.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_help.Text = "帮助";
-            // 
-            // MenuItem_setupDriver
-            // 
-            this.MenuItem_setupDriver.Name = "MenuItem_setupDriver";
-            this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
-            this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
-            this.MenuItem_setupDriver.Click += new System.EventHandler(this.MenuItem_setupDriver_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
-            // 
-            // MenuItem_manual
-            // 
-            this.MenuItem_manual.Name = "MenuItem_manual";
-            this.MenuItem_manual.Size = new System.Drawing.Size(353, 30);
-            this.MenuItem_manual.Text = "使用帮助 ...";
-            this.MenuItem_manual.Click += new System.EventHandler(this.MenuItem_manual_Click);
-            // 
-            // MenuItem_about
-            // 
-            this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
-            this.MenuItem_about.Text = "关于本软件 ...";
-            this.MenuItem_about.Click += new System.EventHandler(this.MenuItem_about_Click);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolButton_stop,
-            this.toolStripDropDownButton_stopAll});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 34);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(960, 31);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolButton_stop
-            // 
-            this.toolButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolButton_stop.Enabled = false;
-            this.toolButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_stop.Image")));
-            this.toolButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
-            this.toolButton_stop.Name = "toolButton_stop";
-            this.toolButton_stop.Size = new System.Drawing.Size(28, 28);
-            this.toolButton_stop.Text = "停止";
-            this.toolButton_stop.Click += new System.EventHandler(this.toolButton_stop_Click);
-            // 
-            // toolStripDropDownButton_stopAll
-            // 
-            this.toolStripDropDownButton_stopAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton_stopAll.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_stopAll});
-            this.toolStripDropDownButton_stopAll.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton_stopAll.Name = "toolStripDropDownButton_stopAll";
-            this.toolStripDropDownButton_stopAll.Size = new System.Drawing.Size(18, 28);
-            this.toolStripDropDownButton_stopAll.Text = "停止全部";
-            // 
-            // ToolStripMenuItem_stopAll
-            // 
-            this.ToolStripMenuItem_stopAll.Name = "ToolStripMenuItem_stopAll";
-            this.ToolStripMenuItem_stopAll.Size = new System.Drawing.Size(189, 30);
-            this.ToolStripMenuItem_stopAll.Text = "停止全部(&A)";
-            this.ToolStripMenuItem_stopAll.ToolTipText = "停止全部正在处理的操作";
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripProgressBar1,
-            this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 508);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(960, 37);
-            this.statusStrip1.TabIndex = 2;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(122, 31);
-            // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 32);
             // 
             // tabControl_main
             // 
@@ -335,7 +113,7 @@
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(960, 443);
-            this.tabControl_main.TabIndex = 3;
+            this.tabControl_main.TabIndex = 7;
             // 
             // tabPage_start
             // 
@@ -406,7 +184,6 @@
             this.button_cancel.Text = "取消";
             this.button_cancel.UseVisualStyleBackColor = true;
             this.button_cancel.Visible = false;
-            this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
             // 
             // tabPage_operHistory
             // 
@@ -468,7 +245,6 @@
             this.button_setDefaultThreshold.TabIndex = 14;
             this.button_setDefaultThreshold.Text = "恢复默认值";
             this.button_setDefaultThreshold.UseVisualStyleBackColor = true;
-            this.button_setDefaultThreshold.Click += new System.EventHandler(this.button_setDefaultThreshold_Click);
             // 
             // textBox_cfg_shreshold
             // 
@@ -476,7 +252,6 @@
             this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
             this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_shreshold.TabIndex = 13;
-            this.textBox_cfg_shreshold.TextChanged += new System.EventHandler(this.textBox_cfg_shreshold_TextChanged);
             // 
             // label7
             // 
@@ -583,7 +358,6 @@
             this.textBox_cfg_password.PasswordChar = '*';
             this.textBox_cfg_password.Size = new System.Drawing.Size(283, 31);
             this.textBox_cfg_password.TabIndex = 6;
-            this.textBox_cfg_password.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // textBox_cfg_userName
             // 
@@ -593,7 +367,6 @@
             this.textBox_cfg_userName.Name = "textBox_cfg_userName";
             this.textBox_cfg_userName.Size = new System.Drawing.Size(283, 31);
             this.textBox_cfg_userName.TabIndex = 4;
-            this.textBox_cfg_userName.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label3
             // 
@@ -622,9 +395,8 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(895, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(869, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
-            this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
             // label1
             // 
@@ -651,7 +423,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(898, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(872, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -664,7 +436,6 @@
             this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 48);
             this.toolStripButton_cfg_setXeServer.Text = "单机版服务器";
             this.toolStripButton_cfg_setXeServer.ToolTipText = "设为单机版服务器";
-            this.toolStripButton_cfg_setXeServer.Click += new System.EventHandler(this.toolStripButton_cfg_setXeServer_Click);
             // 
             // toolStripSeparator1
             // 
@@ -681,9 +452,218 @@
             this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 48);
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
-            this.toolStripButton_cfg_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_cfg_setHongnibaServer_Click);
             // 
-            // MainForm
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripProgressBar1,
+            this.toolStripStatusLabel1});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 508);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(960, 37);
+            this.statusStrip1.TabIndex = 6;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(122, 31);
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 32);
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolButton_stop,
+            this.toolStripDropDownButton_stopAll});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 34);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(960, 31);
+            this.toolStrip1.TabIndex = 5;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolButton_stop
+            // 
+            this.toolButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolButton_stop.Enabled = false;
+            this.toolButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_stop.Image")));
+            this.toolButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolButton_stop.Name = "toolButton_stop";
+            this.toolButton_stop.Size = new System.Drawing.Size(28, 28);
+            this.toolButton_stop.Text = "停止";
+            // 
+            // toolStripDropDownButton_stopAll
+            // 
+            this.toolStripDropDownButton_stopAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton_stopAll.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_stopAll});
+            this.toolStripDropDownButton_stopAll.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_stopAll.Name = "toolStripDropDownButton_stopAll";
+            this.toolStripDropDownButton_stopAll.Size = new System.Drawing.Size(18, 28);
+            this.toolStripDropDownButton_stopAll.Text = "停止全部";
+            // 
+            // ToolStripMenuItem_stopAll
+            // 
+            this.ToolStripMenuItem_stopAll.Name = "ToolStripMenuItem_stopAll";
+            this.ToolStripMenuItem_stopAll.Size = new System.Drawing.Size(189, 30);
+            this.ToolStripMenuItem_stopAll.Text = "停止全部(&A)";
+            this.ToolStripMenuItem_stopAll.ToolTipText = "停止全部正在处理的操作";
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_file,
+            this.MenuItem_testing,
+            this.MenuItem_help});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(960, 34);
+            this.menuStrip1.TabIndex = 4;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // MenuItem_file
+            // 
+            this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_start,
+            this.ToolStripMenuItem_reopen,
+            this.MenuItem_refresh,
+            this.MenuItem_clearFingerprintCacheFile,
+            this.toolStripSeparator3,
+            this.ToolStripMenuItem_exit});
+            this.MenuItem_file.Name = "MenuItem_file";
+            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_file.Text = "文件";
+            // 
+            // ToolStripMenuItem_start
+            // 
+            this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_start.Text = "启动(&S)";
+            // 
+            // ToolStripMenuItem_reopen
+            // 
+            this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
+            // 
+            // MenuItem_refresh
+            // 
+            this.MenuItem_refresh.Name = "MenuItem_refresh";
+            this.MenuItem_refresh.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_refresh.Text = "刷新指纹信息";
+            // 
+            // MenuItem_clearFingerprintCacheFile
+            // 
+            this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
+            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
+            // 
+            // ToolStripMenuItem_exit
+            // 
+            this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_exit.Text = "退出(&X)";
+            // 
+            // MenuItem_testing
+            // 
+            this.MenuItem_testing.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_openReader,
+            this.MenuItem_closeReader,
+            this.MenuItem_inventory,
+            this.MenuItem_connectTag,
+            this.MenuItem_closeTag,
+            this.MenuItem_throwException});
+            this.MenuItem_testing.Name = "MenuItem_testing";
+            this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_testing.Text = "测试";
+            // 
+            // MenuItem_openReader
+            // 
+            this.MenuItem_openReader.Name = "MenuItem_openReader";
+            this.MenuItem_openReader.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openReader.Text = "Open Reader";
+            this.MenuItem_openReader.Click += new System.EventHandler(this.MenuItem_openReader_Click);
+            // 
+            // MenuItem_closeReader
+            // 
+            this.MenuItem_closeReader.Name = "MenuItem_closeReader";
+            this.MenuItem_closeReader.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeReader.Text = "Close Reader";
+            this.MenuItem_closeReader.Click += new System.EventHandler(this.MenuItem_closeReader_Click);
+            // 
+            // MenuItem_inventory
+            // 
+            this.MenuItem_inventory.Name = "MenuItem_inventory";
+            this.MenuItem_inventory.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_inventory.Text = "Inventory";
+            this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
+            // 
+            // MenuItem_connectTag
+            // 
+            this.MenuItem_connectTag.Name = "MenuItem_connectTag";
+            this.MenuItem_connectTag.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_connectTag.Text = "Connect Tag";
+            // 
+            // MenuItem_closeTag
+            // 
+            this.MenuItem_closeTag.Name = "MenuItem_closeTag";
+            this.MenuItem_closeTag.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeTag.Text = "Close Tag";
+            // 
+            // MenuItem_throwException
+            // 
+            this.MenuItem_throwException.Name = "MenuItem_throwException";
+            this.MenuItem_throwException.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_throwException.Text = "throw exception";
+            // 
+            // MenuItem_help
+            // 
+            this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_setupDriver,
+            this.toolStripSeparator2,
+            this.MenuItem_manual,
+            this.MenuItem_about});
+            this.MenuItem_help.Name = "MenuItem_help";
+            this.MenuItem_help.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_help.Text = "帮助";
+            // 
+            // MenuItem_setupDriver
+            // 
+            this.MenuItem_setupDriver.Name = "MenuItem_setupDriver";
+            this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
+            // 
+            // MenuItem_manual
+            // 
+            this.MenuItem_manual.Name = "MenuItem_manual";
+            this.MenuItem_manual.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_manual.Text = "使用帮助 ...";
+            // 
+            // MenuItem_about
+            // 
+            this.MenuItem_about.Name = "MenuItem_about";
+            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_about.Text = "关于本软件 ...";
+            // 
+            // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -693,20 +673,12 @@
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "MainForm";
-            this.ShowIcon = false;
-            this.Text = "dp2-指纹中心";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Name = "Form1";
+            this.Text = "dp2-RFID中心";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_start.ResumeLayout(false);
             this.splitContainer_start.Panel1.ResumeLayout(false);
@@ -719,6 +691,12 @@
             this.tabPage_cfg.PerformLayout();
             this.toolStrip_server.ResumeLayout(false);
             this.toolStrip_server.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -726,18 +704,24 @@
 
         #endregion
 
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.TabControl tabControl_main;
         private System.Windows.Forms.TabPage tabPage_start;
+        private System.Windows.Forms.SplitContainer splitContainer_start;
+        private System.Windows.Forms.PictureBox pictureBox_fingerprint;
+        private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.TabPage tabPage_operHistory;
+        private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.TabPage tabPage_cfg;
-        private System.Windows.Forms.TextBox textBox_cfg_dp2LibraryServerUrl;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ToolStrip toolStrip_server;
-        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setXeServer;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setHongnibaServer;
+        private System.Windows.Forms.Button button_setDefaultThreshold;
+        private System.Windows.Forms.TextBox textBox_cfg_shreshold;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBox_deviceList;
+        private System.Windows.Forms.Label label6;
+        public System.Windows.Forms.TextBox textBox_replicationStart;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox checkBox_speak;
+        private System.Windows.Forms.CheckBox checkBox_beep;
         public System.Windows.Forms.CheckBox checkBox_cfg_savePasswordLong;
         public System.Windows.Forms.TextBox textBox_cfg_location;
         private System.Windows.Forms.Label label4;
@@ -745,45 +729,39 @@
         public System.Windows.Forms.TextBox textBox_cfg_userName;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearFingerprintCacheFile;
+        private System.Windows.Forms.TextBox textBox_cfg_dp2LibraryServerUrl;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStrip toolStrip_server;
+        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setXeServer;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setHongnibaServer;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolButton_stop;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_stopAll;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_stopAll;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.CheckBox checkBox_speak;
-        private System.Windows.Forms.CheckBox checkBox_beep;
-        private System.Windows.Forms.Button button_cancel;
-        private System.Windows.Forms.SplitContainer splitContainer_start;
-        private System.Windows.Forms.PictureBox pictureBox_fingerprint;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_exit;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_start;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_reopen;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_testing;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightWhite;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightRed;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_lightGreen;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_replication;
-        public System.Windows.Forms.TextBox textBox_replicationStart;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_testInitCache;
-        private System.Windows.Forms.TabPage tabPage_operHistory;
-        private System.Windows.Forms.WebBrowser webBrowser1;
-        private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refresh;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_clearFingerprintCacheFile;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_exit;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_testing;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openReader;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_closeReader;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_inventory;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_connectTag;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_closeTag;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_throwException;
-        private System.Windows.Forms.ComboBox comboBox_deviceList;
-        private System.Windows.Forms.Label label6;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_help;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_setupDriver;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox textBox_cfg_shreshold;
-        private System.Windows.Forms.Button button_setDefaultThreshold;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_about;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_manual;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_about;
     }
 }
 
