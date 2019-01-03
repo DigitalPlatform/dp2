@@ -1379,12 +1379,14 @@ namespace DigitalPlatform.ResultSet
                     FileAccess.ReadWrite,
                     FileShare.ReadWrite);
 
-                this.m_count = m_streamSmall.Length / 8;  //m_count;
+                // this.m_count = m_streamSmall.Length / 8;  //m_count;
             }
             else
             {
-                m_count = GetCount();
+                // m_count = GetCount();
             }
+
+            RefreshCount();
         }
 
         // 把某个文件挂接到结果集上

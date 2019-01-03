@@ -625,7 +625,6 @@ namespace DigitalPlatform.OPAC.Server
 
             string strDataFilePath = this.App.DataDir + "/browse/" + strDataFile;
 
-
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -813,7 +812,6 @@ namespace DigitalPlatform.OPAC.Server
                     }
 
                     string strResultSetName = "opac_browse_" + strPureCaption;
-
 
                     long lRet = 0;
                     int nRedoCount = 0;
@@ -1809,41 +1807,75 @@ strGlobalFilename);
 
             string strTargetFilename = strResultsetFilename + "_target";
 
+            string strDataFileName = "";
+            string strIndexFileName = "";
+            string strDataFileName1 = "";
+            string strIndexFileName1 = "";
+
             DpResultSet target = new DpResultSet(false, false);
             target.Create(strTargetFilename,
     strTargetFilename + ".index");
+            try
+            {
+                // 2019/1/2
+                if (resultset.Sorted == false)
+                {
+                    this.SetProgressText("正在排序");
 
-            StringBuilder debugInfo = null;
-            int nRet = DpResultSetManager.Merge(strOperator == "AND" ? LogicOper.AND : LogicOper.SUB,
-                resultset,
-                global,
-                "", // strOutputStyle,
-                target,
-                null,
-                null,
-                null,   // stop
-                null,   // param
-                ref debugInfo,
-                out strError);
-            if (nRet == -1)
-                return -1;
-            resultset.Detach(out string strDataFileName, out string strIndexFileName);
+                    this.AppendResultText("开始排序。事项数 " + resultset.Count + "\r\n");
+                    resultset.QuickSort();
+                    this.AppendResultText("结束排序。事项数 " + resultset.Count + "\r\n");
+
+                    this.SetProgressText("正在去重");
+                    resultset.Sorted = true;    // 2012/5/30
+
+                    this.AppendResultText("开始去重。事项数 " + resultset.Count + "\r\n");
+                    resultset.RemoveDup();
+                    this.AppendResultText("结束去重。事项数 " + resultset.Count + "\r\n");
+                }
+                StringBuilder debugInfo = null;
+                int nRet = DpResultSetManager.Merge(strOperator == "AND" ? LogicOper.AND : LogicOper.SUB,
+                    resultset,
+                    global,
+                    "", // strOutputStyle,
+                    target,
+                    null,
+                    null,
+                    null,   // stop
+                    null,   // param
+                    ref debugInfo,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            finally
+            {
+                target.Detach(out strDataFileName1, out strIndexFileName1);
+            }
+
+#if NO
+            resultset.Detach(out strDataFileName, out strIndexFileName);
             if (string.IsNullOrEmpty(strDataFileName) == false)
                 File.Delete(strDataFileName);
             if (string.IsNullOrEmpty(strIndexFileName) == false)
                 File.Delete(strIndexFileName);
+#endif
+            strDataFileName = resultset.m_strBigFileName;
+            strIndexFileName = resultset.m_strSmallFileName;
 
-            target.Detach(out string strDataFileName1, out string strIndexFileName1);
             if (string.IsNullOrEmpty(strDataFileName1) == false
                 && string.IsNullOrEmpty(strDataFileName) == false)
-                File.Move(strDataFileName1, strDataFileName);
+                File.Copy(strDataFileName1, strDataFileName, true);
             if (string.IsNullOrEmpty(strIndexFileName1) == false
                 && string.IsNullOrEmpty(strIndexFileName) == false)
-                File.Move(strIndexFileName1, strIndexFileName);
+                File.Copy(strIndexFileName1, strIndexFileName, true);
 
+#if NO
             resultset = new DpResultSet(false, false);
             resultset.Attach(strDataFileName, strIndexFileName);
             resultset.Sorted = true;
+#endif
+            resultset.RefreshCount();
             return 0;
         }
 
