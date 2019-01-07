@@ -26,8 +26,10 @@ namespace DigitalPlatform.RFID
 
             return results.ToArray();
         }
+
     }
 #endif
+
     /// <summary>
     /// 模拟 RFID 芯片内的逻辑结构。便于执行整体压缩，解压缩的操作
     /// </summary>
@@ -80,6 +82,16 @@ namespace DigitalPlatform.RFID
             }
 
             return null;
+        }
+
+        // 修改一个元素的文本。如果不存在这个元素，会自动创建
+        public Element SetElement(ElementOID oid, string content)
+        {
+            Element element = FindElement(oid);
+            if (element == null)
+                return NewElement(oid, content);
+            element.Text = content;
+            return element;
         }
 
         // 创建一个元素
@@ -191,6 +203,12 @@ namespace DigitalPlatform.RFID
             this._changed = false;
         }
 
+        // 修改 Changed
+        public void SetChanged(bool changed)
+        {
+            this._changed = changed;
+        }
+
 
         // 对元素进行排序
         // 调用前，要确保每个元素都 Compact 好了，内容放入 OriginData 中了
@@ -203,7 +221,7 @@ namespace DigitalPlatform.RFID
         // 5) 锁定的元素，和非锁定元素区域内部，可以按照 OID 号码排序
         // 上述算法有个优势，就是所有锁定元素中间不一定要 block 边界对齐，这样可以节省一点空间
         // 但存在一个小问题： Content Parameter 要占用多少 byte? 如果以后元素数量增多，(因为它后面就是锁定区域)它无法变大怎么办？
-        public void Sort(int max_bytes, 
+        public void Sort(int max_bytes,
             int block_size,
             bool trim_cp_right)
         {
@@ -478,6 +496,8 @@ namespace DigitalPlatform.RFID
                 total += element.OriginData.Length;
                 prev_type = current_type;
             }
+            if (elements.Count == 0)
+                return;
 
             if (is_tail == false)
             {
@@ -485,6 +505,7 @@ namespace DigitalPlatform.RFID
                 {
                     int delta = segment_volume - total;
                     Debug.Assert(delta > 0);
+                    Debug.Assert(elements.Count > 0);
                     Element element = elements[elements.Count - 1];
                     // TODO: 注意调整可能导致溢出
                     element.OriginData = Element.AdjustPaddingBytes(element.OriginData, delta);
@@ -492,8 +513,11 @@ namespace DigitalPlatform.RFID
             }
             else
             {
+
+                Debug.Assert(elements.Count > 0);
                 Element element = elements[elements.Count - 1];
-                if (element.WillLock)
+                // 注：不管是不是 WillLock，最后一个 element 都调整到 block 边界
+                // if (element.WillLock)
                 {
                     int result = AdjustCount(block_size, total);
                     int delta = result - total;
@@ -836,7 +860,7 @@ start);
             return result;
         }
 
-#endregion
+        #endregion
 
         // 根据当前的所有元素，设置 Content parameter 元素内容
         // parameters:
@@ -877,9 +901,10 @@ start);
         // 打包为 byte[] 形态
         // TODO: 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
         // parameters:
-        //      block_map   块地图。用 
+        //      block_map   [out]块地图。用 
         //                  字符 'l' 表示原来就是锁定状态的块
         //                  字符 'w' 表示需要新锁定的块
+        //                  如果为全部 "...."，和 "" 是等同的。缺省的 char 是 '.'
         public byte[] GetBytes(int max_bytes,
             int block_size,
             GetBytesStyle style,
@@ -888,7 +913,7 @@ start);
             block_map = "";
 
             // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
-            this.Sort(max_bytes, 
+            this.Sort(max_bytes,
                 block_size,
                 (style & GetBytesStyle.ContentParameterFullLength) == 0);
 
@@ -972,6 +997,7 @@ start);
         }
     }
 
+#if NO
     // 模拟一个块的结构
     public class Block
     {
@@ -990,4 +1016,5 @@ start);
         }
     }
 
+#endif
 }

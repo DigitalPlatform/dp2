@@ -55,6 +55,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -66,16 +67,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="ChipDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ChipDialog.Designer.cs">
+      <DependentUpon>ChipDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="RfidServer.cs" />
+    <EmbeddedResource Include="ChipDialog.resx">
+      <DependentUpon>ChipDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -100,6 +111,30 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID.UI\DigitalPlatform.RFID.UI.csproj">
+      <Project>{FE5B6586-85F4-4850-A66D-5607ECB08F9B}</Project>
+      <Name>DigitalPlatform.RFID.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
+      <Project>{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}</Project>
+      <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{FE846FAC-D4CB-4013-AD69-39E72E31D204}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RfidDrivers.First\RfidDrivers.First.csproj">
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
       <Name>RfidDrivers.First</Name>

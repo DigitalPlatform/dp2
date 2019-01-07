@@ -1176,7 +1176,6 @@ namespace DigitalPlatform.RFID
 
         public static bool CheckIsil(string text, bool throwException = true)
         {
-
             foreach (char ch in text)
             {
                 if (IsValidIsilChar(ch) == false)
