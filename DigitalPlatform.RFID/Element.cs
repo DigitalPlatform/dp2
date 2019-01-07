@@ -285,6 +285,20 @@ namespace DigitalPlatform.RFID
             return oid;
         }
 
+        public static bool TryGetOidByName(string name, out ElementOID oid)
+        {
+            try
+            {
+                oid = GetOidByName(name);
+                return true;
+            }
+            catch
+            {
+                oid = ElementOID.UII;
+                return false;
+            }
+        }
+
         // 验证输入的元素文本是否合法
         // return:
         //      null    合法
@@ -404,7 +418,10 @@ namespace DigitalPlatform.RFID
 
             // 注: SetInformation 的编码方式是根据字符串来自动选定的 (GB/T 35660.2-2017 page 32 例子)
 
-            if (oid == (int)ElementOID.ContentParameter)
+            if (oid == (int)ElementOID.ContentParameter
+                || oid == (int)ElementOID.TypeOfUsage
+                || oid == (int)ElementOID.MediaFormat
+                || oid == (int)ElementOID.SupplyChainStage)
                 compact_method = CompactionScheme.OctectString;
             else if (oid == (int)ElementOID.OwnerInstitution
                 || oid == (int)ElementOID.IllBorrowingInstitution)
@@ -820,7 +837,11 @@ namespace DigitalPlatform.RFID
             return string.Join(",", names.ToArray());
         }
 
-
+        public static string GetHexString(byte value)
+        {
+            string strHex = Convert.ToString(value, 16);
+            return strHex.PadLeft(2, '0');
+        }
 
         // 得到用16进制字符串表示的 bin 内容
         public static string GetHexString(byte[] baTimeStamp, string format = "")

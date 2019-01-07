@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Diagnostics;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -76,6 +77,12 @@ namespace DigitalPlatform.CommonControl
             get
             {
                 CreateParams cp = base.CreateParams;
+
+                const int WS_EX_NOACTIVATE = 0x08000000;
+                // const int WS_EX_TOOLWINDOW = 0x00000080;
+                cp.ExStyle |= (int)(WS_EX_NOACTIVATE 
+                    // | WS_EX_TOOLWINDOW
+                    );
 
                 if (this.Clickable == false)
                     cp.ExStyle |= 0x80000 |  // WS_EX_LAYERED
@@ -476,6 +483,7 @@ Stack:
 
         protected override void WndProc(ref Message m)
         {
+
             if (m.Msg == API.WM_NCLBUTTONDOWN)
             {
                 if (this.Closeable == true)
@@ -487,18 +495,23 @@ Stack:
                         this.Invalidate();
                     }
                 }
+
                 if (this.Clicked != null)
                     this.Clicked(this, new EventArgs());
             }
             else if (m.Msg == API.WM_NCHITTEST
-                && (this.Closeable == true || this.Clicked != null))
+                && (this.Closeable == true || this.Clicked != null)
+                )
             {
                 base.WndProc(ref m);
                 m.Result = new IntPtr(2);   // simulate client
             }
             else
+            {
                 base.WndProc(ref m);
+            }
         }
+
 
         // 设定延时 Clear 时间长度
         public void DelayClear(TimeSpan delta)
@@ -531,6 +544,7 @@ Stack:
             timer1.Stop();
             this._clearTime = new DateTime(0);
         }
+
     }
 
     /// <summary>

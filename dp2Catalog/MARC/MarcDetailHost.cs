@@ -705,8 +705,8 @@ namespace dp2Catalog
                 QuestionDlg dlg = new QuestionDlg();
                 GuiUtil.AutoSetDefaultFont(dlg);
                 dlg.StartPosition = FormStartPosition.CenterScreen;
-                dlg.label_messageTitle.Text = strTitle;
-                dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");
+                dlg.MessageTitle = strTitle;
+                dlg.Question = strQuestion.Replace("\n", "\r\n");
                 dlg.ShowDialog(parent);
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -715,7 +715,7 @@ namespace dp2Catalog
                     return 0;
                 }
 
-                questions[questions.Length - 1].Answer = dlg.textBox_result.Text;
+                questions[questions.Length - 1].Answer = dlg.Question;
 
                 question_table[strAuthor] = questions;  // 保存
             }

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using DigitalPlatform.RFID;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
-using DigitalPlatform;
 using System.Text;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using DigitalPlatform;
+using DigitalPlatform.RFID;
 
 namespace UnitTestProject2
 {

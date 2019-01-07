@@ -246,5 +246,13 @@ c0 9e ba a0
         // TODO: 需要测试一下，一个 segment 里面一个 element 也没法填入的情况。
         // 此时 segment 中需要填满 0 值 bytes。或者制造一个不影响使用的“废弃”元素来占据这点空间
 
+
+        // TODO: 这几个元素
+        // ElementOID.ContentParameter
+        // ElementOID.TypeOfUsage
+        // ElementOID.MediaFormat
+        // ElementOID.SupplyChainStage
+        // 都要测试一下，应该是用 OctectString 方式编码到芯片。编码和解码都测试一下
+
     }
 }

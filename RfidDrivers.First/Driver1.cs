@@ -1,25 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
+using DigitalPlatform;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace RfidDrivers.First
 {
     public class Driver1 : IRfidDriver
     {
-        public UIntPtr hreader;
+        // public UIntPtr hreader;
+        internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        public void InitializeDriver()
+        void Lock()
         {
-            GetDriversInfo();
+            //_lock.EnterWriteLock();
         }
 
-        public void ReleaseDriver()
+        void Unlock()
         {
+            //_lock.ExitWriteLock();
+        }
 
+        List<Reader> _readers = new List<Reader>();
+        public List<Reader> Readers
+        {
+            get
+            {
+                return _readers;
+            }
+        }
+
+        public InitializeDriverResult InitializeDriver(string style)
+        {
+            Lock();
+            try
+            {
+                GetDriversInfo();
+
+                // 枚举所有的 reader
+                _readers = EnumUsbReader("RL8000");
+
+                // 打开所有的 reader
+                foreach (Reader reader in _readers)
+                {
+                    OpenReaderResult result = OpenReader(reader.SerialNumber);
+                    reader.Result = result;
+                }
+
+                return new InitializeDriverResult { Readers = _readers };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        public NormalResult ReleaseDriver()
+        {
+            // 关闭所有的 reader
+            foreach (Reader reader in _readers)
+            {
+                if (reader.Result.Value != -1)
+                    CloseReader(reader.Result.ReaderHandle);
+            }
+
+            return new NormalResult();
+        }
+
+        NormalResult GetReaderHandle(string reader_name, out UIntPtr handle)
+        {
+            handle = UIntPtr.Zero;
+            try
+            {
+                handle = (UIntPtr)GetReaderHandle(reader_name);
+                if (handle == null)
+                    return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        // 根据 reader 名字找到 reader_handle
+        object GetReaderHandle(string reader_name)
+        {
+            foreach (Reader reader in _readers)
+            {
+                if (reader.Name == reader_name)
+                {
+                    if (reader.Result.ReaderHandle == null)
+                        throw new Exception($"名为 {reader_name} 的读卡器尚未打开");
+                    return reader.Result.ReaderHandle;
+                }
+            }
+
+            return null;
         }
 
         public List<CReaderDriverInf> readerDriverInfoList = new List<CReaderDriverInf>();
@@ -72,26 +155,84 @@ namespace RfidDrivers.First
 
                     readerDriverInfoList.Add(driver);
                 }
+            }
+        }
 
+
+        // 枚举所有 USB 读卡器
+        // parameters:
+        //      driver_name 例如 "RL8000"
+        private List<Reader> EnumUsbReader(string driver_name)
+        {
+            List<Reader> readers = new List<Reader>();
+            //CReaderDriverInf driver = (CReaderDriverInf)readerDriverInfoList[comboBox6.SelectedIndex];
+
+            //if ((driver.m_commTypeSupported & RFIDLIB.rfidlib_def.COMMTYPE_USB_EN) > 0)
+            {
+                UInt32 nCount = RFIDLIB.rfidlib_reader.HID_Enum(driver_name);
+                int iret;
+                int i;
+                for (i = 0; i < nCount; i++)
+                {
+                    StringBuilder sernum = new StringBuilder();
+                    sernum.Append('\0', 64);
+                    UInt32 nSize1;
+                    nSize1 = (UInt32)sernum.Capacity;
+                    iret = RFIDLIB.rfidlib_reader.HID_GetEnumItem(
+                        (UInt32)i,
+                        RFIDLIB.rfidlib_def.HID_ENUM_INF_TYPE_SERIALNUM,
+                        sernum,
+                        ref nSize1);
+                    if (iret != 0)
+                        continue;
+
+                    Reader reader = new Reader { SerialNumber = sernum.ToString() };
+                    readers.Add(reader);
+
+                    {
+                        StringBuilder path = new StringBuilder();
+                        path.Append('\0', 64);
+                        UInt32 nSize2;
+                        nSize2 = (UInt32)path.Capacity;
+                        iret = RFIDLIB.rfidlib_reader.HID_GetEnumItem(
+                            (UInt32)i,
+                            RFIDLIB.rfidlib_def.HID_ENUM_INF_TYPE_DRIVERPATH,
+                            path,
+                            ref nSize2);
+                        if (iret == 0)
+                        {
+                            reader.DriverPath = path.ToString();
+                        }
+                    }
+
+                    reader.Name = reader.SerialNumber;
+                }
             }
 
-
+            return readers;
         }
 
         // parameters:
         //      comm_type   COM/USB/NET/BLUETOOTH 之一
         string BuildConnectionString(string readerDriverName,
-            string comm_type)
+            string comm_type,
+            string serial_number)
         {
             if (string.IsNullOrEmpty(readerDriverName))
-                readerDriverName = readerDriverInfoList[0].m_name;
+            {
+                readerDriverName = "RL8000";
+                // readerDriverName = readerDriverInfoList[0].m_name;
+            }
 
             if (string.IsNullOrEmpty(comm_type))
                 comm_type = "USB";
+#if NO
+            string result = RFIDLIB.rfidlib_def.CONNSTR_NAME_RDTYPE + "=" + readerDriverName + ";" +
+              RFIDLIB.rfidlib_def.CONNSTR_NAME_COMMTYPE + "=" + comm_type + ";" +
+              "AddrMode=0";// ;SerNum=
+#endif
 
-            return RFIDLIB.rfidlib_def.CONNSTR_NAME_RDTYPE + "=" + readerDriverName + ";" +
-                          RFIDLIB.rfidlib_def.CONNSTR_NAME_COMMTYPE + "=" + comm_type + ";" +
-                          "AddrMode=0";// ;SerNum=
+            return $"RDType={readerDriverName};CommType={comm_type};AddrMode=1;SerNum={serial_number}";
 #if NO
             int commTypeIdx = comboBox10.SelectedIndex;
             string connstr = "";
@@ -141,62 +282,628 @@ namespace RfidDrivers.First
 #endif
         }
 
-        public void OpenReader()
+
+
+        OpenReaderResult OpenReader(string serial_number)
         {
-            var iret = RFIDLIB.rfidlib_reader.RDR_Open(
-                BuildConnectionString("", ""),
-                ref hreader);
-            if (iret != 0)
-                throw new Exception($"OpenReader error, return: {iret}");
+            Lock();
+            try
+            {
+                UIntPtr hreader = UIntPtr.Zero;
+                var iret = RFIDLIB.rfidlib_reader.RDR_Open(
+                    BuildConnectionString("", "", serial_number),
+                    ref hreader);
+                if (iret != 0)
+                    return new OpenReaderResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"OpenReader error, return: {iret}",
+                        ErrorCode = GetErrorCode(iret)
+                    };
+
+
+                return new OpenReaderResult { ReaderHandle = hreader };
+            }
+            finally
+            {
+                Unlock();
+            }
         }
 
-        public void CloseReader()
+        NormalResult CloseReader(object reader_handle)
         {
-            var iret = RFIDLIB.rfidlib_reader.RDR_Close(hreader);
+            Lock();
+            try
+            {
+                var iret = RFIDLIB.rfidlib_reader.RDR_Close((UIntPtr)reader_handle);
+                if (iret != 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"CloseReader error, return: {iret}",
+                        ErrorCode = GetErrorCode(iret)
+                    };
+
+                // 成功
+                // hreader = (UIntPtr)0;
+                return new NormalResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // parameters:
+        //      style   可由下列值组成
+        //              only_new    每次只列出最新发现的那些标签(否则全部列出)
+        public InventoryResult Inventory(string reader_name, string style)
+        {
+            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+            if (result.Value == -1)
+                return new InventoryResult(result);
+            Lock();
+            try
+            {
+                byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
+                if (StringUtil.IsInList("only_new", style))
+                    ai_type = RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE;
+
+                UInt32 nTagCount = 0;
+                int ret = tag_inventory(
+                    hreader,
+                       ai_type,
+                       1,
+                       new Byte[] { 1 },
+                         ref nTagCount,
+                         out List<InventoryInfo> results);
+                if (ret != 0)
+                    return new InventoryResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "error",
+                        ErrorCode = GetErrorCode(ret)
+                    };
+
+                Debug.Assert(nTagCount == results.Count);
+                return new InventoryResult { Results = results };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // 是否为全 0
+        static bool IsZero(byte[] uid)
+        {
+            foreach (byte b in uid)
+            {
+                if (b != 0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        // UIntPtr.Zero
+        UIntPtr _connectTag(
+            UIntPtr hreader,
+            string UID,
+            UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID)
+        {
+            int iret;
+
+            byte[] uid = null;
+            if (string.IsNullOrEmpty(UID) == false)
+                uid = Element.FromHexString(UID);
+#if NO
+            idx = comboBox2.SelectedIndex;
+            if (idx == -1)
+            {
+                MessageBox.Show("please select address mode");
+                return;
+            }
+            if (idx == 1 || idx == 2) // Addressed and select need uid 
+            {
+                if (comboBox3.Text == "")
+                {
+                    MessageBox.Show("please input a uid");
+                    return;
+                }
+            }
+#endif
+
+#if NO
+            //set tag type default is NXP icode sli 
+            UInt32 tagType = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
+            if (comboBox3.SelectedIndex != -1)
+            {
+                // if we get the tag type from inventory ,then input the identified tag type 
+                tagType = (comboBox3.SelectedItem as tagInfo).m_tagType;
+            }
+#endif
+
+            // set address mode 
+            Byte addrMode = 1;  // (Byte)idx;
+            if (uid == null || IsZero(uid))
+            {
+                addrMode = 0;   // none address mode
+                tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
+            }
+
+            UIntPtr hTag = UIntPtr.Zero;
+            // do connection
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_Connect(
+                hreader,
+                tag_type,   // tagType, 
+                addrMode,
+                uid,
+                ref hTag);
             if (iret == 0)
             {
-                // 成功
-                hreader = (UIntPtr)0;
+                /* 
+                * if select none address mode after inventory need to reset the tag first,because the tag is stay quiet now  
+                * if the tag is in ready state ,do not need to call reset
+                */
+                if (addrMode == 0)
+                {
+                    iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_Reset(hreader, hTag);
+                    if (iret != 0)
+                    {
+                        // MessageBox.Show("reset tag fail");
+                        RFIDLIB.rfidlib_reader.RDR_TagDisconnect(hreader, hTag);
+                        return UIntPtr.Zero;
+                    }
+                }
+
+                return hTag;
             }
             else
-                throw new Exception($"CloseReader error, return: {iret}");
+            {
+                return UIntPtr.Zero;    // fail
+            }
         }
 
-        public void Inventory()
+        bool _disconnectTag(
+            UIntPtr hreader,
+            ref UIntPtr hTag)
         {
-            UInt32 nTagCount = 0;
-            int ret = tag_inventory(
-                   RFIDLIB.rfidlib_def.AI_TYPE_NEW,
-                   1,
-                   new Byte[] { 1 },
-                     ref nTagCount);
+            int iret;
 
+            // do disconnection
+            iret = RFIDLIB.rfidlib_reader.RDR_TagDisconnect(hreader, hTag);
+            if (iret == 0)
+            {
+                hTag = (UIntPtr)0;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public void ConnectTag()
+        // parameters:
+        //      read_lock_status    是否要一并读取 lock 状态信息？
+        ReadBlocksResult ReadBlocks(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            UInt32 blockAddr,
+            UInt32 blockToRead,
+            UInt32 block_size,
+            bool read_lock_status)
         {
+            int iret;
+            UInt32 blocksRead = 0;
+            UInt32 nSize;
+            // Byte[] BlockBuffer = new Byte[Math.Max(40, blockToRead)];  // 40
+            Byte[] BlockBuffer = new Byte[blockToRead * (block_size + (read_lock_status ? 1 : 0))];  // 40
 
+            nSize = (UInt32)BlockBuffer.Length; // (UInt32)BlockBuffer.GetLength(0);
+            UInt32 bytesRead = 0;
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ReadMultiBlocks(
+                hreader,
+                hTag,
+                read_lock_status ? (byte)1 : (byte)0,
+                blockAddr,
+                blockToRead,
+                ref blocksRead,
+                BlockBuffer,
+                nSize,
+                ref bytesRead);
+            if (iret != 0)
+                return new ReadBlocksResult { Value = -1, ErrorInfo = "read blocks error", ErrorCode = GetErrorCode(iret) };
+
+            if (read_lock_status == false)
+            {
+                ReadBlocksResult result = new ReadBlocksResult
+                {
+                    Bytes = new byte[bytesRead],
+                    LockStatus = null
+                };
+                Array.Copy(BlockBuffer, result.Bytes, bytesRead);
+                return result;
+            }
+            else
+            {
+                // BlockBuffer 中分离出 lock status byte
+                List<byte> buffer = new List<byte>(BlockBuffer);
+                StringBuilder status = new StringBuilder();
+                for (int i = 0; i < blocksRead; i++)
+                {
+                    byte b = buffer[i * (int)block_size];
+                    status.Append(b == 0 ? '.' : 'l');
+                    buffer.RemoveAt(i * (int)block_size);
+                }
+                ReadBlocksResult result = new ReadBlocksResult
+                {
+                    Bytes = buffer.ToArray(),
+                    LockStatus = status.ToString()
+                };
+                return result;
+            }
         }
 
-        public void DisconnectTag()
+        public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
+            string reader_name,
+            TagInfo old_tag_info,
+            TagInfo new_tag_info)
         {
+            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+            if (result.Value == -1)
+                return result;
+            Lock();
+            try
+            {
+                UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
+                UIntPtr hTag = _connectTag(hreader, old_tag_info.UID, tag_type);
+                if (hTag == UIntPtr.Zero)
+                    return new GetTagInfoResult { Value = -1, ErrorInfo = "connectTag Error" };
+                try
+                {
+                    // *** 分段写入内容 bytes
+                    {
+                        // 写入时候自动跳过锁定的块
+                        List<BlockRange> new_ranges = BlockRange.GetBlockRanges(
+                            (int)old_tag_info.BlockSize,
+                            new_tag_info.Bytes,
+                            old_tag_info.LockStatus,
+                            'l');
 
+                        // 检查要跳过的块，要对比新旧 bytes 是否完全一致。
+                        // 不一致则说明数据修改过程有问题
+                        {
+                            List<BlockRange> compare_ranges = BlockRange.GetBlockRanges(
+            (int)old_tag_info.BlockSize,
+            old_tag_info.Bytes,
+            old_tag_info.LockStatus,
+            'l');
+                            NormalResult result0 = CompareLockedBytes(
+        compare_ranges,
+        new_ranges);
+                            if (result0.Value == -1)
+                                return result0;
+                        }
+
+                        int current_block_count = 0;
+                        foreach (BlockRange range in new_ranges)
+                        {
+                            if (range.Locked == false)
+                            {
+                                NormalResult result0 = WriteBlocks(
+                                    hreader,
+                            hTag,
+                            (uint)current_block_count,
+                            (uint)range.BlockCount,
+                            range.Bytes);
+                                if (result0.Value == -1)
+                                    return new NormalResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+                            }
+
+                            current_block_count += range.BlockCount;
+                        }
+                    }
+
+                    // *** 兑现锁定 'w' 状态的块
+                    {
+                        List<BlockRange> ranges = BlockRange.GetBlockRanges(
+                            (int)old_tag_info.BlockSize,
+                            new_tag_info.Bytes,
+                            new_tag_info.LockStatus,
+                            'w');
+
+                        // 检查，原来的 'l' 状态的块，不应后来被当作 'w' 再次锁定
+                        string error_info = CheckNewlyLockStatus(old_tag_info.LockStatus,
+        new_tag_info.LockStatus);
+                        if (string.IsNullOrEmpty(error_info) == false)
+                            return new NormalResult { Value = -1, ErrorInfo = error_info, ErrorCode = "checkTwoLockStatusError" };
+
+                        int current_block_count = 0;
+                        foreach (BlockRange range in ranges)
+                        {
+                            if (range.Locked == true)
+                            {
+                                string error_code = LockBlocks(
+                                    hreader,
+                                    hTag,
+                                    (uint)current_block_count,
+                                    (uint)range.BlockCount);
+                                if (string.IsNullOrEmpty(error_code) == false)
+                                    return new NormalResult { Value = -1, ErrorInfo = "LockBlocks error", ErrorCode = error_code };
+                            }
+
+                            current_block_count += range.BlockCount;
+                        }
+                    }
+
+                    return new NormalResult();
+                }
+                finally
+                {
+                    _disconnectTag(hreader, ref hTag);
+                }
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // return:
+        //      null 或者 "" 表示没有发现错误
+        //      其他  返回错误描述文字
+        static string CheckNewlyLockStatus(string existing_lock_status,
+            string newly_lock_status)
+        {
+            int length = Math.Max(existing_lock_status.Length, newly_lock_status.Length);
+            for (int i = 0; i < length; i++)
+            {
+                bool old_locked = BlockRange.GetLocked(existing_lock_status, i, 'l');
+                bool new_locked = BlockRange.GetLocked(newly_lock_status, i, 'l');
+                if (old_locked != new_locked)
+                    return $"偏移{i} 位置 old_locked({old_locked}) 和 new_locked({new_locked}) 不一致";
+                bool will_lock = BlockRange.GetLocked(newly_lock_status, i, 'w');
+                if (old_locked == true && will_lock == true)
+                    return $"偏移{i} 位置 old_locked({old_locked}) 和 will_lock({will_lock}) 不应同时为 true";
+            }
+
+            return null;
+        }
+
+        // 比较两套 range 中的锁定状态 bytes 是否一致
+        static NormalResult CompareLockedBytes(
+            List<BlockRange> ranges1,
+            List<BlockRange> ranges2)
+        {
+            List<BlockRange> result1 = new List<BlockRange>();
+            foreach (BlockRange range in ranges1)
+            {
+                if (range.Locked)
+                    result1.Add(range);
+            }
+
+            List<BlockRange> result2 = new List<BlockRange>();
+            foreach (BlockRange range in ranges2)
+            {
+                if (range.Locked)
+                    result2.Add(range);
+            }
+
+            if (result1.Count != result2.Count)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = $"两边的锁定区间数目不一致({result1.Count}和{result2.Count})" };
+            }
+
+            for (int i = 0; i < result1.Count; i++)
+            {
+                if (result1[i].Bytes.SequenceEqual(result2[i].Bytes) == false)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"新旧两套锁定范围 bytes 内容不一致。index={i}, {Element.GetHexString(result1[i].Bytes)}和{Element.GetHexString(result2[i].Bytes)}"
+                    };
+            }
+
+            return new NormalResult();
+        }
+
+        // parameters:
+        //      numOfBlks   块数。等于 data.Length / 块大小
+        NormalResult WriteBlocks(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            UInt32 blkAddr,
+            UInt32 numOfBlks,
+            byte[] data)
+        {
+            int iret;
+
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_WriteMultipleBlocks(
+                hreader,
+                hTag,
+                blkAddr,
+                numOfBlks,
+                data,
+                (uint)data.Length);
+            if (iret != 0)
+                return new NormalResult { Value = -1, ErrorInfo = "Write blocks error", ErrorCode = GetErrorCode(iret) };
+            return new NormalResult();
+        }
+
+        // parameters:
+        //      tag_type    如果 uid 为空，则 tag_type 应为 RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID
+        public GetTagInfoResult GetTagInfo(// byte[] uid, UInt32 tag_type
+            string reader_name,
+            InventoryInfo info)
+        {
+            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+            if (result.Value == -1)
+                return new GetTagInfoResult(result);
+            Lock();
+            try
+            {
+#if DEBUG
+                if (info != null)
+                {
+                    Debug.Assert(info.UID.Length >= 8);
+                }
+#endif
+
+                UIntPtr hTag = _connectTag(
+                    hreader,
+                    info?.UID,
+                    info == null ? RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID : info.TagType);
+                if (hTag == UIntPtr.Zero)
+                    return new GetTagInfoResult { Value = -1, ErrorInfo = "connectTag Error" };
+                try
+                {
+                    int iret;
+                    Byte[] uid = new Byte[8];
+                    if (info != null && string.IsNullOrEmpty(info.UID) == false)
+                    {
+                        uid = Element.FromHexString(info.UID);
+                        //Debug.Assert(info.UID.Length >= 8);
+                        //Array.Copy(info.UID, uid, uid.Length);
+                    }
+
+                    Byte dsfid, afi, icref;
+                    UInt32 blkSize, blkNum;
+                    dsfid = afi = icref = 0;
+                    blkSize = blkNum = 0;
+                    iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
+                        hreader,
+                        hTag,
+                        uid,
+                        ref dsfid,
+                        ref afi,
+                        ref blkSize,
+                        ref blkNum,
+                        ref icref);
+                    if (iret != 0)
+                        return new GetTagInfoResult { Value = -1, ErrorInfo = "error", ErrorCode = GetErrorCode(iret) };
+
+#if NO
+                    byte[] block_status = GetLockStatus(
+                        hTag,
+                        0,
+                        blkNum,
+                        out string error_code);
+                    if (block_status == null)
+                        return new GetTagInfoResult { Value = -1, ErrorInfo = "GetLockStatus error", ErrorCode = error_code };
+#endif
+
+                    ReadBlocksResult result0 = ReadBlocks(
+                        hreader,
+                hTag,
+                0,
+                blkNum,
+                blkSize,
+                true);
+                    if (result0.Value == -1)
+                        return new GetTagInfoResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+
+                    GetTagInfoResult result1 = new GetTagInfoResult
+                    {
+                        TagInfo = new TagInfo
+                        {
+                            UID = Element.GetHexString(uid),
+                            AFI = afi,
+                            DSFID = dsfid,
+                            BlockSize = blkSize,
+                            MaxBlockCount = blkNum,
+                            IcRef = icref,
+                            LockStatus = result0.LockStatus,    // TagInfo.GetLockString(block_status),
+                            Bytes = result0.Bytes,
+                        }
+                    };
+                    return result1;
+                }
+                finally
+                {
+                    _disconnectTag(hreader, ref hTag);
+                }
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // 获得指定范围块的锁定状态
+        // return:
+        //      null    出错。错误码在 error_code 中返回
+        //      返回锁定状态。每个 byte 表示一个 block 的锁定状态。0x00 表示没有锁定，0x01 表示已经锁定
+        byte[] GetLockStatus(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            UInt32 blockAddr,
+            UInt32 blockToRead,
+            out string error_code)
+        {
+            error_code = "";
+            int iret;
+
+#if NO
+            idx = comboBox4.SelectedIndex;
+            if (idx < 0)
+            {
+                MessageBox.Show("please select block address");
+                return;
+            }
+#endif
+            Byte[] buffer = new Byte[blockToRead];
+            UInt32 nSize = (UInt32)buffer.Length;   // (UInt32)buffer.GetLength(0);
+            UInt32 bytesRead = 0;
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetBlockSecStatus(
+                hreader,
+                hTag,
+                blockAddr,
+                blockToRead,
+                buffer,
+                nSize,
+                ref bytesRead);
+            if (iret == 0)
+                return buffer;
+
+            error_code = iret.ToString();
+            return null;    // fail
+        }
+
+        // return:
+        //      null 或者 ""  表示成功
+        //      其他  错误码
+        string LockBlocks(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            UInt32 blkAddr,
+            UInt32 numOfBlks)
+        {
+            int iret;
+
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_LockMultipleBlocks(
+                hreader,
+                hTag,
+                blkAddr,
+                numOfBlks);
+            if (iret == 0)
+                return "";
+            else
+                return iret.ToString();
         }
 
         // parameters:
         //      AIType  RFIDLIB.rfidlib_def.AI_TYPE_NEW / RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE
         //      AntinnaSel  从 1 开始？
         public int tag_inventory(
-                           Byte AIType,
-                             Byte AntennaSelCount,
-                             Byte[] AntennaSel,
-                             //bool enable15693,
-                             //bool enable14443A,
-                             //bool enable18000p3m3,
-                             // Byte afiVal,
-                             // delegate_tag_report_handle tagReportHandler,
-                             ref UInt32 nTagCount)
+            UIntPtr hreader,
+            Byte AIType,
+            Byte AntennaSelCount,
+            Byte[] AntennaSel,
+            ref UInt32 nTagCount,
+            out List<InventoryInfo> results)
         {
+            results = new List<InventoryInfo>();
 
             Byte enableAFI = 0;
             int iret;
@@ -225,18 +932,33 @@ namespace RfidDrivers.First
                     UInt32 tag_id = 0;
                     UInt32 ant_id = 0;
                     Byte dsfid = 0;
-                    Byte uidlen = 0;
-                    Byte[] uid = new Byte[16];
+                    // Byte uidlen = 0;
+                    Byte[] uid = new Byte[8];  // 16
 
                     /* Parse iso15693 tag report */
                     {
-                        iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport, ref aip_id, ref tag_id, ref ant_id, ref dsfid, uid);
+                        iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_ParseTagDataReport(TagDataReport,
+                            ref aip_id,
+                            ref tag_id,
+                            ref ant_id,
+                            ref dsfid,
+                            uid);
                         if (iret == 0)
                         {
-                            uidlen = 8;
-                            object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
+                            // uidlen = 8;
+                            // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
                             //// Invoke(tagReportHandler, pList);
                             //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid ,8);
+                            InventoryInfo result = new InventoryInfo
+                            {
+                                AipID = aip_id,
+                                TagType = tag_id,
+                                AntennaID = ant_id,
+                                DsfID = dsfid,
+                                UID = Element.GetHexString(uid),
+                            };
+                            // Array.Copy(uid, result.UID, result.UID.Length);
+                            results.Add(result);
                         }
                     }
 
@@ -252,7 +974,114 @@ namespace RfidDrivers.First
             }
             if (InvenParamSpecList.ToUInt64() != 0)
                 RFIDLIB.rfidlib_reader.DNODE_Destroy(InvenParamSpecList);
+
+            RFIDLIB.rfidlib_reader.RDR_ResetCommuImmeTimeout(hreader);
             return iret;
+        }
+
+        /*
+附录3. RFIDLIB API错误代码表
+错误代码	  描述
+0	无错误，表示API调用成功。
+-1	未知错误
+-2	与读卡器硬件的通信失败
+-3	API的传入参数有误
+-4	API的传入参数的值不支持，如参数值只能是0-5，如果传入6那么会返回该错误。
+-5	超时，发送到读卡器的命令，在设定时间内等不到数据返回。
+-6	API申请内存失败
+-7	功能未开启
+-8	保留
+-9	保留
+-10	保留
+-11	保留
+-12	读卡器返回的数据包长度有误
+-13	保留
+-14	保留
+-15	保留
+-16	保留
+-17	读卡器返回操作失败标识数据包，可用API
+RDR_GetReaderLastReturnError 获取该失败的错误代码。
+-18	保留
+-19	保留
+-20	保留
+-21	Inventory的停止触发器发生，举个例子：假设设定1秒为Inventory
+的最大读卡时间，如果在1秒钟内还没读完所有的标签，读卡器会终止Inventory，那么API会返回该错误告诉应用程序，可能还有标签没读完。
+-22	标签操作命令不支持
+-23	传入RDR_SetConfig或RDR_GetConfig的配置项不支持。
+-24	保留
+-25	TCP socket错误，API返回该错误表明TCP连接已断开。
+-26	应用层传入的缓冲区太小。
+-27	与读卡器返回的数据有误。
+0	No error
+-1	Unknown error
+-2	IO error
+-3	Parameter error
+-4	Parameter value error
+-5	Reader respond timeout
+-6	Memory allocation fail
+-7	Reserved
+-8	Reserved
+-9	Reserved
+-10	Reserved
+-11	Reserved
+-12	Invalid message size from reader
+-13	Reserved
+-14	Reserved
+-15	Reserved
+-16	Reserved
+-17	Error from reader, 
+can use “RDR_GetReaderLastReturnError” to get reader error code .
+-18	Reserved
+-19	Reserved
+-20	Reserved
+-21	Timeout stop trigger occur .
+-22	Invalid tag command
+-23	Invalid Configuration block No
+-24	Reserved
+-25	TCP socket error
+-26	Size of input buffer too small.
+-27	Reserved
+
+         * */
+        static string GetErrorCode(int value)
+        {
+            switch (value)
+            {
+                case 0:
+                    return "noError";
+                case -1:
+                    return "unknownError";
+                case -2:
+                    return "ioError";
+                case -3:
+                    return "parameterError";
+                case -4:
+                    return "parameterValueError";
+                case -5:
+                    return "readerRespondTimeout";
+                case -6:
+                    return "memoryAllocationFail";
+                case -7:
+                    return "functionNotOpen";
+                case -12:
+                    return "messageSizeError";
+                case -17:
+                    return "errorFromReader";
+                case -21:
+                    return "timeoutStopTrigger";
+                case -22:
+                    return "invalidTagCommand";
+                case -23:
+                    return "invalidConfigBlockNo";
+                case -25:
+                    return "tcpSocketError";
+                case -26:
+                    return "bufferTooSmall";
+                case -27:
+                    return "dataError";
+            }
+
+            return value.ToString();
         }
     }
 

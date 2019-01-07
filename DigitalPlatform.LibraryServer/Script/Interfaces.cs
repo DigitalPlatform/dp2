@@ -506,7 +506,7 @@ namespace DigitalPlatform.LibraryServer
 
         static string GetProperty(Object obj, string name)
         {
-            obj.GetType().GetField(name);
+            obj.GetType().GetField(name);   // ?
             PropertyInfo prop = obj.GetType().GetProperty(name);
             return (string)prop.GetValue(obj);
         }
