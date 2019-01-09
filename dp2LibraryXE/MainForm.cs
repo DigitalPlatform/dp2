@@ -2848,7 +2848,8 @@ TaskScheduler.Default);
                 MessageBox.Show(this, "library_host 尚未安装或启动");
                 return;
             }
-            Process.Start("IExplore.exe", library_host.MetadataUrl);
+            // Process.Start("IExplore.exe", library_host.MetadataUrl);
+            Process.Start(library_host.MetadataUrl);
         }
 
         private void MenuItem_openKernelWsdl_Click(object sender, EventArgs e)
@@ -2858,7 +2859,8 @@ TaskScheduler.Default);
                 MessageBox.Show(this, "kernel_host 尚未安装或启动");
                 return;
             }
-            Process.Start("IExplore.exe", kernel_host.MetadataUrl);
+            // Process.Start("IExplore.exe", kernel_host.MetadataUrl);
+            Process.Start(kernel_host.MetadataUrl);
         }
 
         private void toolButton_stop_Click(object sender, EventArgs e)

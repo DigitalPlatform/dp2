@@ -88,12 +88,14 @@
             this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_testWriteContentToNewChip = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_testLockBlocks = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_testRfidChannel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.ToolStripMenuItem_testRfidChannel = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_startCapture = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_stopCapture = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -416,7 +418,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(739, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(713, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -444,7 +446,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(742, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(716, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -573,6 +575,8 @@
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_start,
             this.ToolStripMenuItem_reopen,
+            this.MenuItem_startCapture,
+            this.MenuItem_stopCapture,
             this.MenuItem_refresh,
             this.MenuItem_clearFingerprintCacheFile,
             this.toolStripSeparator3,
@@ -584,36 +588,36 @@
             // ToolStripMenuItem_start
             // 
             this.ToolStripMenuItem_start.Name = "ToolStripMenuItem_start";
-            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(236, 30);
+            this.ToolStripMenuItem_start.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_start.Text = "启动(&S)";
             // 
             // ToolStripMenuItem_reopen
             // 
             this.ToolStripMenuItem_reopen.Name = "ToolStripMenuItem_reopen";
-            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(236, 30);
+            this.ToolStripMenuItem_reopen.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_reopen.Text = "重新启动(&R)";
             // 
             // MenuItem_refresh
             // 
             this.MenuItem_refresh.Name = "MenuItem_refresh";
-            this.MenuItem_refresh.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_refresh.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_refresh.Text = "刷新指纹信息";
             // 
             // MenuItem_clearFingerprintCacheFile
             // 
             this.MenuItem_clearFingerprintCacheFile.Name = "MenuItem_clearFingerprintCacheFile";
-            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(236, 30);
+            this.MenuItem_clearFingerprintCacheFile.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_clearFingerprintCacheFile.Text = "删除本地缓存文件";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(233, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(236, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             // 
             // MenuItem_testing
@@ -687,6 +691,13 @@
             this.ToolStripMenuItem_testLockBlocks.Text = "测试锁定某些块";
             this.ToolStripMenuItem_testLockBlocks.Click += new System.EventHandler(this.ToolStripMenuItem_testLockBlocks_Click);
             // 
+            // ToolStripMenuItem_testRfidChannel
+            // 
+            this.ToolStripMenuItem_testRfidChannel.Name = "ToolStripMenuItem_testRfidChannel";
+            this.ToolStripMenuItem_testRfidChannel.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_testRfidChannel.Text = "Test RfidChannel";
+            this.ToolStripMenuItem_testRfidChannel.Click += new System.EventHandler(this.ToolStripMenuItem_testRfidChannel_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -721,12 +732,19 @@
             this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
             this.MenuItem_about.Text = "关于本软件 ...";
             // 
-            // ToolStripMenuItem_testRfidChannel
+            // MenuItem_startCapture
             // 
-            this.ToolStripMenuItem_testRfidChannel.Name = "ToolStripMenuItem_testRfidChannel";
-            this.ToolStripMenuItem_testRfidChannel.Size = new System.Drawing.Size(290, 30);
-            this.ToolStripMenuItem_testRfidChannel.Text = "Test RfidChannel";
-            this.ToolStripMenuItem_testRfidChannel.Click += new System.EventHandler(this.ToolStripMenuItem_testRfidChannel_Click);
+            this.MenuItem_startCapture.Name = "MenuItem_startCapture";
+            this.MenuItem_startCapture.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_startCapture.Text = "开始捕获";
+            this.MenuItem_startCapture.Click += new System.EventHandler(this.MenuItem_startCapture_Click);
+            // 
+            // MenuItem_stopCapture
+            // 
+            this.MenuItem_stopCapture.Name = "MenuItem_stopCapture";
+            this.MenuItem_stopCapture.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_stopCapture.Text = "停止捕获";
+            this.MenuItem_stopCapture.Click += new System.EventHandler(this.MenuItem_stopCapture_Click);
             // 
             // MainForm
             // 
@@ -833,6 +851,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton toolStripButton_autoInventory;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_testRfidChannel;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_startCapture;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_stopCapture;
     }
 }
 

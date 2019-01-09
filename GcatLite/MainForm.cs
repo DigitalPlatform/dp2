@@ -314,5 +314,10 @@ namespace GcatLite
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }
+
+        private void button_defaultUrl_Click(object sender, EventArgs e)
+        {
+            this.textBox_url.Text = "http://dp2003.com/dp2library/rest";
+        }
     }
 }

@@ -161,6 +161,8 @@ namespace DigitalPlatform.RFID
         // 块最大总数
         public UInt32 MaxBlockCount { get; set; }
 
+        public bool EAS { get; set; }
+
         // 锁定状态字符串。表达每个块的锁定状态
         // 例如 "ll....lll"。'l' 表示锁定，'.' 表示没有锁定。缺省为 '.'。空字符串表示全部块都没有被锁定
         public string LockStatus { get; set; }
@@ -254,6 +256,18 @@ namespace DigitalPlatform.RFID
         public override string ToString()
         {
             return $"{base.ToString()},ReaderHandle={ReaderHandle}";
+        }
+    }
+
+    public class FindTagResult : NormalResult
+    {
+        // 找到标签所在的读卡器名字
+        public string ReaderName { get; set; }
+        public string UID { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()},ReaderName={ReaderName},UID={UID}";
         }
     }
 

@@ -56,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -119,6 +120,10 @@
       <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID.UI\DigitalPlatform.RFID.UI.csproj">
       <Project>{FE5B6586-85F4-4850-A66D-5607ECB08F9B}</Project>
       <Name>DigitalPlatform.RFID.UI</Name>
@@ -126,6 +131,10 @@
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9D26D2AD-EABB-4C32-8706-FB9E323FAF01}</Project>
       <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
@@ -139,6 +148,11 @@
       <Project>{dfadb438-ebff-47fb-acf6-586224cef771}</Project>
       <Name>RfidDrivers.First</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="history.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

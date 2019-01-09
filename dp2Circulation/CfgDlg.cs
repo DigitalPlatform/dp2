@@ -535,6 +535,12 @@ false);
     "idcardReaderUrl",
     "");  // 常用值 "ipc://IdcardChannel/IdcardServer"
 
+            // RFID 读卡器 URL
+            this.textBox_cardReader_rfidCenterUrl.Text =
+                ap.GetString("cardreader",
+    "rfidCenterUrl",
+    "");  // 常用值 "ipc://RfidChannel/RfidServer"
+
             // *** 指纹
 
             // 指纹阅读器接口URL
@@ -1155,6 +1161,11 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "idcardReaderUrl",
                 this.textBox_cardReader_idcardReaderUrl.Text);
 
+            // RFID 读卡器 URL
+            ap.SetString("cardreader",
+                "rfidCenterUrl",
+                this.textBox_cardReader_rfidCenterUrl.Text);  // 常用值 "ipc://RfidChannel/RfidServer"
+
             // ** 指纹
             // 指纹阅读器URL
             ap.SetString("fingerprint",
@@ -1710,6 +1721,22 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             this.textBox_face_readerUrl.Text = strDefaultValue;
+        }
+
+        private void button_cardReader_setRfidUrlDefaultValue_Click(object sender, EventArgs e)
+        {
+            string strDefaultValue = "ipc://RfidChannel/RfidServer";
+
+            DialogResult result = MessageBox.Show(this,
+    "确实要将 RFID 读卡器接口 URL 的值设置为常用值\r\n \"" + strDefaultValue + "\" ? ",
+    "CfgDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            this.textBox_cardReader_rfidCenterUrl.Text = strDefaultValue;
         }
     }
 

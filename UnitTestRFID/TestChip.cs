@@ -150,6 +150,29 @@ c6 02 07 44
             Assert.AreEqual(block_map, "ww.....wwww");
         }
 
+        // 只有一个 PII 元素的情况。没有 Content parameter 元素
+        [TestMethod]
+        public void Test_chip_layout_4()
+        {
+            LogicChip chip = new LogicChip();
+            chip.NewElement(ElementOID.PII, "123456789012").WillLock = true;
+
+            var result = chip.GetBytes(4 * 11,
+                4,
+                GetBytesStyle.None,
+                out string block_map);
+
+            Debug.Write(chip.ToString());
+
+            string result_string = Element.GetHexString(result, "4");
+            byte[] correct = Element.FromHexString(
+    @"91 00 05 1c
+be 99 1a 14"
+);
+            Assert.IsTrue(result.SequenceEqual(correct));
+            Assert.AreEqual(block_map, "ww");
+        }
+
         // 测试复杂布局
         [TestMethod]
         public void Test_chip_complex_layout_1()
