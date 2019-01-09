@@ -862,6 +862,18 @@ start);
 
         #endregion
 
+        // 检查是否需要使用 Content parameter 字段
+        bool NeedContentParameter()
+        {
+            foreach (Element element in this._elements)
+            {
+                int oid = (int)element.OID;
+                if (oid >= 3)
+                    return true;
+            }
+            return false;
+        }
+
         // 根据当前的所有元素，设置 Content parameter 元素内容
         // parameters:
         //      trim_right  是否要截掉右侧多余的连续 0？
@@ -880,6 +892,12 @@ start);
                     // TODO: 测试 0x80000000 >> 0 会不会有问题
                     value |= 0x8000000000000000 >> (oid - 3);
                 }
+            }
+
+            if (value == 0)
+            {
+                this.RemoveElement(ElementOID.ContentParameter);
+                return;
             }
 
             var bytes = Compact.ReverseBytes(BitConverter.GetBytes(value));

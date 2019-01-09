@@ -12,6 +12,75 @@ namespace DigitalPlatform.RFID.UI
     [DefaultProperty("UserName")]
     public class LogicChipItem : LogicChip
     {
+        #region 特殊信息
+
+        byte _afi = 0;
+
+        [DisplayName("AFI"), Description("AFI")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        [Category("系统信息")]
+        [TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte AFI
+        {
+            get
+            {
+                return _afi;
+            }
+            set
+            {
+                if (_afi != value)
+                    SetChanged(true);
+                _afi = value;
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        byte _dsfid = 0;
+        [DisplayName("DSFID"), Description("DSFID")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        [Category("系统信息")]
+        [TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte DSFID
+        {
+            get
+            {
+                return _dsfid;
+            }
+            set
+            {
+                if (_dsfid != value)
+                    SetChanged(true);
+
+                _dsfid = value;
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        bool _eas = false;
+        [DisplayName("EAS"), Description("EAS")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        [Category("系统信息")]
+        public bool EAS
+        {
+            get
+            {
+                return _eas;
+            }
+            set
+            {
+                if (_eas != value)
+                    SetChanged(true);
+
+                _eas = value;
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        #endregion
+
         public LogicChipItem() : base()
         {
         }
@@ -52,7 +121,7 @@ namespace DigitalPlatform.RFID.UI
         #region 元素
 
         [DisplayName("01 馆藏单件主标识符"), Description("用于唯一标识一个册。常用册条码号来充当")]
-        // [Category("馆藏单件主标识符")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string PrimaryItemIdentifier
@@ -82,6 +151,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("03 所属机构"), Description("该馆藏单件所属机构 ISIL 代码")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string OwnerInstitution
@@ -96,6 +166,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("04 卷(册)信息"), Description("馆藏卷(册)总数和分卷(册)编号")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string SetInformation
@@ -110,6 +181,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("05 应用类别"), Description("针对馆藏单件或者卷(册)附加的限制性信息")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string TypeOfUsage
@@ -124,6 +196,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("06 排架位置"), Description("馆藏单件位置代码")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string ShelfLocation
@@ -138,6 +211,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("07 ONIX媒体格式"), Description("ONIX媒体描述符")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string OnixMediaFormat
@@ -152,6 +226,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("08 MARC媒体格式"), Description("MARC媒体分类描述符")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string MarcMediaFormat
@@ -166,6 +241,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("09 供应商标识符"), Description("馆藏供应商标识代码")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string SupplierIdentifier
@@ -180,6 +256,7 @@ namespace DigitalPlatform.RFID.UI
         }
 
         [DisplayName("10 订购号"), Description("图书馆与供应商馆藏交易编号")]
+        [Category("元素")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
         [ReadOnly(false)]
         public string OrderNumber
@@ -206,7 +283,7 @@ namespace DigitalPlatform.RFID.UI
 
         public void InitialAllReadonly()
         {
-            foreach(PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this.GetType()))
+            foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(this.GetType()))
             {
                 // 找元素名
                 if (Element.TryGetOidByName(descriptor.Name, out ElementOID oid) == false)

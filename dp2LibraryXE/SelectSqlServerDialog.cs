@@ -59,7 +59,8 @@ namespace dp2LibraryXE
             if (this.radioButton_localdb.Checked == true && IsKB2544514Installed() == false)
             {
                 MessageBox.Show(this, "MS SQL LocalDB 要求必须先安装 .NET Framework 4 Runtime Update 2。请先安装它(KB2544514)");
-                Process.Start("IExplore.exe", "https://support.microsoft.com/en-us/kb/2544514");
+                Process.Start(// "IExplore.exe",
+                    "https://support.microsoft.com/en-us/kb/2544514");
                 return;
             }
 
@@ -111,7 +112,8 @@ namespace dp2LibraryXE
             // https://www.microsoft.com/en-us/download/details.aspx?id=42299
             // Microsoft® SQL Server® 2014 Express (v12)
 
-            Process.Start("IExplore.exe", "https://www.microsoft.com/zh-cn/download/details.aspx?id=42299");
+            Process.Start(// "IExplore.exe", 
+                "https://www.microsoft.com/zh-cn/download/details.aspx?id=42299");
         }
 
         public string SelectedType

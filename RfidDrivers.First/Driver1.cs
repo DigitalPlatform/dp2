@@ -89,6 +89,21 @@ namespace RfidDrivers.First
             }
         }
 
+        List<object> GetAllReaderHandle(string reader_name)
+        {
+            List<object> results = new List<object>();
+            foreach (Reader reader in _readers)
+            {
+                if (reader.Result.ReaderHandle == null)
+                    continue;
+                if (reader_name == "*" || reader_name == reader.Name)
+                    results.Add(reader.Result.ReaderHandle);
+            }
+
+            return results;
+        }
+
+
         // 根据 reader 名字找到 reader_handle
         object GetReaderHandle(string reader_name)
         {
@@ -298,7 +313,7 @@ namespace RfidDrivers.First
                     {
                         Value = -1,
                         ErrorInfo = $"OpenReader error, return: {iret}",
-                        ErrorCode = GetErrorCode(iret)
+                        ErrorCode = GetErrorCode(iret, hreader)
                     };
 
 
@@ -321,7 +336,7 @@ namespace RfidDrivers.First
                     {
                         Value = -1,
                         ErrorInfo = $"CloseReader error, return: {iret}",
-                        ErrorCode = GetErrorCode(iret)
+                        ErrorCode = GetErrorCode(iret, (UIntPtr)reader_handle)
                     };
 
                 // 成功
@@ -362,7 +377,7 @@ namespace RfidDrivers.First
                     {
                         Value = -1,
                         ErrorInfo = "error",
-                        ErrorCode = GetErrorCode(ret)
+                        ErrorCode = GetErrorCode(ret, hreader)
                     };
 
                 Debug.Assert(nTagCount == results.Count);
@@ -513,7 +528,14 @@ namespace RfidDrivers.First
                 nSize,
                 ref bytesRead);
             if (iret != 0)
-                return new ReadBlocksResult { Value = -1, ErrorInfo = "read blocks error", ErrorCode = GetErrorCode(iret) };
+            {
+                return new ReadBlocksResult
+                {
+                    Value = -1,
+                    ErrorInfo = "read blocks error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+            }
 
             if (read_lock_status == false)
             {
@@ -545,6 +567,184 @@ namespace RfidDrivers.First
             }
         }
 
+        // TODO: 根据 PII 寻找标签。如果找到两个或者以上，并且它们 UID 不同，会报错
+        // 注：PII 相同，UID 也相同，属于正常情况，这是因为多个读卡器都读到了同一个标签的缘故
+        // return:
+        //      result.Value    -1 出错
+        //      result.Value    0   没有找到指定的标签
+        //      result.Value    1   找到了。result.UID 和 result.ReaderName 里面有返回值
+        public FindTagResult FindTagByPII(
+            string reader_name,
+            string pii)
+        {
+            List<object> handles = GetAllReaderHandle(reader_name);
+            if (handles.Count == 0)
+                return new FindTagResult { Value = -1, ErrorCode = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                foreach (UIntPtr hreader in handles)
+                {
+                    // 枚举所有标签
+                    byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
+
+                    UInt32 nTagCount = 0;
+                    int ret = tag_inventory(
+                        hreader,
+                        ai_type,
+                        1,
+                        new Byte[] { 1 },
+                        ref nTagCount,
+                        out List<InventoryInfo> results);
+                    if (ret != 0)
+                        return new FindTagResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "tag_inventory error",
+                            ErrorCode = GetErrorCode(ret, hreader)
+                        };
+
+                    Debug.Assert(nTagCount == results.Count);
+
+                    foreach (InventoryInfo info in results)
+                    {
+                        UIntPtr hTag = _connectTag(
+    hreader,
+    info?.UID,
+    info.TagType);
+                        if (hTag == UIntPtr.Zero)
+                            return new FindTagResult { Value = -1, ErrorInfo = "connectTag Error" };
+                        try
+                        {
+                            int iret;
+                            Byte[] uid = new Byte[8];
+                            if (info != null && string.IsNullOrEmpty(info.UID) == false)
+                                uid = Element.FromHexString(info.UID);
+
+                            Byte dsfid, afi, icref;
+                            UInt32 blkSize, blkNum;
+                            dsfid = afi = icref = 0;
+                            blkSize = blkNum = 0;
+                            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
+                                hreader,
+                                hTag,
+                                uid,
+                                ref dsfid,
+                                ref afi,
+                                ref blkSize,
+                                ref blkNum,
+                                ref icref);
+                            if (iret != 0)
+                                return new FindTagResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = "error",
+                                    ErrorCode = GetErrorCode(iret, hreader)
+                                };
+
+                            ReadBlocksResult result0 = ReadBlocks(
+                                hreader,
+                        hTag,
+                        0,
+                        blkNum,
+                        blkSize,
+                        true);
+                            if (result0.Value == -1)
+                                return new FindTagResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+
+                            // 解析出 PII
+                            LogicChip chip = LogicChip.From(result0.Bytes,
+                                (int)blkSize);
+                            string current_pii = chip.FindElement(ElementOID.PII)?.Text;
+                            if (pii == current_pii)
+                                return new FindTagResult
+                                {
+                                    Value = 1,
+                                    ReaderName = "",
+                                    UID = info.UID
+                                };
+                        }
+                        finally
+                        {
+                            _disconnectTag(hreader, ref hTag);
+                        }
+                    }
+                }
+
+                return new FindTagResult
+                {
+                    Value = 0,
+                    ErrorInfo = $"没有找到 PII 为 {pii} 的标签",
+                    ErrorCode = "tagNotFound"
+                };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // 设置 EAS 和 AFI
+        // parameters:
+        //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
+        public NormalResult SetEAS(
+    string reader_name,
+    string uid,
+    bool enable)
+        {
+            List<object> handles = GetAllReaderHandle(reader_name);
+            if (handles.Count == 0)
+                return new NormalResult { Value = -1, ErrorCode = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                foreach (UIntPtr hreader in handles)
+                {
+                    UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
+                    UIntPtr hTag = _connectTag(hreader, uid, tag_type);
+                    if (hTag == UIntPtr.Zero)
+                        continue;
+                    try
+                    {
+                        // 写入 AFI
+                        {
+                            NormalResult result0 = WriteAFI(hreader,
+                                hTag,
+                                enable ? (byte)0x07 : (byte)0xc2);
+                            if (result0.Value == -1)
+                                return result0;
+                        }
+
+                        // 设置 EAS 状态
+                        {
+                            NormalResult result0 = EnableEAS(hreader, hTag, enable);
+                            if (result0.Value == -1)
+                                return result0;
+                        }
+
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        _disconnectTag(hreader, ref hTag);
+                    }
+                }
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到 UID 为 {uid} 的标签",
+                    ErrorCode = "tagNotFound"
+                };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
         public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
             string reader_name,
             TagInfo old_tag_info,
@@ -559,10 +759,11 @@ namespace RfidDrivers.First
                 UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
                 UIntPtr hTag = _connectTag(hreader, old_tag_info.UID, tag_type);
                 if (hTag == UIntPtr.Zero)
-                    return new GetTagInfoResult { Value = -1, ErrorInfo = "connectTag Error" };
+                    return new NormalResult { Value = -1, ErrorInfo = "connectTag Error" };
                 try
                 {
                     // *** 分段写入内容 bytes
+                    if (new_tag_info.Bytes != null)
                     {
                         // 写入时候自动跳过锁定的块
                         List<BlockRange> new_ranges = BlockRange.GetBlockRanges(
@@ -606,10 +807,11 @@ namespace RfidDrivers.First
                     }
 
                     // *** 兑现锁定 'w' 状态的块
+                    if (new_tag_info.Bytes != null)
                     {
                         List<BlockRange> ranges = BlockRange.GetBlockRanges(
                             (int)old_tag_info.BlockSize,
-                            new_tag_info.Bytes,
+                            new_tag_info.Bytes, // TODO: 研究一下此参数其实应该允许为 null
                             new_tag_info.LockStatus,
                             'w');
 
@@ -635,6 +837,30 @@ namespace RfidDrivers.First
 
                             current_block_count += range.BlockCount;
                         }
+                    }
+
+                    // 写入 DSFID
+                    if (old_tag_info.DSFID != new_tag_info.DSFID)
+                    {
+                        NormalResult result0 = WriteDSFID(hreader, hTag, new_tag_info.DSFID);
+                        if (result0.Value == -1)
+                            return result0;
+                    }
+
+                    // 写入 AFI
+                    if (old_tag_info.AFI != new_tag_info.AFI)
+                    {
+                        NormalResult result0 = WriteAFI(hreader, hTag, new_tag_info.AFI);
+                        if (result0.Value == -1)
+                            return result0;
+                    }
+
+                    // 设置 EAS 状态
+                    if (old_tag_info.EAS != new_tag_info.EAS)
+                    {
+                        NormalResult result0 = EnableEAS(hreader, hTag, new_tag_info.EAS);
+                        if (result0.Value == -1)
+                            return result0;
                     }
 
                     return new NormalResult();
@@ -708,6 +934,89 @@ namespace RfidDrivers.First
             return new NormalResult();
         }
 
+        // 写入 DSFID 位
+        NormalResult WriteDSFID(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            byte dsfid)
+        {
+            int iret;
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_WriteDSFID(hreader, hTag, dsfid);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "WriteDSFID error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+            return new NormalResult();
+        }
+
+        NormalResult WriteAFI(
+            UIntPtr hreader,
+            UIntPtr hTag,
+            byte afi)
+        {
+            int iret;
+            iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_WriteAFI(
+                hreader,
+                hTag,
+                afi);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "WriteAFI error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+            return new NormalResult();
+        }
+
+        // TODO: 最好让函数可以适应标签不支持 EAS 的情况
+        // 检查 EAS 状态
+        // return:
+        //      result.Value 为 1 表示 On；为 0 表示 Off
+        //      result.Value 为 -1 表示出错
+        NormalResult CheckEAS(UIntPtr hreader,
+            UIntPtr hTag)
+        {
+            int iret;
+            Byte EASStatus = 0;
+            iret = RFIDLIB.rfidlib_aip_iso15693.NXPICODESLI_EASCheck(hreader, hTag, ref EASStatus);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "WriteAFI error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+
+            return new NormalResult { Value = (EASStatus == 0 ? 0 : 1) };
+        }
+
+        NormalResult EnableEAS(UIntPtr hreader,
+            UIntPtr hTag,
+            bool bEnable)
+        {
+            int iret;
+            if (bEnable)
+                iret = RFIDLIB.rfidlib_aip_iso15693.NXPICODESLI_EableEAS(
+                    hreader,
+                    hTag);
+            else
+                iret = RFIDLIB.rfidlib_aip_iso15693.NXPICODESLI_DisableEAS(
+                    hreader,
+                    hTag);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = (bEnable ? "Enable" : "Disable") + "EAS error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
+            return new NormalResult();
+        }
+
         // parameters:
         //      numOfBlks   块数。等于 data.Length / 块大小
         NormalResult WriteBlocks(
@@ -727,7 +1036,12 @@ namespace RfidDrivers.First
                 data,
                 (uint)data.Length);
             if (iret != 0)
-                return new NormalResult { Value = -1, ErrorInfo = "Write blocks error", ErrorCode = GetErrorCode(iret) };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "Write blocks error",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
             return new NormalResult();
         }
 
@@ -781,7 +1095,12 @@ namespace RfidDrivers.First
                         ref blkNum,
                         ref icref);
                     if (iret != 0)
-                        return new GetTagInfoResult { Value = -1, ErrorInfo = "error", ErrorCode = GetErrorCode(iret) };
+                        return new GetTagInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = "error",
+                            ErrorCode = GetErrorCode(iret, hreader)
+                        };
 
 #if NO
                     byte[] block_status = GetLockStatus(
@@ -801,7 +1120,16 @@ namespace RfidDrivers.First
                 blkSize,
                 true);
                     if (result0.Value == -1)
-                        return new GetTagInfoResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+                        return new GetTagInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result0.ErrorInfo,
+                            ErrorCode = result0.ErrorCode
+                        };
+
+                    NormalResult eas_result = CheckEAS(hreader, hTag);
+                    if (eas_result.Value == -1)
+                        return new GetTagInfoResult { Value = -1, ErrorInfo = eas_result.ErrorInfo, ErrorCode = eas_result.ErrorCode };
 
                     GetTagInfoResult result1 = new GetTagInfoResult
                     {
@@ -815,6 +1143,7 @@ namespace RfidDrivers.First
                             IcRef = icref,
                             LockStatus = result0.LockStatus,    // TagInfo.GetLockString(block_status),
                             Bytes = result0.Bytes,
+                            EAS = eas_result.Value == 1,
                         }
                     };
                     return result1;
@@ -1043,7 +1372,7 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
 -27	Reserved
 
          * */
-        static string GetErrorCode(int value)
+        static string GetErrorCode(int value, UIntPtr hr)
         {
             switch (value)
             {
@@ -1066,7 +1395,13 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
                 case -12:
                     return "messageSizeError";
                 case -17:
-                    return "errorFromReader";
+                    if (hr != UIntPtr.Zero)
+                    {
+                        int code = RFIDLIB.rfidlib_reader.RDR_GetReaderLastReturnError(hr);
+                        return $"errorFromReader={code}";
+                    }
+                    else
+                        return "errorFromReader";
                 case -21:
                     return "timeoutStopTrigger";
                 case -22:

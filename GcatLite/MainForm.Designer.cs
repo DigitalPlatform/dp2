@@ -48,6 +48,7 @@
             this.toolStrip_main = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_support = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_copyright = new System.Windows.Forms.ToolStripButton();
+            this.button_defaultUrl = new System.Windows.Forms.Button();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
             this.SuspendLayout();
@@ -120,7 +121,7 @@
             this.textBox_url.Location = new System.Drawing.Point(16, 81);
             this.textBox_url.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_url.Name = "textBox_url";
-            this.textBox_url.Size = new System.Drawing.Size(576, 28);
+            this.textBox_url.Size = new System.Drawing.Size(574, 28);
             this.textBox_url.TabIndex = 13;
             this.textBox_url.Text = "http://dp2003.com/dp2library/rest";
             // 
@@ -258,11 +259,23 @@
             this.toolStripButton_copyright.Text = "版权";
             this.toolStripButton_copyright.Click += new System.EventHandler(this.toolStripButton_copyright_Click_1);
             // 
+            // button_defaultUrl
+            // 
+            this.button_defaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_defaultUrl.Location = new System.Drawing.Point(448, 116);
+            this.button_defaultUrl.Name = "button_defaultUrl";
+            this.button_defaultUrl.Size = new System.Drawing.Size(142, 45);
+            this.button_defaultUrl.TabIndex = 28;
+            this.button_defaultUrl.Text = "恢复默认 URL";
+            this.button_defaultUrl.UseVisualStyleBackColor = true;
+            this.button_defaultUrl.Click += new System.EventHandler(this.button_defaultUrl_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(612, 600);
+            this.Controls.Add(this.button_defaultUrl);
             this.Controls.Add(this.toolStrip_main);
             this.Controls.Add(this.checkBox_clipboardChain);
             this.Controls.Add(this.statusStrip_main);
@@ -315,6 +328,7 @@
         private System.Windows.Forms.ToolStrip toolStrip_main;
         private System.Windows.Forms.ToolStripButton toolStripButton_support;
         private System.Windows.Forms.ToolStripButton toolStripButton_copyright;
+        private System.Windows.Forms.Button button_defaultUrl;
     }
 }
 

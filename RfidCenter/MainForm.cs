@@ -12,6 +12,8 @@ using System.Threading;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
+using System.Web;
+using System.IO;
 
 using RfidDrivers.First;
 
@@ -21,7 +23,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
-
+using DigitalPlatform.IO;
 
 namespace RfidCenter
 {
@@ -52,6 +54,8 @@ namespace RfidCenter
         private void Form1_Load(object sender, EventArgs e)
         {
             ClientInfo.Initial("rfidcenter");
+
+            ClearHtml();
 
             if (StartRemotingServer() == false)
                 return;
@@ -428,6 +432,11 @@ c0 9e ba a0
                 LogicChip = LogicChipItem.From(result.TagInfo.Bytes, (int)result.TagInfo.BlockSize, result.TagInfo.LockStatus)
             };
             item.Tag = tag_info;
+
+            tag_info.LogicChip.DSFID = tag_info.OldInfo.DSFID;
+            tag_info.LogicChip.AFI = tag_info.OldInfo.AFI;
+            tag_info.LogicChip.EAS = tag_info.OldInfo.EAS;
+
             tag_info.LogicChip.PropertyChanged += LogicChip_PropertyChanged;
 
             string pii = tag_info.LogicChip.FindElement(ElementOID.PII)?.Text;
@@ -680,7 +689,8 @@ bool bClickClose = false)
             _chipDialog.ShowMessage(strError, "red", true);
         }
 
-        static TagInfo BuildNewTagInfo(TagInfo old_tag_info, LogicChip chip)
+        static TagInfo BuildNewTagInfo(TagInfo old_tag_info, 
+            LogicChipItem chip)
         {
             TagInfo new_tag_info = old_tag_info.Clone();
             new_tag_info.Bytes = chip.GetBytes(
@@ -689,6 +699,10 @@ bool bClickClose = false)
                 LogicChip.GetBytesStyle.None,
                 out string block_map);
             new_tag_info.LockStatus = block_map;
+
+            new_tag_info.DSFID = chip.DSFID;
+            new_tag_info.AFI = chip.AFI;
+            new_tag_info.EAS = chip.EAS;
             return new_tag_info;
         }
 
@@ -894,6 +908,172 @@ bool bClickClose = false)
         {
             ListReadersResult result = m_rfidObj.ListReaders();
             MessageBox.Show(this, result.ToString());
+        }
+
+        #region 浏览器控件
+
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(ClientInfo.DataDir, "history.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strJs = "";
+            {
+                HtmlDocument doc = this.webBrowser1.Document;
+
+                if (doc == null)
+                {
+                    this.webBrowser1.Navigate("about:blank");
+                    doc = this.webBrowser1.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            WriteHtml(this.webBrowser1,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+
+        delegate void Delegate_AppendHtml(string strText);
+
+        public void AppendHtml(string strText)
+        {
+            if (this.webBrowser1.InvokeRequired)
+            {
+                Delegate_AppendHtml d = new Delegate_AppendHtml(AppendHtml);
+                this.webBrowser1.BeginInvoke(d, new object[] { strText });
+                return;
+            }
+
+            WriteHtml(this.webBrowser1,
+                strText);
+            // Global.ScrollToEnd(this.WebBrowser);
+
+            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+            this.webBrowser1.Document.Window.ScrollTo(0,
+    this.webBrowser1.Document.Body.ScrollRectangle.Height);
+        }
+
+        public static void WriteHtml(WebBrowser webBrowser,
+string strHtml)
+        {
+
+            HtmlDocument doc = webBrowser.Document;
+
+            if (doc == null)
+            {
+                // webBrowser.Navigate("about:blank");
+                Navigate(webBrowser, "about:blank");
+
+                doc = webBrowser.Document;
+            }
+
+            // doc = doc.OpenNew(true);
+            doc.Write(strHtml);
+
+            // 保持末行可见
+            // ScrollToEnd(webBrowser);
+        }
+
+        // 2015/7/28 
+        // 能处理异常的 Navigate
+        internal static void Navigate(WebBrowser webBrowser, string urlString)
+        {
+            int nRedoCount = 0;
+            REDO:
+            try
+            {
+                webBrowser.Navigate(urlString);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                /*
+System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (异常来自 HRESULT:0x800700AA)
+   在 System.Windows.Forms.UnsafeNativeMethods.IWebBrowser2.Navigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.PerformNavigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.Navigate(String urlString)
+   在 dp2Circulation.QuickChargingForm._setReaderRenderString(String strText) 位置 F:\cs4.0\dp2Circulation\Charging\QuickChargingForm.cs:行号 394
+                 * */
+                if ((uint)ex.ErrorCode == 0x800700AA)
+                {
+                    nRedoCount++;
+                    if (nRedoCount < 5)
+                    {
+                        Application.DoEvents(); // 2015/8/13
+                        Thread.Sleep(200);
+                        goto REDO;
+                    }
+                }
+
+                throw ex;
+            }
+        }
+
+        public static void SetHtmlString(WebBrowser webBrowser,
+    string strHtml,
+    string strDataDir,
+    string strTempFileType)
+        {
+            // StopWebBrowser(webBrowser);
+
+            strHtml = strHtml.Replace("%datadir%", strDataDir);
+            strHtml = strHtml.Replace("%mappeddir%", PathUtil.MergePath(strDataDir, "servermapped"));
+
+            string strTempFilename = Path.Combine(strDataDir, "~temp_" + strTempFileType + ".html");
+            using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
+            {
+                sw.Write(strHtml);
+            }
+            // webBrowser.Navigate(strTempFilename);
+            Navigate(webBrowser, strTempFilename);  // 2015/7/28
+        }
+
+        public static void SetHtmlString(WebBrowser webBrowser,
+string strHtml)
+        {
+            webBrowser.DocumentText = strHtml;
+        }
+
+        /// <summary>
+        /// 向控制台输出 HTML
+        /// </summary>
+        /// <param name="strHtml">要输出的 HTML 字符串</param>
+        public void OutputHtml(string strHtml)
+        {
+            AppendHtml(strHtml);
+        }
+
+        public void OutputHistory(string strText, int nWarningLevel = 0)
+        {
+            OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
+        }
+
+        // parameters:
+        //      nWarningLevel   0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)
+        /// <summary>
+        /// 向控制台输出纯文本
+        /// </summary>
+        /// <param name="strText">要输出的纯文本字符串</param>
+        /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
+        public void OutputText(string strText, int nWarningLevel = 0)
+        {
+            string strClass = "normal";
+            if (nWarningLevel == 1)
+                strClass = "warning";
+            else if (nWarningLevel >= 2)
+                strClass = "error";
+            AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+        }
+
+        #endregion
+
+        private void MenuItem_startCapture_Click(object sender, EventArgs e)
+        {
+            m_rfidObj.BeginCapture(true);
+        }
+
+        private void MenuItem_stopCapture_Click(object sender, EventArgs e)
+        {
+            m_rfidObj.BeginCapture(false);
         }
     }
 }

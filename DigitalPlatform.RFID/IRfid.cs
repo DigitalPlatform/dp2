@@ -23,6 +23,15 @@ namespace DigitalPlatform.RFID
     TagInfo old_tag_info,
     TagInfo new_tag_info);
 
+        // parameters:
+        //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态
+        NormalResult SetEAS(
+string reader_name,
+string tag_name,
+bool enable);
+
+        // 开始或者结束捕获标签
+        NormalResult BeginCapture(bool begin);
     }
 
     [Serializable()]

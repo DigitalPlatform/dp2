@@ -52,6 +52,7 @@
     <Compile Include="ChipItem.cs" />
     <Compile Include="LogicChipItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ChipEditor.resx">
