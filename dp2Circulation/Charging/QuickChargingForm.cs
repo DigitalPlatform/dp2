@@ -17,6 +17,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using System.Threading.Tasks;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -178,7 +179,7 @@ namespace dp2Circulation
                 {
                     _rfidChannel.Object.ListReaders();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     this.ShowMessageBox("启动 RFID 设备时出错: " + ex.Message);
                 }
@@ -191,6 +192,21 @@ namespace dp2Circulation
             {
                 EndRfidChannel(_rfidChannel);
                 _rfidChannel = null;
+            }
+        }
+
+        void OpenRfidCapture(bool open)
+        {
+            if (_rfidChannel != null)
+            {
+                try
+                {
+                    _rfidChannel.Object.EnableCapture(open);
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -850,12 +866,22 @@ dlg.UiState);
             }
 
             // 2019/1/9
-            bool is_pii = false;
-            if (strBarcode.StartsWith("pii:") == true)
+            string prefix = "pii:";
+            string type_of_usage = "10";    // 10 流通馆藏; 80 读者证
+            if (strBarcode.StartsWith("pii:") == true
+                || strBarcode.StartsWith("PII:") == true
+                || strBarcode.StartsWith("uid:") == true
+                || strBarcode.StartsWith("UID:") == true)
             {
                 // 这是册条码号(RFID 读卡器发来的)。但内容依然需要进行校验
-                strBarcode = strBarcode.Substring("pii:".Length);
-                is_pii = true;
+                Hashtable table = StringUtil.ParseParameters(strBarcode, ',', ':');
+                strBarcode = GetValue(table,"pii");
+                if (string.IsNullOrEmpty(strBarcode))
+                {
+                    strBarcode = GetValue(table,"uid");
+                    prefix = "uid:";
+                }
+                type_of_usage = GetValue(table, "tou");
             }
 
             // 2015/12/9
@@ -883,10 +909,16 @@ dlg.UiState);
                     strBarcode,
                     EnableControls,
                     out strError);
-                if (is_pii == true && nRet == 1)
+                if (type_of_usage == "10" && nRet == 1)
                 {
-                    // pii: 引导的内容居然符合读者证条码号规则了?
-                    strError = $"pii:引导的号码 {strBarcode} 不符合册条码号校验规则: " + strError;
+                    // pii: 或者 uid: 引导的内容居然符合读者证条码号规则了?
+                    strError = $"{prefix}引导的号码 {strBarcode} 不符合册条码号校验规则: " + strError;
+                    return -1;
+                }
+                if (type_of_usage == "80" && nRet == 2)
+                {
+                    // pii: 或者 uid: 引导的内容居然符合册条码号规则了?
+                    strError = $"{prefix}引导的号码 {strBarcode} 不符合读者证条码号校验规则: " + strError;
                     return -1;
                 }
                 return nRet;
@@ -1737,7 +1769,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "borrow";
             }
             else if (func == dp2Circulation.FuncState.ContinueBorrow)
@@ -1753,27 +1785,27 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "borrow";
             }
             else if (func == dp2Circulation.FuncState.Renew)
             {
                 // task.ReaderBarcode = "";
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "renew";
             }
             else if (func == dp2Circulation.FuncState.VerifyRenew)
             {
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "verify_renew";
             }
             else if (func == dp2Circulation.FuncState.Return)
             {
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "return";
                 task.Parameters = strParameters;
             }
@@ -1781,7 +1813,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 task.ReaderBarcode = this.BatchNo;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "inventory";
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn)
@@ -1797,14 +1829,14 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "verify_return";
                 task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Lost)
             {
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "lost";
                 task.Parameters = strParameters;
             }
@@ -1820,7 +1852,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "verify_lost";
                 task.Parameters = strParameters;
             }
@@ -1837,20 +1869,20 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "read";
             }
             else if (func == dp2Circulation.FuncState.Boxing)
             {
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "boxing";
                 task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Move)
             {
                 task.ItemBarcode = GetContent(strText);
-                task.ItemBarcodePrefix = GetPrefix(strText);
+                task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "move";
                 task.Parameters = strParameters;
             }
@@ -1868,26 +1900,52 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
         }
 
-        // 获得一个字符串的内容部分
+        // 获得一个字符串的 pii: 或者 uid: 内容部分
+        // 例: pii:13412341324,tou:10
         static string GetContent(string strText)
         {
             if (string.IsNullOrEmpty(strText))
                 return "";
             if (strText.IndexOf(":") == -1)
                 return strText;
-            List<string> parts = StringUtil.ParseTwoPart(strText, ":");
-            return parts[1];
+            Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
+            string strBarcode = GetValue(table, "pii");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return strBarcode;
+            return GetValue(table, "uid");
         }
 
-        // 获得一个字符串的前缀部分
-        static string GetPrefix(string strText)
+        static string GetValue(Hashtable table, string name)
+        {
+            string value = (string)table[name];
+            if (string.IsNullOrEmpty(value) == false)
+                return value;
+            value = (string)table[name.ToUpper()];
+            return value;
+        }
+
+        // 获得一个字符串的 RFID 前缀类型
+        // 如果是 pii: 或者 uid: 引导，并且 tou: 内容的第一位为 ‘1’，表示这是 rfid 标签
+        // return:
+        //      "pii" 或 "uid" 表示这是需要修改 EAS 的 RFID 标签
+        //      空   表示这不是需要修改 EAS 的 RFID 标签
+        static string GetEasType(string strText)
         {
             if (string.IsNullOrEmpty(strText))
                 return "";
             if (strText.IndexOf(":") == -1)
                 return "";
-            List<string> parts = StringUtil.ParseTwoPart(strText, ":");
-            return parts[0];
+            Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
+            string strTypeOfUsage = GetValue(table, "tou");
+            if (string.IsNullOrEmpty(strTypeOfUsage) == false && strTypeOfUsage[0] != '1')
+                return "";
+            string strBarcode = GetValue(table, "pii");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return "pii";
+            strBarcode = GetValue(table, "uid");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return "uid";
+            return "";
         }
 
         DpRow FindTaskLine(ChargingTask task)
@@ -3223,36 +3281,13 @@ MessageBoxDefaultButton.Button2);
 
         private void QuickChargingForm_Activated(object sender, EventArgs e)
         {
-#if NO
-            if (_floatingMessage != null)
-            {
-                try
-                {
-                    _floatingMessage.Show();
-                }
-                catch
-                {
-                }
-            }
-#endif
-
             this.textBox_input.Focus();
+            //OpenRfidCapture(true);
         }
 
         private void QuickChargingForm_Deactivate(object sender, EventArgs e)
         {
-#if NO
-            if (_floatingMessage != null)
-            {
-                try
-                {
-                    _floatingMessage.Hide();
-                }
-                catch
-                {
-                }
-            }
-#endif
+            //OpenRfidCapture(false);
         }
 
         private void textBox_input_Enter(object sender, EventArgs e)
@@ -3265,11 +3300,13 @@ MessageBoxDefaultButton.Button2);
 #endif
             // 扫入 3 种条码均可
             EnterOrLeavePQR(true, InputType.ALL);
+            OpenRfidCapture(true);
         }
 
         private void textBox_input_Leave(object sender, EventArgs e)
         {
             EnterOrLeavePQR(false);
+            OpenRfidCapture(false);
         }
 
         private void QuickChargingForm_Enter(object sender, EventArgs e)
