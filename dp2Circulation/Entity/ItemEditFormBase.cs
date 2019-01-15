@@ -315,7 +315,7 @@ namespace dp2Circulation
         //      -1  error
         //      0   没有必要更新
         //      1   已经更新
-        int Restore(out string strError)
+        public virtual int Restore(out string strError)
         {
             strError = "";
             int nRet = 0;
@@ -578,8 +578,7 @@ namespace dp2Circulation
 
                     this._splitContainer_main.Panel1Collapsed = false;
 
-                    string strError = "";
-                    int nRet = FillExisting(out strError);
+                    int nRet = FillExisting(out string strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
 

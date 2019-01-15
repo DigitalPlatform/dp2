@@ -49,6 +49,8 @@ namespace RfidCenter
                 _floatingMessage.RectColor = Color.Green;
                 _floatingMessage.Show(this);
             }
+
+            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -84,6 +86,10 @@ namespace RfidCenter
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            m_rfidObj?.BeginCapture(false);
+
+            UsbNotification.UnregisterUsbDeviceNotification();
+
             _cancelInventory?.Cancel();
 
             {
@@ -122,6 +128,11 @@ namespace RfidCenter
 
                 if (result.Value == -1)
                     this.ShowMessage(result.ErrorInfo, "red", true);
+                else
+                {
+                    // 一开始就启动捕捉状态
+                    m_rfidObj?.BeginCapture(true);
+                }
 
                 this.Invoke((Action)(() =>
                 {
@@ -689,7 +700,7 @@ bool bClickClose = false)
             _chipDialog.ShowMessage(strError, "red", true);
         }
 
-        static TagInfo BuildNewTagInfo(TagInfo old_tag_info, 
+        static TagInfo BuildNewTagInfo(TagInfo old_tag_info,
             LogicChipItem chip)
         {
             TagInfo new_tag_info = old_tag_info.Clone();
@@ -1074,6 +1085,42 @@ string strHtml)
         private void MenuItem_stopCapture_Click(object sender, EventArgs e)
         {
             m_rfidObj.BeginCapture(false);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == UsbNotification.WmDevicechange)
+            {
+                switch ((int)m.WParam)
+                {
+                    case UsbNotification.DbtDeviceremovecomplete:
+                        //MessageBox.Show(this, "removed"); 
+                        BeginRefreshReaders();
+                        break;
+                    case UsbNotification.DbtDevicearrival:
+                        //MessageBox.Show(this, "added");
+                        BeginRefreshReaders();
+                        break;
+                }
+            }
+        }
+
+        private static readonly Object _syncRoot_refresh = new Object(); // 2017/5/18
+
+        void BeginRefreshReaders()
+        {
+            Task.Run(() =>
+            {
+                Thread.Sleep(1000);
+                lock (_syncRoot_refresh)
+                {
+                    _driver.RefreshAllReaders();
+                    m_rfidObj?.BeginCapture(false);
+                    m_rfidObj?.BeginCapture(true);
+                    UpdateDeviceList(_driver.Readers);
+                }
+            });
         }
     }
 }

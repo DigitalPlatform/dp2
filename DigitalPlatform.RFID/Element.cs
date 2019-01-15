@@ -72,11 +72,11 @@ namespace DigitalPlatform.RFID
 
         // Local data A
         LDA = 15,
-        localDataA = 15,
+        LocalDataA = 15,
 
         // Local data B
         LDB = 16,
-        localDataB = 16,
+        LocalDataB = 16,
 
         // Title
         T = 17,
@@ -264,6 +264,24 @@ namespace DigitalPlatform.RFID
             this._startOffs = start;
         }
 
+        public Element Clone()
+        {
+            Element element = new Element(this.StartOffs);
+            element.OriginData = new List<byte>(this.OriginData).ToArray();
+
+            element._precursor = this._precursor;
+            element._paddings = this._paddings;
+            element._lengthOfData = this._lengthOfData;
+            element._compactedData = this._compactedData;
+            element._oid = this._oid;
+            element._text = this._text;
+            element._content = this._content;
+            element._locked = this._locked;
+            element._willLock = this._willLock;
+
+            return element;
+        }
+
         // 用于单元测试
         public void SetLocked(bool locked)
         {
@@ -305,6 +323,10 @@ namespace DigitalPlatform.RFID
         //      其他  返回不合法的文字解释
         public static string VerifyElementText(ElementOID oid, string text)
         {
+            if (oid == ElementOID.PII)
+                return VerifyPII(text);
+            if (oid == ElementOID.OwnerInstitution)
+                return VerifyOwnerInstitution(text);
             if (oid == ElementOID.SetInformation)
                 return VerifySetInformation(text);
             if (oid == ElementOID.TypeOfUsage)
@@ -315,10 +337,29 @@ namespace DigitalPlatform.RFID
                 return VerifyMediaFormat(text);
             if (oid == ElementOID.SupplyChainStage)
                 return VerifySupplyChainStage(text);
+            if (oid == ElementOID.IllBorrowingInstitution)
+                return VerifyIBI(text);
             return null;
         }
 
         #region 校验各种元素的输入文本合法性
+
+        public static string VerifyPII(string text)
+        {
+            return null;
+        }
+
+        public static string VerifyOwnerInstitution(string text)
+        {
+            DigitalPlatform.RFID.Compact.CheckIsil(text);
+            return null;
+        }
+
+        public static string VerifyIBI(string text)
+        {
+            DigitalPlatform.RFID.Compact.CheckIsil(text);
+            return null;
+        }
 
         // GB/T 35660.2-2017 page 9
         // 编码到芯片的时候，根据 text 自动选定编码方式。由于它形态的特点，一般会自动选定 Integer 编码方式

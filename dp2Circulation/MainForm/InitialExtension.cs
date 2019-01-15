@@ -2558,6 +2558,12 @@ AppInfo.GetString("config",
                         if (nRet == -1)
                             goto END1;
 
+                        // 获得 RFID 配置信息
+                        // 2019/1/11
+                        nRet = GetRfidInfo(false);
+                        if (nRet == -1)
+                            goto END1;
+
                         // 获得前端交费接口配置信息
                         // 2009/7/20 
                         nRet = GetClientFineInterfaceInfo(false);
@@ -5061,6 +5067,70 @@ Culture=neutral, PublicKeyToken=null
 
             return -1;  // 出错，不希望继续以后的操作
              * */
+            return 1;
+        }
+
+        /// <summary>
+        /// 获得 RFID 配置信息
+        /// </summary>
+        /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
+        public int GetRfidInfo(bool bPreareSearch = true)
+        {
+            this.RfidInfo = "";
+            this.RfidCfgDom = new XmlDocument();
+            this.RfidCfgDom.LoadXml("<rfid />");
+
+            if (StringUtil.CompareVersion(this.ServerVersion, "3.11") < 0)
+                return 0;
+
+
+                LibraryChannel channel = this.GetChannel();
+
+            string strError = "";
+
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在获得 RFID 配置信息 ...");
+            Stop.BeginLoop();
+
+            try
+            {
+                string strValue = "";
+                long lRet = channel.GetSystemParameter(Stop,
+                    "system",
+                    "rfid",
+                    out strValue,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "针对服务器 " + channel.Url + " 获得 RFID 配置信息过程发生错误：" + strError;
+                    goto ERROR1;
+                }
+
+                this.RfidInfo = strValue;
+
+                try
+                {
+                    // this.RfidCfgDom.DocumentElement.InnerXml = this.RfidInfo;
+                    if (string.IsNullOrEmpty(this.RfidInfo) == false)
+                        this.RfidCfgDom.LoadXml(this.RfidInfo);
+                }
+                catch (Exception ex)
+                {
+                    strError = "load RfidCfgDom OuterXml error: " + ex.Message;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+
+                this.ReturnChannel(channel);
+            }
+
+            return 0;
+            ERROR1:
             return 1;
         }
 

@@ -124,6 +124,12 @@ namespace dp2Circulation
         public XmlDocument CallNumberCfgDom = null;
         string CallNumberInfo = "";  // <callNumber>元素的InnerXml
 
+        /// <summary>
+        /// 从服务器端获取的 RFID 配置信息
+        /// </summary>
+        public XmlDocument RfidCfgDom = null;
+        string RfidInfo = "";  // <rfid> 元素的 OuterXml
+
         // public string LibraryServerDiretory = "";   // dp2libraryws的library.xml中配置的<libraryserver url='???'>内容
 
         /// <summary>

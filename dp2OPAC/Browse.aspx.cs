@@ -467,13 +467,12 @@ ref sessioninfo) == false)
                 if (File.Exists(strResultsetFilename) == true)
                 {
                     // 2010/12/21
-                    string strBuildStyle = "";
                     // 看看是否为每日强制更新的节点 
                     // 获得Build相关参数
                     // parameters:
                     //      strBuildStyle    创建风格 perday / perhour
                     CacheBuilder.GetBuildParam(node,
-                        out strBuildStyle);
+                        out string strBuildStyle);
                     if (String.IsNullOrEmpty(strBuildStyle) == false
                         && strBuildStyle.ToLower() != "disable")
                     {

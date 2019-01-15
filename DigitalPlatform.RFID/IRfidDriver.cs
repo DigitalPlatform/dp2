@@ -104,7 +104,7 @@ namespace DigitalPlatform.RFID
         }
     }
 
-    [Serializable()]
+    // [Serializable()]
     public class InventoryResult : NormalResult
     {
         public List<InventoryInfo> Results { get; set; }
@@ -150,6 +150,7 @@ namespace DigitalPlatform.RFID
         }
     }
 
+    [Serializable]
     public class TagInfo
     {
         public string UID { get; set; }
@@ -251,7 +252,7 @@ namespace DigitalPlatform.RFID
     // [Serializable]
     public class OpenReaderResult : NormalResult
     {
-        public object ReaderHandle { get; set; }
+        public UIntPtr ReaderHandle { get; set; }
 
         public override string ToString()
         {
@@ -274,6 +275,16 @@ namespace DigitalPlatform.RFID
     public class InitializeDriverResult : NormalResult
     {
         public List<Reader> Readers { get; set; }
+
+        public InitializeDriverResult(NormalResult result) : base (result)
+        {
+
+        }
+
+        public InitializeDriverResult()
+        {
+
+        }
     }
 
     // [Serializable()]
@@ -282,7 +293,7 @@ namespace DigitalPlatform.RFID
         public string Name { get; set; }
         public string SerialNumber { get; set; }
         public string DriverPath { get; set; }
-        // public object ReaderHandle { get; set; }
+        public UIntPtr ReaderHandle { get; set; }
         [NonSerialized]
         public OpenReaderResult Result = null;
 

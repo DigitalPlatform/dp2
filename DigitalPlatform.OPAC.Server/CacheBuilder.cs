@@ -2745,15 +2745,17 @@ out strError);
         }
 
         // 根据一个参数名获得default参数值
+        // 从上级元素中找名为 strDefaultAttrName 的属性。这个属性其值应该是 "name1=value1,name2=value2" 这样的形态。
+        // 一旦在 属性值中发现了名为 strName 的子值(比如例子中的 "name1" )，则返回这个子值 (比如例子中的 "value1")。
         static string GetEnvParamValue(XmlNode node,
-            string strDefaultParam,
+            string strDefaultAttrName,
             string strName)
         {
             node = node.ParentNode; // 从父节点的default属性开始找
 
             while (node != null && node.NodeType != XmlNodeType.Document)   // 2012/4/25 add node.NodeType != XmlNodeType.Document
             {
-                string strDefault = DomUtil.GetAttr(node, strDefaultParam);
+                string strDefault = DomUtil.GetAttr(node, strDefaultAttrName);
                 Hashtable param_table = StringUtil.ParseParameters(strDefault);
                 if (param_table.Contains(strName) == true)
                     return (string)param_table[strName];
@@ -2771,9 +2773,9 @@ out strError);
             // build
             string strBuild = GetEnvParamValue(node,
                 "build",
-                "");
+                "autoUpdate");  // 原来是 ""
             if (strBuild != null)
-                param_table["build"] = strBuild;
+                param_table["autoUpdate"] = strBuild;    // 原来是 "build"
 
             return param_table;
         }
@@ -2792,10 +2794,9 @@ out strError);
             // maxcount
             string strMaxCount = GetEnvParamValue(node,
                 "rssDefault",
-                 "maxcount");
+                "maxcount");
             if (strMaxCount != null)
                 param_table["maxcount"] = strMaxCount;
-
 
             return param_table;
         }
@@ -2815,21 +2816,21 @@ out strError);
             // word
             string strWord = GetEnvParamValue(node,
                 "default",
-                 "word");
+                "word");
             if (strWord != null)
                 param_table["word"] = strWord;
 
             // from
             string strFrom = GetEnvParamValue(node,
                 "default",
-                 "from");
+                "from");
             if (strFrom != null)
                 param_table["from"] = strFrom;
 
             // matchstyle
             string strMatchStyle = GetEnvParamValue(node,
                 "default",
-                 "matchstyle");
+                "matchstyle");
             if (strMatchStyle != null)
                 param_table["matchstyle"] = strMatchStyle;
 

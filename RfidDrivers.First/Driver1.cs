@@ -19,12 +19,12 @@ namespace RfidDrivers.First
 
         void Lock()
         {
-            //_lock.EnterWriteLock();
+            _lock.EnterWriteLock();
         }
 
         void Unlock()
         {
-            //_lock.ExitWriteLock();
+            _lock.ExitWriteLock();
         }
 
         List<Reader> _readers = new List<Reader>();
@@ -32,7 +32,7 @@ namespace RfidDrivers.First
         {
             get
             {
-                return _readers;
+                return new List<Reader>(_readers);
             }
         }
 
@@ -43,15 +43,9 @@ namespace RfidDrivers.First
             {
                 GetDriversInfo();
 
-                // 枚举所有的 reader
-                _readers = EnumUsbReader("RL8000");
-
-                // 打开所有的 reader
-                foreach (Reader reader in _readers)
-                {
-                    OpenReaderResult result = OpenReader(reader.SerialNumber);
-                    reader.Result = result;
-                }
+                NormalResult result = OpenAllReaders();
+                if (result.Value == -1)
+                    return new InitializeDriverResult(result);
 
                 return new InitializeDriverResult { Readers = _readers };
             }
@@ -63,29 +57,131 @@ namespace RfidDrivers.First
 
         public NormalResult ReleaseDriver()
         {
+            Lock();
+            try
+            {
+                return CloseAllReaders();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        // 打开所有读卡器
+        NormalResult OpenAllReaders()
+        {
+            // 枚举所有的 reader
+            List<Reader> readers = EnumUsbReader("RL8000");
+
+            // 打开所有的 reader
+            foreach (Reader reader in readers)
+            {
+                OpenReaderResult result = OpenReader(reader.SerialNumber);
+                reader.Result = result;
+                reader.ReaderHandle = result.ReaderHandle;
+            }
+
+            _readers = readers;
+            return new NormalResult();
+        }
+
+        // 刷新读卡器打开状态
+        public NormalResult RefreshAllReaders()
+        {
+            Lock();
+            try
+            {
+#if NO
+                GetDriversInfo();
+
+                // 枚举当前所有的 reader
+                List<Reader> current_readers = EnumUsbReader("RL8000");
+
+                // 增加新的
+                foreach (Reader reader in current_readers)
+                {
+                    if (_findReader(_readers, reader.Name) == null)
+                    {
+                        _readers.Add(reader);
+                        // 打开 reader
+                        OpenReaderResult result = OpenReader(reader.SerialNumber);
+                        reader.Result = result;
+                    }
+                }
+
+                // 和 _readers 对比。删除 _readers 中多余的
+                for (int i = 0; i < _readers.Count; i++)
+                {
+                    Reader reader = _readers[i];
+                    if (_findReader(current_readers, reader.Name) == null)
+                    {
+                        if (reader.Result != null)
+                            CloseReader(reader.Result?.ReaderHandle);
+                        _readers.RemoveAt(i);
+                        i--;
+                    }
+                }
+#endif
+                CloseAllReaders();
+
+                GetDriversInfo();
+
+                NormalResult result = OpenAllReaders();
+                if (result.Value == -1)
+                    return result;
+
+                return new NormalResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        static Reader _findReader(List<Reader> _readers, string serialNumber)
+        {
+            foreach (Reader reader in _readers)
+            {
+                if (reader.SerialNumber == serialNumber)
+                    return reader;
+
+            }
+            return null;
+        }
+
+        NormalResult CloseAllReaders()
+        {
             // 关闭所有的 reader
             foreach (Reader reader in _readers)
             {
-                if (reader.Result.Value != -1)
-                    CloseReader(reader.Result.ReaderHandle);
+                //if (reader.Result == null && reader.Result.Value != -1)
+                //    CloseReader(reader.Result.ReaderHandle);
+                CloseReader(reader.ReaderHandle);
             }
 
             return new NormalResult();
         }
 
-        NormalResult GetReaderHandle(string reader_name, out UIntPtr handle)
+        NormalResult GetReaderHandle(string reader_name, 
+            out UIntPtr handle)
         {
             handle = UIntPtr.Zero;
+            // Lock();
             try
             {
-                handle = (UIntPtr)GetReaderHandle(reader_name);
-                if (handle == null)
+                handle = GetReaderHandle(reader_name);
+                if (handle == UIntPtr.Zero)
                     return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
                 return new NormalResult();
             }
             catch (Exception ex)
             {
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new NormalResult { Value = -1, ErrorInfo = $"GetReaderHandle() 异常: {ExceptionUtil.GetDebugText(ex)}" };
+            }
+            finally
+            {
+                // Unlock();
             }
         }
 
@@ -105,19 +201,23 @@ namespace RfidDrivers.First
 
 
         // 根据 reader 名字找到 reader_handle
-        object GetReaderHandle(string reader_name)
+        UIntPtr GetReaderHandle(string reader_name)
         {
             foreach (Reader reader in _readers)
             {
                 if (reader.Name == reader_name)
                 {
-                    if (reader.Result.ReaderHandle == null)
+#if NO
+                    if (reader.Result == null
+                        || reader.Result?.ReaderHandle == null)
                         throw new Exception($"名为 {reader_name} 的读卡器尚未打开");
-                    return reader.Result.ReaderHandle;
+                    return reader.Result?.ReaderHandle;
+#endif
+                    return reader.ReaderHandle;
                 }
             }
 
-            return null;
+            return UIntPtr.Zero;
         }
 
         public List<CReaderDriverInf> readerDriverInfoList = new List<CReaderDriverInf>();
@@ -135,6 +235,7 @@ namespace RfidDrivers.First
              * Not call required,it can be Omitted in your own appliation
              * enum and show loaded reader driver 
              */
+            readerDriverInfoList.Clear();
             UInt32 nCount;
             nCount = RFIDLIB.rfidlib_reader.RDR_GetLoadedReaderDriverCount();
             uint i;
@@ -201,9 +302,7 @@ namespace RfidDrivers.First
                     if (iret != 0)
                         continue;
 
-                    Reader reader = new Reader { SerialNumber = sernum.ToString() };
-                    readers.Add(reader);
-
+                    string driver_path = "";
                     {
                         StringBuilder path = new StringBuilder();
                         path.Append('\0', 64);
@@ -216,11 +315,19 @@ namespace RfidDrivers.First
                             ref nSize2);
                         if (iret == 0)
                         {
-                            reader.DriverPath = path.ToString();
+                            driver_path = path.ToString();
                         }
+                        else
+                            continue;
                     }
 
-                    reader.Name = reader.SerialNumber;
+                    Reader reader = new Reader {
+                        SerialNumber = sernum.ToString(),
+                        Name = sernum.ToString(),
+                        DriverPath = driver_path
+                    };
+                    readers.Add(reader);
+
                 }
             }
 
@@ -301,7 +408,7 @@ namespace RfidDrivers.First
 
         OpenReaderResult OpenReader(string serial_number)
         {
-            Lock();
+            //Lock();
             try
             {
                 UIntPtr hreader = UIntPtr.Zero;
@@ -321,13 +428,13 @@ namespace RfidDrivers.First
             }
             finally
             {
-                Unlock();
+                //Unlock();
             }
         }
 
         NormalResult CloseReader(object reader_handle)
         {
-            Lock();
+            //Lock();
             try
             {
                 var iret = RFIDLIB.rfidlib_reader.RDR_Close((UIntPtr)reader_handle);
@@ -345,7 +452,7 @@ namespace RfidDrivers.First
             }
             finally
             {
-                Unlock();
+                //Unlock();
             }
         }
 
@@ -354,12 +461,13 @@ namespace RfidDrivers.First
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
         public InventoryResult Inventory(string reader_name, string style)
         {
-            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
-            if (result.Value == -1)
-                return new InventoryResult(result);
             Lock();
             try
             {
+                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                if (result.Value == -1)
+                    return new InventoryResult(result);
+
                 byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
                 if (StringUtil.IsInList("only_new", style))
                     ai_type = RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE;
@@ -382,6 +490,15 @@ namespace RfidDrivers.First
 
                 Debug.Assert(nTagCount == results.Count);
                 return new InventoryResult { Results = results };
+            }
+            catch (Exception ex)
+            {
+                return new InventoryResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"Inventory()出现异常:{ex.Message}",
+                    ErrorCode = "exception"
+                };
             }
             finally
             {
@@ -579,7 +696,7 @@ namespace RfidDrivers.First
         {
             List<object> handles = GetAllReaderHandle(reader_name);
             if (handles.Count == 0)
-                return new FindTagResult { Value = -1, ErrorCode = $"没有找到名为 {reader_name} 的读卡器" };
+                return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             Lock();
             try
@@ -661,7 +778,7 @@ namespace RfidDrivers.First
                                 return new FindTagResult
                                 {
                                     Value = 1,
-                                    ReaderName = "",
+                                    ReaderName = reader_name,
                                     UID = info.UID
                                 };
                         }
@@ -688,6 +805,9 @@ namespace RfidDrivers.First
         // 设置 EAS 和 AFI
         // parameters:
         //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
+        // return result.Value
+        //      -1  出错
+        //      0   成功
         public NormalResult SetEAS(
     string reader_name,
     string uid,
@@ -695,7 +815,7 @@ namespace RfidDrivers.First
         {
             List<object> handles = GetAllReaderHandle(reader_name);
             if (handles.Count == 0)
-                return new NormalResult { Value = -1, ErrorCode = $"没有找到名为 {reader_name} 的读卡器" };
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             Lock();
             try
@@ -745,17 +865,40 @@ namespace RfidDrivers.First
             }
         }
 
+        // 给 byte [] 后面补足内容
+        static bool EnsureBytes(TagInfo new_tag_info)
+        {
+            // 要确保 Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
+            uint max_count = new_tag_info.BlockSize * new_tag_info.MaxBlockCount;
+            if (new_tag_info.Bytes != null && new_tag_info.Bytes.Length < max_count)
+            {
+                List<byte> bytes = new List<byte>(new_tag_info.Bytes);
+                while (bytes.Count < max_count)
+                    bytes.Add(0);
+                new_tag_info.Bytes = bytes.ToArray();
+                return true;
+            }
+
+            return false;
+        }
+
         public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
             string reader_name,
             TagInfo old_tag_info,
             TagInfo new_tag_info)
         {
-            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
-            if (result.Value == -1)
-                return result;
+            // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
+            EnsureBytes(new_tag_info);
+            EnsureBytes(old_tag_info);
+
+
             Lock();
             try
             {
+                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                if (result.Value == -1)
+                    return result;
+
                 UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
                 UIntPtr hTag = _connectTag(hreader, old_tag_info.UID, tag_type);
                 if (hTag == UIntPtr.Zero)
@@ -765,6 +908,8 @@ namespace RfidDrivers.First
                     // *** 分段写入内容 bytes
                     if (new_tag_info.Bytes != null)
                     {
+
+
                         // 写入时候自动跳过锁定的块
                         List<BlockRange> new_ranges = BlockRange.GetBlockRanges(
                             (int)old_tag_info.BlockSize,
@@ -1051,12 +1196,13 @@ namespace RfidDrivers.First
             string reader_name,
             InventoryInfo info)
         {
-            NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
-            if (result.Value == -1)
-                return new GetTagInfoResult(result);
+
             Lock();
             try
             {
+                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                if (result.Value == -1)
+                    return new GetTagInfoResult(result);
 #if DEBUG
                 if (info != null)
                 {
@@ -1418,6 +1564,8 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
 
             return value.ToString();
         }
+
+
     }
 
     public class CReaderDriverInf

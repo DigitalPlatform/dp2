@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -157,6 +158,40 @@ namespace dp2Circulation
             }
 
             // this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+
+            Task.Run(() => { InitialRfidChannel(); });
+        }
+
+        public RfidChannel _rfidChannel = null;
+
+        void InitialRfidChannel()
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false)
+            {
+                _rfidChannel = StartRfidChannel(
+        Program.MainForm.RfidCenterUrl,
+        out string strError);
+                if (_rfidChannel == null)
+                    this.ShowMessageBox(strError);
+                // 马上检测一下通道是否可用
+                try
+                {
+                    _rfidChannel.Object.ListReaders();
+                }
+                catch(Exception ex)
+                {
+                    this.ShowMessageBox("启动 RFID 设备时出错: " + ex.Message);
+                }
+            }
+        }
+
+        void ReleaseRfidChannel()
+        {
+            if (_rfidChannel != null)
+            {
+                EndRfidChannel(_rfidChannel);
+                _rfidChannel = null;
+            }
         }
 
 #if NO
@@ -261,6 +296,7 @@ namespace dp2Circulation
             if (Program.MainForm != null)
                 Program.MainForm.Move -= new EventHandler(MainForm_Move);
 #endif
+            ReleaseRfidChannel();
 
             this.commander.Destroy();
 
@@ -813,6 +849,15 @@ dlg.UiState);
                 return 1;
             }
 
+            // 2019/1/9
+            bool is_pii = false;
+            if (strBarcode.StartsWith("pii:") == true)
+            {
+                // 这是册条码号(RFID 读卡器发来的)。但内容依然需要进行校验
+                strBarcode = strBarcode.Substring("pii:".Length);
+                is_pii = true;
+            }
+
             // 2015/12/9
             if (strBarcode == "_testreader")
             {
@@ -831,13 +876,20 @@ dlg.UiState);
             try
             {
                 // TODO: 使用回调函数，以决定是否 disable textbox
-                return Program.MainForm.VerifyBarcode(
+                int nRet = Program.MainForm.VerifyBarcode(
                     this._barcodeChannel.stop,
                     this._barcodeChannel.Channel,
                     strLibraryCodeList,
                     strBarcode,
                     EnableControls,
                     out strError);
+                if (is_pii == true && nRet == 1)
+                {
+                    // pii: 引导的内容居然符合读者证条码号规则了?
+                    strError = $"pii:引导的号码 {strBarcode} 不符合册条码号校验规则: " + strError;
+                    return -1;
+                }
+                return nRet;
             }
             finally
             {
@@ -1542,16 +1594,14 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             if ((this.UseIsbnBorrow == true && IsISBN(ref strText) == true)
                 || strText.ToLower() == "?b")
             {
-                string strItemBarcode = "";
-                string strError = "";
                 // return:
                 //      -1  error
                 //      0   放弃
                 //      1   成功
                 int nRet = SelectOneItem(func,
                     strText.ToLower() == "?b" ? "" : strText,
-                    out strItemBarcode,
-                    out strError);
+                    out string strItemBarcode,
+                    out string strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, "选择册记录的过程中出错: " + strError);
@@ -1573,13 +1623,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             // 变换条码号
             if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
             {
-                string strError = "";
 
                 // 2017/1/4
                 int nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
                     ref strText,
-                    out strError);
+                    out string strError);
                 if (nRet == -1)
                 {
                     // TODO: 语音提示
@@ -1615,7 +1664,6 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 }
                 else
                 {
-                    string strError = "";
 
                     // 形式校验条码号
                     // return:
@@ -1627,7 +1675,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     int nRet = VerifyBarcode(
                         Program.MainForm.FocusLibraryCode,  // this.Channel.LibraryCodeList,
                         strText,
-                        out strError);
+                        out string strError);
                     if (nRet == -2)
                     {
                         MessageBox.Show(this, "服务器没有配置条码号验证脚本，无法使用验证条码号功能。请在前端参数配置对话框的“快捷出纳”属性页中清除“校验输入的条码号”事项");
@@ -1688,7 +1736,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             else if (func == dp2Circulation.FuncState.Borrow)
             {
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "borrow";
             }
             else if (func == dp2Circulation.FuncState.ContinueBorrow)
@@ -1703,31 +1752,36 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "borrow";
             }
             else if (func == dp2Circulation.FuncState.Renew)
             {
                 // task.ReaderBarcode = "";
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "renew";
             }
             else if (func == dp2Circulation.FuncState.VerifyRenew)
             {
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "verify_renew";
             }
             else if (func == dp2Circulation.FuncState.Return)
             {
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "return";
                 task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.InventoryBook)
             {
                 task.ReaderBarcode = this.BatchNo;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "inventory";
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn)
@@ -1742,13 +1796,15 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "verify_return";
                 task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Lost)
             {
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "lost";
                 task.Parameters = strParameters;
             }
@@ -1763,7 +1819,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "verify_lost";
                 task.Parameters = strParameters;
             }
@@ -1779,18 +1836,21 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     return;
                 }
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "read";
             }
             else if (func == dp2Circulation.FuncState.Boxing)
             {
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "boxing";
                 task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Move)
             {
-                task.ItemBarcode = strText;
+                task.ItemBarcode = GetContent(strText);
+                task.ItemBarcodePrefix = GetPrefix(strText);
                 task.Action = "move";
                 task.Parameters = strParameters;
             }
@@ -1806,6 +1866,28 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 Delegate_DoAction d = new Delegate_DoAction(_doAction);
                 this.BeginInvoke(d, new object[] { func, strText, strTaskID });
             }
+        }
+
+        // 获得一个字符串的内容部分
+        static string GetContent(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+            if (strText.IndexOf(":") == -1)
+                return strText;
+            List<string> parts = StringUtil.ParseTwoPart(strText, ":");
+            return parts[1];
+        }
+
+        // 获得一个字符串的前缀部分
+        static string GetPrefix(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+            if (strText.IndexOf(":") == -1)
+                return "";
+            List<string> parts = StringUtil.ParseTwoPart(strText, ":");
+            return parts[0];
         }
 
         DpRow FindTaskLine(ChargingTask task)

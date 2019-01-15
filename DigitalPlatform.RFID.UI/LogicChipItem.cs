@@ -114,6 +114,11 @@ namespace DigitalPlatform.RFID.UI
             if (element != null && element.Text == value)
                 return;
 
+            // 检查 value 是否合法
+            string error = Element.VerifyElementText(element.OID, value);
+            if (string.IsNullOrEmpty(error) == false)
+                throw new Exception($"值 '{value}' 不合法: {error}");
+
             SetElement(oid, value);
             SetChanged(true);
         }
@@ -270,14 +275,257 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        [DisplayName("11 馆际互借借入机构(ISIL)"), Description("馆际互借借入机构 ISIL 代码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string IllBorrowingInstitution
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("12 馆际互借作业编号"), Description("标识 1 次馆际互借作业的编号")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string IllBorrowingTransactionNumber
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("13 GS1产品标识符"), Description("GS1 的 GTIN-13 代码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string Gs1ProductIndentifier
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("14 备选馆藏单件唯一标识符"), Description("新标签架构下可能的编码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string AlternativeUniqueItemIdentifier
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("15 本地数据A"), Description("本地定义的任何功能项")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string LocalDataA
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("16 本地数据B"), Description("本地定义的任何功能项")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string LocalDataB
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("17 题名"), Description("馆藏单件正题名/题名")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string Title
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("18 本地产品标识符"), Description("非基于 GTIN-13 的产品标识符")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string ProductIdentifierLocal
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("19 媒体格式(其他)"), Description("非 ONIX 或 MARC 的媒体描述符")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string MediaFormat
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("20 供应链阶段"), Description("馆藏当前所在的供应链阶段")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string SupplyChainStage
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("21 供应商发票编号"), Description("图书馆与供应商进行馆藏交易的发票编号")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string SupplierInvoiceNumber
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("22 备选馆藏单件标识符"), Description("馆藏单件可选标识符")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string AlternativeItemIdentifier
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("23 备选所属机构"), Description("所属图书馆/机构的非 ISIL 代码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string AlternativeOwnerInstitution
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("24 所属机构分馆"), Description("图书馆机构定义的内部代码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string SubsidiaryOfAnOwnerInstitution
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("25 备选馆际互借借入机构"), Description("馆际互借借入机构的 非ISIL 代码")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string AlternativeIllBorrowingInstitution
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
+        [DisplayName("26 本地数据C"), Description("本地定义的任何功能项")]
+        [Category("元素")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(false)]
+        public string LocalDataC
+        {
+            get { return GetElementValue(FieldName()); }
+
+            set
+            {
+                SetElementValue(FieldName(), value);
+                OnPropertyChanged(FieldName());
+            }
+        }
+
         #endregion
 
+#if NO
         void SetReadOnly(string fieldName, bool isReadonly)
         {
-            PropertyDescriptor descriptor = TypeDescriptor.GetProperties(this.GetType())[fieldName];
+            // PropertyDescriptor descriptor = TypeDescriptor.GetProperties(this.GetType())[fieldName];
+            PropertyDescriptor descriptor = TypeDescriptor.GetProperties(this)[fieldName];
 
             ReadOnlyAttribute attrib = (ReadOnlyAttribute)descriptor.Attributes[typeof(ReadOnlyAttribute)];
-            FieldInfo isReadOnly = attrib.GetType().GetField("isReadOnly", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo isReadOnly = attrib.GetType().GetField("isReadOnly",
+                BindingFlags.NonPublic | BindingFlags.Instance);
             isReadOnly.SetValue(attrib, isReadonly);
         }
 
@@ -296,8 +544,16 @@ namespace DigitalPlatform.RFID.UI
                     FieldInfo isReadOnly = attrib.GetType().GetField("isReadOnly", BindingFlags.NonPublic | BindingFlags.Instance);
                     isReadOnly.SetValue(attrib, element.Locked);
                 }
+                else
+                {
+                    ReadOnlyAttribute attrib = (ReadOnlyAttribute)descriptor.Attributes[typeof(ReadOnlyAttribute)];
+                    FieldInfo isReadOnly = attrib.GetType().GetField("isReadOnly", BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (isReadOnly != null)
+                        isReadOnly.SetValue(attrib, false);
+                }
             }
         }
+#endif
 
 #if NO
         string _ownerInstitution = "";
@@ -345,6 +601,7 @@ namespace DigitalPlatform.RFID.UI
 
 #endif
 
+#if NO
         // return:
         //      -1  校验过程出错
         //      0   校验发现不正确
@@ -362,7 +619,7 @@ namespace DigitalPlatform.RFID.UI
 
             try
             {
-                Compact.CheckIsil(text);
+                // Compact.CheckIsil(text);
             }
             catch (Exception ex)
             {
@@ -372,7 +629,7 @@ namespace DigitalPlatform.RFID.UI
 
             return 1;
         }
-
+#endif
 
         #region INotifyPropertyChanged Members
 
@@ -384,7 +641,7 @@ namespace DigitalPlatform.RFID.UI
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        #endregion
+#endregion
 
         // 根据物理数据构造 (拆包)
         // parameters:
@@ -395,7 +652,7 @@ namespace DigitalPlatform.RFID.UI
         {
             LogicChipItem chip = new LogicChipItem();
             chip.Parse(data, block_size, block_map);
-            chip.InitialAllReadonly();
+            // chip.InitialAllReadonly();
             return chip;
         }
     }

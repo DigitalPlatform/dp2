@@ -21,6 +21,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.RFID;
 
 // 2013/3/16 添加 XML 注释
 
@@ -1719,6 +1720,91 @@ out string strError)
                     }
                 }));
         }
+
+        #region RFID 有关功能
+
+        public class RfidChannel
+        {
+            public IpcClientChannel Channel { get; set; }
+            public IRfid Object { get; set; }
+        }
+
+        // internal int _inRfidCall = 0; // >0 表示正在调用 RFID API 尚未返回
+
+        public static RfidChannel StartRfidChannel(
+            string strUrl,
+            out string strError)
+        {
+            strError = "";
+
+            RfidChannel result = new RfidChannel();
+
+            result.Channel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
+                    new BinaryClientFormatterSinkProvider());
+
+            ChannelServices.RegisterChannel(result.Channel, true);
+            bool bDone = false;
+            try
+            {
+                result.Object = (IRfid)Activator.GetObject(typeof(IRfid),
+                    strUrl);
+                if (result.Object == null)
+                {
+                    strError = "无法连接到服务器 " + strUrl;
+                    return null;
+                }
+                bDone = true;
+                return result;
+            }
+            finally
+            {
+                if (bDone == false)
+                    EndRfidChannel(result);
+            }
+        }
+
+        public static void EndRfidChannel(RfidChannel channel)
+        {
+            if (channel != null && channel.Channel != null)
+            {
+                ChannelServices.UnregisterChannel(channel.Channel);
+                channel.Channel = null;
+            }
+        }
+
+        // return:
+        //      -2  remoting服务器连接失败。驱动程序尚未启动
+        //      -1  出错
+        //      0   成功
+        public static NormalResult SetEAS(
+            RfidChannel channel,
+            string reader_name,
+            string tag_name,
+            bool enable,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                return channel.Object.SetEAS(reader_name,
+                    tag_name,
+                    enable);
+            }
+            // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
+            catch (System.Runtime.Remoting.RemotingException ex)
+            {
+                strError = "针对 " + Program.MainForm.RfidCenterUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                return new NormalResult { Value = -2, ErrorInfo = strError };
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.RfidCenterUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                return new NormalResult { Value = -1, ErrorInfo = strError };
+            }
+        }
+
+        #endregion
 
         #region 人脸识别有关功能
 
