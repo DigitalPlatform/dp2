@@ -303,7 +303,37 @@ u output:10101
 
 #if NO
         // 新增
-        [TestMethod]        public void Test_isil_process_6()        {            TestIsilProcess("CN-120104-C-YBL",                @"C output:00011N output:01110- output:000001 switch:u-d output:11110,00012 output:00100 output:00001 output:00010 output:00004 output:0100- output:1010C switch:d-u output:1100,00011- output:00000Y output:11001B output:00010L output:01100");        }        [TestMethod]        public void Test_isil_process_7()        {            TestIsilProcess("C-YBL",                @"C output:00011- output:00000Y output:11001B output:00010L output:01100");        }
+        [TestMethod]
+        public void Test_isil_process_6()
+        {
+            TestIsilProcess("CN-120104-C-YBL",
+                @"C output:00011
+N output:01110
+- output:00000
+1 switch:u-d output:11110,0001
+2 output:0010
+0 output:0000
+1 output:0001
+0 output:0000
+4 output:0100
+- output:1010
+C switch:d-u output:1100,00011
+- output:00000
+Y output:11001
+B output:00010
+L output:01100");
+        }
+
+        [TestMethod]
+        public void Test_isil_process_7()
+        {
+            TestIsilProcess("C-YBL",
+                @"C output:00011
+- output:00000
+Y output:11001
+B output:00010
+L output:01100");
+        }
 #endif
 
         // 测试 ISIL 基本逻辑处理是否正确。

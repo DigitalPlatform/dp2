@@ -26,7 +26,13 @@ namespace DigitalPlatform.RFID.UI
             set
             {
                 _chip = value;
-                propertyGrid1.SelectedObject = value;
+                if (value != null)
+                {
+                    var viewModel = ViewModel.DressUp(value);
+                    propertyGrid1.SelectedObject = viewModel;
+                }
+                else
+                    propertyGrid1.SelectedObject = null;
             }
         }
 
@@ -107,5 +113,19 @@ namespace DigitalPlatform.RFID.UI
         }
 
 #endif
+
+        [Browsable(true)]
+        [DefaultValue("")]
+        public override string Text
+        {
+            get
+            {
+                return this.label_titile.Text;
+            }
+            set
+            {
+                this.label_titile.Text = value;
+            }
+        }
     }
 }

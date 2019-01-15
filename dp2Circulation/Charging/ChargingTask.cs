@@ -32,6 +32,9 @@ namespace dp2Circulation
 
         public string ReaderXml = "";   // 读者记录 XML
 
+        public string ReaderBarcodePrefix = "";
+        public string ItemBarcodePrefix = "";
+
         const int IMAGEINDEX_WAITING = 0;
         const int IMAGEINDEX_FINISH = 1;
         const int IMAGEINDEX_ERROR = 2;
@@ -677,7 +680,7 @@ namespace dp2Circulation
                 return false;
 #endif
             return;
-        ERROR1:
+            ERROR1:
             task.State = "error";
             task.Color = "red";
             this.CurrentReaderBarcode = ""; // 及时清除上下文,避免后面错误借到先前的读者名下
@@ -809,6 +812,14 @@ namespace dp2Circulation
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);
 
+            if (task.ItemBarcodePrefix.ToLower() == "pii"
+                && this.Container._rfidChannel == null)
+            {
+                task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
+                goto ERROR1;
+            }
+
+
             long lRet = 0;
             LibraryChannel channel = this.GetChannel();
             try
@@ -860,6 +871,20 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
             }
             task.ErrorInfo = strError;
+
+            if (lRet == 0)
+            {
+                // 修改 EAS
+                if (task.ItemBarcodePrefix.ToLower() == "pii")
+                {
+                    if (SetEAS(task, false, out strError) == false)
+                    {
+                        // TODO: 要 undo 刚才进行的操作
+                        lRet = -1;
+                        task.ErrorInfo = strError;
+                    }
+                }
+            }
 
             times.Add(DateTime.Now);
 
@@ -973,7 +998,7 @@ end_time);
             times.Add(DateTime.Now);
             LogOperTime("borrow", times, strOperText);
             return;
-        ERROR1:
+            ERROR1:
             task.State = "error";
             task.Color = "red";
             // this.Container.SetReaderRenderString(strError);
@@ -997,6 +1022,28 @@ end_time);
             }
 #endif
 
+        }
+
+        bool SetEAS(ChargingTask task, bool enable, out string strError)
+        {
+            strError = "";
+            try
+            {
+                NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
+        task.ItemBarcodePrefix.ToLower() + ":" + task.ItemBarcode,
+        enable);
+                if (result.Value != 1)
+                {
+                    strError = "修改 RFID 标签 EAS 标志位时出错: " + result.ErrorInfo;
+                    return false;
+                }
+                return true;
+            }
+            catch(Exception ex)
+            {
+                strError = "修改 RFID 标签 EAS 标志位时出错: " + ex.Message;
+                return false;
+            }
         }
 
         // parameters:
@@ -1165,6 +1212,13 @@ end_time);
 
             times.Add(DateTime.Now);
 
+            if (task.ItemBarcodePrefix.ToLower() == "pii"
+    && this.Container._rfidChannel == null)
+            {
+                task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
+                goto ERROR1;
+            }
+
             long lRet = 0;
 
             LibraryChannel channel = this.GetChannel();
@@ -1216,6 +1270,20 @@ end_time);
             }
             if (lRet != 0)
                 task.ErrorInfo = strError;
+
+            if (lRet != -1)
+            {
+                // 修改 EAS
+                if (task.ItemBarcodePrefix.ToLower() == "pii")
+                {
+                    if (SetEAS(task, true, out strError) == false)
+                    {
+                        // TODO: 要 undo 刚才进行的操作
+                        lRet = -1;
+                        task.ErrorInfo = strError;
+                    }
+                }
+            }
 
 #if NO
                 if (return_info != null)
@@ -1364,7 +1432,7 @@ end_time);
             LogOperTime("return", times, strOperText);
             return;
 
-        ERROR1:
+            ERROR1:
             task.State = "error";
             task.Color = "red";
             // this.Container.SetReaderRenderString(strError);

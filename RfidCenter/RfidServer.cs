@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -31,13 +32,116 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
-        public InventoryResult Inventory(string reader_name)
+        public ListTagsResult ListTags(string reader_name)
         {
-            return new InventoryResult();
+            InventoryResult result = new InventoryResult();
+            List<OneTag> tags = new List<OneTag>();
+
+            foreach (Reader reader in Program.Rfid.Readers)
+            {
+                if (reader_name == "*" || reader.Name == reader_name)
+                {
+
+                }
+                else
+                    continue;
+
+                InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name, "");
+                if (inventory_result.Value == -1)
+                {
+                    return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo };
+                }
+
+                foreach (InventoryInfo info in inventory_result.Results)
+                {
+                    tags.Add(new OneTag
+                    {
+                        ReaderName = reader.Name,
+                        UID = info.UID,
+                        DSFID = info.DsfID
+                    });
+
+#if NO
+                            GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                            if (result0.Value == -1)
+                            {
+                                // TODO: 如何报错？写入操作历史?
+                                Program.MainForm.OutputText($"读取标签{info.UID}信息时出错:{result0.ToString()}", 2);
+                                continue;
+                            }
+
+                            LogicChip chip = LogicChip.From(result0.TagInfo.Bytes,
+                                (int)result0.TagInfo.BlockSize,
+                                "" // result0.TagInfo.LockStatus
+                                );
+                            Element pii = chip.FindElement(ElementOID.PII);
+                            if (pii == null)
+                            {
+                                Program.MainForm.Invoke((Action)(() =>
+                                {
+                                    // 发送 UID
+                                    SendKeys.SendWait($"uid:{info.UID}\r\n");
+                                }));
+                            }
+                            else
+                            {
+                                Program.MainForm.Invoke((Action)(() =>
+                                {
+                                    // 发送 PII
+                                    SendKeys.SendWait($"pii:{pii.Text}\r\n");
+                                }));
+                            }
+#endif
+                }
+            }
+
+            return new ListTagsResult { Results = tags };
+
+#if NO
+            InventoryResult result = new InventoryResult();
+            List<OneTag> tags = new List<OneTag>();
+            _lockTagList.EnterReadLock();
+            try
+            {
+                foreach (OneTag tag in _tagList)
+                {
+                    if (reader_name == "*" || tag.ReaderName == reader_name)
+                        tags.Add(tag);
+                }
+                return new ListTagsResult { Results = tags };
+            }
+            finally
+            {
+                _lockTagList.ExitReadLock();
+            }
+#endif
         }
 
-        public GetTagInfoResult GetTagInfo(string reader_name, string uid)
+        public GetTagInfoResult GetTagInfo(string reader_name,
+            string uid)
         {
+            foreach (Reader reader in Program.Rfid.Readers)
+            {
+                if (reader_name == "*" || reader.Name == reader_name)
+                {
+
+                }
+                else
+                    continue;
+
+                InventoryInfo info = new InventoryInfo { UID = uid };
+                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+
+                if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
+                    continue;
+
+                if (result0.Value == -1)
+                    return result0;
+
+                // not found
+                return result0;
+            }
+
             return new GetTagInfoResult();
         }
 
@@ -46,7 +150,42 @@ namespace RfidCenter
     TagInfo old_tag_info,
     TagInfo new_tag_info)
         {
-            return new NormalResult();
+            // TODO: 对 old_tag_info 和 new_tag_info 合法性进行一系列检查
+
+            foreach (Reader reader in Program.Rfid.Readers)
+            {
+                if (reader_name == "*" || reader.Name == reader_name)
+                {
+
+                }
+                else
+                    continue;
+
+                InventoryInfo info = new InventoryInfo
+                {
+                    UID = old_tag_info.UID
+                };
+                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+
+                if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
+                    continue;
+
+                if (result0.Value == -1)
+                    return new NormalResult(result0);
+
+                // TODO: 是否对照检查 old_tag_info 和 result0.TagInfo ?
+
+                return Program.Rfid.WriteTagInfo(reader.Name,
+                    old_tag_info,
+                    new_tag_info);
+            }
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"没有找到 UID 为 {old_tag_info.UID} 的标签",
+                ErrorCode = "notFound"
+            };
         }
 
         // parameters:
@@ -89,7 +228,10 @@ bool enable)
                 };
 
             {
-                NormalResult result = SetEAS(
+                // return result.Value
+                //      -1  出错
+                //      0   成功
+                NormalResult result = Program.Rfid.SetEAS(
 reader_name,
 uid,
 enable);
@@ -99,35 +241,6 @@ enable);
             }
         }
 
-        // 开始或者结束捕获标签
-        public NormalResult BeginCapture(bool begin)
-        {
-            StartInventory(begin);
-            return new NormalResult();
-        }
-
-        // 启动或者停止自动盘点
-        void StartInventory(bool start)
-        {
-            if (start)
-            {
-                _cancelInventory?.Cancel();
-                while (_cancelInventory != null)
-                {
-                    Task.Delay(500);
-                }
-                Task.Run(() => { DoInventory(); });
-            }
-            else
-                _cancelInventory?.Cancel();
-        }
-
-        class OneTag
-        {
-            public string ReaderName { get; set; }
-            public string uid { get; set; }
-            public DateTime LastActive { get; set; }
-        }
 
         #region Tag List
 
@@ -135,7 +248,9 @@ enable);
         List<OneTag> _tagList = new List<OneTag>();
         internal ReaderWriterLockSlim _lockTagList = new ReaderWriterLockSlim();
 
-        bool AddToTagList(string reader_name, string uid)
+        bool AddToTagList(string reader_name,
+            string uid,
+            byte dsfid)
         {
             OneTag tag = FindTag(uid);
             if (tag != null)
@@ -146,8 +261,9 @@ enable);
                 tag = new OneTag
                 {
                     ReaderName = reader_name,
-                    uid = uid,
-                    LastActive = DateTime.Now
+                    UID = uid,
+                    LastActive = DateTime.Now,
+                    DSFID = dsfid
                 };
                 _tagList.Add(tag);
             }
@@ -157,7 +273,8 @@ enable);
             }
 
             // 触发通知动作
-            Notify(tag.ReaderName, tag.uid);
+            // TODO: 通知以后，最好把标签内容信息给存储起来，这样 Inventory 的时候可以直接使用
+            Notify(tag.ReaderName, tag.UID);
             return true;
         }
 
@@ -168,7 +285,7 @@ enable);
             {
                 foreach (OneTag tag in _tagList)
                 {
-                    if (tag.uid == uid)
+                    if (tag.UID == uid)
                     {
                         tag.LastActive = DateTime.Now;
                         return tag;
@@ -236,6 +353,37 @@ enable);
 
         #endregion
 
+
+        // 开始或者结束捕获标签
+        public NormalResult BeginCapture(bool begin)
+        {
+            StartInventory(begin);
+            return new NormalResult();
+        }
+
+        // 启动或者停止自动盘点
+        void StartInventory(bool start)
+        {
+            if (start)
+            {
+                _cancelInventory?.Cancel();
+                while (_cancelInventory != null)
+                {
+                    Task.Delay(500);
+                }
+                Task.Run(() => { DoInventory(); });
+            }
+            else
+            {
+                _cancelInventory?.Cancel();
+                while (_cancelInventory != null)
+                {
+                    Task.Delay(500);
+                }
+            }
+        }
+
+
         CancellationTokenSource _cancelInventory = null;
 
         void DoInventory()
@@ -256,52 +404,24 @@ enable);
 
                     foreach (Reader reader in Program.Rfid.Readers)
                     {
-                        InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name, bFirst ? "" : "only_new");
+                        if (reader == null)
+                            continue;
+
+                        InventoryResult inventory_result = Program.Rfid.Inventory(
+                            reader.Name, bFirst ? "" : "only_new");
                         bFirst = false;
                         if (inventory_result.Value == -1)
                         {
                             // ioError 要主动卸载有问题的 reader?
                             // 如何报错？写入操作历史？
                             Program.MainForm.OutputHistory($"读卡器{reader.Name}点选标签时出错:{inventory_result.ToString()}\r\n已停止捕获过程", 2);
+                            // Task.Delay(500, _cancelInventory.Token);
                             return;
                         }
 
                         foreach (InventoryInfo info in inventory_result.Results)
                         {
-                            AddToTagList(reader.Name, info.UID);
-
-
-#if NO
-                            GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
-                            if (result0.Value == -1)
-                            {
-                                // TODO: 如何报错？写入操作历史?
-                                Program.MainForm.OutputText($"读取标签{info.UID}信息时出错:{result0.ToString()}", 2);
-                                continue;
-                            }
-
-                            LogicChip chip = LogicChip.From(result0.TagInfo.Bytes,
-                                (int)result0.TagInfo.BlockSize,
-                                "" // result0.TagInfo.LockStatus
-                                );
-                            Element pii = chip.FindElement(ElementOID.PII);
-                            if (pii == null)
-                            {
-                                Program.MainForm.Invoke((Action)(() =>
-                                {
-                                    // 发送 UID
-                                    SendKeys.SendWait($"uid:{info.UID}\r\n");
-                                }));
-                            }
-                            else
-                            {
-                                Program.MainForm.Invoke((Action)(() =>
-                                {
-                                    // 发送 PII
-                                    SendKeys.SendWait($"pii:{pii.Text}\r\n");
-                                }));
-                            }
-#endif
+                            AddToTagList(reader.Name, info.UID, info.DsfID);
                         }
                     }
                 }
@@ -352,6 +472,5 @@ enable);
 
             return true;
         }
-
     }
 }

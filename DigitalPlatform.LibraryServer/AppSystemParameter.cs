@@ -345,6 +345,22 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strCategory == "system")
                 {
+                    // 2019/1/11
+                    // RFID 相关定义
+                    if (strName == "rfid")
+                    {
+                        XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rfid");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                            strValue = root.OuterXml;
+
+                        goto END1;
+                    }
+
                     // 2018/7/17
                     // 获得 dp2library 失效期
                     if (strName == "expire")

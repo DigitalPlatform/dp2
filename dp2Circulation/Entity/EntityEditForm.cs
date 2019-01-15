@@ -6,6 +6,9 @@ using System.Diagnostics;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.RFID.UI;
+using DigitalPlatform.RFID;
+using static dp2Circulation.MyForm;
 
 namespace dp2Circulation
 {
@@ -42,8 +45,11 @@ namespace dp2Circulation
             _button_Cancel = this.button_Cancel;
 
             _textBox_message = this.textBox_message;
-            _splitContainer_main = this.splitContainer_main;
+            _splitContainer_main = this.splitContainer_itemArea;
             _tableLayoutPanel_main = this.tableLayoutPanel_main;
+
+            this.chipEditor_existing.Text = "标签中原有内容";
+            this.chipEditor_editing.Text = "即将写入的内容";
         }
 
         /// <summary>
@@ -188,7 +194,7 @@ namespace dp2Circulation
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -343,7 +349,7 @@ namespace dp2Circulation
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -437,6 +443,22 @@ namespace dp2Circulation
         {
             // this.button_OK.Enabled = e.CurrentChanged;
             SetOkButtonState();
+
+            if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false)
+            {
+                int nRet = this.Restore(out string strError);
+                if (nRet != -1)
+                {
+                    try
+                    {
+                        this.chipEditor_editing.LogicChipItem = BuildChip(this.Item);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetMessage(ex.Message);
+                    }
+                }
+            }
         }
 
         static string DoAction(
@@ -695,6 +717,406 @@ namespace dp2Circulation
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }
+
+        void DisplayRfidPanel(bool display)
+        {
+            this.splitContainer_back.Panel2Collapsed = !display;
+            // this.panel_rfid.Visible = display;
+        }
+
+        void SetMessage(string text)
+        {
+            this.textBox_message.Text = text;
+            this.textBox_message.Visible = text != null;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            // 把芯片内容装载显示
+            if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false)
+            {
+                if (this.Item != null)
+                {
+                    try
+                    {
+                        this.chipEditor_editing.LogicChipItem = BuildChip(this.Item);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetMessage(ex.Message);
+                    }
+                }
+            }
+
+            DisplayRfidPanel(string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false);
+
+#if NO
+            if (this._editing != null)
+            {
+                LoadItem(this.Item);
+
+                EnablePrevNextRecordButtons();
+
+                // 参考记录
+                if (this.Item != null
+                    && this.Item.Error != null)
+                {
+
+                    this._splitContainer_main.Panel1Collapsed = false;
+
+                    string strError = "";
+                    int nRet = FillExisting(out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, strError);
+
+                    this._existing.SetReadOnly("all");
+
+                    // 突出差异内容
+                    this._editing.HighlightDifferences(this._existing);
+                }
+                else
+                {
+                    this._tableLayoutPanel_main.RowStyles[0].Height = 0F;
+                    this._textBox_message.Visible = false;
+
+                    this._label_editing.Visible = false;
+                    this._splitContainer_main.Panel1Collapsed = true;
+                    this._existing.Enabled = false;
+                }
+            }
+#endif
+        }
+
+        // 根据 BookItem 对象构造一个 LogicChipItem 对象
+        static LogicChipItem BuildChip(BookItem book_item)
+        {
+            LogicChipItem result = new LogicChipItem();
+
+            // barcode --> PII
+            result.NewElement(ElementOID.PII, book_item.Barcode);
+
+            // location --> OwnerInstitution 要配置映射关系
+            // 定义一系列前缀对应的 ISIL 编码。如果 location 和前缀前方一致比对成功，则得到 ISIL 编码
+            MainForm.GetOwnerInstitution(
+                Program.MainForm.RfidCfgDom,
+                StringUtil.GetPureLocation(book_item.Location),
+                out string isil,
+                out string alternative);
+            if (string.IsNullOrEmpty(isil) == false)
+            {
+                result.NewElement(ElementOID.OwnerInstitution, isil);
+            }
+            else if (string.IsNullOrEmpty(alternative) == false)
+            {
+                result.NewElement(ElementOID.AlternativeOwnerInstitution, alternative);
+            }
+
+            // SetInformation？
+            // 可以考虑用 volume 元素映射过来。假设 volume 元素内容符合 (xx,xx) 格式
+            string value = MainForm.GetSetInformation(book_item.Volume);
+            if (value != null)
+                result.NewElement(ElementOID.SetInformation, value);
+
+            // TypeOfUsage?
+            // (十六进制两位数字)
+            // 10 一般流通馆藏
+            // 20 非流通馆藏。保存本库? 加工中?
+            // 70 被剔旧的馆藏。和 state 元素应该有某种对应关系，比如“注销”
+            {
+                string typeOfUsage = "";
+                if (StringUtil.IsInList("注销", book_item.State) == true)
+                    typeOfUsage = "70";
+                else if (string.IsNullOrEmpty(book_item.State) == false
+                    && StringUtil.IsInList("加工中", book_item.State) == false)
+                    typeOfUsage = "20";
+                else
+                    typeOfUsage = "10";
+
+                result.NewElement(ElementOID.TypeOfUsage, typeOfUsage);
+            }
+
+            // AccessNo --> ShelfLocation
+            // 注意去掉 {ns} 部分
+            result.NewElement(ElementOID.ShelfLocation,
+                StringUtil.GetPlainTextCallNumber(book_item.AccessNo)
+                );
+
+            return result;
+        }
+
+        // 左侧编辑器是否成功装载过
+        bool _leftLoaded = false;
+
+        // 写入右侧的信息到标签
+        private void toolStripButton_saveRfid_Click(object sender, EventArgs e)
+        {
+            // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
+            string strError = "";
+
+            string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+
+            // 看左侧是否装载过。如果没有装载过则自动装载
+            if (_leftLoaded == false)
+            {
+                int nRet = LoadOldChip(pii, false, true, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // 然后保存
+            {
+                int nRet = SaveNewChip(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            MessageBox.Show(this, "保存成功");
+
+            // 刷新左侧显示
+            {
+                int nRet = LoadOldChip(pii, true, false, out strError);
+                if (nRet == -1)
+                {
+                    // this.chipEditor_existing.LogicChipItem = null;
+                    _leftLoaded = false;
+                    strError = "保存已经成功。但刷新左侧显示时候出错: " + strError;
+                    goto ERROR1;
+                }
+            }
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 从现有标签中装载信息到左侧，供对比使用
+        private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
+        {
+            // TODO: 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
+            _leftLoaded = false;
+            string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            int nRet = LoadOldChip(pii, false, true, out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            _leftLoaded = true;
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        OneTag _tagExisting = null;
+
+        // 装入以前的标签信息
+        // 如果读卡器上有多个标签，则出现对话框让从中选择一个。列表中和右侧 PII 相同的，优先被选定
+        // parameters:
+        //      auto_close_dialog  是否要自动关闭选择对话框。条件是选中了 auto_select_pii 事项
+        //      adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        int LoadOldChip(
+            string auto_select_pii,
+            bool auto_close_dialog,
+            bool adjust_right,
+            out string strError)
+        {
+            strError = "";
+            try
+            {
+                REDO:
+                // 出现对话框让选择一个
+                SelectTagDialog dialog = new SelectTagDialog();
+                dialog.AutoCloseDialog = auto_close_dialog;
+                dialog.SelectedPII = auto_select_pii;
+                dialog.ShowDialog(this);
+                if (dialog.DialogResult == DialogResult.Cancel)
+                    return 0;
+
+                if (auto_close_dialog == false
+                    && string.IsNullOrEmpty(auto_select_pii) == false
+                    && dialog.SelectedPII != auto_select_pii
+                    && string.IsNullOrEmpty(dialog.SelectedPII) == false)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?",
+    "AccountBookForm",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO;
+                }
+
+                var tag_info = dialog.SelectedTag.TagInfo;
+                _tagExisting = dialog.SelectedTag;
+
+                var chip = LogicChipItem.From(tag_info.Bytes,
+                    (int)tag_info.BlockSize,
+                    tag_info.LockStatus);
+                this.chipEditor_existing.LogicChipItem = chip;
+
+                if (adjust_right)
+                {
+                    int nRet = Merge(this.chipEditor_existing.LogicChipItem,
+    this.chipEditor_editing.LogicChipItem,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 让右侧编辑器感受到 readonly 和 text 的变化
+                    var save = this.chipEditor_editing.LogicChipItem;
+                    this.chipEditor_editing.LogicChipItem = null;
+                    this.chipEditor_editing.LogicChipItem = save;
+                }
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "出现异常: " + ex.Message;
+                return -1;
+            }
+        }
+
+        // 把新旧芯片内容合并。即，新芯片中不应修改旧芯片中已经锁定的元素
+        static int Merge(LogicChipItem old_chip,
+            LogicChipItem new_chip,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+            // 检查一遍
+            foreach (Element element in old_chip.Elements)
+            {
+                if (element.Locked == false)
+                    continue;
+                Element new_element = new_chip.FindElement(element.OID);
+                if (new_element != null)
+                {
+                    if (new_element.Text != element.Text)
+                        errors.Add($"当前标签中元素 {element.OID} 已经被锁定，无法被从 '{element.Text}' 修改为 '{new_element.Text}'");
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, ";");
+                return -1;
+            }
+
+            foreach (Element element in old_chip.Elements)
+            {
+                if (element.Locked == false)
+                    continue;
+                Element new_element = new_chip.FindElement(element.OID);
+                if (new_element != null)
+                {
+                    // 修改新元素
+                    int index = new_chip.Elements.IndexOf(new_element);
+                    Debug.Assert(index != -1);
+                    new_chip.Elements.RemoveAt(index);
+                    new_chip.Elements.Insert(index, element.Clone());
+                }
+            }
+
+            return 0;
+        }
+
+        int SaveNewChip(out string strError)
+        {
+            strError = "";
+
+            RfidChannel channel = StartRfidChannel(
+Program.MainForm.RfidCenterUrl,
+out strError);
+            if (channel == null)
+            {
+                strError = "StartRfidChannel() error";
+                return -1;
+            }
+            try
+            {
+                TagInfo new_tag_info = _tagExisting.TagInfo.Clone();
+                new_tag_info.Bytes = this.chipEditor_editing.LogicChipItem.GetBytes(
+                    (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
+                    (int)new_tag_info.BlockSize,
+                    LogicChip.GetBytesStyle.None,
+                    out string block_map);
+                new_tag_info.LockStatus = block_map;
+                NormalResult result = channel.Object.WriteTagInfo(
+                    _tagExisting.ReaderName,
+                    _tagExisting.TagInfo,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "ListTags() 出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+        }
+#if NO
+        // 装入以前的标签信息
+        // 如果读卡器上有多个标签，则出现对话框让从中选择一个。列表中和右侧 PII 相同的，优先被选定
+        // parameters:
+        //      adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        int LoadOldChip(bool adjust_right, 
+            out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl))
+            {
+                strError = "尚未配置 RFID 中心 URL";
+                return -1;
+            }
+            RfidChannel channel = StartRfidChannel(
+                Program.MainForm.RfidCenterUrl,
+                out strError);
+            if (channel == null)
+                return -1;
+            try
+            {
+                ListTagsResult result = channel.Object.ListTags("*");
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+
+                // 出现对话框让选择一个
+                SelectTagDialog dialog = new SelectTagDialog();
+                dialog.Tags = result.Results;
+                dialog.ShowDialog(this);
+                if (dialog.DialogResult == DialogResult.Cancel)
+                    return 0;
+
+                // 装载标签详细信息
+                GetTagInfoResult result1 = channel.Object.GetTagInfo(dialog.SelectedTag.ReaderName,
+                    dialog.SelectedTag.UID);
+
+                return 1;
+            }
+            catch(Exception ex)
+            {
+                strError = "出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+        }
+
+#endif
     }
 
     /// <summary>

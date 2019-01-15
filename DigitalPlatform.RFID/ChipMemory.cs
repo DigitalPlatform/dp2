@@ -876,7 +876,7 @@ start);
 
         // 根据当前的所有元素，设置 Content parameter 元素内容
         // parameters:
-        //      trim_right  是否要截掉右侧多余的连续 0？
+        //      trim_right  是否要截掉右侧多余的连续 0？截掉是一般做法。而不截掉，也就是保留足够 byte 数，足以应对以后元素增多以后的局面，保证 content parameter 本身耗用的空间和以前一致，有利于芯片以后修改内容时的布局。
         public void SetContentParameter(bool trim_right)
         {
             var content_parameter = this.FindElement(ElementOID.ContentParameter);
@@ -929,6 +929,17 @@ start);
             out string block_map)
         {
             block_map = "";
+
+            // 删除空元素
+            for (int i = 0; i < this._elements.Count; i++)
+            {
+                Element element = this._elements[i];
+                if (string.IsNullOrEmpty(element.Text))
+                {
+                    this._elements.RemoveAt(i);
+                    i--;
+                }
+            }
 
             // 先对 elements 排序。确保 PII 和 Content Parameter 元素 index 在前两个
             this.Sort(max_bytes,

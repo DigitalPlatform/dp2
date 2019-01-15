@@ -3479,6 +3479,7 @@ namespace DigitalPlatform.LibraryServer
                             "authdbgroup",  // 2018/9/2
                             "maps_856u",    // 2018/10/24
                             "globalResults",    // 2018/12/3
+                            "rfid", // 2019/1/11
                         };
 
                         RestoreElements(writer, elements);

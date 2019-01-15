@@ -5037,21 +5037,21 @@ MessageBoxDefaultButton.Button2);
             GetFeatureStringResult result = new GetFeatureStringResult();
             try
             {
-                    // 获得一个指纹特征字符串
-                    // return:
-                    //      -1  error
-                    //      0   放弃输入
-                    //      1   成功输入
-                    int nRet = channel.Object.GetFeatureString(
-                        strExcludeBarcodes,
-                        out string strFingerprint,
-                        out string strVersion,
-                        out string strError);
-                    result.Feature = strFingerprint;
-                    result.Version = strVersion;
-                    result.ErrorInfo = strError;
-                    result.Value = nRet;
-                    return result;
+                // 获得一个指纹特征字符串
+                // return:
+                //      -1  error
+                //      0   放弃输入
+                //      1   成功输入
+                int nRet = channel.Object.GetFeatureString(
+                    strExcludeBarcodes,
+                    out string strFingerprint,
+                    out string strVersion,
+                    out string strError);
+                result.Feature = strFingerprint;
+                result.Version = strVersion;
+                result.ErrorInfo = strError;
+                result.Value = nRet;
+                return result;
             }
             catch (Exception ex)
             {
@@ -5143,29 +5143,29 @@ MessageBoxDefaultButton.Button2);
                 try
                 {
                     return await Task.Factory.StartNew<GetFingerprintStringResult>(
-() =>
-{
-    GetFingerprintStringResult temp_result = new GetFingerprintStringResult();
-    try
-    {
-        temp_result.Value = channel.Object.CancelGetFingerprintString();
-        if (temp_result.Value == -1)
-            temp_result.ErrorInfo = "API cancel return error";
-        return temp_result;
-    }
-    catch (RemotingException ex)
-    {
-        temp_result.ErrorInfo = ex.Message;
-        temp_result.Value = 0;  // 让调主认为没有出错
-        return temp_result;
-    }
-    catch (Exception ex)
-    {
-        temp_result.ErrorInfo = ex.Message;
-        temp_result.Value = -1;
-        return temp_result;
-    }
-});
+                        () =>
+                        {
+                            GetFingerprintStringResult temp_result = new GetFingerprintStringResult();
+                            try
+                            {
+                                temp_result.Value = channel.Object.CancelGetFingerprintString();
+                                if (temp_result.Value == -1)
+                                    temp_result.ErrorInfo = "API cancel return error";
+                                return temp_result;
+                            }
+                            catch (RemotingException ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = 0;  // 让调主认为没有出错
+                                return temp_result;
+                            }
+                            catch (Exception ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = -1;
+                                return temp_result;
+                            }
+                        });
                 }
                 catch (Exception ex)
                 {
@@ -6503,7 +6503,7 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-                this.readerEditControl1.FaceFeature = result.Feature; 
+                this.readerEditControl1.FaceFeature = result.Feature;
                 this.readerEditControl1.FaceFeatureVersion = result.Version;
                 this.readerEditControl1.Changed = true;
             }

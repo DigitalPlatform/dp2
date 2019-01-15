@@ -224,6 +224,9 @@ namespace dp2Circulation
             }
         }
 #endif
+        // 不优化触发 ContentChanged 的过程
+        public bool OptimizeTriggerContentChanged = false;
+
         /// <summary>
         /// 内容是否发生过修改
         /// </summary>
@@ -242,7 +245,8 @@ namespace dp2Circulation
                     this.ResetColor();
 
                 // 触发事件
-                if (bOldValue != value && this.ContentChanged != null)
+                if ((bOldValue != value || OptimizeTriggerContentChanged == false)
+                    && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
                     e.OldChanged = bOldValue;
