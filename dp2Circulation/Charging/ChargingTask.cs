@@ -32,8 +32,10 @@ namespace dp2Circulation
 
         public string ReaderXml = "";   // 读者记录 XML
 
-        public string ReaderBarcodePrefix = "";
-        public string ItemBarcodePrefix = "";
+        public string ReaderBarcodeRfidType = "";
+        // 册条码号是否为 rfid 类型。值为 "pii" "uid" 和 "" 之一
+        // 如果是 "pii" 或 "uid"，则完成借书和还书操作最后一步要修改 RFID 标签的 EAS 标指
+        public string ItemBarcodeEasType = "";
 
         const int IMAGEINDEX_WAITING = 0;
         const int IMAGEINDEX_FINISH = 1;
@@ -812,7 +814,7 @@ namespace dp2Circulation
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);
 
-            if (task.ItemBarcodePrefix.ToLower() == "pii"
+            if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false
                 && this.Container._rfidChannel == null)
             {
                 task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
@@ -875,7 +877,7 @@ namespace dp2Circulation
             if (lRet == 0)
             {
                 // 修改 EAS
-                if (task.ItemBarcodePrefix.ToLower() == "pii")
+                if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
                     if (SetEAS(task, false, out strError) == false)
                     {
@@ -1030,7 +1032,7 @@ end_time);
             try
             {
                 NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
-        task.ItemBarcodePrefix.ToLower() + ":" + task.ItemBarcode,
+        task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
         enable);
                 if (result.Value != 1)
                 {
@@ -1212,7 +1214,7 @@ end_time);
 
             times.Add(DateTime.Now);
 
-            if (task.ItemBarcodePrefix.ToLower() == "pii"
+            if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false
     && this.Container._rfidChannel == null)
             {
                 task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
@@ -1274,7 +1276,7 @@ end_time);
             if (lRet != -1)
             {
                 // 修改 EAS
-                if (task.ItemBarcodePrefix.ToLower() == "pii")
+                if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
                 {
                     if (SetEAS(task, true, out strError) == false)
                     {

@@ -381,6 +381,8 @@ namespace DigitalPlatform.RFID
         // 编码到芯片的时候，要用 OctectString 方式编码为一个 byte
         public static string VerifyTypeOfUsage(string text)
         {
+            if (string.IsNullOrEmpty(text))
+                return null;    // 允许值为空
             if (text.Length != 2)
                 return "TypeOfUsage(应用类别) 元素内容必须是 2 字符";
             foreach (char ch in text)

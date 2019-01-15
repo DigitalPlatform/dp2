@@ -80,7 +80,7 @@ namespace RfidCenter
                                 Program.MainForm.Invoke((Action)(() =>
                                 {
                                     // 发送 UID
-                                    SendKeys.SendWait($"uid:{info.UID}\r\n");
+                                    SendKeys.SendWait($"uid:{info.UID}\r");
                                 }));
                             }
                             else
@@ -88,7 +88,7 @@ namespace RfidCenter
                                 Program.MainForm.Invoke((Action)(() =>
                                 {
                                     // 发送 PII
-                                    SendKeys.SendWait($"pii:{pii.Text}\r\n");
+                                    SendKeys.SendWait($"pii:{pii.Text}\r");
                                 }));
                             }
 #endif
@@ -353,6 +353,21 @@ enable);
 
         #endregion
 
+        private AtomicBoolean _captureEnabled = new AtomicBoolean(false);
+
+        public NormalResult EnableCapture(bool enable)
+        {
+            if (enable == true)
+                this._captureEnabled.FalseToTrue();
+            else
+                this._captureEnabled.TrueToFalse();
+
+            if (enable)
+                Program.MainForm.OutputHistory("捕获打开", 0);
+            else
+                Program.MainForm.OutputHistory("捕获关闭", 0);
+            return new NormalResult();
+        }
 
         // 开始或者结束捕获标签
         public NormalResult BeginCapture(bool begin)
@@ -383,7 +398,6 @@ enable);
             }
         }
 
-
         CancellationTokenSource _cancelInventory = null;
 
         void DoInventory()
@@ -401,6 +415,9 @@ enable);
                 {
                     Task.Delay(500, _cancelInventory.Token);
                     ClearIdleTag(TimeSpan.FromSeconds(2));
+
+                    if (_captureEnabled.Value == false)
+                        continue;
 
                     foreach (Reader reader in Program.Rfid.Readers)
                     {
@@ -439,6 +456,9 @@ enable);
 
         bool NotifyTag(string reader_name, string uid)
         {
+            if (_captureEnabled.Value == false)
+                return false;
+
             InventoryInfo info = new InventoryInfo { UID = uid };
             GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader_name, info);
             if (result0.Value == -1)
@@ -453,22 +473,21 @@ enable);
                 "" // result0.TagInfo.LockStatus
                 );
             Element pii = chip.FindElement(ElementOID.PII);
+            Element typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage);
+
+            StringBuilder text = new StringBuilder();
             if (pii == null)
-            {
-                Program.MainForm.Invoke((Action)(() =>
-                {
-                    // 发送 UID
-                    SendKeys.SendWait($"uid:{info.UID}\r\n");
-                }));
-            }
+                text.Append($"uid:{info.UID}");
             else
+                text.Append($"pii:{pii.Text}");
+            if (typeOfUsage != null)
+                text.Append($",tou:{typeOfUsage.Text}");
+
+            Program.MainForm.Invoke((Action)(() =>
             {
-                Program.MainForm.Invoke((Action)(() =>
-                {
-                    // 发送 PII
-                    SendKeys.SendWait($"pii:{pii.Text}\r\n");
-                }));
-            }
+                // 发送 UID
+                SendKeys.SendWait($"{text}\r");
+            }));
 
             return true;
         }

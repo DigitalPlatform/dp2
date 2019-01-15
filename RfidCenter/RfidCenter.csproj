@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AtomicBoolean.cs" />
     <Compile Include="ChipDialog.cs">
       <SubType>Form</SubType>
     </Compile>
