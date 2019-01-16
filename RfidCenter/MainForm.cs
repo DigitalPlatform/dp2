@@ -1077,14 +1077,14 @@ string strHtml)
 
         #endregion
 
-        private void MenuItem_startCapture_Click(object sender, EventArgs e)
+        private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
-            m_rfidObj.BeginCapture(true);
+            m_rfidObj.EnableSendKey(true);
         }
 
-        private void MenuItem_stopCapture_Click(object sender, EventArgs e)
+        private void MenuItem_closeSendKey_Click(object sender, EventArgs e)
         {
-            m_rfidObj.BeginCapture(false);
+            m_rfidObj.EnableSendKey(false);
         }
 
         protected override void WndProc(ref Message m)
@@ -1121,6 +1121,11 @@ string strHtml)
                     UpdateDeviceList(_driver.Readers);
                 }
             });
+        }
+
+        private void ToolStripMenuItem_exit_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

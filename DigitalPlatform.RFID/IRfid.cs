@@ -33,7 +33,7 @@ bool enable);
         // 开始或者结束捕获标签
         NormalResult BeginCapture(bool begin);
 
-        NormalResult EnableCapture(bool enable);
+        NormalResult EnableSendKey(bool enable);
 
     }
 

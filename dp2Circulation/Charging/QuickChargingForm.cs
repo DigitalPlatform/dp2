@@ -201,7 +201,7 @@ namespace dp2Circulation
             {
                 try
                 {
-                    _rfidChannel.Object.EnableCapture(open);
+                    _rfidChannel.Object.EnableSendKey(open);
                 }
                 catch
                 {

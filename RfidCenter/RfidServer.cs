@@ -274,7 +274,8 @@ enable);
 
             // 触发通知动作
             // TODO: 通知以后，最好把标签内容信息给存储起来，这样 Inventory 的时候可以直接使用
-            Notify(tag.ReaderName, tag.UID);
+            if (_sendKeyEnabled.Value == true)
+                Notify(tag.ReaderName, tag.UID);
             return true;
         }
 
@@ -353,19 +354,19 @@ enable);
 
         #endregion
 
-        private AtomicBoolean _captureEnabled = new AtomicBoolean(false);
+        private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
 
-        public NormalResult EnableCapture(bool enable)
+        public NormalResult EnableSendKey(bool enable)
         {
             if (enable == true)
-                this._captureEnabled.FalseToTrue();
+                this._sendKeyEnabled.FalseToTrue();
             else
-                this._captureEnabled.TrueToFalse();
+                this._sendKeyEnabled.TrueToFalse();
 
             if (enable)
-                Program.MainForm.OutputHistory("捕获打开", 0);
+                Program.MainForm.OutputHistory("SendKey 打开", 0);
             else
-                Program.MainForm.OutputHistory("捕获关闭", 0);
+                Program.MainForm.OutputHistory("SendKey 关闭", 0);
             return new NormalResult();
         }
 
@@ -414,10 +415,10 @@ enable);
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
                     Task.Delay(500, _cancelInventory.Token);
-                    ClearIdleTag(TimeSpan.FromSeconds(2));
+                    ClearIdleTag(TimeSpan.FromSeconds(1));  // 1 秒的放误触发时间
 
-                    if (_captureEnabled.Value == false)
-                        continue;
+                    //if (_captureEnabled.Value == false)
+                    //    continue;
 
                     foreach (Reader reader in Program.Rfid.Readers)
                     {
@@ -426,7 +427,7 @@ enable);
 
                         InventoryResult inventory_result = Program.Rfid.Inventory(
                             reader.Name, bFirst ? "" : "only_new");
-                        bFirst = false;
+                        // bFirst = false;
                         if (inventory_result.Value == -1)
                         {
                             // ioError 要主动卸载有问题的 reader?
@@ -456,7 +457,7 @@ enable);
 
         bool NotifyTag(string reader_name, string uid)
         {
-            if (_captureEnabled.Value == false)
+            if (_sendKeyEnabled.Value == false)
                 return false;
 
             InventoryInfo info = new InventoryInfo { UID = uid };
