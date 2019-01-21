@@ -872,9 +872,18 @@ namespace dp2Circulation
             // 看左侧是否装载过。如果没有装载过则自动装载
             if (_leftLoaded == false)
             {
+                // return:
+                //      -1  出错
+                //      0   放弃装载
+                //      1   成功装载
                 int nRet = LoadOldChip(pii, false, true, out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "已放弃保存 RFID 标签内容";
+                    goto ERROR1;
+                }
             }
 
             // 然后保存
@@ -888,12 +897,16 @@ namespace dp2Circulation
 
             // 刷新左侧显示
             {
+                // return:
+                //      -1  出错
+                //      0   放弃装载
+                //      1   成功装载
                 int nRet = LoadOldChip(pii, true, false, out strError);
-                if (nRet == -1)
+                if (nRet != 1)
                 {
                     // this.chipEditor_existing.LogicChipItem = null;
                     _leftLoaded = false;
-                    strError = "保存已经成功。但刷新左侧显示时候出错: " + strError;
+                    strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
                     goto ERROR1;
                 }
             }
@@ -908,8 +921,12 @@ namespace dp2Circulation
             // TODO: 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
             _leftLoaded = false;
             string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            // return:
+            //      -1  出错
+            //      0   放弃装载
+            //      1   成功装载
             int nRet = LoadOldChip(pii, false, true, out string strError);
-            if (nRet == -1)
+            if (nRet != 1)
                 goto ERROR1;
             _leftLoaded = true;
             return;
@@ -924,6 +941,10 @@ namespace dp2Circulation
         // parameters:
         //      auto_close_dialog  是否要自动关闭选择对话框。条件是选中了 auto_select_pii 事项
         //      adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        // return:
+        //      -1  出错
+        //      0   放弃装载
+        //      1   成功装载
         int LoadOldChip(
             string auto_select_pii,
             bool auto_close_dialog,
@@ -940,7 +961,10 @@ namespace dp2Circulation
                 dialog.SelectedPII = auto_select_pii;
                 dialog.ShowDialog(this);
                 if (dialog.DialogResult == DialogResult.Cancel)
+                {
+                    strError = "放弃装载 RFID 标签内容";
                     return 0;
+                }
 
                 if (auto_close_dialog == false
                     && string.IsNullOrEmpty(auto_select_pii) == false
