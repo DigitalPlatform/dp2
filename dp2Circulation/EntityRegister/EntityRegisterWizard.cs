@@ -2246,6 +2246,16 @@ out strError);
                 // strError = "来自服务器 '" + this._biblio.ServerName + "' 的书目记录 '" + this._biblio.BiblioRecPath + "' 没有找到匹配的保存目标";
                 strServerName = strStartServerName;
                 strBiblioRecPath = strStartRecPath;
+
+                // 2019/1/17
+                if (string.IsNullOrEmpty(strStartServerName)
+                    && string.IsNullOrEmpty(strStartRecPath)
+                    && string.IsNullOrEmpty(strServerName) 
+                    && string.IsNullOrEmpty(strBiblioRecPath))
+                {
+                    strError = "试图新建记录，但当前用户没有可供写入的书目库";
+                    return -1;
+                }
             }
 
             info.RecPath = strBiblioRecPath + "@" + strServerName;

@@ -7,7 +7,6 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -63,7 +62,7 @@ namespace dp2Circulation
                 if (batch.Count >= 100 ||
                     (index == m_barcodes.Count - 1 && batch.Count > 0))
                 {
-                REDO_GETITEMINFO:
+                    REDO_GETITEMINFO:
                     string strBiblio = "";
                     string strResult = "";
                     string strError = "";

@@ -9367,6 +9367,11 @@ out strError);
             else
                 MessageBox.Show(this, "本功能只能和 dp2library 3.6 及以上版本配套使用");
         }
+
+        private void ToolStripMenuItem_openRfidToolForm_Click(object sender, EventArgs e)
+        {
+            OpenWindow<RfidToolForm>();
+        }
     }
 
     /// <summary>
