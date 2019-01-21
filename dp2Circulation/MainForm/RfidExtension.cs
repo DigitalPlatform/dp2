@@ -119,8 +119,8 @@ namespace dp2Circulation
                 return null;
             List<string> parts = StringUtil.ParseTwoPart(strVolume, ",");
             // 2 4 6 字符
-            string left = parts[0].Trim('0', ' ');
-            string right = parts[1].Trim('0', ' ');
+            string left = parts[0].Trim(' ').TrimStart('0');
+            string right = parts[1].Trim(' ').TrimStart('0');
             if (StringUtil.IsNumber(left) == false
                 || StringUtil.IsNumber(right) == false)
                 return null;

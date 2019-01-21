@@ -804,6 +804,9 @@ namespace dp2Circulation
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
         static LogicChipItem BuildChip(BookItem book_item)
         {
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.11") < 0)
+                throw new Exception("当前连接的 dp2library 必须为 3.11 或以上版本，才能使用 RFID 有关功能");
+
             LogicChipItem result = new LogicChipItem();
 
             // barcode --> PII
