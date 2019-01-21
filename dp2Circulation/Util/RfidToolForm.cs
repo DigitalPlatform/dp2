@@ -250,9 +250,7 @@ namespace dp2Circulation
                 OneTag tag = item_info.OneTag;
                 var tag_info = tag.TagInfo;
 
-                var chip = LogicChipItem.From(tag_info.Bytes,
-                    (int)tag_info.BlockSize,
-                    tag_info.LockStatus);
+                var chip = LogicChipItem.FromTagInfo(tag_info);
                 this.chipEditor1.LogicChipItem = chip;
 
                 if (string.IsNullOrEmpty(item_info.Xml) == false)

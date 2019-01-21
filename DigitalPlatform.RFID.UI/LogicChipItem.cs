@@ -36,6 +36,9 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        // 默认的图书 AFI 值。归架状态
+        public static byte DefaultBookAFI = 0x07;
+
         byte _dsfid = 0;
         [DisplayName("DSFID"), Description("DSFID")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
@@ -58,6 +61,9 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        // 默认的 GB 35660 DSFID 值
+        public static byte DefaultDSFID = 0x06;
+
         bool _eas = false;
         [DisplayName("EAS"), Description("EAS")]
         [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
@@ -78,6 +84,9 @@ namespace DigitalPlatform.RFID.UI
                 OnPropertyChanged(FieldName());
             }
         }
+
+        // 默认的图书 EAS 值。归架状态
+        public static bool DefaultBookEAS = true;
 
         #endregion
 
@@ -653,6 +662,21 @@ namespace DigitalPlatform.RFID.UI
             LogicChipItem chip = new LogicChipItem();
             chip.Parse(data, block_size, block_map);
             // chip.InitialAllReadonly();
+            return chip;
+        }
+        
+        // 构造 LogicChipItem
+        // 除了基本数据外，也包括 DSFID EAS AFI
+        public static LogicChipItem FromTagInfo(TagInfo tag_info)
+        {
+            var chip = LogicChipItem.From(tag_info.Bytes,
+    (int)tag_info.BlockSize,
+    tag_info.LockStatus);
+
+            chip.DSFID = tag_info.DSFID;
+            chip.AFI = tag_info.AFI;
+            chip.EAS = tag_info.EAS;
+
             return chip;
         }
     }

@@ -440,7 +440,7 @@ c0 9e ba a0
             ItemInfo tag_info = new ItemInfo
             {
                 OldInfo = result.TagInfo,
-                LogicChip = LogicChipItem.From(result.TagInfo.Bytes, (int)result.TagInfo.BlockSize, result.TagInfo.LockStatus)
+                LogicChip = LogicChipItem.FromTagInfo(result.TagInfo)
             };
             item.Tag = tag_info;
 
