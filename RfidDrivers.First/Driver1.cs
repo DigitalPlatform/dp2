@@ -107,6 +107,7 @@ namespace RfidDrivers.First
                         // 打开 reader
                         OpenReaderResult result = OpenReader(reader.SerialNumber);
                         reader.Result = result;
+                        reader.ReaderHandle = result.ReaderHandle;
                     }
                 }
 
@@ -116,13 +117,14 @@ namespace RfidDrivers.First
                     Reader reader = _readers[i];
                     if (_findReader(current_readers, reader.Name) == null)
                     {
-                        if (reader.Result != null)
-                            CloseReader(reader.Result?.ReaderHandle);
+                        CloseReader(reader.ReaderHandle);
                         _readers.RemoveAt(i);
                         i--;
                     }
                 }
+
 #endif
+
                 CloseAllReaders();
 
                 GetDriversInfo();
@@ -130,7 +132,6 @@ namespace RfidDrivers.First
                 NormalResult result = OpenAllReaders();
                 if (result.Value == -1)
                     return result;
-
                 return new NormalResult();
             }
             finally
@@ -138,6 +139,8 @@ namespace RfidDrivers.First
                 Unlock();
             }
         }
+
+
 
         static Reader _findReader(List<Reader> _readers, string serialNumber)
         {
@@ -163,7 +166,7 @@ namespace RfidDrivers.First
             return new NormalResult();
         }
 
-        NormalResult GetReaderHandle(string reader_name, 
+        NormalResult GetReaderHandle(string reader_name,
             out UIntPtr handle)
         {
             handle = UIntPtr.Zero;
@@ -321,7 +324,8 @@ namespace RfidDrivers.First
                             continue;
                     }
 
-                    Reader reader = new Reader {
+                    Reader reader = new Reader
+                    {
                         SerialNumber = sernum.ToString(),
                         Name = sernum.ToString(),
                         DriverPath = driver_path

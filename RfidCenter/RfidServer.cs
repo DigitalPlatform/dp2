@@ -380,12 +380,13 @@ enable);
         // 启动或者停止自动盘点
         void StartInventory(bool start)
         {
+            // TODO: 是否要加锁，让本函数不能并行执行？
             if (start)
             {
                 _cancelInventory?.Cancel();
                 while (_cancelInventory != null)
                 {
-                    Task.Delay(500);
+                    Task.Delay(500).Wait();
                 }
                 Task.Run(() => { DoInventory(); });
             }
@@ -394,7 +395,7 @@ enable);
                 _cancelInventory?.Cancel();
                 while (_cancelInventory != null)
                 {
-                    Task.Delay(500);
+                    Task.Delay(500).Wait();
                 }
             }
         }
@@ -414,7 +415,7 @@ enable);
             {
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
-                    Task.Delay(500, _cancelInventory.Token);
+                    Task.Delay(200, _cancelInventory.Token).Wait();
                     ClearIdleTag(TimeSpan.FromSeconds(1));  // 1 秒的放误触发时间
 
                     //if (_captureEnabled.Value == false)

@@ -331,7 +331,7 @@ c0 9e ba a0
             {
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
-                    Task.Delay(500, _cancelInventory.Token);
+                    Task.Delay(500, _cancelInventory.Token).Wait();
 
                     InventoryResult result = null;
 

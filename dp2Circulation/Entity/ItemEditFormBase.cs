@@ -239,7 +239,7 @@ namespace dp2Circulation
 
             if (this.Item != null)
             {
-                nRet = Restore(out strError);
+                nRet = Restore(true, out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
@@ -311,16 +311,19 @@ namespace dp2Circulation
         }
 
         // 从界面中更新 item 中的数据
+        // parameters:
+        //      optimize    是否优化。
         // return:
         //      -1  error
         //      0   没有必要更新
         //      1   已经更新
-        public virtual int Restore(out string strError)
+        public virtual int Restore(bool optimize, out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            if (_editing.Changed == false)
+            if (optimize == true 
+                && _editing.Changed == false)
                 return 0;
 
             if (this.Item == null)
@@ -329,6 +332,7 @@ namespace dp2Circulation
                 return -1;
             }
 
+            // 原来 Verify 在这里
             nRet = RestoreVerify(out strError);
             if (nRet == -1)
                 return -1;
@@ -353,6 +357,7 @@ namespace dp2Circulation
             }
 
             this.Item.RefreshListView();
+
             return 1;
         }
 

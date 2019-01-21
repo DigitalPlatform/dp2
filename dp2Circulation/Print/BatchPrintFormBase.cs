@@ -1395,11 +1395,10 @@ namespace dp2Circulation
             {
             REDO_GETITEMINFO:
                 string strBiblio = "";
-                string strResult = "";
                 long lRet = channel.GetItemInfo(stop,
                     "@barcode-list:" + StringUtil.MakePathList(barcodes),
                     "get-path-list",
-                    out strResult,
+                    out string strResult,
                     "", // strBiblioType,
                     out strBiblio,
                     out strError);

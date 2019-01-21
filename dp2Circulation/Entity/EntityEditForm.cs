@@ -446,7 +446,18 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false)
             {
-                int nRet = this.Restore(out string strError);
+                try
+                {
+                    BookItem item = this.Item.Clone();
+                    item.RecordDom = this._editing.DataDom;
+                    this.chipEditor_editing.LogicChipItem = BuildChip(item);
+                }
+                catch (Exception ex)
+                {
+                    SetMessage(ex.Message);
+                }
+#if NO
+                int nRet = this.Restore(true, out string strError);
                 if (nRet != -1)
                 {
                     try
@@ -458,6 +469,7 @@ namespace dp2Circulation
                         SetMessage(ex.Message);
                     }
                 }
+#endif
             }
         }
 
