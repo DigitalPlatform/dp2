@@ -809,6 +809,10 @@ namespace dp2Circulation
 
             LogicChipItem result = new LogicChipItem();
 
+            result.AFI = LogicChipItem.DefaultBookAFI;
+            result.DSFID = LogicChipItem.DefaultDSFID;
+            result.EAS = LogicChipItem.DefaultBookEAS;
+
             // barcode --> PII
             result.NewElement(ElementOID.PII, book_item.Barcode);
 
@@ -975,8 +979,8 @@ namespace dp2Circulation
                     && string.IsNullOrEmpty(dialog.SelectedPII) == false)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
-    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?",
-    "AccountBookForm",
+    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[重试]重新选择 RFID 标签;[取消]将这一种不吻合的 RFID 标签装载进来",
+    "EntityEditForm",
     MessageBoxButtons.RetryCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
@@ -987,9 +991,7 @@ namespace dp2Circulation
                 var tag_info = dialog.SelectedTag.TagInfo;
                 _tagExisting = dialog.SelectedTag;
 
-                var chip = LogicChipItem.From(tag_info.Bytes,
-                    (int)tag_info.BlockSize,
-                    tag_info.LockStatus);
+                var chip = LogicChipItem.FromTagInfo(tag_info);
                 this.chipEditor_existing.LogicChipItem = chip;
 
                 if (adjust_right)
@@ -1032,13 +1034,14 @@ namespace dp2Circulation
                 if (new_element != null)
                 {
                     if (new_element.Text != element.Text)
-                        errors.Add($"当前标签中元素 {element.OID} 已经被锁定，无法被从 '{element.Text}' 修改为 '{new_element.Text}'");
+                        errors.Add($"当前标签中元素 {element.OID} 已经被锁定，无法进行内容合并(从 '{element.Text}' 修改为 '{new_element.Text}')。");
                 }
             }
 
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, ";");
+                strError += "\r\n\r\n强烈建议从图书上撕掉和废弃此标签，然后重新贴一个空白标签并进行写入";
                 return -1;
             }
 

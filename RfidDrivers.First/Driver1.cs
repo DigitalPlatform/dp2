@@ -140,8 +140,6 @@ namespace RfidDrivers.First
             }
         }
 
-
-
         static Reader _findReader(List<Reader> _readers, string serialNumber)
         {
             foreach (Reader reader in _readers)
