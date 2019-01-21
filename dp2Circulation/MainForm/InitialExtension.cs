@@ -5083,8 +5083,7 @@ Culture=neutral, PublicKeyToken=null
             if (StringUtil.CompareVersion(this.ServerVersion, "3.11") < 0)
                 return 0;
 
-
-                LibraryChannel channel = this.GetChannel();
+            LibraryChannel channel = this.GetChannel();
 
             string strError = "";
 

@@ -172,6 +172,27 @@ namespace UnitTestDp2circulation
         }
 
         [TestMethod]
+        public void TestMethod_GetOwnerInstitution_8()
+        {
+            string xml =
+    @"<rfid>
+	    <ownerInstitution>
+		    <item map='星洲小学/' isil='CN-0000001-XZ' />
+        </ownerInstitution>
+    </rfid>";
+            XmlDocument cfg_dom = new XmlDocument();
+            cfg_dom.LoadXml(xml);
+
+            bool bRet = MainForm.GetOwnerInstitution(
+    cfg_dom,
+    "星洲小学/阅览室",
+    out string isil,
+    out string alternative);
+            Assert.AreEqual(isil, "CN-0000001-XZ");
+            Assert.AreEqual(alternative, "");
+        }
+
+        [TestMethod]
         public void Test_GetSetInformation_1()
         {
             {
@@ -232,6 +253,11 @@ namespace UnitTestDp2circulation
             {
                 string result = MainForm.GetSetInformation("(1, 255 )");
                 Assert.AreEqual(result, "001255");
+            }
+
+            {
+                string result = MainForm.GetSetInformation("(100, 20 )");
+                Assert.AreEqual(result, "100020");
             }
         }
     }
