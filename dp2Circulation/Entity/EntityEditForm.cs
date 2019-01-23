@@ -203,7 +203,6 @@ namespace dp2Circulation
         // 获得索取号
         void button_getAccessNo_Click(object sender, EventArgs e)
         {
-
             if (this.GenerateData != null)
             {
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
@@ -803,6 +802,17 @@ namespace dp2Circulation
 #endif
         }
 
+        bool EnsureCreateAccessNo(BookItem book_item)
+        {
+            if (book_item.AccessNo.StartsWith("@"))
+            {
+                button_getAccessNo_Click(this.entityEditControl_editing.GetAccessNoButton, new EventArgs());
+                return true;
+            }
+
+            return false;
+        }
+
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
         static LogicChipItem BuildChip(BookItem book_item)
         {
@@ -874,6 +884,12 @@ namespace dp2Circulation
         // 写入右侧的信息到标签
         private void toolStripButton_saveRfid_Click(object sender, EventArgs e)
         {
+            {
+                BookItem item = this.Item.Clone();
+                item.RecordDom = this._editing.DataDom;
+                EnsureCreateAccessNo(item);
+            }
+
             // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
             string strError = "";
 
@@ -1014,7 +1030,7 @@ namespace dp2Circulation
                 dialog.OkCancelVisible = true;
                 dialog.LayoutVertical = false;
                 dialog.AutoCloseDialog = auto_close_dialog;
-                dialog.SelectedID = auto_select_pii;
+                dialog.SelectedPII = auto_select_pii;
                 Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                 dialog.ShowDialog(this);
 
