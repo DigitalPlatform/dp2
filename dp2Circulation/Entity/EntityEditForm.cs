@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -9,7 +10,6 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using static dp2Circulation.MyForm;
-using System.Xml;
 using DigitalPlatform.Xml;
 
 namespace dp2Circulation
@@ -887,7 +887,10 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   放弃装载
                 //      1   成功装载
-                int nRet = LoadOldChip(pii, false, true, out strError);
+                int nRet = LoadOldChip(pii,
+                    "adjust_right,saving",
+                    // false, true, 
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == 0)
@@ -915,7 +918,10 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   放弃装载
                 //      1   成功装载
-                int nRet = LoadOldChip(new_pii, true, false, out strError);
+                int nRet = LoadOldChip(new_pii,
+                    "auto_close_dialog",
+                    // true, false, 
+                    out strError);
                 if (nRet != 1)
                 {
                     // this.chipEditor_existing.LogicChipItem = null;
@@ -958,7 +964,10 @@ namespace dp2Circulation
             //      -1  出错
             //      0   放弃装载
             //      1   成功装载
-            int nRet = LoadOldChip(pii, false, true, out string strError);
+            int nRet = LoadOldChip(pii,
+                "adjust_right",
+                // false, true, 
+                out string strError);
             if (nRet != 1)
                 goto ERROR1;
             _leftLoaded = true;
@@ -972,27 +981,43 @@ namespace dp2Circulation
         // 装入以前的标签信息
         // 如果读卡器上有多个标签，则出现对话框让从中选择一个。列表中和右侧 PII 相同的，优先被选定
         // parameters:
-        //      auto_close_dialog  是否要自动关闭选择对话框。条件是选中了 auto_select_pii 事项
-        //      adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        //      strStyle    操作方式
+        //                  auto_close_dialog  是否要自动关闭选择对话框。条件是选中了 auto_select_pii 事项
+        //                  adjust_right    是否自动调整右侧元素。即，把左侧的锁定状态元素覆盖到右侧。调整前要询问。如果不同意调整，可以放弃，然后改为放一个空白标签并装载保存
+        //                  saving  是否为了保存而装载？如果是，有些提示要改变
         // return:
         //      -1  出错
         //      0   放弃装载
         //      1   成功装载
         int LoadOldChip(
             string auto_select_pii,
+            string strStyle,
+#if NO
             bool auto_close_dialog,
             bool adjust_right,
+#endif
             out string strError)
         {
             strError = "";
+
+            bool auto_close_dialog = StringUtil.IsInList("auto_close_dialog", strStyle);
+            bool adjust_right = StringUtil.IsInList("adjust_right", strStyle);
+            bool saving = StringUtil.IsInList("saving", strStyle);
+
             try
             {
                 REDO:
                 // 出现对话框让选择一个
-                SelectTagDialog dialog = new SelectTagDialog();
+                // SelectTagDialog dialog = new SelectTagDialog();
+                RfidToolForm dialog = new RfidToolForm();
+                dialog.Text = "选择 RFID 标签";
+                dialog.OkCancelVisible = true;
+                dialog.LayoutVertical = false;
                 dialog.AutoCloseDialog = auto_close_dialog;
-                dialog.SelectedPII = auto_select_pii;
+                dialog.SelectedID = auto_select_pii;
+                Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                 dialog.ShowDialog(this);
+
                 if (dialog.DialogResult == DialogResult.Cancel)
                 {
                     strError = "放弃装载 RFID 标签内容";
@@ -1005,8 +1030,12 @@ namespace dp2Circulation
                     //&& string.IsNullOrEmpty(dialog.SelectedPII) == false
                     )
                 {
+                    string message = $"您所选择的标签其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载";
+                    if (saving)
+                        message = $"您所选择的标签其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 标签中(危险)\r\n[取消]放弃保存";
+
                     DialogResult temp_result = MessageBox.Show(this,
-    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载",
+    message,
     "EntityEditForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -1018,7 +1047,8 @@ namespace dp2Circulation
                         strError = "放弃装载 RFID 标签内容";
                         return 0;
                     }
-                    MessageBox.Show(this, "警告：您刚装入了一个可疑的标签，极有可能不是当前册对应的标签。待会儿保存标签内容的时候，有可能会张冠李戴覆盖了它。保存标签内容前，请务必反复仔细检查");
+                    if (saving == false)
+                        MessageBox.Show(this, "警告：您刚装入了一个可疑的标签，极有可能不是当前册对应的标签。待会儿保存标签内容的时候，有可能会张冠李戴覆盖了它。保存标签内容前，请务必反复仔细检查");
                 }
 
                 var tag_info = dialog.SelectedTag.TagInfo;

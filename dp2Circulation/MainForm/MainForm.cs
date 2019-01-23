@@ -7415,7 +7415,7 @@ out strError);
         {
             get
             {
-                return this.AppInfo.GetString("cardreader",
+                return this.AppInfo?.GetString("cardreader",
     "rfidCenterUrl",
     "");  // 常用值 "ipc://RfidChannel/RfidServer"
             }
