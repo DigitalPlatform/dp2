@@ -679,6 +679,25 @@ namespace DigitalPlatform.RFID.UI
 
             return chip;
         }
+
+        public static TagInfo ToTagInfo(TagInfo existing,
+            LogicChipItem chip)
+        {
+            TagInfo new_tag_info = existing.Clone();
+            new_tag_info.Bytes = chip.GetBytes(
+                (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
+                (int)new_tag_info.BlockSize,
+                LogicChip.GetBytesStyle.None,
+                out string block_map);
+            new_tag_info.LockStatus = block_map;
+
+            // 2019/1/22
+            new_tag_info.AFI = chip.AFI;
+            new_tag_info.DSFID = chip.DSFID;
+            new_tag_info.EAS = chip.EAS;
+
+            return new_tag_info;
+        }
     }
 
 }

@@ -124,6 +124,17 @@ namespace dp2Circulation
             if (StringUtil.IsNumber(left) == false
                 || StringUtil.IsNumber(right) == false)
                 return null;
+
+            // 看值是否超过 0-255
+            if (int.TryParse(left, out int v) == false)
+                return null;
+            if (v < 0 || v > 255)
+                return null;
+            if (int.TryParse(right, out v) == false)
+                return null;
+            if (v < 0 || v > 255)
+                return null;
+
             int max_length = Math.Max(left.Length, right.Length);
             if (max_length == 0 || max_length > 3)
                 return null;

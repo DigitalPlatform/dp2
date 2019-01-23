@@ -5,21 +5,44 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
     public partial class RfidToolForm : MyForm
     {
-        // [in][out] 当前选中的事项的 PII
-        public string SelectedPII { get; set; }
+        string _mode = "";  // auto_fix_eas
+        public string Mode
+        {
+            get
+            {
+                return _mode;
+            }
+            set
+            {
+                _mode = value;
+            }
+        }
+
+        public string MessageText { get; set; }
+
+        // EAS 是否修复成功
+        public bool EasFixed { get; set; }
+
+        // [in][out] 当前选中的事项的 PII 或者 UID。形态为 uid:xxxx 或者 pii:xxxx
+        public string SelectedID { get; set; }
 
         const int COLUMN_READERNAME = 0;
         const int COLUMN_UID = 1;
@@ -37,7 +60,20 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-            Task.Run(() => { UpdateChipList(); });
+            Task.Run(() =>
+            {
+                InitialRfidChannel();
+                OpenRfidCapture(false);
+            });
+
+            Task.Run(() => { UpdateChipList(true); });
+
+            if (string.IsNullOrEmpty(this.MessageText) == false)
+                this.ShowMessage(this.MessageText, "yellow", true);
+
+            this.toolStripButton_autoRefresh.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
+                "auto_refresh",
+                true);
         }
 
         private void RfidToolForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -47,11 +83,15 @@ namespace dp2Circulation
 
         private void RfidToolForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            ReleaseRfidChannel();
 
+            Program.MainForm.AppInfo.SetBoolean("rfidtoolform",
+    "auto_refresh",
+    this.toolStripButton_autoRefresh.Checked);
         }
 
         // 更新标签列表
-        bool UpdateChipList()
+        bool UpdateChipList(bool show_messageBox)
         {
             string strError = "";
             if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl))
@@ -131,10 +171,22 @@ namespace dp2Circulation
                             // 首次填充，自动设好选定状态
                             if (is_empty)
                             {
-                                SelectItem(this.SelectedPII);
+                                SelectItem(this.SelectedID);
                             }
                         }));
-                        FillEntityInfo();
+
+                        this.Invoke((Action)(() =>
+                        {
+                            FillEntityInfo();
+                        }));
+
+                        if (this._mode == "auto_fix_eas")
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                AutoFixEas();
+                            }));
+                        }
                     });
                 }
                 return true;
@@ -149,24 +201,88 @@ namespace dp2Circulation
                 EndRfidChannel(channel);
             }
             ERROR1:
-            MessageBox.Show(this, strError);
+            if (show_messageBox)
+                this.ShowMessageBox(strError);
+            else
+                this.ShowMessage(strError, "red", true);
             return false;
         }
 
-        private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
+        static void SetItemColor(ListViewItem item, string state)
         {
-            Task.Run(() => { UpdateChipList(); });
+            if (state == "normal")
+            {
+                item.BackColor = SystemColors.Control;
+                item.ForeColor = SystemColors.ControlText;
+                return;
+            }
+
+            if (state == "changed")
+            {
+                item.BackColor = SystemColors.Info;
+                item.ForeColor = SystemColors.InfoText;
+                return;
+            }
+
+            if (state == "error")
+            {
+                item.BackColor = Color.DarkRed;
+                item.ForeColor = Color.White;
+                return;
+            }
         }
 
-        bool SelectItem(string pii)
+
+        private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
+            Task.Run(() => { UpdateChipList(true); });
+        }
+
+        class IdInfo
+        {
+            public string Prefix { get; set; }
+            public string Text { get; set; }
+
+            public static IdInfo Parse(string text)
+            {
+                IdInfo info = new IdInfo();
+                if (text.IndexOf(":") == -1)
+                {
+                    info.Prefix = "pii";
+                    info.Text = text;
+                    return info;
+                }
+                List<string> parts = StringUtil.ParseTwoPart(text, ":");
+                info.Prefix = parts[0];
+                info.Text = parts[1];
+                return info;
+            }
+        }
+
+        bool SelectItem(string id)
+        {
+            IdInfo info = IdInfo.Parse(id);
+
             foreach (ListViewItem item in this.listView_tags.Items)
             {
-                string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
-                if (current_pii == pii)
+                if (info.Prefix == "pii")
                 {
-                    ListViewUtil.SelectLine(item, true);
-                    return true;
+                    string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
+                    if (current_pii == info.Text)
+                    {
+                        ListViewUtil.SelectLine(item, true);
+                        return true;
+                    }
+                }
+
+                if (info.Prefix == "uid")
+                {
+                    string current_uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                    if (current_uid == info.Text)
+                    {
+                        ListViewUtil.SelectLine(item, true);
+                        return true;
+                    }
                 }
             }
 
@@ -220,8 +336,8 @@ namespace dp2Circulation
                 {
                     string pii = chip.FindElement(ElementOID.PII)?.Text;
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                    if (pii == this.SelectedPII)
-                        item.Font = new Font(item.Font, FontStyle.Bold);
+                    //if (pii == this.SelectedID)
+                    //    item.Font = new Font(item.Font, FontStyle.Bold);
                 }));
                 return;
             }
@@ -238,7 +354,8 @@ namespace dp2Circulation
             this.Invoke((Action)(() =>
             {
                 ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
-                // TODO: 把 item 修改为红色背景，表示出错的状态
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
             }));
         }
 
@@ -258,7 +375,7 @@ namespace dp2Circulation
                     BookItem book_item = new BookItem();
                     int nRet = book_item.SetData("",
                         item_info.Xml,
-                        null, 
+                        null,
                         out string strError);
                     if (nRet == -1)
                     {
@@ -283,6 +400,13 @@ namespace dp2Circulation
             LibraryChannel channel = this.GetChannel();
             try
             {
+#if NO
+                var items = (ListView.ListViewItemCollection)this.Invoke(new Func<ListView.ListViewItemCollection>(() =>
+                {
+                    return this.listView_tags.Items;
+                }));
+#endif
+
                 foreach (ListViewItem item in this.listView_tags.Items)
                 {
                     ItemInfo item_info = (ItemInfo)item.Tag;
@@ -308,8 +432,6 @@ namespace dp2Circulation
                     }
 
                     item_info.Xml = xml;
-
-
                 }
             }
             finally
@@ -318,10 +440,198 @@ namespace dp2Circulation
             }
         }
 
+        // 自动修复 EAS
+        void AutoFixEas()
+        {
+            string strError = "";
+
+            IdInfo info = IdInfo.Parse(this.SelectedID);
+
+            foreach (ListViewItem item in this.listView_tags.Items)
+            {
+                string uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                var tag_info = item_info.OneTag.TagInfo;
+                if (tag_info == null)
+                    continue;
+                LogicChip chip = LogicChip.From(tag_info.Bytes,
+                    (int)tag_info.BlockSize);
+                string pii = chip.FindElement(ElementOID.PII)?.Text;
+                if ((info.Prefix == "pii" && pii == info.Text)
+                    || (info.Prefix == "uid" && uid == info.Text))
+                {
+                    // 获得册记录的外借状态。
+                    // return:
+                    //      -1  出错
+                    //      0   没有被外借
+                    //      1   在外借状态
+                    int nRet = GetCirculationState(item_info.Xml,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 便于观察
+                    // Application.DoEvents();
+                    // Thread.Sleep(2000);
+
+                    // 检测 EAS 是否正确
+                    NormalResult result = null;
+                    // TODO: 这里发现不一致的时候，是否要出现明确提示，让操作者知晓？
+                    if (nRet == 1 && tag_info.EAS == true)
+                        result = SetEAS(_rfidChannel, "*", "uid:" + tag_info.UID, false, out strError);
+                    else if (nRet == 0 && tag_info.EAS == false)
+                        result = SetEAS(_rfidChannel, "*", "uid:" + tag_info.UID, true, out strError);
+                    else
+                        continue;
+
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        goto ERROR1;
+                    }
+
+                    this.EasFixed = true;
+                }
+            }
+
+            if (this._mode == "auto_fix_eas" && this.EasFixed)
+                this.Close();
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 获得册记录的外借状态。
+        // return:
+        //      -1  出错
+        //      0   没有被外借
+        //      1   在外借状态
+        static int GetCirculationState(string strItemXml, out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(strItemXml))
+            {
+                strError = "册记录 XML 为空，无法判断外借状态";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "册记录 XML 装入 XMLDOM 时出错:" + ex.Message;
+                return -1;
+            }
+
+            string borrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");
+            if (string.IsNullOrEmpty(borrower) == false)
+                return 1;
+            return 0;
+        }
+
+        #region RFID Channel
+
+        public RfidChannel _rfidChannel = null;
+
+        void InitialRfidChannel()
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl) == false)
+            {
+                _rfidChannel = StartRfidChannel(
+        Program.MainForm.RfidCenterUrl,
+        out string strError);
+                if (_rfidChannel == null)
+                    this.ShowMessageBox(strError);
+                // 马上检测一下通道是否可用
+                try
+                {
+                    _rfidChannel.Object.ListReaders();
+                }
+                catch (Exception ex)
+                {
+                    this.ShowMessageBox("启动 RFID 设备时出错: " + ex.Message);
+                }
+            }
+        }
+
+        void ReleaseRfidChannel()
+        {
+            if (_rfidChannel != null)
+            {
+                EndRfidChannel(_rfidChannel);
+                _rfidChannel = null;
+            }
+        }
+
+        void OpenRfidCapture(bool open)
+        {
+            if (_rfidChannel != null)
+            {
+                try
+                {
+                    _rfidChannel.Object.EnableSendKey(open);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        #endregion
+
         class ItemInfo
         {
             public OneTag OneTag { get; set; }
             public string Xml { get; set; }
         }
+
+        private void toolStripButton_autoRefresh_CheckStateChanged(object sender, EventArgs e)
+        {
+            if (this.toolStripButton_autoRefresh.Checked)
+                _timerRefresh = new System.Threading.Timer(
+                    new System.Threading.TimerCallback(timerCallback),
+                    null,
+                    TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            else
+            {
+                _timerRefresh.Dispose();
+                _timerRefresh = null;
+            }
+        }
+
+        System.Threading.Timer _timerRefresh = null;
+
+        void timerCallback(object o)
+        {
+            UpdateChipList(false);
+        }
+
+#if NO
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>
+                {
+                    new ControlWrapper(this.toolStripButton_autoRefresh, true),
+                };
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>
+                {
+                    new ControlWrapper(this.toolStripButton_autoRefresh, true),
+                };
+                GuiState.SetUiState(controls, value);
+            }
+        }
+#endif
     }
 }
