@@ -19,6 +19,7 @@ namespace dp2Circulation
     public partial class SelectTagDialog : Form
     {
         // [in][out] 当前选中的事项的 PII
+        // 注：null 表示不使用它。"" 表示要定位到一个空标签
         public string SelectedPII { get; set; }
 
         // 是否自动关闭对话框。条件是 SelectedPII 事项被自动选定了
@@ -240,6 +241,8 @@ namespace dp2Circulation
 
         bool SelectItem(string pii)
         {
+            if (pii == null)
+                return false;
             foreach (ListViewItem item in this.listView1.Items)
             {
                 string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);

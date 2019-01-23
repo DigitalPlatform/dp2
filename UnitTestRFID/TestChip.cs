@@ -215,7 +215,7 @@ c0 9e ba a0
             string result_string = Element.GetHexString(result, "4");
 
             // 以前的最后一个非锁定元素，跑到了以前最后的锁定元素后面。因为 Content Parameter 字段变长了，顶走了它
-            Assert.AreEqual(block_map, "ll....lll..www");
+            Assert.AreEqual("ll....lll..www", block_map);
 
         }
 
@@ -262,7 +262,7 @@ c0 9e ba a0
             string result_string = Element.GetHexString(result, "4");
 
             // 以前的最后一个非锁定元素，跑到了以前最后的锁定元素后面。因为 Content Parameter 字段变长了，顶走了它
-            Assert.AreEqual(block_map, "ll.....lllww");
+            Assert.AreEqual("ll.....lllww", block_map);
 
         }
 

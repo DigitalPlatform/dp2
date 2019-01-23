@@ -9,6 +9,8 @@ using DigitalPlatform.LibraryServer;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
 using static dp2Circulation.MyForm;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -845,10 +847,11 @@ namespace dp2Circulation
             // 70 被剔旧的馆藏。和 state 元素应该有某种对应关系，比如“注销”
             {
                 string typeOfUsage = "";
-                if (StringUtil.IsInList("注销", book_item.State) == true)
+                if (StringUtil.IsInList("注销", book_item.State) == true
+                    || StringUtil.IsInList("丢失", book_item.State) == true)
                     typeOfUsage = "70";
                 else if (string.IsNullOrEmpty(book_item.State) == false
-                    && StringUtil.IsInList("加工中", book_item.State) == false)
+                    && StringUtil.IsInList("加工中", book_item.State) == true)
                     typeOfUsage = "20";
                 else
                     typeOfUsage = "10";
@@ -874,7 +877,8 @@ namespace dp2Circulation
             // 写入以前，装载标签内容到左侧，然后调整右侧(中间可能会警告)。然后再保存
             string strError = "";
 
-            string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            string pii = GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
 
             // 看左侧是否装载过。如果没有装载过则自动装载
             if (_leftLoaded == false)
@@ -904,11 +908,14 @@ namespace dp2Circulation
 
             // 刷新左侧显示
             {
+                // TODO: 可用保存后的确定了的 UID 重新装载
+                string new_pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+
                 // return:
                 //      -1  出错
                 //      0   放弃装载
                 //      1   成功装载
-                int nRet = LoadOldChip(pii, true, false, out strError);
+                int nRet = LoadOldChip(new_pii, true, false, out strError);
                 if (nRet != 1)
                 {
                     // this.chipEditor_existing.LogicChipItem = null;
@@ -922,12 +929,31 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        // 从册记录 XML 中获得册条码号
+        static string GetPII(string strItemXml)
+        {
+            if (string.IsNullOrEmpty(strItemXml))
+                return null;
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+            return DomUtil.GetElementText(dom.DocumentElement, "barcode");
+        }
+
         // 从现有标签中装载信息到左侧，供对比使用
         private void toolStripButton_loadRfid_Click(object sender, EventArgs e)
         {
-            // TODO: 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
+            // 如果装入的元素里面有锁定状态的元素，要警告以后，覆盖右侧编辑器中的同名元素(右侧这些元素也要显示为只读状态)
             _leftLoaded = false;
-            string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            // string pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+            string pii = GetPII(this.Item.OldRecord);   // 从修改前的册记录中获得册条码号
             // return:
             //      -1  出错
             //      0   放弃装载
@@ -974,18 +1000,25 @@ namespace dp2Circulation
                 }
 
                 if (auto_close_dialog == false
-                    && string.IsNullOrEmpty(auto_select_pii) == false
+                    // && string.IsNullOrEmpty(auto_select_pii) == false
                     && dialog.SelectedPII != auto_select_pii
-                    && string.IsNullOrEmpty(dialog.SelectedPII) == false)
+                    //&& string.IsNullOrEmpty(dialog.SelectedPII) == false
+                    )
                 {
                     DialogResult temp_result = MessageBox.Show(this,
-    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[重试]重新选择 RFID 标签;[取消]将这一种不吻合的 RFID 标签装载进来",
+    $"您所选择的标签其 PII 为 {dialog.SelectedPII}，和期待的 {auto_select_pii} 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载",
     "EntityEditForm",
-    MessageBoxButtons.RetryCancel,
+    MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
-                    if (temp_result == DialogResult.Retry)
+                    if (temp_result == DialogResult.Yes)
                         goto REDO;
+                    if (temp_result == DialogResult.Cancel)
+                    {
+                        strError = "放弃装载 RFID 标签内容";
+                        return 0;
+                    }
+                    MessageBox.Show(this, "警告：您刚装入了一个可疑的标签，极有可能不是当前册对应的标签。待会儿保存标签内容的时候，有可能会张冠李戴覆盖了它。保存标签内容前，请务必反复仔细检查");
                 }
 
                 var tag_info = dialog.SelectedTag.TagInfo;
@@ -1041,7 +1074,7 @@ namespace dp2Circulation
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, ";");
-                strError += "\r\n\r\n强烈建议从图书上撕掉和废弃此标签，然后重新贴一个空白标签并进行写入";
+                strError += "\r\n\r\n强烈建议从图书上撕掉和废弃此标签，然后重新贴一个空白标签才能进行写入";
                 return -1;
             }
 
@@ -1077,6 +1110,7 @@ out strError);
             }
             try
             {
+#if NO
                 TagInfo new_tag_info = _tagExisting.TagInfo.Clone();
                 new_tag_info.Bytes = this.chipEditor_editing.LogicChipItem.GetBytes(
                     (int)(new_tag_info.MaxBlockCount * new_tag_info.BlockSize),
@@ -1084,6 +1118,10 @@ out strError);
                     LogicChip.GetBytesStyle.None,
                     out string block_map);
                 new_tag_info.LockStatus = block_map;
+#endif
+                TagInfo new_tag_info = LogicChipItem.ToTagInfo(
+                    _tagExisting.TagInfo,
+                    this.chipEditor_editing.LogicChipItem);
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo,

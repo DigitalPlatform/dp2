@@ -39,9 +39,11 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_tag = new System.Windows.Forms.TabPage();
+            this.chipEditor1 = new DigitalPlatform.RFID.UI.ChipEditor();
             this.tabPage_record = new System.Windows.Forms.TabPage();
             this.propertyGrid_record = new System.Windows.Forms.PropertyGrid();
-            this.chipEditor1 = new DigitalPlatform.RFID.UI.ChipEditor();
+            this.toolStripButton_autoRefresh = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -57,7 +59,9 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveRfid,
-            this.toolStripButton_loadRfid});
+            this.toolStripButton_loadRfid,
+            this.toolStripSeparator1,
+            this.toolStripButton_autoRefresh});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(800, 31);
@@ -156,6 +160,15 @@
             this.tabPage_tag.Text = "RFID 标签";
             this.tabPage_tag.UseVisualStyleBackColor = true;
             // 
+            // chipEditor1
+            // 
+            this.chipEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chipEditor1.Location = new System.Drawing.Point(3, 3);
+            this.chipEditor1.LogicChipItem = null;
+            this.chipEditor1.Name = "chipEditor1";
+            this.chipEditor1.Size = new System.Drawing.Size(413, 381);
+            this.chipEditor1.TabIndex = 0;
+            // 
             // tabPage_record
             // 
             this.tabPage_record.Controls.Add(this.propertyGrid_record);
@@ -175,14 +188,21 @@
             this.propertyGrid_record.Size = new System.Drawing.Size(413, 381);
             this.propertyGrid_record.TabIndex = 1;
             // 
-            // chipEditor1
+            // toolStripButton_autoRefresh
             // 
-            this.chipEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chipEditor1.Location = new System.Drawing.Point(3, 3);
-            this.chipEditor1.LogicChipItem = null;
-            this.chipEditor1.Name = "chipEditor1";
-            this.chipEditor1.Size = new System.Drawing.Size(413, 381);
-            this.chipEditor1.TabIndex = 0;
+            this.toolStripButton_autoRefresh.CheckOnClick = true;
+            this.toolStripButton_autoRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_autoRefresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_autoRefresh.Image")));
+            this.toolStripButton_autoRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_autoRefresh.Name = "toolStripButton_autoRefresh";
+            this.toolStripButton_autoRefresh.Size = new System.Drawing.Size(86, 28);
+            this.toolStripButton_autoRefresh.Text = "自动刷新";
+            this.toolStripButton_autoRefresh.CheckStateChanged += new System.EventHandler(this.toolStripButton_autoRefresh_CheckStateChanged);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // RfidToolForm
             // 
@@ -227,5 +247,7 @@
         private System.Windows.Forms.TabPage tabPage_record;
         private System.Windows.Forms.PropertyGrid propertyGrid_record;
         private DigitalPlatform.RFID.UI.ChipEditor chipEditor1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_autoRefresh;
     }
 }

@@ -1034,14 +1034,33 @@ end_time);
                 NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
         task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
         enable);
+                // testing
+                // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
+
                 if (result.Value != 1)
                 {
                     strError = "修改 RFID 标签 EAS 标志位时出错: " + result.ErrorInfo;
+
+                    bool eas_fixed = false;
+                    string text = strError;
+                    this.Container.Invoke((Action)(() =>
+                    {
+                        RfidToolForm dlg = new RfidToolForm();
+                        dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
+                        dlg.Mode = "auto_fix_eas";
+                        dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                        dlg.ShowDialog(this.Container);
+                        eas_fixed = dlg.EasFixed;
+                    }));
+
+                    if (eas_fixed == true)
+                        return true;
+
                     return false;
                 }
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "修改 RFID 标签 EAS 标志位时出错: " + ex.Message;
                 return false;

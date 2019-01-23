@@ -29,8 +29,8 @@ namespace UnitTestDp2circulation
     "海淀分馆/",
     out string isil,
     out string alternative);
-            Assert.AreEqual(isil, "test");
-            Assert.AreEqual(alternative, "");
+            Assert.AreEqual("test", isil);
+            Assert.AreEqual("", alternative);
         }
 
         // 分馆名字部分匹配上了，但是房间名字部分没有匹配上
@@ -52,8 +52,8 @@ namespace UnitTestDp2circulation
     "海淀分馆/阅览室",
     out string isil,
     out string alternative);
-            Assert.AreEqual(isil, "test");
-            Assert.AreEqual(alternative, "");
+            Assert.AreEqual("test",isil);
+            Assert.AreEqual("",alternative);
         }
 
         [TestMethod]
@@ -74,8 +74,8 @@ namespace UnitTestDp2circulation
     "西城/",
     out string isil,
     out string alternative);
-            Assert.AreEqual(isil, "");
-            Assert.AreEqual(alternative, "xc");
+            Assert.AreEqual("", isil);
+            Assert.AreEqual("xc", alternative);
         }
 
         // 分馆名字部分匹配上了

@@ -1897,7 +1897,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-
                 }
                 finally
                 {
