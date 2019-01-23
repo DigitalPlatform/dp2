@@ -73,11 +73,12 @@ namespace RfidDrivers.First
         {
             // 枚举所有的 reader
             List<Reader> readers = EnumUsbReader("RL8000");
+            // readers.AddRange(EnumUsbReader("M201"));
 
             // 打开所有的 reader
             foreach (Reader reader in readers)
             {
-                OpenReaderResult result = OpenReader(reader.SerialNumber);
+                OpenReaderResult result = OpenReader(reader.DriverName, reader.SerialNumber);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
             }
@@ -275,7 +276,6 @@ namespace RfidDrivers.First
             }
         }
 
-
         // 枚举所有 USB 读卡器
         // parameters:
         //      driver_name 例如 "RL8000"
@@ -329,7 +329,6 @@ namespace RfidDrivers.First
                         DriverPath = driver_path
                     };
                     readers.Add(reader);
-
                 }
             }
 
@@ -408,14 +407,14 @@ namespace RfidDrivers.First
 
 
 
-        OpenReaderResult OpenReader(string serial_number)
+        OpenReaderResult OpenReader(string driver_name, string serial_number)
         {
             //Lock();
             try
             {
                 UIntPtr hreader = UIntPtr.Zero;
                 var iret = RFIDLIB.rfidlib_reader.RDR_Open(
-                    BuildConnectionString("", "", serial_number),
+                    BuildConnectionString(driver_name, "", serial_number),
                     ref hreader);
                 if (iret != 0)
                     return new OpenReaderResult

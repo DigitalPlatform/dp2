@@ -291,6 +291,7 @@ namespace DigitalPlatform.RFID
     public class Reader
     {
         public string Name { get; set; }
+        public string DriverName { get; set; }  // RL8000 M201 等等
         public string SerialNumber { get; set; }
         public string DriverPath { get; set; }
         public UIntPtr ReaderHandle { get; set; }

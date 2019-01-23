@@ -210,7 +210,12 @@ namespace dp2Circulation
                                 // 首次填充，自动设好选定状态
                                 if (is_empty)
                                 {
-                                    SelectItem(this.SelectedID);
+                                    SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
+
+                                    if (string.IsNullOrEmpty(this.SelectedPII) == false
+    && this.AutoCloseDialog)
+                                        this.button_OK_Click(this, new EventArgs());
+
                                 }
                             }));
 
@@ -377,6 +382,8 @@ namespace dp2Circulation
 
                 tag.TagInfo = result.TagInfo;
 
+                string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
+
                 LogicChip chip = LogicChip.From(result.TagInfo.Bytes,
                     (int)result.TagInfo.BlockSize);
 
@@ -384,8 +391,8 @@ namespace dp2Circulation
                 {
                     string pii = chip.FindElement(ElementOID.PII)?.Text;
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                    //if (pii == this.SelectedID)
-                    //    item.Font = new Font(item.Font, FontStyle.Bold);
+                    if (pii == this.SelectedPII)
+                        item.Font = new Font(item.Font, FontStyle.Bold);
                 }));
                 return;
             }
