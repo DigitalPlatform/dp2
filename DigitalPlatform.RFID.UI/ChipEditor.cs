@@ -127,5 +127,21 @@ namespace DigitalPlatform.RFID.UI
                 this.label_titile.Text = value;
             }
         }
+
+        public bool TitleVisible
+        {
+            get
+            {
+                return this.label_titile.Visible;
+            }
+            set
+            {
+                this.label_titile.Visible = value;
+                if (value == false)
+                    this.propertyGrid1.Dock = DockStyle.Fill;
+                else
+                    this.propertyGrid1.Dock = DockStyle.None;
+            }
+        }
     }
 }

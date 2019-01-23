@@ -1051,6 +1051,9 @@ end_time);
                         dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
                         dlg.ShowDialog(this.Container);
                         eas_fixed = dlg.EasFixed;
+                        // 2019/1/23
+                        // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
+                        this.Container.OpenRfidCapture(true);
                     }));
 
                     if (eas_fixed == true)

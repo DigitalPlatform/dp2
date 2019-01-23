@@ -32,6 +32,8 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_saveRfid = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_loadRfid = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_autoRefresh = new System.Windows.Forms.ToolStripButton();
             this.listView_tags = new System.Windows.Forms.ListView();
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -42,8 +44,10 @@
             this.chipEditor1 = new DigitalPlatform.RFID.UI.ChipEditor();
             this.tabPage_record = new System.Windows.Forms.TabPage();
             this.propertyGrid_record = new System.Windows.Forms.PropertyGrid();
-            this.toolStripButton_autoRefresh = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.panel_okCancel = new System.Windows.Forms.Panel();
+            this.button_Cancel = new System.Windows.Forms.Button();
+            this.button_OK = new System.Windows.Forms.Button();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -52,6 +56,8 @@
             this.tabControl1.SuspendLayout();
             this.tabPage_tag.SuspendLayout();
             this.tabPage_record.SuspendLayout();
+            this.panel_okCancel.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -87,6 +93,22 @@
             this.toolStripButton_loadRfid.Text = "装载标签";
             this.toolStripButton_loadRfid.Click += new System.EventHandler(this.toolStripButton_loadRfid_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripButton_autoRefresh
+            // 
+            this.toolStripButton_autoRefresh.CheckOnClick = true;
+            this.toolStripButton_autoRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_autoRefresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_autoRefresh.Image")));
+            this.toolStripButton_autoRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_autoRefresh.Name = "toolStripButton_autoRefresh";
+            this.toolStripButton_autoRefresh.Size = new System.Drawing.Size(86, 28);
+            this.toolStripButton_autoRefresh.Text = "自动刷新";
+            this.toolStripButton_autoRefresh.CheckStateChanged += new System.EventHandler(this.toolStripButton_autoRefresh_CheckStateChanged);
+            // 
             // listView_tags
             // 
             this.listView_tags.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -99,7 +121,7 @@
             this.listView_tags.Location = new System.Drawing.Point(0, 0);
             this.listView_tags.MultiSelect = false;
             this.listView_tags.Name = "listView_tags";
-            this.listView_tags.Size = new System.Drawing.Size(365, 419);
+            this.listView_tags.Size = new System.Drawing.Size(362, 369);
             this.listView_tags.TabIndex = 1;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
@@ -123,7 +145,7 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -133,8 +155,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(800, 419);
-            this.splitContainer1.SplitterDistance = 365;
+            this.splitContainer1.Size = new System.Drawing.Size(794, 369);
+            this.splitContainer1.SplitterDistance = 362;
             this.splitContainer1.SplitterWidth = 8;
             this.splitContainer1.TabIndex = 2;
             // 
@@ -146,7 +168,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(427, 419);
+            this.tabControl1.Size = new System.Drawing.Size(424, 369);
             this.tabControl1.TabIndex = 1;
             // 
             // tabPage_tag
@@ -155,7 +177,7 @@
             this.tabPage_tag.Location = new System.Drawing.Point(4, 28);
             this.tabPage_tag.Name = "tabPage_tag";
             this.tabPage_tag.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_tag.Size = new System.Drawing.Size(419, 387);
+            this.tabPage_tag.Size = new System.Drawing.Size(416, 337);
             this.tabPage_tag.TabIndex = 0;
             this.tabPage_tag.Text = "RFID 标签";
             this.tabPage_tag.UseVisualStyleBackColor = true;
@@ -166,7 +188,7 @@
             this.chipEditor1.Location = new System.Drawing.Point(3, 3);
             this.chipEditor1.LogicChipItem = null;
             this.chipEditor1.Name = "chipEditor1";
-            this.chipEditor1.Size = new System.Drawing.Size(413, 381);
+            this.chipEditor1.Size = new System.Drawing.Size(410, 331);
             this.chipEditor1.TabIndex = 0;
             // 
             // tabPage_record
@@ -175,7 +197,7 @@
             this.tabPage_record.Location = new System.Drawing.Point(4, 28);
             this.tabPage_record.Name = "tabPage_record";
             this.tabPage_record.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_record.Size = new System.Drawing.Size(419, 387);
+            this.tabPage_record.Size = new System.Drawing.Size(416, 337);
             this.tabPage_record.TabIndex = 1;
             this.tabPage_record.Text = "数据记录";
             this.tabPage_record.UseVisualStyleBackColor = true;
@@ -185,31 +207,67 @@
             this.propertyGrid_record.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid_record.Location = new System.Drawing.Point(3, 3);
             this.propertyGrid_record.Name = "propertyGrid_record";
-            this.propertyGrid_record.Size = new System.Drawing.Size(413, 381);
+            this.propertyGrid_record.Size = new System.Drawing.Size(410, 331);
             this.propertyGrid_record.TabIndex = 1;
             // 
-            // toolStripButton_autoRefresh
+            // panel_okCancel
             // 
-            this.toolStripButton_autoRefresh.CheckOnClick = true;
-            this.toolStripButton_autoRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_autoRefresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_autoRefresh.Image")));
-            this.toolStripButton_autoRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_autoRefresh.Name = "toolStripButton_autoRefresh";
-            this.toolStripButton_autoRefresh.Size = new System.Drawing.Size(86, 28);
-            this.toolStripButton_autoRefresh.Text = "自动刷新";
-            this.toolStripButton_autoRefresh.CheckStateChanged += new System.EventHandler(this.toolStripButton_autoRefresh_CheckStateChanged);
+            this.panel_okCancel.Controls.Add(this.button_Cancel);
+            this.panel_okCancel.Controls.Add(this.button_OK);
+            this.panel_okCancel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel_okCancel.Location = new System.Drawing.Point(3, 378);
+            this.panel_okCancel.Name = "panel_okCancel";
+            this.panel_okCancel.Size = new System.Drawing.Size(794, 38);
+            this.panel_okCancel.TabIndex = 3;
+            this.panel_okCancel.Visible = false;
             // 
-            // toolStripSeparator1
+            // button_Cancel
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
+            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.button_Cancel.Location = new System.Drawing.Point(707, 0);
+            this.button_Cancel.Name = "button_Cancel";
+            this.button_Cancel.Size = new System.Drawing.Size(84, 33);
+            this.button_Cancel.TabIndex = 7;
+            this.button_Cancel.Text = "取消";
+            this.button_Cancel.UseVisualStyleBackColor = true;
+            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
+            // 
+            // button_OK
+            // 
+            this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_OK.Enabled = false;
+            this.button_OK.Location = new System.Drawing.Point(617, 0);
+            this.button_OK.Name = "button_OK";
+            this.button_OK.Size = new System.Drawing.Size(84, 33);
+            this.button_OK.TabIndex = 6;
+            this.button_OK.Text = "确定";
+            this.button_OK.UseVisualStyleBackColor = true;
+            this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.panel_okCancel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.splitContainer1, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(800, 419);
+            this.tableLayoutPanel1.TabIndex = 4;
             // 
             // RfidToolForm
             // 
+            this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "RfidToolForm";
             this.ShowIcon = false;
@@ -227,6 +285,8 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage_tag.ResumeLayout(false);
             this.tabPage_record.ResumeLayout(false);
+            this.panel_okCancel.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -249,5 +309,9 @@
         private DigitalPlatform.RFID.UI.ChipEditor chipEditor1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton toolStripButton_autoRefresh;
+        private System.Windows.Forms.Panel panel_okCancel;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }

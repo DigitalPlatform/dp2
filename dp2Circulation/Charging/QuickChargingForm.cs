@@ -195,7 +195,7 @@ namespace dp2Circulation
             }
         }
 
-        void OpenRfidCapture(bool open)
+        public void OpenRfidCapture(bool open)
         {
             if (_rfidChannel != null)
             {
