@@ -72,8 +72,7 @@ namespace RfidDrivers.First
         NormalResult OpenAllReaders()
         {
             // 枚举所有的 reader
-            List<Reader> readers = EnumUsbReader("RL8000");
-            // readers.AddRange(EnumUsbReader("M201"));
+            List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
 
             // 打开所有的 reader
             foreach (Reader reader in readers)
@@ -282,7 +281,7 @@ namespace RfidDrivers.First
 
         // 枚举所有 USB 读卡器
         // parameters:
-        //      driver_name 例如 "RL8000"
+        //      driver_name 例如 "M201" "RL8000"
         private List<Reader> EnumUsbReader(string driver_name)
         {
             List<Reader> readers = new List<Reader>();
@@ -1465,7 +1464,7 @@ namespace RfidDrivers.First
         {
             if (string.IsNullOrEmpty(readerDriverName))
             {
-                readerDriverName = "RL8000";
+                readerDriverName = "M201";  // "RL8000";
                 // readerDriverName = readerDriverInfoList[0].m_name;
             }
 
