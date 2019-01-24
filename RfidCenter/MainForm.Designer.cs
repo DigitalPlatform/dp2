@@ -88,7 +88,6 @@
             this.ToolStripMenuItem_testLockBlocks = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_testRfidChannel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
@@ -414,7 +413,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(661, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(635, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -442,7 +441,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(664, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(638, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -580,26 +579,26 @@
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(207, 30);
             this.MenuItem_openSendKey.Text = "打开 SendKey";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(207, 30);
             this.MenuItem_closeSendKey.Text = "关闭 SendKey";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(204, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(207, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -684,7 +683,6 @@
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.MenuItem_setupDriver,
             this.toolStripSeparator2,
             this.MenuItem_manual,
             this.MenuItem_about});
@@ -692,27 +690,21 @@
             this.MenuItem_help.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_help.Text = "帮助";
             // 
-            // MenuItem_setupDriver
-            // 
-            this.MenuItem_setupDriver.Name = "MenuItem_setupDriver";
-            this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
-            this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
-            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(350, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(249, 6);
             // 
             // MenuItem_manual
             // 
             this.MenuItem_manual.Name = "MenuItem_manual";
-            this.MenuItem_manual.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_manual.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_manual.Text = "使用帮助 ...";
             // 
             // MenuItem_about
             // 
             this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(353, 30);
+            this.MenuItem_about.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_about.Text = "关于本软件 ...";
             // 
             // MainForm
@@ -727,6 +719,7 @@
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
+            this.ShowIcon = false;
             this.Text = "dp2-RFID中心";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -804,7 +797,6 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_readBlocks;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_throwException;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_help;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_setupDriver;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_manual;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_about;

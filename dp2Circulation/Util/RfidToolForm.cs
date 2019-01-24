@@ -236,7 +236,7 @@ namespace dp2Circulation
                     }
                     return true;
                 }
-                catch(RemotingException ex)
+                catch (RemotingException ex)
                 {
                     strError = "UpdateChipList() 出现异常: " + ex.Message;
                     goto ERROR1;
@@ -397,7 +397,8 @@ namespace dp2Circulation
                 {
                     string pii = chip.FindElement(ElementOID.PII)?.Text;
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                    if (pii == this.SelectedPII)
+                    if (this.SelectedPII != null
+                        && pii == this.SelectedPII)
                         item.Font = new Font(item.Font, FontStyle.Bold);
                 }));
                 return;
@@ -739,6 +740,119 @@ namespace dp2Circulation
             {
                 this.panel_okCancel.Visible = value;
             }
+        }
+
+        private void listView_tags_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
+        }
+
+        void menu_selectAll_Click(object sender, EventArgs e)
+        {
+            ListViewUtil.SelectAllItems(this.listView_tags);
+        }
+
+        async void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+$"确实要移除选定的 {this.listView_tags.SelectedItems.Count} 个事项?",
+"RfidToolForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                // string uid = ListViewUtil.GetItemText(item, COLUMN_UID);
+                await ClearTagContent(item);
+            }
+
+            listView_tags_SelectedIndexChanged(this, new EventArgs());
+        }
+
+        async Task ClearTagContent(ListViewItem item)
+        {
+            RfidChannel channel = StartRfidChannel(
+    Program.MainForm.RfidCenterUrl,
+    out string strError);
+            if (channel == null)
+            {
+                strError = "StartRfidChannel() error";
+                goto ERROR1;
+            }
+            try
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                var old_tag_info = item_info.OneTag.TagInfo;
+                var new_tag_info = old_tag_info.Clone();
+                // 制造一套空内容
+                {
+                    new_tag_info.AFI = 0;
+                    new_tag_info.DSFID = 0;
+                    new_tag_info.EAS = false;
+                    List<byte> bytes = new List<byte>();
+                    for (int i = 0; i < new_tag_info.BlockSize * new_tag_info.MaxBlockCount; i++)
+                    {
+                        bytes.Add(0);
+                    }
+                    new_tag_info.Bytes = bytes.ToArray();
+                    new_tag_info.LockStatus = "";
+                }
+                var result = channel.Object.WriteTagInfo(item_info.OneTag.ReaderName,
+                    old_tag_info,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                await Task.Run(() => { GetTagInfo(item); });
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "ClearTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+            }));
         }
 
 #if NO
