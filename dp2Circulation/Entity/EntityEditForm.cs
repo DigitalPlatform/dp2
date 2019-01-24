@@ -927,7 +927,23 @@ namespace dp2Circulation
 
             // 刷新左侧显示
             {
-                // TODO: 可用保存后的确定了的 UID 重新装载
+                // 用保存后的确定了的 UID 重新装载
+                int nRet = LoadChipByUID(
+                    _tagExisting.ReaderName,
+                    _tagExisting.TagInfo.UID,
+    out TagInfo tag_info,
+    out strError);
+                if (nRet == -1)
+                {
+                    _leftLoaded = false;
+                    strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
+                    goto ERROR1;
+                }
+                _tagExisting.TagInfo = tag_info;
+                var chip = LogicChipItem.FromTagInfo(tag_info);
+                this.chipEditor_existing.LogicChipItem = chip;
+
+#if NO
                 string new_pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII)?.Text;
 
                 // return:
@@ -945,6 +961,7 @@ namespace dp2Circulation
                     strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
                     goto ERROR1;
                 }
+#endif
             }
             return;
             ERROR1:
@@ -1190,6 +1207,49 @@ out strError);
                 EndRfidChannel(channel);
             }
         }
+
+        int LoadChipByUID(
+            string reader_name,
+            string uid, 
+            out TagInfo tag_info,
+            out string strError)
+        {
+            strError = "";
+            tag_info = null;
+
+            RfidChannel channel = StartRfidChannel(
+Program.MainForm.RfidCenterUrl,
+out strError);
+            if (channel == null)
+            {
+                strError = "StartRfidChannel() error";
+                return -1;
+            }
+            try
+            {
+                var result = channel.Object.GetTagInfo(
+                    reader_name,
+                    uid);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+
+                tag_info = result.TagInfo;
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "GetTagInfo() 出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+        }
+
 #if NO
         // 装入以前的标签信息
         // 如果读卡器上有多个标签，则出现对话框让从中选择一个。列表中和右侧 PII 相同的，优先被选定
