@@ -928,7 +928,7 @@ namespace dp2Circulation
             // 刷新左侧显示
             {
                 // TODO: 可用保存后的确定了的 UID 重新装载
-                string new_pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII).Text;
+                string new_pii = this.chipEditor_editing.LogicChipItem.FindElement(ElementOID.PII)?.Text;
 
                 // return:
                 //      -1  出错

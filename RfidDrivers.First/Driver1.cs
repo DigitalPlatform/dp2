@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -78,6 +78,10 @@ namespace RfidDrivers.First
             // 打开所有的 reader
             foreach (Reader reader in readers)
             {
+                var fill_result = FillReaderInfo(reader);
+                if (fill_result.Value == -1)
+                    return fill_result;
+
                 OpenReaderResult result = OpenReader(reader.DriverName, reader.SerialNumber);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
@@ -333,6 +337,1124 @@ namespace RfidDrivers.First
             }
 
             return readers;
+        }
+
+
+        #region XML
+
+        static string product_xml = @"
+<all_device>
+
+  <!--RL8600-->
+  <device product='RL8600'>
+    <basic>
+      <id>118001</id>
+      <driver>118000</driver>
+      <type>reader</type>
+      <description>RL8000</description>
+      <picture>RL8600.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true' ISO14443A='true' ISO14443B='true' ISO18000P3M3='true' ST_ISO14443B='true' Sony_Felica='true' NFC_Forum_Type1='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='NuMicro' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+        <load_key>true</load_key>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='false'/>
+          <ISO14443Ap4_Transceive/>
+        </Transceive>
+      </single_tag>
+      <nfc_operation/>
+    </function>
+  </device>
+
+  <!--RPAN(HF)-->
+  <device product='R-PAN ISO15693'>
+    <basic>
+      <id>200001</id>
+      <driver>200001</driver>
+      <type>r_pan</type>
+      <communication com='true' usb='true' tcp_ip='true' bluetooth='true'/>
+      <description>r_pan</description>
+      <picture>RPAN.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' EnableTransparent='false' Driver='118000' WaitTime='10000'></upgrade>
+    <function>
+      <configuration>
+        <save_block>false</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_sys_time>true</set_sys_time>
+        <erase_flash>true</erase_flash>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <buffer_mode/>
+    </function>
+
+  </device>
+
+  <!--RD503-->
+  <device product='RD503'>
+    <basic>
+      <id>000007</id>
+      <driver>000007</driver>
+      <type>reader</type>
+      <communication com='true' tcp_ip='true'/>
+      <picture>rd503.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-board</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <noise_detect/>
+    </function>
+
+  </device>
+
+  <!--G302-->
+  <device product='G302'>
+    <basic>
+      <id>685422</id>
+      <driver>685422</driver>
+      <type>mt_gate</type>
+      <communication com='true' tcp_ip='true'/>
+      <picture>g302.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+
+    <function>
+      <configuration>
+        <save_block>false</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-board</name>
+          <name>Output#1</name>
+          <name>Output#2</name>
+          <name>Output#3</name>
+          <name>Output#4</name>
+        </set_output>
+      </command>
+      <channel_mode/>
+      <noise_detect/>
+    </function>
+
+  </device>
+
+  <!--LSG406-->
+  <device product='LSG406'>
+    <basic>
+      <id>474026</id>
+      <driver>474026</driver>
+      <type>lsg_gate</type>
+      <communication tcp_ip='true'/>
+      <picture>lsg406.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Relay#1</name>
+        </set_output>
+        <flow_counter>true</flow_counter>
+        <reset_counter>true</reset_counter>
+        <reverse_direction>true</reverse_direction>
+        <get_sys_time>true</get_sys_time>
+        <set_sys_time>true</set_sys_time>
+      </command>
+      <flow_detect/>
+      <noise_detect/>
+    </function>
+  </device>
+
+  <!--LSG606-->
+  <device product='LSG606'>
+    <basic>
+      <id>120001</id>
+      <driver>120001</driver>
+      <type>lsg_gate</type>
+      <communication tcp_ip='true'/>
+      <picture>lsg406.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Relay#1</name>
+        </set_output>
+        <flow_counter>true</flow_counter>
+        <reset_counter>true</reset_counter>
+        <reverse_direction>true</reverse_direction>
+        <get_sys_time>true</get_sys_time>
+        <set_sys_time>true</set_sys_time>
+      </command>
+      <flow_detect/>
+    </function>
+  </device>
+
+
+  <!--M103R-->
+  <device product='M103R'>
+    <basic>
+      <id>690103</id>
+      <driver>690103</driver>
+      <type>reader</type>
+      <picture>m103r.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+
+  </device>
+
+  <!--M201-->
+  <device product='M201'>
+    <basic>
+      <id>690201</id>
+      <driver>690201</driver>
+      <type>reader</type>
+      <picture>m201.jpg</picture>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <noise_detect/>
+    </function>
+  </device>
+
+  <!--M60-->
+  <device product='M60'>
+    <basic>
+      <id>690600</id>
+      <driver>690600</driver>
+      <type>reader</type>
+      <picture>M60.jpg</picture>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true'/>
+    </basic>
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+  </device>
+
+  <!--MR113-->
+  <device product='MR113R'>
+    <basic>
+      <id>051103</id>
+      <driver>051103</driver>
+      <type>reader</type>
+      <description>MR113R</description>
+      <picture>mr113r.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true' ISO14443A='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+
+  </device>
+
+
+  <!--RD100-->
+  <device product='RD100'>
+    <basic>
+      <id>680100</id>
+      <driver>680100</driver>
+      <type>reader</type>
+      <description>RD100</description>
+      <picture>rd100.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+
+  </device>
+
+  <!--RD120M-->
+  <device product='RD120M'>
+    <basic>
+      <id>000010</id>
+      <driver>000010</driver>
+      <type>reader</type>
+      <description>RD120M</description>
+      <picture>rd120m.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true' ISO14443A='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <nfc_operation/>
+    </function>
+
+  </device>
+
+  <!--RD131-->
+  <device product='RD131'>
+    <basic>
+      <id>680131</id>
+      <driver>680131</driver>
+      <type>reader</type>
+      <description>RD131</description>
+      <picture>rd131.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+        <RF_Close>true</RF_Close>
+        <led_display>true</led_display>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+
+  </device>
+
+  <!--RD201-->
+  <device product='RD201'>
+    <basic>
+      <id>680201</id>
+      <driver>680201</driver>
+      <type>reader</type>
+      <picture>rd201.jpg</picture>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <single_tag/>
+      <multiple_tags/>
+      <noise_detect/>
+    </function>
+
+  </device>
+
+  <!--RD242-->
+  <device product='RD242'>
+    <basic>
+      <id>680242</id>
+      <driver>680242</driver>
+      <type>reader</type>
+      <picture>rd242.jpg</picture>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>4</antena_count>
+      <communication com='true' usb='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <noise_detect/>
+    </function>
+
+  </device>
+
+
+  <!--RD5112-->
+  <device product='RD5112'>
+    <basic>
+      <id>000005</id>
+      <driver>000005</driver>
+      <type>reader</type>
+      <picture>rd5112.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>12</antena_count>
+      <communication com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-Board</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <noise_detect/>
+    </function>
+
+  </device>
+
+
+  <!--RD5100-->
+  <device product='RD5100'>
+    <basic>
+      <id>680530</id>
+      <driver>680530</driver>
+      <type>reader</type>
+      <picture>rd5100.jpg</picture>
+      <cfg_name>RD5100</cfg_name>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>30</antena_count>
+      <cfg_antenna_count>30</cfg_antenna_count>
+      <communication com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-Board</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='false'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <antennas_check>true</antennas_check>
+        <temperature_check>true</temperature_check>
+        <error_check>true</error_check>
+        <pa_current>true</pa_current>
+        <noise_check>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+
+  <!--RD122-->
+  <device product='RD122'>
+    <basic>
+      <id>000004</id>
+      <driver>000004</driver>
+      <type>reader</type>
+      <picture>rd122.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>0</antena_count>
+      <communication usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-Board</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+
+  </device>
+
+
+  <!--SSR100-->
+  <device product='SSR100'>
+    <basic>
+      <id>000003</id>
+      <driver>000003</driver>
+      <type>reader</type>
+      <picture>ssr100.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>12</antena_count>
+      <communication com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-Board</name>
+          <name>Relay#1 On-Board</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <noise_detect/>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+  </device>
+
+
+  <!--RD543-->
+  <device product='RD543'>
+    <basic>
+      <id>000006</id>
+      <driver>000006</driver>
+      <type>reader</type>
+      <picture>rd543.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>4</antena_count>
+      <communication com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer On-Board</name>
+          <name>Relay#1</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <noise_detect/>
+    </function>
+  </device>
+
+
+  <!--MF102U-->
+  <device product='MF102U'>
+    <basic>
+      <id>011002</id>
+      <driver>011002</driver>
+      <type>reader</type>
+      <description>MF102U</description>
+      <picture>mf102u.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO14443A='true'/>
+    </protocol>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+        <load_key>true</load_key>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+  </device>
+
+  <!--RL1500-->
+  <device product='RL1500'>
+    <basic>
+      <id>111501</id>
+      <driver>118000</driver>
+      <type>reader</type>
+      <description>RL1500</description>
+      <picture>RL1500.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO14443A='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='NuMicro' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+        <load_key>true</load_key>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <nfc_operation/>
+    </function>
+
+  </device>
+
+
+  <!--RL1700-->
+  <device product='RL1700'>
+    <basic>
+      <id>111701</id>
+      <driver>118000</driver>
+      <type>reader</type>
+      <description>RL1700</description>
+      <picture>RL1700.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+      <communication com='true' usb='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='NuMicro' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Buzzer</name>
+        </set_output>
+        <RF_Open>true</RF_Open>
+        <RF_Close>true</RF_Close>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <nfc_operation/>
+    </function>
+
+  </device>
+
+  <!--R-PAN ILT-->
+  <device product='R-PAN ILT'>
+    <basic>
+      <id>200003</id>
+      <driver>200001</driver>
+      <type>r_pan</type>
+      <communication com='true' usb='true' tcp_ip='true' bluetooth='true'/>
+      <description>r_pan</description>
+      <picture>RPAN.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+    <protocol>
+      <HF ISO18000P3M3='true'/>
+    </protocol>
+    <upgrade Enable='true' EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_sys_time>true</set_sys_time>
+        <erase_flash>true</erase_flash>
+      </command>
+      <buffer_mode/>
+    </function>
+
+  </device>
+
+
+  <!--  R-PAN UHF  -->
+  <device product='R-PAN UHF'>
+    <basic>
+      <id>200002</id>
+      <driver>200002</driver>
+      <type>r_pan</type>
+      <communication com='true' usb='true' tcp_ip='true' bluetooth='true'/>
+      <description>R-PAN UHF</description>
+      <picture>RPAN.jpg</picture>
+      <range>short</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>1</antena_count>
+    </basic>
+
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <upgrade Enable='true' EnableTransparent='false' Driver='118000' WaitTime='10000'></upgrade>
+    <function>
+      <configuration>
+        <save_block>false</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_sys_time>true</set_sys_time>
+        <erase_flash>true</erase_flash>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <buffer_mode/>
+    </function>
+
+  </device>
+
+  <!--UM200-->
+  <device product='UM200'>
+    <basic>
+      <id>691200</id>
+      <driver>691200</driver>
+      <type>reader</type>
+      <communication com='true' usb='true'/>
+      <description>UM200</description>
+      <picture>um200.jpg</picture>
+      <range>long</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>0</antena_count>
+    </basic>
+
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <RF_Operation>true</RF_Operation>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+      <device_diagnosis>
+        <antennas_check>true</antennas_check>
+        <temperature_check>true</temperature_check>
+      </device_diagnosis>
+    </function>
+
+  </device>
+
+  <!--URD2004-->
+  <device product='URD2004'>
+    <basic>
+      <id>690601</id>
+      <driver>690600</driver>
+      <type>reader</type>
+      <communication com='true' usb='true'/>
+      <description>URD2004</description>
+      <range>long</range>
+      <min_antenna_id>0</min_antenna_id>
+      <antena_count>4</antena_count>
+    </basic>
+
+    <protocol>
+      <UHF ISO18000P6C='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='true'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output>
+          <name>Port#1</name>
+        </set_output>
+      </command>
+      <multiple_tags/>
+      <single_tag/>
+    </function>
+  </device>
+
+  <!--RD5200-->
+  <device product='RD5200'>
+    <basic>
+      <id>690050</id>
+      <driver>690050</driver>
+      <type>reader</type>
+      <picture>RD5200.jpg</picture>
+      <noise>true</noise>
+      <range>long</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>0</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output auto_detect='true'/>
+        <input_status>true</input_status>
+        <RF_Operation>true</RF_Operation>
+        <check_mux>true</check_mux>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <antennas_check>true</antennas_check>
+        <temperature_check>true</temperature_check>
+        <error_check>true</error_check>
+        <pa_current>true</pa_current>
+        <noise_check>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+
+  <!--M22-->
+  <device product='M22'>
+    <basic>
+      <id>690022</id>
+      <driver>690050</driver>
+      <type>reader</type>
+      <picture>M22.jpg</picture>
+      <cfg_name>M22</cfg_name>
+      <noise>true</noise>
+      <range>middle</range>
+      <min_antenna_id>1</min_antenna_id>
+      <antena_count>1</antena_count>
+      <buffer_mode>false</buffer_mode>
+      <save_block>true</save_block>
+      <communication usb ='true' com='true' tcp_ip='true'/>
+    </basic>
+    <protocol>
+      <HF ISO15693='true'/>
+    </protocol>
+    <upgrade Enable='true' MCU='STM32'  EnableTransparent='false'></upgrade>
+    <function>
+      <configuration>
+        <save_block>true</save_block>
+      </configuration>
+      <command>
+        <information>true</information>
+        <set_output auto_detect='true'/>
+        <input_status>true</input_status>
+        <RF_Operation>true</RF_Operation>
+        <reset_sys>true</reset_sys>
+      </command>
+      <multiple_tags/>
+      <single_tag>
+        <Transceive>
+          <ISO15693_Transceive Multiple_Antenna='true'/>
+        </Transceive>
+      </single_tag>
+      <device_diagnosis>
+        <temperature_check>true</temperature_check>
+        <error_check check_flg='0x05FF'>true</error_check>
+        <noise_check>true</noise_check>
+      </device_diagnosis>
+    </function>
+  </device>
+
+</all_device>";
+
+
+        #endregion
+
+        static XmlDocument _product_dom = null;
+
+        static string GetDriverName(string product_id)
+        {
+            if (_product_dom == null)
+            {
+                _product_dom = new XmlDocument();
+                _product_dom.LoadXml(product_xml);
+            }
+
+            // return _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
+
+            XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
+            if (node == null)
+                return null;
+
+            // driver id
+            return node.Value;
+
+#if NO
+            XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
+            if (node == null)
+                return null;
+
+            string driver_id = node.Value;
+
+            return _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{driver_id}']]/@product")?.Value;
+#endif
+        }
+
+        NormalResult FillReaderInfo(Reader reader)
+        {
+            var result = OpenReader("", reader.SerialNumber);
+            try
+            {
+                int iret;
+                /*
+                 * Try to get  serial number and type from device
+                 */
+                StringBuilder devInfor = new StringBuilder();
+                devInfor.Append('\0', 128);
+                UInt32 nSize;
+                nSize = (UInt32)devInfor.Capacity;
+                iret = RFIDLIB.rfidlib_reader.RDR_GetReaderInfor(result.ReaderHandle, 0, devInfor, ref nSize);
+                if (iret != 0)
+                    return new NormalResult { Value = -1, ErrorInfo = "GetReaderInfo() error" };
+
+                string dev_info = devInfor.ToString();
+                string[] parts = dev_info.Split(new char[] {';'});
+                if (parts.Length < 3)
+                    return new NormalResult { Value = -1, ErrorInfo = $"所得到的结果字符串 '{dev_info}' 格式不正确。应该为分号间隔的三段形态" };
+                string product_id = parts[1];
+
+                string driver_name = GetDriverName(product_id);
+                if (string.IsNullOrEmpty(driver_name))
+                    return new NormalResult { Value = -1, ErrorInfo = $"product_id {product_id} 没有找到 driver name" };
+
+                reader.DriverName = driver_name;
+                return new NormalResult();
+            }
+            finally
+            {
+                CloseReader(result.ReaderHandle);
+            }
         }
 
         // parameters:

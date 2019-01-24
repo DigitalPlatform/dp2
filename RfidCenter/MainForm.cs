@@ -108,6 +108,9 @@ namespace RfidCenter
 
         void UpdateDeviceList(List<Reader> readers)
         {
+            if (readers == null)
+                return;
+
             this.Invoke((Action)(() =>
             {
                 this.comboBox_deviceList.Items.Clear();
