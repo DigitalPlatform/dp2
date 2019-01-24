@@ -126,6 +126,7 @@
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
             this.listView_tags.SelectedIndexChanged += new System.EventHandler(this.listView_tags_SelectedIndexChanged);
+            this.listView_tags.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_tags_MouseUp);
             // 
             // columnHeader_readerName
             // 
@@ -190,6 +191,7 @@
             this.chipEditor1.Name = "chipEditor1";
             this.chipEditor1.Size = new System.Drawing.Size(410, 331);
             this.chipEditor1.TabIndex = 0;
+            this.chipEditor1.TitleVisible = true;
             // 
             // tabPage_record
             // 
