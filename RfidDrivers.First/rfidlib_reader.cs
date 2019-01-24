@@ -149,7 +149,10 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_GetTagTypeName(UIntPtr hr, UInt32 AIP_ID, UInt32 TAG_ID, StringBuilder nameBuf, ref UInt32 nSize);
 
-         
+        // 2019/1/24
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_LoadFactoryDefault(UIntPtr hr);
+
 #else
 
         /**************************************************Use Multi-Byte Character Set***********************************************/

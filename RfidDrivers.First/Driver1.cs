@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -74,6 +76,9 @@ namespace RfidDrivers.First
             // 枚举所有的 reader
             List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
 
+            // name --> count
+            Hashtable table = new Hashtable();
+
             // 打开所有的 reader
             foreach (Reader reader in readers)
             {
@@ -84,7 +89,24 @@ namespace RfidDrivers.First
                 OpenReaderResult result = OpenReader(reader.DriverName, reader.SerialNumber);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
+
+                // 构造 Name
+                // 重复的 ProductName 后面要加上序号
+                {
+                    int count = 0;
+                    if (table.ContainsKey(reader.ProductName) == true)
+                        count = (int)table[reader.ProductName];
+
+                    if (count == 0)
+                        reader.Name = reader.ProductName;
+                    else
+                        reader.Name = $"{reader.ProductName}({count + 1})";
+
+                    table[reader.ProductName] = count++;
+                }
             }
+
+
 
             _readers = readers;
             return new NormalResult();
@@ -328,7 +350,7 @@ namespace RfidDrivers.First
                     Reader reader = new Reader
                     {
                         SerialNumber = sernum.ToString(),
-                        Name = sernum.ToString(),
+                        // Name = sernum.ToString(),
                         DriverPath = driver_path
                     };
                     readers.Add(reader);
@@ -1392,8 +1414,13 @@ namespace RfidDrivers.First
 
         static XmlDocument _product_dom = null;
 
-        static string GetDriverName(string product_id)
+        static bool GetDriverName(string product_id,
+            out string driver_name,
+            out string product_name)
         {
+            driver_name = "";
+            product_name = "";
+
             if (_product_dom == null)
             {
                 _product_dom = new XmlDocument();
@@ -1404,11 +1431,13 @@ namespace RfidDrivers.First
 
             XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
             if (node == null)
-                return null;
+                return false;
 
             // driver id
-            return node.Value;
+            driver_name = node.Value;
 
+            product_name = _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
+            return true;
 #if NO
             XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
             if (node == null)
@@ -1420,6 +1449,7 @@ namespace RfidDrivers.First
 #endif
         }
 
+        // 填充驱动类型和设备型号
         NormalResult FillReaderInfo(Reader reader)
         {
             var result = OpenReader("", reader.SerialNumber);
@@ -1438,16 +1468,19 @@ namespace RfidDrivers.First
                     return new NormalResult { Value = -1, ErrorInfo = "GetReaderInfo() error" };
 
                 string dev_info = devInfor.ToString();
-                string[] parts = dev_info.Split(new char[] {';'});
+                string[] parts = dev_info.Split(new char[] { ';' });
                 if (parts.Length < 3)
                     return new NormalResult { Value = -1, ErrorInfo = $"所得到的结果字符串 '{dev_info}' 格式不正确。应该为分号间隔的三段形态" };
                 string product_id = parts[1];
 
-                string driver_name = GetDriverName(product_id);
-                if (string.IsNullOrEmpty(driver_name))
+                bool bRet = GetDriverName(product_id,
+                    out string driver_name,
+                    out string product_name);
+                if (bRet == false)
                     return new NormalResult { Value = -1, ErrorInfo = $"product_id {product_id} 没有找到 driver name" };
 
                 reader.DriverName = driver_name;
+                reader.ProductName = product_name;
                 return new NormalResult();
             }
             finally
@@ -1578,6 +1611,30 @@ namespace RfidDrivers.First
             }
         }
 
+#if NO
+        NormalResult LoadFactoryDefault(object reader_handle)
+        {
+            Lock();
+            try
+            {
+                var iret = RFIDLIB.rfidlib_reader.RDR_LoadFactoryDefault((UIntPtr)reader_handle);
+                if (iret != 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"LoadFactoryDefault error, return: {iret}",
+                        ErrorCode = GetErrorCode(iret, (UIntPtr)reader_handle)
+                    };
+
+                // 成功
+                return new NormalResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+#endif
         // parameters:
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
@@ -1917,6 +1974,35 @@ namespace RfidDrivers.First
                     ErrorInfo = $"没有找到 PII 为 {pii} 的标签",
                     ErrorCode = "tagNotFound"
                 };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        public NormalResult LoadFactoryDefault(string reader_name)
+        {
+            List<object> handles = GetAllReaderHandle(reader_name);
+            if (handles.Count == 0)
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                foreach (UIntPtr reader_handle in handles)
+                {
+                    var iret = RFIDLIB.rfidlib_reader.RDR_LoadFactoryDefault(reader_handle);
+                    if (iret != 0)
+                        return new NormalResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"LoadFactoryDefault error, return: {iret}",
+                            ErrorCode = GetErrorCode(iret, reader_handle)
+                        };
+                }
+
+                return new NormalResult();
             }
             finally
             {

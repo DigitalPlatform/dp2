@@ -13,7 +13,6 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
@@ -94,7 +93,6 @@ namespace dp2Circulation
                 OpenRfidCapture(false);
             });
 
-            Task.Run(() => { UpdateChipList(true); });
 
             if (string.IsNullOrEmpty(this.MessageText) == false)
                 this.ShowMessage(this.MessageText, "yellow", true);
@@ -102,6 +100,8 @@ namespace dp2Circulation
             this.toolStripButton_autoRefresh.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
                 "auto_refresh",
                 true);
+            if (this.toolStripButton_autoRefresh.Checked == false)
+                Task.Run(() => { UpdateChipList(true); });
         }
 
         private void RfidToolForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -390,12 +390,12 @@ namespace dp2Circulation
 
                 string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
 
-                LogicChip chip = LogicChip.From(result.TagInfo.Bytes,
-                    (int)result.TagInfo.BlockSize);
-
+                item_info.LogicChipItem = LogicChipItem.FromTagInfo(result.TagInfo);
+                item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
                 this.Invoke((Action)(() =>
                 {
-                    string pii = chip.FindElement(ElementOID.PII)?.Text;
+                    string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
+                    // .FindElement(ElementOID.PII)?.Text;
                     ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
                     if (this.SelectedPII != null
                         && pii == this.SelectedPII)
@@ -421,19 +421,84 @@ namespace dp2Circulation
             }));
         }
 
+        private void LogicChipItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            UpdateChanged(sender as LogicChipItem);
+
+            UpdateSaveButton();
+        }
+
+        void UpdateSaveButton()
+        {
+            this.Invoke((Action)(() =>
+            {
+                int count = 0;
+                foreach (ListViewItem item in this.listView_tags.Items)
+                {
+                    ItemInfo tag_info = (ItemInfo)item.Tag;
+                    if (tag_info.LogicChipItem != null
+                    && tag_info.LogicChipItem.Changed == true)
+                        count++;
+                }
+                if (count > 0)
+                    this.toolStripButton_saveRfid.Enabled = true;
+                else
+                    this.toolStripButton_saveRfid.Enabled = false;
+            }));
+        }
+
+        void UpdateChanged(LogicChipItem chip)
+        {
+            this.Invoke((Action)(() =>
+            {
+                foreach (ListViewItem item in this.listView_tags.Items)
+                {
+                    ItemInfo tag_info = (ItemInfo)item.Tag;
+                    if (tag_info.LogicChipItem == chip)
+                    {
+#if NO
+                        // 更新 column 0
+                        string uid = ListViewUtil.GetItemText(item, 0);
+                        if (uid.StartsWith("*"))
+                            uid = uid.Substring(1);
+                        if (tag_info.LogicChip.Changed)
+                            uid = "*" + uid;
+                        ListViewUtil.ChangeItemText(item, 0, uid);
+#endif
+
+                        if (tag_info.LogicChipItem.Changed)
+                        {
+                            item.BackColor = Color.DarkGreen;
+                            item.ForeColor = Color.White;
+                        }
+                        else
+                        {
+                            item.BackColor = this.listView_tags.BackColor;
+                            item.ForeColor = this.listView_tags.ForeColor;
+                        }
+
+                        // 更新 PII
+                        string pii = tag_info.LogicChipItem.FindElement(ElementOID.PII)?.Text;
+                        ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                        return;
+                    }
+                }
+            }));
+        }
+
+
         private void listView_tags_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.listView_tags.SelectedItems.Count > 0)
             {
                 ItemInfo item_info = (ItemInfo)this.listView_tags.SelectedItems[0].Tag;
                 OneTag tag = item_info.OneTag;
-                var tag_info = tag.TagInfo;
+                // var tag_info = tag.TagInfo;
 
                 this.SelectedTag = tag;
                 this.button_OK.Enabled = true;
 
-                var chip = LogicChipItem.FromTagInfo(tag_info);
-                this.chipEditor1.LogicChipItem = chip;
+                this.chipEditor1.LogicChipItem = item_info.LogicChipItem;
 
                 if (string.IsNullOrEmpty(item_info.Xml) == false)
                 {
@@ -618,6 +683,7 @@ namespace dp2Circulation
         out string strError);
                 if (_rfidChannel == null)
                     this.ShowMessageBox(strError);
+#if NO
                 // 马上检测一下通道是否可用
                 try
                 {
@@ -627,6 +693,7 @@ namespace dp2Circulation
                 {
                     this.ShowMessageBox("启动 RFID 设备时出错: " + ex.Message);
                 }
+#endif
             }
         }
 
@@ -660,6 +727,7 @@ namespace dp2Circulation
         {
             public OneTag OneTag { get; set; }
             public string Xml { get; set; }
+            public LogicChipItem LogicChipItem { get; set; }
         }
 
         private void toolStripButton_autoRefresh_CheckStateChanged(object sender, EventArgs e)
@@ -768,6 +836,11 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("保存标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem.Click += new System.EventHandler(this.menu_saveSelectedTagContent_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
         }
@@ -780,7 +853,7 @@ namespace dp2Circulation
         async void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-$"确实要移除选定的 {this.listView_tags.SelectedItems.Count} 个事项?",
+$"确实要清除选定的 {this.listView_tags.SelectedItems.Count} 个标签的内容?",
 "RfidToolForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -853,6 +926,115 @@ MessageBoxDefaultButton.Button2);
                 // 把 item 修改为红色背景，表示出错的状态
                 SetItemColor(item, "error");
             }));
+        }
+
+        async void menu_saveSelectedTagContent_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                if (await SaveTagContent(item) == true)
+                    count++;
+            }
+
+            listView_tags_SelectedIndexChanged(this, new EventArgs());
+
+            UpdateSaveButton();
+
+            if (count > 0)
+                this.ShowMessage($"保存成功({count})", "green", true);
+            else
+                this.ShowMessage("没有需要保存的事项", "yellow", true);
+        }
+
+        async Task<bool> SaveTagContent(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.LogicChipItem.Changed == false)
+                return false;
+
+            RfidChannel channel = StartRfidChannel(
+    Program.MainForm.RfidCenterUrl,
+    out string strError);
+            if (channel == null)
+            {
+                strError = "StartRfidChannel() error";
+                goto ERROR1;
+            }
+            try
+            {
+                var old_tag_info = item_info.OneTag.TagInfo;
+                var new_tag_info = BuildNewTagInfo(
+    old_tag_info,
+    item_info.LogicChipItem);
+
+                var result = channel.Object.WriteTagInfo(item_info.OneTag.ReaderName,
+                    old_tag_info,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                await Task.Run(() => { GetTagInfo(item); });
+
+                UpdateChanged(item_info.LogicChipItem);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = "SaveTagContent() 出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+            ERROR1:
+            this.Invoke((Action)(() =>
+            {
+                ListViewUtil.ChangeItemText(item, COLUMN_PII, "error:" + strError);
+                // 把 item 修改为红色背景，表示出错的状态
+                SetItemColor(item, "error");
+            }));
+            return false;
+        }
+
+        static TagInfo BuildNewTagInfo(TagInfo old_tag_info,
+    LogicChipItem chip)
+        {
+            TagInfo new_tag_info = old_tag_info.Clone();
+            new_tag_info.Bytes = chip.GetBytes(
+                (int)new_tag_info.MaxBlockCount * (int)new_tag_info.BlockSize,
+                (int)new_tag_info.BlockSize,
+                LogicChip.GetBytesStyle.None,
+                out string block_map);
+            new_tag_info.LockStatus = block_map;
+
+            new_tag_info.DSFID = chip.DSFID;
+            new_tag_info.AFI = chip.AFI;
+            new_tag_info.EAS = chip.EAS;
+            return new_tag_info;
+        }
+
+        private async void toolStripButton_saveRfid_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            foreach (ListViewItem item in this.listView_tags.Items)
+            {
+                if (await SaveTagContent(item) == true)
+                    count++;
+            }
+
+            listView_tags_SelectedIndexChanged(this, new EventArgs());
+
+            UpdateSaveButton();
+
+            if (count > 0)
+                this.ShowMessage($"保存成功({count})", "green", true);
+            else
+                this.ShowMessage("没有需要保存的事项", "yellow", true);
         }
 
 #if NO

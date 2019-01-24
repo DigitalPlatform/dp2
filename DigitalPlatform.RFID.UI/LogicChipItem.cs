@@ -124,7 +124,7 @@ namespace DigitalPlatform.RFID.UI
                 return;
 
             // 检查 value 是否合法
-            string error = Element.VerifyElementText(element.OID, value);
+            string error = Element.VerifyElementText(oid, value);
             if (string.IsNullOrEmpty(error) == false)
                 throw new Exception($"值 '{value}' 不合法: {error}");
 
@@ -673,10 +673,15 @@ namespace DigitalPlatform.RFID.UI
     (int)tag_info.BlockSize,
     tag_info.LockStatus);
 
+            chip.SetSystemValues(tag_info.DSFID, tag_info.AFI, tag_info.EAS);
+#if NO
             chip.DSFID = tag_info.DSFID;
             chip.AFI = tag_info.AFI;
             chip.EAS = tag_info.EAS;
 
+            // 2019/1/25
+            chip.SetChanged(false);
+#endif
             return chip;
         }
 
@@ -697,6 +702,14 @@ namespace DigitalPlatform.RFID.UI
             new_tag_info.EAS = chip.EAS;
 
             return new_tag_info;
+        }
+
+        // 设置三个系统值。此函数不会改变 this.Changed
+        public void SetSystemValues(byte dsfid, byte afi, bool eas)
+        {
+            this._dsfid = dsfid;
+            this._afi = afi;
+            this._eas = eas;
         }
     }
 
