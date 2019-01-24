@@ -388,7 +388,9 @@ enable);
                 {
                     Task.Delay(500).Wait();
                 }
-                Task.Run(() => { DoInventory(); });
+
+                var task = DoInventory();
+                // Task.Run(() => { DoInventory(); });
             }
             else
             {
@@ -402,7 +404,7 @@ enable);
 
         CancellationTokenSource _cancelInventory = null;
 
-        void DoInventory()
+        async Task DoInventory()
         {
             Program.MainForm.OutputHistory("开始捕获", 0);
 
@@ -415,7 +417,7 @@ enable);
             {
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
-                    Task.Delay(200, _cancelInventory.Token).Wait();
+                    await Task.Delay(200, _cancelInventory.Token).ConfigureAwait(false);
                     ClearIdleTag(TimeSpan.FromSeconds(1));  // 1 秒的放误触发时间
 
                     //if (_captureEnabled.Value == false)

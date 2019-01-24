@@ -41,13 +41,14 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_tag = new System.Windows.Forms.TabPage();
-            this.chipEditor1 = new DigitalPlatform.RFID.UI.ChipEditor();
             this.tabPage_record = new System.Windows.Forms.TabPage();
             this.propertyGrid_record = new System.Windows.Forms.PropertyGrid();
             this.panel_okCancel = new System.Windows.Forms.Panel();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.chipEditor1 = new DigitalPlatform.RFID.UI.ChipEditor();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -64,10 +65,11 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_saveRfid,
             this.toolStripButton_loadRfid,
             this.toolStripSeparator1,
-            this.toolStripButton_autoRefresh});
+            this.toolStripButton_autoRefresh,
+            this.toolStripSeparator2,
+            this.toolStripButton_saveRfid});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(800, 31);
@@ -77,11 +79,14 @@
             // toolStripButton_saveRfid
             // 
             this.toolStripButton_saveRfid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_saveRfid.Enabled = false;
             this.toolStripButton_saveRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveRfid.Image")));
             this.toolStripButton_saveRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveRfid.Name = "toolStripButton_saveRfid";
             this.toolStripButton_saveRfid.Size = new System.Drawing.Size(28, 28);
             this.toolStripButton_saveRfid.Text = "写入标签";
+            this.toolStripButton_saveRfid.ToolTipText = "保存全部修改";
+            this.toolStripButton_saveRfid.Click += new System.EventHandler(this.toolStripButton_saveRfid_Click);
             // 
             // toolStripButton_loadRfid
             // 
@@ -183,16 +188,6 @@
             this.tabPage_tag.Text = "RFID 标签";
             this.tabPage_tag.UseVisualStyleBackColor = true;
             // 
-            // chipEditor1
-            // 
-            this.chipEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chipEditor1.Location = new System.Drawing.Point(3, 3);
-            this.chipEditor1.LogicChipItem = null;
-            this.chipEditor1.Name = "chipEditor1";
-            this.chipEditor1.Size = new System.Drawing.Size(410, 331);
-            this.chipEditor1.TabIndex = 0;
-            this.chipEditor1.TitleVisible = true;
-            // 
             // tabPage_record
             // 
             this.tabPage_record.Controls.Add(this.propertyGrid_record);
@@ -262,6 +257,21 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(800, 419);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
+            // chipEditor1
+            // 
+            this.chipEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chipEditor1.Location = new System.Drawing.Point(3, 3);
+            this.chipEditor1.LogicChipItem = null;
+            this.chipEditor1.Name = "chipEditor1";
+            this.chipEditor1.Size = new System.Drawing.Size(410, 331);
+            this.chipEditor1.TabIndex = 0;
+            this.chipEditor1.TitleVisible = true;
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            // 
             // RfidToolForm
             // 
             this.AcceptButton = this.button_OK;
@@ -315,5 +325,6 @@
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }

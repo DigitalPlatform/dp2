@@ -1130,5 +1130,14 @@ string strHtml)
         {
             this.Close();
         }
+
+        private void MenuItem_loadFactoryDefault_Click(object sender, EventArgs e)
+        {
+            NormalResult result = _driver.LoadFactoryDefault("*");
+            if (result.Value == -1)
+                MessageBox.Show(this, result.ErrorInfo);
+            else
+                MessageBox.Show(this, "OK");
+        }
     }
 }
