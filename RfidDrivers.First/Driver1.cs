@@ -166,6 +166,7 @@ namespace RfidDrivers.First
             }
         }
 
+#if NO
         static Reader _findReader(List<Reader> _readers, string serialNumber)
         {
             foreach (Reader reader in _readers)
@@ -176,6 +177,7 @@ namespace RfidDrivers.First
             }
             return null;
         }
+#endif
 
         NormalResult CloseAllReaders()
         {
@@ -212,15 +214,37 @@ namespace RfidDrivers.First
             }
         }
 
+        List<Reader> GetReadersByName(string reader_name)
+        {
+            List<Reader> results = new List<Reader>();
+            foreach (Reader reader in _readers)
+            {
+                if (reader.ReaderHandle == UIntPtr.Zero)
+                    continue;
+                if (reader_name == "*" || reader_name == reader.Name)
+                    results.Add(reader);
+            }
+
+            return results;
+        }
+
+
         List<object> GetAllReaderHandle(string reader_name)
         {
             List<object> results = new List<object>();
             foreach (Reader reader in _readers)
             {
+#if NO
                 if (reader.Result.ReaderHandle == null)
                     continue;
                 if (reader_name == "*" || reader_name == reader.Name)
                     results.Add(reader.Result.ReaderHandle);
+#endif
+
+                if (reader.ReaderHandle == UIntPtr.Zero)
+                    continue;
+                if (reader_name == "*" || reader_name == reader.Name)
+                    results.Add(reader.ReaderHandle);
             }
 
             return results;
@@ -1611,6 +1635,7 @@ namespace RfidDrivers.First
             }
         }
 
+
 #if NO
         NormalResult LoadFactoryDefault(object reader_handle)
         {
@@ -2008,6 +2033,135 @@ namespace RfidDrivers.First
             {
                 Unlock();
             }
+        }
+
+        // parameters:
+        //      command 形态为 beep:-,...
+        public NormalResult SetConfig(string reader_name,
+            string command)
+        {
+            List<Reader> readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                Hashtable table = StringUtil.ParseParameters(command, ',', ':');
+
+                foreach (Reader reader in readers)
+                {
+                    UIntPtr reader_handle = reader.ReaderHandle;
+
+                    foreach (string key in table.Keys)
+                    {
+                        string value = (string)table[key];
+
+                        var result = ModifyConfig(reader,
+    key,
+    value);
+                        if (result.Value == -1)
+                            return result;
+                    }
+                }
+
+                return new NormalResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        NormalResult ModifyConfig(Reader reader,
+            string key,
+            string value)
+        {
+            uint cfg_no = 0;
+            int index = 0;  // byte 位置
+            int bit = 0;    // bit 位置。从低 bit 计算
+            if (reader.ProductName == "RL1700")
+            {
+                if (key == "beep")
+                {
+                    if (value != "+" && value != "-")
+                        return new NormalResult { Value = -1, ErrorInfo = $"key '{key}' 的 value 部分 '{value}' 不合法。应为 + - 之一" };
+                    cfg_no = 3;
+                    index = 0;
+                    bit = 1;
+                }
+                else if (key == "mode")
+                {
+                    if (value != "scan" && value != "host" && value != "buffer")
+                        return new NormalResult { Value = -1, ErrorInfo = $"key '{key}' 的 value 部分 '{value}' 不合法。应为 host scan buffer 之一" };
+                    cfg_no = 1;
+                    index = 3;  // SM byte
+                    bit = -1;   // 表示不用 bit，而使用整个 byte
+                }
+                else
+                    return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'" };
+            }
+            else
+                return new NormalResult { Value = 0, ErrorInfo = $"暂不支持读卡器型号 '{reader.ProductName}'" };
+
+            byte[] buffer = new byte[16];
+            var iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockRead(
+                reader.ReaderHandle,
+                cfg_no,
+                buffer,
+                16);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ModifyConfig() read error, return: {iret}",
+                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                };
+
+            // 修改
+            if (key == "beep")
+            {
+                Debug.Assert(bit >= 0 && bit <= 7);
+                if (value == "-")
+                    buffer[index] = (byte)(buffer[index] & (0xff - (0x01 << bit)));
+                else
+                    buffer[index] = (byte)(buffer[index] | (0x01 << bit));
+            }
+            else if (key == "mode")
+            {
+                if (value == "host")    // 被动模式，接收主机命令才工作
+                    buffer[index] = 0x00;
+                else if (value == "scan")   // 主动模式，设备启动后自动开启扫描标签，扫描到标签主动发送数据
+                    buffer[index] = 0x01;
+                else if (value == "buffer") // 缓冲模式，设备启动后自动开启扫描标签，扫描到标签后缓冲，主机通过命令获取缓冲记录
+                    buffer[index] = 0x02;
+            }
+            iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockWrite(
+                reader.ReaderHandle,
+                cfg_no,
+                buffer,
+                16,
+                0xffff);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ModifyConfig() write error, return: {iret}",
+                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                };
+
+            iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockSave(
+    reader.ReaderHandle,
+    cfg_no);
+            if (iret != 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ModifyConfig() save error, return: {iret}",
+                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                };
+
+            return new NormalResult { Value = 1 };
         }
 
         // 设置 EAS 和 AFI
