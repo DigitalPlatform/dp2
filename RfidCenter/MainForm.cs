@@ -1133,11 +1133,55 @@ string strHtml)
 
         private void MenuItem_loadFactoryDefault_Click(object sender, EventArgs e)
         {
-            NormalResult result = _driver.LoadFactoryDefault("*");
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要将全部读卡器恢复为厂家出厂状态?",
+    "MainForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
+            {
+                NormalResult result = _driver.LoadFactoryDefault("*");
+                if (result.Value == -1)
+                    MessageBox.Show(this, result.ErrorInfo);
+                else
+                    MessageBox.Show(this, "OK");
+            }
+        }
+
+        private void MenuItem_testSetConfig_Click(object sender, EventArgs e)
+        {
+            NormalResult result = _driver.SetConfig("*", "beep:-");
             if (result.Value == -1)
                 MessageBox.Show(this, result.ErrorInfo);
             else
                 MessageBox.Show(this, "OK");
+        }
+
+        private void MenuItem_resetReaderToDigitalPlatformState_Click(object sender, EventArgs e)
+        {
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要将全部读卡器恢复为数字平台初始状态?",
+    "MainForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
+            {
+                NormalResult result = _driver.SetConfig("*", "beep:-,mode:host");
+                if (result.Value == -1)
+                    MessageBox.Show(this, result.ErrorInfo);
+                else
+                    MessageBox.Show(this, "OK");
+            }
         }
     }
 }
