@@ -14,6 +14,37 @@ namespace DigitalPlatform.RFID.UI
     {
         #region 特殊信息
 
+        // 保存原始的 bytes。用于读入现有的芯片内容。新创建的 LogicChipItem 对象此成员为 null
+        [ReadOnly(true)]
+        public byte[] OriginBytes { get; set; }
+
+        [ReadOnly(true)]
+        public int BlockSize { get; set; }
+        [ReadOnly(true)]
+        public int MaxBlockCount { get; set; }
+
+        string _uid = "";
+
+        [DisplayName("UID"), Description("UID")]
+        [System.ComponentModel.RefreshProperties(RefreshProperties.All)]
+        [ReadOnly(true)]
+        [Category("系统信息")]
+        // [TypeConverter(typeof(ByteHexTypeConverter))]
+        public string UID
+        {
+            get
+            {
+                return _uid;
+            }
+            set
+            {
+                if (_uid != value)
+                    SetChanged(true);
+                _uid = value;
+                OnPropertyChanged(FieldName());
+            }
+        }
+
         byte _afi = 0;
 
         [DisplayName("AFI"), Description("AFI")]
@@ -673,7 +704,14 @@ namespace DigitalPlatform.RFID.UI
     (int)tag_info.BlockSize,
     tag_info.LockStatus);
 
-            chip.SetSystemValues(tag_info.DSFID, tag_info.AFI, tag_info.EAS);
+            chip.SetSystemValues(
+                tag_info.Bytes,
+                (int)tag_info.MaxBlockCount,
+                (int)tag_info.BlockSize,
+                tag_info.UID,
+                tag_info.DSFID, 
+                tag_info.AFI, 
+                tag_info.EAS);
 #if NO
             chip.DSFID = tag_info.DSFID;
             chip.AFI = tag_info.AFI;
@@ -705,11 +743,59 @@ namespace DigitalPlatform.RFID.UI
         }
 
         // 设置三个系统值。此函数不会改变 this.Changed
-        public void SetSystemValues(byte dsfid, byte afi, bool eas)
+        public void SetSystemValues(
+            byte [] origin_bytes,
+            int max_block_count,
+            int block_size,
+            string uid,
+            byte dsfid, 
+            byte afi, 
+            bool eas)
         {
+            this.OriginBytes = origin_bytes;
+            this.MaxBlockCount = max_block_count;
+            this.BlockSize = block_size;
+            this._uid = uid;
             this._dsfid = dsfid;
             this._afi = afi;
             this._eas = eas;
+        }
+
+        public string GetDescription()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append($"UID:{UID}\r\n");
+            text.Append($"AFI:{AFI}\r\n");
+            text.Append($"DSFID:{DSFID}\r\n");
+            text.Append($"EAS:{EAS}\r\n");
+
+            text.Append($"Elements:(共 {this.Elements.Count} 个)\r\n");
+            int i = 0;
+            foreach(Element element in this.Elements)
+            {
+                text.Append($"{++i}) {element.ToString()}\r\n");
+            }
+
+            if (this.OriginBytes != null)
+            {
+                text.Append($"OriginBytes:\r\n{Element.GetHexString(this.OriginBytes, this.BlockSize.ToString())}\r\n");
+            }
+
+            try
+            {
+                byte[] bytes = this.GetBytes(
+                    this.MaxBlockCount * this.BlockSize,
+                    this.BlockSize,
+                    GetBytesStyle.None,
+                    out string block_map);
+                text.Append($"Bytes:\r\n{Element.GetHexString(bytes, this.BlockSize.ToString())}\r\n");
+            }
+            catch(Exception ex)
+            {
+                text.Append($"Bytes:\r\n构造 Bytes 过程出现异常: {ex.Message}\r\n");
+            }
+
+            return text.ToString();
         }
     }
 

@@ -905,16 +905,19 @@ namespace DigitalPlatform.RFID
             }
 
             // 每行四个 byte
-            if (format == "4")
+            if (int.TryParse(format, out int bytes_per_line) == true)
             {
+                if (bytes_per_line < 1)
+                    throw new ArgumentException($"format 参数值应为 1 或以上的一个数字");
+
                 StringBuilder text = new StringBuilder();
                 for (int i = 0; i < baTimeStamp.Length; i++)
                 {
                     string strHex = Convert.ToString(baTimeStamp[i], 16);
                     text.Append(strHex.PadLeft(2, '0'));
-                    if ((i % 4) <= 2)
+                    if ((i % bytes_per_line) < bytes_per_line - 1)
                         text.Append(" ");
-                    if ((i % 4) == 3)
+                    if ((i % bytes_per_line) == bytes_per_line - 1)
                         text.Append("\r\n");
                 }
 
