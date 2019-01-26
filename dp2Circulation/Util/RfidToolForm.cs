@@ -489,7 +489,7 @@ namespace dp2Circulation
 
         private void listView_tags_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.listView_tags.SelectedItems.Count > 0)
+            if (this.listView_tags.SelectedItems.Count == 1)
             {
                 ItemInfo item_info = (ItemInfo)this.listView_tags.SelectedItems[0].Tag;
                 OneTag tag = item_info.OneTag;
