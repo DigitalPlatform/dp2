@@ -102,7 +102,7 @@ namespace RfidDrivers.First
                     else
                         reader.Name = $"{reader.ProductName}({count + 1})";
 
-                    table[reader.ProductName] = count++;
+                    table[reader.ProductName] = ++count;
                 }
             }
 
@@ -2036,7 +2036,7 @@ namespace RfidDrivers.First
         }
 
         // parameters:
-        //      command 形态为 beep:-,...
+        //      command 形态为 beep:-,mode:host
         public NormalResult SetConfig(string reader_name,
             string command)
         {

@@ -117,8 +117,22 @@ namespace DigitalPlatform.RFID
                     Text = content,
                 };
 
-                _elements.Add(element);
-                // 注：此处不对 elements 排序。最后需要的时候(比如组装的阶段)再排序
+                if (element.OID == ElementOID.ContentParameter)
+                {
+                    // ContentParameter 的位置要特殊处理
+                    if (_elements.Count > 0
+                        && _elements[0].OID == ElementOID.PII)
+                        _elements.Insert(1, element);
+                    else
+                        _elements.Insert(0, element);
+                }
+                else
+                {
+                    // TODO: 尽量按照 OID 序号顺序插入
+                    // 注：此处不对 elements 排序。最后需要的时候(比如组装的阶段)再排序
+                    _elements.Add(element);
+                }
+
                 return element;
             }
         }
@@ -355,6 +369,8 @@ namespace DigitalPlatform.RFID
                     elements);
                 if (layouts.Count == 0)
                     throw new Exception("没有找到可用的排列方式");
+
+                // TODO: 如何优选 layouts? 目前能想到的，是把 ContentParameter 在第一个元素以后的优选出来
 
                 // 安排元素顺序
                 SetElementsPos(
@@ -930,11 +946,15 @@ start);
         {
             block_map = "";
 
+            if ((max_bytes % block_size) != 0)
+                throw new ArgumentException($"max_bytes({max_bytes}) 不是 block_size({block_size}) 的整倍数");
+
             // 删除空元素
             for (int i = 0; i < this._elements.Count; i++)
             {
                 Element element = this._elements[i];
-                if (string.IsNullOrEmpty(element.Text))
+                if (string.IsNullOrEmpty(element.Text)
+                    && element.OID != ElementOID.ContentParameter)
                 {
                     this._elements.RemoveAt(i);
                     i--;

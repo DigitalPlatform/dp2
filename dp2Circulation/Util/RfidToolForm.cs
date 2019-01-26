@@ -826,7 +826,17 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&S)");
+            menuItem = new MenuItem("复制解释信息到剪贴板 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_copyDescriptionToClipbard_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("清除标签内容 [" + this.listView_tags.SelectedItems.Count.ToString() + "] (&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearSelectedTagContent_Click);
             if (this.listView_tags.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -843,6 +853,20 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
+        }
+
+        // 针对选定的标签，创建描述文字并复制到 Windows 剪贴板
+        void menu_copyDescriptionToClipbard_Click(object sender, EventArgs e)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach(ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                if (text.Length > 0)
+                    text.Append("\r\n***\r\n");
+                ItemInfo item_info = (ItemInfo)item.Tag;
+                text.Append(item_info.LogicChipItem.GetDescription());
+            }
+            Clipboard.SetDataObject(text.ToString(), true);
         }
 
         void menu_selectAll_Click(object sender, EventArgs e)
