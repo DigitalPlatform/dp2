@@ -24,6 +24,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 
 namespace RfidCenter
 {
@@ -77,6 +78,12 @@ namespace RfidCenter
             {
                 InitializeDriver();
             });
+
+            if (StringUtil.IsDevelopMode() == false)
+            {
+                MenuItem_testing.Visible = false;
+                this.toolStripButton_autoInventory.Visible = false;
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -1162,11 +1169,13 @@ string strHtml)
                 MessageBox.Show(this, "OK");
         }
 
+        // 将读卡器恢复为出厂状态，和数字平台预设的状态(不鸣叫，被动模式)
         private void MenuItem_resetReaderToDigitalPlatformState_Click(object sender, EventArgs e)
         {
+            string strError = "";
             {
                 DialogResult result = MessageBox.Show(this,
-    "确实要将全部读卡器恢复为数字平台初始状态?",
+    "确实要将全部读卡器恢复为初始状态?",
     "MainForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1176,12 +1185,27 @@ string strHtml)
             }
 
             {
+                NormalResult result = _driver.LoadFactoryDefault("*");
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
+
+            {
                 NormalResult result = _driver.SetConfig("*", "beep:-,mode:host");
                 if (result.Value == -1)
-                    MessageBox.Show(this, result.ErrorInfo);
-                else
-                    MessageBox.Show(this, "OK");
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
             }
+
+            MessageBox.Show(this, "OK");
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 }

@@ -933,7 +933,8 @@ start);
         }
 
         // 打包为 byte[] 形态
-        // TODO: 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
+        // 注意，本函数执行后 this._elements 内各个元素的顺序可能会发生变化
+        // 对于修改的情形，要避开已经 lock 的元素，对元素进行空间布局
         // parameters:
         //      block_map   [out]块地图。用 
         //                  字符 'l' 表示原来就是锁定状态的块
@@ -954,7 +955,8 @@ start);
             {
                 Element element = this._elements[i];
                 if (string.IsNullOrEmpty(element.Text)
-                    && element.OID != ElementOID.ContentParameter)
+                    && element.OID != ElementOID.ContentParameter
+                    && element.Locked == false)
                 {
                     this._elements.RemoveAt(i);
                     i--;
@@ -1013,7 +1015,7 @@ start);
             map[index] = ch;
         }
 
-        static char GetBlockStatus(string map, int index)
+        public static char GetBlockStatus(string map, int index)
         {
             if (index >= map.Length)
                 return '.';

@@ -701,6 +701,7 @@
             this.MenuItem_loadFactoryDefault.Name = "MenuItem_loadFactoryDefault";
             this.MenuItem_loadFactoryDefault.Size = new System.Drawing.Size(290, 30);
             this.MenuItem_loadFactoryDefault.Text = "恢复读卡器出厂设置";
+            this.MenuItem_loadFactoryDefault.Visible = false;
             this.MenuItem_loadFactoryDefault.Click += new System.EventHandler(this.MenuItem_loadFactoryDefault_Click);
             // 
             // toolStripSeparator2
@@ -730,8 +731,8 @@
             // MenuItem_resetReaderToDigitalPlatformState
             // 
             this.MenuItem_resetReaderToDigitalPlatformState.Name = "MenuItem_resetReaderToDigitalPlatformState";
-            this.MenuItem_resetReaderToDigitalPlatformState.Size = new System.Drawing.Size(290, 30);
-            this.MenuItem_resetReaderToDigitalPlatformState.Text = "恢复读卡器数字平台设置";
+            this.MenuItem_resetReaderToDigitalPlatformState.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_resetReaderToDigitalPlatformState.Text = "恢复读卡器初始设置";
             this.MenuItem_resetReaderToDigitalPlatformState.Click += new System.EventHandler(this.MenuItem_resetReaderToDigitalPlatformState_Click);
             // 
             // MainForm
