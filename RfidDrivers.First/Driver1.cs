@@ -2182,6 +2182,8 @@ namespace RfidDrivers.First
             Lock();
             try
             {
+                List<NormalResult> error_results = new List<NormalResult>();
+
                 foreach (UIntPtr hreader in handles)
                 {
                     UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
@@ -2196,14 +2198,20 @@ namespace RfidDrivers.First
                                 hTag,
                                 enable ? (byte)0x07 : (byte)0xc2);
                             if (result0.Value == -1)
-                                return result0;
+                            {
+                                error_results.Add(result0);
+                                continue;
+                            }
                         }
 
                         // 设置 EAS 状态
                         {
                             NormalResult result0 = EnableEAS(hreader, hTag, enable);
                             if (result0.Value == -1)
-                                return result0;
+                            {
+                                error_results.Add(result0);
+                                continue;
+                            }
                         }
 
                         return new NormalResult();
@@ -2213,6 +2221,10 @@ namespace RfidDrivers.First
                         _disconnectTag(hreader, ref hTag);
                     }
                 }
+
+                // 循环中曾经出现过报错
+                if (error_results.Count > 0)
+                    return error_results[0];
 
                 return new NormalResult
                 {
@@ -2494,7 +2506,7 @@ namespace RfidDrivers.First
                 return new NormalResult
                 {
                     Value = -1,
-                    ErrorInfo = "WriteAFI error",
+                    ErrorInfo = "CheckEAS error",
                     ErrorCode = GetErrorCode(iret, hreader)
                 };
 

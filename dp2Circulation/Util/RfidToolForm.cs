@@ -623,7 +623,7 @@ namespace dp2Circulation
 
                     if (result.Value == -1)
                     {
-                        strError = result.ErrorInfo;
+                        strError = $"{result.ErrorInfo}, error_code={result.ErrorCode}";
                         goto ERROR1;
                     }
 
