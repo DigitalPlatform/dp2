@@ -265,6 +265,7 @@ enable);
                     LastActive = DateTime.Now,
                     DSFID = dsfid
                 };
+                tag.LastActive = DateTime.Now;
                 _tagList.Add(tag);
             }
             finally

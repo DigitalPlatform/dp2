@@ -1034,6 +1034,7 @@ end_time);
                 NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
         task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
         enable);
+
                 // testing
                 // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
 

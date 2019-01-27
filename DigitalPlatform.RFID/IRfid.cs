@@ -71,6 +71,11 @@ bool enable);
 
         public TagInfo TagInfo { get; set; }
 
+        public OneTag()
+        {
+            this.LastActive = DateTime.Now;
+        }
+
         public override string ToString()
         {
             return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)}";
