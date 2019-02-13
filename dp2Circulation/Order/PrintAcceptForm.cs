@@ -1351,14 +1351,13 @@ namespace dp2Circulation
                 }
             }
 
-            string strCopyDetail = "";
             // return:
             //      -1  出错
             //      0   一般册，不是套内的册。strResult中为空
             //      1   套内册。strResult中返回了值
             nRet = GetCopyDetail(strDistribute,
                 strRefID,
-                out strCopyDetail,
+                out string strCopyDetail,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1397,7 +1396,7 @@ namespace dp2Circulation
             SetItemColor(item, TYPE_ERROR);
         }
 
-        // 剖析套内详情的各个部分
+        // 顺次剖析套内详情的各个部分
         // 0:1/7
         static int ParseSubCopy(string strText,
             out string strNo,
@@ -5564,6 +5563,42 @@ out strError);
             return 0;
         }
 
+        // 获得修正后的册价格
+        static string GetItemPrice(
+            Hashtable item_price_table,
+            int i,
+            ListViewItem source)
+        {
+            // 1:2/2 表示 第一套内的第二册，(一套)一共二册
+            string strSubCopy = ListViewUtil.GetItemText(source,
+                ORIGIN_COLUMN_ACCEPTSUBCOPY);
+            if (string.IsNullOrEmpty(strSubCopy))
+                return ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ITEMPRICE);
+
+            string strOrderRecPath = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERRECPATH);
+            string strItemPrice = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ITEMPRICE);
+            // 顺次剖析套内详情的各个部分
+            int nRet = ParseSubCopy(strSubCopy,
+    out string strNo,
+    out string strIndex,
+    out string strCopy,
+    out string strError);
+            if (nRet == -1)
+            {
+                strError = "事项 " + (i + 1).ToString() + " 的套内详情格式错误: '" + strError + "'，请先排除问题...";
+                throw new Exception(strError);
+            }
+
+            string strPath = strOrderRecPath + "/" + strNo; // 套序
+            List<string> prices = (List<string>)item_price_table[strPath];
+            if (prices != null)
+            {
+                return GetTotalPrice(prices,
+$"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{strItemPrice}' 时");
+            }
+            return strItemPrice;
+        }
+
         // 填充合并后数据列表
         int FillMergedList(out string strError)
         {
@@ -5588,21 +5623,25 @@ out strError);
 
                 // 只提取一套一册的，和一套的第一册
                 List<ListViewItem> items = new List<ListViewItem>();
+                // 册价格修正表。订购记录路径 --> List<string> 正确的册价格字符串
+                // TODO: 也可以考虑在 Origin ListView 中直接修正，即，把每套第一个册记录的修改为总价，其余册记录修改为 0。不过这样容易让观察者感到迷惑
+                Hashtable item_price_table = new Hashtable();
                 for (int i = 0; i < this.listView_origin.Items.Count; i++)
                 {
                     ListViewItem source = this.listView_origin.Items[i];
 
+                    // 1:2/2 表示 第一套内的第二册，(一套)一共二册
                     string strSubCopy = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     if (String.IsNullOrEmpty(strSubCopy) == false)
                     {
-                        string strNo = "";
-                        string strIndex = "";
-                        string strCopy = "";
+                        string strOrderRecPath = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ORDERRECPATH);
+                        string strItemPrice = ListViewUtil.GetItemText(source, ORIGIN_COLUMN_ITEMPRICE);
+                        // 顺次剖析套内详情的各个部分
                         nRet = ParseSubCopy(strSubCopy,
-                out strNo,
-                out strIndex,
-                out strCopy,
+                out string strNo,
+                out string strIndex,
+                out string strCopy,
                 out strError);
                         if (nRet == -1)
                         {
@@ -5610,9 +5649,25 @@ out strError);
                             return -1;
                         }
 
+                        string strPath = strOrderRecPath + "/" + strNo; // 套序
+                        List<string> prices = (List<string>)item_price_table[strPath];
+                        if (prices == null)
+                        {
+                            prices = new List<string>();
+                            item_price_table[strPath] = prices;
+                        }
+
+                        prices.Add(strItemPrice);
+
                         // 不是各套的第一册，就跳过
+                        // 但要特殊累加单册价格
+                        // if (strIndex != "1")
+
+                        // 如果不是第一套的第一册，就跳过
                         if (strIndex != "1")
+                        {
                             continue;
+                        }
                     }
 
                     items.Add(source);
@@ -5658,10 +5713,27 @@ out strError);
                     string strSellerAddress = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_SELLERADDRESS);
 
+                    // 单价，实体价
+                    string strItemPrice = GetItemPrice(item_price_table,
+                        i, source);
+#if NO
                     // 2013/5/31
                     // 单价，实体价
                     string strItemPrice = ListViewUtil.GetItemText(source,
                         ORIGIN_COLUMN_ITEMPRICE);
+
+                    // 修正册价格
+                    {
+                        string strOrderRecPath = ListViewUtil.GetItemText(source,
+                            ORIGIN_COLUMN_ORDERRECPATH);
+                        List<string> prices = (List<string>)item_price_table[strOrderRecPath];
+                        if (prices != null)
+                        {
+                            strItemPrice = GetTotalPrice(prices,
+        $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 strItemPrice '{strItemPrice}' 时");
+                        }
+                    }
+#endif
 
                     // 订购码洋
                     string strOrderFixedPrice = ListViewUtil.GetItemText(source,
@@ -5753,8 +5825,23 @@ out strError);
                         string strCurrentSellerAddress = ListViewUtil.GetItemText(current_source,
                             ORIGIN_COLUMN_SELLERADDRESS);
 
+                        string strCurrentItemPrice = GetItemPrice(item_price_table,
+                            j, current_source);
+#if NO
                         string strCurrentItemPrice = ListViewUtil.GetItemText(current_source,
                             ORIGIN_COLUMN_ITEMPRICE);
+                        // 修正册价格
+                        {
+                            string strOrderRecPath = ListViewUtil.GetItemText(source,
+                                ORIGIN_COLUMN_ORDERRECPATH);
+                            List<string> prices = (List<string>)item_price_table[strOrderRecPath];
+                            if (prices != null)
+                            {
+                                strCurrentItemPrice = GetTotalPrice(prices,
+            $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 strCurrentItemPrice '{strCurrentItemPrice}' 时");
+                            }
+                        }
+#endif
 
                         string strCurrentOrderFixedPrice = ListViewUtil.GetItemText(current_source,
         ORIGIN_COLUMN_ORDER_FIXEDPRICE);

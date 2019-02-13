@@ -810,6 +810,8 @@ namespace DigitalPlatform.RFID.UI
             text.Append($"AFI:\t{Element.GetHexString(AFI)}\r\n");
             text.Append($"DSFID:\t{Element.GetHexString(DSFID)}\r\n");
             text.Append($"EAS:\t{EAS}\r\n");
+            text.Append($"MaxBlockCount:\t{MaxBlockCount}\r\n");
+            text.Append($"BlockSize:\t{BlockSize}\r\n");
 
             if (this.OriginBytes != null)
             {

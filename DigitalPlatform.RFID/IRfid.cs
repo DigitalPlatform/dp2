@@ -14,7 +14,7 @@ namespace DigitalPlatform.RFID
         // 列出当前可用的 reader
         ListReadersResult ListReaders();
 
-        ListTagsResult ListTags(string reader_name);
+        ListTagsResult ListTags(string reader_name, string style);
 
         GetTagInfoResult GetTagInfo(string reader_name, string uid);
 
@@ -34,7 +34,6 @@ bool enable);
         NormalResult BeginCapture(bool begin);
 
         NormalResult EnableSendKey(bool enable);
-
     }
 
     [Serializable()]

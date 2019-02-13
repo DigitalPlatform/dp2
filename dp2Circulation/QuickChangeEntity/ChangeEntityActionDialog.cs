@@ -81,6 +81,11 @@ namespace dp2Circulation
 "returnInEdit",
 "<无>");
 
+            this.checkBox_writeToRfidTag.Checked = Program.MainForm.AppInfo.GetBoolean(
+"change_param",
+"writeToRfidTag",
+false);
+
             this.comboBox_state_TextChanged(null, null);
         }
 
@@ -124,6 +129,11 @@ namespace dp2Circulation
  "change_param",
  "returnInEdit",
  this.comboBox_returnInEdit.Text);
+
+            Program.MainForm.AppInfo.SetBoolean(
+"change_param",
+"writeToRfidTag",
+this.checkBox_writeToRfidTag.Checked);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -348,7 +358,6 @@ namespace dp2Circulation
                 this.label_state.BackColor = this.BackColor;
             else
                 this.label_state.BackColor = Color.Green;
-
         }
 
         private void comboBox_location_SizeChanged(object sender, EventArgs e)
@@ -447,6 +456,5 @@ namespace dp2Circulation
             this.BeginInvoke(d, new object[] { sender });
 #endif
         }
-
     }
 }

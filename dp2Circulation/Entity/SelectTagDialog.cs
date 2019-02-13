@@ -16,6 +16,7 @@ using static dp2Circulation.MyForm;
 // TODO: 1) ListTags 动作移动到对话框里面来做；2)自动不停刷新列表；3)自动填充 PII 等栏
 namespace dp2Circulation
 {
+    // 注: 本对话框暂时不使用。改用 RfidToolForm 来代替
     public partial class SelectTagDialog : Form
     {
         // [in][out] 当前选中的事项的 PII
@@ -148,7 +149,7 @@ namespace dp2Circulation
             }
             try
             {
-                ListTagsResult result = channel.Object.ListTags("*");
+                ListTagsResult result = channel.Object.ListTags("*", null);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;

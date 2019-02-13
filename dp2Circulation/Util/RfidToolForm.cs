@@ -24,6 +24,8 @@ namespace dp2Circulation
 {
     public partial class RfidToolForm : MyForm
     {
+        public event AskTagEventHandler AskTag = null;
+
         public bool LayoutVertical
         {
             get
@@ -69,9 +71,15 @@ namespace dp2Circulation
         // 是否自动关闭对话框。条件是 SelectedID 事项被自动选定了
         public bool AutoCloseDialog { get; set; }
 
-        const int COLUMN_READERNAME = 0;
+        // 自动选择的条件。
+        // 空等同于 "auto"。
+        //      "auto"  表示会自动使用 selectedID 和 selectedPII 中非 null 的哪个
+        //      "auto_or_blankPII" 表示匹配上 SelectedID 和 SelectedPII 之一，或者当前列表中有一个空标签(PII 为空)就算匹配
+        public string AutoSelectCondition { get; set; }
+
+        const int COLUMN_PII = 0;
         const int COLUMN_UID = 1;
-        const int COLUMN_PII = 2;
+        const int COLUMN_READERNAME = 2;
 
         public RfidToolForm()
         {
@@ -82,6 +90,8 @@ namespace dp2Circulation
 
         private void RfidToolForm_Load(object sender, EventArgs e)
         {
+            this.FloatingMessageForm.AutoHide = false;
+
             if (Program.MainForm != null)
             {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
@@ -102,6 +112,11 @@ namespace dp2Circulation
                 true);
             if (this.toolStripButton_autoRefresh.Checked == false)
                 Task.Run(() => { UpdateChipList(true); });
+
+            this.BeginInvoke(new Action(() =>
+            {
+                this.listView_tags.Focus();
+            }));
         }
 
         private void RfidToolForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -132,6 +147,7 @@ namespace dp2Circulation
             {
                 if (nRet != 1)
                     return false;
+                // this.ClearMessage();
                 string strError = "";
                 if (string.IsNullOrEmpty(Program.MainForm.RfidCenterUrl))
                 {
@@ -149,7 +165,7 @@ namespace dp2Circulation
                 }
                 try
                 {
-                    ListTagsResult result = channel.Object.ListTags("*");
+                    ListTagsResult result = channel.Object.ListTags("*", null);
                     if (result.Value == -1)
                     {
                         strError = result.ErrorInfo;
@@ -158,7 +174,7 @@ namespace dp2Circulation
 
                     List<Task> tasks = new List<Task>();
                     bool is_empty = false;
-
+                    bool changed = false;
                     this.Invoke((Action)(() =>
                     {
                         is_empty = this.listView_tags.Items.Count == 0;
@@ -171,8 +187,9 @@ namespace dp2Circulation
                                 tag.UID);
                             if (item == null)
                             {
-                                item = new ListViewItem(tag.ReaderName);
-                                ListViewUtil.ChangeItemText(item, 1, tag.UID);
+                                item = new ListViewItem();
+                                ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
+                                ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
                                 item.Tag = new ItemInfo { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
 
@@ -184,6 +201,7 @@ namespace dp2Circulation
                             }
 
                             items.Add(item);
+                            changed = true;
                         }
 
                         // 交叉运算得到比 items 中多出来的 ListViewItem，删除它们
@@ -197,42 +215,59 @@ namespace dp2Circulation
                         foreach (ListViewItem item in delete_items)
                         {
                             this.listView_tags.Items.Remove(item);
+                            changed = true;
                         }
                     }));
 
                     // 再建立一个 task，等待 tasks 执行完以后，自动选定一个 item
-                    if (tasks.Count > 0)
+                    if (tasks.Count > 0 || changed)
                     {
                         Task.Run(() =>
                         {
                             Task.WaitAll(tasks.ToArray());
+                            bool closed = false;
                             this.Invoke((Action)(() =>
                             {
                                 // 首次填充，自动设好选定状态
-                                if (is_empty)
+                                // if (is_empty)
                                 {
-                                    SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
+                                    var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
 
-                                    if (string.IsNullOrEmpty(this.SelectedPII) == false
-    && this.AutoCloseDialog)
+                                    if (// string.IsNullOrEmpty(this.SelectedPII) == false
+                                        ret == true
+                                        && this.AutoCloseDialog)
+                                    {
                                         this.button_OK_Click(this, new EventArgs());
-
+                                        closed = true;
+                                    }
                                 }
                             }));
 
-                            //this.Invoke((Action)(() =>
-                            //{
-                            FillEntityInfo();
-                            //}));
-
-                            if (this._mode == "auto_fix_eas")
+                            if (closed == false)
                             {
-                                this.Invoke((Action)(() =>
+                                //this.Invoke((Action)(() =>
+                                //{
+                                FillEntityInfo();
+                                //}));
+
+                                if (this._mode == "auto_fix_eas")
                                 {
-                                    AutoFixEas();
-                                }));
+                                    this.Invoke((Action)(() =>
+                                    {
+                                        AutoFixEas();
+                                    }));
+                                }
                             }
                         });
+                    }
+                    else
+                    {
+                        if (this.AskTag != null)
+                        {
+                            AskTagEventArgs e = new AskTagEventArgs();
+                            this.AskTag(this, e);
+                            this.ShowMessage(e.Text, "green", true);
+                        }
                     }
                     return true;
                 }
@@ -268,8 +303,8 @@ namespace dp2Circulation
         {
             if (state == "normal")
             {
-                item.BackColor = SystemColors.Control;
-                item.ForeColor = SystemColors.ControlText;
+                item.BackColor = SystemColors.Window;
+                item.ForeColor = SystemColors.WindowText;
                 return;
             }
 
@@ -315,22 +350,39 @@ namespace dp2Circulation
             }
         }
 
+#if NO
+        // 事项和权重
+        class ItemAndWeight
+        {
+            public ListViewItem Item { get; set; }
+            public int Weight { get; set; }
+        }
+#endif
+
         bool SelectItem(string id)
         {
             if (id == null)
                 return false;
 
             IdInfo info = IdInfo.Parse(id);
-
+            List<ListViewItem> level1_items = new List<ListViewItem>();
+            List<ListViewItem> level2_items = new List<ListViewItem>();
+            // List<ItemAndWeight> results = new List<ItemAndWeight>();
             foreach (ListViewItem item in this.listView_tags.Items)
             {
                 if (info.Prefix == "pii")
                 {
-                    string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
+                    // string current_pii = ListViewUtil.GetItemText(item, COLUMN_PII);
+                    string current_pii = GetItemPII(item);
                     if (current_pii == info.Text)
                     {
-                        ListViewUtil.SelectLine(item, true);
-                        return true;
+                        level1_items.Add(item);
+                        //ListViewUtil.SelectLine(item, true);
+                        //return true;
+                    }
+                    else if (StringUtil.IsInList("auto_or_blankPII", this.AutoSelectCondition) && string.IsNullOrEmpty(current_pii) == true)
+                    {
+                        level2_items.Add(item);
                     }
                 }
 
@@ -339,10 +391,32 @@ namespace dp2Circulation
                     string current_uid = ListViewUtil.GetItemText(item, COLUMN_UID);
                     if (current_uid == info.Text)
                     {
-                        ListViewUtil.SelectLine(item, true);
-                        return true;
+                        level1_items.Add(item);
+                        // ListViewUtil.SelectLine(item, true);
+                        // return true;
                     }
                 }
+            }
+
+            if (level1_items.Count > 0)
+            {
+                ListViewUtil.SelectLine(level1_items[0], true);
+                return true;
+            }
+
+            // 只有当 level2 命中精确为一个时才选中。命中多了则无法选择
+            if (level2_items.Count == 1)
+            {
+                ListViewUtil.SelectLine(level2_items[0], true);
+                return true;
+            }
+
+            // 触发提示
+            if (this.AskTag != null)
+            {
+                AskTagEventArgs e = new AskTagEventArgs();
+                this.AskTag(this, e);
+                this.ShowMessage(e.Text, "green", true);
             }
 
             return false;
@@ -395,8 +469,8 @@ namespace dp2Circulation
                 this.Invoke((Action)(() =>
                 {
                     string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
-                    // .FindElement(ElementOID.PII)?.Text;
-                    ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                    // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                    SetItemPIIColumn(item, pii);
                     if (this.SelectedPII != null
                         && pii == this.SelectedPII)
                         item.Font = new Font(item.Font, FontStyle.Bold);
@@ -405,7 +479,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "ListTags() 出现异常: " + ex.Message;
+                strError = "GetTagInfo() 出现异常: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -479,7 +553,8 @@ namespace dp2Circulation
 
                         // 更新 PII
                         string pii = tag_info.LogicChipItem.FindElement(ElementOID.PII)?.Text;
-                        ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                        // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                        SetItemPIIColumn(item, pii);
                         return;
                     }
                 }
@@ -569,6 +644,10 @@ namespace dp2Circulation
 
                     item_info.Xml = xml;
                 }
+            }
+            catch (Exception ex)
+            {
+                // TODO: 如何报错？让操作者从册信息界面上可以看出报错
             }
             finally
             {
@@ -766,7 +845,8 @@ namespace dp2Circulation
             if (this.listView_tags.SelectedItems.Count > 0)
             {
                 this.SelectedID = "uid:" + ListViewUtil.GetItemText(this.listView_tags.SelectedItems[0], COLUMN_UID);
-                this.SelectedPII = ListViewUtil.GetItemText(this.listView_tags.SelectedItems[0], COLUMN_PII);
+                this.SelectedPII = GetItemPII(this.listView_tags.SelectedItems[0]);
+                // this.SelectedPII = ListViewUtil.GetItemText(this.listView_tags.SelectedItems[0], COLUMN_PII);
             }
             else
             {
@@ -790,6 +870,27 @@ namespace dp2Circulation
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 修改 ListViewItem 的 PII 列文字
+        static void SetItemPIIColumn(ListViewItem item, string pii)
+        {
+            if (string.IsNullOrEmpty(pii))
+                pii = "(空白)";
+            ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+            SetItemColor(item, "normal");
+        }
+
+        // 获得一个 ListViewItem 的 PII 列文字
+        static string GetItemPII(ListViewItem item)
+        {
+            ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info != null && item_info.LogicChipItem != null)
+                return item_info.LogicChipItem.PrimaryItemIdentifier;
+            string text = ListViewUtil.GetItemText(item, COLUMN_PII);
+            if (text == "(空白)")
+                text = "";
+            return text;
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -859,12 +960,15 @@ namespace dp2Circulation
         void menu_copyDescriptionToClipbard_Click(object sender, EventArgs e)
         {
             StringBuilder text = new StringBuilder();
-            foreach(ListViewItem item in this.listView_tags.SelectedItems)
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
             {
                 if (text.Length > 0)
                     text.Append("\r\n***\r\n");
                 ItemInfo item_info = (ItemInfo)item.Tag;
-                text.Append(item_info.LogicChipItem.GetDescription());
+                if (item_info.LogicChipItem == null)
+                    text.Append("\r\n[LogicChipItem 为空]\r\n");
+                else
+                    text.Append(item_info.LogicChipItem.GetDescription());
             }
             Clipboard.SetDataObject(text.ToString(), true);
         }
@@ -877,11 +981,11 @@ namespace dp2Circulation
         async void menu_clearSelectedTagContent_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-$"确实要清除选定的 {this.listView_tags.SelectedItems.Count} 个标签的内容?",
-"RfidToolForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+    $"确实要清除选定的 {this.listView_tags.SelectedItems.Count} 个标签的内容?",
+    "RfidToolForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
@@ -1082,5 +1186,22 @@ MessageBoxDefaultButton.Button2);
             }
         }
 #endif
+    }
+
+    /// <summary>
+    /// 提示放置标签事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AskTagEventHandler(object sender,
+    AskTagEventArgs e);
+
+    /// <summary>
+    /// 提示放置标签事件的参数
+    /// </summary>
+    public class AskTagEventArgs : EventArgs
+    {
+        // [out] 提示文字
+        public string Text { get; set; }
     }
 }

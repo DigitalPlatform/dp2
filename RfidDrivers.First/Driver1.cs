@@ -2051,7 +2051,7 @@ namespace RfidDrivers.First
 
                 foreach (Reader reader in readers)
                 {
-                    UIntPtr reader_handle = reader.ReaderHandle;
+                    // UIntPtr reader_handle = reader.ReaderHandle;
 
                     foreach (string key in table.Keys)
                     {
@@ -2080,7 +2080,8 @@ namespace RfidDrivers.First
             uint cfg_no = 0;
             int index = 0;  // byte 位置
             int bit = 0;    // bit 位置。从低 bit 计算
-            if (reader.ProductName == "RL1700")
+            if (reader.ProductName == "RL1700"
+                || reader.ProductName == "RL8600")
             {
                 if (key == "beep")
                 {
@@ -2099,10 +2100,10 @@ namespace RfidDrivers.First
                     bit = -1;   // 表示不用 bit，而使用整个 byte
                 }
                 else
-                    return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'" };
+                    return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'", ErrorCode = "notSupportKey" };
             }
             else
-                return new NormalResult { Value = 0, ErrorInfo = $"暂不支持读卡器型号 '{reader.ProductName}'" };
+                return new NormalResult { Value = 0, ErrorInfo = $"暂不支持读卡器型号 '{reader.ProductName}'", ErrorCode = "notSupportReader" };
 
             byte[] buffer = new byte[16];
             var iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockRead(
@@ -2118,24 +2119,40 @@ namespace RfidDrivers.First
                     ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                 };
 
+            bool changed = false;
             // 修改
             if (key == "beep")
             {
                 Debug.Assert(bit >= 0 && bit <= 7);
+
+                byte old_value = buffer[index];
+
                 if (value == "-")
                     buffer[index] = (byte)(buffer[index] & (0xff - (0x01 << bit)));
                 else
                     buffer[index] = (byte)(buffer[index] | (0x01 << bit));
+
+                if (old_value != buffer[index])
+                    changed = true;
             }
             else if (key == "mode")
             {
+                byte old_value = buffer[index];
+
                 if (value == "host")    // 被动模式，接收主机命令才工作
                     buffer[index] = 0x00;
                 else if (value == "scan")   // 主动模式，设备启动后自动开启扫描标签，扫描到标签主动发送数据
                     buffer[index] = 0x01;
                 else if (value == "buffer") // 缓冲模式，设备启动后自动开启扫描标签，扫描到标签后缓冲，主机通过命令获取缓冲记录
                     buffer[index] = 0x02;
+
+                if (old_value != buffer[index])
+                    changed = true;
             }
+
+            if (changed == false)
+                return new NormalResult { Value = 0, ErrorInfo = "没有发生修改" };  // Value == 0 表示没有发生实际修改
+
             iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockWrite(
                 reader.ReaderHandle,
                 cfg_no,
@@ -2162,6 +2179,51 @@ namespace RfidDrivers.First
                 };
 
             return new NormalResult { Value = 1 };
+        }
+
+        public ReadConfigResult ReadConfig(string reader_name, uint cfg_no)
+        {
+            List<Reader> readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
+                return new ReadConfigResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                foreach (Reader reader in readers)
+                {
+                    var result = ReadConfig(reader, cfg_no);
+                    if (result.Value == -1)
+                        return result;
+                    return result;  // 只返回第一个读卡器的信息
+                }
+
+                return new ReadConfigResult();
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
+
+        ReadConfigResult ReadConfig(Reader reader,
+    uint cfg_no)
+        {
+            byte[] buffer = new byte[16];
+            var iret = RFIDLIB.rfidlib_reader.RDR_ConfigBlockRead(
+                reader.ReaderHandle,
+                cfg_no,
+                buffer,
+                16);
+            if (iret != 0)
+                return new ReadConfigResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ReadConfig() error, return: {iret}",
+                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
+                };
+
+            return new ReadConfigResult { Value = 1, Bytes = buffer, CfgNo = cfg_no };
         }
 
         // 设置 EAS 和 AFI
@@ -2765,6 +2827,9 @@ namespace RfidDrivers.First
                     enableAFI,
                     0x00,   // AFI, 打算要匹配的 AFI byte 值
                     0);
+
+                RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
+
             }
             nTagCount = 0;
             LABEL_TAG_INVENTORY:
@@ -2800,6 +2865,7 @@ namespace RfidDrivers.First
                             //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid ,8);
                             InventoryInfo result = new InventoryInfo
                             {
+                                Protocol = "ISO15693",
                                 AipID = aip_id,
                                 TagType = tag_id,
                                 AntennaID = ant_id,
@@ -2807,6 +2873,39 @@ namespace RfidDrivers.First
                                 UID = Element.GetHexString(uid),
                             };
                             // Array.Copy(uid, result.UID, result.UID.Length);
+                            results.Add(result);
+                        }
+                    }
+
+                    /* Parse Iso14443A tag report */
+                    {
+                        uid = new Byte[4];
+
+                        Byte uidlen = 0;
+
+                        iret = RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_ParseTagDataReport(TagDataReport,
+                            ref aip_id,
+                            ref tag_id,
+                            ref ant_id,
+                            uid,
+                            ref uidlen);
+                        if (iret == 0)
+                        {
+                            // object[] pList = { aip_id, tag_id, ant_id, uid, (int)uidlen };
+                            // Invoke(tagReportHandler, pList);
+                            //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid, uidlen);
+
+                            Debug.Assert(uidlen == 4);
+
+                            InventoryInfo result = new InventoryInfo
+                            {
+                                Protocol = "ISO14443A",
+                                AipID = aip_id,
+                                TagType = tag_id,
+                                AntennaID = ant_id,
+                                DsfID = dsfid,
+                                UID = Element.GetHexString(uid),
+                            };
                             results.Add(result);
                         }
                     }
@@ -2948,5 +3047,11 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
         public string m_name;
         public string m_productType;
         public UInt32 m_commTypeSupported;
+    }
+
+    public class ReadConfigResult : NormalResult
+    {
+        public uint CfgNo { get; set; }
+        public byte[] Bytes { get; set; }
     }
 }

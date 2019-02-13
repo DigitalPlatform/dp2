@@ -14,6 +14,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -103,10 +105,13 @@ namespace DigitalPlatform.CirculationClient
 
         public static string Lang = "zh";
 
+        public static string ProductName = "";
+
         // parameters:
         //      product_name    例如 "fingerprintcenter"
         public static void Initial(string product_name)
         {
+            ProductName = product_name;
             ClientVersion = Assembly.GetAssembly(TypeOfProgram).GetName().Version.ToString();
 
             if (ApplicationDeployment.IsNetworkDeployed == true)
@@ -137,11 +142,37 @@ namespace DigitalPlatform.CirculationClient
             log4net.Config.XmlConfigurator.Configure(repository);
 
             LibraryChannelManager.Log = LogManager.GetLogger("main", "channellib");
-            _log = LogManager.GetLogger("main", "fingerprintcenter");
+            _log = LogManager.GetLogger("main", 
+                product_name
+                // "fingerprintcenter"
+                );
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常
             WriteInfoLog(Assembly.GetAssembly(typeof(ClientInfo)).FullName);
+
+            {
+                // 检查序列号
+                // if (DateTime.Now >= start_day || this.MainForm.IsExistsSerialNumberStatusFile() == true)
+                if (SerialNumberMode == "must")
+                {
+                    // 在用户目录中写入一个隐藏文件，表示序列号功能已经启用
+                    // this.WriteSerialNumberStatusFile();
+
+                    string strError = "";
+                    int nRet = VerifySerialCode($"{product_name}需要先设置序列号才能使用",
+                        "",
+                        "reinput",
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(MainForm, $"{product_name}需要先设置序列号才能使用");
+                        API.PostMessage(MainForm.Handle, API.WM_CLOSE, 0, 0);
+                        return;
+                    }
+                }
+            }
+
         }
 
         public static void Finish()
@@ -506,5 +537,273 @@ namespace DigitalPlatform.CirculationClient
 
             return new NormalResult();
         }
+
+
+        #region 序列号
+
+        // parameters:
+        //      strRequirFuncList   要求必须具备的功能列表。逗号间隔的字符串
+        //      strStyle    风格
+        //                  reinput    如果序列号不满足要求，是否直接出现对话框让用户重新输入序列号
+        //                  reset   执行重设序列号任务。意思就是无论当前序列号是否可用，都直接出现序列号对话框
+        // return:
+        //      -1  出错
+        //      0   正确
+        public static int VerifySerialCode(
+            string strTitle,
+            string strRequirFuncList,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            bool bReinput = StringUtil.IsInList("reinput", strStyle);
+            bool bReset = StringUtil.IsInList("reset", strStyle);
+
+            string strFirstMac = "";
+            List<string> macs = SerialCodeForm.GetMacAddress();
+            if (macs.Count != 0)
+            {
+                strFirstMac = macs[0];
+            }
+
+            string strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+
+            // 首次运行
+            if (string.IsNullOrEmpty(strSerialCode) == true)
+            {
+            }
+
+            REDO_VERIFY:
+            if (bReset == false
+                && SerialNumberMode != "must"
+                && strSerialCode == "community")
+            {
+                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                {
+                    CommunityMode = true;
+                    ClientInfo.Config.Set("main_form", "last_mode", "community");
+                    return 0;
+                }
+            }
+
+            if (bReset == true
+                || CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false
+                || MatchLocalString(strSerialCode) == false
+                || String.IsNullOrEmpty(strSerialCode) == true)
+            {
+                if (bReinput == false && bReset == false)
+                {
+                    strError = "序列号无效";
+                    return -1;
+                }
+
+                if (bReset == false)
+                {
+                    if (String.IsNullOrEmpty(strSerialCode) == false)
+                        MessageBox.Show(MainForm, "序列号无效。请重新输入");
+                    else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                        MessageBox.Show(MainForm, "序列号中 function 参数无效。请重新输入");
+                }
+
+                // 出现设置序列号对话框
+                nRet = ResetSerialCode(
+                    strTitle,
+                    false,
+                    strSerialCode,
+                    GetEnvironmentString(strFirstMac));
+                if (nRet == 0)
+                {
+                    strError = "放弃";
+                    return -1;
+                }
+                strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+                goto REDO_VERIFY;
+            }
+            return 0;
+        }
+
+        static bool _communityMode = false;
+
+        public static bool CommunityMode
+        {
+            get
+            {
+                return _communityMode;
+            }
+            set
+            {
+                _communityMode = value;
+                SetTitle();
+            }
+        }
+
+        public static string SerialNumberMode = ""; // 序列号模式。空表示不需要序列号。"must" 要求需要序列号；"loose" 不要序列号也可运行，但高级功能需要序列号。loose 和 must 都会出现“设置序列号”菜单命令
+        public static string CopyrightKey = "";    // "dp2catalog_sn_key";
+
+        static void SetTitle()
+        {
+#if NO
+            if (this.CommunityMode == true)
+                this.Text = "dp2Catalog V3 -- 编目 [社区版]";
+            else
+                this.Text = "dp2Catalog V3 -- 编目 [专业版]";
+#endif
+        }
+
+        // return:
+        //      0   Cancel
+        //      1   OK
+        static int ResetSerialCode(
+            string strTitle,
+            bool bAllowSetBlank,
+            string strOldSerialCode,
+            string strOriginCode)
+        {
+            Hashtable ext_table = StringUtil.ParseParameters(strOriginCode);
+            string strMAC = (string)ext_table["mac"];
+            if (string.IsNullOrEmpty(strMAC) == true)
+                strOriginCode = "!error";
+            else
+            {
+                Debug.Assert(string.IsNullOrEmpty(CopyrightKey) == false);
+                strOriginCode = Cryptography.Encrypt(strOriginCode,
+                CopyrightKey);
+            }
+            SerialCodeForm dlg = new SerialCodeForm();
+            dlg.Text = strTitle;
+            dlg.Font = MainForm.Font;
+            if (SerialNumberMode == "loose")
+                dlg.DefaultCodes = new List<string>(new string[] { "community|社区版" });
+            dlg.SerialCode = strOldSerialCode;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.OriginCode = strOriginCode;
+
+            REDO:
+            dlg.ShowDialog(MainForm);
+            if (dlg.DialogResult != DialogResult.OK)
+                return 0;
+
+            if (string.IsNullOrEmpty(dlg.SerialCode) == true)
+            {
+                if (bAllowSetBlank == true)
+                {
+                    DialogResult result = MessageBox.Show(MainForm,
+        $"确实要将序列号设置为空?\r\n\r\n(一旦将序列号设置为空，{ProductName} 将自动退出，下次启动需要重新设置序列号)",
+        $"{ProductName}",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        return 0;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(MainForm, "序列号不允许为空。请重新设置");
+                    goto REDO;
+                }
+            }
+
+            ClientInfo.Config.Set("sn", "sn", dlg.SerialCode);
+            ClientInfo.Config.Save();
+            return 1;
+        }
+
+        // 将本地字符串匹配序列号
+        static bool MatchLocalString(string strSerialNumber)
+        {
+            List<string> macs = SerialCodeForm.GetMacAddress();
+            foreach (string mac in macs)
+            {
+                string strLocalString = GetEnvironmentString(mac);
+                string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
+                if (strSha1 == SerialCodeForm.GetCheckCode(strSerialNumber))
+                    return true;
+            }
+
+            if (DateTime.Now.Month == 12)
+            {
+                foreach (string mac in macs)
+                {
+                    string strLocalString = GetEnvironmentString(mac, true);
+                    string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
+                    if (strSha1 == SerialCodeForm.GetCheckCode(strSerialNumber))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        // return:
+        //      false   不满足
+        //      true    满足
+        static bool CheckFunction(string strEnvString,
+            string strFuncList)
+        {
+            Hashtable table = StringUtil.ParseParameters(strEnvString);
+            string strFuncValue = (string)table["function"];
+            string[] parts = strFuncList.Split(new char[] { ',' });
+            foreach (string part in parts)
+            {
+                if (string.IsNullOrEmpty(part) == true)
+                    continue;
+                if (StringUtil.IsInList(part, strFuncValue) == false)
+                    return false;
+            }
+
+            return true;
+        }
+
+        // parameters:
+        static string GetEnvironmentString(string strMAC,
+            bool bNextYear = false)
+        {
+            Hashtable table = new Hashtable();
+            table["mac"] = strMAC;  //  SerialCodeForm.GetMacAddress();
+            if (bNextYear == false)
+                table["time"] = SerialCodeForm.GetTimeRange();
+            else
+                table["time"] = SerialCodeForm.GetNextYearTimeRange();
+
+            table["product"] = ProductName;
+
+            string strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+            // 将 strSerialCode 中的扩展参数设定到 table 中
+            SerialCodeForm.SetExtParams(ref table, strSerialCode);
+            return StringUtil.BuildParameterString(table);
+        }
+
+        // 获得 xxx|||xxxx 的左边部分
+        static string GetCheckCode(string strSerialCode)
+        {
+            string strSN = "";
+            string strExtParam = "";
+            StringUtil.ParseTwoPart(strSerialCode,
+                "|||",
+                out strSN,
+                out strExtParam);
+
+            return strSN;
+        }
+
+        // 获得 xxx|||xxxx 的右边部分
+        static string GetExtParams(string strSerialCode)
+        {
+            string strSN = "";
+            string strExtParam = "";
+            StringUtil.ParseTwoPart(strSerialCode,
+                "|||",
+                out strSN,
+                out strExtParam);
+
+            return strExtParam;
+        }
+
+        #endregion
     }
 }

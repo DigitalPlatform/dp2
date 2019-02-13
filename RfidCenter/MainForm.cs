@@ -1207,5 +1207,23 @@ string strHtml)
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void MenuItem_readConfig_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strCfgNo = InputDlg.GetInput(this, "", "cfg_no", "0");
+            if (strCfgNo == null)
+                return;
+            if (uint.TryParse(strCfgNo, out uint cfg_no) == false)
+            {
+                strError = $"cfg_no '{strCfgNo}' 不合法";
+                goto ERROR1;
+            }
+            ReadConfigResult result = _driver.ReadConfig("*", cfg_no);
+            MessageDlg.Show(this, $"cfg_no:{result.CfgNo}\r\nbytes:\r\n{Element.GetHexString(result.Bytes, "4")}", "config info");
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

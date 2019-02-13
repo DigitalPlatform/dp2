@@ -122,9 +122,9 @@
             // listView_tags
             // 
             this.listView_tags.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader_readerName,
+            this.columnHeader_pii,
             this.columnHeader_uid,
-            this.columnHeader_pii});
+            this.columnHeader_readerName});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
