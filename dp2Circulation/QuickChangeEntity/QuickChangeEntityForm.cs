@@ -17,6 +17,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.RFID.UI;
+using DigitalPlatform.RFID;
 
 namespace dp2Circulation
 {
@@ -276,7 +278,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             strError = "装载册条码号为 " + strBarcode + "的记录发生错误: " + strError;
             // MessageBox.Show(this, strError);
             return -1;
@@ -345,7 +347,7 @@ namespace dp2Circulation
                     return;
                 }
             }
-        DOLOAD:
+            DOLOAD:
 
             nRet = LoadRecord(true, this.textBox_barcode.Text,
                 out strError);
@@ -359,11 +361,12 @@ namespace dp2Circulation
             {
                 // 自动修改
                 AutoChangeData();
+                TryWriteToRfidTag();
             }
 
             this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
 
-        SETFOCUS:
+            SETFOCUS:
             // 焦点定位
             string strFocusAction = Program.MainForm.AppInfo.GetString(
 "change_param",
@@ -416,6 +419,231 @@ namespace dp2Circulation
             return;
         }
 
+        #region RFID 功能
+
+        // return:
+        //      -1  出错
+        //      0   没有发生写入
+        //      1   发生了写入
+        int TryWriteToRfidTag()
+        {
+            var need = Program.MainForm.AppInfo.GetBoolean(
+"change_param",
+"writeToRfidTag",
+false);
+            if (need == false)
+                return 0;
+
+            string strError = "";
+            this.ShowMessage("正在写入 RFID 标签");
+            try
+            {
+                int nRet = this.entityEditControl1.GetData(
+                    true,
+                    out string strXml,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strXml);
+                }
+                catch(Exception ex)
+                {
+                    strError = "记录 XML 装入 XMLDOM 时出现异常: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                BookItem item = new BookItem();
+                item.RecordDom = dom;
+
+                LogicChipItem chip = EntityEditForm.BuildChip(item);
+                _right = chip;
+
+                string pii = EntityEditForm.GetPII(strXml);   // 从修改前的册记录中获得册条码号
+
+                // return:
+                //      -1  出错
+                //      0   放弃装载
+                //      1   成功装载
+                nRet = LoadOldChip(
+                    pii,
+                    "adjust_right,saving,auto_close_dialog",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "已放弃写入 RFID 标签内容";
+                    goto CANCEL0;
+                }
+
+                nRet = SaveNewChip(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // TODO: 遇到出错，出现对话框提醒重试装入和写入？
+
+                return 1;
+            }
+            finally
+            {
+                this.ClearMessage();
+            }
+            CANCEL0:
+            MessageBox.Show(this, strError);
+            return 0;
+            ERROR1:
+            this.ShowMessage(strError, "red", true);
+            return -1;
+        }
+
+        LogicChipItem _left = null;
+        LogicChipItem _right = null;
+        OneTag _tagExisting = null;
+
+        // return:
+        //      -1  出错
+        //      0   放弃装载
+        //      1   成功装载
+        int LoadOldChip(
+            string auto_select_pii,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+
+            bool auto_close_dialog = StringUtil.IsInList("auto_close_dialog", strStyle);
+            bool adjust_right = StringUtil.IsInList("adjust_right", strStyle);
+            bool saving = StringUtil.IsInList("saving", strStyle);
+
+            try
+            {
+                REDO:
+                // 出现对话框让选择一个
+                // SelectTagDialog dialog = new SelectTagDialog();
+                RfidToolForm dialog = new RfidToolForm();
+                dialog.Text = "选择 RFID 标签";
+                dialog.OkCancelVisible = true;
+                dialog.LayoutVertical = false;
+                dialog.AutoCloseDialog = auto_close_dialog;
+                dialog.SelectedPII = auto_select_pii;
+                dialog.AutoSelectCondition = "auto_or_blankPII";
+                dialog.AskTag += Dialog_AskTag;
+                Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
+                dialog.ShowDialog(this);
+
+                if (dialog.DialogResult == DialogResult.Cancel)
+                {
+                    strError = "放弃装载 RFID 标签内容";
+                    return 0;
+                }
+
+                if (auto_close_dialog == false
+                    // && string.IsNullOrEmpty(auto_select_pii) == false
+                    && dialog.SelectedPII != auto_select_pii
+                    && string.IsNullOrEmpty(dialog.SelectedPII) == false
+                    )
+                {
+                    string message = $"您所选择的标签其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载";
+                    if (saving)
+                        message = $"您所选择的标签其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 标签中(危险)\r\n[取消]放弃保存";
+
+                    DialogResult temp_result = MessageBox.Show(this,
+    message,
+    "QuickChangeEntityForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Yes)
+                        goto REDO;
+                    if (temp_result == DialogResult.Cancel)
+                    {
+                        strError = "放弃装载 RFID 标签内容";
+                        return 0;
+                    }
+                    if (saving == false)
+                        MessageBox.Show(this, "警告：您刚装入了一个可疑的标签，极有可能不是当前册对应的标签。待会儿保存标签内容的时候，有可能会张冠李戴覆盖了它。保存标签内容前，请务必反复仔细检查");
+                }
+
+                var tag_info = dialog.SelectedTag.TagInfo;
+                _tagExisting = dialog.SelectedTag;
+
+                var chip = LogicChipItem.FromTagInfo(tag_info);
+                _left = chip;
+
+                if (adjust_right)
+                {
+                    int nRet = EntityEditForm.Merge(_left,
+    _right,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 让右侧编辑器感受到 readonly 和 text 的变化
+                    //var save = this.chipEditor_editing.LogicChipItem;
+                    //this.chipEditor_editing.LogicChipItem = null;
+                    //this.chipEditor_editing.LogicChipItem = save;
+                }
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "出现异常: " + ex.Message;
+                return -1;
+            }
+        }
+
+        private void Dialog_AskTag(object sender, AskTagEventArgs e)
+        {
+            e.Text = "准备写入 RFID 标签，请在读写器上放置贴有标签的图书 ...";
+        }
+
+        int SaveNewChip(out string strError)
+        {
+            strError = "";
+
+            RfidChannel channel = StartRfidChannel(
+Program.MainForm.RfidCenterUrl,
+out strError);
+            if (channel == null)
+            {
+                strError = "StartRfidChannel() error";
+                return -1;
+            }
+            try
+            {
+                TagInfo new_tag_info = LogicChipItem.ToTagInfo(
+                    _tagExisting.TagInfo,
+                    _right);
+                NormalResult result = channel.Object.WriteTagInfo(
+                    _tagExisting.ReaderName,
+                    _tagExisting.TagInfo,
+                    new_tag_info);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "ListTags() 出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                EndRfidChannel(channel);
+            }
+        }
+
+        #endregion
+
         // return:
         //      0   没有实质性改变
         //      1   有实质性改变
@@ -432,7 +660,6 @@ namespace dp2Circulation
             if (strState != "<不改变>")
                 this.entityEditControl1.State = strState;
             */
-
 
             // state
             string strStateAction = Program.MainForm.AppInfo.GetString(
@@ -627,7 +854,7 @@ namespace dp2Circulation
                 }
 
                 return 1;
-            ERROR1:
+                ERROR1:
                 strError = "保存条码为 " + this.entityEditControl1.Barcode + " 的册记录时出错: " + strError;
                 return -1;
             }
@@ -651,10 +878,9 @@ namespace dp2Circulation
 
             EntityInfo info = new EntityInfo();
 
-            string strXml = "";
             nRet = this.entityEditControl1.GetData(
                 true,
-                out strXml,
+                out string strXml,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -724,7 +950,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -928,7 +1154,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return nRet;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -967,7 +1193,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             return nRet;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -1118,6 +1344,7 @@ namespace dp2Circulation
                         //      0   没有实质性改变
                         //      1   有实质性改变
                         AutoChangeData();
+                        TryWriteToRfidTag();
 
                         if (this.entityEditControl1.Changed == true)
                         {
@@ -1184,7 +1411,7 @@ namespace dp2Circulation
             MessageBox.Show(this, "处理完成。共处理记录 " + nRet.ToString() + " 条");
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1306,7 +1533,7 @@ namespace dp2Circulation
             MessageBox.Show(this, "处理完成。共处理记录 " + nRet.ToString() + " 条");
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
 
         }
@@ -1351,7 +1578,7 @@ namespace dp2Circulation
                 }
             }
 
-        END1:
+            END1:
             return base.ProcessDialogKey(keyData);
         }
 

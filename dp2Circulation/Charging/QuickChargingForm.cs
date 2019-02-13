@@ -866,8 +866,8 @@ dlg.UiState);
             }
 
             // 2019/1/9
-            string prefix = "pii:";
-            string type_of_usage = "10";    // 10 流通馆藏; 80 读者证
+            string prefix = ""; //  "pii:";
+            string type_of_usage = "";  // "10";    // 10 流通馆藏; 80 读者证
             if (strBarcode.StartsWith("pii:") == true
                 || strBarcode.StartsWith("PII:") == true
                 || strBarcode.StartsWith("uid:") == true
@@ -882,6 +882,8 @@ dlg.UiState);
                     prefix = "uid:";
                 }
                 type_of_usage = GetValue(table, "tou");
+                if (string.IsNullOrEmpty(type_of_usage))
+                    type_of_usage = "10";
             }
 
             // 2015/12/9

@@ -814,7 +814,7 @@ namespace dp2Circulation
         }
 
         // 根据 BookItem 对象构造一个 LogicChipItem 对象
-        static LogicChipItem BuildChip(BookItem book_item)
+        public static LogicChipItem BuildChip(BookItem book_item)
         {
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.11") < 0)
                 throw new Exception("当前连接的 dp2library 必须为 3.11 或以上版本，才能使用 RFID 有关功能");
@@ -969,7 +969,7 @@ namespace dp2Circulation
         }
 
         // 从册记录 XML 中获得册条码号
-        static string GetPII(string strItemXml)
+        public static string GetPII(string strItemXml)
         {
             if (string.IsNullOrEmpty(strItemXml))
                 return null;
@@ -998,7 +998,7 @@ namespace dp2Circulation
             //      0   放弃装载
             //      1   成功装载
             int nRet = LoadOldChip(pii,
-                "adjust_right",
+                "adjust_right,auto_close_dialog",
                 // false, true, 
                 out string strError);
             if (nRet != 1)
@@ -1048,6 +1048,7 @@ namespace dp2Circulation
                 dialog.LayoutVertical = false;
                 dialog.AutoCloseDialog = auto_close_dialog;
                 dialog.SelectedPII = auto_select_pii;
+                dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
                 Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                 dialog.ShowDialog(this);
 
@@ -1060,7 +1061,7 @@ namespace dp2Circulation
                 if (auto_close_dialog == false
                     // && string.IsNullOrEmpty(auto_select_pii) == false
                     && dialog.SelectedPII != auto_select_pii
-                    //&& string.IsNullOrEmpty(dialog.SelectedPII) == false
+                    && string.IsNullOrEmpty(dialog.SelectedPII) == false
                     )
                 {
                     string message = $"您所选择的标签其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 标签;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载";
@@ -1114,7 +1115,7 @@ namespace dp2Circulation
         }
 
         // 把新旧芯片内容合并。即，新芯片中不应修改旧芯片中已经锁定的元素
-        static int Merge(LogicChipItem old_chip,
+        public static int Merge(LogicChipItem old_chip,
             LogicChipItem new_chip,
             out string strError)
         {
@@ -1199,7 +1200,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "ListTags() 出现异常: " + ex.Message;
+                strError = "SaveNewChip() 出现异常: " + ex.Message;
                 return -1;
             }
             finally

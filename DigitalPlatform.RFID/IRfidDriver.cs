@@ -137,6 +137,7 @@ namespace DigitalPlatform.RFID
 
     public class InventoryInfo
     {
+        public string Protocol { get; set; }
         public string UID { get; set; }
         public UInt32 TagType { get; set; }
 

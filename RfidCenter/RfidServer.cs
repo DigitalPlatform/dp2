@@ -32,7 +32,9 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
-        public ListTagsResult ListTags(string reader_name)
+        // parameters:
+        //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
+        public ListTagsResult ListTags(string reader_name, string style)
         {
             InventoryResult result = new InventoryResult();
             List<OneTag> tags = new List<OneTag>();
@@ -54,13 +56,30 @@ namespace RfidCenter
 
                 foreach (InventoryInfo info in inventory_result.Results)
                 {
-                    tags.Add(new OneTag
+                    var tag = new OneTag
                     {
                         ReaderName = reader.Name,
                         UID = info.UID,
                         DSFID = info.DsfID
-                    });
+                    };
 
+                    tags.Add(tag);
+
+                    if (StringUtil.IsInList("getTagInfo", style))
+                    {
+                        // TODO: 这里要利用 Hashtable 缓存
+                        GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+                        if (result0.Value == -1)
+                        {
+                            tag.TagInfo = null;
+                            // TODO: 如何报错？写入操作历史?
+                            // $"读取标签{info.UID}信息时出错:{result0.ToString()}"
+                        }
+                        else
+                        {
+                            tag.TagInfo = result0.TagInfo;
+                        }
+                    }
 #if NO
                             GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
                             if (result0.Value == -1)
@@ -120,6 +139,7 @@ namespace RfidCenter
         public GetTagInfoResult GetTagInfo(string reader_name,
             string uid)
         {
+            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
             foreach (Reader reader in Program.Rfid.Readers)
             {
                 if (reader_name == "*" || reader.Name == reader_name)
@@ -132,17 +152,26 @@ namespace RfidCenter
                 InventoryInfo info = new InventoryInfo { UID = uid };
                 GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
-                if (result0.Value == -1 && result0.ErrorCode == "errorFromReader=4")
+                // 继续尝试往后寻找
+                if (result0.Value == -1
+                    && result0.ErrorCode == "errorFromReader=4")
+                {
+                    errors.Add(result0);
                     continue;
+                }
 
                 if (result0.Value == -1)
                     return result0;
 
-                // not found
+                // found
                 return result0;
             }
 
-            return new GetTagInfoResult();
+            // 2019/2/13
+            if (errors.Count > 0)
+                return errors[0];
+
+            return new GetTagInfoResult { ErrorCode = "notFoundReader"};
         }
 
         public NormalResult WriteTagInfo(

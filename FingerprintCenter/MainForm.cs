@@ -26,6 +26,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using static DigitalPlatform.CirculationClient.BioUtil;
+using System.Collections;
 
 namespace FingerprintCenter
 {
@@ -133,6 +134,8 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            ClientInfo.SerialNumberMode = "must";
+            ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
             ClientInfo.Initial("fingerprintcenter");
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
 
@@ -1498,6 +1501,91 @@ token);
         {
             Process.Start("https://github.com/DigitalPlatform/dp2/issues/222");
         }
+
+        // 重新设置序列号
+        private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
+        {
+            // return:
+            //      -1  出错
+            //      0   正确
+            int nRet = ClientInfo.VerifySerialCode(
+                "", // strTitle,
+                "", // strRequirFuncList,
+                "reset",
+                out string strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+
+#if NO
+            string strError = "";
+            int nRet = 0;
+
+            // 2014/11/15
+            string strFirstMac = "";
+            List<string> macs = SerialCodeForm.GetMacAddress();
+            if (macs.Count != 0)
+            {
+                strFirstMac = macs[0];
+            }
+
+            string strRequirFuncList = "";  // 因为这里是设置通用的序列号，不具体针对哪个功能，所以对设置后，序列号的功能不做检查。只有等到用到具体功能的时候，才能发现序列号是否包含具体功能的 function = ... 参数
+
+            string strSerialCode = "";
+            REDO_VERIFY:
+
+            if (strSerialCode == "community")
+            {
+                ClientInfo.CommunityMode = true;
+                ClientInfo.Config.Set("main_form", "last_mode", "community");
+                return;
+            }
+            else
+            {
+                ClientInfo.CommunityMode = false;
+                ClientInfo.Config.Set("main_form", "last_mode", "standard");
+            }
+
+            if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false ||
+                // strSha1 != GetCheckCode(strSerialCode) 
+                MatchLocalString(strSerialCode) == false
+                || String.IsNullOrEmpty(strSerialCode) == true)
+            {
+                if (String.IsNullOrEmpty(strSerialCode) == false)
+                    MessageBox.Show(this, "序列号无效。请重新输入");
+                else if (CheckFunction(GetEnvironmentString(""), strRequirFuncList) == false)
+                    MessageBox.Show(this, "序列号中 function 参数无效。请重新输入");
+
+
+                // 出现设置序列号对话框
+                nRet = ResetSerialCode(
+                    "重新设置序列号",
+                    true,
+                    strSerialCode,
+                    ClientInfo.GetEnvironmentString(strFirstMac));
+                if (nRet == 0)
+                {
+                    strError = "放弃";
+                    goto ERROR1;
+                }
+                strSerialCode = ClientInfo.Config.Get("sn", "sn", "");
+                if (string.IsNullOrEmpty(strSerialCode) == true)
+                {
+                    Application.Exit();
+                    return;
+                }
+
+                ClientInfo.Config.Save();
+                goto REDO_VERIFY;
+            }
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+#endif
+        }
+
     }
 
     class MyWebClient : WebClient
