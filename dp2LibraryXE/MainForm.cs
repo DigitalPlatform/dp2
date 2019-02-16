@@ -251,6 +251,19 @@ FormWindowState.Normal);
             Task task = Initialize();
 
             AutoStartDp2circulation = AutoStartDp2circulation;
+
+            // 2019/2/15
+            // 后台自动检查更新
+            Task.Run(() =>
+            {
+                var result = ClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    AppendString($"ClickOnce 后台自动更新出错: {result.ErrorInfo}\r\n");
+                else if (result.Value == 1)
+                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+            });
         }
 
         // delegate void Delegate_Initialize();
@@ -4449,6 +4462,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
 
         #region console
+
         /// <summary>
         /// 将浏览器控件中已有的内容清除，并为后面输出的纯文本显示做好准备
         /// </summary>

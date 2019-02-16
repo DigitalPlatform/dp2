@@ -24,9 +24,8 @@ namespace dp2SSL
         {
             InitializeComponent();
 
-            var page = new PageMenu();
-            page.Background = Brushes.Blue;
-            this.Content = page;
+            //var page = new PageMenu();
+            //this.Content = page;
         }
     }
 }

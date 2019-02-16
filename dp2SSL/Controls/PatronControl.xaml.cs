@@ -16,12 +16,12 @@ using System.Windows.Shapes;
 namespace dp2SSL
 {
     /// <summary>
-    /// 显示一个册的控件
+    /// 显示一个读者信息的控件
     /// EntityControl.xaml 的交互逻辑
     /// </summary>
-    public partial class EntityControl : UserControl
+    public partial class PatronControl : UserControl
     {
-        public EntityControl()
+        public PatronControl()
         {
             InitializeComponent();
         }

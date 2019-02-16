@@ -27,16 +27,29 @@ namespace dp2SSL
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
+#if NO
             Window mainWindow = Application.Current.MainWindow;
             var page = new PageBorrow();
             // page.Background = Brushes.Red;
             mainWindow.Content = page;
+#endif
+            this.NavigationService.Navigate(new PageBorrow("borrow"));
         }
 
         private void Config_Click(object sender, RoutedEventArgs e)
         {
             Window cfg_window = new ConfigWindow();
             cfg_window.ShowDialog();
+        }
+
+        private void ReturnButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageBorrow("return"));
+        }
+
+        private void RenewBotton_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageBorrow("renew"));
         }
     }
 }

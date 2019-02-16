@@ -6,25 +6,35 @@
       xmlns:local="clr-namespace:dp2SSL"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PageMenu">
+      Background="Black"
+      WindowTitle="主菜单" Title="主菜单">
 
-    <Grid Width="600" Height="300">
-        <!--定义了两列-->
+    <UniformGrid Width="300" Height="300">
+
+        <!--
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <!--定义了两行-->
+
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+-->
+        <Button Grid.Row="0" Grid.Column="0" 
+                Name="borrowButton" Content="借书" Click="Button_Borrow_Click"
+                Background="DarkBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <Button Grid.Row="0" Grid.Column="1" 
+                Name="returnButton" Content="还书" Click="ReturnButton_Click"
+                Background="BlueViolet" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <Button Grid.Row="1" Grid.Column="0" 
+                Name="renewBotton" Content="续借" Click="RenewBotton_Click"
+                Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <Button Name="config" Grid.Row="1" Grid.Column="1" Content="设置"  Click="Config_Click"
+                Background="CornflowerBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
 
-        <Button Grid.Row="0" Grid.Column="0" Content="借书" Width="300" Height="150" Click="Button_Borrow_Click"/>
-        <Button Grid.Row="0" Grid.Column="1" Content="还书"  Width="300" Height="150"/>
-        <Button Grid.Row="1" Grid.Column="0" Content="模块 3"  Width="300" Height="150"/>
-        <Button Name="config" Grid.Row="1" Grid.Column="1" Content="模块 4"  Width="300" Height="150" Click="Config_Click"/>
-
-    </Grid>
+    </UniformGrid>
 </Page>
