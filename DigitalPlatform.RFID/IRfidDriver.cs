@@ -137,6 +137,10 @@ namespace DigitalPlatform.RFID
 
     public class InventoryInfo
     {
+        // 协议类型
+        public const string ISO15693 = "ISO15693";
+        public const string ISO14443A = "ISO14443A";
+
         public string Protocol { get; set; }
         public string UID { get; set; }
         public UInt32 TagType { get; set; }

@@ -58,6 +58,7 @@ namespace RfidCenter
                 {
                     var tag = new OneTag
                     {
+                        Protocol = info.Protocol,
                         ReaderName = reader.Name,
                         UID = info.UID,
                         DSFID = info.DsfID
@@ -279,7 +280,8 @@ enable);
 
         bool AddToTagList(string reader_name,
             string uid,
-            byte dsfid)
+            byte dsfid,
+            string protocol)
         {
             OneTag tag = FindTag(uid);
             if (tag != null)
@@ -289,6 +291,7 @@ enable);
             {
                 tag = new OneTag
                 {
+                    Protocol = protocol,
                     ReaderName = reader_name,
                     UID = uid,
                     LastActive = DateTime.Now,
@@ -472,7 +475,7 @@ enable);
 
                         foreach (InventoryInfo info in inventory_result.Results)
                         {
-                            AddToTagList(reader.Name, info.UID, info.DsfID);
+                            AddToTagList(reader.Name, info.UID, info.DsfID, info.Protocol);
                         }
                     }
                 }

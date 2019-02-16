@@ -61,6 +61,8 @@ bool enable);
     [Serializable()]
     public class OneTag
     {
+        public string Protocol { get; set; }
+
         public string ReaderName { get; set; }
         public string UID { get; set; }
         public DateTime LastActive { get; set; }
@@ -77,7 +79,7 @@ bool enable);
 
         public override string ToString()
         {
-            return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)}";
+            return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)},Protocol={Protocol}";
         }
     }
 

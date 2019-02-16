@@ -882,7 +882,7 @@ namespace DigitalPlatform.RFID
 
         public static string GetHexString(byte value)
         {
-            string strHex = Convert.ToString(value, 16);
+            string strHex = Convert.ToString(value, 16).ToUpper();
             return strHex.PadLeft(2, '0');
         }
 
@@ -897,7 +897,7 @@ namespace DigitalPlatform.RFID
                 for (int i = 0; i < baTimeStamp.Length; i++)
                 {
                     //string strHex = String.Format("{0,2:X}",baTimeStamp[i]);
-                    string strHex = Convert.ToString(baTimeStamp[i], 16);
+                    string strHex = Convert.ToString(baTimeStamp[i], 16).ToUpper();
                     text.Append(strHex.PadLeft(2, '0'));
                 }
 
@@ -913,7 +913,7 @@ namespace DigitalPlatform.RFID
                 StringBuilder text = new StringBuilder();
                 for (int i = 0; i < baTimeStamp.Length; i++)
                 {
-                    string strHex = Convert.ToString(baTimeStamp[i], 16);
+                    string strHex = Convert.ToString(baTimeStamp[i], 16).ToUpper();
                     text.Append(strHex.PadLeft(2, '0'));
                     if ((i % bytes_per_line) < bytes_per_line - 1)
                         text.Append(" ");

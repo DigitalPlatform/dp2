@@ -180,6 +180,19 @@ FormWindowState.Normal);
             Refresh_dp2ZServer_MenuItems();
 
             this.BeginInvoke(new Action<object, EventArgs>(MenuItem_autoUpgrade_Click), this, new EventArgs());
+
+            // 2019/2/15
+            // 后台自动检查更新
+            Task.Run(() =>
+            {
+                var result = ClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    AppendString($"ClickOnce 后台自动更新出错: {result.ErrorInfo}\r\n");
+                else if (result.Value == 1)
+                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    AppendString($"ClickOnce 后台自动更新: {result.ErrorInfo}\r\n");
+            });
         }
 
         void DisplayCopyRight()

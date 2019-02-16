@@ -778,7 +778,7 @@ namespace DigitalPlatform.RFID.UI
             StringBuilder text = new StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
             {
-                string strHex = Convert.ToString(bytes[i], 16);
+                string strHex = Convert.ToString(bytes[i], 16).ToUpper();
                 text.Append(strHex.PadLeft(2, '0'));
                 if ((i % block_size) < block_size - 1)
                     text.Append(" ");

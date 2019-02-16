@@ -86,15 +86,23 @@
       <DependentUpon>ConfigWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Config\ConfigParams.cs" />
+    <Compile Include="Controls\Entity.cs" />
+    <Compile Include="Controls\Patron.cs" />
+    <Compile Include="Converter\CountToVisibilityConverter.cs" />
+    <Compile Include="Converter\StringToBrushConverter.cs" />
+    <Compile Include="LayoutAdorner.cs" />
     <Compile Include="PasswordEditor.cs" />
-    <Compile Include="StateToBorderConverter.cs" />
-    <Compile Include="StringToVisibilityConverter.cs" />
+    <Compile Include="ProgressWindow.xaml.cs">
+      <DependentUpon>ProgressWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converter\StateToBorderConverter.cs" />
+    <Compile Include="Converter\StringToVisibilityConverter.cs" />
     <Compile Include="WpfClientInfo.cs" />
     <Page Include="ConfigWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\EntityControl.xaml">
+    <Page Include="Controls\PatronControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -110,8 +118,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\EntityControl.xaml.cs">
-      <DependentUpon>EntityControl.xaml</DependentUpon>
+    <Compile Include="Controls\PatronControl.xaml.cs">
+      <DependentUpon>PatronControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\EntityListControl.xaml.cs">
       <DependentUpon>EntityListControl.xaml</DependentUpon>
@@ -125,6 +133,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PageMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -174,6 +186,10 @@
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
       <Name>DigitalPlatform.RFID</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>

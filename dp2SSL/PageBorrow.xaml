@@ -6,11 +6,11 @@
       xmlns:local="clr-namespace:dp2SSL"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PageBorrow">
+      WindowTitle="借书" Title="借书">
     <Page.Resources>
-
+        <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
-    <Grid Background="Black" >
+    <Grid Background="Black" Name="mainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60" />
             <ColumnDefinition Width="*" />
@@ -24,18 +24,27 @@
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
         <Button Grid.Row="1" Grid.Column="0">Left</Button>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
+        <!--
         <Button Grid.Row="2" Grid.ColumnSpan="3">Bottom</Button>
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3"
+            Name="error" Visibility="Collapsed">Error Text</TextBlock>
+        -->
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Error}"
+                                       FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
+                                       Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
+                                       TextWrapping="WrapWithOverflow"/>
+
         <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
-            <local:EntityListControl x:Name="entities" Grid.Column="0" />
+            <local:EntityListControl x:Name="booksControl" Grid.Column="0" />
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 
                 https://stackoverflow.com/questions/1665781/styling-gridsplitter-wpf-c-sharp 
@@ -43,23 +52,48 @@
                 <GridSplitter.Template>
                     <ControlTemplate TargetType="{x:Type GridSplitter}">
                         <Grid>
-                            <Button Content="⁞" />
+                            <Button Content="⁞" BorderThickness="0" Background="Transparent" Foreground="DarkGray"/>
                             <Rectangle Fill="#00FFFFFF" />
                         </Grid>
                     </ControlTemplate>
                 </GridSplitter.Template>
             </GridSplitter>
-            <Button Grid.Column="2">Patron Info</Button>
-            <Button Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"
+            <local:PatronControl x:Name="patronControl" Grid.Column="2" MaxWidth="300"/>
+            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Name="borrowButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
-                    Foreground="White" >
-                <Button.Content>
-                    <TextBlock><Run Text="借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding Path=Borrowable, UpdateSourceTrigger=Explicit}" /><Run FontSize="20" Text=")"/>
-                    </TextBlock>
-                </Button.Content>
-            </Button>
+                    Foreground="White" 
+                     Click="BorrowButton_Click">
+                    <Button.Content>
+                        <TextBlock><Run Text="借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Borrowable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="returnButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="ReturnButton_Click">
+                    <Button.Content>
+                        <TextBlock><Run Text="还"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Returnable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="renewButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="RenewButton_Click">
+                    <Button.Content>
+                        <TextBlock><Run Text="续借"/><Run FontSize="20" Text=" ("/><Run FontSize="20" Text="{Binding ElementName=booksControl, Path=Renewable, UpdateSourceTrigger=PropertyChanged}" /><Run FontSize="20" Text=")"/>
+                        </TextBlock>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Page>
