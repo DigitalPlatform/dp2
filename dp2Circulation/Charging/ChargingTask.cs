@@ -874,7 +874,7 @@ namespace dp2Circulation
             }
             task.ErrorInfo = strError;
 
-            if (lRet == 0)
+            if (lRet != -1)
             {
                 // 修改 EAS
                 if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
@@ -883,7 +883,9 @@ namespace dp2Circulation
                     {
                         // TODO: 要 undo 刚才进行的操作
                         lRet = -1;
-                        task.ErrorInfo = strError;
+                        if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                            task.ErrorInfo += "; ";
+                        task.ErrorInfo += strError;
                     }
                 }
             }
@@ -1305,7 +1307,9 @@ end_time);
                     {
                         // TODO: 要 undo 刚才进行的操作
                         lRet = -1;
-                        task.ErrorInfo = strError;
+                        if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                            task.ErrorInfo += "; ";
+                        task.ErrorInfo += strError;
                     }
                 }
             }

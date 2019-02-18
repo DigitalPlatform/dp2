@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
-        Title="ProgressWindow" Width="400" Height="200" 
+        Title="ProgressWindow" Width="400" Height="240" 
         Background="Black" Foreground="White"
         WindowStyle="None"
     AllowsTransparency="True"
@@ -26,7 +26,7 @@
                  Background="Transparent" Foreground="White" 
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
             <ProgressBar Name="progressBar" Grid.Row="2"
-                     Height="20" Background="Transparent" BorderThickness="0"/>
+                     Height="5" Background="Transparent" BorderThickness="0"/>
 
             <Button Name="okButton" Grid.Row="3"
                     Style="{DynamicResource RoundedButtonStyle}" 

@@ -44,6 +44,13 @@ namespace dp2SSL
             }
         }
 
+        public string FingerprintUrl
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "fingerprintUrl", "");
+            }
+        }
 
         #region LibraryChannel
 

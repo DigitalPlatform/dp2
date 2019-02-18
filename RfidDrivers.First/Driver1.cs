@@ -1688,7 +1688,7 @@ namespace RfidDrivers.First
                     return new InventoryResult
                     {
                         Value = -1,
-                        ErrorInfo = "error",
+                        ErrorInfo = "Inventory() error",
                         ErrorCode = GetErrorCode(ret, hreader)
                     };
 
@@ -1960,7 +1960,7 @@ namespace RfidDrivers.First
                                 return new FindTagResult
                                 {
                                     Value = -1,
-                                    ErrorInfo = "error",
+                                    ErrorInfo = "ISO15693_GetSystemInfo() error 1",
                                     ErrorCode = GetErrorCode(iret, hreader)
                                 };
 
@@ -2680,7 +2680,7 @@ namespace RfidDrivers.First
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = "error",
+                            ErrorInfo = "ISO15693_GetSystemInfo() error 2",
                             ErrorCode = GetErrorCode(iret, hreader)
                         };
 

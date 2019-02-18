@@ -15,7 +15,12 @@ namespace dp2SSL
     public class EntityCollection : ObservableCollection<Entity>
     {
         // 第一阶段：填充 UID 和 PII
-        public bool Refresh(List<OneTag> tags)
+        // parameters:
+        //      new_entities    返回本次新增的部分 Entity。调用前如果为 null，则表示不希望返回信息
+        // return:
+        //      是否发生了变动
+        public bool Refresh(List<OneTag> tags,
+            ref List<Entity> new_entities)
         {
             bool changed = false;
             List<Entity> need_delete = new List<Entity>();
@@ -63,9 +68,17 @@ namespace dp2SSL
                     // 尝试重新获取一次
                 }
 
-                Entity entity = new Entity { UID = tag.UID, PII = pii };
+                Entity entity = new Entity
+                {
+                    TagInfo = tag.TagInfo,
+                    UID = tag.UID,
+                    PII = pii
+                };
                 this.Add(entity);
                 changed = true;
+
+                if (new_entities != null)
+                    new_entities.Add(entity);
             }
 
             return changed;
@@ -74,6 +87,8 @@ namespace dp2SSL
 
     public class Entity : RfidItem
     {
+        public TagInfo TagInfo { get; set; }
+
         private string _itemRecPath;
 
         public string ItemRecPath

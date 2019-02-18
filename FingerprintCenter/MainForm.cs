@@ -26,7 +26,6 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using static DigitalPlatform.CirculationClient.BioUtil;
-using System.Collections;
 
 namespace FingerprintCenter
 {
@@ -130,6 +129,8 @@ bool bClickClose = false)
             this.ShowMessage("");
         }
 
+        // FingerprintServer _server = new FingerprintServer();
+
         FingerPrint FingerPrint = null;
 
         private void Form1_Load(object sender, EventArgs e)
@@ -151,8 +152,7 @@ bool bClickClose = false)
 
             ClearHtml();
 
-            if (StartRemotingServer() == false)
-                return;
+            //
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
@@ -165,6 +165,17 @@ bool bClickClose = false)
             FingerPrint.Captured += FingerPrint_Captured;
             FingerPrint.Speak += FingerPrint_Speak;
             FingerPrint.ImageReady += FingerPrint_ImageReady;
+
+            try
+            {
+                if (FingerprintServer.StartRemotingServer() == false)
+                    return;
+            }
+            catch (Exception ex)
+            {
+                this.ShowMessage(ex.Message);
+                return;
+            }
 
             if (string.IsNullOrEmpty(this.textBox_cfg_dp2LibraryServerUrl.Text) == true)
             {
@@ -317,6 +328,7 @@ bool bClickClose = false)
                 {
                     Speak("很好");
                     // TODO: 显示文字中包含 e.Text?
+                    
                     SendKeys.SendWait(e.Text + "\r");
                 }
             }));
@@ -395,7 +407,7 @@ bool bClickClose = false)
             }
 
             EndChannel();
-            EndRemotingServer();
+            FingerprintServer.EndRemotingServer();
 
             // FingerPrint.CloseZK();
             FingerPrint.Free();
@@ -714,67 +726,6 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-        #region remoting server
-
-#if HTTP_CHANNEL
-        HttpChannel m_serverChannel = null;
-#else
-        IpcServerChannel m_serverChannel = null;
-#endif
-
-        bool StartRemotingServer()
-        {
-            try
-            {
-                // EndRemoteChannel();
-
-                //Instantiate our server channel.
-#if HTTP_CHANNEL
-            m_serverChannel = new HttpChannel();
-#else
-                // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
-                m_serverChannel = new IpcServerChannel(
-                    "FingerprintChannel");
-#endif
-
-                //Register the server channel.
-                ChannelServices.RegisterChannel(m_serverChannel, false);
-
-                RemotingConfiguration.ApplicationName = "FingerprintServer";
-
-                /*
-                RemotingConfiguration.RegisterWellKnownServiceType(
-                    typeof(ServerFactory),
-                    "ServerFactory",
-                    WellKnownObjectMode.Singleton);
-                 * */
-
-
-                //Register this service type.
-                RemotingConfiguration.RegisterWellKnownServiceType(
-                    typeof(FingerprintServer),
-                    "FingerprintServer",
-                    WellKnownObjectMode.Singleton);
-                return true;
-            }
-            catch (RemotingException ex)
-            {
-                this.ShowMessage(ex.Message);
-                return false;
-            }
-        }
-
-        void EndRemotingServer()
-        {
-            if (m_serverChannel != null)
-            {
-                ChannelServices.UnregisterChannel(m_serverChannel);
-                m_serverChannel = null;
-            }
-        }
-
-
-        #endregion
 
         #region ipc channel
 
@@ -1585,6 +1536,7 @@ token);
             MessageBox.Show(this, strError);
 #endif
         }
+
 
     }
 

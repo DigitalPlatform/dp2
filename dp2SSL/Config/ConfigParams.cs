@@ -74,7 +74,7 @@ namespace dp2SSL
             }
         }
 
-
+        // 默认值 ipc://RfidChannel/RfidServer
         [Display(
 Order = 4,
 Name = "RFID 接口 URL",
@@ -92,5 +92,25 @@ Description = "RFID 接口 URL 地址"
                 _config.Set("global", "rfidUrl", value);
             }
         }
+
+        // 默认值 ipc://FingerprintChannel/FingerprintServer
+        [Display(
+Order = 5,
+Name = "指纹接口 URL",
+Description = "指纹接口 URL 地址"
+)]
+        [Category("指纹接口")]
+        public string FingerprintURL
+        {
+            get
+            {
+                return _config.Get("global", "fingerprintUrl", "");
+            }
+            set
+            {
+                _config.Set("global", "fingerprintUrl", value);
+            }
+        }
+
     }
 }
