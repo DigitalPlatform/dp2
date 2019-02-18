@@ -9,7 +9,10 @@
     <UserControl.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
         <local:InvertStringToVisibilityConverter x:Key="InvertStringToVis" />
-
+        <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
+        <local:BoolToVisibilityConverter
+         x:Key="VisibleIfFalseConverter"
+         TrueValue="Hidden" FalseValue="Visible" />
     </UserControl.Resources>
     <Border BorderThickness="2" BorderBrush="Black"
             Margin="20" CornerRadius="8" >
@@ -20,7 +23,7 @@
             </LinearGradientBrush>
         </Border.Background>
         <Grid>
-            <Grid Visibility="{Binding Path=UID, Converter={StaticResource StringToVis}}"
+            <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
                   >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="20"/>
@@ -44,10 +47,11 @@
                 <TextBlock Grid.Row="1" Grid.Column="1" 
                            Text="UID" 
                            Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
-                <TextBox Grid.Row="1" Grid.Column="3"
+                <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
                          Text="{Binding UID}" 
-                        IsReadOnly="True" BorderThickness="0"
-                       Background="Transparent" Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"/>
+                         IsReadOnly="True" BorderThickness="0"
+                         Background="Transparent" Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"
+                         />
 
                 <TextBlock Grid.Row="2" Grid.Column="1" 
                            Text="证条码号" 
@@ -79,7 +83,7 @@
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"
-                       Visibility="{Binding Path=UID, Converter={StaticResource InvertStringToVis}}"
+                       Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}"
                        TextWrapping="WrapWithOverflow"/>
 
         </Grid>

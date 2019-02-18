@@ -23,6 +23,12 @@ namespace ZkFingerprint
 {
     public class FingerprintServer : MarshalByRefObject, IFingerprint, IDisposable
     {
+        public event MessageArrivedEvent MessageArrived;
+        public string GetMessage(string style)
+        {
+            return null;
+        }
+
         TimeSpan m_interval = new TimeSpan(0, 0, 0, 1, 0);
         DateTime m_lastFinish = new DateTime(0);
 

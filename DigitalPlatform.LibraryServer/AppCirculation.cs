@@ -5587,6 +5587,7 @@ account == null ? null : new AccountRecord(account));
 #endif
                                 // 暂时不报错，滞后验证
                                 bDelayVerifyReaderBarcode = true;
+                                // TODO: 此句有疑问
                                 strIdcardNumber = strReaderBarcodeParam;
                             }
                         }

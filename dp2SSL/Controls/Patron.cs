@@ -33,8 +33,11 @@ namespace dp2SSL
             get => _uid;
             set
             {
-                _uid = value;
-                OnPropertyChanged("UID");
+                if (_uid != value)
+                {
+                    _uid = value;
+                    OnPropertyChanged("UID");
+                }
             }
         }
 
@@ -114,6 +117,67 @@ namespace dp2SSL
     // 读者信息
     public class Patron : RfidItem
     {
+        // 来源。默认从 RFID 读卡器。"fingerprint" 表示从指纹仪而来
+        public string Source { get; set; }
+
+        public new string UID
+        {
+            get
+            {
+                return base.UID;
+            }
+            set
+            {
+                base.UID = value;
+                SetNotEmpty();
+            }
+        }
+
+        public new string PII
+        {
+            get
+            {
+                return base.PII;
+            }
+            set
+            {
+                base.PII = value;
+                SetNotEmpty();
+            }
+        }
+
+        public new string Error
+        {
+            get
+            {
+                return base.Error;
+            }
+            set
+            {
+                base.Error = value;
+                SetNotEmpty();
+            }
+        }
+
+        // 是否非空
+        bool _notEmpty = false;
+
+        public bool NotEmpty
+        {
+            get
+            {
+                return _notEmpty;
+            }
+            set
+            {
+                if (_notEmpty != value)
+                {
+                    _notEmpty = value;
+                    OnPropertyChanged("NotEmpty");
+                }
+            }
+        }
+
         string _patronName;
 
         public string PatronName
@@ -124,8 +188,11 @@ namespace dp2SSL
             }
             set
             {
-                _patronName = value;
-                OnPropertyChanged("PatronName");
+                if (_patronName != value)
+                {
+                    _patronName = value;
+                    OnPropertyChanged("PatronName");
+                }
             }
         }
 
@@ -139,8 +206,12 @@ namespace dp2SSL
             }
             set
             {
-                _barcode = value;
-                OnPropertyChanged("Barcode");
+                if (_barcode != value)
+                {
+                    _barcode = value;
+                    OnPropertyChanged("Barcode");
+                    this.SetNotEmpty();
+                }
             }
         }
 
@@ -154,8 +225,11 @@ namespace dp2SSL
             }
             set
             {
-                _department = value;
-                OnPropertyChanged("Department");
+                if (_department != value)
+                {
+                    _department = value;
+                    OnPropertyChanged("Department");
+                }
             }
         }
 
@@ -189,6 +263,11 @@ namespace dp2SSL
                 pii = chip.FindElement(ElementOID.PII)?.Text;
             }
 
+            if (this.UID == tag.UID && this.PII == pii)
+                return; // 优化
+
+            this.Clear();
+
             this.UID = tag.UID;
             this.PII = pii;
         }
@@ -200,6 +279,20 @@ namespace dp2SSL
             this.Department = null;
             this.UID = null;
             this.PII = null;
+
+            this.SetNotEmpty();
         }
+
+        public void SetNotEmpty()
+        {
+            if (string.IsNullOrEmpty(this.Barcode) == false
+                || string.IsNullOrEmpty(this.UID) == false
+                || string.IsNullOrEmpty(this.PII) == false
+                || string.IsNullOrEmpty(this.Error) == false)
+                this.NotEmpty = true;
+            else
+                this.NotEmpty = false;
+        }
+
     }
 }

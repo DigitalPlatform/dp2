@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
 
 namespace DigitalPlatform.Interfaces
@@ -10,6 +11,8 @@ namespace DigitalPlatform.Interfaces
     /// </summary>
     public interface IFingerprint
     {
+        event MessageArrivedEvent MessageArrived;
+
         int Open(out string strError);
 
         int Close();
@@ -68,6 +71,7 @@ namespace DigitalPlatform.Interfaces
         // 设置参数
         bool SetParameter(string strName, object value);
 
+        string GetMessage(string style);
 
         // event MessageHandler DisplayMessage;
     }
@@ -90,5 +94,68 @@ namespace DigitalPlatform.Interfaces
     public class MessageEventArgs : EventArgs
     {
         public string Message = "";
+    }
+
+#if NO
+    [Serializable()]
+    public delegate void ScanedEventHandler(object sender,
+ScanedEventArgs e);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Serializable()]
+    public class ScanedEventArgs : EventArgs
+    {
+        public string Text { get; set; }
+    }
+#endif
+
+#if NO
+    public abstract class MyDelegateObject : MarshalByRefObject
+    {
+        public void EventHandlerCallback(object sender, ScanedEventArgs e)
+        {
+            EventHandlerCallbackCore(sender, e);
+        }
+
+        protected abstract void EventHandlerCallbackCore(object sender, ScanedEventArgs e);
+
+        public override object InitializeLifetimeService() { return null; }
+    }
+#endif
+
+    public delegate void MessageArrivedEvent(string Message);
+
+    public class EventProxy : MarshalByRefObject
+    {
+
+        #region Event Declarations
+
+        public event MessageArrivedEvent MessageArrived;
+
+        #endregion
+
+        #region Lifetime Services
+
+        public override object InitializeLifetimeService()
+        {
+            return null;
+            //Returning null holds the object alive
+            //until it is explicitly destroyed
+        }
+
+        #endregion
+
+        #region Local Handlers
+
+        public void LocallyHandleMessageArrived(string Message)
+        {
+            if (MessageArrived != null)
+                MessageArrived(Message);
+        }
+
+        #endregion
+
     }
 }

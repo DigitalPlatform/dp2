@@ -3,10 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 
 using DigitalPlatform;
+using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
@@ -27,6 +24,9 @@ namespace dp2SSL
     /// </summary>
     public partial class PageBorrow : Page, INotifyPropertyChanged
     {
+        LayoutAdorner _adorner = null;
+        AdornerLayer _layer = null;
+
         Timer _timer = null;
 
         EntityCollection _entities = new EntityCollection();
@@ -37,6 +37,7 @@ namespace dp2SSL
             InitializeComponent();
 
             Loaded += PageBorrow_Loaded;
+            Unloaded += PageBorrow_Unloaded;
 
             this.DataContext = this;
 
@@ -46,7 +47,63 @@ namespace dp2SSL
 
             this.patronControl.DataContext = _patron;
 
+            this._patron.PropertyChanged += _patron_PropertyChanged;
+
             // Refresh();
+
+        }
+
+        FingerprintChannel _fingerprintChannel = null;
+        RfidChannel _rfidChannel = null;
+        // EventProxy eventProxy;
+
+        private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
+        {
+            _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
+            _adorner = new LayoutAdorner(this);
+
+            List<string> errors = new List<string>();
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+            {
+#if NO
+                eventProxy = new EventProxy();
+                eventProxy.MessageArrived +=
+                  new MessageArrivedEvent(eventProxy_MessageArrived);
+#endif
+                _fingerprintChannel = FingerPrint.StartFingerprintChannel(
+                    App.FingerprintUrl,
+                    out string strError);
+                if (_fingerprintChannel == null)
+                    errors.Add(strError);
+                // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
+#if NO
+                _fingerprintChannel.Object.MessageArrived +=
+  new MessageArrivedEvent(eventProxy.LocallyHandleMessageArrived);
+#endif
+                try
+                {
+                    _fingerprintChannel.Object.GetMessage("clear");
+                }
+                catch (Exception ex)
+                {
+                    errors.Add("ClearMessage Exception: " + ex.Message);
+                }
+
+
+            }
+
+            if (string.IsNullOrEmpty(App.RfidUrl) == false)
+            {
+                _rfidChannel = RFID.StartRfidChannel(
+    App.RfidUrl,
+    out string strError);
+                if (_rfidChannel == null)
+                    errors.Add(strError);
+            }
+
+            if (errors.Count > 0)
+                this.Error = StringUtil.MakePathList(errors, "; ");
+
             // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
             if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
                 _timer = new System.Threading.Timer(
@@ -56,18 +113,61 @@ namespace dp2SSL
         TimeSpan.FromSeconds(1));
         }
 
+#if NO
+        void eventProxy_MessageArrived(string Message)
+        {
+            MessageBox.Show(Message);
+        }
+#endif
+
+        private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (_fingerprintChannel != null)
+            {
+                FingerPrint.EndFingerprintChannel(_fingerprintChannel);
+                _fingerprintChannel = null;
+            }
+
+            if (_rfidChannel != null)
+            {
+                RFID.EndRfidChannel(_rfidChannel);
+                _rfidChannel = null;
+            }
+
+            if (_timer != null)
+                _timer.Dispose();
+        }
+
+        bool _visiblityChanged = false;
+
+        private void _patron_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "UID")
+            {
+                // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
+                if (string.IsNullOrEmpty(_patron.UID) == false
+                    && this.patronControl.Visibility != Visibility.Visible)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        patronControl.Visibility = Visibility.Visible;
+                        _visiblityChanged = true;
+                    }));
+                // 如果读者卡又被拿走了，则要恢复 patronControl 的隐藏状态
+                else if (string.IsNullOrEmpty(_patron.UID) == true
+    && this.patronControl.Visibility == Visibility.Visible
+    && _visiblityChanged)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        patronControl.Visibility = Visibility.Collapsed;
+                    }));
+            }
+        }
+
         public PageBorrow(string buttons) : this()
         {
             this.ActionButtons = buttons;
         }
 
-        LayoutAdorner _adorner = null;
-        AdornerLayer _layer = null;
-        private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
-        {
-            _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
-            _adorner = new LayoutAdorner(this);
-        }
 
         void AddLayer()
         {
@@ -106,18 +206,25 @@ namespace dp2SSL
             set
             {
                 List<string> buttons = StringUtil.SplitList(value);
+
                 if (buttons.IndexOf("borrow") != -1)
                     borrowButton.Visibility = Visibility.Visible;
                 else
                     borrowButton.Visibility = Visibility.Collapsed;
+
                 if (buttons.IndexOf("return") != -1)
                     returnButton.Visibility = Visibility.Visible;
                 else
                     returnButton.Visibility = Visibility.Collapsed;
+
                 if (buttons.IndexOf("renew") != -1)
                     renewButton.Visibility = Visibility.Visible;
                 else
                     renewButton.Visibility = Visibility.Collapsed;
+
+                // (普通)还书和续借操作并不需要读者卡
+                if (borrowButton.Visibility != Visibility.Visible)
+                    this.patronControl.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -153,64 +260,79 @@ namespace dp2SSL
             return new GetTagInfoResult { TagInfo = info };
         }
 
+        int _inRefresh = 0;
+
         void Refresh()
         {
-            // 第一阶段出错
-            // List<string> first_stag_error_uids = new List<string>();
+            // 防止重入
+            int v = Interlocked.Increment(ref this._inRefresh);
+            if (v > 1)
+            {
+                Interlocked.Decrement(ref this._inRefresh);
+                return;
+            }
 
             _cancelRefresh = new CancellationTokenSource();
             try
             {
-                RfidChannel channel = StartRfidChannel(App.RfidUrl,
-        out string strError);
-                if (channel == null)
-                    throw new Exception(strError);
-                try
-                {
-                    // 获得所有协议类型的标签
-                    var result = channel.Object.ListTags("*",
-                        null
-                        // "getTagInfo"
-                        );
+                // 获得所有协议类型的标签
+                var result = _rfidChannel.Object.ListTags("*",
+                    null
+                    // "getTagInfo"
+                    );
 
-                    List<OneTag> books = new List<OneTag>();
-                    List<OneTag> patrons = new List<OneTag>();
-                    // 分离图书标签和读者卡标签
-                    foreach (OneTag tag in result.Results)
+                List<OneTag> books = new List<OneTag>();
+                List<OneTag> patrons = new List<OneTag>();
+
+                // 分离图书标签和读者卡标签
+                foreach (OneTag tag in result.Results)
+                {
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
+                        patrons.Add(tag);
+                    else if (tag.Protocol == InventoryInfo.ISO15693)
                     {
-                        if (tag.Protocol == InventoryInfo.ISO14443A)
-                            patrons.Add(tag);
-                        else if (tag.Protocol == InventoryInfo.ISO15693)
+                        var gettaginfo_result = GetTagInfo(_rfidChannel, tag.UID);
+                        if (gettaginfo_result.Value == -1)
                         {
-                            var gettaginfo_result = GetTagInfo(channel, tag.UID);
-                            if (gettaginfo_result.Value == -1)
-                            {
-                                this.Error = gettaginfo_result.ErrorInfo;
-                                continue;
-                            }
-                            TagInfo info = gettaginfo_result.TagInfo;
-                            // 观察 typeOfUsage 元素
-                            var chip = LogicChip.From(info.Bytes,
+                            this.Error = gettaginfo_result.ErrorInfo;
+                            continue;
+                        }
+                        TagInfo info = gettaginfo_result.TagInfo;
+                        // 观察 typeOfUsage 元素
+                        var chip = LogicChip.From(info.Bytes,
 (int)info.BlockSize,
 "");
-                            string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
-                                patrons.Add(tag);
-                            else
-                                books.Add(tag);
-                        }
+                        string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                            patrons.Add(tag);
                         else
                             books.Add(tag);
                     }
+                    else
+                        books.Add(tag);
+                }
 
+                List<Entity> new_entities = new List<Entity>();
+                {
+                    // 比较当前集合。对当前集合进行增删改
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        // 比较当前集合。对当前集合进行增删改
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            _entities.Refresh(books);
-                        }));
-                    }
+                        _entities.Refresh(books, ref new_entities);
+                    }));
 
+                    if (_entities.Count == 0 && _patron.Source == "fingerprint")
+                        _patron.Clear();
+                }
+
+                if (patrons.Count == 1)
+                    _patron.Source = "";
+
+                if (_patron.Source == "fingerprint")
+                {
+
+                }
+                else
+                {
                     if (patrons.Count > 1)
                     {
                         // 读卡器上放了多张读者卡
@@ -221,30 +343,81 @@ namespace dp2SSL
                     else
                         _patron.Clear();
                 }
-                catch (Exception ex)
-                {
+
+
+                GetPatronFromFingerprint();
+
+                FillBookFields();
+                FillPatronDetail();
+
+                CheckEAS(new_entities);
+            }
+            catch (Exception ex)
+            {
 #if NO
                     this.error.Text = ex.Message;
                     this.error.Visibility = Visibility.Visible;
 #endif
-                    this.Error = ex.Message;
-                    return;
-                }
-                finally
-                {
-                    EndRfidChannel(channel);
-                }
-
-                FillBookFields();
-                FillPatronInfo();
+                this.Error = ex.Message;
+                return;
             }
             finally
             {
                 _cancelRefresh = null;
+                Interlocked.Decrement(ref this._inRefresh);
             }
         }
 
-        void FillPatronInfo()
+        // 检查芯片的 EAS 状态
+        void CheckEAS(List<Entity> entities)
+        {
+            foreach (Entity entity in entities)
+            {
+                if (entity.TagInfo == null)
+                    continue;
+
+                // 检测 EAS 是否正确
+                NormalResult result = null;
+                if (entity.State == "borrowed" && entity.TagInfo.EAS == true)
+                    result = SetEAS(entity.UID, false);
+                else if (entity.State == "onshelf" && entity.TagInfo.EAS == false)
+                    result = SetEAS(entity.UID, true);
+                else
+                    continue;
+
+                if (result.Value == -1)
+                    entity.SetError($"自动修正 EAS 时出错: {result.ErrorInfo}", "red");
+                else
+                    entity.SetError("自动修正 EAS 成功", "green");
+            }
+        }
+
+        // 从指纹阅读器获取消息(第一阶段)
+        void GetPatronFromFingerprint()
+        {
+            if (_fingerprintChannel == null)
+                return;
+            try
+            {
+                var message = _fingerprintChannel.Object.GetMessage("");
+                if (message == null)
+                    return;
+
+                _patron.Clear();
+                // _patron.UID = "#fingerprint";
+                _patron.PII = message;
+                _patron.Source = "fingerprint";
+                // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
+                // “新一轮”意思是图书全部取走以后开始的下一轮
+            }
+            catch (Exception ex)
+            {
+                this._patron.Error = ex.Message;
+            }
+        }
+
+        // 填充读者信息的其他字段(第二阶段)
+        void FillPatronDetail()
         {
             if (_cancelRefresh == null
     || _cancelRefresh.IsCancellationRequested)
@@ -294,11 +467,12 @@ namespace dp2SSL
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         void FillBookFields()
         {
-            RfidChannel channel = StartRfidChannel(App.RfidUrl,
+#if NO
+            RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
 out string strError);
             if (channel == null)
                 throw new Exception(strError);
-
+#endif
             try
             {
                 foreach (Entity entity in _entities)
@@ -318,7 +492,7 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.PII))
                     {
                         // var result = channel.Object.GetTagInfo("*", entity.UID);
-                        var result = GetTagInfo(channel, entity.UID);
+                        var result = GetTagInfo(_rfidChannel, entity.UID);
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
@@ -326,6 +500,8 @@ out string strError);
                         }
 
                         Debug.Assert(result.TagInfo != null);
+
+                        entity.TagInfo = result.TagInfo;
 
                         LogicChip chip = LogicChip.From(result.TagInfo.Bytes,
 (int)result.TagInfo.BlockSize,
@@ -370,7 +546,9 @@ out string strError);
             }
             finally
             {
-                EndRfidChannel(channel);
+#if NO
+                RFID.EndRfidChannel(channel);
+#endif
             }
         }
 
@@ -478,88 +656,6 @@ out string strError);
             }
         }
 
-        #region RFID 有关功能
-
-        public class RfidChannel
-        {
-            public IpcClientChannel Channel { get; set; }
-            public IRfid Object { get; set; }
-        }
-
-        public static RfidChannel StartRfidChannel(
-            string strUrl,
-            out string strError)
-        {
-            strError = "";
-
-            RfidChannel result = new RfidChannel();
-
-            result.Channel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
-                    new BinaryClientFormatterSinkProvider());
-
-            ChannelServices.RegisterChannel(result.Channel, true);
-            bool bDone = false;
-            try
-            {
-                result.Object = (IRfid)Activator.GetObject(typeof(IRfid),
-                    strUrl);
-                if (result.Object == null)
-                {
-                    strError = "无法连接到服务器 " + strUrl;
-                    return null;
-                }
-                bDone = true;
-                return result;
-            }
-            finally
-            {
-                if (bDone == false)
-                    EndRfidChannel(result);
-            }
-        }
-
-        public static void EndRfidChannel(RfidChannel channel)
-        {
-            if (channel != null && channel.Channel != null)
-            {
-                ChannelServices.UnregisterChannel(channel.Channel);
-                channel.Channel = null;
-            }
-        }
-
-        // return:
-        //      -2  remoting服务器连接失败。驱动程序尚未启动
-        //      -1  出错
-        //      0   成功
-        public static NormalResult SetEAS(
-            RfidChannel channel,
-            string reader_name,
-            string tag_name,
-            bool enable,
-            out string strError)
-        {
-            strError = "";
-
-            try
-            {
-                return channel.Object.SetEAS(reader_name,
-                    tag_name,
-                    enable);
-            }
-            // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
-            catch (System.Runtime.Remoting.RemotingException ex)
-            {
-                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
-                return new NormalResult { Value = -2, ErrorInfo = strError };
-            }
-            catch (Exception ex)
-            {
-                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
-                return new NormalResult { Value = -1, ErrorInfo = strError };
-            }
-        }
-
-        #endregion
 
 
         #region Borrowable 属性
@@ -613,7 +709,7 @@ out string strError);
         {
             Task.Run(() =>
             {
-                var result = Loan("borrow");
+                Loan("borrow");
             });
         }
 
@@ -630,7 +726,7 @@ out string strError);
             _patron.Error = null;
         }
 
-        NormalResult Loan(string action)
+        void Loan(string action)
         {
             ProgressWindow progress = null;
 
@@ -651,10 +747,45 @@ out string strError);
                 AddLayer();
             }));
 
+            // 检查读者卡状态是否 OK
+            if (IsPatronOK() == false)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.MessageText = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+                    progress.BackColor = "red";
+                    progress = null;
+                }));
+                return;
+            }
+
+            // 借书操作必须要有读者卡。(还书和续借，可要可不要)
+            if (action == "borrow")
+            {
+                if (string.IsNullOrEmpty(_patron.Barcode))
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.MessageText = $"请先在读卡器上放好读者卡，再进行{action_name}";
+                        progress.BackColor = "red";
+                        progress = null;
+                    }));
+                    return;
+                }
+            }
+
             LibraryChannel channel = App.GetChannel();
             try
             {
-                // ClearEntitiesError();
+                ClearEntitiesError();
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.ProgressBar.Value = 0;
+                    progress.ProgressBar.Minimum = 0;
+                    progress.ProgressBar.Maximum = _entities.Count;
+                }));
+
                 int skip_count = 0;
                 int success_count = 0;
                 List<string> errors = new List<string>();
@@ -707,6 +838,18 @@ out string strError);
                             continue;
                         }
 
+                        // return 操作，提前修改 EAS
+                        // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+                        {
+                            var result = SetEAS(entity.UID, action == "return");
+                            if (result.Value == -1)
+                            {
+                                entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
+                                errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
+                                continue;
+                            }
+                        }
+
                         entity.Waiting = true;
                         lRet = channel.Return(null,
                             "return",
@@ -727,21 +870,58 @@ out string strError);
                             out strError);
                     }
 
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.ProgressBar.Value++;
+                    }));
+
                     if (lRet == -1)
                     {
+                        // return 操作如果 API 失败，则要改回原来的 EAS 状态
+                        if (action == "return")
+                        {
+                            var result = SetEAS(entity.UID, false);
+                            if (result.Value == -1)
+                                strError += $"\r\n并且复原 EAS 状态的动作也失败了: {result.ErrorInfo}";
+                        }
+
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
                         // TODO: 这里最好用 title
                         errors.Add($"册 '{entity.PII}': {strError}");
+                        continue;
                     }
-                    else
+
+                    // borrow 操作，API 之后才修改 EAS
+                    // 注: 如果 API 成功但修改 EAS 动作失败(可能由于读者从读卡器上过早拿走图书导致)，读者会无法把本册图书拿出门禁。遇到此种情况，读者回来补充修改 EAS 一次即可
+                    if (action == "borrow")
+                    {
+                        var result = SetEAS(entity.UID, action == "return");
+                        if (result.Value == -1)
+                        {
+                            entity.SetError($"虽然{action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}", "yellow");
+                            errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
+                        }
+                    }
+
+                    // 刷新显示
                     {
                         if (item_records?.Length > 0)
                             entity.SetData(entity.ItemRecPath, item_records[0]);
-                        entity.SetError($"{action_name}成功", "green");
+
+                        if (entity.Error != null)
+                            continue;
+
+                        entity.SetError($"{action_name}成功", lRet == 1 ? "yellow" : "green");
                         success_count++;
                         // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
                 }
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.ProgressBar.Visibility = Visibility.Collapsed;
+                    // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
+                }));
 
                 // 修改 borrowable
                 booksControl.SetBorrowable();
@@ -762,7 +942,7 @@ out string strError);
                         progress.BackColor = "red";
                         progress = null;
                     }));
-                    return new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, "; ") };
+                    return; // new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, "; ") };
                 }
                 else
                 {
@@ -784,7 +964,7 @@ out string strError);
                     }));
                 }
 
-                return new NormalResult { Value = success_count };
+                return; // new NormalResult { Value = success_count };
             }
             finally
             {
@@ -800,6 +980,44 @@ out string strError);
         private void Progress_Closed(object sender, EventArgs e)
         {
             RemoveLayer();
+        }
+
+        NormalResult SetEAS(string uid, bool enable)
+        {
+#if NO
+            RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
+out string strError);
+            if (channel == null)
+                throw new Exception(strError);
+#endif
+            try
+            {
+                return _rfidChannel.Object.SetEAS("*", $"uid:{uid}", enable);
+            }
+            catch (Exception ex)
+            {
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+            finally
+            {
+#if NO
+                RFID.EndRfidChannel(channel);
+#endif
+            }
+        }
+
+        // 当前读者卡状态是否 OK?
+        // 注：如果卡片虽然放上去了，但无法找到读者记录，这种状态就不是 OK 的。此时应该拒绝进行流通操作
+        bool IsPatronOK()
+        {
+            if (string.IsNullOrEmpty(_patron.UID)
+                && string.IsNullOrEmpty(_patron.Barcode))
+                return true;
+
+            if (string.IsNullOrEmpty(_patron.UID) == false
+    && string.IsNullOrEmpty(_patron.Barcode) == false)
+                return true;
+            return false;
         }
 
 #if NO
@@ -866,7 +1084,7 @@ out string strError);
         {
             Task.Run(() =>
             {
-                var result = Loan("return");
+                Loan("return");
             });
         }
 
@@ -875,8 +1093,13 @@ out string strError);
         {
             Task.Run(() =>
             {
-                var result = Loan("renew");
+                Loan("renew");
             });
+        }
+
+        private void GoHome_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageMenu());
         }
     }
 }

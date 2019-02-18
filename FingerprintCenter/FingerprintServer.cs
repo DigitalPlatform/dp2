@@ -5,14 +5,169 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Speech.Synthesis;
 using System.Threading;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Serialization.Formatters;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Interfaces;
+
 
 namespace FingerprintCenter
 {
     public class FingerprintServer : MarshalByRefObject, IFingerprint, IDisposable
     {
+        public event MessageArrivedEvent MessageArrived;
+
+        #region remoting server
+
+#if HTTP_CHANNEL
+        HttpChannel m_serverChannel = null;
+#else
+        static IpcServerChannel _serverChannel = null;
+#endif
+        // private ObjRef internalRef;
+
+        public static bool StartRemotingServer()
+        {
+#if NO
+            try
+            {
+#endif
+            // EndRemoteChannel();
+            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            provider.TypeFilterLevel = TypeFilterLevel.Full;
+            Hashtable ht = new Hashtable();
+            ht["portName"] = "FingerprintChannel";
+            ht["name"] = "ipc";
+            ht["authorizedGroup"] = "Administrators"; // "Everyone";
+
+            //Instantiate our server channel.
+#if HTTP_CHANNEL
+            m_serverChannel = new HttpChannel();
+#else
+            // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
+            // m_serverChannel = new IpcServerChannel(
+            //     "FingerprintChannel");
+            _serverChannel = new IpcServerChannel(ht, provider);
+
+#endif
+
+            //Register the server channel.
+            ChannelServices.RegisterChannel(_serverChannel, false);
+
+            RemotingConfiguration.ApplicationName = "FingerprintServer";
+
+            /*
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                typeof(ServerFactory),
+                "ServerFactory",
+                WellKnownObjectMode.Singleton);
+             * */
+
+
+            //Register this service type.
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                typeof(FingerprintServer),
+                "FingerprintServer",
+                WellKnownObjectMode.Singleton);
+#if NO
+            internalRef = RemotingServices.Marshal(this,
+                "FingerprintServer");
+#endif
+            Program.FingerPrint.Captured += FingerPrint_Captured;
+            // Program.MainForm.OutputHistory("111");
+            return true;
+#if NO
+            }
+            catch (RemotingException ex)
+            {
+                this.ShowMessage(ex.Message);
+                return false;
+            }
+#endif
+        }
+
+        private static void FingerPrint_Captured(object sender, DigitalPlatform.CirculationClient.CapturedEventArgs e)
+        {
+            lock (_syncRoot_messages)
+            {
+                // Program.MainForm.OutputHistory("captured");
+
+                _messages.Add(e.Text);
+                while (_messages.Count > 1000)
+                    _messages.RemoveAt(0);
+            }
+        }
+
+        public static void EndRemotingServer()
+        {
+            if (_serverChannel != null)
+            {
+                // RemotingServices.Unmarshal(internalRef);
+                // Program.MainForm.OutputHistory("222");
+                Program.FingerPrint.Captured -= FingerPrint_Captured;
+
+                ChannelServices.UnregisterChannel(_serverChannel);
+                _serverChannel = null;
+            }
+        }
+
+        #endregion
+
+
+        private void SafeInvokeMessageArrived(string Message)
+        {
+            //if (!serverActive)
+            //    return;
+
+            if (MessageArrived == null)
+                return;         //No Listeners
+
+            MessageArrivedEvent listener = null;
+            Delegate[] dels = MessageArrived.GetInvocationList();
+
+            foreach (Delegate del in dels)
+            {
+                try
+                {
+                    listener = (MessageArrivedEvent)del;
+                    listener.Invoke(Message);
+                }
+                catch (Exception ex)
+                {
+                    //Could not reach the destination, so remove it
+                    //from the list
+                    MessageArrived -= listener;
+                }
+            }
+        }
+
+        private static readonly Object _syncRoot_messages = new Object(); // 2017/5/18
+        static List<string> _messages = new List<string>();
+
+        // 取走一条消息
+        public string GetMessage(string style)
+        {
+            lock (_syncRoot_messages)
+            {
+                // Program.MainForm.OutputHistory($"messages.Count={_messages.Count}");
+
+                if (_messages.Count == 0)
+                    return null;
+                if (style == "clear")
+                {
+                    _messages.Clear();
+                    return "";
+                }
+                string message = _messages[0];
+                _messages.RemoveAt(0);
+                return message;
+            }
+        }
+
         public int GetVersion(out string strVersion,
             out string strCfgInfo,
             out string strError)

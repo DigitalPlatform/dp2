@@ -88,8 +88,10 @@
     <Compile Include="Config\ConfigParams.cs" />
     <Compile Include="Controls\Entity.cs" />
     <Compile Include="Controls\Patron.cs" />
+    <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="Converter\CountToVisibilityConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
+    <Compile Include="FingerPrint.cs" />
     <Compile Include="LayoutAdorner.cs" />
     <Compile Include="PasswordEditor.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
@@ -97,6 +99,7 @@
     </Compile>
     <Compile Include="Converter\StateToBorderConverter.cs" />
     <Compile Include="Converter\StringToVisibilityConverter.cs" />
+    <Compile Include="RFID.cs" />
     <Compile Include="WpfClientInfo.cs" />
     <Page Include="ConfigWindow.xaml">
       <SubType>Designer</SubType>
@@ -175,6 +178,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
