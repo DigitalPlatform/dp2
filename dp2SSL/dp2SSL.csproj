@@ -93,6 +93,9 @@
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="FingerPrint.cs" />
     <Compile Include="LayoutAdorner.cs" />
+    <Compile Include="PageSetting.xaml.cs">
+      <DependentUpon>PageSetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PasswordEditor.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
@@ -136,6 +139,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PageMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PageSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

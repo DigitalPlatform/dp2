@@ -4083,6 +4083,7 @@ MessageBoxDefaultButton.Button1);
             {
                 // 清空以前的全部缓存内容，以便重新建立
                 // return:
+                //      -3  新版本 fingerprintcenter，不需要进行缓存初始化
                 //      -2  remoting服务器连接失败。驱动程序尚未启动
                 //      -1  出错
                 //      >=0 实际发送给接口程序的事项数目
@@ -4090,6 +4091,11 @@ MessageBoxDefaultButton.Button1);
                     out strError);
                 if (nRet == -1 || nRet == -2)
                     return nRet;
+                if (nRet == -3)
+                {
+                    strError = "新版本 fingerprintcenter 不需要进行指纹缓存初始化";
+                    return 0;
+                }
 
                 // TODO: 这里延迟显示
                 if (bDelayShow == true)
@@ -4685,6 +4691,7 @@ out strError);
         }
 
         // return:
+        //      -3  新版本 fingerprintcenter，不需要进行缓存初始化
         //      -2  remoting服务器连接失败。驱动程序尚未启动
         //      -1  出错
         //      >=0 实际发送给接口程序的事项数目
@@ -4716,7 +4723,7 @@ out strError);
                 }
 
                 if (StringUtil.IsInList("selfInitCache", result.CfgInfo) == true)
-                    return 0;
+                    return -3;
 
                 if (resultset == null)
                 {

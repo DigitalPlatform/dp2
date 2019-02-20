@@ -1865,6 +1865,9 @@ out string strError)
         {
             public IpcClientChannel Channel { get; set; }
             public IFingerprint Object { get; set; }
+
+            public string Version { get; set; }
+            public string CfgInfo { get; set; }
         }
 
         // IpcClientChannel m_fingerPrintChannel = new IpcClientChannel();

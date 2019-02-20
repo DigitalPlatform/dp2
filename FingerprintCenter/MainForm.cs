@@ -52,6 +52,8 @@ namespace FingerprintCenter
                 _floatingMessage.RectColor = Color.Green;
                 _floatingMessage.Show(this);
             }
+
+            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
         }
 
         private const int CP_NOCLOSE_BUTTON = 0x200;
@@ -328,7 +330,7 @@ bool bClickClose = false)
                 {
                     Speak("很好");
                     // TODO: 显示文字中包含 e.Text?
-                    
+
                     SendKeys.SendWait(e.Text + "\r");
                 }
             }));
@@ -397,6 +399,8 @@ bool bClickClose = false)
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             _cancel.Cancel();
+
+            UsbNotification.UnregisterUsbDeviceNotification();
 
             {
                 if (this.checkBox_cfg_savePasswordLong.Checked == false)
@@ -1044,6 +1048,7 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
+#if NO
         #region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
@@ -1077,6 +1082,59 @@ Keys keyData)
         }
 
         #endregion
+#endif
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == UsbNotification.WmDevicechange)
+            {
+                switch ((int)m.WParam)
+                {
+                    case UsbNotification.DbtDeviceremovecomplete:
+                        //MessageBox.Show(this, "removed"); 
+                        BeginRefreshReaders();
+                        break;
+                    case UsbNotification.DbtDevicearrival:
+                        //MessageBox.Show(this, "added");
+                        BeginRefreshReaders();
+                        break;
+                }
+            }
+        }
+
+        System.Threading.Timer _refreshTimer = null;
+        private static readonly Object _syncRoot_refresh = new Object();
+
+        // 2 秒内多次到来的请求，会被合并为一次执行
+        void BeginRefreshReaders()
+        {
+            lock (_syncRoot_refresh)
+            {
+                if (_refreshTimer == null)
+                {
+                    _refreshTimer = new System.Threading.Timer(
+            new System.Threading.TimerCallback(refreshTimerCallback),
+            null,
+            TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+                }
+            }
+        }
+
+        void refreshTimerCallback(object o)
+        {
+            // 迫使重新启动
+            _initialized = false;
+            BeginStart();
+            lock (_syncRoot_refresh)
+            {
+                if (_refreshTimer != null)
+                {
+                    _refreshTimer.Dispose();
+                    _refreshTimer = null;
+                }
+            }
+        }
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {

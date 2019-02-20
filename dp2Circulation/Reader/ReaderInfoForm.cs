@@ -5339,6 +5339,11 @@ MessageBoxDefaultButton.Button2);
                 result.Version = strVersion;
                 result.ErrorInfo = strError;
                 result.Value = nRet;
+
+                // 2019/2/19
+                channel.Version = result.Version;
+                channel.CfgInfo = result.CfgInfo;
+
                 return result;
             }
             catch (System.Runtime.Remoting.RemotingException)

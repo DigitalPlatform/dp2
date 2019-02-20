@@ -656,9 +656,7 @@ out string strError);
             }
         }
 
-
-
-        #region Borrowable 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)

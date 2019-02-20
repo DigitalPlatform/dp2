@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -50,6 +51,46 @@ namespace dp2SSL
             {
                 return WpfClientInfo.Config.Get("global", "fingerprintUrl", "");
             }
+        }
+
+        // 用于锁屏的密码
+        public string LockingPassword
+        {
+            get
+            {
+                return DecryptPasssword(WpfClientInfo.Config.Get("global", "lockingPassword", ""));
+            }
+            set
+            {
+                WpfClientInfo.Config.Set("global", "lockingPassword", EncryptPassword(value));
+            }
+        }
+
+        const string EncryptKey = "dp2ssl_client_password_key";
+
+        internal string DecryptPasssword(string strEncryptedText)
+        {
+            if (String.IsNullOrEmpty(strEncryptedText) == false)
+            {
+                try
+                {
+                    string strPassword = Cryptography.Decrypt(
+        strEncryptedText,
+        EncryptKey);
+                    return strPassword;
+                }
+                catch
+                {
+                    return "errorpassword";
+                }
+            }
+
+            return "";
+        }
+
+        internal string EncryptPassword(string strPlainText)
+        {
+            return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
         #region LibraryChannel
