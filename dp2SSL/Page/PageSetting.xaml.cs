@@ -34,11 +34,13 @@ namespace dp2SSL
         {
             // 首次设置密码，或者登录
             InitialPage();
+            if (this.password.Visibility == Visibility.Visible)
+                this.password.Focus();
         }
 
         void InitialPage()
         {
-            if (string.IsNullOrEmpty(App.LockingPassword))
+            if (App.IsLockingPasswordEmpty())
             {
                 this.passwordArea.Visibility = Visibility.Visible;
                 this.buttonArea.Visibility = Visibility.Collapsed;
@@ -64,6 +66,7 @@ namespace dp2SSL
             }
         }
 
+#if NO
         static App App
         {
             get
@@ -71,8 +74,9 @@ namespace dp2SSL
                 return ((App)Application.Current);
             }
         }
+#endif
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -136,7 +140,7 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
 
 
         private void Config_Click(object sender, RoutedEventArgs e)
@@ -166,7 +170,7 @@ namespace dp2SSL
                 return;
             }
 
-            App.LockingPassword = this.password.Password;
+            App.SetLockingPassword(this.password.Password);
             InitialPage();
         }
 
@@ -174,7 +178,7 @@ namespace dp2SSL
         {
             this.Error = null;
 
-            if (this.password.Password != App.LockingPassword)
+            if (App.MatchLockingPassword(this.password.Password) == false)
             {
                 this.Error = "密码不正确，登录失败";
                 return;

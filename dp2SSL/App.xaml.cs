@@ -1,12 +1,13 @@
-﻿using DigitalPlatform.LibraryClient;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -21,7 +22,10 @@ namespace dp2SSL
         protected override void OnStartup(StartupEventArgs e)
         {
             WpfClientInfo.TypeOfProgram = typeof(App);
-            WpfClientInfo.Initial("dp2ssl");
+            if (StringUtil.IsDevelopMode() == false)
+                WpfClientInfo.PrepareCatchException();
+
+            WpfClientInfo.Initial("dp2SSL");
             base.OnStartup(e);
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -32,9 +36,23 @@ namespace dp2SSL
         {
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
+            this._channelPool.Close();
 
             WpfClientInfo.Finish();
             base.OnExit(e);
+        }
+
+        public static App CurrentApp
+        {
+            get
+            {
+                return ((App)Application.Current);
+            }
+        }
+
+        public void ClearChannelPool()
+        {
+            this._channelPool.Clear();
         }
 
         public string RfidUrl
@@ -53,6 +71,15 @@ namespace dp2SSL
             }
         }
 
+        public string dp2Password
+        {
+            get
+            {
+                return DecryptPasssword(WpfClientInfo.Config.Get("global", "dp2Password", ""));
+            }
+        }
+
+#if NO
         // 用于锁屏的密码
         public string LockingPassword
         {
@@ -65,10 +92,32 @@ namespace dp2SSL
                 WpfClientInfo.Config.Set("global", "lockingPassword", EncryptPassword(value));
             }
         }
+#endif
 
-        const string EncryptKey = "dp2ssl_client_password_key";
+        public static void SetLockingPassword(string password)
+        {
+            string strSha1 = Cryptography.GetSHA1(password + "_ok");
+            WpfClientInfo.Config.Set("global", "lockingPassword", strSha1);
+        }
 
-        internal string DecryptPasssword(string strEncryptedText)
+        public static bool MatchLockingPassword(string password)
+        {
+            string sha1 = WpfClientInfo.Config.Get("global", "lockingPassword", "");
+            string current_sha1 = Cryptography.GetSHA1(password + "_ok");
+            if (sha1 == current_sha1)
+                return true;
+            return false;
+        }
+
+        public static bool IsLockingPasswordEmpty()
+        {
+            string sha1 = WpfClientInfo.Config.Get("global", "lockingPassword", "");
+            return (string.IsNullOrEmpty(sha1));
+        }
+
+        static string EncryptKey = "dp2ssl_client_password_key";
+
+        public static string DecryptPasssword(string strEncryptedText)
         {
             if (String.IsNullOrEmpty(strEncryptedText) == false)
             {
@@ -88,12 +137,12 @@ namespace dp2SSL
             return "";
         }
 
-        internal string EncryptPassword(string strPlainText)
+        public static string EncryptPassword(string strPlainText)
         {
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-        #region LibraryChannel
+#region LibraryChannel
 
         internal void Channel_BeforeLogin(object sender,
 DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
@@ -104,7 +153,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     e.UserName = WpfClientInfo.Config.Get("global", "dp2UserName", "");
 
                     // e.Password = this.DecryptPasssword(e.Password);
-                    e.Password = WpfClientInfo.Config.Get("global", "dp2Password", "");
+                    e.Password = this.dp2Password;
 
 #if NO
                     strPhoneNumber = AppInfo.GetString(
@@ -180,6 +229,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _channelList.Remove(channel);
         }
 
-        #endregion
+#endregion
     }
 }

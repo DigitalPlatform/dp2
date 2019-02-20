@@ -133,7 +133,7 @@ bool bClickClose = false)
 
         // FingerprintServer _server = new FingerprintServer();
 
-        FingerPrint FingerPrint = null;
+        FingerPrint FingerPrint = new FingerPrint();
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -159,7 +159,7 @@ bool bClickClose = false)
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
-            this.FingerPrint = new FingerPrint();
+            // this.FingerPrint = new FingerPrint();
             Program.FingerPrint = this.FingerPrint;
 
             FingerPrint.Prompt += FingerPrint_Prompt;

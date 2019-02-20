@@ -62,6 +62,7 @@ namespace dp2SSL
             }
         }
 
+#if NO
         static App App
         {
             get
@@ -69,6 +70,7 @@ namespace dp2SSL
                 return ((App)Application.Current);
             }
         }
+#endif
 
         // return:
         //      -2  remoting服务器连接失败。驱动程序尚未启动
@@ -92,17 +94,17 @@ namespace dp2SSL
             // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
             catch (System.Runtime.Remoting.RemotingException ex)
             {
-                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                strError = "针对 " + App.CurrentApp.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
                 return new NormalResult { Value = -2, ErrorInfo = strError };
             }
             catch (Exception ex)
             {
-                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                strError = "针对 " + App.CurrentApp.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
                 return new NormalResult { Value = -1, ErrorInfo = strError };
             }
         }
 
-        #endregion
+#endregion
 
     }
 

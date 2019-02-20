@@ -59,11 +59,13 @@ namespace dp2SSL
 
         private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
+            // throw new Exception("test");
+
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
 
             List<string> errors = new List<string>();
-            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+            if (string.IsNullOrEmpty(App.CurrentApp.FingerprintUrl) == false)
             {
 #if NO
                 eventProxy = new EventProxy();
@@ -71,7 +73,7 @@ namespace dp2SSL
                   new MessageArrivedEvent(eventProxy_MessageArrived);
 #endif
                 _fingerprintChannel = FingerPrint.StartFingerprintChannel(
-                    App.FingerprintUrl,
+                    App.CurrentApp.FingerprintUrl,
                     out string strError);
                 if (_fingerprintChannel == null)
                     errors.Add(strError);
@@ -92,10 +94,10 @@ namespace dp2SSL
 
             }
 
-            if (string.IsNullOrEmpty(App.RfidUrl) == false)
+            if (string.IsNullOrEmpty(App.CurrentApp.RfidUrl) == false)
             {
                 _rfidChannel = RFID.StartRfidChannel(
-    App.RfidUrl,
+    App.CurrentApp.RfidUrl,
     out string strError);
                 if (_rfidChannel == null)
                     errors.Add(strError);
@@ -225,14 +227,6 @@ namespace dp2SSL
                 // (普通)还书和续借操作并不需要读者卡
                 if (borrowButton.Visibility != Visibility.Visible)
                     this.patronControl.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        static App App
-        {
-            get
-            {
-                return ((App)Application.Current);
             }
         }
 
@@ -570,7 +564,7 @@ out string strError);
             item_xml = "";
             item_recpath = "";
 
-            LibraryChannel channel = App.GetChannel();
+            LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
 #if NO
@@ -620,7 +614,7 @@ out string strError);
             }
             finally
             {
-                App.ReturnChannel(channel);
+                App.CurrentApp.ReturnChannel(channel);
             }
         }
 
@@ -632,7 +626,7 @@ out string strError);
             out string reader_xml)
         {
             reader_xml = "";
-            LibraryChannel channel = App.GetChannel();
+            LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
                 long lRet = channel.GetReaderInfo(null,
@@ -652,7 +646,7 @@ out string strError);
             }
             finally
             {
-                App.ReturnChannel(channel);
+                App.CurrentApp.ReturnChannel(channel);
             }
         }
 
@@ -772,7 +766,7 @@ out string strError);
                 }
             }
 
-            LibraryChannel channel = App.GetChannel();
+            LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
                 ClearEntitiesError();
@@ -966,7 +960,7 @@ out string strError);
             }
             finally
             {
-                App.ReturnChannel(channel);
+                App.CurrentApp.ReturnChannel(channel);
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     if (progress != null)
