@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -280,7 +281,12 @@ namespace RfidDrivers.First
              *  Call required, when application load ,this API just only need to load once
              *  Load all reader driver dll from drivers directory, like "rfidlib_ANRD201.dll"  
              */
-            RFIDLIB.rfidlib_reader.RDR_LoadReaderDrivers("\\Drivers");
+            string path = "\\x86\\Drivers";
+            if (IntPtr.Size == 8 )
+                path = "\\x64\\Drivers";
+            int ret = RFIDLIB.rfidlib_reader.RDR_LoadReaderDrivers(
+                path
+                );
 
             /*
              * Not call required,it can be Omitted in your own appliation

@@ -220,5 +220,8 @@ ModelManifest.xml
 !/dp2LibraryXE/gsdll32.dll
 
 !/fingerprintcenter/libzkfpcsharp.dll
+!/RfidCenter/x86/
+!/RfidCenter/x64/
+!/RfidCenter/Drivers/
 
 FaceCenter/
