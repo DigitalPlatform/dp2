@@ -11,6 +11,9 @@ using RfidDrivers.First;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using System.Reflection;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace RfidCenter
 {
@@ -21,12 +24,24 @@ namespace RfidCenter
         static ExecutionContext context = null;
         static Mutex mutex = null;
 
+        // https://stackoverflow.com/questions/8836093/how-can-i-specify-a-dllimport-path-at-runtime
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool SetDllDirectory(string lpPathName);
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
         [STAThread]
         static void Main()
         {
+            string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string assemblyPath = Path.Combine(folderPath, IntPtr.Size == 8 ? "x64" : "x86");
+
+            SetDllDirectory(assemblyPath);
+
+            //AppDomain currentDomain = AppDomain.CurrentDomain;
+            //currentDomain.AssemblyResolve += new ResolveEventHandler(LoadFromSameFolder);
+
             ClientInfo.TypeOfProgram = typeof(Program);
 
             if (StringUtil.IsDevelopMode() == false)
@@ -92,7 +107,18 @@ namespace RfidCenter
         }
 #endif
 
-            static MainForm _mainForm = null;
+#if NO
+        static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
+        {
+            string folderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            if (!File.Exists(assemblyPath)) return null;
+            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            return assembly;
+        }
+#endif
+
+        static MainForm _mainForm = null;
         // 这里用 _mainForm 存储窗口对象，不采取 Form.ActiveForm 获取的方式。原因如下
         // http://stackoverflow.com/questions/17117372/form-activeform-occasionally-works
         // Form.ActiveForm occasionally works
