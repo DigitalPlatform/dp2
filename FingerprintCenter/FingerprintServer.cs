@@ -36,22 +36,25 @@ namespace FingerprintCenter
             try
             {
 #endif
-            // EndRemoteChannel();
+// EndRemoteChannel();
+
+#if NO
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
             provider.TypeFilterLevel = TypeFilterLevel.Full;
             Hashtable ht = new Hashtable();
             ht["portName"] = "FingerprintChannel";
             ht["name"] = "ipc";
             ht["authorizedGroup"] = "Administrators"; // "Everyone";
+#endif
 
             //Instantiate our server channel.
 #if HTTP_CHANNEL
             m_serverChannel = new HttpChannel();
 #else
             // TODO: 重复启动 .exe 这里会抛出异常，要进行警告处理
-            // m_serverChannel = new IpcServerChannel(
-            //     "FingerprintChannel");
-            _serverChannel = new IpcServerChannel(ht, provider);
+            _serverChannel = new IpcServerChannel(
+                 "FingerprintChannel");
+            // _serverChannel = new IpcServerChannel(ht, provider);
 
 #endif
 
@@ -115,7 +118,7 @@ namespace FingerprintCenter
             }
         }
 
-        #endregion
+#endregion
 
 
         private void SafeInvokeMessageArrived(string Message)

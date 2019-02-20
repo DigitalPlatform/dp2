@@ -1116,8 +1116,10 @@ string strHtml)
             }
         }
 
+        System.Threading.Timer _refreshTimer = null;
         private static readonly Object _syncRoot_refresh = new Object(); // 2017/5/18
 
+#if NO
         void BeginRefreshReaders()
         {
             Task.Run(() =>
@@ -1131,6 +1133,42 @@ string strHtml)
                     UpdateDeviceList(_driver.Readers);
                 }
             });
+        }
+#endif
+
+        // 2 秒内多次到来的请求，会被合并为一次执行
+        void BeginRefreshReaders()
+        {
+            lock (_syncRoot_refresh)
+            {
+                if (_refreshTimer == null)
+                {
+                    _refreshTimer = new System.Threading.Timer(
+            new System.Threading.TimerCallback(refreshTimerCallback),
+            null,
+            TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+                }
+            }
+        }
+
+        void refreshTimerCallback(object o)
+        {
+            // 迫使重新启动
+            {
+                _driver.RefreshAllReaders();
+                m_rfidObj?.BeginCapture(false);
+                m_rfidObj?.BeginCapture(true);
+                UpdateDeviceList(_driver.Readers);
+            }
+
+            lock (_syncRoot_refresh)
+            {
+                if (_refreshTimer != null)
+                {
+                    _refreshTimer.Dispose();
+                    _refreshTimer = null;
+                }
+            }
         }
 
         private void ToolStripMenuItem_exit_Click(object sender, EventArgs e)

@@ -23,6 +23,20 @@ namespace dp2SSL
         public PageMenu()
         {
             InitializeComponent();
+            this.Loaded += PageMenu_Loaded;
+        }
+
+        private void PageMenu_Loaded(object sender, RoutedEventArgs e)
+        {
+            Window window = Application.Current.MainWindow;
+
+            window.WindowStyle = WindowStyle.None;
+            window.ResizeMode = ResizeMode.NoResize;
+            window.Left = 0;
+            window.Top = 0;
+            window.Width = SystemParameters.VirtualScreenWidth;
+            window.Height = SystemParameters.VirtualScreenHeight;
+            // window.Topmost = true;
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
@@ -38,8 +52,9 @@ namespace dp2SSL
 
         private void Config_Click(object sender, RoutedEventArgs e)
         {
-            Window cfg_window = new ConfigWindow();
-            cfg_window.ShowDialog();
+            //Window cfg_window = new ConfigWindow();
+            //cfg_window.ShowDialog();
+            this.NavigationService.Navigate(new PageSetting());
         }
 
         private void ReturnButton_Click(object sender, RoutedEventArgs e)

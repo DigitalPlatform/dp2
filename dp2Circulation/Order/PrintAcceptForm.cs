@@ -3048,10 +3048,11 @@ namespace dp2Circulation
 <body>
     <div class='pageheader'>%date% %seller% 验收单 - 来源: %sourcedescription% - (共 %pagecount% 页)</div>
     <div class='tabletitle'>%date% %seller% 验收单</div>
-    <div class='seller'>书商: %seller%</div>
-    <div class='copies'>册数: %totalcopies%</div>
+    <div class='seller'>渠道: %seller%</div>
     <div class='bibliocount'>种数: %bibliocount%</div>
-    <div class='totalprice'>总价: %totalprice%</div>
+    <div class='series'>套数: %totalseries%</div>
+    <div class='copies'>册数: %totalcopies%</div>
+    <div class='totalprice'>总验收价: %totalprice%</div>
     <div class='totalprice'>总码洋: %totalfixedprice%</div>
     <div class='totalitemprice'>总册价: %totalitemprice%</div>
     <div class='sepline'><hr/></div>
