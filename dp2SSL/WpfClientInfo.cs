@@ -14,6 +14,9 @@ using log4net;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using System.Threading;
+using DigitalPlatform.Text;
+using DigitalPlatform;
 
 namespace dp2SSL
 {
@@ -222,6 +225,124 @@ namespace dp2SSL
             catch
             {
 
+            }
+        }
+
+        #endregion
+
+        #region 未捕获的异常处理 
+
+        // 准备接管未捕获的异常
+        public static void PrepareCatchException()
+        {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        static bool _bExiting = false;   // 是否处在 正在退出 的状态
+
+        static void CurrentDomain_UnhandledException(object sender,
+    UnhandledExceptionEventArgs e)
+        {
+            if (_bExiting == true)
+                return;
+
+            Exception ex = (Exception)e.ExceptionObject;
+            string strError = GetExceptionText(ex, "");
+
+            MessageWindow message_dlg = new MessageWindow();
+            message_dlg.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            message_dlg.title.Text = $"{ProgramName} 发生未知的异常";
+            message_dlg.text.Text = $"{ProgramName} 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n点“关闭”即关闭程序";
+            message_dlg.Closed += new EventHandler(delegate (object o1, EventArgs e1)
+            {
+            });
+            message_dlg.ShowDialog();
+            // 发送异常报告
+            if ((bool)message_dlg.sendReport.IsChecked)
+                CrashReport(strError);
+
+            // TODO: 把信息提供给数字平台的开发人员，以便纠错
+            // TODO: 显示为红色窗口，表示警告的意思
+
+            // TODO: 重启应用？
+            Application.Current.MainWindow.Close();
+        }
+
+        static string GetExceptionText(Exception ex, string strType)
+        {
+            // Exception ex = (Exception)e.Exception;
+            string strError = "发生未捕获的" + strType + "异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+            Assembly myAssembly = Assembly.GetAssembly(TypeOfProgram);
+            strError += $"\r\n{ProgramName} 版本: " + myAssembly.FullName;
+            strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
+            // strError += "\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
+
+            // TODO: 给出操作系统的一般信息
+
+            // MainForm.WriteErrorLog(strError);
+            return strError;
+        }
+
+#if NO
+        static void Application_ThreadException(object sender,
+    ThreadExceptionEventArgs e)
+        {
+            if (_bExiting == true)
+                return;
+
+            Exception ex = (Exception)e.Exception;
+            string strError = GetExceptionText(ex, "界面线程");
+
+            bool bSendReport = true;
+            DialogResult result = MessageDlg.Show(MainForm,
+    $"{ProgramName} 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n是否关闭程序?",
+    $"{ProgramName} 发生未知的异常",
+    MessageBoxButtons.YesNo,
+    MessageBoxDefaultButton.Button2,
+    ref bSendReport,
+    new string[] { "关闭", "继续" },
+    "将信息发送给开发者");
+            {
+                if (bSendReport)
+                    CrashReport(strError);
+            }
+            if (result == DialogResult.Yes)
+            {
+                _bExiting = true;
+                Application.Exit();
+            }
+        }
+#endif
+
+        static void CrashReport(string strText)
+        {
+            int nRet = 0;
+            string strError = "";
+            try
+            {
+                string strSender = "";
+                //if (MainForm != null)
+                //    strSender = MainForm.GetCurrentUserName() + "@" + MainForm.ServerUID;
+                // 崩溃报告
+
+                nRet = LibraryChannel.CrashReport(
+                    strSender,
+                    $"{ProgramName}",
+                    strText,
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                nRet = -1;
+            }
+
+            if (nRet == -1)
+            {
+                strError = "向 dp2003.com 发送异常报告时出错，未能发送成功。详细情况: " + strError;
+                MessageBox.Show(strError);
+                // 写入错误日志
+                WriteErrorLog(strError);
             }
         }
 

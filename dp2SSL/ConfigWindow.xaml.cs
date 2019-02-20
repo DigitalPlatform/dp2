@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Xceed.Wpf.Toolkit.PropertyGrid;
 
 namespace dp2SSL
 {
@@ -29,6 +30,25 @@ namespace dp2SSL
 
         public void Initial()
         {
+        }
+
+        private void UrlDefault_Click(object sender, RoutedEventArgs e)
+        {
+            int i = 0;
+            i++;
+
+            Button button = (Button)sender;
+            PropertyItem item = (PropertyItem)button.DataContext;
+            if (item.PropertyName == "RfidURL")
+            {
+                item.Value = "ipc://RfidChannel/RfidServer";
+            }
+            else if (item.PropertyName == "FingerprintURL")
+            {
+                item.Value = "ipc://FingerprintChannel/FingerprintServer";
+            }
+            else
+                throw new Exception($"未知的属性名{item.PropertyName}");
         }
     }
 }

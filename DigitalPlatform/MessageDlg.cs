@@ -78,12 +78,12 @@ namespace DigitalPlatform
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message.BackColor = System.Drawing.SystemColors.Window;
-            this.textBox_message.Location = new System.Drawing.Point(12, 12);
+            this.textBox_message.Location = new System.Drawing.Point(20, 18);
             this.textBox_message.Multiline = true;
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
             this.textBox_message.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_message.Size = new System.Drawing.Size(424, 193);
+            this.textBox_message.Size = new System.Drawing.Size(408, 152);
             this.textBox_message.TabIndex = 0;
             // 
             // checkBox_noAsk
@@ -91,18 +91,18 @@ namespace DigitalPlatform
             this.checkBox_noAsk.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox_noAsk.AutoSize = true;
-            this.checkBox_noAsk.Location = new System.Drawing.Point(12, 211);
+            this.checkBox_noAsk.Location = new System.Drawing.Point(20, 180);
             this.checkBox_noAsk.Name = "checkBox_noAsk";
-            this.checkBox_noAsk.Size = new System.Drawing.Size(174, 16);
+            this.checkBox_noAsk.Size = new System.Drawing.Size(259, 22);
             this.checkBox_noAsk.TabIndex = 1;
             this.checkBox_noAsk.Text = "以后遇相同情况不再询问(&N)";
             // 
             // button_1
             // 
             this.button_1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_1.Location = new System.Drawing.Point(188, 241);
+            this.button_1.Location = new System.Drawing.Point(14, 224);
             this.button_1.Name = "button_1";
-            this.button_1.Size = new System.Drawing.Size(76, 22);
+            this.button_1.Size = new System.Drawing.Size(127, 32);
             this.button_1.TabIndex = 2;
             this.button_1.Text = "是(&Y)";
             this.button_1.Click += new System.EventHandler(this.button_1_Click);
@@ -110,9 +110,9 @@ namespace DigitalPlatform
             // button_2
             // 
             this.button_2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_2.Location = new System.Drawing.Point(270, 241);
+            this.button_2.Location = new System.Drawing.Point(151, 224);
             this.button_2.Name = "button_2";
-            this.button_2.Size = new System.Drawing.Size(74, 22);
+            this.button_2.Size = new System.Drawing.Size(123, 32);
             this.button_2.TabIndex = 3;
             this.button_2.Text = "否(&N)";
             this.button_2.Click += new System.EventHandler(this.button_2_Click);
@@ -120,16 +120,16 @@ namespace DigitalPlatform
             // button_3
             // 
             this.button_3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_3.Location = new System.Drawing.Point(361, 241);
+            this.button_3.Location = new System.Drawing.Point(303, 224);
             this.button_3.Name = "button_3";
-            this.button_3.Size = new System.Drawing.Size(75, 22);
+            this.button_3.Size = new System.Drawing.Size(125, 32);
             this.button_3.TabIndex = 4;
             this.button_3.Text = "取消(&C)";
             this.button_3.Click += new System.EventHandler(this.button_3_Click);
             // 
             // MessageDlg
             // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
+            this.AutoScaleBaseSize = new System.Drawing.Size(10, 21);
             this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(448, 276);
             this.Controls.Add(this.button_3);

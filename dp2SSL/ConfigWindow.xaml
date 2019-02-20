@@ -10,7 +10,26 @@
     <Grid>
         <xctk:PropertyGrid
             x:Name="_propertyGrid" Margin="10,10,9.667,10"
-                                     AutoGenerateProperties="True" ShowSearchBox="False" ShowTitle="False"/>
+                                     AutoGenerateProperties="True" ShowSearchBox="False" ShowTitle="False">
+            <xctk:PropertyGrid.EditorDefinitions>
+                <!--  EditorTemplateDefinition #2
+               This EditorTemplateDefinition will provide a yellow TextBox to:
+               1) The property named "LastName"
+               2) The property named "FirstName"
+               3) The property named "Spouse"
+               Replacing the default editor. -->
+                <xctk:EditorTemplateDefinition TargetProperties="RfidURL,FingerprintURL">
+                    <xctk:EditorTemplateDefinition.EditingTemplate>
+                        <DataTemplate>
+                            <DockPanel HorizontalAlignment="Stretch">
+                                <Button Name="urlDefault" Click="UrlDefault_Click" DockPanel.Dock="Right">设为常用值</Button>
+                                <TextBox Text="{Binding Value}" HorizontalAlignment="Stretch"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </xctk:EditorTemplateDefinition.EditingTemplate>
+                </xctk:EditorTemplateDefinition>
+            </xctk:PropertyGrid.EditorDefinitions>
+        </xctk:PropertyGrid>
 
     </Grid>
 </Window>

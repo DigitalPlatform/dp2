@@ -93,11 +93,14 @@
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="FingerPrint.cs" />
     <Compile Include="LayoutAdorner.cs" />
-    <Compile Include="PageSetting.xaml.cs">
+    <Compile Include="Dialog\MessageWindow.xaml.cs">
+      <DependentUpon>MessageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Page\PageSetting.xaml.cs">
       <DependentUpon>PageSetting.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PasswordEditor.cs" />
-    <Compile Include="ProgressWindow.xaml.cs">
+    <Compile Include="Config\PasswordEditor.cs" />
+    <Compile Include="Dialog\ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converter\StateToBorderConverter.cs" />
@@ -134,28 +137,32 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PageBorrow.xaml">
+    <Page Include="Dialog\MessageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PageMenu.xaml">
+    <Page Include="Page\PageBorrow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PageSetting.xaml">
+    <Page Include="Page\PageMenu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ProgressWindow.xaml">
+    <Page Include="Page\PageSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\ProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PageBorrow.xaml.cs">
+    <Compile Include="Page\PageBorrow.xaml.cs">
       <DependentUpon>PageBorrow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PageMenu.xaml.cs">
+    <Compile Include="Page\PageMenu.xaml.cs">
       <DependentUpon>PageMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">

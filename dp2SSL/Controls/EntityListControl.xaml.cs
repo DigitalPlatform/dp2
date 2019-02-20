@@ -103,7 +103,7 @@ namespace dp2SSL
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-
+#if NO
         static App App
         {
             get
@@ -111,6 +111,7 @@ namespace dp2SSL
                 return ((App)Application.Current);
             }
         }
+#endif
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {

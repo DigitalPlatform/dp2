@@ -84,12 +84,12 @@
                 </Button>
                 <Button Name="exitButton"
                     Style="{DynamicResource RoundedButtonStyle}" 
-                    Width="160" Height="60" 
+                    Width="260" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
                      Click="ExitButton_Click">
                     <Button.Content>
-                        <TextBlock>退出</TextBlock>
+                        <TextBlock>退出 dp2SSL</TextBlock>
                     </Button.Content>
                 </Button>
             </StackPanel>

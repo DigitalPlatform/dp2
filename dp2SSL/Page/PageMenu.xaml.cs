@@ -23,6 +23,9 @@ namespace dp2SSL
         public PageMenu()
         {
             InitializeComponent();
+
+            this.ShowsNavigationUI = false;
+
             this.Loaded += PageMenu_Loaded;
         }
 

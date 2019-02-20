@@ -34,6 +34,7 @@ namespace dp2SSL
             set
             {
                 _config.Set("global", "dp2ServerUrl", value);
+                App.CurrentApp.ClearChannelPool();
             }
         }
 
@@ -52,6 +53,7 @@ namespace dp2SSL
             set
             {
                 _config.Set("global", "dp2UserName", value);
+                App.CurrentApp.ClearChannelPool();
             }
         }
 
@@ -66,11 +68,12 @@ namespace dp2SSL
         {
             get
             {
-                return _config.Get("global", "dp2Password", "");
+                return App.DecryptPasssword(_config.Get("global", "dp2Password", ""));
             }
             set
             {
-                _config.Set("global", "dp2Password", value);
+                _config.Set("global", "dp2Password", App.EncryptPassword(value));
+                App.CurrentApp.ClearChannelPool();
             }
         }
 
