@@ -90,8 +90,6 @@ namespace dp2SSL
                 {
                     errors.Add("ClearMessage Exception: " + ex.Message);
                 }
-
-
             }
 
             if (string.IsNullOrEmpty(App.CurrentApp.RfidUrl) == false)
