@@ -7,7 +7,8 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      WindowTitle="借书" Title="借书">
+      WindowTitle="借书" Title="借书"
+      x:Name="_this" >
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
@@ -59,7 +60,12 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
-            <local:EntityListControl x:Name="booksControl" Grid.Column="0" />
+            <!-- 图书信息 -->
+            <StackPanel  Grid.Column="0">
+                <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
+                    Text="{Binding ElementName=booksControl, Path=ItemCount, StringFormat={}图书 ({0})}"/>
+                <local:EntityListControl x:Name="booksControl" />
+            </StackPanel>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 
                 https://stackoverflow.com/questions/1665781/styling-gridsplitter-wpf-c-sharp 
@@ -73,7 +79,12 @@
                     </ControlTemplate>
                 </GridSplitter.Template>
             </GridSplitter>
-            <local:PatronControl x:Name="patronControl" Grid.Column="2" MaxWidth="300"/>
+            <!-- 读者信息 -->
+            <StackPanel Grid.Column="2">
+                <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
+                    Text="读者"/>
+                <local:PatronControl x:Name="patronControl"  MaxWidth="300"/>
+            </StackPanel>
             <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="borrowButton"
                     Style="{DynamicResource RoundedButtonStyle}" 

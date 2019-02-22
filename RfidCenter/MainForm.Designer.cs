@@ -88,13 +88,13 @@
             this.ToolStripMenuItem_testLockBlocks = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_testRfidChannel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testSetConfig = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_readConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_loadFactoryDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_readConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -192,7 +192,6 @@
             this.label_message.Name = "label_message";
             this.label_message.Size = new System.Drawing.Size(672, 306);
             this.label_message.TabIndex = 0;
-            this.label_message.Text = "label6";
             this.label_message.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_cancel
@@ -417,7 +416,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(557, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(531, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -445,7 +444,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(560, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(534, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -693,6 +692,13 @@
             this.MenuItem_testSetConfig.Text = "SetConfig";
             this.MenuItem_testSetConfig.Click += new System.EventHandler(this.MenuItem_testSetConfig_Click);
             // 
+            // MenuItem_readConfig
+            // 
+            this.MenuItem_readConfig.Name = "MenuItem_readConfig";
+            this.MenuItem_readConfig.Size = new System.Drawing.Size(290, 30);
+            this.MenuItem_readConfig.Text = "ReadConfig";
+            this.MenuItem_readConfig.Click += new System.EventHandler(this.MenuItem_readConfig_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -736,13 +742,6 @@
             this.MenuItem_about.Name = "MenuItem_about";
             this.MenuItem_about.Size = new System.Drawing.Size(254, 30);
             this.MenuItem_about.Text = "关于本软件 ...";
-            // 
-            // MenuItem_readConfig
-            // 
-            this.MenuItem_readConfig.Name = "MenuItem_readConfig";
-            this.MenuItem_readConfig.Size = new System.Drawing.Size(290, 30);
-            this.MenuItem_readConfig.Text = "ReadConfig";
-            this.MenuItem_readConfig.Click += new System.EventHandler(this.MenuItem_readConfig_Click);
             // 
             // MainForm
             // 

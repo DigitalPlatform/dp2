@@ -264,8 +264,10 @@ namespace dp2SSL
             // TODO: 把信息提供给数字平台的开发人员，以便纠错
             // TODO: 显示为红色窗口，表示警告的意思
 
-            // TODO: 重启应用？
-            Application.Current.MainWindow.Close();
+            // 自动重启应用
+            System.Windows.Forms.Application.Restart();
+            System.Windows.Application.Current.Shutdown();
+            // Application.Current.MainWindow.Close();
         }
 
         static string GetExceptionText(Exception ex, string strType)
@@ -348,5 +350,95 @@ namespace dp2SSL
 
         #endregion
 
+        public static NormalResult InstallUpdateSync()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                Boolean updateAvailable = false;
+                ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
+
+                try
+                {
+                    updateAvailable = ad.CheckForUpdate();
+                }
+                catch (DeploymentDownloadException dde)
+                {
+                    // This exception occurs if a network error or disk error occurs
+                    // when downloading the deployment.
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "The application cannt check for the existence of a new version at this time. \n\nPlease check your network connection, or try again later. Error: " + dde
+                    };
+                }
+                catch (InvalidDeploymentException ide)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "The application cannot check for an update. The ClickOnce deployment is corrupt. Please redeploy the application and try again. Error: " + ide.Message
+                    };
+                }
+                catch (InvalidOperationException ioe)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "This application cannot check for an update. This most often happens if the application is already in the process of updating. Error: " + ioe.Message
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "检查更新出现异常: " + ExceptionUtil.GetDebugText(ex)
+                    };
+                }
+
+                if (updateAvailable == false)
+                    return new NormalResult
+                    {
+                        Value = 0,
+                        ErrorInfo = "没有发现更新"
+                    };
+                try
+                {
+                    ad.Update();
+                    return new NormalResult
+                    {
+                        Value = 1,
+                        ErrorInfo = "自动更新完成。重启可使用新版本"
+                    };
+                    // Application.Restart();
+                }
+                catch (DeploymentDownloadException dde)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "Cannot install the latest version of the application. Either the deployment server is unavailable, or your network connection is down. \n\nPlease check your network connection, or try again later. Error: " + dde.Message
+                    };
+                }
+                catch (TrustNotGrantedException tnge)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "The application cannot be updated. The system did not grant the application the appropriate level of trust. Please contact your system administrator or help desk for further troubleshooting. Error: " + tnge.Message
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "自动更新出现异常: " + ExceptionUtil.GetDebugText(ex)
+                    };
+                }
+            }
+
+            return new NormalResult();
+        }
     }
 }

@@ -96,8 +96,11 @@ namespace dp2SSL
             get => _itemRecPath;
             set
             {
-                _itemRecPath = value;
-                OnPropertyChanged("ItemRecPath");
+                if (_itemRecPath != value)
+                {
+                    _itemRecPath = value;
+                    OnPropertyChanged("ItemRecPath");
+                }
             }
         }
 
@@ -123,8 +126,11 @@ namespace dp2SSL
             get => _title;
             set
             {
-                _title = value;
-                OnPropertyChanged("Title");
+                if (_title != value)
+                {
+                    _title = value;
+                    OnPropertyChanged("Title");
+                }
             }
         }
 
@@ -135,8 +141,11 @@ namespace dp2SSL
             get => _borrowInfo;
             set
             {
-                _borrowInfo = value;
-                OnPropertyChanged("BorrowInfo");
+                if (_borrowInfo != value)
+                {
+                    _borrowInfo = value;
+                    OnPropertyChanged("BorrowInfo");
+                }
             }
         }
 

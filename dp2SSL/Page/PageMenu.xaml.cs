@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,13 +34,15 @@ namespace dp2SSL
         {
             Window window = Application.Current.MainWindow;
 
-            window.WindowStyle = WindowStyle.None;
-            window.ResizeMode = ResizeMode.NoResize;
             window.Left = 0;
             window.Top = 0;
-            window.Width = SystemParameters.VirtualScreenWidth;
-            window.Height = SystemParameters.VirtualScreenHeight;
-            // window.Topmost = true;
+            if (StringUtil.IsDevelopMode() == false)
+            {
+                window.WindowStyle = WindowStyle.None;
+                window.ResizeMode = ResizeMode.NoResize;
+                window.Width = SystemParameters.VirtualScreenWidth;
+                window.Height = SystemParameters.VirtualScreenHeight;
+            }
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
@@ -57,6 +60,13 @@ namespace dp2SSL
         {
             //Window cfg_window = new ConfigWindow();
             //cfg_window.ShowDialog();
+
+            // 测试用
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                System.Windows.Application.Current.Shutdown();
+                return;
+            }
             this.NavigationService.Navigate(new PageSetting());
         }
 

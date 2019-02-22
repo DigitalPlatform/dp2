@@ -94,12 +94,12 @@ namespace dp2SSL
             // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
             catch (System.Runtime.Remoting.RemotingException ex)
             {
-                strError = "针对 " + App.CurrentApp.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
                 return new NormalResult { Value = -2, ErrorInfo = strError };
             }
             catch (Exception ex)
             {
-                strError = "针对 " + App.CurrentApp.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
+                strError = "针对 " + App.RfidUrl + " 的 SetEAS() 操作失败: " + ex.Message;
                 return new NormalResult { Value = -1, ErrorInfo = strError };
             }
         }
@@ -112,5 +112,7 @@ namespace dp2SSL
     {
         public IpcClientChannel Channel { get; set; }
         public IRfid Object { get; set; }
+        // 通道已经成功启动。意思是已经至少经过一个 API 调用并表现正常
+        public bool Started { get; set; }
     }
 }

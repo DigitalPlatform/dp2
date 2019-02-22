@@ -383,7 +383,7 @@ namespace DigitalPlatform.CirculationClient
             string strReaderBarcode = GetReaderBarcode(new_dom);
             if (string.IsNullOrEmpty(strReaderBarcode))
                 return 0;
-            string strFingerPrintString = DomUtil.GetElementText(new_dom.DocumentElement, 
+            string strFingerPrintString = DomUtil.GetElementText(new_dom.DocumentElement,
                 this.ElementName);
 
             // TODO: 看新旧记录之间 fingerprint 之间的差异。有差异才需要覆盖进入高速缓存
@@ -482,13 +482,12 @@ namespace DigitalPlatform.CirculationClient
         // return:
         //      -1  出错
         //      >=0   成功。返回实际初始化的事项
-        public int InitFingerprintCache(
+        public NormalResult InitFingerprintCache(
             LibraryChannel channel,
             string strDir,
-            CancellationToken token,
-            out string strError)
+            CancellationToken token)
         {
-            strError = "";
+            string strError = "";
 
             try
             {
@@ -499,7 +498,7 @@ namespace DigitalPlatform.CirculationClient
                 int nRet = CreateFingerprintCache(null,
                     out strError);
                 if (nRet == -1 || nRet == -2)
-                    return nRet;
+                    return new NormalResult { Value = nRet, ErrorInfo = strError };
 
                 // this.Prompt("正在初始化指纹缓存 ...\r\n请不要关闭本窗口\r\n\r\n(在此过程中，与指纹识别无关的窗口和功能不受影响，可前往使用)\r\n");
 
@@ -508,11 +507,13 @@ namespace DigitalPlatform.CirculationClient
                     out List<string> readerdbnames,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    return new NormalResult { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+                }
                 if (readerdbnames.Count == 0)
                 {
                     strError = "因当前用户没有管辖任何读者库，初始化指纹缓存的操作无法完成";
-                    return -1;
+                    return new NormalResult { Value = -1, ErrorInfo = strError };
                 }
 
                 this.SetProgress(0, readerdbnames.Count);
@@ -535,7 +536,7 @@ namespace DigitalPlatform.CirculationClient
                         token,
                         out strError);
                     if (nRet == -1)
-                        return -1;
+                        return new NormalResult { Value = -1, ErrorInfo = strError };
                     nCount += nRet;
                     i++;
 
@@ -552,16 +553,16 @@ namespace DigitalPlatform.CirculationClient
                 if (nCount == 0)
                 {
                     strError = "当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，指纹缓存为空";
-                    return 0;
+                    return new NormalResult();
                 }
 
                 this.ShowMessage("指纹缓存初始化成功");
-                return nCount;
+                return new NormalResult { Value = nCount };
             }
             catch (Exception ex)
             {
                 strError = ex.Message;
-                return -1;
+                return new NormalResult { Value = -1, ErrorInfo = strError };
             }
         }
 

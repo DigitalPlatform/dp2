@@ -19,8 +19,11 @@ namespace dp2SSL
             get => _pii;
             set
             {
-                _pii = value;
-                OnPropertyChanged("PII");
+                if (_pii != value)
+                {
+                    _pii = value;
+                    OnPropertyChanged("PII");
+                }
             }
         }
 
@@ -61,8 +64,11 @@ namespace dp2SSL
             }
             set
             {
-                _errorColor = value;
-                OnPropertyChanged("ErrorColor");
+                if (_errorColor != value)
+                {
+                    _errorColor = value;
+                    OnPropertyChanged("ErrorColor");
+                }
             }
         }
 
@@ -74,8 +80,11 @@ namespace dp2SSL
             }
             set
             {
-                _waiting = value;
-                OnPropertyChanged("Waiting");
+                if (_waiting != value)
+                {
+                    _waiting = value;
+                    OnPropertyChanged("Waiting");
+                }
             }
         }
 
@@ -90,8 +99,11 @@ namespace dp2SSL
             }
             set
             {
-                _state = value;
-                OnPropertyChanged("State");
+                if (_state != value)
+                {
+                    _state = value;
+                    OnPropertyChanged("State");
+                }
             }
         }
 
