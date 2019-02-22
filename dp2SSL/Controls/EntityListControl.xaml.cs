@@ -1,29 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Xml;
-
-using DigitalPlatform;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -40,6 +21,8 @@ namespace dp2SSL
         public EntityListControl()
         {
             InitializeComponent();
+
+            ((INotifyCollectionChanged)listView.Items).CollectionChanged += ListView_CollectionChanged;
 
             // RfidUrl = WpfClientInfo.Config.Get("global", "rfidUrl", "");
         }
@@ -60,9 +43,53 @@ namespace dp2SSL
             }
             set
             {
-                _borrowable = value;
-                OnPropertyChanged("Borrowable");
+                if (_borrowable != value)
+                {
+                    _borrowable = value;
+                    OnPropertyChanged("Borrowable");
+                }
             }
+        }
+
+#if NO
+        public int ItemsCount
+        {
+            get
+            {
+                return listView.Items.Count;
+            }
+        }
+#endif
+
+#if NO
+        public static readonly DependencyProperty CompanyNameProperty =
+  DependencyProperty.Register("ItemsCount", typeof(int), typeof(EntityListControl), new UIPropertyMetadata(100));
+
+        public int ItemsCount
+        {
+            get { return (int)this.GetValue(CompanyNameProperty); }
+            set { this.SetValue(CompanyNameProperty, value); }
+        }
+#endif
+        int _itemCount = 0;
+
+        public int ItemCount
+        {
+            get { return _itemCount; }
+            set
+            {
+                if (_itemCount != value)
+                {
+                    _itemCount = value;
+                    OnPropertyChanged("ItemCount");
+                }
+            }
+        }
+
+        private void ListView_CollectionChanged(object sender,
+            NotifyCollectionChangedEventArgs e)
+        {
+            ItemCount = listView.Items.Count;
         }
 
         string _renewable = null;
@@ -75,8 +102,11 @@ namespace dp2SSL
             }
             set
             {
-                _renewable = value;
-                OnPropertyChanged("Renewable");
+                if (_renewable != value)
+                {
+                    _renewable = value;
+                    OnPropertyChanged("Renewable");
+                }
             }
         }
 
@@ -90,8 +120,11 @@ namespace dp2SSL
             }
             set
             {
-                _returnable = value;
-                OnPropertyChanged("Returnable");
+                if (_returnable != value)
+                {
+                    _returnable = value;
+                    OnPropertyChanged("Returnable");
+                }
             }
         }
 

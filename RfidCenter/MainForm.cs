@@ -42,6 +42,9 @@ namespace RfidCenter
 
             InitializeComponent();
 
+            this.tabControl_main.TabPages.Remove(this.tabPage_cfg);
+            this.tabPage_cfg.Dispose();
+
             {
                 _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.AutoHide = false;
@@ -56,9 +59,19 @@ namespace RfidCenter
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
+            {
+                MessageBox.Show(this, "rfidcenter 被木马软件干扰，无法启动");
+                Application.Exit();
+                return;
+            }
+
             ClientInfo.Initial("rfidcenter");
 
             ClearHtml();
+
+            // 显示版本号
+            this.OutputHistory($"版本号: {ClientInfo.ClientVersion}");
 
             if (StartRemotingServer() == false)
                 return;
@@ -84,6 +97,18 @@ namespace RfidCenter
                 MenuItem_testing.Visible = false;
                 this.toolStripButton_autoInventory.Visible = false;
             }
+
+            // 后台自动检查更新
+            Task.Run(() =>
+            {
+                NormalResult result = ClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                else if (result.Value == 1)
+                    OutputHistory(result.ErrorInfo, 1);
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    OutputHistory(result.ErrorInfo, 0);
+            });
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

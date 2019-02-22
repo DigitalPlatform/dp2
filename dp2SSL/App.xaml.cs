@@ -5,7 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-
+using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 
@@ -21,6 +22,13 @@ namespace dp2SSL
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
+            {
+                MessageBox.Show("dp2SSL 被木马软件干扰，无法启动");
+                System.Windows.Application.Current.Shutdown();
+                return;
+            }
+
             WpfClientInfo.TypeOfProgram = typeof(App);
             if (StringUtil.IsDevelopMode() == false)
                 WpfClientInfo.PrepareCatchException();
@@ -30,6 +38,24 @@ namespace dp2SSL
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+            // 后台自动检查更新
+            Task.Run(() =>
+            {
+                NormalResult result = WpfClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                else if (result.Value == 1)
+                    OutputHistory(result.ErrorInfo, 1);
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    OutputHistory(result.ErrorInfo, 0);
+            });
+        }
+
+        // TODO: 如何显示后台任务执行信息? 可以考虑只让管理者看到
+        public void OutputHistory(string strText, int nWarningLevel = 0)
+        {
+            // OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -55,7 +81,23 @@ namespace dp2SSL
             this._channelPool.Clear();
         }
 
-        public string RfidUrl
+        public static string dp2ServerUrl
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "dp2ServerUrl", "");
+            }
+        }
+
+        public static string dp2UserName
+        {
+            get
+            {
+                return WpfClientInfo.Config.Get("global", "dp2UserName", "");
+            }
+        }
+
+        public static string RfidUrl
         {
             get
             {
@@ -63,7 +105,7 @@ namespace dp2SSL
             }
         }
 
-        public string FingerprintUrl
+        public static string FingerprintUrl
         {
             get
             {
@@ -71,7 +113,7 @@ namespace dp2SSL
             }
         }
 
-        public string dp2Password
+        public static string dp2Password
         {
             get
             {
@@ -150,10 +192,10 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             if (e.FirstTry == true)
             {
                 {
-                    e.UserName = WpfClientInfo.Config.Get("global", "dp2UserName", "");
+                    e.UserName = dp2UserName;
 
                     // e.Password = this.DecryptPasssword(e.Password);
-                    e.Password = this.dp2Password;
+                    e.Password = dp2Password;
 
 #if NO
                     strPhoneNumber = AppInfo.GetString(
@@ -213,9 +255,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetChannel()
         {
-            string strServerUrl = WpfClientInfo.Config.Get("global", "dp2ServerUrl", "");
+            string strServerUrl = dp2ServerUrl;
 
-            string strUserName = WpfClientInfo.Config.Get("global", "dp2UserName", "");
+            string strUserName = dp2UserName;
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
             _channelList.Add(channel);

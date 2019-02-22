@@ -107,6 +107,8 @@ namespace dp2SSL
     {
         public IpcClientChannel Channel { get; set; }
         public IFingerprint Object { get; set; }
+        // 通道已经成功启动。意思是已经至少经过一个 API 调用并表现正常
+        public bool Started { get; set; }
     }
 
 #if NO

@@ -370,7 +370,7 @@ namespace dp2Circulation
             }
             catch (FileLoadException ex)
             {
-                if (Detect360() == true)
+                if (DetectVirus.Detect360() == true)
                 {
                     MessageBox.Show("dp2Circulation (内务)受到 360 软件干扰而无法启动。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
                     throw ex;
@@ -502,7 +502,7 @@ Stack:
                 // && ApplicationDeployment.IsNetworkDeployed
                 )
             {
-                if (Detect360() == true)
+                if (DetectVirus.Detect360() == true)
                 {
                     Program.PromptAndExit(this, "dp2Circulation (内务)受到 360 软件干扰而无法启动 [文件" + strFontFilePath + "不存在]。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
                     return;
@@ -2917,7 +2917,7 @@ false);
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {
-                    if (Detect360() == true || DetectGuanjia() == true)
+                    if (DetectVirus.Detect360() == true || DetectVirus.DetectGuanjia() == true)
                     {
                         channel.Close();
                         Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.Remoting;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -44,13 +45,9 @@ namespace dp2SSL
             // this.booksControl.PropertyChanged += Entities_PropertyChanged;
 
             this.booksControl.SetSource(_entities);
-
             this.patronControl.DataContext = _patron;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
-
-            // Refresh();
-
         }
 
         FingerprintChannel _fingerprintChannel = null;
@@ -64,8 +61,9 @@ namespace dp2SSL
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
 
+            // 准备指纹通道
             List<string> errors = new List<string>();
-            if (string.IsNullOrEmpty(App.CurrentApp.FingerprintUrl) == false)
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
             {
 #if NO
                 eventProxy = new EventProxy();
@@ -73,10 +71,10 @@ namespace dp2SSL
                   new MessageArrivedEvent(eventProxy_MessageArrived);
 #endif
                 _fingerprintChannel = FingerPrint.StartFingerprintChannel(
-                    App.CurrentApp.FingerprintUrl,
+                    App.FingerprintUrl,
                     out string strError);
                 if (_fingerprintChannel == null)
-                    errors.Add(strError);
+                    errors.Add($"启动指纹通道时出错: {strError}");
                 // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
 #if NO
                 _fingerprintChannel.Object.MessageArrived +=
@@ -85,20 +83,48 @@ namespace dp2SSL
                 try
                 {
                     _fingerprintChannel.Object.GetMessage("clear");
+                    _fingerprintChannel.Started = true;
                 }
                 catch (Exception ex)
                 {
-                    errors.Add("ClearMessage Exception: " + ex.Message);
+                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
+                        errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
+                    else
+                        errors.Add($"启动指纹通道时出错(2): {ex.Message}");
                 }
             }
 
-            if (string.IsNullOrEmpty(App.CurrentApp.RfidUrl) == false)
+            // 准备 RFID 通道
+            if (string.IsNullOrEmpty(App.RfidUrl) == false)
             {
                 _rfidChannel = RFID.StartRfidChannel(
-    App.CurrentApp.RfidUrl,
+    App.RfidUrl,
     out string strError);
                 if (_rfidChannel == null)
-                    errors.Add(strError);
+                    errors.Add($"启动 RFID 通道时出错: {strError}");
+
+                try
+                {
+                    var result = _rfidChannel.Object.ListReaders();
+
+                    // TODO: 某处界面可以显示当前连接的读卡器名字
+                    // 看看是否有至少一个读卡器
+                    if (result.Readers.Length == 0)
+                        errors.Add("当前指纹中心没有任何连接的读卡器。请检查读卡器是否正确连接");
+                    else
+                        _rfidChannel.Started = true;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
+                        errors.Add($"启动 RFID 通道时出错: “RFID-中心”({App.RfidUrl})没有响应");
+                    else
+                        errors.Add($"启动 RFID 通道时出错: {ex.Message}");
+                }
+            }
+            else
+            {
+                errors.Add($"尚未配置 RFID 接口 URL");
             }
 
             if (errors.Count > 0)
@@ -264,6 +290,9 @@ namespace dp2SSL
 
         void Refresh()
         {
+            if (_rfidChannel == null || _rfidChannel.Started == false)
+                return;
+
             // 防止重入
             int v = Interlocked.Increment(ref this._inRefresh);
             if (v > 1)
@@ -315,14 +344,21 @@ namespace dp2SSL
                 List<Entity> new_entities = new List<Entity>();
                 {
                     // 比较当前集合。对当前集合进行增删改
+                    bool changed = false;
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        _entities.Refresh(books, ref new_entities);
+                        changed = _entities.Refresh(books, ref new_entities);
                     }));
 
-                    if (_entities.Count == 0 && _patron.Source == "fingerprint")
+                    if (_entities.Count == 0 
+                        && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
+                        && _patron.Source == "fingerprint")
                         _patron.Clear();
                 }
+
+                // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
+                if (_entities.Count == 0 && _tagTable.Count > 0)
+                    ClearTagTable(null);
 
                 if (patrons.Count == 1)
                     _patron.Source = "";
@@ -354,11 +390,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-#if NO
-                    this.error.Text = ex.Message;
-                    this.error.Visibility = Visibility.Visible;
-#endif
-                this.Error = ex.Message;
+                this.Error = $"后台刷新过程出现异常: {ex.Message}";
                 return;
             }
             finally
@@ -395,7 +427,7 @@ namespace dp2SSL
         // 从指纹阅读器获取消息(第一阶段)
         void GetPatronFromFingerprint()
         {
-            if (_fingerprintChannel == null)
+            if (_fingerprintChannel == null || _fingerprintChannel.Started == false)
                 return;
             try
             {
@@ -632,6 +664,8 @@ out string strError);
             out string reader_xml)
         {
             reader_xml = "";
+            if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
+                return new NormalResult { Value = -1, ErrorInfo = "dp2library 服务器 URL 尚未配置，无法获得读者信息" };
             LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
@@ -695,8 +729,11 @@ out string strError);
             get => _error;
             set
             {
-                _error = value;
-                OnPropertyChanged("Error");
+                if (_error != value)
+                {
+                    _error = value;
+                    OnPropertyChanged("Error");
+                }
             }
         }
 
@@ -746,11 +783,14 @@ out string strError);
             }));
 
             // 检查读者卡状态是否 OK
-            if (IsPatronOK() == false)
+            if (IsPatronOK(action, out string check_message) == false)
             {
+                if (string.IsNullOrEmpty(check_message))
+                    check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    progress.MessageText = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
+                    progress.MessageText = check_message;
                     progress.BackColor = "red";
                     progress = null;
                 }));
@@ -1007,15 +1047,35 @@ out string strError);
 
         // 当前读者卡状态是否 OK?
         // 注：如果卡片虽然放上去了，但无法找到读者记录，这种状态就不是 OK 的。此时应该拒绝进行流通操作
-        bool IsPatronOK()
+        bool IsPatronOK(string action, out string message)
         {
-            if (string.IsNullOrEmpty(_patron.UID)
-                && string.IsNullOrEmpty(_patron.Barcode))
+            message = "";
+
+            // 还书和续借操作，允许读者区为空
+            if (action == "return" || action == "renew")
+            {
+                if (_patron.UID == null)
+                    return true;
+            }
+
+            // 如果 UID 为空，而 Barcode 有内容，也是 OK 的。这是指纹的场景
+            if (string.IsNullOrEmpty(_patron.UID) == true
+                && string.IsNullOrEmpty(_patron.Barcode) == false)
                 return true;
 
+            // UID 和 Barcode 都不为空。这是 15693 和 14443 读者卡的场景
             if (string.IsNullOrEmpty(_patron.UID) == false
     && string.IsNullOrEmpty(_patron.Barcode) == false)
                 return true;
+
+            if (action == "borrow")
+            {
+                // 提示信息要考虑到应用了指纹的情况
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                    message = "请先放好读者卡，或扫入一次指纹，然后再进行借书操作";
+                else
+                    message = "请先放好读者卡，然后再进行借书操作";
+            }
             return false;
         }
 

@@ -137,6 +137,13 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
+            {
+                MessageBox.Show(this, "fingerprintcenter 被木马软件干扰，无法启动");
+                Application.Exit();
+                return;
+            }
+
             ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
             ClientInfo.Initial("fingerprintcenter");
@@ -154,7 +161,8 @@ bool bClickClose = false)
 
             ClearHtml();
 
-            //
+            // 显示版本号
+            this.OutputHistory($"版本号: {ClientInfo.ClientVersion}");
 
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
@@ -249,9 +257,11 @@ bool bClickClose = false)
             DisplayText("正在初始化指纹环境 ...");
             DisplayText("正在打开指纹设备 ...");
 
-            NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
-            if (result.Value == -1)
-                return result;
+            {
+                NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
+                if (result.Value == -1)
+                    return result;
+            }
 
             UpdateDeviceList();
 #if NO
@@ -263,38 +273,43 @@ bool bClickClose = false)
 
             DisplayText("Init Cache ...");
 
-            // 初始化指纹缓存
-            // return:
-            //      -1  出错
-            //      0   没有获得任何数据
-            //      >=1 获得了数据
-            int nRet = InitFingerprintCache(
-    out string strError);
-            if (nRet == -1)
             {
-                // 开始捕捉指纹
-                FingerPrint.StartCapture(_cancel.Token);
-                return new NormalResult { Value = -1, ErrorInfo = strError };
+                // 初始化指纹缓存
+                // return:
+                //      -1  出错
+                //      0   没有获得任何数据
+                //      >=1 获得了数据
+                var result = InitFingerprintCache();
+                if (result.Value == -1)
+                {
+
+                    // 开始捕捉指纹
+                    FingerPrint.StartCapture(_cancel.Token);
+                    // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
+                    if (result.ErrorCode == "RequestError")
+                        StartTimer();
+                    return result;
+                }
+                if (result.Value == 0)
+                    this.ShowMessage(result.ErrorInfo, "yellow", true);
             }
-            if (nRet == 0)
-                this.ShowMessage(strError, "yellow", true);
 
             // 开始捕捉指纹
             FingerPrint.StartCapture(_cancel.Token);
 
-            {
+            //
+            StartTimer();
+
+            return new NormalResult();
+        }
+
+        void StartTimer()
+        {
+            if (_timer == null)
                 _timer = new System.Threading.Timer(
                     new System.Threading.TimerCallback(timerCallback),
                     null,
                     TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(5));
-
-#if NO
-                timer_replication.Interval = 1000 * 60 * 1; // 5 分种
-                timer_replication.Enabled = true;
-                timer_replication.Start();
-#endif
-            }
-            return new NormalResult();
         }
 
         private void FingerPrint_ImageReady(object sender, ImageReadyEventArgs e)
@@ -398,6 +413,13 @@ bool bClickClose = false)
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+            // 2019/2/21
+            if (_timer != null)
+            {
+                _timer.Dispose();
+                _timer = null;
+            }
+
             _cancel.Cancel();
 
             UsbNotification.UnregisterUsbDeviceNotification();
@@ -607,10 +629,9 @@ bool bClickClose = false)
         //      -1  出错
         //      0   没有获得任何数据
         //      >=1 获得了数据
-        int InitFingerprintCache(
-            out string strError)
+        NormalResult InitFingerprintCache()
         {
-            strError = "";
+            string strError = "";
             string strUrl = (string)this.Invoke((Func<string>)(() =>
             {
                 return this.textBox_cfg_dp2LibraryServerUrl.Text;
@@ -618,7 +639,7 @@ bool bClickClose = false)
             if (string.IsNullOrEmpty(strUrl))
             {
                 strError = "尚未配置 dp2library 服务器 URL，无法获得读者指纹信息";
-                return -1;
+                return new NormalResult { Value = -1, ErrorInfo = strError };
             }
 
             // 先把正在运行的同步过程中断
@@ -642,13 +663,12 @@ bool bClickClose = false)
                 // return:
                 //      -1  出错
                 //      >=0   成功。返回实际初始化的事项
-                int nRet = FingerPrint.InitFingerprintCache(channel,
+                var result = FingerPrint.InitFingerprintCache(channel,
                     strDir,
-                    _cancel.Token,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                return nRet;
+                    _cancel.Token);
+                if (result.Value == -1)
+                    return result;
+                return result;
             }
             finally
             {
@@ -667,10 +687,9 @@ bool bClickClose = false)
                 //      -1  出错
                 //      0   没有获得任何数据
                 //      >=1 获得了数据
-                int nRet = InitFingerprintCache(
-        out string strError);
-                if (nRet == -1)
-                    ShowMessageBox(strError);
+                var result = InitFingerprintCache();
+                if (result.Value == -1)
+                    ShowMessageBox(result.ErrorInfo);
             });
         }
 
@@ -1205,6 +1224,14 @@ Keys keyData)
             // 如果当前正在进行缓存初始化，则放弃进行同步
             if (_inInitialCache)
                 return;
+
+            if (_initialized == false)
+            {
+                // 先检查首次初始化指纹缓存是否完成。没有完成(因为曾出错)的情况，要先尝试首次初始化指纹缓存
+                // TODO: 这里需要优化的是，应该是仅仅是 dp2library/dp2libraryxe 未响应的出错以后才需要重试 BeginStart()。其他情况如果频繁重试，可能并不合适
+                BeginStart();
+                return;
+            }
 
             Task.Run(() =>
             {
