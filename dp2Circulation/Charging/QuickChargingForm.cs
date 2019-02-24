@@ -829,7 +829,7 @@ dlg.UiState);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.textBox_input.Enabled = bEnable;
+            // this.textBox_input.Enabled = bEnable;
         }
 
         /// <summary>
@@ -1764,7 +1764,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             task.ID = strTaskID;
             if (func == FuncState.LoadPatronInfo)
             {
-                task.ReaderBarcode = strText;
+                task.ReaderBarcode = GetContent(strText);   // strText
                 task.Action = "load_reader_info";
             }
             else if (func == dp2Circulation.FuncState.Borrow)

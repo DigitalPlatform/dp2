@@ -25,6 +25,7 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using System.Speech.Synthesis;
 
 namespace RfidCenter
 {
@@ -109,6 +110,8 @@ namespace RfidCenter
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                     OutputHistory(result.ErrorInfo, 0);
             });
+
+            this.Speak("RFID 中心启动");
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -1287,6 +1290,47 @@ string strHtml)
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        SpeechSynthesizer m_speech = new SpeechSynthesizer();
+        string m_strSpeakContent = "";
+
+        public void Speak(string strText, bool bError = false)
+        {
+#if NO
+            string color = "gray";
+            if (bError)
+                color = "darkred";
+
+            DisplayText(strText, "white", color);
+#endif
+
+            if (this.m_speech == null)
+                return;
+
+            if (this.SpeakOn == false)
+                return;
+
+            this.m_strSpeakContent = strText;
+            this.Invoke((Action)(() =>
+            {
+                this.m_speech.SpeakAsyncCancelAll();
+                this.m_speech.SpeakAsync(strText);
+            }));
+        }
+
+        public bool SpeakOn
+        {
+            get
+            {
+                return true;    // for testing
+#if NO
+                return (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_speak.Checked;
+                }));
+#endif
+            }
         }
     }
 }

@@ -322,6 +322,8 @@
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
+            this.checkBox_speak.Checked = true;
+            this.checkBox_speak.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox_speak.Location = new System.Drawing.Point(135, 491);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
@@ -416,7 +418,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(531, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(505, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -444,7 +446,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(534, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(508, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
