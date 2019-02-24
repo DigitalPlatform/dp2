@@ -61,11 +61,15 @@
                 <RowDefinition Height="60"/>
             </Grid.RowDefinitions>
             <!-- 图书信息 -->
-            <StackPanel  Grid.Column="0">
+            <Grid  Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="{Binding ElementName=booksControl, Path=ItemCount, StringFormat={}图书 ({0})}"/>
-                <local:EntityListControl x:Name="booksControl" />
-            </StackPanel>
+                <local:EntityListControl x:Name="booksControl" Grid.Row="1"/>
+            </Grid>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
                 <!-- 
                 https://stackoverflow.com/questions/1665781/styling-gridsplitter-wpf-c-sharp 
@@ -80,11 +84,15 @@
                 </GridSplitter.Template>
             </GridSplitter>
             <!-- 读者信息 -->
-            <StackPanel Grid.Column="2">
+            <Grid Grid.Column="2" MaxWidth="300">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="读者"/>
-                <local:PatronControl x:Name="patronControl"  MaxWidth="300"/>
-            </StackPanel>
+                <local:PatronControl x:Name="patronControl" Grid.Row="1"/>
+            </Grid>
             <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Name="borrowButton"
                     Style="{DynamicResource RoundedButtonStyle}" 

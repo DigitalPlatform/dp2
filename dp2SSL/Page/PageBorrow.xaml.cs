@@ -11,7 +11,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 
 using DigitalPlatform;
-using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
@@ -327,6 +326,11 @@ namespace dp2SSL
                             continue;
                         }
                         TagInfo info = gettaginfo_result.TagInfo;
+
+                        // 记下来。避免以后重复再次去获取了
+                        if (tag.TagInfo == null)
+                            tag.TagInfo = info;
+
                         // 观察 typeOfUsage 元素
                         var chip = LogicChip.From(info.Bytes,
 (int)info.BlockSize,
@@ -523,20 +527,25 @@ out string strError);
                     // 注：如果 PII 为空，文字重要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.PII))
                     {
-                        // var result = channel.Object.GetTagInfo("*", entity.UID);
-                        var result = GetTagInfo(_rfidChannel, entity.UID);
-                        if (result.Value == -1)
+                        if (entity.TagInfo == null)
                         {
-                            entity.SetError(result.ErrorInfo);
-                            continue;
+                            // var result = channel.Object.GetTagInfo("*", entity.UID);
+                            var result = GetTagInfo(_rfidChannel, entity.UID);
+                            if (result.Value == -1)
+                            {
+                                entity.SetError(result.ErrorInfo);
+                                continue;
+                            }
+
+                            Debug.Assert(result.TagInfo != null);
+
+                            entity.TagInfo = result.TagInfo;
                         }
 
-                        Debug.Assert(result.TagInfo != null);
+                        Debug.Assert(entity.TagInfo != null);
 
-                        entity.TagInfo = result.TagInfo;
-
-                        LogicChip chip = LogicChip.From(result.TagInfo.Bytes,
-(int)result.TagInfo.BlockSize,
+                        LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
+(int)entity.TagInfo.BlockSize,
 "" // tag.TagInfo.LockStatus
 );
                         string pii = chip.FindElement(ElementOID.PII)?.Text;
