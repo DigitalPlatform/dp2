@@ -33,6 +33,8 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
+
+
         // parameters:
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
         public ListTagsResult ListTags(string reader_name, string style)
@@ -40,17 +42,23 @@ namespace RfidCenter
             InventoryResult result = new InventoryResult();
             List<OneTag> tags = new List<OneTag>();
 
-            // uid --> Driver Name
+            // uid --> OneTag
             Hashtable uid_table = new Hashtable();
 
             foreach (Reader reader in Program.Rfid.Readers)
             {
+#if NO
                 if (reader_name == "*" || reader.Name == reader_name)
                 {
 
                 }
                 else
                     continue;
+#endif
+
+                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                    continue;
+
 
                 InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name, "");
                 if (inventory_result.Value == -1)
@@ -60,23 +68,30 @@ namespace RfidCenter
 
                 foreach (InventoryInfo info in inventory_result.Results)
                 {
-#if NO
+                    OneTag tag = null;
                     if (uid_table.ContainsKey(info.UID))
-                        continue;
-                    uid_table[info.UID] = reader.Name;
-#endif
-
-                    var tag = new OneTag
                     {
-                        Protocol = info.Protocol,
-                        ReaderName = reader.Name,
-                        UID = info.UID,
-                        DSFID = info.DsfID
-                    };
+                        // 重复出现的，追加 读卡器名字
+                        tag = (OneTag)uid_table[info.UID];
+                        tag.ReaderName += "," + reader.Name;
+                    }
+                    else
+                    {
+                        // 首次出现
+                        tag = new OneTag
+                        {
+                            Protocol = info.Protocol,
+                            ReaderName = reader.Name,
+                            UID = info.UID,
+                            DSFID = info.DsfID
+                        };
 
-                    tags.Add(tag);
+                        uid_table[info.UID] = tag;
+                        tags.Add(tag);
+                    }
 
-                    if (StringUtil.IsInList("getTagInfo", style))
+                    if (StringUtil.IsInList("getTagInfo", style)
+                        && tag.TagInfo == null)
                     {
                         // TODO: 这里要利用 Hashtable 缓存
                         GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
@@ -153,12 +168,17 @@ namespace RfidCenter
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
             foreach (Reader reader in Program.Rfid.Readers)
             {
+#if NO
                 if (reader_name == "*" || reader.Name == reader_name)
                 {
 
                 }
                 else
                     continue;
+#endif
+                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                    continue;
+
 
                 InventoryInfo info = new InventoryInfo { UID = uid };
                 GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
@@ -195,12 +215,18 @@ namespace RfidCenter
 
             foreach (Reader reader in Program.Rfid.Readers)
             {
+#if NO
                 if (reader_name == "*" || reader.Name == reader_name)
                 {
 
                 }
                 else
                     continue;
+#endif
+
+                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                    continue;
+
 
                 InventoryInfo info = new InventoryInfo
                 {
@@ -283,7 +309,7 @@ enable);
         }
 
 
-#region Tag List
+        #region Tag List
 
         // 当前在读卡器探测范围内的标签
         List<OneTag> _tagList = new List<OneTag>();
@@ -396,7 +422,7 @@ enable);
             });
         }
 
-#endregion
+        #endregion
 
         private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
 
