@@ -199,6 +199,21 @@ namespace dp2Circulation
                                     tasks.Add(Task.Run(() => { GetTagInfo(item); }));
                                 }
                             }
+                            else
+                            {
+                                // 刷新 readerName
+                                string old_readername = ListViewUtil.GetItemText(item, COLUMN_READERNAME);
+                                if (old_readername != tag.ReaderName)
+                                {
+                                    // ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
+                                    item.Tag = new ItemInfo { OneTag = tag };
+                                    if (tag.TagInfo == null)
+                                    {
+                                        // 启动单独的线程去填充 .TagInfo
+                                        tasks.Add(Task.Run(() => { GetTagInfo(item); }));
+                                    }
+                                }
+                            }
 
                             items.Add(item);
                             changed = true;
@@ -431,7 +446,8 @@ namespace dp2Circulation
             {
                 ItemInfo item_info = (ItemInfo)item.Tag;
                 OneTag tag = item_info.OneTag;
-                if (tag.ReaderName == reader_name && tag.UID == uid)
+                if (// tag.ReaderName == reader_name && 
+                    tag.UID == uid)
                     return item;
             }
 
@@ -468,6 +484,18 @@ namespace dp2Circulation
                 item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
                 this.Invoke((Action)(() =>
                 {
+                    // 2019/2/27
+                    // 刷新 ReaderName 列
+                    {
+                        string new_readername = tag.TagInfo.ReaderName;
+                        if (string.IsNullOrEmpty(new_readername))
+                            new_readername = tag.ReaderName;
+
+                        string old_readername = ListViewUtil.GetItemText(item, COLUMN_READERNAME);
+                        if (old_readername != new_readername)
+                            ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, new_readername);
+                    }
+
                     string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
                     // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
                     SetItemPIIColumn(item, pii);

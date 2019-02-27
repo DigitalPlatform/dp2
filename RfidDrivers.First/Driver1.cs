@@ -222,7 +222,8 @@ namespace RfidDrivers.First
             {
                 if (reader.ReaderHandle == UIntPtr.Zero)
                     continue;
-                if (reader_name == "*" || reader_name == reader.Name)
+                // if (reader_name == "*" || reader_name == reader.Name)
+                if (Reader.MatchReaderName(reader_name, reader.Name))
                     results.Add(reader);
             }
 
@@ -244,7 +245,8 @@ namespace RfidDrivers.First
 
                 if (reader.ReaderHandle == UIntPtr.Zero)
                     continue;
-                if (reader_name == "*" || reader_name == reader.Name)
+                // if (reader_name == "*" || reader_name == reader.Name)
+                if (Reader.MatchReaderName(reader_name, reader.Name))
                     results.Add(reader.ReaderHandle);
             }
 
@@ -282,7 +284,7 @@ namespace RfidDrivers.First
              *  Load all reader driver dll from drivers directory, like "rfidlib_ANRD201.dll"  
              */
             string path = "\\x86\\Drivers";
-            if (IntPtr.Size == 8 )
+            if (IntPtr.Size == 8)
                 path = "\\x64\\Drivers";
             int ret = RFIDLIB.rfidlib_reader.RDR_LoadReaderDrivers(
                 path
@@ -2703,11 +2705,11 @@ namespace RfidDrivers.First
 
                     ReadBlocksResult result0 = ReadBlocks(
                         hreader,
-                hTag,
-                0,
-                blkNum,
-                blkSize,
-                true);
+                        hTag,
+                        0,
+                        blkNum,
+                        blkSize,
+                        true);
                     if (result0.Value == -1)
                         return new GetTagInfoResult
                         {
@@ -2724,6 +2726,9 @@ namespace RfidDrivers.First
                     {
                         TagInfo = new TagInfo
                         {
+                            // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
+                            ReaderName = reader_name,   // 2019/2/27
+
                             UID = Element.GetHexString(uid),
                             AFI = afi,
                             DSFID = dsfid,

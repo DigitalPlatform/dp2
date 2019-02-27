@@ -158,6 +158,9 @@ namespace DigitalPlatform.RFID
     [Serializable]
     public class TagInfo
     {
+        // 2019/2/27
+        public string ReaderName { get; set; }
+
         public string UID { get; set; }
         public byte DSFID { get; set; }
         public byte AFI { get; set; }
@@ -307,6 +310,19 @@ namespace DigitalPlatform.RFID
         public override string ToString()
         {
             return $"Name={Name},SerialNumber={SerialNumber},DriverPath={DriverPath},Result={Result?.ToString()}";
+        }
+
+        // 匹配读卡器名字
+        public static bool MatchReaderName(string list, string one)
+        {
+            if (list == "*" || list == one)
+                return true;
+            if (list.IndexOf(",") == -1)
+                return false;
+            string[] names = list.Split(new char[] { }, StringSplitOptions.RemoveEmptyEntries);
+            if (Array.IndexOf(names, one) != -1)
+                return true;
+            return false;
         }
     }
 }
