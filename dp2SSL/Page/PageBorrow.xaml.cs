@@ -354,7 +354,7 @@ namespace dp2SSL
                         changed = _entities.Refresh(books, ref new_entities);
                     }));
 
-                    if (_entities.Count == 0 
+                    if (_entities.Count == 0
                         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
                         && _patron.Source == "fingerprint")
                         _patron.Clear();
@@ -1077,13 +1077,19 @@ out string strError);
     && string.IsNullOrEmpty(_patron.Barcode) == false)
                 return true;
 
+            string debug_info = $"uid:[{_patron.UID}],barcode:[{_patron.Barcode}]";
             if (action == "borrow")
             {
                 // 提示信息要考虑到应用了指纹的情况
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    message = "请先放好读者卡，或扫入一次指纹，然后再进行借书操作";
+                    message = $"请先放好读者卡，或扫入一次指纹，然后再进行借书操作({debug_info})";
                 else
-                    message = "请先放好读者卡，然后再进行借书操作";
+                    message = $"请先放好读者卡，然后再进行借书操作({debug_info})";
+            }
+            else
+            {
+                // 调试用
+                message = $"读卡器上的当前读者卡状态不正确。无法进行 xxx 操作({debug_info})";
             }
             return false;
         }

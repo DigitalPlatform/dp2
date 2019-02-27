@@ -1622,6 +1622,7 @@ namespace RfidDrivers.First
             //Lock();
             try
             {
+                RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter((UIntPtr)reader_handle);
                 var iret = RFIDLIB.rfidlib_reader.RDR_Close((UIntPtr)reader_handle);
                 if (iret != 0)
                     return new NormalResult
@@ -2686,7 +2687,7 @@ namespace RfidDrivers.First
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = "ISO15693_GetSystemInfo() error 2",
+                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. reader_name:{reader_name},uid:{uid}",
                             ErrorCode = GetErrorCode(iret, hreader)
                         };
 
@@ -2840,6 +2841,7 @@ namespace RfidDrivers.First
             nTagCount = 0;
             LABEL_TAG_INVENTORY:
             iret = RFIDLIB.rfidlib_reader.RDR_TagInventory(hreader, AIType, AntennaSelCount, AntennaSel, InvenParamSpecList);
+            RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
             if (iret == 0 || iret == -21)
             {
                 nTagCount += RFIDLIB.rfidlib_reader.RDR_GetTagDataReportCount(hreader);

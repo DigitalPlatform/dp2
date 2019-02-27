@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
@@ -20,8 +22,19 @@ namespace dp2SSL
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
+        Mutex myMutex;
+
         protected override void OnStartup(StartupEventArgs e)
         {
+            bool aIsNewInstance = false;
+            myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
+            if (!aIsNewInstance)
+            {
+                MessageBox.Show("dp2SSL 不允许重复启动");
+                App.Current.Shutdown();
+                return;
+            }
+
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
             {
                 MessageBox.Show("dp2SSL 被木马软件干扰，无法启动");
@@ -184,7 +197,7 @@ namespace dp2SSL
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-#region LibraryChannel
+        #region LibraryChannel
 
         internal void Channel_BeforeLogin(object sender,
 DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
@@ -271,6 +284,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _channelList.Remove(channel);
         }
 
-#endregion
+        #endregion
     }
 }

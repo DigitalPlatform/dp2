@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -43,6 +44,8 @@ namespace dp2SSL
                 window.Width = SystemParameters.VirtualScreenWidth;
                 window.Height = SystemParameters.VirtualScreenHeight;
             }
+
+            this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)

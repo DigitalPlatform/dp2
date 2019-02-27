@@ -346,7 +346,7 @@ namespace DigitalPlatform.Script
                     }
                     else
                     {
-                        u_list.Add(new Map856uResult { Result = u });
+                        u_list.Add(new Map856uResult { Result = u });   // WrapUrl == true ?
                     }
                 }
 
@@ -557,7 +557,7 @@ namespace DigitalPlatform.Script
 
             if (StringUtil.HasHead(u, "uri:") == false)
             {
-                results.Add(new Map856uResult { Result = u });
+                results.Add(new Map856uResult { Result = u, WrapUrl = true });
                 return 0;
             }
 
@@ -784,7 +784,7 @@ namespace DigitalPlatform.Script
                     }
                     else
                     {
-                        u_list.Add(new Map856uResult { Result = u });
+                        u_list.Add(new Map856uResult { Result = u });   // WrapUrl == true ?
                     }
                 }
 
