@@ -165,7 +165,8 @@ namespace RfidCenter
 
                 // 继续尝试往后寻找
                 if (result0.Value == -1
-                    && result0.ErrorCode == "errorFromReader=4")
+                    // && result0.ErrorCode == "errorFromReader=4"
+                    )
                 {
                     errors.Add(result0);
                     continue;
