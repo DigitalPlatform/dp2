@@ -2687,7 +2687,7 @@ namespace RfidDrivers.First
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. reader_name:{reader_name},uid:{uid}",
+                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. reader_name:{reader_name},uid:{Element.GetHexString(uid)}",
                             ErrorCode = GetErrorCode(iret, hreader)
                         };
 

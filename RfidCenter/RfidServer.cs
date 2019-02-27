@@ -60,9 +60,11 @@ namespace RfidCenter
 
                 foreach (InventoryInfo info in inventory_result.Results)
                 {
+#if NO
                     if (uid_table.ContainsKey(info.UID))
                         continue;
                     uid_table[info.UID] = reader.Name;
+#endif
 
                     var tag = new OneTag
                     {
@@ -280,7 +282,7 @@ enable);
         }
 
 
-        #region Tag List
+#region Tag List
 
         // 当前在读卡器探测范围内的标签
         List<OneTag> _tagList = new List<OneTag>();
@@ -393,7 +395,7 @@ enable);
             });
         }
 
-        #endregion
+#endregion
 
         private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
 
