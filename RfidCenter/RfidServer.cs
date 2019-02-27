@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,9 @@ namespace RfidCenter
             InventoryResult result = new InventoryResult();
             List<OneTag> tags = new List<OneTag>();
 
+            // uid --> Driver Name
+            Hashtable uid_table = new Hashtable();
+
             foreach (Reader reader in Program.Rfid.Readers)
             {
                 if (reader_name == "*" || reader.Name == reader_name)
@@ -56,6 +60,10 @@ namespace RfidCenter
 
                 foreach (InventoryInfo info in inventory_result.Results)
                 {
+                    if (uid_table.ContainsKey(info.UID))
+                        continue;
+                    uid_table[info.UID] = reader.Name;
+
                     var tag = new OneTag
                     {
                         Protocol = info.Protocol,
@@ -453,6 +461,8 @@ enable);
             bool bFirst = true;
             try
             {
+                // uid --> Driver Name
+                // Hashtable uid_table = new Hashtable();
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
                     await Task.Delay(200, _cancelInventory.Token).ConfigureAwait(false);
@@ -461,6 +471,7 @@ enable);
                     //if (_captureEnabled.Value == false)
                     //    continue;
 
+                    // uid_table.Clear();
                     foreach (Reader reader in Program.Rfid.Readers)
                     {
                         if (reader == null)
@@ -480,6 +491,9 @@ enable);
 
                         foreach (InventoryInfo info in inventory_result.Results)
                         {
+                            //if (uid_table.ContainsKey(info.UID))
+                            //    continue;
+                            //uid_table[info.UID] = reader.Name;
                             AddToTagList(reader.Name, info.UID, info.DsfID, info.Protocol);
                         }
                     }

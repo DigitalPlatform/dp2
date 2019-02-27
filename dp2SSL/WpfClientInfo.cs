@@ -14,8 +14,6 @@ using log4net;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
-using System.Threading;
-using DigitalPlatform.Text;
 using DigitalPlatform;
 
 namespace dp2SSL
