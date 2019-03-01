@@ -1174,7 +1174,7 @@ string strHtml)
                     _refreshTimer = new System.Threading.Timer(
             new System.Threading.TimerCallback(refreshTimerCallback),
             null,
-            TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
                 }
             }
         }

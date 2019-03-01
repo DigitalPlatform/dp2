@@ -57,6 +57,8 @@ namespace dp2Circulation
             }
         }
 
+        public string ProtocolFilter = null;    //  InventoryInfo.ISO15693 + "," + InventoryInfo.ISO14443A;
+
         public string MessageText { get; set; }
 
         // EAS 是否修复成功
@@ -80,6 +82,7 @@ namespace dp2Circulation
         const int COLUMN_PII = 0;
         const int COLUMN_UID = 1;
         const int COLUMN_READERNAME = 2;
+        const int COLUMN_PROTOCOL = 3;
 
         public RfidToolForm()
         {
@@ -182,6 +185,10 @@ namespace dp2Circulation
                         List<ListViewItem> items = new List<ListViewItem>();
                         foreach (OneTag tag in result.Results)
                         {
+                            if (this.ProtocolFilter != null
+                                && StringUtil.IsInList(tag.Protocol, this.ProtocolFilter) == false)
+                                continue;
+
                             ListViewItem item = FindItem(this.listView_tags,
                                 tag.ReaderName,
                                 tag.UID);
@@ -190,6 +197,7 @@ namespace dp2Circulation
                                 item = new ListViewItem();
                                 ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
                                 ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
+                                ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.Protocol);
                                 item.Tag = new ItemInfo { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
 
@@ -215,7 +223,8 @@ namespace dp2Circulation
                                 }
                             }
 
-                            items.Add(item);
+                            if (item != null)
+                                items.Add(item);
                             changed = true;
                         }
 
@@ -252,7 +261,7 @@ namespace dp2Circulation
                                         ret == true
                                         && this.AutoCloseDialog)
                                     {
-                                        this.button_OK_Click(this, new EventArgs());
+                                        this.DoOK(show_messageBox);
                                         closed = true;
                                     }
                                 }
@@ -458,6 +467,8 @@ namespace dp2Circulation
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
             OneTag tag = item_info.OneTag;
+            if (tag.Protocol == InventoryInfo.ISO14443A)
+                return; // 暂时还不支持对 14443A 的卡进行 GetTagInfo() 操作
 
             RfidChannel channel = StartRfidChannel(
     Program.MainForm.RfidCenterUrl,
@@ -858,9 +869,7 @@ namespace dp2Circulation
             UpdateChipList(false);
         }
 
-        public OneTag SelectedTag = null;
-
-        private void button_OK_Click(object sender, EventArgs e)
+        private bool DoOK(bool show_messageBox)
         {
             string strError = "";
 
@@ -885,10 +894,64 @@ namespace dp2Circulation
             Debug.Assert(this.SelectedTag != null);
             if (this.SelectedTag != null
                 && this.SelectedTag.TagInfo == null
+                && this.SelectedTag.Protocol == InventoryInfo.ISO15693
                 && this.listView_tags.SelectedItems.Count > 0)
             {
                 Debug.Assert(this.listView_tags.SelectedItems.Count > 0);
-                GetTagInfo(this.listView_tags.SelectedItems[0]);
+                ListViewItem selected_item = this.listView_tags.SelectedItems[0];
+                GetTagInfo(selected_item);
+                strError = "您选择的行尚未获得 TagInfo。请稍候重试";
+                goto ERROR1;
+            }
+
+            return true;
+            ERROR1:
+            if (show_messageBox)
+                MessageBox.Show(this, strError);
+            return false;
+        }
+
+
+        public OneTag SelectedTag = null;
+
+        private void button_OK_Click(object sender, EventArgs e)
+        {
+            if (DoOK(true) == true)
+            {
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+#if NO
+            string strError = "";
+
+            if (this.listView_tags.SelectedItems.Count == 0)
+            {
+                strError = "请选择一个标签";
+                goto ERROR1;
+            }
+
+            if (this.listView_tags.SelectedItems.Count > 0)
+            {
+                this.SelectedID = "uid:" + ListViewUtil.GetItemText(this.listView_tags.SelectedItems[0], COLUMN_UID);
+                this.SelectedPII = GetItemPII(this.listView_tags.SelectedItems[0]);
+                // this.SelectedPII = ListViewUtil.GetItemText(this.listView_tags.SelectedItems[0], COLUMN_PII);
+            }
+            else
+            {
+                this.SelectedID = null;
+                this.SelectedPII = null;
+            }
+
+
+            Debug.Assert(this.SelectedTag != null);
+            if (this.SelectedTag != null
+                && this.SelectedTag.TagInfo == null
+                && this.SelectedTag.Protocol == InventoryInfo.ISO15693
+                && this.listView_tags.SelectedItems.Count > 0)
+            {
+                Debug.Assert(this.listView_tags.SelectedItems.Count > 0);
+                ListViewItem selected_item = this.listView_tags.SelectedItems[0];
+                GetTagInfo(selected_item);
                 strError = "您选择的行尚未获得 TagInfo。请稍候重试";
                 goto ERROR1;
             }
@@ -898,6 +961,7 @@ namespace dp2Circulation
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // 修改 ListViewItem 的 PII 列文字

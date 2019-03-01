@@ -455,7 +455,7 @@
             // 
             this.splitContainer_rfidArea.Panel2.Controls.Add(this.chipEditor_editing);
             this.splitContainer_rfidArea.Size = new System.Drawing.Size(460, 342);
-            this.splitContainer_rfidArea.SplitterDistance = 221;
+            this.splitContainer_rfidArea.SplitterDistance = 220;
             this.splitContainer_rfidArea.TabIndex = 0;
             // 
             // chipEditor_existing
@@ -464,8 +464,9 @@
             this.chipEditor_existing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_existing.LogicChipItem = null;
             this.chipEditor_existing.Name = "chipEditor_existing";
-            this.chipEditor_existing.Size = new System.Drawing.Size(221, 342);
+            this.chipEditor_existing.Size = new System.Drawing.Size(220, 342);
             this.chipEditor_existing.TabIndex = 0;
+            this.chipEditor_existing.TitleVisible = true;
             // 
             // chipEditor_editing
             // 
@@ -473,8 +474,9 @@
             this.chipEditor_editing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_editing.LogicChipItem = null;
             this.chipEditor_editing.Name = "chipEditor_editing";
-            this.chipEditor_editing.Size = new System.Drawing.Size(235, 342);
+            this.chipEditor_editing.Size = new System.Drawing.Size(236, 342);
             this.chipEditor_editing.TabIndex = 1;
+            this.chipEditor_editing.TitleVisible = true;
             // 
             // toolStrip_rfid
             // 

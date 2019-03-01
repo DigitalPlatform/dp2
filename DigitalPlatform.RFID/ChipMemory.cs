@@ -72,6 +72,14 @@ namespace DigitalPlatform.RFID
             this._isNew = isNew;
         }
 
+        // 是否为空白内容？
+        public virtual bool IsBlank()
+        {
+            if (this.Elements.Count == 0)
+                return true;
+            return false;
+        }
+
         // 查找一个元素
         public Element FindElement(ElementOID oid)
         {

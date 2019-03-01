@@ -109,7 +109,7 @@ namespace dp2SSL
                     // TODO: 某处界面可以显示当前连接的读卡器名字
                     // 看看是否有至少一个读卡器
                     if (result.Readers.Length == 0)
-                        errors.Add("当前指纹中心没有任何连接的读卡器。请检查读卡器是否正确连接");
+                        errors.Add("当前 RFID 中心没有任何连接的读卡器。请检查读卡器是否正确连接");
                     else
                         _rfidChannel.Started = true;
                 }
@@ -128,6 +128,15 @@ namespace dp2SSL
 
             if (errors.Count > 0)
                 this.Error = StringUtil.MakePathList(errors, "; ");
+
+            {
+                List<string> style = new List<string>();
+                if (_rfidChannel?.Started == true)
+                    style.Add("rfid");
+                if (_fingerprintChannel?.Started == true)
+                    style.Add("fingerprint");
+                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+            }
 
             // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
             if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))

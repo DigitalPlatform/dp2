@@ -21,7 +21,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>458DBD8488B5B2A4FD0653A590D3F6E2BC38DA9F</ManifestCertificateThumbprint>
     <ManifestKeyFile>dp2003.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>98</ApplicationRevision>
+    <ApplicationRevision>101</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -672,6 +672,12 @@
     <Compile Include="Order\DateSliceDialog.Designer.cs">
       <DependentUpon>DateSliceDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reader\BindCardNumberDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\BindCardNumberDialog.Designer.cs">
+      <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\ChangeStateActionControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -695,6 +701,12 @@
     </Compile>
     <Compile Include="Reader\PrintReaderSheetDialog.Designer.cs">
       <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\RfidPatronCardDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\RfidPatronCardDialog.Designer.cs">
+      <DependentUpon>RfidPatronCardDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Reader\SelectPatronDialog.cs">
       <SubType>Form</SubType>
@@ -1785,6 +1797,9 @@
     <EmbeddedResource Include="Order\DateSliceDialog.resx">
       <DependentUpon>DateSliceDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Reader\BindCardNumberDialog.resx">
+      <DependentUpon>BindCardNumberDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Reader\ChangeStateActionControl.resx">
       <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -1796,6 +1811,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\PrintReaderSheetDialog.resx">
       <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\RfidPatronCardDialog.resx">
+      <DependentUpon>RfidPatronCardDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\SelectPatronDialog.resx">
       <DependentUpon>SelectPatronDialog.cs</DependentUpon>
