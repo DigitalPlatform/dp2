@@ -79,7 +79,7 @@
 
 
             </Grid>
-            <TextBlock Text="请放好读者卡 ..."
+            <TextBlock Name="startMessage" Text="请放好读者卡 ..."
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"

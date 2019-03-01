@@ -116,7 +116,7 @@ namespace DigitalPlatform.RFID.UI
 
         [Browsable(true)]
         [DefaultValue("")]
-        public override string Text
+        public string Title
         {
             get
             {

@@ -6561,5 +6561,29 @@ MessageBoxDefaultButton.Button1);
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // 创建 15693 读者卡
+        private void toolStripMenuItem_createRfidCard_Click(object sender, EventArgs e)
+        {
+            string library_code = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(this.ReaderEditControl.RecPath));
+            RfidPatronCardDialog dlg = new RfidPatronCardDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.SetData(this.ReaderEditControl, library_code);
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_RfidPatronCardDialog_state");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+        }
+
+        private void toolStripMenuItem_bindCardNumber_Click(object sender, EventArgs e)
+        {
+            BindCardNumberDialog dlg = new BindCardNumberDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Numbers = this.readerEditControl1.CardNumber;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_BindCardNumberDialog_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+            this.readerEditControl1.CardNumber = dlg.Numbers;
+        }
     }
 }

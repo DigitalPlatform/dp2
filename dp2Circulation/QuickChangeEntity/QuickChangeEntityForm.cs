@@ -532,6 +532,7 @@ false);
                 dialog.SelectedPII = auto_select_pii;
                 dialog.AutoSelectCondition = "auto_or_blankPII";
                 dialog.AskTag += Dialog_AskTag;
+                dialog.ProtocolFilter = InventoryInfo.ISO15693;
                 Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                 dialog.ShowDialog(this);
 

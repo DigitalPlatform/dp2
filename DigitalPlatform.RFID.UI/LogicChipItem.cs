@@ -72,6 +72,8 @@ namespace DigitalPlatform.RFID.UI
 
         // 默认的图书 AFI 值。归架状态
         public static byte DefaultBookAFI = 0x07;
+        // 默认的读者 AFI 值。“借出”状态
+        public static byte DefaultPatronAFI = 0xC2;
 
         byte _dsfid = 0;
         [DisplayName("DSFID"), Description("DSFID")]
@@ -121,6 +123,8 @@ namespace DigitalPlatform.RFID.UI
 
         // 默认的图书 EAS 值。归架状态
         public static bool DefaultBookEAS = true;
+        // 默认的读者 EAS 值。Disabled
+        public static bool DefaultPatronEAS = false;
 
         #endregion
 
@@ -853,6 +857,16 @@ namespace DigitalPlatform.RFID.UI
             }
 
             return text.ToString();
+        }
+
+        // 是否为空白内容？
+        public override bool IsBlank()
+        {
+            if (base.IsBlank())
+                return true;
+            if (this.AFI == 0 && this.DSFID == 0 && this.EAS == false)
+                return true;
+            return false;
         }
     }
 

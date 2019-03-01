@@ -36,9 +36,9 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_saveRfid = new System.Windows.Forms.ToolStripButton();
             this.listView_tags = new System.Windows.Forms.ListView();
-            this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_tag = new System.Windows.Forms.TabPage();
@@ -49,6 +49,7 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -124,7 +125,8 @@
             this.listView_tags.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_pii,
             this.columnHeader_uid,
-            this.columnHeader_readerName});
+            this.columnHeader_readerName,
+            this.columnHeader_protocol});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
@@ -137,20 +139,20 @@
             this.listView_tags.SelectedIndexChanged += new System.EventHandler(this.listView_tags_SelectedIndexChanged);
             this.listView_tags.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_tags_MouseUp);
             // 
-            // columnHeader_readerName
+            // columnHeader_pii
             // 
-            this.columnHeader_readerName.Text = "读卡器";
-            this.columnHeader_readerName.Width = 200;
+            this.columnHeader_pii.Text = "PII";
+            this.columnHeader_pii.Width = 200;
             // 
             // columnHeader_uid
             // 
             this.columnHeader_uid.Text = "UID";
             this.columnHeader_uid.Width = 200;
             // 
-            // columnHeader_pii
+            // columnHeader_readerName
             // 
-            this.columnHeader_pii.Text = "PII";
-            this.columnHeader_pii.Width = 200;
+            this.columnHeader_readerName.Text = "读卡器";
+            this.columnHeader_readerName.Width = 200;
             // 
             // splitContainer1
             // 
@@ -271,6 +273,11 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(800, 419);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
+            // columnHeader_protocol
+            // 
+            this.columnHeader_protocol.Text = "协议";
+            this.columnHeader_protocol.Width = 200;
+            // 
             // RfidToolForm
             // 
             this.AcceptButton = this.button_OK;
@@ -325,5 +332,6 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ColumnHeader columnHeader_protocol;
     }
 }

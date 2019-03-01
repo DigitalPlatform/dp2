@@ -80,6 +80,7 @@
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_createRfidCard = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_editXML = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportDetailToExcelFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_exportExcel = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,6 +95,7 @@
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.toolStripMenuItem_bindCardNumber = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -593,6 +595,8 @@
             this.toolStripDropDownButton_otherFunc.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveTemplate,
             this.toolStripSeparator8,
+            this.toolStripMenuItem_createRfidCard,
+            this.toolStripMenuItem_bindCardNumber,
             this.toolStripMenuItem_editXML,
             this.toolStripMenuItem_exportDetailToExcelFile,
             this.toolStripMenuItem_exportExcel,
@@ -623,6 +627,13 @@
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
             this.toolStripSeparator8.Size = new System.Drawing.Size(357, 6);
+            // 
+            // toolStripMenuItem_createRfidCard
+            // 
+            this.toolStripMenuItem_createRfidCard.Name = "toolStripMenuItem_createRfidCard";
+            this.toolStripMenuItem_createRfidCard.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_createRfidCard.Text = "创建 RFID 读者卡 (ISO15693) ...";
+            this.toolStripMenuItem_createRfidCard.Click += new System.EventHandler(this.toolStripMenuItem_createRfidCard_Click);
             // 
             // toolStripMenuItem_editXML
             // 
@@ -746,6 +757,13 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(915, 506);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
+            // toolStripMenuItem_bindCardNumber
+            // 
+            this.toolStripMenuItem_bindCardNumber.Name = "toolStripMenuItem_bindCardNumber";
+            this.toolStripMenuItem_bindCardNumber.Size = new System.Drawing.Size(360, 30);
+            this.toolStripMenuItem_bindCardNumber.Text = "绑定卡号 ...";
+            this.toolStripMenuItem_bindCardNumber.Click += new System.EventHandler(this.toolStripMenuItem_bindCardNumber_Click);
+            // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
@@ -850,5 +868,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_editXML;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_registerFace;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_pasteCardPhoto;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_createRfidCard;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_bindCardNumber;
     }
 }

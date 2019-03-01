@@ -10,6 +10,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.RFID;
 
 namespace dp2Circulation
 {
@@ -1052,6 +1053,7 @@ end_time);
                         dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
                         dlg.Mode = "auto_fix_eas";
                         dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                        dlg.ProtocolFilter = InventoryInfo.ISO15693;
                         dlg.ShowDialog(this.Container);
                         eas_fixed = dlg.EasFixed;
                         // 2019/1/23

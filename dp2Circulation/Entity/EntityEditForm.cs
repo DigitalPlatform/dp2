@@ -50,8 +50,8 @@ namespace dp2Circulation
             _splitContainer_main = this.splitContainer_itemArea;
             _tableLayoutPanel_main = this.tableLayoutPanel_main;
 
-            this.chipEditor_existing.Text = "标签中原有内容";
-            this.chipEditor_editing.Text = "即将写入的内容";
+            this.chipEditor_existing.Title = "标签中原有内容";
+            this.chipEditor_editing.Title = "即将写入的内容";
         }
 
         /// <summary>
@@ -1049,6 +1049,7 @@ namespace dp2Circulation
                 dialog.AutoCloseDialog = auto_close_dialog;
                 dialog.SelectedPII = auto_select_pii;
                 dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
+                dialog.ProtocolFilter = InventoryInfo.ISO15693;
                 Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
                 dialog.ShowDialog(this);
 

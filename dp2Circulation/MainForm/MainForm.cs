@@ -5262,6 +5262,9 @@ dlg.TempCode);
 
         void AutoStartDp2libraryXE()
         {
+            if (ApplicationDeployment.IsNetworkDeployed == false)
+                return; // TODO: 以后尝试增加自动启动绿色版的方法
+
             string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V3/dp2Library XE V3");
             if (File.Exists(strShortcutFilePath) == false)
             {
