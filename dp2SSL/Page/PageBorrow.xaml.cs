@@ -127,7 +127,7 @@ namespace dp2SSL
             }
 
             if (errors.Count > 0)
-                this.Error = StringUtil.MakePathList(errors, "; ");
+                this.GlobalError = StringUtil.MakePathList(errors, "; ");
 
             {
                 List<string> style = new List<string>();
@@ -312,6 +312,8 @@ namespace dp2SSL
             _cancelRefresh = new CancellationTokenSource();
             try
             {
+                this.Error = null;
+
                 // 获得所有协议类型的标签
                 var result = _rfidChannel.Object.ListTags("*",
                     null
@@ -754,6 +756,22 @@ out string strError);
                 }
             }
         }
+
+        private string _globalError = null;   // "test error line asdljasdkf; ;jasldfjasdjkf aasdfasdf";
+
+        public string GlobalError
+        {
+            get => _globalError;
+            set
+            {
+                if (_globalError != value)
+                {
+                    _globalError = value;
+                    OnPropertyChanged("GlobalError");
+                }
+            }
+        }
+
 
         #endregion
 

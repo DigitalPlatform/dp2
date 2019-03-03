@@ -1165,7 +1165,7 @@ string strHtml)
 #endif
 
         // 2 秒内多次到来的请求，会被合并为一次执行
-        void BeginRefreshReaders()
+        public void BeginRefreshReaders()
         {
             lock (_syncRoot_refresh)
             {
