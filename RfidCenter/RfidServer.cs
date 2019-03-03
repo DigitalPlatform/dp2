@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 
@@ -15,6 +16,8 @@ namespace RfidCenter
 {
     public class RfidServer : MarshalByRefObject, IRfid, IDisposable
     {
+        static CompactLog _compactLog = new CompactLog();
+
         public void Dispose()
         {
             _cancelInventory?.Cancel();
@@ -312,8 +315,8 @@ enable);
         #region Tag List
 
         // 当前在读卡器探测范围内的标签
-        List<OneTag> _tagList = new List<OneTag>();
-        internal ReaderWriterLockSlim _lockTagList = new ReaderWriterLockSlim();
+        static List<OneTag> _tagList = new List<OneTag>();
+        static internal ReaderWriterLockSlim _lockTagList = new ReaderWriterLockSlim();
 
         bool AddToTagList(string reader_name,
             string uid,
@@ -424,14 +427,14 @@ enable);
 
         #endregion
 
-        private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
+        static private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
 
         public NormalResult EnableSendKey(bool enable)
         {
             if (enable == true)
-                this._sendKeyEnabled.FalseToTrue();
+                _sendKeyEnabled.FalseToTrue();
             else
-                this._sendKeyEnabled.TrueToFalse();
+                _sendKeyEnabled.TrueToFalse();
 
             string message = "";
             if (enable)
@@ -477,7 +480,7 @@ enable);
             }
         }
 
-        CancellationTokenSource _cancelInventory = null;
+        static CancellationTokenSource _cancelInventory = null;
 
         async Task DoInventory()
         {
@@ -495,7 +498,10 @@ enable);
                 while (_cancelInventory.IsCancellationRequested == false)
                 {
                     await Task.Delay(200, _cancelInventory.Token).ConfigureAwait(false);
-                    ClearIdleTag(TimeSpan.FromSeconds(1));  // 1 秒的放误触发时间
+
+                    ClearIdleTag(TimeSpan.FromSeconds(1));  // 1 秒的防误触发时间
+
+                    FlushCompactLog();
 
                     //if (_captureEnabled.Value == false)
                     //    continue;
@@ -511,11 +517,14 @@ enable);
                         // bFirst = false;
                         if (inventory_result.Value == -1)
                         {
+                            _compactLog?.Add($"*** 读卡器 {0} 点选标签时出错: {1}",
+                                new object[] { reader.Name, inventory_result.ToString() }
+                                );
+                            continue;
                             // ioError 要主动卸载有问题的 reader?
                             // 如何报错？写入操作历史？
-                            Program.MainForm.OutputHistory($"读卡器{reader.Name}点选标签时出错:{inventory_result.ToString()}\r\n已停止捕获过程", 2);
-                            // Task.Delay(500, _cancelInventory.Token);
-                            return;
+                            // Program.MainForm.OutputHistory($"读卡器{reader.Name}点选标签时出错:{inventory_result.ToString()}\r\n已停止捕获过程", 2);
+                            // return;
                         }
 
                         foreach (InventoryInfo info in inventory_result.Results)
@@ -536,6 +545,35 @@ enable);
             {
                 _cancelInventory = null;
                 Program.MainForm.OutputHistory("结束捕获", 0);
+            }
+        }
+
+        static DateTime _lastFlushTime = DateTime.Now;
+        static int _lastErrorCount = 0;
+
+        void FlushCompactLog()
+        {
+            if (_compactLog == null)
+                return;
+
+            int minutes = 10;    // 分钟数
+            TimeSpan delta = TimeSpan.FromMinutes(minutes);   // 10
+
+            if (DateTime.Now - _lastFlushTime > delta)
+            {
+                _lastErrorCount += _compactLog.WriteToLog((text) =>
+                {
+                    Program.MainForm.OutputHistory(text, 2);
+                });
+                _lastFlushTime = DateTime.Now;
+
+                if (_lastErrorCount > 200 * minutes)  // 200 相当于一分钟连续报错的量
+                {
+                    // 触发重启全部读卡器
+                    Program.MainForm?.BeginRefreshReaders();
+                    Program.MainForm?.Speak("尝试重新初始化全部读卡器");
+                    _lastErrorCount = 0;
+                }
             }
         }
 
