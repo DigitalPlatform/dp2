@@ -39,5 +39,7 @@
         <TextBlock Grid.ColumnSpan="2" Name="message"
                    Text="test" TextAlignment="Center" 
                    Background="CornflowerBlue" Foreground="White"/>
+        <Button Name="error" Content="错误信息"  Click="Error_Click"
+                Background="DarkRed" Foreground="White" FontSize="40" BorderThickness="0"/>
     </UniformGrid>
 </Page>

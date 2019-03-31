@@ -2213,6 +2213,7 @@ out strError);
             string strBiblioRecPath = "";
             bool bAllowCopy = true;
 
+#if NO
             AccountInfo _currentAccount = _base.GetAccountInfo(strStartServerName, false);
             if (_currentAccount == null)
             {
@@ -2226,6 +2227,7 @@ out strError);
                 else
                     bAllowCopy = false;
             }
+#endif
 
             // 根据书目记录的路径，匹配适当的目标
             // return:
@@ -2708,7 +2710,7 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-        #region 册记录相关
+#region 册记录相关
 
         // 将一条书目记录下属的若干册记录装入列表
         // return:
@@ -3069,9 +3071,9 @@ int nCount)
                 this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
-        #endregion
+#endregion
 
-        #region 保存书目记录
+#region 保存书目记录
 
         // 保存书目记录和下属的册记录
         // return:
@@ -3555,6 +3557,7 @@ int nCount)
                 {
                     if (IsWritable(server, strEditBiblioRecPath) == true)
                     {
+                        // TODO: 还要看看是否具备下属的实体库
                         strServerName = strEditServerName;
                         strBiblioRecPath = strEditBiblioRecPath;
                         return 1;
@@ -3598,9 +3601,9 @@ int nCount)
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region 删除书目记录
+#region 删除书目记录
 
         // return:
         //      -1  出错
@@ -3789,7 +3792,7 @@ int nCount)
             }
         }
 
-        #endregion
+#endregion
 
         private void flowLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -4409,7 +4412,7 @@ MessageBoxDefaultButton.Button2);
             this.DeleteBiblioRecord();
         }
 
-        #region 键盘输入面板
+#region 键盘输入面板
 
         KeyboardForm _keyboardForm = null;
 
@@ -4555,7 +4558,7 @@ MessageBoxDefaultButton.Button2);
             // this.easyMarcControl1.HideSelection = true;
         }
 
-        #endregion
+#endregion
 
         private void EntityRegisterWizard_Move(object sender, EventArgs e)
         {

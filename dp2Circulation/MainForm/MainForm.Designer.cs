@@ -98,6 +98,8 @@
             this.MenuItem_openChargingPrintManageForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openCardPrintForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openLabelPrintForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator32 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_openRfidToolForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_statisForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openOperLogStatisForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -243,8 +245,6 @@
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.toolStripSeparator32 = new System.Windows.Forms.ToolStripSeparator();
-            this.ToolStripMenuItem_openRfidToolForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -596,56 +596,68 @@
             // MenuItem_openSettlementForm
             // 
             this.MenuItem_openSettlementForm.Name = "MenuItem_openSettlementForm";
-            this.MenuItem_openSettlementForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openSettlementForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openSettlementForm.Text = "结算窗(&S)";
             this.MenuItem_openSettlementForm.Click += new System.EventHandler(this.MenuItem_openSettlementForm_Click);
             // 
             // MenuItem_openPassGateForm
             // 
             this.MenuItem_openPassGateForm.Name = "MenuItem_openPassGateForm";
-            this.MenuItem_openPassGateForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openPassGateForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openPassGateForm.Text = "入馆登记窗(&P)";
             this.MenuItem_openPassGateForm.Click += new System.EventHandler(this.MenuItem_openPassGateForm_Click);
             // 
             // MenuItem_openZhongcihaoForm
             // 
             this.MenuItem_openZhongcihaoForm.Name = "MenuItem_openZhongcihaoForm";
-            this.MenuItem_openZhongcihaoForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openZhongcihaoForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openZhongcihaoForm.Text = "种次号窗(&Z)";
             this.MenuItem_openZhongcihaoForm.Click += new System.EventHandler(this.MenuItem_openZhongcihaoForm_Click);
             // 
             // MenuItem_openCallNumberForm
             // 
             this.MenuItem_openCallNumberForm.Name = "MenuItem_openCallNumberForm";
-            this.MenuItem_openCallNumberForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openCallNumberForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openCallNumberForm.Text = "同类书区分号窗(&C)";
             this.MenuItem_openCallNumberForm.Click += new System.EventHandler(this.MenuItem_openCallNumberForm_Click);
             // 
             // toolStripSeparator23
             // 
             this.toolStripSeparator23.Name = "toolStripSeparator23";
-            this.toolStripSeparator23.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator23.Size = new System.Drawing.Size(239, 6);
             // 
             // MenuItem_openChargingPrintManageForm
             // 
             this.MenuItem_openChargingPrintManageForm.Name = "MenuItem_openChargingPrintManageForm";
-            this.MenuItem_openChargingPrintManageForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openChargingPrintManageForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openChargingPrintManageForm.Text = "出纳打印管理窗(&C)";
             this.MenuItem_openChargingPrintManageForm.Click += new System.EventHandler(this.MenuItem_openChargingPrintManageForm_Click);
             // 
             // MenuItem_openCardPrintForm
             // 
             this.MenuItem_openCardPrintForm.Name = "MenuItem_openCardPrintForm";
-            this.MenuItem_openCardPrintForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openCardPrintForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openCardPrintForm.Text = "卡片打印窗(&C)";
             this.MenuItem_openCardPrintForm.Click += new System.EventHandler(this.MenuItem_openCardPrintForm_Click);
             // 
             // MenuItem_openLabelPrintForm
             // 
             this.MenuItem_openLabelPrintForm.Name = "MenuItem_openLabelPrintForm";
-            this.MenuItem_openLabelPrintForm.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openLabelPrintForm.Size = new System.Drawing.Size(242, 30);
             this.MenuItem_openLabelPrintForm.Text = "标签打印窗(&L)";
             this.MenuItem_openLabelPrintForm.Click += new System.EventHandler(this.MenuItem_openLabelPrintForm_Click);
+            // 
+            // toolStripSeparator32
+            // 
+            this.toolStripSeparator32.Name = "toolStripSeparator32";
+            this.toolStripSeparator32.Size = new System.Drawing.Size(239, 6);
+            // 
+            // ToolStripMenuItem_openRfidToolForm
+            // 
+            this.ToolStripMenuItem_openRfidToolForm.Name = "ToolStripMenuItem_openRfidToolForm";
+            this.ToolStripMenuItem_openRfidToolForm.Size = new System.Drawing.Size(242, 30);
+            this.ToolStripMenuItem_openRfidToolForm.Text = "RFID 工具窗(&R)";
+            this.ToolStripMenuItem_openRfidToolForm.Click += new System.EventHandler(this.ToolStripMenuItem_openRfidToolForm_Click);
             // 
             // toolStripSeparator13
             // 
@@ -1888,18 +1900,6 @@
             this.splitter_fixed.Size = new System.Drawing.Size(3, 459);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
-            // 
-            // toolStripSeparator32
-            // 
-            this.toolStripSeparator32.Name = "toolStripSeparator32";
-            this.toolStripSeparator32.Size = new System.Drawing.Size(249, 6);
-            // 
-            // ToolStripMenuItem_openRfidToolForm
-            // 
-            this.ToolStripMenuItem_openRfidToolForm.Name = "ToolStripMenuItem_openRfidToolForm";
-            this.ToolStripMenuItem_openRfidToolForm.Size = new System.Drawing.Size(252, 30);
-            this.ToolStripMenuItem_openRfidToolForm.Text = "RFID 工具窗(&R)";
-            this.ToolStripMenuItem_openRfidToolForm.Click += new System.EventHandler(this.ToolStripMenuItem_openRfidToolForm_Click);
             // 
             // MainForm
             // 

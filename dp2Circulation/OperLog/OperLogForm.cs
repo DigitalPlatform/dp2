@@ -367,7 +367,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return -1;
         }
@@ -3839,18 +3839,22 @@ FileShare.ReadWrite))
                         if (node != null)
                             strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                        if (string.IsNullOrEmpty(strRecPath) == false
-                            && this.m_recPathList.IndexOf(strRecPath) != -1)
+                        // 路径列表为空，表示无论什么路径都满足
+                        if (this.m_recPathList.Count > 0)
                         {
-                            param.Comment = "path:" + strRecPath;
+                            if (string.IsNullOrEmpty(strRecPath) == false
+                                && this.m_recPathList.IndexOf(strRecPath) != -1)
+                            {
+                                param.Comment = "path:" + strRecPath;
+                            }
+                            else if (string.IsNullOrEmpty(strOldRecPath) == false
+                                && this.m_recPathList.IndexOf(strOldRecPath) != -1)
+                            {
+                                param.Comment = "path:" + strOldRecPath;
+                            }
+                            else
+                                return false;
                         }
-                        else if (string.IsNullOrEmpty(strOldRecPath) == false
-                            && this.m_recPathList.IndexOf(strOldRecPath) != -1)
-                        {
-                            param.Comment = "path:" + strOldRecPath;
-                        }
-                        else
-                            return false;
                     }
                     else if (strOperation == "borrow" || strOperation == "return")
                     {
@@ -3861,13 +3865,17 @@ FileShare.ReadWrite))
                         if (node != null)
                             strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                        if (string.IsNullOrEmpty(strRecPath) == false
-                            && this.m_recPathList.IndexOf(strRecPath) != -1)
+                        // 路径列表为空，表示无论什么路径都满足
+                        if (this.m_recPathList.Count > 0)
                         {
-                            param.Comment = "path:" + strRecPath;
+                            if (string.IsNullOrEmpty(strRecPath) == false
+                            && this.m_recPathList.IndexOf(strRecPath) != -1)
+                            {
+                                param.Comment = "path:" + strRecPath;
+                            }
+                            else
+                                return false;
                         }
-                        else
-                            return false;
                     }
                     else
                         return false;
@@ -3882,16 +3890,13 @@ FileShare.ReadWrite))
                         string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
                         string strNewRecord = DomUtil.GetElementText(dom.DocumentElement, "record");
 
-                        string strOutMarcSyntax = "";
-                        string strOldMarc = "";
-                        string strNewMarc = "";
                         // 将XML格式转换为MARC格式
                         // 自动从数据记录中获得MARC语法
                         nRet = MarcUtil.Xml2Marc(strOldRecord,
                             true,
                             null,
-                            out strOutMarcSyntax,
-                            out strOldMarc,
+                            out string strOutMarcSyntax,
+                            out string strOldMarc,
                             out strError);
                         if (nRet == -1)
                         {
@@ -3904,7 +3909,7 @@ FileShare.ReadWrite))
         true,
         null,
         out strOutMarcSyntax,
-        out strNewMarc,
+        out string strNewMarc,
         out strError);
                         if (nRet == -1)
                         {
@@ -3938,7 +3943,7 @@ FileShare.ReadWrite))
             }
             return true;
 
-        ERROR1:
+            ERROR1:
             foreach (string error in errors)
             {
                 Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
@@ -4128,7 +4133,7 @@ FileShare.ReadWrite))
 
             Program.MainForm.StatusBarMessage = "总共耗费时间: " + this.estimate.GetTotalTime().ToString();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -4576,7 +4581,7 @@ FileShare.ReadWrite))
 
             MessageBox.Show(this, "修复完成。\r\n\r\n共丢弃 " + nRet.ToString() + " 个段落。\r\n\r\n修复后的内容已经写入目标文件 " + this.textBox_repair_targetFilename.Text);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -4902,7 +4907,7 @@ FileShare.ReadWrite))
                 {
                     dom.LoadXml(strBody);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "XML 内容不合法: " + ex.Message;
                     return -1;
@@ -5138,7 +5143,7 @@ FileShare.ReadWrite))
             MessageBox.Show(this, "验证完成。\r\n\r\n共验证 " + nFileCount + " 个日志文件，其中有 " + nRet.ToString() + " 个日志文件发现格式错误。\r\n\r\n"
                 + StringUtil.MakePathList(errorfilenames, "\r\n"));
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5440,7 +5445,7 @@ FileShare.ReadWrite))
             }
             this.textBox_filenames.Text = strText;
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -5569,7 +5574,7 @@ FileShare.ReadWrite))
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, "DoViewOperlog() 出错: " + strError);
         }
 
@@ -5675,7 +5680,7 @@ FileShare.ReadWrite))
             }
 
             // 检查是否具备足够权限
-            string[] rights = new string[] { 
+            string[] rights = new string[] {
             "setbiblioinfo",
             "setiteminfo",
             "setissueinfo",
@@ -5817,7 +5822,7 @@ MessageBoxDefaultButton.Button1);
                         MessageBox.Show(this, "移动 " + strOldRecPath + " --> " + strRecPath + " 的过程中出现警告：" + strError);
                     }
 
-                CONTINUE:
+                    CONTINUE:
                     stop.SetProgressValue(i + 1);
                     i++;
                 }
@@ -5839,7 +5844,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6011,7 +6016,7 @@ MessageBoxDefaultButton.Button1);
                 this.ReturnChannel(channel);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6064,7 +6069,7 @@ MessageBoxDefaultButton.Button1);
                 writer.WriteEndDocument();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6369,7 +6374,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6702,7 +6707,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -6960,7 +6965,7 @@ Keys keyData)
 
             Program.MainForm.StatusBarMessage = "操作类型为 '" + m_strFindOperations + "' 的日志记录没有找到";
             return;
-        FOUND:
+            FOUND:
             ListViewUtil.ClearSelection(this.listView_records);
             found_item.Selected = true;
             found_item.EnsureVisible();
@@ -6998,7 +7003,7 @@ Keys keyData)
         }
 
 
-#region 改进后的批处理功能
+        #region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -7398,7 +7403,7 @@ MessageBoxDefaultButton.Button1);
     string strVersionFileName,
     string strLibraryCodeList,
     string strDp2LibraryServerUrl,
-            //string strFilter,   // 2017/9/20
+    //string strFilter,   // 2017/9/20
     out string strError)
         {
             strError = "";
@@ -8224,10 +8229,10 @@ MessageBoxDefaultButton.Button1);
 
             lProgressValue += lFileSize;
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
-#endregion
+        #endregion
 
         public string UiState
         {
@@ -8292,7 +8297,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8783,7 +8788,7 @@ MessageBoxDefaultButton.Button1);
 
                     // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
 
-                REDO:
+                    REDO:
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
                     byte[] baNewTimestamp = null;
@@ -8859,7 +8864,7 @@ MessageBoxDefaultButton.Button1);
                         goto REDO;
                     }
 
-                CONTINUE:
+                    CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
@@ -8879,7 +8884,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -8983,7 +8988,7 @@ MessageBoxDefaultButton.Button1);
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
 
-                CONTINUE:
+                    CONTINUE:
                     i++;
                     stop.SetProgressValue(i);
                 }
@@ -9010,7 +9015,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9059,7 +9064,7 @@ MessageBoxDefaultButton.Button1);
             // FillRecoverList();
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -9555,7 +9560,7 @@ strHtml2 +
                 }
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, "DoViewRecover() 出错: " + strError);
         }
 

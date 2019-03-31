@@ -129,9 +129,9 @@ namespace DigitalPlatform.Script
             }
 
             strError = "ISBN第一部分字符数不能超过5";
-        WRONG:
+            WRONG:
             return -1;
-        CORRECT:
+            CORRECT:
             return 0;
         }
 
@@ -204,6 +204,13 @@ namespace DigitalPlatform.Script
                 return 1;
             }
 
+            // 检查前面 length - 1 位必须为数字。最后一位必须是数字或者 X
+            if (VerifyChars(strISBN) == false)
+            {
+                strError = $"ISBN '{strISBN}' 校验不正确。出现了非法字符";
+                return 1;
+            }
+
             if (strISBN.Length == 10)
             {
                 try
@@ -234,6 +241,33 @@ namespace DigitalPlatform.Script
             }
 
             return 0;
+        }
+
+        static bool VerifyChars(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return true;
+            for (int i = 0; i < text.Length; i++)
+            {
+                char ch = text[i];
+
+                if (ch >= '0' && ch <= '9')
+                {
+                }
+                else
+                {
+                    // 最后一个 char
+                    if (i == text.Length - 1)
+                    {
+                        if (char.ToLower(ch) != 'x')
+                            return false;
+                        continue;
+                    }
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -498,7 +532,7 @@ namespace DigitalPlatform.Script
             strError = "第二部分格式错误 nFirstLen=[" + Convert.ToString(strFirstPart.Length) + "]";
             return -1;
 
-        FINISH:
+            FINISH:
             strTarget = strSource;
 
             strTarget = strTarget.Insert(strFirstPart.Length, "-");

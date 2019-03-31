@@ -36,7 +36,7 @@ namespace FingerprintCenter
             try
             {
 #endif
-// EndRemoteChannel();
+            // EndRemoteChannel();
 
 #if NO
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
@@ -82,6 +82,7 @@ namespace FingerprintCenter
 #endif
             Program.FingerPrint.Captured += FingerPrint_Captured;
             // Program.MainForm.OutputHistory("111");
+
             return true;
 #if NO
             }
@@ -118,8 +119,39 @@ namespace FingerprintCenter
             }
         }
 
-#endregion
+        #endregion
 
+
+        #region SendKey 有关功能
+
+        // static private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
+
+        public NormalResult EnableSendKey(bool enable)
+        {
+            return _enableSendKey(enable);
+        }
+
+        public static NormalResult _enableSendKey(bool enable)
+        {
+            if (Program.MainForm != null)
+                Program.MainForm.SendKeyEnabled = enable;
+
+            string message = "";
+            if (enable)
+                message = "指纹发送打开";
+            else
+                message = "指纹发送关闭";
+
+            Task.Run(() =>
+            {
+                Program.MainForm?.OutputHistory(message, 0);
+                // Program.MainForm?.Speak(message);
+            });
+
+            return new NormalResult();
+        }
+
+        #endregion
 
         private void SafeInvokeMessageArrived(string Message)
         {

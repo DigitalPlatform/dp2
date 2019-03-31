@@ -311,6 +311,19 @@ enable);
             }
         }
 
+        public NormalResult ChangePassword(string reader_name,
+    string uid,
+    string type,
+    uint old_password,
+    uint new_password)
+        {
+            return Program.Rfid.ChangePassword(
+reader_name,
+uid,
+type,
+old_password,
+new_password);
+        }
 
         #region Tag List
 
@@ -438,9 +451,9 @@ enable);
 
             string message = "";
             if (enable)
-                message = "SendKey 打开";
+                message = "RFID 发送打开";
             else
-                message = "SendKey 关闭";
+                message = "RFID 发送关闭";
             Program.MainForm.OutputHistory(message, 0);
 
             Program.MainForm?.Speak(message);

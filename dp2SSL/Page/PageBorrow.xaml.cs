@@ -47,9 +47,17 @@ namespace dp2SSL
             this.patronControl.DataContext = _patron;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
+
         }
 
-        FingerprintChannel _fingerprintChannel = null;
+        public FingerprintChannel _fingerprintChannel
+        {
+            get
+            {
+                return App.CurrentApp.FingerprintChannel;
+            }
+        }
+
         RfidChannel _rfidChannel = null;
         // EventProxy eventProxy;
 
@@ -62,6 +70,12 @@ namespace dp2SSL
 
             // 准备指纹通道
             List<string> errors = new List<string>();
+
+            // 重试初始化指纹环境
+            errors.AddRange(App.CurrentApp.InitialFingerprint());
+
+            App.CurrentApp.ClearFingerprintMessage();
+#if NO
             if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
             {
 #if NO
@@ -92,6 +106,8 @@ namespace dp2SSL
                         errors.Add($"启动指纹通道时出错(2): {ex.Message}");
                 }
             }
+
+#endif
 
             // 准备 RFID 通道
             if (string.IsNullOrEmpty(App.RfidUrl) == false)
@@ -156,11 +172,13 @@ namespace dp2SSL
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
+#if NO
             if (_fingerprintChannel != null)
             {
                 FingerPrint.EndFingerprintChannel(_fingerprintChannel);
                 _fingerprintChannel = null;
             }
+#endif
 
             if (_rfidChannel != null)
             {
@@ -298,8 +316,8 @@ namespace dp2SSL
 
         void Refresh()
         {
-            if (_rfidChannel == null || _rfidChannel.Started == false)
-                return;
+            //if (_rfidChannel == null || _rfidChannel.Started == false)
+            //    return;
 
             // 防止重入
             int v = Interlocked.Increment(ref this._inRefresh);
@@ -315,45 +333,51 @@ namespace dp2SSL
                 this.Error = null;
 
                 // 获得所有协议类型的标签
-                var result = _rfidChannel.Object.ListTags("*",
-                    null
-                    // "getTagInfo"
-                    );
+                ListTagsResult result = null;
+
+                if ((bool)_rfidChannel?.Started)
+                    result = _rfidChannel?.Object?.ListTags("*",
+                        null
+                        // "getTagInfo"
+                        );
 
                 List<OneTag> books = new List<OneTag>();
                 List<OneTag> patrons = new List<OneTag>();
 
                 // 分离图书标签和读者卡标签
-                foreach (OneTag tag in result.Results)
+                if (result?.Results != null)
                 {
-                    if (tag.Protocol == InventoryInfo.ISO14443A)
-                        patrons.Add(tag);
-                    else if (tag.Protocol == InventoryInfo.ISO15693)
+                    foreach (OneTag tag in result?.Results)
                     {
-                        var gettaginfo_result = GetTagInfo(_rfidChannel, tag.UID);
-                        if (gettaginfo_result.Value == -1)
-                        {
-                            this.Error = gettaginfo_result.ErrorInfo;
-                            continue;
-                        }
-                        TagInfo info = gettaginfo_result.TagInfo;
-
-                        // 记下来。避免以后重复再次去获取了
-                        if (tag.TagInfo == null)
-                            tag.TagInfo = info;
-
-                        // 观察 typeOfUsage 元素
-                        var chip = LogicChip.From(info.Bytes,
-(int)info.BlockSize,
-"");
-                        string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                        if (tag.Protocol == InventoryInfo.ISO14443A)
                             patrons.Add(tag);
+                        else if (tag.Protocol == InventoryInfo.ISO15693)
+                        {
+                            var gettaginfo_result = GetTagInfo(_rfidChannel, tag.UID);
+                            if (gettaginfo_result.Value == -1)
+                            {
+                                this.Error = gettaginfo_result.ErrorInfo;
+                                continue;
+                            }
+                            TagInfo info = gettaginfo_result.TagInfo;
+
+                            // 记下来。避免以后重复再次去获取了
+                            if (tag.TagInfo == null)
+                                tag.TagInfo = info;
+
+                            // 观察 typeOfUsage 元素
+                            var chip = LogicChip.From(info.Bytes,
+    (int)info.BlockSize,
+    "");
+                            string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+                            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                                patrons.Add(tag);
+                            else
+                                books.Add(tag);
+                        }
                         else
                             books.Add(tag);
                     }
-                    else
-                        books.Add(tag);
                 }
 
                 List<Entity> new_entities = new List<Entity>();
@@ -394,7 +418,6 @@ namespace dp2SSL
                     else
                         _patron.Clear();
                 }
-
 
                 GetPatronFromFingerprint();
 
@@ -710,7 +733,7 @@ out string strError);
             }
         }
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -773,7 +796,7 @@ out string strError);
         }
 
 
-        #endregion
+#endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)

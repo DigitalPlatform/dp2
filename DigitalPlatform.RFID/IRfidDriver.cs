@@ -26,6 +26,11 @@ namespace DigitalPlatform.RFID
             // UInt32 tag_type,
             TagInfo new_tag_info);
 
+        NormalResult ChangePassword(string reader_name,
+string uid,
+string type,
+uint old_password,
+uint new_password);
 
         //void ConnectTag();
 
@@ -299,9 +304,10 @@ namespace DigitalPlatform.RFID
     public class Reader
     {
         public string Name { get; set; }
+        public string Type { get; set; }    // 类型 USB/COM
         public string DriverName { get; set; }  // RL8000 M201 等等
         public string ProductName { get; set; } // 产品型号
-        public string SerialNumber { get; set; }
+        public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
         public string DriverPath { get; set; }
         public UIntPtr ReaderHandle { get; set; }
         [NonSerialized]
@@ -319,7 +325,7 @@ namespace DigitalPlatform.RFID
                 return true;
             if (list.IndexOf(",") == -1)
                 return false;
-            string[] names = list.Split(new char[] { }, StringSplitOptions.RemoveEmptyEntries);
+            string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             if (Array.IndexOf(names, one) != -1)
                 return true;
             return false;

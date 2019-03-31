@@ -172,7 +172,7 @@ false);
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = Program.MainForm.DefaultUserName;
 
-            LibraryChannel channel =  this._channelPool.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)
                 channel.Idle += channel_Idle;
             return channel;
@@ -240,7 +240,7 @@ false);
             account.UserName = server.GetAttribute("userName");
             account.Password = server.GetAttribute("password");
             account.IsReader = server.GetAttribute("isReader");
-
+            account.ServerNode = server;
             return account;
         }
 
@@ -389,18 +389,32 @@ out strError);
             return 0;
         }
 
-        // 获得具有实体库的全部书目库名列表
+        // 获得全部书目库名列表
         // parameters:
         //      strServerName   服务器名。可以为 .
         public string GetBiblioDbNames()
         {
             List<string> results = new List<string>();
-            if (this.BiblioDbProperties != null)
+
+            // 2019/3/14
+            if (this.AccountInfo != null && this.AccountInfo.ServerNode != null)
+            {
+                XmlNodeList databases = this.AccountInfo.ServerNode.SelectNodes("database");
+                foreach (XmlElement database in databases)
+                {
+                    string dbName = database.GetAttribute("name");
+                    results.Add(dbName);
+                }
+            }
+            else if (this.BiblioDbProperties != null)
             {
                 foreach (BiblioDbProperty prop in this.BiblioDbProperties)
                 {
-                    if (string.IsNullOrEmpty(prop.DbName) == false &&
-                        string.IsNullOrEmpty(prop.ItemDbName) == false)
+                    // 2019/3/13 改为 不管有没有实体库，都参与检索
+                    // 但不具备下属实体库的书目记录，在装入详细界面的时候，要当作外来数据处理
+                    if (string.IsNullOrEmpty(prop.DbName) == false
+                        // && string.IsNullOrEmpty(prop.ItemDbName) == false
+                        )
                     {
                         results.Add(prop.DbName);
                     }
@@ -419,6 +433,9 @@ out strError);
         public string UserName = "";
         public string Password = "";
         public string IsReader = "";    // yes / no / 空 / . 。空和点表示依从当前帐户配置
+
+        // 2019/3/14
+        public XmlElement ServerNode { get; set; }
 
         public bool IsLocalServer
         {

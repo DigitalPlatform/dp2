@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace RfidCenter
+namespace DigitalPlatform
 {
     // https://stackoverflow.com/questions/6661055/using-interlocked-compareexchange-operation-on-a-bool-value/18027246#18027246
     public class AtomicBoolean
@@ -71,4 +71,5 @@ namespace RfidCenter
             return originalValue == whenValue;
         }
     }
+
 }

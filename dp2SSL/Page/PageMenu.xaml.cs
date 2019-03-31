@@ -46,6 +46,10 @@ namespace dp2SSL
             }
 
             this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
+            if (App.CurrentApp.Errors.Count == 0)
+            {
+                this.error.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
@@ -81,6 +85,11 @@ namespace dp2SSL
         private void RenewBotton_Click(object sender, RoutedEventArgs e)
         {
             this.NavigationService.Navigate(new PageBorrow("renew"));
+        }
+
+        private void Error_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageError());
         }
     }
 }

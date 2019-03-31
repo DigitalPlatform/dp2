@@ -422,7 +422,14 @@ namespace DigitalPlatform.CirculationClient
                 string strSourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 strSourcePath = Path.Combine(strSourcePath, strProductName) + ".appref-ms";
 
-                File.Copy(strSourcePath, strTargetPath, true);
+                try
+                {
+                    File.Copy(strSourcePath, strTargetPath, true);
+                }
+                catch(System.IO.FileNotFoundException)
+                {
+                    // source 文件有可能不存在
+                }
             }
         }
 

@@ -2260,6 +2260,14 @@ string strTimestamp)
             return results;
         }
 
+        // 2019/3/22
+        public static bool StartsWith(string strText, string strSub)
+        {
+            if (strText == null)
+                return false;
+            return strText.StartsWith(strSub);
+        }
+
         // 检测一个字符串的头部
         public static bool HasHead(string strText,
             string strHead,

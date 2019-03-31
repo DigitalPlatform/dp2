@@ -144,7 +144,7 @@ bool bClickClose = false)
                 return;
             }
 
-            ClientInfo.SerialNumberMode = "must";
+            // ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
             ClientInfo.Initial("fingerprintcenter");
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
@@ -184,6 +184,17 @@ bool bClickClose = false)
             catch (Exception ex)
             {
                 this.ShowMessage(ex.Message);
+                return;
+            }
+
+            // "ipc://FingerprintChannel/FingerprintServer"
+            // 通道打开成功后，窗口应该显示成一种特定的状态
+            int nRet = StartChannel(
+                "ipc://FingerprintChannel/FingerprintServer",
+                out string strError);
+            if (nRet == -1)
+            {
+                this.ShowMessage(strError, "red", true);
                 return;
             }
 
@@ -309,7 +320,8 @@ bool bClickClose = false)
                 _timer = new System.Threading.Timer(
                     new System.Threading.TimerCallback(timerCallback),
                     null,
-                    TimeSpan.FromSeconds(30), TimeSpan.FromMinutes(5));
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromMinutes(5));   // 5 分钟
         }
 
         private void FingerPrint_ImageReady(object sender, ImageReadyEventArgs e)
@@ -330,6 +342,20 @@ bool bClickClose = false)
             SystemSounds.Beep.Play();
         }
 
+        bool _sendKeyEnabled = true;
+
+        public bool SendKeyEnabled
+        {
+            get
+            {
+                return _sendKeyEnabled;
+            }
+            set
+            {
+                _sendKeyEnabled = value;
+            }
+        }
+
         private void FingerPrint_Captured(object sender, CapturedEventArgs e)
         {
             this.Invoke((Action)(() =>
@@ -346,7 +372,8 @@ bool bClickClose = false)
                     Speak("很好");
                     // TODO: 显示文字中包含 e.Text?
 
-                    SendKeys.SendWait(e.Text + "\r");
+                    if (this.SendKeyEnabled)
+                        SendKeys.SendWait(e.Text + "\r");
                 }
             }));
         }
@@ -377,6 +404,9 @@ bool bClickClose = false)
             {
                 if (e.Actions == "yes,cancel")
                 {
+                    e.ResultAction = "yes";
+                    return;
+
                     DialogResult result = MessageBox.Show(this,
         e.MessageText +
         (e.IncludeOperText == false ? "\r\n\r\n是否跳过本条继续后面操作?\r\n\r\n(确定: 跳过并继续; 取消: 停止全部操作)" : ""),
@@ -394,6 +424,9 @@ bool bClickClose = false)
                 // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
                 if (e.Actions == "yes,no,cancel")
                 {
+                    e.ResultAction = "no";
+                    return;
+
                     DialogResult result = MessageBox.Show(this,
         e.MessageText +
         (e.IncludeOperText == false ? "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)" : ""),
@@ -577,7 +610,7 @@ bool bClickClose = false)
         SpeechSynthesizer m_speech = new SpeechSynthesizer();
         string m_strSpeakContent = "";
 
-        void Speak(string strText, bool bError = false)
+        public void Speak(string strText, bool bError = false)
         {
             string color = "gray";
             if (bError)
@@ -595,18 +628,38 @@ bool bClickClose = false)
             //    return; // 正在说同样的句子，不必打断
 
             this.m_strSpeakContent = strText;
+
+            /*
             this.m_speech.SpeakAsyncCancelAll();
             this.m_speech.SpeakAsync(strText);
+            */
+            this.BeginInvoke((Action)(() =>
+            {
+                try
+                {
+                    this.m_speech.SpeakAsyncCancelAll();
+                    this.m_speech.SpeakAsync(strText);
+                }
+                catch (System.Runtime.InteropServices.COMException)
+                {
+                    // TODO: 如何报错?
+                }
+            }));
         }
 
         public bool SpeakOn
         {
             get
             {
-                return (bool)this.Invoke(new Func<bool>(() =>
+                if (this.InvokeRequired)
                 {
+                    return (bool)this.Invoke(new Func<bool>(() =>
+                    {
+                        return this.checkBox_speak.Checked;
+                    }));
+                }
+                else
                     return this.checkBox_speak.Checked;
-                }));
             }
         }
 
@@ -748,7 +801,6 @@ MessageBoxDefaultButton.Button2);
         {
             _cancel.Cancel();
         }
-
 
         #region ipc channel
 
@@ -1020,7 +1072,7 @@ string strHtml)
             string html = string.Format("<html><body><div style='font-size:30px;'>{0}</div></body></html>", HttpUtility.HtmlEncode(text));
             SetHtmlString(this.webBrowser1, html);
 #endif
-            this.Invoke((Action)(() =>
+            this.BeginInvoke((Action)(() =>
             {
                 this.label_message.Text = text;
                 this.label_message.BackColor = Color.FromName(backColor);
@@ -1265,12 +1317,15 @@ Keys keyData)
                 return this.textBox_replicationStart.Text;
             }));
 
+            bool done = false;
             _eventReplicationFinish.Reset();
 
             this.OutputHistory($"增量同步指纹信息 {strStartDate}");
             this.ShowMessage($"正在同步最新指纹信息 {strStartDate} ...");
             EnableControls(false);
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromSeconds(30);
             try
             {
                 string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
@@ -1283,10 +1338,14 @@ LogType.OperLog,
 token);
                 if (result.Value == -1)
                 {
-                    this.ShowMessage(result.ErrorInfo);
+                    strError = $"增量同步指纹信息 {strStartDate} 失败: {result.ErrorInfo}";
+                    this.OutputHistory(strError, 2);
+                    this.ShowMessage(strError, "red", true);
+                    this.Speak(strError);
                     return;
                 }
 
+                done = true;
                 // result.Value == 0 表示本次没有获得任何新信息,即服务器的日志没有发生增长
 
                 if (result.Value == 1)
@@ -1297,9 +1356,11 @@ token);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 EnableControls(true);
-                this.ClearMessage();
+                if (done == true)
+                    this.ClearMessage();
 
                 _eventReplicationFinish.Set();
                 _cancelReplication = null;
@@ -1622,7 +1683,17 @@ token);
 #endif
         }
 
+        private void MenuItem_closeSendKey_Click(object sender, EventArgs e)
+        {
+            // m_fingerprintObj.EnableSendKey(false);
+            FingerprintServer._enableSendKey(false);
+        }
 
+        private void MenuItem_openSendKey_Click(object sender, EventArgs e)
+        {
+            // m_fingerprintObj.EnableSendKey(true);
+            FingerprintServer._enableSendKey(true);
+        }
     }
 
     class MyWebClient : WebClient

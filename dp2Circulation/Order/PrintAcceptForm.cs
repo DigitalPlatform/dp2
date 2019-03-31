@@ -8476,6 +8476,23 @@ false);
             MessageBox.Show(this, strError);
         }
 
+        private void listView_origin_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DislayLineIndex(this.listView_origin);
+        }
+
+        private void listView_merged_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DislayLineIndex(this.listView_merged);
+        }
+
+        void DislayLineIndex(ListView list)
+        {
+            if (list.SelectedIndices.Count > 0)
+                this.label_message.Text = $"{list.SelectedIndices[0] + 1}";
+            else
+                this.label_message.Text = "";
+        }
     }
 
     // 合并后数据打印 定义了特定缺省值的PrintOption派生类

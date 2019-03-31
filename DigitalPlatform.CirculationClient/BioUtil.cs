@@ -262,6 +262,10 @@ namespace DigitalPlatform.CirculationClient
                     LastIndex = last_index
                 };
             }
+            catch(ChannelException ex)
+            {
+                return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
+            }
             catch (Exception ex)
             {
                 string strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);

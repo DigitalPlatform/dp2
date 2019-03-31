@@ -6752,7 +6752,7 @@ MessageBoxDefaultButton.Button2);
             }
             else
             {
-                Debug.Assert(strPubType == "图书", "");
+                Debug.Assert(strPubType == "图书", "Assert strPubType == '图书' failed");
                 // 图标
                 // SetItemColor(item, TYPE_NORMAL);
             }

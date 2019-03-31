@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
 using ZKFPEngXControl;
+using DigitalPlatform;
 
 // ZK4500
 
@@ -917,5 +918,31 @@ Exception rethrown at [0]:
             MainForm form = (MainForm)Application.OpenForms[0];
             form.ReleaseImagePanelInfo(hDC);
         }
+
+        #region SendKey 有关功能
+
+        static private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
+
+        public NormalResult EnableSendKey(bool enable)
+        {
+            if (enable == true)
+                _sendKeyEnabled.FalseToTrue();
+            else
+                _sendKeyEnabled.TrueToFalse();
+
+            /*
+            string message = "";
+            if (enable)
+                message = "SendKey 打开";
+            else
+                message = "SendKey 关闭";
+            Program.MainForm.OutputHistory(message, 0);
+            Program.MainForm?.Speak(message);
+            */
+
+            return new NormalResult();
+        }
+
+        #endregion
     }
 }

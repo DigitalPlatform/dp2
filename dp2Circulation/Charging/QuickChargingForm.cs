@@ -308,6 +308,8 @@ namespace dp2Circulation
 
         private void QuickChargingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            OpenRfidCapture(false);
+
 #if NO
             if (Program.MainForm != null)
                 Program.MainForm.Move -= new EventHandler(MainForm_Move);
@@ -899,6 +901,11 @@ dlg.UiState);
                 strError = "无法确定类型(为兼容“读过”功能)";
                 return -2;
             }
+
+            // 2019/3/18
+            // 14443A 的读者卡，不校验 UID 字符串
+            if (prefix == "uid:" && type_of_usage.StartsWith("8"))
+                return 1;
 
             this._barcodeChannel.PrepareSearch("正在验证条码号 " + strBarcode + "...");
             try
@@ -1551,13 +1558,13 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 return true;
             }
 
-            string strError = "";
+            // string strError = "";
             // return:
             //      -1  出错
             //      0   校验正确
             //      1   校验不正确。提示信息在strError中
             int nRet = IsbnSplitter.VerifyISBN(strText,
-                out strError);
+                out string strError);
             if (nRet == 0)
             {
                 // 2016/12/15

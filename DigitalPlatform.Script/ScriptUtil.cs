@@ -313,6 +313,9 @@ namespace DigitalPlatform.Script
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');
                 string strType = (string)table["type"];
 
+                // TODO:
+                if (strType == null) strType = "";
+
                 if (string.IsNullOrEmpty(strType) == false
                     && (style & BuildObjectHtmlTableStyle.FrontCover) == 0
                     && (strType == "FrontCover" || strType.StartsWith("FrontCover.") == true))
@@ -428,7 +431,8 @@ namespace DigitalPlatform.Script
                     if (string.IsNullOrEmpty(urlLabel) == true)
                         urlLabel = strObjectUrl;
 
-                    if (strUri.StartsWith("!error:"))
+                    //
+                    if (StringUtil.StartsWith(strUri, "!error:"))
                         urlLabel += strUri;
 
                     // 2018/11/5
@@ -515,7 +519,12 @@ namespace DigitalPlatform.Script
             // 锚点文字附加部分
             public string AnchorText { get; set; }
 
-            public bool WrapUrl { get; set; }
+            bool _wrapUrl = true;
+            public bool WrapUrl
+            {
+                get { return _wrapUrl; }
+                set { _wrapUrl = value; }
+            }
 
             public static string MacroAnchorText(string template, string old_text)
             {
@@ -603,7 +612,7 @@ namespace DigitalPlatform.Script
                 {
                     foreach (XmlAttribute attr in item.Attributes)
                     {
-                        if (attr.Name.StartsWith("_"))
+                        if (StringUtil.StartsWith(attr.Name, "_"))
                             parameters[attr.Name.Substring(1)] = attr.Value;
                     }
                 }
@@ -750,9 +759,12 @@ namespace DigitalPlatform.Script
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');
                 string strType = (string)table["type"];
 
+                if (strType == null)
+                    strType = "";
+
                 if (string.IsNullOrEmpty(strType) == false
                     && (style & BuildObjectHtmlTableStyle.FrontCover) == 0
-                    && (strType == "FrontCover" || strType.StartsWith("FrontCover.") == true))
+                    && (strType == "FrontCover" || StringUtil.StartsWith(strType, "FrontCover.") == true))
                     continue;
 
                 string strSize = (string)table["size"];

@@ -30,6 +30,12 @@ string reader_name,
 string tag_name,
 bool enable);
 
+        NormalResult ChangePassword(string reader_name,
+string uid,
+string type,
+uint old_password,
+uint new_password);
+
         // 开始或者结束捕获标签
         NormalResult BeginCapture(bool begin);
 

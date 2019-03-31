@@ -89,6 +89,7 @@
             this.ToolStripMenuItem_testRfidChannel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testSetConfig = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_readConfig = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_writePassword = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_loadFactoryDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
@@ -418,7 +419,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(505, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(453, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -446,7 +447,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(508, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(456, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -584,26 +585,26 @@
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(207, 30);
-            this.MenuItem_openSendKey.Text = "打开 SendKey";
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openSendKey.Text = "打开 发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(207, 30);
-            this.MenuItem_closeSendKey.Text = "关闭 SendKey";
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(204, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(207, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -620,7 +621,8 @@
             this.ToolStripMenuItem_testLockBlocks,
             this.ToolStripMenuItem_testRfidChannel,
             this.MenuItem_testSetConfig,
-            this.MenuItem_readConfig});
+            this.MenuItem_readConfig,
+            this.MenuItem_writePassword});
             this.MenuItem_testing.Name = "MenuItem_testing";
             this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_testing.Text = "测试";
@@ -700,6 +702,13 @@
             this.MenuItem_readConfig.Size = new System.Drawing.Size(290, 30);
             this.MenuItem_readConfig.Text = "ReadConfig";
             this.MenuItem_readConfig.Click += new System.EventHandler(this.MenuItem_readConfig_Click);
+            // 
+            // MenuItem_writePassword
+            // 
+            this.MenuItem_writePassword.Name = "MenuItem_writePassword";
+            this.MenuItem_writePassword.Size = new System.Drawing.Size(290, 30);
+            this.MenuItem_writePassword.Text = "WritePassword";
+            this.MenuItem_writePassword.Click += new System.EventHandler(this.MenuItem_writePassword_Click);
             // 
             // MenuItem_help
             // 
@@ -852,6 +861,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_testSetConfig;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetReaderToDigitalPlatformState;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_readConfig;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_writePassword;
     }
 }
 
