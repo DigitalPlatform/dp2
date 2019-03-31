@@ -4237,6 +4237,36 @@ true);
 
         int m_nInDisable = 0;
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 System.Windows.Forms.ToolStripControlHost.set_Enabled(Boolean value)
+在 dp2Circulation.EntityForm.EnableControls(Boolean bEnable)
+在 dp2Circulation.EntityForm.MoveTo(String strAction, String strTargetRecPathParam, CopyParam copy_param, MergeStyle auto_mergeStyle, String& strError)
+在 dp2Circulation.EntityForm.MoveTo(String strTargetRecPathParam, String& strError)
+在 dp2Circulation.EntityForm.toolStripButton_marcEditor_moveTo_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: xxx 
+操作时间 2019/3/22 16:58:39 (Fri, 22 Mar 2019 16:58:39 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+* */
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
@@ -4262,7 +4292,15 @@ true);
                 SetSaveAllButtonState(bEnable);
 
             this.button_search.Enabled = bEnable;
-            this.toolStripButton_option.Enabled = bEnable;
+
+            try
+            {
+                this.toolStripButton_option.Enabled = bEnable;
+            }
+            catch
+            {
+
+            }
 
             this.entityControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
             this.issueControl1.Enabled = (this.m_bDeletedMode == true) ? false : bEnable;
@@ -4279,10 +4317,17 @@ true);
 
             this.textBox_biblioRecPath.Enabled = bEnable;
 
-            this.toolStripButton_clear.Enabled = bEnable;
+            try
+            {
+                this.toolStripButton_clear.Enabled = bEnable;
 
-            if (this.toolStrip_marcEditor.Enabled != bEnable)
-                this.toolStrip_marcEditor.Enabled = bEnable;
+                if (this.toolStrip_marcEditor.Enabled != bEnable)
+                    this.toolStrip_marcEditor.Enabled = bEnable;
+            }
+            catch
+            {
+
+            }
 
             bool bValue = (this.m_bDeletedMode == true) ? false : bEnable;  // 2012/3/19
             if (this.m_marcEditor.Enabled != bValue)

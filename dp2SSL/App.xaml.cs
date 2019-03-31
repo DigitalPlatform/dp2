@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Runtime.Remoting;
+using System.Speech.Synthesis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -52,6 +54,12 @@ namespace dp2SSL
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
+            List<string> errors = InitialFingerprint();
+            if (errors.Count > 0)
+                AddErrors(errors);
+
+            EnableSendkey(false);
+
             // 后台自动检查更新
             Task.Run(() =>
             {
@@ -73,6 +81,8 @@ namespace dp2SSL
 
         protected override void OnExit(ExitEventArgs e)
         {
+            EndFingerprint();
+
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this._channelPool.Close();
@@ -282,6 +292,157 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             this._channelPool.ReturnChannel(channel);
             _channelList.Remove(channel);
+        }
+
+        SpeechSynthesizer m_speech = new SpeechSynthesizer();
+        string m_strSpeakContent = "";
+
+        public void Speak(string strText, bool bError = false)
+        {
+            if (this.m_speech == null)
+                return;
+
+            //if (strText == this.m_strSpeakContent)
+            //    return; // 正在说同样的句子，不必打断
+
+            this.m_strSpeakContent = strText;
+
+            try
+            {
+                this.m_speech.SpeakAsyncCancelAll();
+                this.m_speech.SpeakAsync(strText);
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                // TODO: 如何报错?
+            }
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            EnableSendkey(false);
+            // Speak("Activated");
+            base.OnActivated(e);
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            // Speak("DeActivated");
+            base.OnDeactivated(e);
+        }
+
+        #endregion
+
+        List<string> _errors = new List<string>();
+
+        public List<string> Errors
+        {
+            get
+            {
+                return _errors;
+            }
+        }
+
+        public void AddErrors(List<string> errors)
+        {
+            DateTime now = DateTime.Now;
+            // _errors.AddRange(errors);
+            foreach(string error in errors)
+            {
+                _errors.Add($"{now.ToShortTimeString()} {error}");
+            }
+
+            while (_errors.Count > 1000)
+            {
+                errors.RemoveAt(0);
+            }
+        }
+
+        void EnableSendkey(bool enable)
+        {
+            try
+            {
+                if (_fingerprintChannel != null && _fingerprintChannel.Started)
+                    _fingerprintChannel?.Object?.EnableSendKey(enable);
+            }
+            catch
+            {
+                // TODO: 如何显示出错信息？
+            }
+        }
+
+        public void ClearFingerprintMessage()
+        {
+            try
+            {
+                if (_fingerprintChannel != null && _fingerprintChannel.Started)
+                    _fingerprintChannel?.Object?.GetMessage("clear");
+            }
+            catch
+            {
+                // TODO: 如何显示出错信息？
+            }
+        }
+
+        #region 指纹
+
+        FingerprintChannel _fingerprintChannel = null;
+
+        public FingerprintChannel FingerprintChannel
+        {
+            get
+            {
+                return _fingerprintChannel;
+            }
+        }
+
+        // TODO: 如果没有初始化成功，要提供重试初始化的办法
+        public List<string> InitialFingerprint()
+        {
+            // 准备指纹通道
+            List<string> errors = new List<string>();
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                && (_fingerprintChannel == null || _fingerprintChannel.Started == false))
+            {
+#if NO
+                eventProxy = new EventProxy();
+                eventProxy.MessageArrived +=
+                  new MessageArrivedEvent(eventProxy_MessageArrived);
+#endif
+                _fingerprintChannel = FingerPrint.StartFingerprintChannel(
+                    App.FingerprintUrl,
+                    out string strError);
+                if (_fingerprintChannel == null)
+                    errors.Add($"启动指纹通道时出错: {strError}");
+                // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
+#if NO
+                _fingerprintChannel.Object.MessageArrived +=
+  new MessageArrivedEvent(eventProxy.LocallyHandleMessageArrived);
+#endif
+                try
+                {
+                    _fingerprintChannel.Object.GetMessage("clear");
+                    _fingerprintChannel.Started = true;
+                }
+                catch (Exception ex)
+                {
+                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
+                        errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
+                    else
+                        errors.Add($"启动指纹通道时出错(2): {ex.Message}");
+                }
+            }
+
+            return errors;
+        }
+
+        void EndFingerprint()
+        {
+            if (_fingerprintChannel != null)
+            {
+                FingerPrint.EndFingerprintChannel(_fingerprintChannel);
+                _fingerprintChannel = null;
+            }
         }
 
         #endregion

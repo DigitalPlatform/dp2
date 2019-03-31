@@ -76,6 +76,7 @@ namespace RfidDrivers.First
         {
             // 枚举所有的 reader
             List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
+            readers.AddRange(EnumComReader("M201"));
 
             // name --> count
             Hashtable table = new Hashtable();
@@ -87,7 +88,9 @@ namespace RfidDrivers.First
                 if (fill_result.Value == -1)
                     return fill_result;
 
-                OpenReaderResult result = OpenReader(reader.DriverName, reader.SerialNumber);
+                OpenReaderResult result = OpenReader(reader.DriverName,
+                    reader.Type,
+                    reader.SerialNumber);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
 
@@ -106,8 +109,6 @@ namespace RfidDrivers.First
                     table[reader.ProductName] = ++count;
                 }
             }
-
-
 
             _readers = readers;
             return new NormalResult();
@@ -381,9 +382,38 @@ namespace RfidDrivers.First
 
                     Reader reader = new Reader
                     {
+                        Type = "USB",
                         SerialNumber = sernum.ToString(),
                         // Name = sernum.ToString(),
                         DriverPath = driver_path
+                    };
+                    readers.Add(reader);
+                }
+            }
+
+            return readers;
+        }
+
+        // 枚举所有 COM 读卡器
+        private List<Reader> EnumComReader(string driver_name)
+        {
+            List<Reader> readers = new List<Reader>();
+            //CReaderDriverInf driver = (CReaderDriverInf)readerDriverInfoList[comboBox6.SelectedIndex];
+
+            //if ((driver.m_commTypeSupported & RFIDLIB.rfidlib_def.COMMTYPE_USB_EN) > 0)
+            {
+                UInt32 nCOMCnt = RFIDLIB.rfidlib_reader.COMPort_Enum();
+                for (uint i = 0; i < nCOMCnt; i++)
+                {
+                    StringBuilder comName = new StringBuilder();
+                    comName.Append('\0', 64);
+                    RFIDLIB.rfidlib_reader.COMPort_GetEnumItem(i, comName, (UInt32)comName.Capacity);
+                    // comName);
+
+                    Reader reader = new Reader
+                    {
+                        Type = "COM",
+                        SerialNumber = comName.ToString(),
                     };
                     readers.Add(reader);
                 }
@@ -1484,7 +1514,9 @@ namespace RfidDrivers.First
         // 填充驱动类型和设备型号
         NormalResult FillReaderInfo(Reader reader)
         {
-            var result = OpenReader("", reader.SerialNumber);
+            var result = OpenReader("",
+                reader.Type,
+                reader.SerialNumber);
             try
             {
                 int iret;
@@ -1540,8 +1572,16 @@ namespace RfidDrivers.First
               RFIDLIB.rfidlib_def.CONNSTR_NAME_COMMTYPE + "=" + comm_type + ";" +
               "AddrMode=0";// ;SerNum=
 #endif
+            if (comm_type == "USB")
+                return $"RDType={readerDriverName};CommType={comm_type};AddrMode=1;SerNum={serial_number}";
+            else if (comm_type == "COM")
+            {
+                // TODO: BaudRate=38400;Frame=8E1;BusAddr=255 应该可以配置
+                return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate=38400;Frame=8E1;BusAddr=255";
+            }
+            else
+                throw new ArgumentException($"未知的 comm_type [{comm_type}]");
 
-            return $"RDType={readerDriverName};CommType={comm_type};AddrMode=1;SerNum={serial_number}";
 #if NO
             int commTypeIdx = comboBox10.SelectedIndex;
             string connstr = "";
@@ -1593,14 +1633,18 @@ namespace RfidDrivers.First
 
 
 
-        OpenReaderResult OpenReader(string driver_name, string serial_number)
+        OpenReaderResult OpenReader(string driver_name,
+            string type,
+            string serial_number)
         {
             //Lock();
             try
             {
                 UIntPtr hreader = UIntPtr.Zero;
                 var iret = RFIDLIB.rfidlib_reader.RDR_Open(
-                    BuildConnectionString(driver_name, "", serial_number),
+                    BuildConnectionString(driver_name,
+                    type,
+                    serial_number),
                     ref hreader);
                 if (iret != 0)
                     return new OpenReaderResult
@@ -2045,7 +2089,7 @@ namespace RfidDrivers.First
         }
 
         // parameters:
-        //      command 形态为 beep:-,mode:host
+        //      command 形态为 beep:-,mode:host,autoCloseRF:-
         public NormalResult SetConfig(string reader_name,
             string command)
         {
@@ -2111,6 +2155,19 @@ namespace RfidDrivers.First
                 else
                     return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'", ErrorCode = "notSupportKey" };
             }
+            else if (reader.ProductName == "M201")
+            {
+                if (key == "autoCloseRF")
+                {
+                    if (value != "+" && value != "-")
+                        return new NormalResult { Value = -1, ErrorInfo = $"key '{key}' 的 value 部分 '{value}' 不合法。应为 + - 之一" };
+                    cfg_no = 3;
+                    index = 0;
+                    bit = 2;
+                }
+                else
+                    return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'", ErrorCode = "notSupportKey" };
+            }
             else
                 return new NormalResult { Value = 0, ErrorInfo = $"暂不支持读卡器型号 '{reader.ProductName}'", ErrorCode = "notSupportReader" };
 
@@ -2130,7 +2187,7 @@ namespace RfidDrivers.First
 
             bool changed = false;
             // 修改
-            if (key == "beep")
+            if (key == "beep" || key == "autoCloseRF")
             {
                 Debug.Assert(bit >= 0 && bit <= 7);
 
@@ -2327,15 +2384,18 @@ namespace RfidDrivers.First
             return false;
         }
 
+        // parameters:
+        //      style   randomizeEasAfiPassword
         public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
             string reader_name,
             TagInfo old_tag_info,
-            TagInfo new_tag_info)
+            TagInfo new_tag_info //,
+                                 // string style
+            )
         {
             // 要确保 new_tag_info.Bytes 包含全部 byte，避免以前标签的内容在保存后出现残留
             EnsureBytes(new_tag_info);
             EnsureBytes(old_tag_info);
-
 
             Lock();
             try
@@ -2350,11 +2410,11 @@ namespace RfidDrivers.First
                     return new NormalResult { Value = -1, ErrorInfo = "connectTag Error" };
                 try
                 {
+                    // TODO: 如果是新标签，第一次执行修改密码命令
+
                     // *** 分段写入内容 bytes
                     if (new_tag_info.Bytes != null)
                     {
-
-
                         // 写入时候自动跳过锁定的块
                         List<BlockRange> new_ranges = BlockRange.GetBlockRanges(
                             (int)old_tag_info.BlockSize,
@@ -2892,7 +2952,7 @@ namespace RfidDrivers.First
 
                     /* Parse Iso14443A tag report */
                     {
-                        uid = new Byte[4];
+                        uid = new Byte[8];
 
                         Byte uidlen = 0;
 
@@ -2908,7 +2968,12 @@ namespace RfidDrivers.First
                             // Invoke(tagReportHandler, pList);
                             //tagReportHandler(hreader, aip_id, tag_id, ant_id, uid, uidlen);
 
-                            Debug.Assert(uidlen == 4);
+                            {
+                                Debug.Assert(uidlen >= 4);
+                                byte[] temp = new byte[uidlen];
+                                Array.Copy(uid, temp, uidlen);
+                                uid = temp;
+                            }
 
                             InventoryInfo result = new InventoryInfo
                             {
@@ -3051,6 +3116,99 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
             return value.ToString();
         }
 
+        static byte GetPasswordID(string type)
+        {
+            type = type.ToLower();
+            if (type == "read")
+                return 0x01;
+            if (type == "write")
+                return 0x02;
+            if (type == "private")
+                return 0x04;
+            if (type == "destroy")
+                return 0x08;
+            if (type == "eas/afi")
+                return 0x10;
+
+            throw new ArgumentException($"未知的 type 值 {type}");
+        }
+
+        // parameters:
+        //      reader_name 读卡器名字。可以为 "*"，表示所有读卡器，此时会自动在多个读卡器上寻找 uid 符合的标签并进行修改
+        //      type    为 read write private destroy eas/afi 之一
+        // return result.Value
+        //      -1  出错
+        //      0   成功
+        public NormalResult ChangePassword(
+    string reader_name,
+    string uid,
+    string type,
+    uint old_password,
+    uint new_password)
+        {
+            byte pwdType = GetPasswordID(type);
+
+            List<object> handles = GetAllReaderHandle(reader_name);
+            if (handles.Count == 0)
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            Lock();
+            try
+            {
+                List<NormalResult> error_results = new List<NormalResult>();
+
+                foreach (UIntPtr hreader in handles)
+                {
+                    UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
+                    UIntPtr hTag = _connectTag(hreader, uid, tag_type);
+                    if (hTag == UIntPtr.Zero)
+                        continue;
+                    try
+                    {
+                        int iret = RFIDLIB.rfidlib_aip_iso15693.NXPICODESLI_GetRandomAndSetPassword(
+                            hreader, hTag, pwdType, old_password);
+                        if (iret != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "Authenticate error",
+                                ErrorCode = GetErrorCode(iret, hreader)
+                            };
+
+                        iret = RFIDLIB.rfidlib_aip_iso15693.NXPICODESLI_WritePassword(
+                            hreader, hTag, pwdType, new_password);
+                        if (iret != 0)
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "WritePassword error",
+                                ErrorCode = GetErrorCode(iret, hreader)
+                            };
+
+                        return new NormalResult();
+                    }
+                    finally
+                    {
+                        _disconnectTag(hreader, ref hTag);
+                    }
+                }
+
+                // 循环中曾经出现过报错
+                if (error_results.Count > 0)
+                    return error_results[0];
+
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到 UID 为 {uid} 的标签",
+                    ErrorCode = "tagNotFound"
+                };
+            }
+            finally
+            {
+                Unlock();
+            }
+        }
 
     }
 

@@ -1874,7 +1874,7 @@ out string strError)
         // IFingerprint m_fingerPrintObj = null;
         internal int _inFingerprintCall = 0; // >0 表示正在调用指纹 API 尚未返回
 
-        public FingerprintChannel StartFingerprintChannel(
+        public static FingerprintChannel StartFingerprintChannel(
             string strUrl,
             out string strError)
         {
@@ -1906,7 +1906,7 @@ out string strError)
             }
         }
 
-        public void EndFingerprintChannel(FingerprintChannel channel)
+        public static void EndFingerprintChannel(FingerprintChannel channel)
         {
             if (channel != null && channel.Channel != null)
             {

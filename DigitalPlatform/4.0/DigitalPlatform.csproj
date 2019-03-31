@@ -251,6 +251,7 @@
     <Compile Include="..\WizardPages.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AtomicBoolean.cs" />
     <Compile Include="ConfirmSupervisorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

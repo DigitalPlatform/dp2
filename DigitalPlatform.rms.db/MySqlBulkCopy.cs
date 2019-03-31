@@ -381,6 +381,9 @@ namespace DigitalPlatform.rms
                         command.CommandText = "use " + strDbName + " ;\n"
                             + strHead + strCommand + " ;\n";
 
+                        // 2019/3/6
+                        command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
+                        
                         // Debug.WriteLine("command length=" + command.CommandText.Length);
                         command.ExecuteNonQuery();
 
@@ -407,6 +410,9 @@ namespace DigitalPlatform.rms
 
                     command.CommandText = "use " + strDbName + " ;\n"
                         + strHead + strCommand + " ;\n";
+
+                    // 2019/3/6
+                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                     // Debug.WriteLine("(last) command length=" + command.CommandText.Length);
                     command.ExecuteNonQuery();

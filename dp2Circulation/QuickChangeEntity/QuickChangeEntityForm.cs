@@ -542,9 +542,9 @@ false);
                     return 0;
                 }
 
-                if (auto_close_dialog == false
+                if (// auto_close_dialog == false
                     // && string.IsNullOrEmpty(auto_select_pii) == false
-                    && dialog.SelectedPII != auto_select_pii
+                    dialog.SelectedPII != auto_select_pii
                     && string.IsNullOrEmpty(dialog.SelectedPII) == false
                     )
                 {

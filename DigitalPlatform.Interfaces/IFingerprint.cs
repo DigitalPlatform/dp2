@@ -4,6 +4,8 @@ using System.Linq;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
 
+using DigitalPlatform;
+
 namespace DigitalPlatform.Interfaces
 {
     /// <summary>
@@ -74,6 +76,8 @@ namespace DigitalPlatform.Interfaces
         string GetMessage(string style);
 
         // event MessageHandler DisplayMessage;
+
+        NormalResult EnableSendKey(bool enable);
     }
 
     [Serializable()]

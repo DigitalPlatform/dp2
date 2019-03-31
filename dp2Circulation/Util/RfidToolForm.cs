@@ -255,14 +255,19 @@ namespace dp2Circulation
                                 // 首次填充，自动设好选定状态
                                 // if (is_empty)
                                 {
+                                    // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
                                     var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
 
                                     if (// string.IsNullOrEmpty(this.SelectedPII) == false
                                         ret == true
                                         && this.AutoCloseDialog)
                                     {
-                                        this.DoOK(show_messageBox);
-                                        closed = true;
+                                        if (this.DoOK(show_messageBox) == true)
+                                        {
+                                            this.DialogResult = DialogResult.OK;
+                                            this.Close();
+                                            closed = true;
+                                        }
                                     }
                                 }
                             }));
@@ -327,15 +332,22 @@ namespace dp2Circulation
         {
             if (state == "normal")
             {
-                item.BackColor = SystemColors.Window;
-                item.ForeColor = SystemColors.WindowText;
+                //item.BackColor = SystemColors.Window;
+                //item.ForeColor = SystemColors.WindowText;
+
+                item.BackColor = item.ListView.BackColor;
+                item.ForeColor = item.ListView.ForeColor;
+
                 return;
             }
 
             if (state == "changed")
             {
-                item.BackColor = SystemColors.Info;
-                item.ForeColor = SystemColors.InfoText;
+                //item.BackColor = SystemColors.Info;
+                //item.ForeColor = SystemColors.InfoText;
+
+                item.BackColor = Color.DarkGreen;
+                item.ForeColor = Color.White;
                 return;
             }
 
@@ -509,7 +521,7 @@ namespace dp2Circulation
 
                     string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
                     // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                    SetItemPIIColumn(item, pii);
+                    SetItemPIIColumn(item, pii, true);
                     if (this.SelectedPII != null
                         && pii == this.SelectedPII)
                         item.Font = new Font(item.Font, FontStyle.Bold);
@@ -581,25 +593,28 @@ namespace dp2Circulation
 
                         if (tag_info.LogicChipItem.Changed)
                         {
-                            item.BackColor = Color.DarkGreen;
-                            item.ForeColor = Color.White;
+                            SetItemColor(item, "changed");
+
+                            // item.BackColor = Color.DarkGreen;
+                            // item.ForeColor = Color.White;
                         }
                         else
                         {
-                            item.BackColor = this.listView_tags.BackColor;
-                            item.ForeColor = this.listView_tags.ForeColor;
+                            SetItemColor(item, "normal");
+
+                            //item.BackColor = this.listView_tags.BackColor;
+                            //item.ForeColor = this.listView_tags.ForeColor;
                         }
 
                         // 更新 PII
                         string pii = tag_info.LogicChipItem.FindElement(ElementOID.PII)?.Text;
                         // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                        SetItemPIIColumn(item, pii);
+                        SetItemPIIColumn(item, pii, false);
                         return;
                     }
                 }
             }));
         }
-
 
         private void listView_tags_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -965,12 +980,14 @@ namespace dp2Circulation
         }
 
         // 修改 ListViewItem 的 PII 列文字
-        static void SetItemPIIColumn(ListViewItem item, string pii)
+        static void SetItemPIIColumn(ListViewItem item, string pii, bool clearColor)
         {
             if (string.IsNullOrEmpty(pii))
                 pii = "(空白)";
             ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-            SetItemColor(item, "normal");
+
+            if (clearColor)
+                SetItemColor(item, "normal");
         }
 
         // 获得一个 ListViewItem 的 PII 列文字

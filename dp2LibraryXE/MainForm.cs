@@ -4158,8 +4158,17 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             // 使用这个 AppPool
             lines.Add("set app \"dp2Site/dp2OPAC\" /applicationPool:dp2OPAC");
 
-            // 确保 MyDocuments 里面的 IISExpress 和 My WebSites 目录创建
+            // https://docs.microsoft.com/en-us/iis/configuration/system.webserver/defaultdocument/
+            lines.Add("set config \"dp2Site/dp2OPAC\" /section:defaultDocument /enabled:true /+files.[value='searchbiblio.aspx']");
 
+#if NO
+            // 2019/3/22
+            // https://blog.csdn.net/qingming7841/article/details/52314934
+            // 让目录可以浏览
+            lines.Add("set config /section:system.webServer/directoryBrowse /enabled:true");
+#endif
+
+            // 确保 MyDocuments 里面的 IISExpress 和 My WebSites 目录创建
 
             // return:
             //      -1  出错
@@ -4461,7 +4470,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
         // http://www.microsoft.com/en-us/download/details.aspx?id=34679
 
 
-        #region console
+#region console
 
         /// <summary>
         /// 将浏览器控件中已有的内容清除，并为后面输出的纯文本显示做好准备
@@ -4575,7 +4584,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
         }
 
 
-        #endregion
+#endregion
 
         // 检查当前超级用户帐户是否为空密码
         // return:

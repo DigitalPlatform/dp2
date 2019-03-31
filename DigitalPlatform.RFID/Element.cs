@@ -649,7 +649,13 @@ namespace DigitalPlatform.RFID
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.SevenBitCode)
                     element.Text = RFID.Compact.Bit7Extract(element._compactedData);
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.OctectString)
-                    element.Text = GetHexString(element._compactedData);
+                {
+                    // element.Text = Encoding.ASCII.GetString(element._compactedData); // GetHexString(element._compactedData);
+                    if (element.OID == ElementOID.TypeOfUsage)
+                        element.Text = GetHexString(element._compactedData);
+                    else
+                        element.Text = Encoding.ASCII.GetString(element._compactedData); // GetHexString(element._compactedData);
+                }
                 else if (element._precursor.CompactionCode == (int)CompactionScheme.Utf8String)
                     element.Text = Encoding.UTF8.GetString(element._compactedData);
                 else

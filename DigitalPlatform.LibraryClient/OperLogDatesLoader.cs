@@ -121,8 +121,9 @@ namespace DigitalPlatform.LibraryClient
                         }
                         else
                         {
-                            // ??
-                            continue;
+                            // 还没有得到文件名，通讯就失败，所以操作无法进行了，只能抛出异常
+                            throw new ChannelException(this.Channel.ErrorCode, strError);
+                            // continue;
                         }
                     }
                     else

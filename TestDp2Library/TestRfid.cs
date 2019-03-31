@@ -459,6 +459,7 @@ L output:01100");
             // zhiyan 2
             byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30D600000203A80008830203D6593F0000250110370210405F080599A713063F");
             LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
 
         }
 
@@ -468,6 +469,8 @@ L output:01100");
             // jiangxi jingyuan 1
             byte[] data = ByteArray.GetTimeStampByteArray("11030AA8AE0000000000000000000000000000000000000000000000000000000000000000000000");
             LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
         }
 
         [TestMethod]
@@ -476,6 +479,8 @@ L output:01100");
             // jiangxi jingyuan 2
             byte[] data = ByteArray.GetTimeStampByteArray("11030AA9770000000000000000000000000000000000000000000000000000000000000000000000");
             LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
         }
 
         [TestMethod]
@@ -484,6 +489,8 @@ L output:01100");
             // 
             byte[] data = ByteArray.GetTimeStampByteArray("C102071100B0C30C30C600000203A80008830203D6593F0000250110370210405F080599A713063F");
             LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
         }
 
         [TestMethod]
@@ -505,6 +512,127 @@ L output:01100");
             Debug.Write(chip.ToString());
 
         }
+
+        [TestMethod]
+        public void test_logicChip_8()
+        {
+            string bytes = @"E1 01 08 30 
+31 30 30 31 
+36 34 33 00 
+82 00 01 A0 
+E3 01 08 53 
+4D 33 36 31 
+30 30 31 00 
+E5 00 01 32 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+31 30 00 00 
+36 31 30 30 
+00 00 33 34 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+";
+            // wanghu 1
+            byte[] data = Element.FromHexString(bytes);
+            LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
+        }
+
+        [TestMethod]
+        public void test_logicChip_9()
+        {
+            // 数字平台
+            string bytes = @"21 04 00 00 
+00 1F 02 01 
+30 65 01 10 
+56 11 AA D9 
+B3 45 CC 59 
+31 5F 39 AB 
+96 0B F6 69 
+DD 95 9F 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+00 00 00 00 
+";
+            byte[] data = Element.FromHexString(bytes);
+            LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
+        }
+
+
+        [TestMethod]
+        public void test_logicChip_10()
+        {
+            // liuxing
+            // 暂时无法解析第二个元素
+            string bytes = @"21 04 00 00 
+61 0a 53 45
+30 31 30 33
+36 31 30 33
+02 01 a0 03
+0b 1b 81 e1
+20 00 0a 01
+ac a2 a6 5f
+65 01 80 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+00 00 00 00
+";
+            byte[] data = Element.FromHexString(bytes);
+            LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
+        }
+
 
         #endregion
 

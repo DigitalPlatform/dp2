@@ -815,10 +815,48 @@ namespace dp2Circulation
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 dp2Circulation.ItemControlBase`2.GetChangedRecPath()
+在 dp2Circulation.EntityForm.GetChangedRecords(String strStyle)
+在 System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
+在 CallSite.Target(Closure , CallSite , Object , String )
+在 dp2Circulation.MainForm.GetChangedRecords(String strStyle)
+在 dp2Circulation.PrintOrderForm.button_load_loadFromBatchNo_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: xxx 
+操作时间 2019/3/22 9:35:14 (Fri, 22 Mar 2019 09:35:14 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         // 获得所有修改过的事项的记录路径
         public List<string> GetChangedRecPath()
         {
             List<string> results = new List<string>();
+
+            // 2019/3/23
+            if (this.Items == null)
+                return results;
+
             foreach (T bookitem in this.Items)
             {
                 if (bookitem.Changed)
