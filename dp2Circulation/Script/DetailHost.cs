@@ -3288,7 +3288,7 @@ namespace dp2Circulation
             strAuthor = "";
             strPinyin = "";
 
-            MarcNodeList fields = record.select("field[@name='700' or @name='710' or @name='701'  or @name='711' or @name='702' or @name='712']");
+            MarcNodeList fields = record.select("field[@name='700' or @name='710' or @name='720' or @name='701' or @name='711' or @name='721' or @name='702' or @name='712' or @name='722']");
             fields.add(record.select("field[@name='200']")); // 必须两次分别 select。因为 200 一般在 MARC 记录中会先出现
 
             Sort7xx(fields);
@@ -3346,6 +3346,8 @@ namespace dp2Circulation
             strAuthor = "";
             strError = "";
             int nRet = 0;
+
+            Sort7xx(fields);
 
             foreach (MarcNode field in fields)
             {
