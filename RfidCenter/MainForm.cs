@@ -26,6 +26,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using System.Speech.Synthesis;
+using log4net;
 
 namespace RfidCenter
 {
@@ -68,7 +69,15 @@ namespace RfidCenter
             }
 
             ClientInfo.Initial("rfidcenter");
-
+            {
+                Driver1Manager.Log = LogManager.GetLogger("main", "driver1");
+                /*
+                _log = LogManager.GetLogger("main",
+                    product_name
+                    // "fingerprintcenter"
+                    );
+                    */
+            }
             ClearHtml();
 
             // 显示版本号
@@ -1402,6 +1411,18 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(ClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+            }
         }
     }
 }

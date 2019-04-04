@@ -12,6 +12,7 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using log4net;
 
 namespace RfidDrivers.First
 {
@@ -90,7 +91,8 @@ namespace RfidDrivers.First
 
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
-                    reader.SerialNumber);
+                    reader.SerialNumber,
+                    null);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
 
@@ -403,12 +405,17 @@ namespace RfidDrivers.First
             //if ((driver.m_commTypeSupported & RFIDLIB.rfidlib_def.COMMTYPE_USB_EN) > 0)
             {
                 UInt32 nCOMCnt = RFIDLIB.rfidlib_reader.COMPort_Enum();
+
+                Driver1Manager.Log?.Debug($"COMPort_Enum() return [{nCOMCnt}]");
+
                 for (uint i = 0; i < nCOMCnt; i++)
                 {
                     StringBuilder comName = new StringBuilder();
                     comName.Append('\0', 64);
                     RFIDLIB.rfidlib_reader.COMPort_GetEnumItem(i, comName, (UInt32)comName.Capacity);
                     // comName);
+
+                    Driver1Manager.Log?.Debug($"COMPort_Enum() {i}: comName=[{comName.ToString()}]");
 
                     Reader reader = new Reader
                     {
@@ -1514,9 +1521,13 @@ namespace RfidDrivers.First
         // 填充驱动类型和设备型号
         NormalResult FillReaderInfo(Reader reader)
         {
-            var result = OpenReader("",
+            StringBuilder debugInfo = new StringBuilder();
+            var result = OpenReader(reader.DriverName,  // "",
                 reader.Type,
-                reader.SerialNumber);
+                reader.SerialNumber,
+                debugInfo);
+            Driver1Manager.Log?.Debug($"FillReaderInfo() OpenReader() return [{result.ToString()}]");
+
             try
             {
                 int iret;
@@ -1529,8 +1540,10 @@ namespace RfidDrivers.First
                 nSize = (UInt32)devInfor.Capacity;
                 iret = RFIDLIB.rfidlib_reader.RDR_GetReaderInfor(result.ReaderHandle, 0, devInfor, ref nSize);
                 if (iret != 0)
-                    return new NormalResult { Value = -1, ErrorInfo = "GetReaderInfo() error" };
-
+                {
+                    Driver1Manager.Log?.Debug($"RDR_GetReaderInfor() return [{iret}], debugInfo={debugInfo.ToString()}");
+                    return new NormalResult { Value = -1, ErrorInfo = $"GetReaderInfo() error, iret=[{iret}], debugInfo={debugInfo.ToString()}" };
+                }
                 string dev_info = devInfor.ToString();
                 string[] parts = dev_info.Split(new char[] { ';' });
                 if (parts.Length < 3)
@@ -1631,36 +1644,30 @@ namespace RfidDrivers.First
 #endif
         }
 
-
-
         OpenReaderResult OpenReader(string driver_name,
             string type,
-            string serial_number)
+            string serial_number,
+            StringBuilder debugInfo)
         {
-            //Lock();
-            try
-            {
-                UIntPtr hreader = UIntPtr.Zero;
-                var iret = RFIDLIB.rfidlib_reader.RDR_Open(
-                    BuildConnectionString(driver_name,
-                    type,
-                    serial_number),
-                    ref hreader);
-                if (iret != 0)
-                    return new OpenReaderResult
-                    {
-                        Value = -1,
-                        ErrorInfo = $"OpenReader error, return: {iret}",
-                        ErrorCode = GetErrorCode(iret, hreader)
-                    };
+            UIntPtr hreader = UIntPtr.Zero;
+            string connection_string = BuildConnectionString(driver_name,
+                type,
+                serial_number);
+            if (debugInfo != null)
+                debugInfo.Append($"driver_name=[{driver_name}],type=[{type}],serial_number=[{serial_number}],connect_string=[{connection_string}]");
 
+            var iret = RFIDLIB.rfidlib_reader.RDR_Open(
+                connection_string,
+                ref hreader);
+            if (iret != 0)
+                return new OpenReaderResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"OpenReader error, return: {iret}",
+                    ErrorCode = GetErrorCode(iret, hreader)
+                };
 
-                return new OpenReaderResult { ReaderHandle = hreader };
-            }
-            finally
-            {
-                //Unlock();
-            }
+            return new OpenReaderResult { ReaderHandle = hreader };
         }
 
         NormalResult CloseReader(object reader_handle)
@@ -3224,5 +3231,13 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
     {
         public uint CfgNo { get; set; }
         public byte[] Bytes { get; set; }
+    }
+
+    /// <summary>
+    /// Driver1 函数库全局参数
+    /// </summary>
+    public static class Driver1Manager
+    {
+        public static ILog Log { get; set; }
     }
 }
