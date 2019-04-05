@@ -16,7 +16,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.ResultSet;
-using DigitalPlatform.Range;
 
 namespace DigitalPlatform.rms
 {

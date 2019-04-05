@@ -21,7 +21,6 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;

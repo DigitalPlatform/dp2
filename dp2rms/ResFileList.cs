@@ -13,7 +13,6 @@ using DigitalPlatform;
 //using DigitalPlatform.XmlEditor;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;

@@ -12,7 +12,6 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;

@@ -22,8 +22,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
-// using DigitalPlatform.Drawing;  // ShrinkPic()
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;

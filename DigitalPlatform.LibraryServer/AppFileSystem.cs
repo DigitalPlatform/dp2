@@ -7,9 +7,9 @@ using System.Diagnostics;
 
 using Ionic.Zip;
 
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -371,7 +371,7 @@ namespace DigitalPlatform.LibraryServer
                 int nStartOfBuffer = 0;
                 for (int i = 0; i < rangeList.Count; i++)
                 {
-                    RangeItem range = (RangeItem)rangeList[i];
+                    RangeItem range = rangeList[i];
                     // int nStartOfTarget = (int)range.lStart;
                     int nLength = (int)range.lLength;
                     if (nLength == 0)

@@ -9,7 +9,6 @@ using Ionic.Zip;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
