@@ -14,6 +14,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using System.Globalization;
+using DigitalPlatform.Core;
 
 namespace dp2LibraryConsole
 {
@@ -1398,7 +1399,7 @@ value);
                     }
 
                     RangeList rl = new RangeList(ranges[j]);
-                    long uploaded = ((RangeItem)rl[0]).lStart;
+                    long uploaded = (rl[0]).lStart;
 
                     string strPercent = "";
                     if (rl.Count >= 1)

@@ -4252,6 +4252,7 @@ out string strError)
             string strBinDir = Environment.CurrentDirectory;
 
             string[] saAddRef1 = {
+                    Path.Combine(strBinDir , "digitalplatform.core.dll"),
                     Path.Combine(strBinDir , "digitalplatform.marcdom.dll"),
                     Path.Combine(strBinDir , "digitalplatform.marckernel.dll"),
                     Path.Combine(strBinDir , "digitalplatform.marcquery.dll"),

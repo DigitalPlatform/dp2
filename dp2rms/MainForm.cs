@@ -22,6 +22,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Script;
 
 using DigitalPlatform.Library;
+using DigitalPlatform.Core;
 
 namespace dp2rms
 {

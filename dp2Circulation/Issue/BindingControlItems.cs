@@ -23,6 +23,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

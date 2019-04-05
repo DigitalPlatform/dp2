@@ -11,6 +11,7 @@ using System.Threading;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2LibraryXE
 {

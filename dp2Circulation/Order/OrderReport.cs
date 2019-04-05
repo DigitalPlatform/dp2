@@ -10,6 +10,7 @@ using static dp2Circulation.PrintOrderForm;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using System.Reflection;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

@@ -2032,6 +2032,16 @@ namespace DigitalPlatform.Script
             strErrorInfo = "";
             strWarningInfo = "";
 
+
+            // 2019/4/5
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
+
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;
             compilerParams = new CompilerParameters();
@@ -2167,6 +2177,16 @@ namespace DigitalPlatform.Script
             // System.Reflection.Assembly compiledAssembly = null;
             strErrorInfo = "";
             strWarningInfo = "";
+
+
+            // 2019/4/5
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
 
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;
@@ -2304,6 +2324,15 @@ namespace DigitalPlatform.Script
             assembly = null;
             strErrorInfo = "";
             strWarningInfo = "";
+
+            // 2019/4/5
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
 
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;

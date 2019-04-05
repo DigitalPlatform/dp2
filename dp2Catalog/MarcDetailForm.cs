@@ -6112,6 +6112,7 @@ Stack:
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -7454,7 +7455,7 @@ Keys keyData)
                                     "system.windows.forms.dll",
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
-
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -7576,6 +7577,7 @@ Keys keyData)
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
