@@ -1,19 +1,19 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using DigitalPlatform.Text;
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.OldZ3950
 {
     public class PolandNode : BerNode
     {
         public string m_strOrgExpression = "";
         // public stringLPSTR m_pszOrgExpression;
-        public string m_strToken;			// µ±Ç°¶ÁÈëµÄtoken
-        public int m_nType;				// tokenµÄÀàĞÍ
+        public string m_strToken;			// å½“å‰è¯»å…¥çš„token
+        public int m_nType;				// tokençš„ç±»å‹
 
-        #region ³£Á¿
+        #region å¸¸é‡
 
         public const int TYPE_AND	= 0;
         public const int TYPE_OR	= 1;
@@ -21,8 +21,8 @@ namespace DigitalPlatform.Z3950
         public const int TYPE_OPERAND    = 3;
         public const int TYPE_NEAR	= 4;
         public const int TYPE_WITHIN	= 5;
-        public const int TYPE_LEFTBRACKET = 6;		// ×óÀ¨ºÅ
-        public const int TYPE_RIGHTBRACKET = 7; 	// ÓÒÀ¨ºÅ
+        public const int TYPE_LEFTBRACKET = 6;		// å·¦æ‹¬å·
+        public const int TYPE_RIGHTBRACKET = 7; 	// å³æ‹¬å·
 
 
         
@@ -33,7 +33,7 @@ namespace DigitalPlatform.Z3950
         public const ushort z3950_and_not                       = 2;
         public const ushort z3950_prox                          = 3;
 
-/* ÏàËÆ²Ù×÷µÄ¼¸ÖÖÊôĞÔ */
+/* ç›¸ä¼¼æ“ä½œçš„å‡ ç§å±æ€§ */
         public const ushort z3950_exclusion                     = 1;
         public const ushort z3950_distance                      = 2;
         public const ushort z3950_ordered                       = 3;
@@ -49,7 +49,7 @@ namespace DigitalPlatform.Z3950
         public const ushort z3950_known                         = 1;
         public const ushort z3950_private                       = 2;
 
-/* ²éÑ¯ÀàĞÍ */
+/* æŸ¥è¯¢ç±»å‹ */
         public const ushort z3950_type_0                        = 0;
         public const ushort z3950_type_1                        = 1;
         public const ushort z3950_type_2                        = 2;
@@ -74,7 +74,7 @@ namespace DigitalPlatform.Z3950
             get
             {
                 if (this.m_nOffs >= this.m_strOrgExpression.Length)
-                    return (char)0; // ¼æÈİÔ­À´µÄÏ°¹ß
+                    return (char)0; // å…¼å®¹åŸæ¥çš„ä¹ æƒ¯
 
                 return this.m_strOrgExpression[this.m_nOffs];
             }
@@ -90,10 +90,10 @@ namespace DigitalPlatform.Z3950
             }
         }
 
-        // µ±Ç°Î»ÖÃÖ¸ÕëÏòºóÒÆ¶¯Ò»¸ö×Ö·û
+        // å½“å‰ä½ç½®æŒ‡é’ˆå‘åç§»åŠ¨ä¸€ä¸ªå­—ç¬¦
         // return:
-        //      true    µ½´ïÄ©Î²
-        //      false   Ã»ÓĞµ½´ïÄ©Î²
+        //      true    åˆ°è¾¾æœ«å°¾
+        //      false   æ²¡æœ‰åˆ°è¾¾æœ«å°¾
         public bool MoveNext()
         {
             this.m_nOffs++;
@@ -108,11 +108,11 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // ½«Ô­Ê¼±í´ïÊ½×ª»»ÎªÄæ²¨À¼±í´ïÊ½
+        // å°†åŸå§‹è¡¨è¾¾å¼è½¬æ¢ä¸ºé€†æ³¢å…°è¡¨è¾¾å¼
         // parameters
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         public void ChangeOrgToRPN()
         {
             for (; ; )
@@ -143,7 +143,7 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        // ½«ÊäÈëµÄ±í´ïÊ½·Ö¸îÎª¶ÀÁ¢µÄµ¥Ôª
+        // å°†è¾“å…¥çš„è¡¨è¾¾å¼åˆ†å‰²ä¸ºç‹¬ç«‹çš„å•å…ƒ
         // parameters
         int GetAToken()
         {
@@ -151,26 +151,26 @@ namespace DigitalPlatform.Z3950
             this.m_nType = -1;
 
 
-            while (IsWhite(this.CurrentChar) == true) //È¥µô¿Õ¸ñ¡¢\t¡¢\r¡¢\n
+            while (IsWhite(this.CurrentChar) == true) //å»æ‰ç©ºæ ¼ã€\tã€\rã€\n
             {
                 ++this.m_nOffs;
             }
 
-            // **1 ÎÄ¼ş½áÎ²£º
-            // Ìõ¼ş£ºÓöµ½0×Ö·û
-            // ·µ»Ø£ºtokenÄÚÎª¿Õ´®
+            // **1 æ–‡ä»¶ç»“å°¾ï¼š
+            // æ¡ä»¶ï¼šé‡åˆ°0å­—ç¬¦
+            // è¿”å›ï¼štokenå†…ä¸ºç©ºä¸²
             //       token_type -1
             if (this.ReachEnd == true)
-            {   //	Èç¹ûÓöµ½½áÎ²¡£
+            {   //	å¦‚æœé‡åˆ°ç»“å°¾ã€‚
                 m_strToken = "";
                 m_nType = -1;
                 return 0;
             }
 
-            // **3 À¨ºÅ
-            // Ìõ¼ş£ºÓöµ½"()"Ö®Ò»
-            // ·µ»Ø£ºtoken ×óÀ¨ºÅ»òÓÒÀ¨ºÅ
-            //       token_type  ×óÀ¨ºÅ»òÓÒÀ¨ºÅ
+            // **3 æ‹¬å·
+            // æ¡ä»¶ï¼šé‡åˆ°"()"ä¹‹ä¸€
+            // è¿”å›ï¼štoken å·¦æ‹¬å·æˆ–å³æ‹¬å·
+            //       token_type  å·¦æ‹¬å·æˆ–å³æ‹¬å·
             if (this.CurrentChar == '('
                 || this.CurrentChar == ')')
             {
@@ -184,10 +184,10 @@ namespace DigitalPlatform.Z3950
                 return 0;
             }
 
-            // **5 ×Ö·û´®
-            // Ìõ¼ş£ºÓöµ½"
-            // ·µ»Ø£ºtoken ×Ö·û´®£¬±íÊ¾Ëã×Ó
-            //       ÉèÖÃ×Ö·û´®ÀàĞÍÎªËã×Ó
+            // **5 å­—ç¬¦ä¸²
+            // æ¡ä»¶ï¼šé‡åˆ°"
+            // è¿”å›ï¼štoken å­—ç¬¦ä¸²ï¼Œè¡¨ç¤ºç®—å­
+            //       è®¾ç½®å­—ç¬¦ä¸²ç±»å‹ä¸ºç®—å­
             if (this.CurrentChar == '"')
             {  // quoted string 
                 /*
@@ -196,13 +196,13 @@ namespace DigitalPlatform.Z3950
                 int nLen = 0;
                  * */
 
-                // ÕÒµ½½áÊøµÄ'"'
+                // æ‰¾åˆ°ç»“æŸçš„'"'
                 int nRet = this.m_strOrgExpression.IndexOf('\"', this.m_nOffs + 1);
                 if (nRet == -1)
-                    throw new Exception("·Ç·¨×Ö·û´®³£Á¿");
+                    throw new Exception("éæ³•å­—ç¬¦ä¸²å¸¸é‡");
 
-                nRet++;	// Ìø¹ı"·ûºÅ
-                // ½Ó×ÅÔ½¹ı"ºóÃæ½ÓĞøµÄ·Çdelimeter¶ÎÂä
+                nRet++;	// è·³è¿‡"ç¬¦å·
+                // æ¥ç€è¶Šè¿‡"åé¢æ¥ç»­çš„édelimeteræ®µè½
                 for (; nRet < m_strOrgExpression.Length; nRet++)
                 {
                     if (IsDelim(m_strOrgExpression[nRet]) == true)
@@ -210,7 +210,7 @@ namespace DigitalPlatform.Z3950
                 }
 
                 /*
-                pTemp ++;	// Ìø¹ı"·ûºÅ
+                pTemp ++;	// è·³è¿‡"ç¬¦å·
                 while (!IsDelim(*pTemp))
                 {
                     pTemp++;
@@ -228,10 +228,10 @@ namespace DigitalPlatform.Z3950
 
             }
 
-            // **6 ²»´øÒıºÅµÄ×Ö·û´®
-            // Ìõ¼ş£º²»Âú×ãÒÔÉÏËùÓĞÌõ¼ş
-            // ·µ»Ø£ºtoken ×Ö·û´®£¬±íÊ¾Ëã×Ó»òËã·û
-            //      ÉèÖÃ×Ö·û´®ÀàĞÍÎªËã×Ó
+            // **6 ä¸å¸¦å¼•å·çš„å­—ç¬¦ä¸²
+            // æ¡ä»¶ï¼šä¸æ»¡è¶³ä»¥ä¸Šæ‰€æœ‰æ¡ä»¶
+            // è¿”å›ï¼štoken å­—ç¬¦ä¸²ï¼Œè¡¨ç¤ºç®—å­æˆ–ç®—ç¬¦
+            //      è®¾ç½®å­—ç¬¦ä¸²ç±»å‹ä¸ºç®—å­
             /*
             LPTSTR pStr;
             LPSTR pTemp;
@@ -284,10 +284,10 @@ namespace DigitalPlatform.Z3950
 	new RESERVEENTRY("",-1),
         };
 
-        // ²éÕÒ±£Áô×Ö±í£¬µÃµ½±£Áô×ÖµÄÕûÊı´úºÅ
+        // æŸ¥æ‰¾ä¿ç•™å­—è¡¨ï¼Œå¾—åˆ°ä¿ç•™å­—çš„æ•´æ•°ä»£å·
         // return:
         //		-1	not found
-        //		ÆäËü	±£Áô×ÖµÄÕûÊı´úºÅ
+        //		å…¶å®ƒ	ä¿ç•™å­—çš„æ•´æ•°ä»£å·
         int GetReserveType(string strName)
         {
             int i;
@@ -308,53 +308,53 @@ namespace DigitalPlatform.Z3950
         }
 
 
-        //	´¦ÀíÒ»¸öToken(CStringĞÍ)
-        //	·µ»ØÖµ£ºÕıÈ·ÇÒÎ´½áÊø£º0;     ³ö´í£º-1;    ½áÊø£º1¡£
-        //	±í´ïÊ½¶ÁÍêºó£¬Ò»¶¨ÒªËÍÒ»´ÎEnd Èç£º"#"
+        //	å¤„ç†ä¸€ä¸ªToken(CStringå‹)
+        //	è¿”å›å€¼ï¼šæ­£ç¡®ä¸”æœªç»“æŸï¼š0;     å‡ºé”™ï¼š-1;    ç»“æŸï¼š1ã€‚
+        //	è¡¨è¾¾å¼è¯»å®Œåï¼Œä¸€å®šè¦é€ä¸€æ¬¡End å¦‚ï¼š"#"
         int HandlingAToken()
         {
 
-            //TokenÎªÒ»¸ö×óÀ¨ºÅ
+            //Tokenä¸ºä¸€ä¸ªå·¦æ‹¬å·
             if (m_nType == TYPE_LEFTBRACKET)
                 return DoLeftBracket();
 
-            //TokenÎªÒ»¸öÓÒÀ¨ºÅ
+            //Tokenä¸ºä¸€ä¸ªå³æ‹¬å·
             if (m_nType == TYPE_RIGHTBRACKET)
                 return DoRightBracket();
 
-            //TokenÎª±í´ïÊ½½áÊø·û
+            //Tokenä¸ºè¡¨è¾¾å¼ç»“æŸç¬¦
             if (m_nType == -1)
                 return DoEnd();//vv
 
-            //TokenÎªÒ»¸öÔËËãÒò×Ó£¨±äÁ¿£©
+            //Tokenä¸ºä¸€ä¸ªè¿ç®—å› å­ï¼ˆå˜é‡ï¼‰
             if (m_nType == TYPE_OPERAND)
                 return PutTokenToArray(m_strToken, m_nType);
 
-            //TokenÎªÒ»¸öÔËËã·û
+            //Tokenä¸ºä¸€ä¸ªè¿ç®—ç¬¦
             return DoOperator(m_strToken, m_nType);
         }
 
-        // ´¦Àí×óÀ¨ºÅ
+        // å¤„ç†å·¦æ‹¬å·
         // parameters:
         int DoLeftBracket()
         {
-            //	ÔËËã·ûÕ»ÖĞÓĞÎŞÔËËã·û£¿
+            //	è¿ç®—ç¬¦æ ˆä¸­æœ‰æ— è¿ç®—ç¬¦ï¼Ÿ
             if (m_OperatorArray.Count == 0)
             {
-                //	ÎŞ£¬ÔòÏÈËÍÈë"("ÒÔÊ¾½øÈëĞÂÒ»²ã±í´ïÊ½
+                //	æ— ï¼Œåˆ™å…ˆé€å…¥"("ä»¥ç¤ºè¿›å…¥æ–°ä¸€å±‚è¡¨è¾¾å¼
                PutOperatorToArray("(",
-                    TYPE_LEFTBRACKET);	//	ÏÈËÍÈë"("
+                    TYPE_LEFTBRACKET);	//	å…ˆé€å…¥"("
             }
 
             PutOperatorToArray("(",
-                TYPE_LEFTBRACKET);//	ÔÙËÍÈëÔËËã·û
+                TYPE_LEFTBRACKET);//	å†é€å…¥è¿ç®—ç¬¦
 
             return 0;
         }
 
 
 
-        // ´¦ÀíÓÒÀ¨ºÅ
+        // å¤„ç†å³æ‹¬å·
         // parameters:
         int DoRightBracket()
         {
@@ -362,31 +362,31 @@ namespace DigitalPlatform.Z3950
             int index;
             for (; ; )
             {
-                //	ÔËËã·ûÕ»¶¥ÊÇ·ñÎª"("£¿
+                //	è¿ç®—ç¬¦æ ˆé¡¶æ˜¯å¦ä¸º"("ï¼Ÿ
                 index = m_OperatorArray.Count - 1;
                 if (index == -1)
                     return -1;
 
-                Token token = m_OperatorArray[index]; //	ÔËËã·ûÕ»¶¥È¡³ö
+                Token token = m_OperatorArray[index]; //	è¿ç®—ç¬¦æ ˆé¡¶å–å‡º
 
                 if (token.m_strToken == "(")
                 {
-                    m_OperatorArray.RemoveAt(index);//	É¾³ıÕâ¸öÔËËã·ûÕ»¶¥ÔªËØ
+                    m_OperatorArray.RemoveAt(index);//	åˆ é™¤è¿™ä¸ªè¿ç®—ç¬¦æ ˆé¡¶å…ƒç´ 
                     break;
                 }
 
                 nRet = PutTokenToArray(token.m_strToken,
-                    token.m_nType);//	ÔÙËÍÈëÔËËã·ûÈëPL
+                    token.m_nType);//	å†é€å…¥è¿ç®—ç¬¦å…¥PL
                 if (nRet == -1)
-                    return -1;//Ö»Òª²»É¾Êı×éÏî£¬¾Í²»±Øµ£ĞÄdelete ÎÊÌâ
+                    return -1;//åªè¦ä¸åˆ æ•°ç»„é¡¹ï¼Œå°±ä¸å¿…æ‹…å¿ƒdelete é—®é¢˜
 
-                m_OperatorArray.RemoveAt(index);//	É¾³ıÕâ¸öÔËËã·ûÕ»¶¥ÔªËØ
+                m_OperatorArray.RemoveAt(index);//	åˆ é™¤è¿™ä¸ªè¿ç®—ç¬¦æ ˆé¡¶å…ƒç´ 
             }
 
             return 0;
         }
 
-        // ´¦Àí½áÊø·û
+        // å¤„ç†ç»“æŸç¬¦
         // parameters:
         int DoEnd()
         {
@@ -394,7 +394,7 @@ namespace DigitalPlatform.Z3950
             int index;
             for (; ; )
             {
-                //	ÔËËã·ûÕ»¶¥ÊÇ·ñÎª"("£¿
+                //	è¿ç®—ç¬¦æ ˆé¡¶æ˜¯å¦ä¸º"("ï¼Ÿ
 
                 index = m_OperatorArray.Count - 1;
 
@@ -402,30 +402,30 @@ namespace DigitalPlatform.Z3950
                 {
                     return -1;
                 }
-                Token token = m_OperatorArray[index]; //	ÔËËã·ûÕ»¶¥È¡³ö
+                Token token = m_OperatorArray[index]; //	è¿ç®—ç¬¦æ ˆé¡¶å–å‡º
 
                 if (token.m_strToken == "(")
                 {
-                    m_OperatorArray.RemoveAt(index);//	É¾³ıÕâ¸öÔËËã·ûÕ»¶¥ÔªËØ
+                    m_OperatorArray.RemoveAt(index);//	åˆ é™¤è¿™ä¸ªè¿ç®—ç¬¦æ ˆé¡¶å…ƒç´ 
                     break;
                 }
 
                 nRet = PutTokenToArray(token.m_strToken,
-                    token.m_nType);//	ÔÙËÍÈëÔËËã·ûÈëPL
+                    token.m_nType);//	å†é€å…¥è¿ç®—ç¬¦å…¥PL
                 if (nRet == -1)
-                    return -1;//´ËÊ±²»±Ødelete token ,ÒòÎªArrayÎ´É¾³ı£¬²»±Øµ£ĞÄ
+                    return -1;//æ­¤æ—¶ä¸å¿…delete token ,å› ä¸ºArrayæœªåˆ é™¤ï¼Œä¸å¿…æ‹…å¿ƒ
 
-                m_OperatorArray.RemoveAt(index);//	É¾³ıÕâ¸öÔËËã·ûÕ»¶¥ÔªËØ
+                m_OperatorArray.RemoveAt(index);//	åˆ é™¤è¿™ä¸ªè¿ç®—ç¬¦æ ˆé¡¶å…ƒç´ 
             }
 
             index = m_OperatorArray.Count;
             if (index != -1)
                 return -1;
 
-            return 1;  //	·µ»Ø1£¬±íÊ¾½áÊø¡£
+            return 1;  //	è¿”å›1ï¼Œè¡¨ç¤ºç»“æŸã€‚
         }
 
-        // ½«token¼ÓÈëm_PolandArray
+        // å°†tokenåŠ å…¥m_PolandArray
         // parameters:
         int PutTokenToArray(string strToken,
             int nType)
@@ -440,55 +440,55 @@ namespace DigitalPlatform.Z3950
 
             if (m_OperatorArray.Count == 0)
             {
-                //	ÎŞ£¬ÔòÏÈËÍÈë"("ÒÔÊ¾½øÈëĞÂÒ»²ã±í´ïÊ½
+                //	æ— ï¼Œåˆ™å…ˆé€å…¥"("ä»¥ç¤ºè¿›å…¥æ–°ä¸€å±‚è¡¨è¾¾å¼
                 PutOperatorToArray("(",
-                    TYPE_LEFTBRACKET);	//	ÏÈËÍÈë"("
+                    TYPE_LEFTBRACKET);	//	å…ˆé€å…¥"("
             }
 
             return 0;
         }
 
 
-        // ´¦Àíoperator
+        // å¤„ç†operator
         // parameters:
         int DoOperator(string strToken,
             int nType)
         {
             int nRet = 0;
 
-            //	ÔËËã·ûÕ»ÖĞÓĞÎŞÔËËã·û£¿
+            //	è¿ç®—ç¬¦æ ˆä¸­æœ‰æ— è¿ç®—ç¬¦ï¼Ÿ
             if (m_OperatorArray.Count == 0)
             {
-                //	ÎŞ£¬ÔòÏÈËÍÈë"("ÒÔÊ¾½øÈëĞÂÒ»²ã±í´ïÊ½
+                //	æ— ï¼Œåˆ™å…ˆé€å…¥"("ä»¥ç¤ºè¿›å…¥æ–°ä¸€å±‚è¡¨è¾¾å¼
                 PutOperatorToArray("(",
-                    TYPE_LEFTBRACKET);	//	ÏÈËÍÈë"("
+                    TYPE_LEFTBRACKET);	//	å…ˆé€å…¥"("
 
-                PutOperatorToArray(strToken, nType); //	ÔÙËÍÈëÔËËã·û
+                PutOperatorToArray(strToken, nType); //	å†é€å…¥è¿ç®—ç¬¦
             }
-            else	//	ÈôÓĞ(ÉèÎªOP1)£¬ÔòÅĞÔËËã·ûstrTokenµÄÓÅÏÈ¼¶±ğ£º
-            //  ÈôYX(op1)´óÓÚµÈÓÚYX(strToken)ÔòÏÈËÍOP1ÈëPL£¨PolandArray)
+            else	//	è‹¥æœ‰(è®¾ä¸ºOP1)ï¼Œåˆ™åˆ¤è¿ç®—ç¬¦strTokençš„ä¼˜å…ˆçº§åˆ«ï¼š
+            //  è‹¥YX(op1)å¤§äºç­‰äºYX(strToken)åˆ™å…ˆé€OP1å…¥PLï¼ˆPolandArray)
             {
                 int index = m_OperatorArray.Count - 1;
                 if (index == -1)
                     return -1;
 
-                Token token = m_OperatorArray[index]; //	ÔËËã·ûÕ»¶¥È¡³ö
+                Token token = m_OperatorArray[index]; //	è¿ç®—ç¬¦æ ˆé¡¶å–å‡º
                 if (token.m_strToken != "(")
                 {
 
                     if (Precedence(token.m_strToken) >= Precedence(strToken))
                     {
-                        //	>=Ê±£¬ÏÈËÍOP1ÈëPL£¬ÔÙËÍstrTokenÈëOP(OperatorArray)
+                        //	>=æ—¶ï¼Œå…ˆé€OP1å…¥PLï¼Œå†é€strTokenå…¥OP(OperatorArray)
                         nRet = PutTokenToArray(token.m_strToken, token.m_nType);
-                        //	ÔËËã·ûÕ»¶¥ÈëPL
+                        //	è¿ç®—ç¬¦æ ˆé¡¶å…¥PL
                         if (nRet == -1)
-                            return -1;//´ËÊ±²»±Ødelete token ,ÒòÎªArrayÎ´É¾³ı£¬²»±Øµ£ĞÄ
+                            return -1;//æ­¤æ—¶ä¸å¿…delete token ,å› ä¸ºArrayæœªåˆ é™¤ï¼Œä¸å¿…æ‹…å¿ƒ
 
-                        m_OperatorArray.RemoveAt(index);//	É¾³ıÕâ¸öÔËËã·ûÕ»¶¥ÔªËØ
+                        m_OperatorArray.RemoveAt(index);//	åˆ é™¤è¿™ä¸ªè¿ç®—ç¬¦æ ˆé¡¶å…ƒç´ 
                     }
                 }
 
-                PutOperatorToArray(strToken, nType); //	ËÍÈëÔËËã·û
+                PutOperatorToArray(strToken, nType); //	é€å…¥è¿ç®—ç¬¦
             }
 
             return 0;
@@ -525,11 +525,11 @@ namespace DigitalPlatform.Z3950
 		    new PRETABLE("",0),
 	    };
 
-        // »ñµÃÔËËã·ûµÄÓÅÏÈ¼¶Êı
+        // è·å¾—è¿ç®—ç¬¦çš„ä¼˜å…ˆçº§æ•°
         // parameters:
         // return:
         //      -1  not found
-        //      ÆäËû
+        //      å…¶ä»–
         int Precedence(string strToken)
         {
             Debug.Assert(String.IsNullOrEmpty(strToken) == false, "");
@@ -542,10 +542,10 @@ namespace DigitalPlatform.Z3950
                 }
             }
 
-            return -1;  // Î´ÕÒµ½
+            return -1;  // æœªæ‰¾åˆ°
         }
 
-        // ½«ÔËËã·ûËÍÈëm_OperatorArray
+        // å°†è¿ç®—ç¬¦é€å…¥m_OperatorArray
         // parameters:
         void PutOperatorToArray(string strToken,
             int nType)
@@ -568,11 +568,11 @@ namespace DigitalPlatform.Z3950
 
         }
 
-        // ½«Äæ²¨À¼±í´ïÊ½×ª»»ÎªÒ»¿ÃÊ÷
+        // å°†é€†æ³¢å…°è¡¨è¾¾å¼è½¬æ¢ä¸ºä¸€æ£µæ ‘
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         BerNode ChangeRPNToTree()
         {
             BerNode param = null;
@@ -608,18 +608,18 @@ namespace DigitalPlatform.Z3950
             pParam->DumpToFile("polandtree.txt");
             */
 
-            // Èç¹ûpParam->m_ChildArray.GetSize() > 1
-            // ±íÊ¾²»ÄÜÎª21£¬±ØĞëÔÚ21ÏÂÃæÓĞÒ»¸ö1
+            // å¦‚æœpParam->m_ChildArray.GetSize() > 1
+            // è¡¨ç¤ºä¸èƒ½ä¸º21ï¼Œå¿…é¡»åœ¨21ä¸‹é¢æœ‰ä¸€ä¸ª1
             m_Subroot.AddSubtree(param);
 
             return param;
         }
 
-        // ´¦ÀíËã×Ó
+        // å¤„ç†ç®—å­
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         int HandleOperand(string strToken)
         {
             BerNode param = null;
@@ -644,18 +644,18 @@ namespace DigitalPlatform.Z3950
             return 0;
         }
 
-        // ¹¹ÔìËã×Ó×ÓÊ÷
+        // æ„é€ ç®—å­å­æ ‘
         // parameters:
         int BuildOperand(BerNode param,
             string strToken)
         {
 
             // int nRet;
-            /*	// ÔİÊ±×¢ÊÍµô
+            /*	// æš‚æ—¶æ³¨é‡Šæ‰
             int nSearches;
 
             nSearches = g_ptrResultName.GetSize();
-            //  ÅĞ¶ÏoperandÊÇ·ñÎªResultSetName
+            //  åˆ¤æ–­operandæ˜¯å¦ä¸ºResultSetName
             for(i=0; i<nSearches; i++) {
                 if(strcmp((char *)g_ptrResultName[i], strToken)==0)
                 {
@@ -668,7 +668,7 @@ namespace DigitalPlatform.Z3950
             return BldAttributesPlusTerm(param, strToken);
         }
 
-        // µ±Ëã×ÓÎªResultSetIdÊ±
+        // å½“ç®—å­ä¸ºResultSetIdæ—¶
         // parameters:
         int BldResultSetId(BerNode param,
             string strToken)
@@ -680,11 +680,11 @@ namespace DigitalPlatform.Z3950
             return 0;
         }
 
-        // µ±Ëã×ÓÎªAttributesPlusTermÊ±
+        // å½“ç®—å­ä¸ºAttributesPlusTermæ—¶
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         int BldAttributesPlusTerm(BerNode param,
             string strToken)
         {
@@ -706,7 +706,7 @@ namespace DigitalPlatform.Z3950
                 out strAttrType,
                 out strAttrValue);
 
-            // È±Ê¡Öµ
+            // ç¼ºçœå€¼
             if (strAttrType == "")
                 strAttrType = "1";
             if (strAttrValue == "")
@@ -727,7 +727,7 @@ namespace DigitalPlatform.Z3950
             }
             catch(Exception ex)
             {
-                throw new Exception("BldAttributesPlusTerm() ´¦Àí token '" + strToken + "' ¹ı³ÌÖĞ³öÏÖÒì³£", ex);
+                throw new Exception("BldAttributesPlusTerm() å¤„ç† token '" + strToken + "' è¿‡ç¨‹ä¸­å‡ºç°å¼‚å¸¸", ex);
             }
 
             if (strToken.IndexOf('/', 0) == -1)
@@ -740,7 +740,7 @@ namespace DigitalPlatform.Z3950
                 seq.NewChildIntegerNode(BerTree.z3950_AttributeType,
                     ASN1_CONTEXT,
                     BitConverter.GetBytes((Int16)three));  /* position */
-                // Ò»Ñù£¿
+                // ä¸€æ ·ï¼Ÿ
                 seq.NewChildIntegerNode(BerTree.z3950_AttributeValue,
                     ASN1_CONTEXT,
                     BitConverter.GetBytes((Int16)three));  /* position */
@@ -750,7 +750,7 @@ namespace DigitalPlatform.Z3950
         }
 
 #if NOOOOOOOOOOOOO
-// ´¦Àí¼ìË÷´ÊµÃµ½Ò»¸öterm»òAttributesList
+// å¤„ç†æ£€ç´¢è¯å¾—åˆ°ä¸€ä¸ªtermæˆ–AttributesList
 // parameters:
 //		strQuery	[out]
 int DivideToken(LPSTR &pszQuery,
@@ -762,19 +762,19 @@ int DivideToken(LPSTR &pszQuery,
 	strQuery.Empty();
 	
 	
-	while(IsWhite(*pszQuery)) //È¥µô¿Õ¸ñ¡¢\t¡¢\r¡¢\n
+	while(IsWhite(*pszQuery)) //å»æ‰ç©ºæ ¼ã€\tã€\rã€\n
 		++(pszQuery);
 
 
-// **1 ÎÄ¼ş½áÎ²£º
-// Ìõ¼ş£ºÓöµ½0×Ö·û
-	if (*pszQuery == 0) {   //	Èç¹ûÓöµ½½áÎ²¡£
+// **1 æ–‡ä»¶ç»“å°¾ï¼š
+// æ¡ä»¶ï¼šé‡åˆ°0å­—ç¬¦
+	if (*pszQuery == 0) {   //	å¦‚æœé‡åˆ°ç»“å°¾ã€‚
 		strQuery = "";
 		return 0;
 	}
 
-// **3 '/'»ò'='
-// Ìõ¼ş£ºÓöµ½"/="Ö®Ò»
+// **3 '/'æˆ–'='
+// æ¡ä»¶ï¼šé‡åˆ°"/="ä¹‹ä¸€
 	/*
 	if (strchr(" /=",*pszQuery))  { 
 		strQuery = *pszQuery++;
@@ -801,7 +801,7 @@ int DivideToken(LPSTR &pszQuery,
 	return 0;
 			
 // **5 term
-// Ìõ¼ş£º²»Âú×ãÒÔÉÏËùÓĞÌõ¼ş
+// æ¡ä»¶ï¼šä¸æ»¡è¶³ä»¥ä¸Šæ‰€æœ‰æ¡ä»¶
 	LPTSTR pStr;
 	LPSTR  pTemp;
 	int nLen = 0;
@@ -829,14 +829,14 @@ int DivideToken(LPSTR &pszQuery,
 #endif 
 
         // new version
-        // ½«Á¬ĞøµÄ×Ö·û´®ÄÚÈİÆÊÎö·Ö½âÎª3¸ö²¿·Ö
-        // ÀıÈç:	ÖĞ¹ú/1=4
-        //			»òÕß "ÖĞ¹ú"/1=4
+        // å°†è¿ç»­çš„å­—ç¬¦ä¸²å†…å®¹å‰–æåˆ†è§£ä¸º3ä¸ªéƒ¨åˆ†
+        // ä¾‹å¦‚:	ä¸­å›½/1=4
+        //			æˆ–è€… "ä¸­å›½"/1=4
         // parameters:
-        //		strToken	´ıÆÊÎöµÄ×Ö·û´®
-        //		strTerm		[out]¼ìË÷´Ê
-        //		strAttrType	[out]ÊôĞÔÀàĞÍ
-        //		strAttrValue [out]ÊôĞÔÖµ
+        //		strToken	å¾…å‰–æçš„å­—ç¬¦ä¸²
+        //		strTerm		[out]æ£€ç´¢è¯
+        //		strAttrType	[out]å±æ€§ç±»å‹
+        //		strAttrValue [out]å±æ€§å€¼
         int DivideToken(string strToken,
                     out string strTerm,
                     out string strAttrType,
@@ -854,7 +854,7 @@ int DivideToken(LPSTR &pszQuery,
 
             int nOffs = 0;
 
-            // ²éÕÒtermÄ©Î²
+            // æŸ¥æ‰¾termæœ«å°¾
             bInQuote = false;
             // pszQuery = (LPTSTR)(LPCTSTR)strToken;
             while (nOffs < strToken.Length)
@@ -893,14 +893,14 @@ int DivideToken(LPSTR &pszQuery,
             return 0;
         }
 
-        // ½«³£Á¿×Ö·û´®ÍâÃæµÄ"È¥³ı
+        // å°†å¸¸é‡å­—ç¬¦ä¸²å¤–é¢çš„"å»é™¤
         // return:
-        //		TRUE	³É¹¦
-        //		FALSE	²»ÊÇ³£Á¿×Ö·û´®("Ã»ÓĞ»òÕß²»Åä¶Ô)
+        //		TRUE	æˆåŠŸ
+        //		FALSE	ä¸æ˜¯å¸¸é‡å­—ç¬¦ä¸²("æ²¡æœ‰æˆ–è€…ä¸é…å¯¹)
         bool UnQuoteString(ref string strString)
         {
             if (strString.Length < 2)
-                return false;	// Èç¹û³¤¶ÈĞ¡ÓÚ2×Ö·û(²»ÊÇbyte!)£¬ÔòÖ±½Ó·µ»Ø
+                return false;	// å¦‚æœé•¿åº¦å°äº2å­—ç¬¦(ä¸æ˜¯byte!)ï¼Œåˆ™ç›´æ¥è¿”å›
 
             char first = (char)0;
             if (strString[0] == '\"')
@@ -919,47 +919,47 @@ int DivideToken(LPSTR &pszQuery,
         }
 
         /*
-·¢ÉúÎ´²¶»ñµÄ½çÃæÏß³ÌÒì³£: 
+å‘ç”Ÿæœªæ•è·çš„ç•Œé¢çº¿ç¨‹å¼‚å¸¸: 
 Type: System.FormatException
-Message: İ”Èë×Ö´®¸ñÊ½²»Õı´_¡£
+Message: è¼¸å…¥å­—ä¸²æ ¼å¼ä¸æ­£ç¢ºã€‚
 Stack:
-ì¶ System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
-ì¶ System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
-ì¶ System.Int16.Parse(String s, NumberStyles style, NumberFormatInfo info)
-ì¶ System.Convert.ToInt16(String value)
-ì¶ DigitalPlatform.Z3950.PolandNode.HandleQuery(BerNode param, BerNode subparam, String strTerm, String strAttrType, String strAttrValue)
-ì¶ DigitalPlatform.Z3950.PolandNode.BldAttributesPlusTerm(BerNode param, String strToken)
-ì¶ DigitalPlatform.Z3950.PolandNode.BuildOperand(BerNode param, String strToken)
-ì¶ DigitalPlatform.Z3950.PolandNode.HandleOperand(String strToken)
-ì¶ DigitalPlatform.Z3950.PolandNode.ChangeRPNToTree()
-ì¶ DigitalPlatform.Z3950.PolandNode.ChangeOrgToRPN()
-ì¶ DigitalPlatform.Z3950.BerTree.make_type_1(String strQuery, Encoding queryTermEncoding, BerNode subroot)
-ì¶ DigitalPlatform.Z3950.BerTree.SearchRequest(SEARCH_REQUEST struSearch_request, Byte[]& baPackage)
-ì¶ dp2Catalog.ZConnection.DoSearchAsync()
-ì¶ dp2Catalog.ZConnection.ZConnection_InitialComplete(Object sender, EventArgs e)
-ì¶ dp2Catalog.ZConnection.BeginCommands(List`1 commands)
-ì¶ dp2Catalog.ZSearchForm.DoSearchOneServer(TreeNode nodeServerOrDatabase, String& strError)
-ì¶ dp2Catalog.ZSearchForm.DoSearch()
-ì¶ dp2Catalog.ZSearchForm.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.TextBoxBase.ProcessDialogKey(Keys keyData)
-ì¶ System.Windows.Forms.Control.PreProcessMessage(Message& msg)
-ì¶ System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
-ì¶ System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
+æ–¼ System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+æ–¼ System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+æ–¼ System.Int16.Parse(String s, NumberStyles style, NumberFormatInfo info)
+æ–¼ System.Convert.ToInt16(String value)
+æ–¼ DigitalPlatform.Z3950.PolandNode.HandleQuery(BerNode param, BerNode subparam, String strTerm, String strAttrType, String strAttrValue)
+æ–¼ DigitalPlatform.Z3950.PolandNode.BldAttributesPlusTerm(BerNode param, String strToken)
+æ–¼ DigitalPlatform.Z3950.PolandNode.BuildOperand(BerNode param, String strToken)
+æ–¼ DigitalPlatform.Z3950.PolandNode.HandleOperand(String strToken)
+æ–¼ DigitalPlatform.Z3950.PolandNode.ChangeRPNToTree()
+æ–¼ DigitalPlatform.Z3950.PolandNode.ChangeOrgToRPN()
+æ–¼ DigitalPlatform.Z3950.BerTree.make_type_1(String strQuery, Encoding queryTermEncoding, BerNode subroot)
+æ–¼ DigitalPlatform.Z3950.BerTree.SearchRequest(SEARCH_REQUEST struSearch_request, Byte[]& baPackage)
+æ–¼ dp2Catalog.ZConnection.DoSearchAsync()
+æ–¼ dp2Catalog.ZConnection.ZConnection_InitialComplete(Object sender, EventArgs e)
+æ–¼ dp2Catalog.ZConnection.BeginCommands(List`1 commands)
+æ–¼ dp2Catalog.ZSearchForm.DoSearchOneServer(TreeNode nodeServerOrDatabase, String& strError)
+æ–¼ dp2Catalog.ZSearchForm.DoSearch()
+æ–¼ dp2Catalog.ZSearchForm.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.SplitContainer.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.ContainerControl.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.Control.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.TextBoxBase.ProcessDialogKey(Keys keyData)
+æ–¼ System.Windows.Forms.Control.PreProcessMessage(Message& msg)
+æ–¼ System.Windows.Forms.Control.PreProcessControlMessageInternal(Control target, Message& msg)
+æ–¼ System.Windows.Forms.Application.ThreadContext.PreTranslateMessage(MSG& msg)
 
          * */
         // new version
-        // ´¦Àíterm»òAttributesList
+        // å¤„ç†termæˆ–AttributesList
         // parameters:
         void HandleQuery(BerNode param,
             BerNode subparam,
@@ -973,9 +973,9 @@ Stack:
                 ASN1_SEQUENCE,
                 ASN1_UNIVERSAL);
 
-            // ´¦Àíterm¡¢attributeType»òattributeValue
+            // å¤„ç†termã€attributeTypeæˆ–attributeValue
 
-            //    ´¦ÀíattributeType
+            //    å¤„ç†attributeType
             try
             {
                 Int16 i = Convert.ToInt16(strAttrType);
@@ -986,10 +986,10 @@ Stack:
             }
             catch(Exception ex)
             {
-                throw new Exception("strAttrType = '"+strAttrType+"' Ó¦ÎªÊı×Ö¡£", ex);
+                throw new Exception("strAttrType = '"+strAttrType+"' åº”ä¸ºæ•°å­—ã€‚", ex);
             }
 
-            //		´¦ÀíattributeValue 
+            //		å¤„ç†attributeValue 
             try
             {
                 Int16 i = Convert.ToInt16(strAttrValue);
@@ -999,13 +999,13 @@ Stack:
             }
             catch (Exception ex)
             {
-                throw new Exception("strAttrValue = '" + strAttrValue + "' Ó¦ÎªÊı×Ö¡£", ex);
+                throw new Exception("strAttrValue = '" + strAttrValue + "' åº”ä¸ºæ•°å­—ã€‚", ex);
             }
-            // TODO: ÎªºÎÕâÀï±»µ÷ÓÃÁËÁ½´Î?
+            // TODO: ä¸ºä½•è¿™é‡Œè¢«è°ƒç”¨äº†ä¸¤æ¬¡?
 
             // term
             {
-                BerNode tempnode = param.NewChildCharNode(BerTree.z3950_Term,		//	´¦Àíterm
+                BerNode tempnode = param.NewChildCharNode(BerTree.z3950_Term,		//	å¤„ç†term
                     ASN1_CONTEXT,
                     //Encoding.GetEncoding(936).GetBytes(strTerm));
                     this.m_queryTermEncoding.GetBytes(strTerm));
@@ -1027,7 +1027,7 @@ Stack:
 
             if (m_StackArray.Count == 0)
             {
-                Debug.Assert(false, "¶ÑÕ»ÒÑ¿Õ");
+                Debug.Assert(false, "å †æ ˆå·²ç©º");
                 return -1;
             }
 
@@ -1037,11 +1037,11 @@ Stack:
             return 0;
         }
 
-        // ´¦Àíoperator
+        // å¤„ç†operator
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         int HandleOperator(int nType,
             string strToken)
         {
@@ -1057,7 +1057,7 @@ Stack:
             param.m_uTag = 1;
             param.m_strDebugInfo = "operator [" + strToken + "]";
 
-            // ´Ó¶ÑÕ»ÖĞµ¯³öÁ½¸ö²Ù×÷Êı¶ÔÏó
+            // ä»å †æ ˆä¸­å¼¹å‡ºä¸¤ä¸ªæ“ä½œæ•°å¯¹è±¡
             for (i = 0; i < 2; i++)
             {
                 nRet = PopFromArray(out subparam);
@@ -1066,19 +1066,19 @@ Stack:
                 param.AddSubtree(subparam);
             }
 
-            // ´´½¨op
+            // åˆ›å»ºop
             BldOperator(param,
                 nType,
                 strToken);
 
-            // ½á¹ûÓÖÈëÕ»
+            // ç»“æœåˆå…¥æ ˆ
             PushToArray(param);
 
             return 0;
         }
 
 
-        // ¹¹Ôìoperator×ÓÊ÷
+        // æ„é€ operatorå­æ ‘
         // parameters:
         int BldOperator(BerNode param,
                                  int nType,
@@ -1087,7 +1087,7 @@ Stack:
             BerNode subparam = null;
 
             // pSubparam = pParam->NewChildconstructedNode(1,ASN1_CONTEXT);
-            // ´Ë²ãËÆºõÎª¶àÓàµÄ£¬ÊÔÊÔ´ËÓï¾ä×¢ÊÍµôÒÔºóµÄĞ§¹û
+            // æ­¤å±‚ä¼¼ä¹ä¸ºå¤šä½™çš„ï¼Œè¯•è¯•æ­¤è¯­å¥æ³¨é‡Šæ‰ä»¥åçš„æ•ˆæœ
             // 2000/11/26 changed
 
 
@@ -1106,15 +1106,15 @@ Stack:
         }
 
 
-        // ¹¹ÔìwithinÔËËã·ûµÄ×ÓÊ÷
+        // æ„é€ withinè¿ç®—ç¬¦çš„å­æ ‘
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         int BuildWithin(BerNode param,
             string strToken)
         {
-            Debug.Assert(false, "ÉĞÎ´ÊµÏÖ");
+            Debug.Assert(false, "å°šæœªå®ç°");
             /*
             BerNode seq = null;
             BerNode subparam = null;
@@ -1133,7 +1133,7 @@ Stack:
                 ASN1_CONTEXT);
 	
             pSeq->NewChildintegerNode(z3950_exclusion, ASN1_CONTEXT,
-                (CHAR*)&zero,sizeof(zero));   // ²»ÅÅ³ı 
+                (CHAR*)&zero,sizeof(zero));   // ä¸æ’é™¤ 
 	
             pSeq->NewChildintegerNode(z3950_distance, ASN1_CONTEXT,
                 (CHAR*)&distance,sizeof(distance));   
@@ -1159,15 +1159,15 @@ Stack:
         }
 
 
-        // ¹¹ÔìnearÔËËã·ûµÄ×ÓÊ÷
+        // æ„é€ nearè¿ç®—ç¬¦çš„å­æ ‘
         // parameters:
         // return:
         //		NULL
-        //		ÆäËû
+        //		å…¶ä»–
         int BuildNear(BerNode param,
             string strToken)
         {
-            Debug.Assert(false, "ÉĞÎ´ÊµÏÖ");
+            Debug.Assert(false, "å°šæœªå®ç°");
             /*
             CBERNode *pSeq;
             CBERNode *pSubparam;
@@ -1189,7 +1189,7 @@ Stack:
 
             pSeq->NewChildintegerNode(z3950_exclusion, 
                 ASN1_CONTEXT,
-                (CHAR*)&zero,sizeof(zero));   // ²»ÅÅ³ı 
+                (CHAR*)&zero,sizeof(zero));   // ä¸æ’é™¤ 
 
             pSeq->NewChildintegerNode(z3950_distance, 
                 ASN1_CONTEXT,
@@ -1215,13 +1215,13 @@ Stack:
         }
 
 
-        // ¹¹Ôì·Çnear¡¢withinÔËËã·ûµÄ×ÓÊ÷
+        // æ„é€ énearã€withinè¿ç®—ç¬¦çš„å­æ ‘
         // parameters:
         int BuildGeneral(BerNode param,
             string strToken,
             int nType)
         {
-            Debug.Assert(nType <= 0xffff, "");	// ±ÜÃâ×ª»»Îªunsigned short intÊ±ºò³öÎÊÌâ
+            Debug.Assert(nType <= 0xffff, "");	// é¿å…è½¬æ¢ä¸ºunsigned short intæ—¶å€™å‡ºé—®é¢˜
 
             param.NewChildCharNode((ushort)nType,
                 ASN1_CONTEXT,

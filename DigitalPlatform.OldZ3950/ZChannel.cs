@@ -9,7 +9,7 @@ using System.Threading;
 using DigitalPlatform;
 
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.OldZ3950
 {
     public class ZChannel
     {

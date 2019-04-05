@@ -1,14 +1,14 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 
 namespace dp2Catalog
 {
     /// <summary>
-    /// ¸÷ÖÖ¼ìË÷´°µÄ¹«¹²³éÏó½Ó¿Ú
-    /// ±ãÓÚÍâ²¿Í¨¹ıÒ»ÖÂµÄ½Ó¿Ú»ñÈ¡Êı¾İ
+    /// å„ç§æ£€ç´¢çª—çš„å…¬å…±æŠ½è±¡æ¥å£
+    /// ä¾¿äºå¤–éƒ¨é€šè¿‡ä¸€è‡´çš„æ¥å£è·å–æ•°æ®
     /// </summary>
     public interface ISearchForm
     {
@@ -22,17 +22,17 @@ namespace dp2Catalog
             get;
         }
 
-        // »ñµÃÒ»ÌõMARC/XML¼ÇÂ¼
+        // è·å¾—ä¸€æ¡MARC/XMLè®°å½•
         // parameters:
-        //      index   ×¢Òâ£¬¿ÉÄÜÔÚµ÷ÓÃºó·¢ÏÖÎªĞèÒªÌø¹ıµÄ·Ö¸îÌõÎ»ÖÃ
+        //      index   æ³¨æ„ï¼Œå¯èƒ½åœ¨è°ƒç”¨åå‘ç°ä¸ºéœ€è¦è·³è¿‡çš„åˆ†å‰²æ¡ä½ç½®
         // return:
         //      -1  error
         //      0   suceed
-        //      1   ÎªÕï¶Ï¼ÇÂ¼
-        //      2   ·Ö¸îÌõ£¬ĞèÒªÌø¹ıÕâÌõ¼ÇÂ¼
+        //      1   ä¸ºè¯Šæ–­è®°å½•
+        //      2   åˆ†å‰²æ¡ï¼Œéœ€è¦è·³è¿‡è¿™æ¡è®°å½•
         int GetOneRecord(
             string strStyle,
-            int nTest,  // ÔİÊ±Ê¹ÓÃ
+            int nTest,  // æš‚æ—¶ä½¿ç”¨
             string strPathParam, // int index,
             string strParameters,   // bool bHilightBrowseLine,
             out string strSavePath,
@@ -41,39 +41,39 @@ namespace dp2Catalog
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo, 
             out string strError);
 
-        // Ë¢ĞÂÒ»ÌõMARC¼ÇÂ¼
+        // åˆ·æ–°ä¸€æ¡MARCè®°å½•
         // parameters:
         //      strAction   refresh / delete
         // return:
-        //      -2  ²»Ö§³Ö
+        //      -2  ä¸æ”¯æŒ
         //      -1  error
-        //      0   Ïà¹Ø´°¿ÚÒÑ¾­Ïú»Ù£¬Ã»ÓĞ±ØÒªË¢ĞÂ
-        //      1   ÒÑ¾­Ë¢ĞÂ
-        //      2   ÔÚ½á¹û¼¯ÖĞÃ»ÓĞÕÒµ½ÒªË¢ĞÂµÄ¼ÇÂ¼
+        //      0   ç›¸å…³çª—å£å·²ç»é”€æ¯ï¼Œæ²¡æœ‰å¿…è¦åˆ·æ–°
+        //      1   å·²ç»åˆ·æ–°
+        //      2   åœ¨ç»“æœé›†ä¸­æ²¡æœ‰æ‰¾åˆ°è¦åˆ·æ–°çš„è®°å½•
         int RefreshOneRecord(
             string strPathParam,
             string strAction,
             out string strError);
 
-        // ¶ÔÏó¡¢´°¿ÚÊÇ·ñ»¹ÓĞĞ§?
+        // å¯¹è±¡ã€çª—å£æ˜¯å¦è¿˜æœ‰æ•ˆ?
         bool IsValid();
 
-        // TODO: »Øµ÷º¯Êı£¬ÀïÃæ¿ÉÒÔ³öÏÖ¶Ô»°¿òÑ¯ÎÊ
-        // Í¬²½Ò»Ìõ MARC/XML ¼ÇÂ¼
-        // Èç¹û Lversion ±È¼ìË÷´°ÖĞµÄ¼ÇÂ¼ĞÂ£¬ÔòÓÃ strMARC ÄÚÈİ¸üĞÂ¼ìË÷´°ÄÚµÄ¼ÇÂ¼
-        // Èç¹û lVersion ±È¼ìË÷´°ÖĞµÄ¼ÇÂ¼¾É(Ò²¾ÍÊÇËµ Lverion µÄÖµÆ«Ğ¡)£¬ÄÇÃ´´Ó strMARC ÖĞÈ¡³ö¼ÇÂ¼¸üĞÂµ½¼ÇÂ¼´°
+        // TODO: å›è°ƒå‡½æ•°ï¼Œé‡Œé¢å¯ä»¥å‡ºç°å¯¹è¯æ¡†è¯¢é—®
+        // åŒæ­¥ä¸€æ¡ MARC/XML è®°å½•
+        // å¦‚æœ Lversion æ¯”æ£€ç´¢çª—ä¸­çš„è®°å½•æ–°ï¼Œåˆ™ç”¨ strMARC å†…å®¹æ›´æ–°æ£€ç´¢çª—å†…çš„è®°å½•
+        // å¦‚æœ lVersion æ¯”æ£€ç´¢çª—ä¸­çš„è®°å½•æ—§(ä¹Ÿå°±æ˜¯è¯´ Lverion çš„å€¼åå°)ï¼Œé‚£ä¹ˆä» strMARC ä¸­å–å‡ºè®°å½•æ›´æ–°åˆ°è®°å½•çª—
         // parameters:
-        //      lVersion    [in]¼ÇÂ¼´°µÄ Version [out] ¼ìË÷´°µÄ¼ÇÂ¼ Version
+        //      lVersion    [in]è®°å½•çª—çš„ Version [out] æ£€ç´¢çª—çš„è®°å½• Version
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª¸üĞÂ
-        //      1   ÒÑ¾­¸üĞÂµ½ ¼ìË÷´°
-        //      2   ĞèÒª´Ó strMARC ÖĞÈ¡³öÄÚÈİ¸üĞÂµ½¼ÇÂ¼´°
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦æ›´æ–°
+        //      1   å·²ç»æ›´æ–°åˆ° æ£€ç´¢çª—
+        //      2   éœ€è¦ä» strMARC ä¸­å–å‡ºå†…å®¹æ›´æ–°åˆ°è®°å½•çª—
         int SyncOneRecord(string strPath,
             ref long lVersion,
             ref string strSyntax,

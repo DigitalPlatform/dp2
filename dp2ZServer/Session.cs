@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 
 using DigitalPlatform;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 

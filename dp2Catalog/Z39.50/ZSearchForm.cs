@@ -13,7 +13,7 @@ using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
@@ -2211,7 +2211,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
         // 根据不同格式自动创建浏览格式
         public int BuildBrowseText(
             ZConnection connection,
-            DigitalPlatform.Z3950.Record record,
+            DigitalPlatform.OldZ3950.Record record,
             string strStyle,
             out string strBrowseText,
             out int nImageIndex,
@@ -2928,7 +2928,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)
@@ -3086,7 +3086,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             // strSavePath = (index+1).ToString();
 
             // 
-            record = (DigitalPlatform.Z3950.Record)
+            record = (DigitalPlatform.OldZ3950.Record)
                 connection.VirtualItems[index].Tag; //  curListViewItem.Tag;
 
             if (record == null)
@@ -3464,10 +3464,10 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             }
             
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             if (index < connection.VirtualItems.Count)
             {
-                record = (DigitalPlatform.Z3950.Record)
+                record = (DigitalPlatform.OldZ3950.Record)
                     connection.VirtualItems[index].Tag;
                 Debug.Assert(record != null, "");
             }
@@ -3531,10 +3531,10 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 goto ERROR1;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             if (index < connection.VirtualItems.Count)
             {
-                record = (DigitalPlatform.Z3950.Record)
+                record = (DigitalPlatform.OldZ3950.Record)
                     connection.VirtualItems[index].Tag;
             }
             else
@@ -3587,10 +3587,10 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 goto ERROR1;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             if (index < connection.VirtualItems.Count)
             {
-                record = (DigitalPlatform.Z3950.Record)
+                record = (DigitalPlatform.OldZ3950.Record)
                     connection.VirtualItems[index].Tag;
             }
             else
@@ -3636,10 +3636,10 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 return;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             if (index < connection.VirtualItems.Count)
             {
-                record = (DigitalPlatform.Z3950.Record)
+                record = (DigitalPlatform.OldZ3950.Record)
                     connection.VirtualItems[index].Tag;
             }
             else
@@ -3817,7 +3817,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
              * */
             ToolStripSeparator sep = null;
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             int index = -1;
 
             ZConnection connection = this.GetCurrentZConnection();
@@ -3833,7 +3833,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             if (nSelectedCount > 0)
             {
                 index = connection.VirtualItems.SelectedIndices[0];
-                record = (DigitalPlatform.Z3950.Record)
+                record = (DigitalPlatform.OldZ3950.Record)
                  connection.VirtualItems[index].Tag;
             }
 
@@ -4026,7 +4026,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                     LoginInfo logininfo = null;
                     long lVersion = 0;
                     string strXmlFragment = "";
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currentEncoding = null;
                     string strMARC = "";
 
@@ -4080,7 +4080,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
             for (int i = 0; i < connection.VirtualItems.SelectedIndices.Count; i++)
             {
                 int index = connection.VirtualItems.SelectedIndices[i];
-                DigitalPlatform.Z3950.Record record = (DigitalPlatform.Z3950.Record)
+                DigitalPlatform.OldZ3950.Record record = (DigitalPlatform.OldZ3950.Record)
     connection.VirtualItems[index].Tag;
 
                 if (record == null)
@@ -4221,7 +4221,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -4326,7 +4326,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -4668,7 +4668,7 @@ MessageBoxDefaultButton.Button1);
                     LoginInfo logininfo = null;
                     long lVersion = 0;
                     string strXmlFragment = "";
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currentEncoding = null;
                     string strMARC = "";
 
@@ -4788,7 +4788,7 @@ MessageBoxDefaultButton.Button1);
                 // 观察要保存的第一条记录的marc syntax
                 int first_index = connection.VirtualItems.SelectedIndices[0];
                 VirtualItem first_item = connection.VirtualItems[first_index];
-                DigitalPlatform.Z3950.Record first_record = (DigitalPlatform.Z3950.Record)first_item.Tag;
+                DigitalPlatform.OldZ3950.Record first_record = (DigitalPlatform.OldZ3950.Record)first_item.Tag;
 
                 /*
                 if (first_record.m_strMarcSyntaxOID == "1.2.840.10003.5.1")
@@ -4951,7 +4951,7 @@ MessageBoxDefaultButton.Button1);
                     LoginInfo logininfo = null;
                     long lVersion = 0;
                     string strXmlFragment = "";
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currentEncoding = null;
                     string strMARC = "";
 
@@ -5129,7 +5129,7 @@ MessageBoxDefaultButton.Button1);
                  * */
 
 
-                DigitalPlatform.Z3950.Record record = (DigitalPlatform.Z3950.Record)
+                DigitalPlatform.OldZ3950.Record record = (DigitalPlatform.OldZ3950.Record)
                     connection.VirtualItems[i].Tag;
 
                 string strError = "";

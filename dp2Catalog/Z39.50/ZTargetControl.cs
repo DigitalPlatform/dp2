@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.GUI;  // for event SetMenuEventHandle
 using DigitalPlatform.Xml;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 
 namespace dp2Catalog
 {

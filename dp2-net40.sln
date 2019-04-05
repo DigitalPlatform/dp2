@@ -83,7 +83,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiffPlex", "DiffPlex\DiffPl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.UnionCatalogClient", "DigitalPlatform.UnionCatalogClient\DigitalPlatform.UnionCatalogClient.csproj", "{F3D9A4E5-E891-4196-864A-A3DB788424AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Z3950", "DigitalPlatform.Z3950\DigitalPlatform.Z3950.csproj", "{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.OldZ3950", "DigitalPlatform.OldZ3950\DigitalPlatform.OldZ3950.csproj", "{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.DTLP", "Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj", "{91B90948-8475-4D9B-A3C7-6285EFC45E19}"
 EndProject
@@ -129,6 +129,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipUtil", "ZipUtil\ZipUtil.csproj", "{47E73ADC-0C75-4018-A42F-C8CA68679F25}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD72314A-D69F-4D70-B12F-64DDB6AB672E}"
+	ProjectSection(SolutionItems) = preProject
+		devlist.txt = devlist.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Manager", "dp2Manager\dp2Manager.csproj", "{5AA3C3B4-C22F-4837-926D-AC4101014D08}"
 EndProject
