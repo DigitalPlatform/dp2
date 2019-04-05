@@ -22,6 +22,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Script
 {

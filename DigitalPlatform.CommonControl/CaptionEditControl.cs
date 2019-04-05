@@ -9,6 +9,7 @@ using System.Xml;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {

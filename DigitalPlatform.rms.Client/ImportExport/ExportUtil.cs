@@ -11,6 +11,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

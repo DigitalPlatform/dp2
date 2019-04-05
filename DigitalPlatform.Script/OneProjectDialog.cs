@@ -7,6 +7,7 @@ using System.IO;
 using System.Diagnostics;
 
 using DigitalPlatform.GUI;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Script
 {

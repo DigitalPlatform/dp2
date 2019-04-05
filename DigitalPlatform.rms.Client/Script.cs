@@ -8,6 +8,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

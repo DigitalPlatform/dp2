@@ -117,6 +117,10 @@
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\zxing_lib\zxing.csproj">
       <Project>{6431CF13-7A7B-4602-B96A-47CDA6F0B008}</Project>
       <Name>zxing</Name>
@@ -191,7 +195,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FontUtil.cs" />
-    <Compile Include="GraphicsUtil.cs">
+    <Compile Include="GraphicsUtil.cs" />
+    <Compile Include="GraphicsUtil_save.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GrayscaleQuantizer.cs" />

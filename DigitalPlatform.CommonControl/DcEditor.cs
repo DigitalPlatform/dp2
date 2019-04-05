@@ -10,6 +10,7 @@ using System.IO;
 using System.Diagnostics;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {
