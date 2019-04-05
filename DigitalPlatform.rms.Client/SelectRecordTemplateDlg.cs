@@ -8,6 +8,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

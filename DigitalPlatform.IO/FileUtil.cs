@@ -1,4 +1,5 @@
 ﻿using AutoIt.Common;
+using DigitalPlatform.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
