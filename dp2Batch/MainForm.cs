@@ -21,12 +21,12 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Library;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace dp2Batch
 {

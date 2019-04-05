@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,11 +14,12 @@ using System.IO.Compression;
 namespace DigitalPlatform
 {
 
-    // byte[] Êı×éµÄÊµÓÃº¯Êı¼¯
+#if REMOVED
+    // byte[] æ•°ç»„çš„å®ç”¨å‡½æ•°é›†
     public class ByteArray
     {
         /*
-        // ¸´ÖÆÒ»¸öbyteÊı×é
+        // å¤åˆ¶ä¸€ä¸ªbyteæ•°ç»„
         public static byte[] Dup(byte [] source)
         {
             if (source == null)
@@ -72,7 +73,7 @@ namespace DigitalPlatform
             }
         }
 
-        // ¿ËÂ¡Ò»¸ö×Ö·ûÊı×é
+        // å…‹éš†ä¸€ä¸ªå­—ç¬¦æ•°ç»„
         public static byte[] GetCopy(byte[] baContent)
         {
             if (baContent == null)
@@ -82,7 +83,7 @@ namespace DigitalPlatform
             return baResult;
         }
 
-        // ½«byte[]×ª»»Îª×Ö·û´®£¬×Ô¶¯Ì½²â±àÂë·½Ê½
+        // å°†byte[]è½¬æ¢ä¸ºå­—ç¬¦ä¸²ï¼Œè‡ªåŠ¨æ¢æµ‹ç¼–ç æ–¹å¼
         public static string ToString(byte[] baContent)
         {
             ArrayList encodings = new ArrayList();
@@ -105,11 +106,11 @@ namespace DigitalPlatform
                         baContent.Length - Preamble.Length);
             }
 
-            // È±Ê¡µ±×÷UTF8
+            // ç¼ºçœå½“ä½œUTF8
             return Encoding.UTF8.GetString(baContent);
         }
 
-        // byte[] µ½ ×Ö·û´®
+        // byte[] åˆ° å­—ç¬¦ä¸²
         public static string ToString(byte[] bytes,
             Encoding encoding)
         {
@@ -150,13 +151,13 @@ namespace DigitalPlatform
         }
 
 
-        // ±È½ÏÁ½¸öbyte[]Êı×éÊÇ·ñÏàµÈ¡£
+        // æ¯”è¾ƒä¸¤ä¸ªbyte[]æ•°ç»„æ˜¯å¦ç›¸ç­‰ã€‚
         // parameter:
-        //		bytes1: µÚÒ»¸öbyte[]Êı×é
-        //		bytes2: µÚ¶ş¸öbyte[]Êı×é
+        //		bytes1: ç¬¬ä¸€ä¸ªbyte[]æ•°ç»„
+        //		bytes2: ç¬¬äºŒä¸ªbyte[]æ•°ç»„
         // return:
-        //		0   ÏàµÈ
-        //		´óÓÚ»òÕßĞ¡ÓÚ0   ²»µÈ¡£ÏÈ±È½Ï³¤¶È¡£³¤¶ÈÏàµÈ£¬ÔÙÖğ¸ö×Ö·ûÏà¼õ¡£
+        //		0   ç›¸ç­‰
+        //		å¤§äºæˆ–è€…å°äº0   ä¸ç­‰ã€‚å…ˆæ¯”è¾ƒé•¿åº¦ã€‚é•¿åº¦ç›¸ç­‰ï¼Œå†é€ä¸ªå­—ç¬¦ç›¸å‡ã€‚
         public static int Compare(
             byte[] bytes1,
             byte[] bytes2)
@@ -182,10 +183,10 @@ namespace DigitalPlatform
             return 0;
         }
 
-        // ±È½ÏÁ½¸öbyteÊı×éµÄ¾Ö²¿
+        // æ¯”è¾ƒä¸¤ä¸ªbyteæ•°ç»„çš„å±€éƒ¨
         // return:
-        //		0   ÏàµÈ
-        //		´óÓÚ»òÕßĞ¡ÓÚ0   ²»µÈ¡£ÏÈ±È½Ï³¤¶È¡£³¤¶ÈÏàµÈ£¬ÔÙÖğ¸ö×Ö·ûÏà¼õ¡£
+        //		0   ç›¸ç­‰
+        //		å¤§äºæˆ–è€…å°äº0   ä¸ç­‰ã€‚å…ˆæ¯”è¾ƒé•¿åº¦ã€‚é•¿åº¦ç›¸ç­‰ï¼Œå†é€ä¸ªå­—ç¬¦ç›¸å‡ã€‚
         public static int Compare(
             byte[] bytes1,
             byte[] bytes2,
@@ -216,7 +217,7 @@ namespace DigitalPlatform
             }
             return -1;
         }
-        // È·±£Êı×é³ß´ç×ã¹»
+        // ç¡®ä¿æ•°ç»„å°ºå¯¸è¶³å¤Ÿ
         public static byte[] EnsureSize(byte[] source,
             int nSize)
         {
@@ -233,14 +234,14 @@ namespace DigitalPlatform
                     temp,
                     0,
                     source.Length);
-                return temp;	// ³ß´ç²»¹»£¬ÒÑ¾­ÖØĞÂ·ÖÅä£¬²¢ÇÒ¼Ì³ĞÁËÔ­ÓĞÄÚÈİ
+                return temp;	// å°ºå¯¸ä¸å¤Ÿï¼Œå·²ç»é‡æ–°åˆ†é…ï¼Œå¹¶ä¸”ç»§æ‰¿äº†åŸæœ‰å†…å®¹
             }
 
-            return source;	// ³ß´ç×ã¹»
+            return source;	// å°ºå¯¸è¶³å¤Ÿ
         }
 
 
-        // ÔÚ»º³åÇøÎ²²¿×·¼ÓÒ»¸ö×Ö½Ú
+        // åœ¨ç¼“å†²åŒºå°¾éƒ¨è¿½åŠ ä¸€ä¸ªå­—èŠ‚
         public static byte[] Add(byte[] source,
             byte v)
         {
@@ -261,7 +262,7 @@ namespace DigitalPlatform
             return source;
         }
 
-        // ÔÚ»º³åÇøÎ²²¿×·¼ÓÈô¸É×Ö½Ú
+        // åœ¨ç¼“å†²åŒºå°¾éƒ¨è¿½åŠ è‹¥å¹²å­—èŠ‚
         public static byte[] Add(byte[] source,
             byte[] v)
         {
@@ -286,7 +287,7 @@ namespace DigitalPlatform
         }
 
         // 2011/9/12
-        // ÔÚ»º³åÇøÎ²²¿×·¼ÓÈô¸É×Ö½Ú
+        // åœ¨ç¼“å†²åŒºå°¾éƒ¨è¿½åŠ è‹¥å¹²å­—èŠ‚
         public static byte[] Add(byte[] source,
             byte[] v,
             int nLength)
@@ -312,7 +313,7 @@ namespace DigitalPlatform
             return source;
         }
 
-        // µÃµ½ÓÃ16½øÖÆ±íÊ¾µÄÊ±¼ä´Á×Ö·û´®
+        // å¾—åˆ°ç”¨16è¿›åˆ¶è¡¨ç¤ºçš„æ—¶é—´æˆ³å­—ç¬¦ä¸²
         public static string GetHexTimeStampString(byte[] baTimeStamp)
         {
             if (baTimeStamp == null)
@@ -328,7 +329,7 @@ namespace DigitalPlatform
             return text.ToString();
         }
 
-        // µÃµ½byte[]ÀàĞÍµÄÊ±¼ä´Á
+        // å¾—åˆ°byte[]ç±»å‹çš„æ—¶é—´æˆ³
         public static byte[] GetTimeStampByteArray(string strHexTimeStamp)
         {
             if (string.IsNullOrEmpty(strHexTimeStamp) == true)
@@ -346,9 +347,11 @@ namespace DigitalPlatform
         }
     }
 
+#endif
+
     /*
     /// <summary>
-    /// Ò»°ãĞÔ¡¢È«¾Öº¯Êı
+    /// ä¸€èˆ¬æ€§ã€å…¨å±€å‡½æ•°
     /// </summary>
     public class General
     {
@@ -374,14 +377,14 @@ namespace DigitalPlatform
     }
     */
 
-    // ±àĞ´Õß: ÈÎÑÓ»ª
+    // ç¼–å†™è€…: ä»»å»¶å
     public class ConvertUtil
     {
 
-        // ÓÃCopyTo()¼´¿É
-        // °Ñ°üº¬string¶ÔÏóµÄArrayList×ª»»Îªstring[]ÀàĞÍ
+        // ç”¨CopyTo()å³å¯
+        // æŠŠåŒ…å«stringå¯¹è±¡çš„ArrayListè½¬æ¢ä¸ºstring[]ç±»å‹
         // parameters:
-        //      nStartCol   ¿ªÊ¼µÄÁĞºÅ¡£Ò»°ãÎª0
+        //      nStartCol   å¼€å§‹çš„åˆ—å·ã€‚ä¸€èˆ¬ä¸º0
         public static string[] GetStringArray(
             int nStartCol,
             ArrayList aText)
@@ -394,7 +397,7 @@ namespace DigitalPlatform
             return result;
         }
 
-        //×Ö·û´®µ½int32
+        //å­—ç¬¦ä¸²åˆ°int32
         public static int S2Int32(string strText)
         {
             int nTemp = 0;
@@ -404,12 +407,12 @@ namespace DigitalPlatform
             }
             catch (Exception ex)
             {
-                throw (new Exception("ÅäÖÃÎÄ¼ş²»ºÏÊÊµÄÖµ:" + strText + "\r\n" + ex.Message));
+                throw (new Exception("é…ç½®æ–‡ä»¶ä¸åˆé€‚çš„å€¼:" + strText + "\r\n" + ex.Message));
             }
             return nTemp;
         }
 
-        //×Ö·û´®µ½int32´øÖ¸¶¨½øÖÆ°æ±¾
+        //å­—ç¬¦ä¸²åˆ°int32å¸¦æŒ‡å®šè¿›åˆ¶ç‰ˆæœ¬
         public static int S2Int32(string strText, int nBase)
         {
             int nTemp = 0;
@@ -419,12 +422,12 @@ namespace DigitalPlatform
             }
             catch (Exception ex)
             {
-                throw (new Exception("ÅäÖÃÎÄ¼ş²»ºÏÊÊµÄÖµ:" + strText + "\r\n" + ex.Message));
+                throw (new Exception("é…ç½®æ–‡ä»¶ä¸åˆé€‚çš„å€¼:" + strText + "\r\n" + ex.Message));
             }
             return nTemp;
         }
 
-        // ¼æÈİÒÔÇ°µÄĞ§¹û£º lStart == lTotalLength »áµ±×÷³ö´í·µ»Ø
+        // å…¼å®¹ä»¥å‰çš„æ•ˆæœï¼š lStart == lTotalLength ä¼šå½“ä½œå‡ºé”™è¿”å›
         public static int GetRealLength(long lStart,
     int nNeedLength,
     long lTotalLength,
@@ -435,7 +438,7 @@ namespace DigitalPlatform
             if (lStart == lTotalLength)
             {
                 lOutputLength = 0;
-                strError = "·¶Î§´íÎó: ÆğÊ¼Öµ " + lStart.ToString() + " ´óÓÚ×Ü³¤¶È " + lTotalLength.ToString() + "\r\n";
+                strError = "èŒƒå›´é”™è¯¯: èµ·å§‹å€¼ " + lStart.ToString() + " å¤§äºæ€»é•¿åº¦ " + lTotalLength.ToString() + "\r\n";
                 return -1;
             }
 
@@ -447,18 +450,18 @@ namespace DigitalPlatform
                 out strError);
         }
 
-        // ¼ìË÷·¶Î§ÊÇ·ñºÏ·¨,²¢·µ»ØÕæÕıÄÜ¹»È¡µÄ³¤¶È
+        // æ£€ç´¢èŒƒå›´æ˜¯å¦åˆæ³•,å¹¶è¿”å›çœŸæ­£èƒ½å¤Ÿå–çš„é•¿åº¦
         // parameter:
-        //		nStart          ÆğÊ¼Î»ÖÃ ²»ÄÜĞ¡ÓÚ0
-        //		nNeedLength     ĞèÒªµÄ³¤¶È	²»ÄÜĞ¡ÓÚ-1£¬-1±íÊ¾´ÓnStart-(nTotalLength-1)
-        //		lTotalLength    Êı¾İÊµ¼Ê×Ü³¤¶È ²»ÄÜĞ¡ÓÚ0
-        //		nMaxLength      ÏŞÖÆµÄ×î´ó³¤¶È	µÈÓÚ-1£¬±íÊ¾²»ÏŞÖÆ
-        //		lOutputLength   out²ÎÊı£¬·µ»ØµÄ¿ÉÒÔÓÃµÄ³¤¶È 2012/8/26 ĞŞ¸ÄÎªlongÀàĞÍ
-        //                      2017/8/15 µ± lStart == lTotalLength Ê±£¬lOutputLength ·µ»Ø 0£¬²»µ±×÷³ö´íÇéĞÎ
-        //		strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		nStart          èµ·å§‹ä½ç½® ä¸èƒ½å°äº0
+        //		nNeedLength     éœ€è¦çš„é•¿åº¦	ä¸èƒ½å°äº-1ï¼Œ-1è¡¨ç¤ºä»nStart-(nTotalLength-1)
+        //		lTotalLength    æ•°æ®å®é™…æ€»é•¿åº¦ ä¸èƒ½å°äº0
+        //		nMaxLength      é™åˆ¶çš„æœ€å¤§é•¿åº¦	ç­‰äº-1ï¼Œè¡¨ç¤ºä¸é™åˆ¶
+        //		lOutputLength   outå‚æ•°ï¼Œè¿”å›çš„å¯ä»¥ç”¨çš„é•¿åº¦ 2012/8/26 ä¿®æ”¹ä¸ºlongç±»å‹
+        //                      2017/8/15 å½“ lStart == lTotalLength æ—¶ï¼ŒlOutputLength è¿”å› 0ï¼Œä¸å½“ä½œå‡ºé”™æƒ…å½¢
+        //		strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
         public static int GetRealLengthNew(long lStart,
             int nNeedLength,
             long lTotalLength,
@@ -469,17 +472,17 @@ namespace DigitalPlatform
             lOutputLength = 0;
             strError = "";
 
-            // ÆğÊ¼Öµ,»òÕß×Ü³¤¶È²»ºÏ·¨
+            // èµ·å§‹å€¼,æˆ–è€…æ€»é•¿åº¦ä¸åˆæ³•
             if (lStart < 0
                 || lTotalLength < 0)
             {
-                strError = "·¶Î§´íÎó:nStart < 0 »ò nTotalLength <0 \r\n";
+                strError = "èŒƒå›´é”™è¯¯:nStart < 0 æˆ– nTotalLength <0 \r\n";
                 return -1;
             }
             if (lStart != 0
-                && lStart > lTotalLength)   // >= 2017/8/15 ĞŞ¸Ä
+                && lStart > lTotalLength)   // >= 2017/8/15 ä¿®æ”¹
             {
-                strError = "·¶Î§´íÎó: ÆğÊ¼Öµ " + lStart.ToString() + " ´óÓÚ×Ü³¤¶È " + lTotalLength.ToString() + "\r\n";
+                strError = "èŒƒå›´é”™è¯¯: èµ·å§‹å€¼ " + lStart.ToString() + " å¤§äºæ€»é•¿åº¦ " + lTotalLength.ToString() + "\r\n";
                 return -1;
             }
 
@@ -489,15 +492,15 @@ namespace DigitalPlatform
                 return 0;
             }
 
-            // ÒòÎªÖĞ¼äÔËËãµÄÊ±ºòlOutoutLengthµÄÖµ¿ÉÄÜÒ»¶ÈºÜ´ó£¬ËùÒÔÓÃÁËlongÀàĞÍ¡£µ«×îºó¾­¹ıÏŞÖÆÖ®ºó£¬²»»á³¬¹ıintµÄ·¶Î§
+            // å› ä¸ºä¸­é—´è¿ç®—çš„æ—¶å€™lOutoutLengthçš„å€¼å¯èƒ½ä¸€åº¦å¾ˆå¤§ï¼Œæ‰€ä»¥ç”¨äº†longç±»å‹ã€‚ä½†æœ€åç»è¿‡é™åˆ¶ä¹‹åï¼Œä¸ä¼šè¶…è¿‡intçš„èŒƒå›´
 
-            if (lOutputLength == -1)  // ´Ó¿ªÊ¼µ½È«²¿
+            if (lOutputLength == -1)  // ä»å¼€å§‹åˆ°å…¨éƒ¨
                 lOutputLength = lTotalLength - lStart;
 
             if (lStart + lOutputLength > lTotalLength)
                 lOutputLength = lTotalLength - lStart;
 
-            // ÏŞÖÆÁË×î´ó³¤¶È
+            // é™åˆ¶äº†æœ€å¤§é•¿åº¦
             if (nMaxLength != -1 && nMaxLength >= 0)
             {
                 if (lOutputLength > nMaxLength)
@@ -515,14 +518,14 @@ namespace DigitalPlatform
 
 	public class ArrayListUtil
 	{
-		// ¹¦ÄÜ: ºÏ²¢Á½¸ö×Ö·û´®Êı×é
+		// åŠŸèƒ½: åˆå¹¶ä¸¤ä¸ªå­—ç¬¦ä¸²æ•°ç»„
 		// parameter:
-		//		sourceLeft: Ô´×ó±ßÊı×é
-		//		sourceRight: Ô´ÓÒ±ßÊı×é
-		//		targetLeft: Ä¿±ê×ó±ßÊı×é
-		//		targetMiddle: Ä¿±êÖĞ¼äÊı×é
-		//		targetRight: Ä¿±êÓÒ±ßÊı×é
-		// ³ö´íÅ×³öÒì³£
+		//		sourceLeft: æºå·¦è¾¹æ•°ç»„
+		//		sourceRight: æºå³è¾¹æ•°ç»„
+		//		targetLeft: ç›®æ ‡å·¦è¾¹æ•°ç»„
+		//		targetMiddle: ç›®æ ‡ä¸­é—´æ•°ç»„
+		//		targetRight: ç›®æ ‡å³è¾¹æ•°ç»„
+		// å‡ºé”™æŠ›å‡ºå¼‚å¸¸
 		public static void MergeStringArray(ArrayList sourceLeft,
 			ArrayList sourceRight,
 			List<string> targetLeft,
@@ -585,7 +588,7 @@ namespace DigitalPlatform
 				}
 				else
 				{
-					ret = strLeft.CompareTo(strRight);  //MyCompareTo(oldOneKey); //¸ÄCompareTO
+					ret = strLeft.CompareTo(strRight);  //MyCompareTo(oldOneKey); //æ”¹CompareTO
 				}
 
 				if (ret == 0 && targetMiddle != null) 

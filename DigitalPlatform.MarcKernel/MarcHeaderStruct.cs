@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Core;
+using System;
 using System.Diagnostics;
 using System.Text;
 

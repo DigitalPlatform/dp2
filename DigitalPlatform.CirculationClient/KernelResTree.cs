@@ -10,9 +10,9 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

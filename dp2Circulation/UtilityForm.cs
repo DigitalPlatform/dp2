@@ -17,7 +17,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using System.Collections;

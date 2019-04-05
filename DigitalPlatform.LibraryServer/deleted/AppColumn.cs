@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,7 +11,7 @@ using System.Diagnostics;
 using System.Net.Mail;
 using System.Web;
 
-using DigitalPlatform;	// StopÀà
+using DigitalPlatform;	// Stopç±»
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -19,7 +19,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
@@ -28,18 +27,18 @@ namespace DigitalPlatform.LibraryServer
 {
 #if NOOOOOOOOOOOOOOOOOO
     /// <summary>
-    /// ±¾²¿·ÖÊÇºÍÀ¸Ä¿´æ´¢¹ÜÀíÓĞ¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å’Œæ ç›®å­˜å‚¨ç®¡ç†æœ‰å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // CommentColumn×¨ÓÃËø¡£¿ØÖÆ´´½¨¡¢¸üĞÂ¡¢ÏÔÊ¾Ê±¼ä¶Ô´æ´¢½á¹¹µÄºê¹Û´æÈ¡²Ù×÷
+        // CommentColumnä¸“ç”¨é”ã€‚æ§åˆ¶åˆ›å»ºã€æ›´æ–°ã€æ˜¾ç¤ºæ—¶é—´å¯¹å­˜å‚¨ç»“æ„çš„å®è§‚å­˜å–æ“ä½œ
         public ReaderWriterLock m_lockCommentColumn = new ReaderWriterLock();
-        public int m_nCommentColumnLockTimeout = 5000;	// 5000=5Ãë
+        public int m_nCommentColumnLockTimeout = 5000;	// 5000=5ç§’
 
-        // ´æ´¢½á¹¹
+        // å­˜å‚¨ç»“æ„
         public ColumnStorage CommentColumn = null;
 
-        // ´æ´¢ÎÄ¼şÃû
+        // å­˜å‚¨æ–‡ä»¶å
         string StorageFileName = "";
 
         private void CloseCommentColumn()
@@ -54,7 +53,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ×°ÔØÀ¸Ä¿´æ´¢
+        // è£…è½½æ ç›®å­˜å‚¨
         private int LoadCommentColumn(
             string strStorageFileName,
             out string strError)
@@ -86,20 +85,20 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "Attach ÎÄ¼ş " + strStorageFileName + " ºÍË÷ÒıÊ§°Ü :" + ex.Message;
+                    strError = "Attach æ–‡ä»¶ " + strStorageFileName + " å’Œç´¢å¼•å¤±è´¥ :" + ex.Message;
                     return -1;
                 }
                 return 0;
             }
             catch /*(System.ApplicationException ex)*/
             {
-                strError = "À¸Ä¿ÔİÊ±±»Ëø¶¨¡£ÇëÉÔºóÔÙÊÔ¡£";
+                strError = "æ ç›®æš‚æ—¶è¢«é”å®šã€‚è¯·ç¨åå†è¯•ã€‚";
                 return -1;
             }
         }
 
-        // [Íâ²¿µ÷ÓÃ]
-        // ´´½¨ÄÚ´æºÍÎïÀí´æ´¢¶ÔÏó
+        // [å¤–éƒ¨è°ƒç”¨]
+        // åˆ›å»ºå†…å­˜å’Œç‰©ç†å­˜å‚¨å¯¹è±¡
         public int CreateCommentColumn(
             SessionInfo sessioninfo,
             System.Web.UI.Page page,
@@ -114,16 +113,16 @@ namespace DigitalPlatform.LibraryServer
                 if (sessioninfo.Account == null
     || StringUtil.IsInList("managecache", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "µ±Ç°ÕÊ»§²»¾ß±¸ managecache È¨ÏŞ£¬²»ÄÜ´´½¨À¸Ä¿»º´æ";
+                    strError = "å½“å‰å¸æˆ·ä¸å…·å¤‡ managecache æƒé™ï¼Œä¸èƒ½åˆ›å»ºæ ç›®ç¼“å­˜";
                     return -1;
                 }
 
                 this.CloseCommentColumn();
 
                 if (page != null
-                    && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                    && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
                 {
-                    strError = "ÖĞ¶Ï";
+                    strError = "ä¸­æ–­";
                     return -1;
                 }
 
@@ -136,7 +135,7 @@ namespace DigitalPlatform.LibraryServer
 
                 this.CommentColumn.Open(true);
                 this.CommentColumn.Clear();
-                // ¼ìË÷
+                // æ£€ç´¢
                 nRet = SearchTopLevelArticles(
                     sessioninfo,
                     page,
@@ -144,7 +143,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
 
-                // ÅÅĞò
+                // æ’åº
                 if (page != null)
                 {
                     page.Response.Write("--- begin sort ...<br/>");
@@ -162,7 +161,7 @@ namespace DigitalPlatform.LibraryServer
                     page.Response.Flush();
                 }
 
-                // ±£´æÎïÀíÎÄ¼ş
+                // ä¿å­˜ç‰©ç†æ–‡ä»¶
                 string strTemp1;
                 string strTemp2;
                 this.CommentColumn.Detach(out strTemp1,
@@ -172,7 +171,7 @@ namespace DigitalPlatform.LibraryServer
 
                 this.CloseCommentColumn();
 
-                // ÖØĞÂ×°ÔØ
+                // é‡æ–°è£…è½½
                 nRet = LoadCommentColumn(
                     this.StorageFileName,
                     out strError);
@@ -187,10 +186,10 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ¼ìË÷¶¥²ãÎÄÕÂ
+        // æ£€ç´¢é¡¶å±‚æ–‡ç« 
         // return:
         //		-1	error
-        //		ÆäËû ÃüÖĞÊı
+        //		å…¶ä»– å‘½ä¸­æ•°
         private int SearchTopLevelArticles(
             SessionInfo sessioninfo,
             System.Web.UI.Page page,
@@ -199,13 +198,13 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
             {
-                strError = "ÖĞ¶Ï";
+                strError = "ä¸­æ–­";
                 return -1;
             }
 
-            // ¼ìË÷È«²¿ÆÀ×¢ÎÄÕÂ Ò»¶¨Ê±¼ä·¶Î§ÄÚµÄ?
+            // æ£€ç´¢å…¨éƒ¨è¯„æ³¨æ–‡ç«  ä¸€å®šæ—¶é—´èŒƒå›´å†…çš„?
             List<string> dbnames = new List<string>();
             for (int i = 0; i < this.ItemDbs.Count; i++)
             {
@@ -224,7 +223,7 @@ namespace DigitalPlatform.LibraryServer
             for (int i = 0; i < dbnames.Count; i++)
             {
                 string strDbName = dbnames[i];
-                string strOneQueryXml = "<target list='" + strDbName + ":" + "×îºóĞŞ¸ÄÊ±¼ä'><item><word>"    // <order>DESC</order>
+                string strOneQueryXml = "<target list='" + strDbName + ":" + "æœ€åä¿®æ”¹æ—¶é—´'><item><word>"    // <order>DESC</order>
                     + strTime + "</word><match>exact</match><relation>" + StringUtil.GetXmlStringSimple(">=") + "</relation><dataType>number</dataType><maxCount>"
                     + "-1"// Convert.ToString(m_nMaxLineCount)
                     + "</maxCount></item><lang>zh</lang></target>";
@@ -238,7 +237,7 @@ namespace DigitalPlatform.LibraryServer
                 strQueryXml = "<group>" + strQueryXml + "</group>";
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
-            Debug.Assert(channel != null, "Channels.GetChannel Òì³£");
+            Debug.Assert(channel != null, "Channels.GetChannel å¼‚å¸¸");
 
             if (page != null)
             {
@@ -253,7 +252,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ìË÷Ê±³ö´í: " + strError;
+                strError = "æ£€ç´¢æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -271,9 +270,9 @@ namespace DigitalPlatform.LibraryServer
 
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
             {
-                strError = "ÖĞ¶Ï";
+                strError = "ä¸­æ–­";
                 return -1;
             }
             if (page != null)
@@ -294,7 +293,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "»ñµÃ¼ìË÷½á¹ûÊ±³ö´í: " + strError;
+                strError = "è·å¾—æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -308,14 +307,14 @@ namespace DigitalPlatform.LibraryServer
 
             if (aPath.Count == 0)
             {
-                strError = "»ñÈ¡µÄ¼ìË÷½á¹ûÎª¿Õ";
+                strError = "è·å–çš„æ£€ç´¢ç»“æœä¸ºç©º";
                 return -1;
             }
 
             if (page != null
-                && page.Response.IsClientConnected == false)	// ÁéÃôÖĞ¶Ï
+                && page.Response.IsClientConnected == false)	// çµæ•ä¸­æ–­
             {
-                strError = "ÖĞ¶Ï";
+                strError = "ä¸­æ–­";
                 return -1;
             }
 
@@ -329,9 +328,9 @@ namespace DigitalPlatform.LibraryServer
             time = DateTime.Now;
 
 
-            this.CommentColumn.Clear();	// Çå¿Õ¼¯ºÏ
+            this.CommentColumn.Clear();	// æ¸…ç©ºé›†åˆ
 
-            // ¼ÓÈëĞÂĞĞ¶ÔÏó¡£ĞÂĞĞ¶ÔÏóÖĞ£¬Ö»³õÊ¼»¯ÁËm_strRecPath²ÎÊı
+            // åŠ å…¥æ–°è¡Œå¯¹è±¡ã€‚æ–°è¡Œå¯¹è±¡ä¸­ï¼Œåªåˆå§‹åŒ–äº†m_strRecPathå‚æ•°
             for (int i = 0; i < Math.Min(aPath.Count, 1000000); i++)	// <Math.Min(aPath.Count, 10)
             {
                 Line line = new Line();
@@ -345,7 +344,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
-                    return -1;	// ÁéÃôÖĞ¶Ï
+                    return -1;	// çµæ•ä¸­æ–­
 
 
                 TopArticleItem item = new TopArticleItem();
@@ -371,12 +370,12 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // [Íâ²¿µ÷ÓÃ]
-        // ĞŞ¸ÄÆÀ×¢¼ÇÂ¼ºó£¬¸üĞÂÀ¸Ä¿´æ´¢½á¹¹
+        // [å¤–éƒ¨è°ƒç”¨]
+        // ä¿®æ”¹è¯„æ³¨è®°å½•åï¼Œæ›´æ–°æ ç›®å­˜å‚¨ç»“æ„
         // parameters:
-        //      strAction   ¶¯×÷¡£change/delete/new
+        //      strAction   åŠ¨ä½œã€‚change/delete/new
         // return:
-        //      -2   À¸Ä¿»º´æÉĞÎ´´´½¨,Òò´ËÎŞ´Ó¸üĞÂ
+        //      -2   æ ç›®ç¼“å­˜å°šæœªåˆ›å»º,å› æ­¤æ— ä»æ›´æ–°
         //		-1	error
         //		0	not found line object
         //		1	succeed
@@ -392,7 +391,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.CommentColumn == null
     || this.CommentColumn.Opened == false)
             {
-                strError = "ÉĞÎ´´´½¨À¸Ä¿»º´æ...";
+                strError = "å°šæœªåˆ›å»ºæ ç›®ç¼“å­˜...";
                 return -2;
             }
 
@@ -407,8 +406,8 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strAction == "change" || strAction == "delete")
                 {
-                    // ÔÚStorageÖĞÕÒ
-                    // ĞèÒªĞ´Ëø¶¨
+                    // åœ¨Storageä¸­æ‰¾
+                    // éœ€è¦å†™é”å®š
                     for (i = 0; i < this.CommentColumn.Count; i++)
                     {
                         string strCurrentRecPath = this.CommentColumn.GetItemRecPath(i);
@@ -436,7 +435,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    strError = "Î´ÖªµÄstrActionÖµ '" + strAction + "'";
+                    strError = "æœªçŸ¥çš„strActionå€¼ '" + strAction + "'";
                     return -1;
                 }
 
@@ -445,18 +444,18 @@ namespace DigitalPlatform.LibraryServer
                     return 1;
 
                 int nRet = line.ProcessXml(
-                    null,	// page,	ÕâÀïÖÁ¹ØÖØÒª£¬²»ÄÜÔÊĞíÁéÃôÖĞ¶Ï
+                    null,	// page,	è¿™é‡Œè‡³å…³é‡è¦ï¼Œä¸èƒ½å…è®¸çµæ•ä¸­æ–­
                     strXml,
                     out strError);
                 if (nRet == -1)
                 {
-                    // ½«´ËÇé¿öĞ´Èë´íÎóÈÕÖ¾
-                    this.WriteErrorLog("ÔÚUpdateLine()º¯ÊıÖĞ£¬µ÷ÓÃline.ProcessXml()·¢Éú´íÎó, ¼ÇÂ¼Â·¾¶=" + line.m_strRecPath + ")¡£Õâ½«µ¼ÖÂÀ¸Ä¿Ö÷Ò³ÃæÖĞ£¬¸Ã¼ÇÂ¼´ÓÏÔÊ¾ÖĞ¶ªÊ§¡£ÏêÏ¸Ô­Òò£º" + strError);
+                    // å°†æ­¤æƒ…å†µå†™å…¥é”™è¯¯æ—¥å¿—
+                    this.WriteErrorLog("åœ¨UpdateLine()å‡½æ•°ä¸­ï¼Œè°ƒç”¨line.ProcessXml()å‘ç”Ÿé”™è¯¯, è®°å½•è·¯å¾„=" + line.m_strRecPath + ")ã€‚è¿™å°†å¯¼è‡´æ ç›®ä¸»é¡µé¢ä¸­ï¼Œè¯¥è®°å½•ä»æ˜¾ç¤ºä¸­ä¸¢å¤±ã€‚è¯¦ç»†åŸå› ï¼š" + strError);
                     return -1;
                 }
 
                 {
-                    // Èç¹û²åÈëÎ»ÖÃÔÚStorage·¶Î§ÄÚ
+                    // å¦‚æœæ’å…¥ä½ç½®åœ¨StorageèŒƒå›´å†…
                     TopArticleItem item = new TopArticleItem();
                     item.Line = line;
                     this.CommentColumn.Insert(0,
