@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,28 +12,28 @@ using System.IO;
 using System.Threading;
 using System.Reflection;
 
-using DigitalPlatform.Drawing;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.Drawing;
 
 namespace DigitalPlatform.Marc
 {
 
 	public class MarcFixedFieldControl : System.Windows.Forms.ScrollableControl
 	{
-        public event GetTemplateDefEventHandler GetTemplateDef = null;  // Íâ²¿½Ó¿Ú£¬»ñÈ¡Ò»¸öÌØ¶¨Ä£°åµÄXML¶¨Òå
+        public event GetTemplateDefEventHandler GetTemplateDef = null;  // å¤–éƒ¨æ¥å£ï¼Œè·å–ä¸€ä¸ªç‰¹å®šæ¨¡æ¿çš„XMLå®šä¹‰
         public event EventHandler ResetSize = null;
         public event ResetTitleEventHandler ResetTitle = null;
 
 
-		#region ³ÉÔ±±äÁ¿
+		#region æˆå‘˜å˜é‡
 
         XmlNode nodeTemplateDef = null;
 
-        List<XmlNode> CurValueListNodes = null;    // µ±Ç°ÕıÔÚÏÔÊ¾µÄÖµÁĞ±í½Úµã
-        string CurActiveValueUnit = "";  // µ±Ç°ÒÑ¾­¼ÓÁÁµÄÖµÊÂÏî
+        List<XmlNode> CurValueListNodes = null;    // å½“å‰æ­£åœ¨æ˜¾ç¤ºçš„å€¼åˆ—è¡¨èŠ‚ç‚¹
+        string CurActiveValueUnit = "";  // å½“å‰å·²ç»åŠ äº®çš„å€¼äº‹é¡¹
 
-		public XmlDocument MarcDefDom = null;  // ÅäÖÃÎÄ¼şµÄdom
+		public XmlDocument MarcDefDom = null;  // é…ç½®æ–‡ä»¶çš„dom
 		public string Lang = "";
 
 		TemplateRoot templateRoot = null;
@@ -41,7 +41,7 @@ namespace DigitalPlatform.Marc
 		public int nCurLine = -1;
 
         Font m_fontDefaultInfo = null;
-		// ÎÄ×ÖµÄ×ÖÌå×ÖºÅ
+		// æ–‡å­—çš„å­—ä½“å­—å·
         public Font DefaultInfoFont
         {
             get
@@ -86,23 +86,23 @@ namespace DigitalPlatform.Marc
 		#endregion
 
         /// <summary>
-        /// ½âÎöºê
+        /// è§£æå®
         /// </summary>
         public event ParseMacroEventHandler ParseMacro = null;
 
         // public event GetConfigFileEventHandle GetConfigFile = null;
 
         /// <summary>
-        /// »ñµÃÅäÖÃÎÄ¼şµÄ XmlDocument ¶ÔÏó
+        /// è·å¾—é…ç½®æ–‡ä»¶çš„ XmlDocument å¯¹è±¡
         /// </summary>
         public event GetConfigDomEventHandle GetConfigDom = null;
 
 		public MarcFixedFieldControl()
 		{
-			// ¸Ãµ÷ÓÃÊÇ Windows.Forms ´°ÌåÉè¼ÆÆ÷Ëù±ØĞèµÄ¡£
+			// è¯¥è°ƒç”¨æ˜¯ Windows.Forms çª—ä½“è®¾è®¡å™¨æ‰€å¿…éœ€çš„ã€‚
 			InitializeComponent();
 
-			// TODO: ÔÚ InitComponent µ÷ÓÃºóÌí¼ÓÈÎºÎ³õÊ¼»¯
+			// TODO: åœ¨ InitComponent è°ƒç”¨åæ·»åŠ ä»»ä½•åˆå§‹åŒ–
 		}
 
 
@@ -116,10 +116,10 @@ namespace DigitalPlatform.Marc
 			base.Dispose( disposing );
 		}
 
-		#region ×é¼şÉè¼ÆÆ÷Éú³ÉµÄ´úÂë
+		#region ç»„ä»¶è®¾è®¡å™¨ç”Ÿæˆçš„ä»£ç 
 		/// <summary>
-		/// Éè¼ÆÆ÷Ö§³ÖËùĞèµÄ·½·¨ - ²»ÒªÊ¹ÓÃ´úÂë±à¼­Æ÷ 
-		/// ĞŞ¸Ä´Ë·½·¨µÄÄÚÈİ¡£
+		/// è®¾è®¡å™¨æ”¯æŒæ‰€éœ€çš„æ–¹æ³• - ä¸è¦ä½¿ç”¨ä»£ç ç¼–è¾‘å™¨ 
+		/// ä¿®æ”¹æ­¤æ–¹æ³•çš„å†…å®¹ã€‚
 		/// </summary>
 		private void InitializeComponent()
 		{
@@ -146,20 +146,20 @@ namespace DigitalPlatform.Marc
 		}
 		#endregion
 
-		#region º¯Êı
+		#region å‡½æ•°
 
 #if NO
-		// ²ğ·ÖÒ»¸öref×Ö·û´®ÎªÀ´Ô´ºÍValueListµÄÃû³Æ
+		// æ‹†åˆ†ä¸€ä¸ªrefå­—ç¬¦ä¸²ä¸ºæ¥æºå’ŒValueListçš„åç§°
 		// parameters:
-		//		strRef	ref×Ö·û´®
-		//		strFirst5	µ±ÓĞÀ´Ô´Ê±£¬À´Ô´µÄÇ°5¸ö×Ö·û
-		//		strSource	À´Ô´
-		//		strValueListName	ValueListÓĞÃû³Æ
-		//		strError	³ö´íĞÅÏ¢
+		//		strRef	refå­—ç¬¦ä¸²
+		//		strFirst5	å½“æœ‰æ¥æºæ—¶ï¼Œæ¥æºçš„å‰5ä¸ªå­—ç¬¦
+		//		strSource	æ¥æº
+		//		strValueListName	ValueListæœ‰åç§°
+		//		strError	å‡ºé”™ä¿¡æ¯
 		// return:
-		//		-1	Ê§°Ü
-		//		0	³É¹¦
-		// ×¢: À´Ô´ÓëValueListÃû³ÆÖ®¼äÓÃ#·Ö¸ô
+		//		-1	å¤±è´¥
+		//		0	æˆåŠŸ
+		// æ³¨: æ¥æºä¸ValueListåç§°ä¹‹é—´ç”¨#åˆ†éš”
 		public int SplitRef(string strRef,
 			out string strFirst5,
 			out string strSource,
@@ -206,7 +206,7 @@ namespace DigitalPlatform.Marc
 			strValueListName = strRef.Substring(nIndex + 1);
 			if (strSource.Length < 5)
 			{
-                strError = "À´Ô´'" + strSource + "'²»ºÏ·¨£¬Ç°5¸ö×Ö·û±ØĞëÊÇ'http:'»ò'file:'";
+                strError = "æ¥æº'" + strSource + "'ä¸åˆæ³•ï¼Œå‰5ä¸ªå­—ç¬¦å¿…é¡»æ˜¯'http:'æˆ–'file:'";
 				return -1;					
 			}
 			else
@@ -215,7 +215,7 @@ namespace DigitalPlatform.Marc
 				if (strFirst5 != "http:"
 					&& strFirst5 != "file:")
 				{
-					strError = "À´Ô´'" + strRef + "'²»ºÏ·¨£¬Ç°5¸ö×Ö·û±ØĞëÊÇ'http:'»ò'file:'";
+					strError = "æ¥æº'" + strRef + "'ä¸åˆæ³•ï¼Œå‰5ä¸ªå­—ç¬¦å¿…é¡»æ˜¯'http:'æˆ–'file:'";
 					return -1;					
 				}
 			}
@@ -223,14 +223,14 @@ namespace DigitalPlatform.Marc
 			if (strSource == ""
 				&& strFirst5 != "")
 			{
-				strError = "refÀ´Ô´'" + strRef + "'²»ºÏ·¨";
+				strError = "refæ¥æº'" + strRef + "'ä¸åˆæ³•";
 				return -1;
 			}
 			return 0;
 		}
 #endif
 
-		// µÃµ½LabelµÄ×î´ó¿í¶È
+		// å¾—åˆ°Labelçš„æœ€å¤§å®½åº¦
 		public void GetMaxWidth(//Graphics g,
             out int nMaxLabelWidth,
             out int nMaxNameWidth)
@@ -261,14 +261,14 @@ namespace DigitalPlatform.Marc
 		}
 
 
-		// ³õÊ¼»¯¿Ø¼ş
+		// åˆå§‹åŒ–æ§ä»¶
 		// paramters:
-		//		fieldNode	Field½Úµã
-		//		strLang	ÓïÑÔ°æ±¾
+		//		fieldNode	FieldèŠ‚ç‚¹
+		//		strLang	è¯­è¨€ç‰ˆæœ¬
 		// return:
-		//		-1	³ö´í
-		//		0	²»ÊÇ¶¨³¤×Ö¶Î
-		//		1	³É¹¦
+		//		-1	å‡ºé”™
+		//		0	ä¸æ˜¯å®šé•¿å­—æ®µ
+		//		1	æˆåŠŸ
 		public int Initial(XmlNode node,
 			string strLang,
             out int nResultWidth,
@@ -365,8 +365,8 @@ namespace DigitalPlatform.Marc
             this.listView_values.Name = "listView_values";
             this.listView_values.TabIndex = 100;
             this.listView_values.View = View.Details;
-            this.listView_values.Columns.Add("Öµ", 50, HorizontalAlignment.Left);
-            this.listView_values.Columns.Add("ËµÃ÷", 700, HorizontalAlignment.Left);
+            this.listView_values.Columns.Add("å€¼", 50, HorizontalAlignment.Left);
+            this.listView_values.Columns.Add("è¯´æ˜", 700, HorizontalAlignment.Left);
             this.listView_values.FullRowSelect = true;
             this.listView_values.HideSelection = false;
             this.AutoScroll = true;
@@ -475,7 +475,7 @@ namespace DigitalPlatform.Marc
 			int nListViewOrgY = 0;
 
 			int nListViewWidth = 200;
-			int nListViewHeight = Math.Max(y, 10 * this.DefaultValueFont.Height);  // ±£Ö¤¸ß¶È²»ÄÜÌ«Ğ¡
+			int nListViewHeight = Math.Max(y, 10 * this.DefaultValueFont.Height);  // ä¿è¯é«˜åº¦ä¸èƒ½å¤ªå°
 
 			this.listView_values = new ListView();
 			this.listView_values.Location = new System.Drawing.Point(nListViewOrgX,nListViewOrgY);
@@ -489,8 +489,8 @@ namespace DigitalPlatform.Marc
 
 
 			this.listView_values.View = View.Details;
-			this.listView_values.Columns.Add("Öµ", 50, HorizontalAlignment.Left);
-			this.listView_values.Columns.Add("ËµÃ÷",700, HorizontalAlignment.Left);
+			this.listView_values.Columns.Add("å€¼", 50, HorizontalAlignment.Left);
+			this.listView_values.Columns.Add("è¯´æ˜",700, HorizontalAlignment.Left);
 			this.listView_values.FullRowSelect = true;
 			this.listView_values.HideSelection = false;
             this.AutoScroll = true;
@@ -512,7 +512,7 @@ namespace DigitalPlatform.Marc
             this.ResumeLayout(false);
             this.PerformLayout();
 #endif
-            this.nodeTemplateDef = node;    // ±£´æ¶¨Òå½Úµã
+            this.nodeTemplateDef = node;    // ä¿å­˜å®šä¹‰èŠ‚ç‚¹
 
             AdjustTextboxSize(
                 true,
@@ -554,7 +554,7 @@ namespace DigitalPlatform.Marc
                 if (changed_line.IsSensitive == true
                     && this.GetTemplateDef != null)
                 {
-                    // ĞèÒªÖØĞÂ×°ÔØÄ£°å¶¨Òå
+                    // éœ€è¦é‡æ–°è£…è½½æ¨¡æ¿å®šä¹‰
                     GetTemplateDefEventArgs e1 = new GetTemplateDefEventArgs();
                     if (this.nodeTemplateDef != null)
                     {
@@ -569,13 +569,13 @@ namespace DigitalPlatform.Marc
                         }
                         else
                         {
-                            strError = "Ä£°å¶¨Òå½ÚµãÎªÒâÍâµÄ <" + this.nodeTemplateDef.Name + "> ÔªËØ£¬ÎŞ·¨½øĞĞÃô¸Ğ´¦Àí";
+                            strError = "æ¨¡æ¿å®šä¹‰èŠ‚ç‚¹ä¸ºæ„å¤–çš„ <" + this.nodeTemplateDef.Name + "> å…ƒç´ ï¼Œæ— æ³•è¿›è¡Œæ•æ„Ÿå¤„ç†";
                             goto ERROR1;
                         }
                     }
                     else
                     {
-                        strError = "µ±Ç°Ã»ÓĞÄ£°å¶¨Òå½ÚµãĞÅÏ¢£¬ÎŞ·¨½øĞĞÃô¸Ğ´¦Àí";
+                        strError = "å½“å‰æ²¡æœ‰æ¨¡æ¿å®šä¹‰èŠ‚ç‚¹ä¿¡æ¯ï¼Œæ— æ³•è¿›è¡Œæ•æ„Ÿå¤„ç†";
                         goto ERROR1;
                     }
 
@@ -586,7 +586,7 @@ namespace DigitalPlatform.Marc
 
                     if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                     {
-                        strError = "»ñµÃÄ£°å¶¨ÒåÊ±³ö´í: " + e1.ErrorInfo;
+                        strError = "è·å¾—æ¨¡æ¿å®šä¹‰æ—¶å‡ºé”™: " + e1.ErrorInfo;
                         goto ERROR1;
                     }
 
@@ -594,18 +594,18 @@ namespace DigitalPlatform.Marc
                         return;
 
                     if (e1.DefNode == this.nodeTemplateDef)
-                        return; // Ä£°å¶¨ÒåÃ»ÓĞ·¢Éú±ä»¯
+                        return; // æ¨¡æ¿å®šä¹‰æ²¡æœ‰å‘ç”Ÿå˜åŒ–
 
                     int nResultWidth = 0;
                     int nResultHeight = 0;
 
                     // paramters:
-                    //		fieldNode	Field½Úµã
-                    //		strLang	ÓïÑÔ°æ±¾
+                    //		fieldNode	FieldèŠ‚ç‚¹
+                    //		strLang	è¯­è¨€ç‰ˆæœ¬
                     // return:
-                    //		-1	³ö´í
-                    //		0	²»ÊÇ¶¨³¤×Ö¶Î
-                    //		1	³É¹¦
+                    //		-1	å‡ºé”™
+                    //		0	ä¸æ˜¯å®šé•¿å­—æ®µ
+                    //		1	æˆåŠŸ
                     int nRet = this.Initial(e1.DefNode,
                 this.Lang,
                 out nResultWidth,
@@ -616,13 +616,13 @@ namespace DigitalPlatform.Marc
 
                     this.Value = strValue;
 
-                    // Í¨ÖªForm³ß´ç·¢ÉúÁË±ä»¯
+                    // é€šçŸ¥Formå°ºå¯¸å‘ç”Ÿäº†å˜åŒ–
                     if (this.ResetSize != null)
                     {
                         this.ResetSize(this, new EventArgs());
                     }
 
-                    // Í¨Öª±êÌâ±ä»¯
+                    // é€šçŸ¥æ ‡é¢˜å˜åŒ–
                     if (this.ResetTitle != null)
                     {
                         ResetTitleEventArgs e2 = new ResetTitleEventArgs();
@@ -653,7 +653,7 @@ namespace DigitalPlatform.Marc
             return null;
         }
 
-        // »ñµÃÈ±Ê¡Öµ
+        // è·å¾—ç¼ºçœå€¼
         // return:
         //      -1  error
         //      0   not found
@@ -668,20 +668,20 @@ namespace DigitalPlatform.Marc
             TemplateLine line = (TemplateLine)this.templateRoot.Lines[index];
 			if (line == null)
 			{
-                strError = "Î´ÕÒµ½ĞòºÅÎª'" + Convert.ToString(index) + "'ĞĞ";
+                strError = "æœªæ‰¾åˆ°åºå·ä¸º'" + Convert.ToString(index) + "'è¡Œ";
                 return -1;
 			}
 
             if (line.DefaultValue == null)
             {
-                strError = "È±Ê¡ÖµÎ´¶¨Òå";
+                strError = "ç¼ºçœå€¼æœªå®šä¹‰";
                 return 0;
             }
 
             if (this.ParseMacro == null)
             {
-                strError = "Ã»ÓĞ¹Ò½ÓÊÂ¼ş";
-                return 0;    // Ã»ÓĞ¹Ò½ÓÊÂ¼ş
+                strError = "æ²¡æœ‰æŒ‚æ¥äº‹ä»¶";
+                return 0;    // æ²¡æœ‰æŒ‚æ¥äº‹ä»¶
             }
 
             ParseMacroEventArgs e = new ParseMacroEventArgs();
@@ -718,7 +718,7 @@ namespace DigitalPlatform.Marc
 
         int m_nInShowValueList = 0;
 
-		// ÏÔÊ¾ÖµÁĞ±í
+		// æ˜¾ç¤ºå€¼åˆ—è¡¨
 		public void ShowValueList(
             int nCaretPosition,
             int nLineChars,
@@ -731,7 +731,7 @@ namespace DigitalPlatform.Marc
 
             if (this.m_nInShowValueList > 0)
             {
-                // TODO: ÊÇ·ñPostÒ»¸öÏûÏ¢³öÈ¥£¬ÉÔºóÔÙ×÷?
+                // TODO: æ˜¯å¦Postä¸€ä¸ªæ¶ˆæ¯å‡ºå»ï¼Œç¨åå†ä½œ?
                 return;
             }
 
@@ -744,11 +744,11 @@ namespace DigitalPlatform.Marc
                 TemplateLine line = (TemplateLine)this.templateRoot.Lines[this.nCurLine];
                 if (line == null)
                 {
-                    strError = "Î´ÕÒµ½ĞòºÅÎª'" + Convert.ToString(this.nCurLine) + "'ĞĞ";
+                    strError = "æœªæ‰¾åˆ°åºå·ä¸º'" + Convert.ToString(this.nCurLine) + "'è¡Œ";
                     return;
                 }
 
-                int nValueChars = 0;    // ÖµµÄ×Ö·ûÊı
+                int nValueChars = 0;    // å€¼çš„å­—ç¬¦æ•°
 
                 if (line.ValueListNodes == null
                     || line.ValueListNodes.Count == 0)
@@ -766,13 +766,13 @@ namespace DigitalPlatform.Marc
                     if (this.listView_values.Items.Count > 0)
                     {
                         nValueChars = this.listView_values.Items[0].Text.Length;
-                        goto SELECT; // ÓÅ»¯
+                        goto SELECT; // ä¼˜åŒ–
                     }
                 }
 
                 this.listView_values.Items.Clear();
 
-                // ½â¾öref
+                // è§£å†³ref
                 while (true)
                 {
                     bool bFoundNew = false;
@@ -793,7 +793,7 @@ namespace DigitalPlatform.Marc
                             this.GetConfigDom(this, ar);
                             if (string.IsNullOrEmpty(ar.ErrorInfo) == false)
                             {
-                                strError = "»ñÈ¡ '" + line.m_strName + "' ¶ÔÓ¦µÄValueList³ö´í£¬Ô­Òò:" + ar.ErrorInfo;
+                                strError = "è·å– '" + line.m_strName + "' å¯¹åº”çš„ValueListå‡ºé”™ï¼ŒåŸå› :" + ar.ErrorInfo;
                                 goto END1;
                             }
                             if (ar.XmlDocument == null)
@@ -814,11 +814,11 @@ namespace DigitalPlatform.Marc
                             XmlNode valueListNode = ar.XmlDocument.SelectSingleNode("//ValueList[@name='" + strValueListName + "']");
                             if (valueListNode == null)
                             {
-                                strError = "Î´ÕÒµ½Â·¾¶Îª'" + strRef + "'µÄ½Úµã¡£";
+                                strError = "æœªæ‰¾åˆ°è·¯å¾„ä¸º'" + strRef + "'çš„èŠ‚ç‚¹ã€‚";
                                 goto END1;
                             }
 
-                            // Ìæ»»
+                            // æ›¿æ¢
                             line.ValueListNodes[i] = valueListNode;
                             bFoundNew = true;
                         }
@@ -837,16 +837,16 @@ namespace DigitalPlatform.Marc
                     {
                         string strItemLable = "";
 
-                        // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNodeµÄInnerText
+                        // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNodeçš„InnerText
                         // parameters:
-                        //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+                        //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
                         strItemLable = DomUtil.GetXmlLangedNodeText(
                     this.Lang,
                     itemNode,
                     "Label",
                     true);
                         if (string.IsNullOrEmpty(strItemLable) == true)
-                            strItemLable = "<ÉĞÎ´¶¨Òå>";
+                            strItemLable = "<å°šæœªå®šä¹‰>";
                         else
                             strItemLable = StringUtil.Trim(strItemLable);
 
@@ -857,7 +857,7 @@ namespace DigitalPlatform.Marc
                         if (itemLabelNode == null
                             || string.IsNullOrEmpty(itemLabelNode.InnerText.Trim()) == true)
                         {
-                            // Èç¹ûÕÒ²»µ½£¬ÔòÕÒµ½µÚÒ»¸öÓĞÖµµÄ
+                            // å¦‚æœæ‰¾ä¸åˆ°ï¼Œåˆ™æ‰¾åˆ°ç¬¬ä¸€ä¸ªæœ‰å€¼çš„
                             XmlNodeList nodes = itemNode.SelectNodes("Label", nsmgr);
                             foreach (XmlNode temp_node in nodes)
                             {
@@ -870,7 +870,7 @@ namespace DigitalPlatform.Marc
                         }
 
                         if (itemLabelNode == null)
-                            strItemLable = "<ÉĞÎ´¶¨Òå>";
+                            strItemLable = "<å°šæœªå®šä¹‰>";
                         else
                             strItemLable = StringUtil.Trim(itemLabelNode.InnerText);
 #endif
@@ -884,7 +884,7 @@ namespace DigitalPlatform.Marc
                             nValueChars = strItemValue.Length;
                         }
 
-                        // ¼ÓÈëlistview
+                        // åŠ å…¥listview
                         ListViewItem item = new ListViewItem(strItemValue);
                         item.SubItems.Add(strItemLable);
                         this.listView_values.Items.Add(item);
@@ -895,17 +895,17 @@ namespace DigitalPlatform.Marc
 
             SELECT:
 
-                // ¼ÓÁÁµ±Ç°ÊÂÏî
+                // åŠ äº®å½“å‰äº‹é¡¹
                 if (nValueChars != 0)
                 {
-                    // Ëã³öµ±Ç°²åÈë·ûÔÚµÚ¼¸¸öµ¥ÔªµÄÖµÉÏ
+                    // ç®—å‡ºå½“å‰æ’å…¥ç¬¦åœ¨ç¬¬å‡ ä¸ªå•å…ƒçš„å€¼ä¸Š
                     int nIndex = nCaretPosition / nValueChars;
                     if ((nIndex * nValueChars) + nValueChars <= strCurLine.Length)
                     {
 
                         string strCurUnit = strCurLine.Substring(nIndex * nValueChars, nValueChars);
 
-                        // ÔÚlistviewÖĞÕÒµ½Õâ¸öÖµ, ²¢Ñ¡ÔñËü¡£
+                        // åœ¨listviewä¸­æ‰¾åˆ°è¿™ä¸ªå€¼, å¹¶é€‰æ‹©å®ƒã€‚
                         for (int i = 0; i < this.listView_values.Items.Count; i++)
                         {
                             if (this.listView_values.Items[i].Text.Replace("_", " ") == strCurUnit)
@@ -913,7 +913,7 @@ namespace DigitalPlatform.Marc
                                 this.CurActiveValueUnit = strCurUnit;
 
                                 this.listView_values.Items[i].Selected = true;
-                                // ¹öÈëÊÓÏßÄÚ
+                                // æ»šå…¥è§†çº¿å†…
                                 this.listView_values.EnsureVisible(i);
                             }
                             else
@@ -928,7 +928,7 @@ namespace DigitalPlatform.Marc
 
             END1:
                 /////////////////////////////////////
-                // ´¥·¢EndGetValueListÊÂ¼ş
+                // è§¦å‘EndGetValueListäº‹ä»¶
                 ///////////////////////////////////////
                 EndGetValueListEventArgs argsEnd = new EndGetValueListEventArgs();
                 if (strError != "")
@@ -952,7 +952,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-        ValueEditBox m_currentTextBox = null;   // µ±Ç°´¦ÓÚ½¹µãµÄTextBox
+        ValueEditBox m_currentTextBox = null;   // å½“å‰å¤„äºç„¦ç‚¹çš„TextBox
 
         public void ChangeFocusDisplay(ValueEditBox textbox)
         {
@@ -973,7 +973,7 @@ namespace DigitalPlatform.Marc
             CaretPosition caretposition)
         {
             if (nLineIndex >= templateRoot.Lines.Count)
-                return null; // ÏÂ±êÔ½½ç
+                return null; // ä¸‹æ ‡è¶Šç•Œ
 
             TemplateLine line = (TemplateLine)templateRoot.Lines[nLineIndex];
 
@@ -1000,50 +1000,50 @@ namespace DigitalPlatform.Marc
 
 
         /*
-²Ù×÷ÀàĞÍ crashReport -- Òì³£±¨¸æ 
-Ö÷Ìâ dp2catalog 
-·¢ËÍÕß xxx
-Ã½ÌåÀàĞÍ text 
-ÄÚÈİ ·¢ÉúÎ´²¶»ñµÄ½çÃæÏß³ÌÒì³£: 
+æ“ä½œç±»å‹ crashReport -- å¼‚å¸¸æŠ¥å‘Š 
+ä¸»é¢˜ dp2catalog 
+å‘é€è€… xxx
+åª’ä½“ç±»å‹ text 
+å†…å®¹ å‘ç”Ÿæœªæ•è·çš„ç•Œé¢çº¿ç¨‹å¼‚å¸¸: 
 Type: System.ArgumentOutOfRangeException
-Message: InvalidArgument=¡°0¡±µÄÖµ¶ÔÓÚ¡°index¡±ÎŞĞ§¡£
-²ÎÊıÃû: index
+Message: InvalidArgument=â€œ0â€çš„å€¼å¯¹äºâ€œindexâ€æ— æ•ˆã€‚
+å‚æ•°å: index
 Stack:
-ÔÚ System.Windows.Forms.ListView.SelectedListViewItemCollection.get_Item(Int32 index)
-ÔÚ DigitalPlatform.Marc.MarcFixedFieldControl.ValueList_DoubleClick(Object sender, EventArgs e)
-ÔÚ System.Windows.Forms.Control.OnDoubleClick(EventArgs e)
-ÔÚ System.Windows.Forms.ListView.WndProc(Message& m)
-ÔÚ System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
-ÔÚ System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
-ÔÚ System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+åœ¨ System.Windows.Forms.ListView.SelectedListViewItemCollection.get_Item(Int32 index)
+åœ¨ DigitalPlatform.Marc.MarcFixedFieldControl.ValueList_DoubleClick(Object sender, EventArgs e)
+åœ¨ System.Windows.Forms.Control.OnDoubleClick(EventArgs e)
+åœ¨ System.Windows.Forms.ListView.WndProc(Message& m)
+åœ¨ System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+åœ¨ System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+åœ¨ System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
 
-dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
-²Ù×÷ÏµÍ³£ºMicrosoft Windows NT 5.1.2600 Service Pack 3 
-²Ù×÷Ê±¼ä 2015/9/17 16:38:54 (Thu, 17 Sep 2015 16:38:54 +0800) 
-Ç°¶ËµØÖ· xxx ¾­ÓÉ http://dp2003.com/dp2library 
+dp2Catalog ç‰ˆæœ¬: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
+æ“ä½œç³»ç»Ÿï¼šMicrosoft Windows NT 5.1.2600 Service Pack 3 
+æ“ä½œæ—¶é—´ 2015/9/17 16:38:54 (Thu, 17 Sep 2015 16:38:54 +0800) 
+å‰ç«¯åœ°å€ xxx ç»ç”± http://dp2003.com/dp2library 
 
          * */
-        // µ±ÔÚValueListÁĞ±íÖĞË«»÷Ä³ÏîÊ±°ÑÖµ»Øµ½¶ÔÓ¦µÄµØ·½
+        // å½“åœ¨ValueListåˆ—è¡¨ä¸­åŒå‡»æŸé¡¹æ—¶æŠŠå€¼å›åˆ°å¯¹åº”çš„åœ°æ–¹
 		private void ValueList_DoubleClick(object sender, System.EventArgs e)
 		{
             string strError = "";
 
             if (this.listView_values.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÊÂÏî";
+                strError = "å°šæœªé€‰æ‹©äº‹é¡¹";
                 goto ERROR1;
             }
 
 			ListViewItem item = this.listView_values.SelectedItems[0];
 
-            // ÅäÖÃÎÄ¼şÖĞ¿ÉÒÔÊ¹ÓÃ '_' ´úÌæ¿Õ¸ñ
+            // é…ç½®æ–‡ä»¶ä¸­å¯ä»¥ä½¿ç”¨ '_' ä»£æ›¿ç©ºæ ¼
 			string strValue = item.Text.Trim().Replace("_", " ");
 			//MessageBox.Show(this,strValue);
 
             if (string.IsNullOrEmpty(strValue) == true)
             {
-                strError = "ÖµÎª¿Õ¡£Çë¶¨ÒåÒ»¸öÖµ×Ö·û´®";
+                strError = "å€¼ä¸ºç©ºã€‚è¯·å®šä¹‰ä¸€ä¸ªå€¼å­—ç¬¦ä¸²";
                 goto ERROR1;
             }
 
@@ -1053,10 +1053,10 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 			if (nPosition == line.m_nValueLength)
 				nPosition = line.m_nValueLength -1;
 
-			// µÃµ½ÕıÈ·µÄ²åÈë·ûÎ»ÖÃ
+			// å¾—åˆ°æ­£ç¡®çš„æ’å…¥ç¬¦ä½ç½®
 			if (line.TextBox_value.MaxLength % strValue.Length != 0)
 			{
-                strError = "Öµ×Ö·ûÊı±ØĞëÊÇÅäÖÃÖµµÄÕû±¶Êı";  // 2009/9/21 add
+                strError = "å€¼å­—ç¬¦æ•°å¿…é¡»æ˜¯é…ç½®å€¼çš„æ•´å€æ•°";  // 2009/9/21 add
 				goto ERROR1;
 			}
 
@@ -1080,7 +1080,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             MessageBox.Show(this, strError);
 		}
 		
-		// µÃµ½×Ö¶ÎµÄÖµ
+		// å¾—åˆ°å­—æ®µçš„å€¼
 		public string Value
 		{
 			get
@@ -1101,7 +1101,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 			}
 		}
 
-        // ¶à´¦À´µÄ×Ö·û´®²¿·Ö
+        // å¤šå¤„æ¥çš„å­—ç¬¦ä¸²éƒ¨åˆ†
         public string AdditionalValue
         {
             get
@@ -1120,7 +1120,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
 		#endregion
 
-		#region ÊÂ¼ş
+		#region äº‹ä»¶
 
 		public event BeginGetValueListEventHandle BeginGetValueList;
 		public void fireBeginGetValueList(object sender,
@@ -1165,7 +1165,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 
         public void FocusFirstLine()
         {
-            // Èç¹ûÓĞÏĞÏ¾£¬¿ÉÒÔ±àÎªµÚÒ»´Î¾ÍÕë¶ÔĞÔ½¹µãÔÚÄ³¸öĞĞÉÏ
+            // å¦‚æœæœ‰é—²æš‡ï¼Œå¯ä»¥ç¼–ä¸ºç¬¬ä¸€æ¬¡å°±é’ˆå¯¹æ€§ç„¦ç‚¹åœ¨æŸä¸ªè¡Œä¸Š
             if (this.templateRoot.Lines.Count > 0)
             {
                 TemplateLine line = (TemplateLine)this.templateRoot.Lines[0];
@@ -1271,7 +1271,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             int nListViewOrgY = 0;
 
             int nListViewWidth = Math.Min(this.Width - nListViewOrgX - 10, 200);
-            int nListViewHeight = Math.Max(y+this.Padding.Bottom, 10 * this.DefaultValueFont.Height);  // ±£Ö¤¸ß¶È²»ÄÜÌ«Ğ¡
+            int nListViewHeight = Math.Max(y+this.Padding.Bottom, 10 * this.DefaultValueFont.Height);  // ä¿è¯é«˜åº¦ä¸èƒ½å¤ªå°
 
             if (bSimulate == false)
             {
@@ -1290,7 +1290,7 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
             nResultHeight = nDocumentHeight;
 
 
-            // TODO: ĞŞ¸ÄlabelµÄ¿í¶È?
+            // TODO: ä¿®æ”¹labelçš„å®½åº¦?
             if (bSimulate == false)
             {
                 this.ResumeLayout(false);
@@ -1303,7 +1303,7 @@ EventArgs e)
         {
             base.OnFontChanged(e);
 
-            // ÆÈÊ¹²ÉÓÃ×îĞÂµÄ×ÖÌå
+            // è¿«ä½¿é‡‡ç”¨æœ€æ–°çš„å­—ä½“
             this.m_fontDefaultInfo = null;
             this.m_fontDefaultValue = null;
 
@@ -1364,16 +1364,16 @@ GetConfigDomEventArgs e);
     }
 
 
-    // »ñµÃºêµÄÊµ¼ÊÖµ
+    // è·å¾—å®çš„å®é™…å€¼
     public delegate void ParseMacroEventHandler(object sender,
         ParseMacroEventArgs e);
 
     public class ParseMacroEventArgs : EventArgs
     {
-        public string Macro = "";   // ºê
-        public bool Simulate = false;   // ÊÇ·ñÎªÄ£Äâ·½Ê½? ÔÚÄ£Äâ·½Ê½ÏÂ, ÖÖ×ÓºÅÔöÁ¿½«±äÎª»ñµÃÖÖ×ÓºÅÀ´Ö´ĞĞ,Ò²¾ÍÊÇ²»»á¸Ä±äÖÖ×ÓÖµ
-        public string Value = "";   // [out]¶ÒÏÖºóµÄÖµ
-        public string ErrorInfo = "";   // [out]³ö´íĞÅÏ¢
+        public string Macro = "";   // å®
+        public bool Simulate = false;   // æ˜¯å¦ä¸ºæ¨¡æ‹Ÿæ–¹å¼? åœ¨æ¨¡æ‹Ÿæ–¹å¼ä¸‹, ç§å­å·å¢é‡å°†å˜ä¸ºè·å¾—ç§å­å·æ¥æ‰§è¡Œ,ä¹Ÿå°±æ˜¯ä¸ä¼šæ”¹å˜ç§å­å€¼
+        public string Value = "";   // [out]å…‘ç°åçš„å€¼
+        public string ErrorInfo = "";   // [out]å‡ºé”™ä¿¡æ¯
     }
 
 
@@ -1385,48 +1385,48 @@ GetConfigDomEventArgs e);
     }
 
     /// <summary>
-    /// »ñÈ¡Ò»¸öÌØ¶¨Ä£°åµÄ XML ¶¨ÒåµÄÊÂ¼ş
+    /// è·å–ä¸€ä¸ªç‰¹å®šæ¨¡æ¿çš„ XML å®šä¹‰çš„äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetTemplateDefEventHandler(object sender,
 GetTemplateDefEventArgs e);
 
     /// <summary>
-    /// »ñÈ¡Ò»¸öÌØ¶¨Ä£°åµÄ XML ¶¨ÒåµÄÊÂ¼şµÄ²ÎÊı
+    /// è·å–ä¸€ä¸ªç‰¹å®šæ¨¡æ¿çš„ XML å®šä¹‰çš„äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class GetTemplateDefEventArgs : EventArgs
     {
         /// <summary>
-        /// [in] ×Ö¶ÎÃû
+        /// [in] å­—æ®µå
         /// </summary>
         public string FieldName = "";           // [in]
         /// <summary>
-        /// [in] ×Ó×Ö¶ÎÃû
+        /// [in] å­å­—æ®µå
         /// </summary>
         public string SubfieldName = "";        // [in]
         /// <summary>
-        /// [in] ÓÃÓÚ¸¨ÖúÅĞ¶ÏµÄ×Ö·û´®¡£Ò»°ãÊÇÄ£°åÖĞµ±Ç°µÄÈ«²¿ÄÚÈİ
+        /// [in] ç”¨äºè¾…åŠ©åˆ¤æ–­çš„å­—ç¬¦ä¸²ã€‚ä¸€èˆ¬æ˜¯æ¨¡æ¿ä¸­å½“å‰çš„å…¨éƒ¨å†…å®¹
         /// </summary>
-        public string Value = "";   // [in]ÓÃÓÚ¸¨ÖúÅĞ¶ÏµÄ×Ö·û´®¡£Ò»°ãÊÇÄ£°åÖĞµ±Ç°µÄÈ«²¿ÄÚÈİ
+        public string Value = "";   // [in]ç”¨äºè¾…åŠ©åˆ¤æ–­çš„å­—ç¬¦ä¸²ã€‚ä¸€èˆ¬æ˜¯æ¨¡æ¿ä¸­å½“å‰çš„å…¨éƒ¨å†…å®¹
 
         /// <summary>
-        /// [out] ·µ»Ø´íÎóĞÅÏ¢
+        /// [out] è¿”å›é”™è¯¯ä¿¡æ¯
         /// </summary>
-        public string ErrorInfo = "";   // [out]´íÎóĞÅÏ¢
+        public string ErrorInfo = "";   // [out]é”™è¯¯ä¿¡æ¯
         /// <summary>
-        /// [out] ÊÂ¼şÖĞÊÇ·ñ·ÅÆúÁË¶Ô¸Ã×Ö¶Î/×Ó×Ö¶ÎÄ£°åµÄ´¦Àí
+        /// [out] äº‹ä»¶ä¸­æ˜¯å¦æ”¾å¼ƒäº†å¯¹è¯¥å­—æ®µ/å­å­—æ®µæ¨¡æ¿çš„å¤„ç†
         /// </summary>
-        public bool Canceled = false;   // [out]ÊÂ¼şÖĞÊÇ·ñ·ÅÆúÁË¶Ô¸Ã×Ö¶Î/×Ó×Ö¶ÎÄ£°åµÄ´¦Àí¡£
+        public bool Canceled = false;   // [out]äº‹ä»¶ä¸­æ˜¯å¦æ”¾å¼ƒäº†å¯¹è¯¥å­—æ®µ/å­å­—æ®µæ¨¡æ¿çš„å¤„ç†ã€‚
 
         /// <summary>
-        /// [out] ¶¨Òå½Úµã
+        /// [out] å®šä¹‰èŠ‚ç‚¹
         /// </summary>
-        public XmlNode DefNode = null;   // [out]¶¨Òå½Úµã
+        public XmlNode DefNode = null;   // [out]å®šä¹‰èŠ‚ç‚¹
         /// <summary>
-        /// [out] Ä£°å´°¿Ú±êÌâ¡£Ò»°ãÊÇÎÄÏ×ÀàĞÍÖ®ÀàÄÚÈİ
+        /// [out] æ¨¡æ¿çª—å£æ ‡é¢˜ã€‚ä¸€èˆ¬æ˜¯æ–‡çŒ®ç±»å‹ä¹‹ç±»å†…å®¹
         /// </summary>
-        public string Title = "";       // [out]Ä£°å´°¿Ú±êÌâ¡£Ò»°ãÊÇÎÄÏ×ÀàĞÍÖ®ÀàÄÚÈİ
+        public string Title = "";       // [out]æ¨¡æ¿çª—å£æ ‡é¢˜ã€‚ä¸€èˆ¬æ˜¯æ–‡çŒ®ç±»å‹ä¹‹ç±»å†…å®¹
     }
 
     // 

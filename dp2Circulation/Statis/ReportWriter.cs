@@ -20,6 +20,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

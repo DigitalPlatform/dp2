@@ -1,3 +1,4 @@
+ï»¿using DigitalPlatform.Core;
 using System;
 using System.Collections;
 using System.Diagnostics;
@@ -7,12 +8,12 @@ using System.Text;
 namespace DigitalPlatform.DTLP
 {
 
-	// Í¨Ñ¶°üÖĞµÄÒ»¸öµ¥Ôª
+	// é€šè®¯åŒ…ä¸­çš„ä¸€ä¸ªå•å…ƒ
 	public class Cell
 	{
-		public string	Path = null;	// m_strPath Ç°µ¼²¿·ÖºÍÃ¶¾Ù²¿·ÖµÄ×éºÏ
-		public string	Lead = null;	// m_strLead Ç°µ¼²¿·Ö
-		public string	Content = null;	// m_strContent Ã¶¾Ù²¿·Ö
+		public string	Path = null;	// m_strPath å‰å¯¼éƒ¨åˆ†å’Œæšä¸¾éƒ¨åˆ†çš„ç»„åˆ
+		public string	Lead = null;	// m_strLead å‰å¯¼éƒ¨åˆ†
+		public string	Content = null;	// m_strContent æšä¸¾éƒ¨åˆ†
 		public byte []	ContentBytes = null;	// m_baContent
 		// public int		m_nContentCharset;
 		public Int32	Mask = 0;		// m_lMask
@@ -25,15 +26,15 @@ namespace DigitalPlatform.DTLP
 	}
 
 	/// <summary>
-	/// ´¦ÀíÍ¨Ñ¶°üµÄÀà
+	/// å¤„ç†é€šè®¯åŒ…çš„ç±»
 	/// </summary>
 	public class Package : ArrayList
 	{
 
-		byte[]	m_baPackage;	// Í¨Ñ¶°ü
+		byte[]	m_baPackage;	// é€šè®¯åŒ…
 
 		public string	ContinueString = "";	// m_strNext
-		public byte[]	ContinueBytes = null;	// m_baNext Îª¼æÈİdt1000/dt1500 ansi°æ±¾µÄÄÚºË£¬°ë¸öºº×ÖÎÊÌâ
+		public byte[]	ContinueBytes = null;	// m_baNext ä¸ºå…¼å®¹dt1000/dt1500 ansiç‰ˆæœ¬çš„å†…æ ¸ï¼ŒåŠä¸ªæ±‰å­—é—®é¢˜
 
 		Encoding	m_encoding	= Encoding.GetEncoding(936);
 
@@ -44,7 +45,7 @@ namespace DigitalPlatform.DTLP
 			//
 		}
 
-		// ×°ÔØ°üÄÚÈİ
+		// è£…è½½åŒ…å†…å®¹
 		public int LoadPackage(byte [] baPackage, 
 			Encoding encoding)
 		{
@@ -55,14 +56,14 @@ namespace DigitalPlatform.DTLP
 			if (baPackage == null) 
 			{
 				Debug.Assert(false,
-					"baPackage²ÎÊı²»ÄÜÎªnull");
+					"baPackageå‚æ•°ä¸èƒ½ä¸ºnull");
 				return -1;
 			}
 
 			if (baPackage.Length < 4) 
 			{
 				Debug.Assert(false,
-					"baPackageÄÚÈİ³ß´çĞ¡ÓÚ4£¬²»ÕıÈ·");
+					"baPackageå†…å®¹å°ºå¯¸å°äº4ï¼Œä¸æ­£ç¡®");
 				return -1;
 			}
 
@@ -70,16 +71,16 @@ namespace DigitalPlatform.DTLP
 			if (lPackageLen < 0) 
 			{
 				Debug.Assert(false,
-					"baPackageÄÚÈİ³ß´çĞ¡ÓÚ0£¬²»ÕıÈ·");
+					"baPackageå†…å®¹å°ºå¯¸å°äº0ï¼Œä¸æ­£ç¡®");
 				m_baPackage = null;
 				return -1;
 			}
 
 			if ( baPackage.Length < lPackageLen) 
 			{
-				// Í¨Ñ¶°ü¸ñÊ½´æÔÚÑÏÖØ´íÎó£¬Í·²¿¶¨ÒåµÄ³¤¶È´óÓÚÊµ¼Ê³¤¶È
+				// é€šè®¯åŒ…æ ¼å¼å­˜åœ¨ä¸¥é‡é”™è¯¯ï¼Œå¤´éƒ¨å®šä¹‰çš„é•¿åº¦å¤§äºå®é™…é•¿åº¦
 				Debug.Assert(false,
-					"Í¨Ñ¶°ü¸ñÊ½´æÔÚÑÏÖØ´íÎó£¬Í·²¿¶¨ÒåµÄ³¤¶È´óÓÚÊµ¼Ê³¤¶È");
+					"é€šè®¯åŒ…æ ¼å¼å­˜åœ¨ä¸¥é‡é”™è¯¯ï¼Œå¤´éƒ¨å®šä¹‰çš„é•¿åº¦å¤§äºå®é™…é•¿åº¦");
 				m_baPackage = null;
 				return -1;
 			}
@@ -92,7 +93,7 @@ namespace DigitalPlatform.DTLP
 			return 0;
 		}
 
-		// ²âËãansi×Ö·û¼¯×Ö·û´®µÄ³¤¶È
+		// æµ‹ç®—ansiå­—ç¬¦é›†å­—ç¬¦ä¸²çš„é•¿åº¦
 		public static int strlen(byte [] baContent, int nOffs)
 		{
 			int nResult = 0;
@@ -108,10 +109,10 @@ namespace DigitalPlatform.DTLP
 
 
 
-		// ½«Í¨Ñ¶°ü×ª»»Îª±ãÓÚ´¦ÀíµÄĞĞ¸ñÊ½£¬·ÅÈëm_LineArrayÖĞ
-		// ×¢Òâ±¾º¯ÊıĞèÔÚLoadPackage()º¯ÊıºóÊ¹ÓÃ¡£
-		// ±¾º¯Êı°Ñ×Ó°üÖĞµÄÄÚÈİµ±×÷CÓïÑÔ×Ö·û´®´¦Àí£¬½«Ò»¸ö×Ó°ü²ğ·ÖÎªÈô¸É¸ö×Ö·û´®¡£
-		// ·µ»Ø-1±íÊ¾Ê§°Ü¡£
+		// å°†é€šè®¯åŒ…è½¬æ¢ä¸ºä¾¿äºå¤„ç†çš„è¡Œæ ¼å¼ï¼Œæ”¾å…¥m_LineArrayä¸­
+		// æ³¨æ„æœ¬å‡½æ•°éœ€åœ¨LoadPackage()å‡½æ•°åä½¿ç”¨ã€‚
+		// æœ¬å‡½æ•°æŠŠå­åŒ…ä¸­çš„å†…å®¹å½“ä½œCè¯­è¨€å­—ç¬¦ä¸²å¤„ç†ï¼Œå°†ä¸€ä¸ªå­åŒ…æ‹†åˆ†ä¸ºè‹¥å¹²ä¸ªå­—ç¬¦ä¸²ã€‚
+		// è¿”å›-1è¡¨ç¤ºå¤±è´¥ã€‚
 		public int Parse(PackageFormat format)
 		{
 			Int32 lPackageLen;
@@ -141,7 +142,7 @@ namespace DigitalPlatform.DTLP
 			lPackageLen =  BitConverter.ToInt32(m_baPackage, 0);
 
 			Debug.Assert( lPackageLen == m_baPackage.Length,
-				"°üÍ·²¿³ß´ç²»ÕıÈ·");
+				"åŒ…å¤´éƒ¨å°ºå¯¸ä¸æ­£ç¡®");
 	
 //			pp = src + 4;
 			nOffs += 4;
@@ -150,7 +151,7 @@ namespace DigitalPlatform.DTLP
 			{
 				lPathLen = BitConverter.ToInt32(m_baPackage, nOffs);
 
-				Debug.Assert(lPathLen < 1000, "lPathLen²»ÕıÈ·");
+				Debug.Assert(lPathLen < 1000, "lPathLenä¸æ­£ç¡®");
 
 				// lpPath = pp + 4;
 				nPathStart = nOffs + 4;
@@ -164,7 +165,7 @@ namespace DigitalPlatform.DTLP
 
 				if (lWholeLen == lPackageLen) 
 				{
-					// Ã»ÓĞÃ¶¾Ù²¿·Ö
+					// æ²¡æœ‰æšä¸¾éƒ¨åˆ†
 					lBaoLen = 0;
 					lMask = 0;
 				}
@@ -184,7 +185,7 @@ namespace DigitalPlatform.DTLP
 
 						ContinueString = Encoding.GetEncoding(936).GetString(m_baPackage, nOffs+12, len-1);
 
-						// ¼æÈİÄ£¿é
+						// å…¼å®¹æ¨¡å—
 						ContinueBytes = new byte[len-1];
 						Array.Copy(m_baPackage, nOffs+12, ContinueBytes, 0, len -1);
 
@@ -198,14 +199,14 @@ namespace DigitalPlatform.DTLP
 				else 
 					nBaoStart = nOffs + 12;
 
-				// ½«Í¨Ñ¶°ü×ª»»ÎªÒÔ×Ó°üÎªµ¥ÔªµÄ¸ñÊ½£¬·ÅÈëm_LineArrayÖĞ
-				// ±¾º¯Êı²»°Ñ×Ó°üÖĞµÄÄÚÈİµ±×÷CÓïÑÔ×Ö·û´®´¦Àí¡£
-				// ×¢Òâ! pCell->ContentBytesÖĞ×Ö·û¼¯Î´×÷×ª»»(ÆäËü³ÉÔ±ÒÑ¾­×ª»»)¡£¿ÉÄÜÓĞÒÔÏÂ¼¸ÖÖĞÎÊ½£º
-				//	1)CÓïÑÔ×Ö·û´®ĞÎÊ½¡£DBCS/UTF8×Ö·û¼¯¡£
-				//	2)MARC¼ÇÂ¼¡£Ç°Ãæ9×Ö½ÚÎª¶ş½øÖÆÄÚÈİ£¬ºóÃæÎªCÓïÑÔ×Ö·û´®¡£ÕâÑù£¬¾Í²»ÄÜ°ÑÕû¸öContentBytes
-				//		µ±×÷Ò»¸ö×Ö·û´®½øĞĞ·­Òë£¬ÒòÎªÇ°Ãæ9×Ö½ÚÖĞ¼ä¿ÉÄÜ°üº¬0×Ö·û£¬½«µ¼ÖÂ×Ö·û´®ÖÕÖ¹¡£
-				//		Ê±¼ä´ÁºÍMARC¼ÇÂ¼ÔÚÒ»ÆğµÄÓÃ·¨ÏÖÔÚ¿´À´ÊÇÒ»¸ö´ó°Ü±Ê¡£
-				// ·µ»Ø-1±íÊ¾Ê§°Ü¡£
+				// å°†é€šè®¯åŒ…è½¬æ¢ä¸ºä»¥å­åŒ…ä¸ºå•å…ƒçš„æ ¼å¼ï¼Œæ”¾å…¥m_LineArrayä¸­
+				// æœ¬å‡½æ•°ä¸æŠŠå­åŒ…ä¸­çš„å†…å®¹å½“ä½œCè¯­è¨€å­—ç¬¦ä¸²å¤„ç†ã€‚
+				// æ³¨æ„! pCell->ContentBytesä¸­å­—ç¬¦é›†æœªä½œè½¬æ¢(å…¶å®ƒæˆå‘˜å·²ç»è½¬æ¢)ã€‚å¯èƒ½æœ‰ä»¥ä¸‹å‡ ç§å½¢å¼ï¼š
+				//	1)Cè¯­è¨€å­—ç¬¦ä¸²å½¢å¼ã€‚DBCS/UTF8å­—ç¬¦é›†ã€‚
+				//	2)MARCè®°å½•ã€‚å‰é¢9å­—èŠ‚ä¸ºäºŒè¿›åˆ¶å†…å®¹ï¼Œåé¢ä¸ºCè¯­è¨€å­—ç¬¦ä¸²ã€‚è¿™æ ·ï¼Œå°±ä¸èƒ½æŠŠæ•´ä¸ªContentBytes
+				//		å½“ä½œä¸€ä¸ªå­—ç¬¦ä¸²è¿›è¡Œç¿»è¯‘ï¼Œå› ä¸ºå‰é¢9å­—èŠ‚ä¸­é—´å¯èƒ½åŒ…å«0å­—ç¬¦ï¼Œå°†å¯¼è‡´å­—ç¬¦ä¸²ç»ˆæ­¢ã€‚
+				//		æ—¶é—´æˆ³å’ŒMARCè®°å½•åœ¨ä¸€èµ·çš„ç”¨æ³•ç°åœ¨çœ‹æ¥æ˜¯ä¸€ä¸ªå¤§è´¥ç¬”ã€‚
+				// è¿”å›-1è¡¨ç¤ºå¤±è´¥ã€‚
 
 				if (format == PackageFormat.Binary) 
 				{
@@ -219,16 +220,16 @@ namespace DigitalPlatform.DTLP
 					if (lPathLen > 0 && m_baPackage[nPathStart] != 0) 
 					{
 						Debug.Assert(nPathStart!=-1,
-							"nPathStartÉĞÎ´³õÊ¼»¯");
+							"nPathStartå°šæœªåˆå§‹åŒ–");
 
 						Debug.Assert(strlen(m_baPackage, nPathStart) == lPathLen-4-1,
-							"lPathLenÖµ²»ÕıÈ·");
+							"lPathLenå€¼ä¸æ­£ç¡®");
 
 						cell.Path += m_encoding.GetString(m_baPackage, nPathStart, lPathLen-4-1);
 						cell.Lead += m_encoding.GetString(m_baPackage, nPathStart, lPathLen-4-1);
 
 						/*
-						// ×îºóÒ»¸ö×Ö·û²»ÊÇ'/'¡£¼´±ãÎªUTF8×Ö·û¼¯£¬ÕâÀïÈÔ¿ÉÒÔÊ¹ÓÃDBCSÅĞ¶Ï·¨¡£
+						// æœ€åä¸€ä¸ªå­—ç¬¦ä¸æ˜¯'/'ã€‚å³ä¾¿ä¸ºUTF8å­—ç¬¦é›†ï¼Œè¿™é‡Œä»å¯ä»¥ä½¿ç”¨DBCSåˆ¤æ–­æ³•ã€‚
 						if (cell.Path.Length !=0
 							&& cell.Path[Math.Max(0, cell.Path.Length-1)] != '/' )
 							cell.Path += "/";
@@ -243,11 +244,11 @@ namespace DigitalPlatform.DTLP
 					if (lBaoLen <= 12)
 						goto SKIP;
 
-					// Ã¶¾Ù²¿·Ö£¬µ±×÷Ò»¸öÕûÌå
+					// æšä¸¾éƒ¨åˆ†ï¼Œå½“ä½œä¸€ä¸ªæ•´ä½“
 					Debug.Assert( lBaoLen >= 12 ,
-						"lBaoLen²»ÕıÈ·");
+						"lBaoLenä¸æ­£ç¡®");
 
-					if (lBaoLen > 12) // ÕıºÃ== 12£¬²»×ö
+					if (lBaoLen > 12) // æ­£å¥½== 12ï¼Œä¸åš
 					{
 						cell.ContentBytes  = new byte[lBaoLen - 12];
 
@@ -277,15 +278,15 @@ namespace DigitalPlatform.DTLP
 						if (lPathLen > 0 && m_baPackage[nPathStart] != 0) 
 						{
 							Debug.Assert(nPathStart!=-1,
-								"nPathStartÉĞÎ´³õÊ¼»¯");
+								"nPathStartå°šæœªåˆå§‹åŒ–");
 
 							Debug.Assert(strlen(m_baPackage, nPathStart) == lPathLen-4-1,
-								"lPathLenÖµ²»ÕıÈ·");
+								"lPathLenå€¼ä¸æ­£ç¡®");
 
 							cell.Path += m_encoding.GetString(m_baPackage, nPathStart, lPathLen-4-1);
 							cell.Lead += m_encoding.GetString(m_baPackage, nPathStart, lPathLen-4-1);
 
-							// ×îºóÒ»¸ö×Ö·û²»ÊÇ'/'¡£¼´±ãÎªUTF8×Ö·û¼¯£¬ÕâÀïÈÔ¿ÉÒÔÊ¹ÓÃDBCSÅĞ¶Ï·¨¡£
+							// æœ€åä¸€ä¸ªå­—ç¬¦ä¸æ˜¯'/'ã€‚å³ä¾¿ä¸ºUTF8å­—ç¬¦é›†ï¼Œè¿™é‡Œä»å¯ä»¥ä½¿ç”¨DBCSåˆ¤æ–­æ³•ã€‚
 							if (cell.Path.Length !=0
 								&& cell.Path[Math.Max(0, cell.Path.Length-1)] != '/' )
 								cell.Path += "/";
@@ -307,13 +308,13 @@ namespace DigitalPlatform.DTLP
 							}
 							else 
 							{
-								// DBCSÊ±¼äÓÅ»¯£¬±ÜÃâÒ»´Î¶àÓàµÄ¸´ÖÆ
+								// DBCSæ—¶é—´ä¼˜åŒ–ï¼Œé¿å…ä¸€æ¬¡å¤šä½™çš„å¤åˆ¶
 								pCell->Path += (LPCSTR)lpPath; 
 								pCell->Lead += (LPCSTR)lpPath;
 							}
 
 				
-							// ×îºóÒ»¸ö×Ö·û²»ÊÇ'/'¡£¼´±ãÎªUTF8×Ö·û¼¯£¬ÕâÀïÈÔ¿ÉÒÔÊ¹ÓÃDBCSÅĞ¶Ï·¨¡£
+							// æœ€åä¸€ä¸ªå­—ç¬¦ä¸æ˜¯'/'ã€‚å³ä¾¿ä¸ºUTF8å­—ç¬¦é›†ï¼Œè¿™é‡Œä»å¯ä»¥ä½¿ç”¨DBCSåˆ¤æ–­æ³•ã€‚
 							if ( strlen(lpPath)!=0 && 
 								*(lpPath+max(0,strlen(lpPath)-1))!='/' )
 								pCell->Path += _T("/");
@@ -357,8 +358,8 @@ namespace DigitalPlatform.DTLP
 
 
 
-		// µÃµ½°üÖĞµÚÒ»¸ö×Ó°üµÄÄÚÈİ²¿·Ö
-		// ×¢ÒâĞèÔÚº¯ÊıParse(PackageFormat.Binary)ºóÊ¹ÓÃ£¬·ñÔòÃ»ÓĞÄÚÈİ¿É´¦Àí¡£
+		// å¾—åˆ°åŒ…ä¸­ç¬¬ä¸€ä¸ªå­åŒ…çš„å†…å®¹éƒ¨åˆ†
+		// æ³¨æ„éœ€åœ¨å‡½æ•°Parse(PackageFormat.Binary)åä½¿ç”¨ï¼Œå¦åˆ™æ²¡æœ‰å†…å®¹å¯å¤„ç†ã€‚
 		// return:
 		//		-1	error
 		//		0	not found

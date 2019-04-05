@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

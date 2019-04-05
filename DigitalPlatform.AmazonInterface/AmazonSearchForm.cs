@@ -15,6 +15,7 @@ using System.Collections;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.AmazonInterface
 {

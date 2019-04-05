@@ -33,6 +33,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.AmazonInterface;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

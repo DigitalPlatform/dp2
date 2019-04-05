@@ -21,6 +21,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using System.Collections;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

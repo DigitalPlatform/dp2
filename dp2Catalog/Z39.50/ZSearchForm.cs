@@ -21,6 +21,7 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;    // for NormalDbProperty
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

@@ -26,6 +26,7 @@ using DigitalPlatform.CirculationClient;
 
 using dp2Secure;
 using DigitalPlatform.AmazonInterface;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

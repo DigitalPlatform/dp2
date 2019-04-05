@@ -13,6 +13,7 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

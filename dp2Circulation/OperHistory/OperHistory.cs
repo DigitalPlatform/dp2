@@ -20,6 +20,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 // 2013/3/16 添加 XML 注释
 

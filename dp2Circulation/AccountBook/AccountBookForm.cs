@@ -27,6 +27,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Core;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
