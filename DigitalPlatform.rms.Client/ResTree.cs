@@ -15,7 +15,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;   // Backup
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 

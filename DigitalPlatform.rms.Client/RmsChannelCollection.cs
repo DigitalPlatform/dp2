@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Net;
 using System.Diagnostics;
@@ -10,22 +10,21 @@ using System.IO;
 // using Microsoft.Web.Services3;
 // using Microsoft.Web.Services3.Attachments;
 
-using System.Web.Services.Protocols;	// ÎªÁËWebClientAsyncResult
+using System.Web.Services.Protocols;	// ä¸ºäº†WebClientAsyncResult
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.rms.Client
 {
 	/// <summary>
-	/// Í¨Ñ¶Í¨µÀ¼¯ºÏ
+	/// é€šè®¯é€šé“é›†åˆ
 	/// </summary>
 	public class RmsChannelCollection : Hashtable, IDisposable
 	{
-		// »ñµÃÈ±Ê¡ÕË»§ÃûµÈĞÅÏ¢µÄ»Øµ÷º¯ÊıµØÖ·
+		// è·å¾—ç¼ºçœè´¦æˆ·åç­‰ä¿¡æ¯çš„å›è°ƒå‡½æ•°åœ°å€
 		// public Delegate_AskAccountInfo procAskAccountInfo = null;
 
         public event AskAccountInfoEventHandle AskAccountInfo = null;
@@ -65,7 +64,7 @@ namespace DigitalPlatform.rms.Client
         {
             if (this.AskAccountInfo == null)
             {
-                e.ErrorInfo = "AskAccountInfoÊÂ¼şº¯ÊıÎ´ÉèÖÃ";
+                e.ErrorInfo = "AskAccountInfoäº‹ä»¶å‡½æ•°æœªè®¾ç½®";
                 e.Result = -1;
                 return;
             }
@@ -74,8 +73,8 @@ namespace DigitalPlatform.rms.Client
                 this.AskAccountInfo(sender, e);
         }
 
-		// »ñµÃÒ»¸öChannel¶ÔÏó
-		// Èç¹û¼¯ºÏÖĞÒÑ¾­´æÔÚÕâ¸ö¶ÔÏó£¬ÔòÖ±½Ó·µ»Ø£»·ñÔò´´½¨Ò»¸öĞÂ¶ÔÏó
+		// è·å¾—ä¸€ä¸ªChannelå¯¹è±¡
+		// å¦‚æœé›†åˆä¸­å·²ç»å­˜åœ¨è¿™ä¸ªå¯¹è±¡ï¼Œåˆ™ç›´æ¥è¿”å›ï¼›å¦åˆ™åˆ›å»ºä¸€ä¸ªæ–°å¯¹è±¡
 		public RmsChannel GetChannel(string strUrl)
 		{
 			string strRegularUrl = strUrl.ToUpper();
@@ -85,7 +84,7 @@ namespace DigitalPlatform.rms.Client
 			if (channel != null)
 				return channel;
 
-			// ´´½¨
+			// åˆ›å»º
 			channel = new RmsChannel();
 			channel.Url = strUrl;
 			channel.Container = this;
@@ -94,13 +93,13 @@ namespace DigitalPlatform.rms.Client
 			return channel;
 		}
  
-        // TPPD: ĞèÒª°ÑÕâĞ©ÁÙÊ±¶ÔÏó¹ÜÀíÆğÀ´£¬ÔÚ±ØÒªµÄÊ±ºò½øĞĞClose()
-        // ´´½¨Ò»¸öÁÙÊ±Channel¶ÔÏó
+        // TPPD: éœ€è¦æŠŠè¿™äº›ä¸´æ—¶å¯¹è±¡ç®¡ç†èµ·æ¥ï¼Œåœ¨å¿…è¦çš„æ—¶å€™è¿›è¡ŒClose()
+        // åˆ›å»ºä¸€ä¸ªä¸´æ—¶Channelå¯¹è±¡
         public RmsChannel CreateTempChannel(string strUrl)
         {
             string strRegularUrl = strUrl.ToUpper();
 
-            // ´´½¨
+            // åˆ›å»º
             RmsChannel channel = new RmsChannel();
             channel.Url = strUrl;
             channel.Container = this;
@@ -118,7 +117,7 @@ namespace DigitalPlatform.rms.Client
 	}
 
     /*
-	// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+	// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 	// return:
 	//		2	already login succeed
 	//		1	dialog return OK
@@ -130,7 +129,7 @@ namespace DigitalPlatform.rms.Client
 	string strUrl,
 	string strPath,
 	LoginStyle loginStyle,
-	out IWin32Window owner,	// Èç¹ûĞèÒª³öÏÖ¶Ô»°¿ò£¬ÕâÀï·µ»Ø¶Ô»°¿òµÄËŞÖ÷Form
+	out IWin32Window owner,	// å¦‚æœéœ€è¦å‡ºç°å¯¹è¯æ¡†ï¼Œè¿™é‡Œè¿”å›å¯¹è¯æ¡†çš„å®¿ä¸»Form
 	out string strUserName,
 	out string strPassword);
      */
@@ -140,26 +139,26 @@ namespace DigitalPlatform.rms.Client
 		public string Key = "";
 		public string KeyNoProcess = "";
 		public string Num = "";
-		public string FromName = "";	// ¼ìË÷Í¾¾¶Ãû
-		public string FromValue = "";	// keyÖĞfrom×Ö¶ÎÖµ
+		public string FromName = "";	// æ£€ç´¢é€”å¾„å
+		public string FromValue = "";	// keyä¸­fromå­—æ®µå€¼
 		public string ID = "";
 	}
 
-    // ÊÂ¼ş: Ñ¯ÎÊÕÊ»§ĞÅÏ¢
+    // äº‹ä»¶: è¯¢é—®å¸æˆ·ä¿¡æ¯
     public delegate void AskAccountInfoEventHandle(object sender,
     AskAccountInfoEventArgs e);
 
     public class AskAccountInfoEventArgs : EventArgs
     {
-        // ÊäÈë²ÎÊı
+        // è¾“å…¥å‚æ•°
 	    public RmsChannelCollection Channels = null;
-        public RmsChannel Channel = null;   // [in] ÇëÇóµÄChannel¡£  Èç¹û == null£¬²Å´Ó ChannelsÀïÃæ¸ù¾İ Url À´ÕÒ 2013/2/14
+        public RmsChannel Channel = null;   // [in] è¯·æ±‚çš„Channelã€‚  å¦‚æœ == nullï¼Œæ‰ä» Channelsé‡Œé¢æ ¹æ® Url æ¥æ‰¾ 2013/2/14
 	    public string Comment = "";
 	    public string Url = "";
 	    public string Path = "";
 	    public LoginStyle LoginStyle;
-        // Êä³ö²ÎÊı
-	    public IWin32Window Owner = null;	// Èç¹ûĞèÒª³öÏÖ¶Ô»°¿ò£¬ÕâÀï·µ»Ø¶Ô»°¿òµÄËŞÖ÷Form
+        // è¾“å‡ºå‚æ•°
+	    public IWin32Window Owner = null;	// å¦‚æœéœ€è¦å‡ºç°å¯¹è¯æ¡†ï¼Œè¿™é‡Œè¿”å›å¯¹è¯æ¡†çš„å®¿ä¸»Form
 	    public string UserName = "";
 	    public string Password = "";
 

@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {
