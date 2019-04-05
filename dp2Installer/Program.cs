@@ -11,6 +11,7 @@ using System.Security.Principal;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Installer
 {

@@ -234,6 +234,10 @@
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PublishFile Include="default_models.xml">

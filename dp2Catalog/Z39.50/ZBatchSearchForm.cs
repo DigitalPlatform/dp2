@@ -1854,7 +1854,8 @@ out string strError)
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
+                                         this.BinDir + "\\digitalplatform.core.dll",
+                                         this.BinDir + "\\digitalplatform.marcdom.dll",
 										 this.BinDir + "\\digitalplatform.marckernel.dll",
 										 this.BinDir + "\\digitalplatform.dll",
 										 this.BinDir + "\\digitalplatform.Text.dll",

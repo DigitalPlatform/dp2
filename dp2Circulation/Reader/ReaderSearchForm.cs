@@ -5392,6 +5392,7 @@ out strFingerprint);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",

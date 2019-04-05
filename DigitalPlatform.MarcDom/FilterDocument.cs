@@ -1597,6 +1597,15 @@ namespace DigitalPlatform.MarcDom
             // System.Reflection.Assembly compiledAssembly = null;
             strErrorInfo = "";
 
+
+            // 2019/4/5
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;
             compilerParams = new CompilerParameters();

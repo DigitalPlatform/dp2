@@ -15,7 +15,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
-
+using DigitalPlatform.Core;
 
 namespace dp2SIPServer
 {

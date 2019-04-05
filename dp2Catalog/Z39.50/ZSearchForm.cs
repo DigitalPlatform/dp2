@@ -2504,7 +2504,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
+                                         this.BinDir + "\\digitalplatform.core.dll",
+                                         this.BinDir + "\\digitalplatform.marcdom.dll",
 										 // this.BinDir + "\\digitalplatform.marckernel.dll",
 										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
 										 this.BinDir + "\\digitalplatform.dll",

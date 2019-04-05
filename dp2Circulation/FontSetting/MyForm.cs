@@ -1443,6 +1443,7 @@ out string strError)
             string strBinDir = Environment.CurrentDirectory;
 
             string[] saAddRef1 = {
+                                         strBinDir + "\\digitalplatform.core.dll",
                                          strBinDir + "\\digitalplatform.marcdom.dll",
 										 // this.BinDir + "\\digitalplatform.marckernel.dll",
 										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
