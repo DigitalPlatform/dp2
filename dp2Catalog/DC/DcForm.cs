@@ -64,7 +64,7 @@ namespace dp2Catalog
         }
          * */
 
-        DigitalPlatform.Z3950.Record CurrentRecord = null;
+        DigitalPlatform.OldZ3950.Record CurrentRecord = null;
 
         Encoding CurrentEncoding = Encoding.GetEncoding(936);
 
@@ -502,7 +502,7 @@ namespace dp2Catalog
             this.LinkedSearchForm = searchform;
             this.SavePath = "";
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;
@@ -734,7 +734,7 @@ channel,
                 goto ERROR1;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;

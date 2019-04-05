@@ -2925,7 +2925,7 @@ namespace dp2Catalog
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)
@@ -3138,7 +3138,7 @@ namespace dp2Catalog
             out string strOutputPath,
             out string strOutStyle,
             out byte[] baTimestamp,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out string strError)
         {
@@ -3338,7 +3338,7 @@ namespace dp2Catalog
 
                 Debug.Assert(string.IsNullOrEmpty(strRecord) == false, "");
 
-                record = new DigitalPlatform.Z3950.Record();
+                record = new DigitalPlatform.OldZ3950.Record();
                 if (strOutMarcSyntax == "unimarc" || strOutMarcSyntax == "")
                     record.m_strSyntaxOID = "1.2.840.10003.5.1";
                 else if (strOutMarcSyntax == "usmarc")
@@ -3363,7 +3363,7 @@ namespace dp2Catalog
                 strRecord = strXml;
                 strOutStyle = strStyle;
 
-                record = new DigitalPlatform.Z3950.Record();
+                record = new DigitalPlatform.OldZ3950.Record();
                 record.m_strSyntaxOID = "1.2.840.10003.5.109.10";
             }
 
@@ -5223,7 +5223,7 @@ namespace dp2Catalog
                     string strOutputPath = "";
                     string strOutStyle = "";
                     byte[] baTimestamp = null;
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currrentEncoding;
                     string strXmlFragment = "";
 
@@ -5489,7 +5489,7 @@ namespace dp2Catalog
                     string strOutputPath = "";
                     string strOutStyle = "";
                     byte[] baTimestamp = null;
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currrentEncoding;
                     string strXmlFragment = "";
 
@@ -7747,7 +7747,7 @@ out string strError)
                         string strOutputPath = "";
                         string strOutStyle = "";
                         byte[] baTimestamp = null;
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currrentEncoding;
                         string strXmlFragment = "";
                         nRet = InternalGetOneRecord(
@@ -7820,7 +7820,7 @@ out string strError)
                         string strOutputPath = "";
                         string strOutStyle = "";
                         byte[] baTimestamp = null;
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currrentEncoding;
                         string strXmlFragment = "";
                         nRet = InternalGetOneRecord(

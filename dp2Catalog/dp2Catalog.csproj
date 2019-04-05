@@ -668,6 +668,10 @@
       <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
       <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.OldZ3950\DigitalPlatform.OldZ3950.csproj">
+      <Project>{0e2b8dbd-1e6e-40e9-8af7-efd6d30ddebf}</Project>
+      <Name>DigitalPlatform.OldZ3950</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
       <Project>{5107DE16-DDA1-4606-B3A3-840B24428329}</Project>
       <Name>DigitalPlatform.Script</Name>
@@ -683,10 +687,6 @@
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.Z3950\DigitalPlatform.Z3950.csproj">
-      <Project>{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}</Project>
-      <Name>DigitalPlatform.Z3950</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>

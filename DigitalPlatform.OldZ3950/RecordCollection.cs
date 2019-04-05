@@ -1,22 +1,22 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.OldZ3950
 {
     public class Record 
     {
-        public byte [] m_baRecord = null;   // Ô­Ê¼ĞÎÌ¬µÄÊı¾İ
+        public byte [] m_baRecord = null;   // åŸå§‹å½¢æ€çš„æ•°æ®
         public string m_strSyntaxOID = "";
 	    public string m_strDBName = "";
         public string m_strElementSetName = ""; // B / F
 
-	    // Õï¶ÏĞÅÏ¢
-	    public int m_nDiagCondition = 0;    // 0±íÊ¾Ã»ÓĞÕï¶ÏĞÅÏ¢
+	    // è¯Šæ–­ä¿¡æ¯
+	    public int m_nDiagCondition = 0;    // 0è¡¨ç¤ºæ²¡æœ‰è¯Šæ–­ä¿¡æ¯
 	    public string m_strDiagSetID = "";
 	    public string m_strAddInfo = "";
 
-        public string AutoDetectedSyntaxOID = "";   // ×Ô¶¯Ê¶±ğµÄOID£¬ºóÆÚÊ¹ÓÃ
+        public string AutoDetectedSyntaxOID = "";   // è‡ªåŠ¨è¯†åˆ«çš„OIDï¼ŒåæœŸä½¿ç”¨
     }
 
 

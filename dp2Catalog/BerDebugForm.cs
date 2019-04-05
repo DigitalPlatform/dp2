@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 
 namespace dp2Catalog
 {
@@ -16,7 +16,7 @@ namespace dp2Catalog
     {
         public MainForm MainForm = null;
 
-        long CurrentRightStartOffs = -1; // µ±Ç°ÒÑ¾­ÏÔÊ¾ÔÚÓÒ²àµÄÊı¾İstartoffs
+        long CurrentRightStartOffs = -1; // å½“å‰å·²ç»æ˜¾ç¤ºåœ¨å³ä¾§çš„æ•°æ®startoffs
 
         public BerDebugForm()
         {
@@ -56,7 +56,7 @@ namespace dp2Catalog
 
         }
 
-        // ×°ÔØ¼ÇÂ¼Ë÷Òı
+        // è£…è½½è®°å½•ç´¢å¼•
         int LoadIndex(string strLogFilename,
             out string strError)
         {
@@ -95,8 +95,8 @@ namespace dp2Catalog
 
                     if (length == -1)
                     {
-                        // ³öÏÖÁËÒ»¸öÎ´ÊÕÎ²µÄÊÂÏî
-                        // °ÑÎÄ¼ş×îºó¶¼Ëã×÷ËüµÄÄÚÈİ
+                        // å‡ºç°äº†ä¸€ä¸ªæœªæ”¶å°¾çš„äº‹é¡¹
+                        // æŠŠæ–‡ä»¶æœ€åéƒ½ç®—ä½œå®ƒçš„å†…å®¹
                         length = stream.Length - stream.Position;
                     }
 
@@ -108,7 +108,7 @@ namespace dp2Catalog
 
                     if (length == 0)
                     {
-                        // ÌØÊâ´¦Àí
+                        // ç‰¹æ®Šå¤„ç†
                         node.Text = i.ToString();
                         node.ImageIndex = 0;
                         node.Tag = info;
@@ -120,10 +120,10 @@ namespace dp2Catalog
 
                     long lStartOffs = stream.Position;
 
-                    length--;   // ÕâÊÇÄÚÈİ³¤¶È
+                    length--;   // è¿™æ˜¯å†…å®¹é•¿åº¦
 
                     node.Text = i.ToString();
-                    // ·½Ïò'
+                    // æ–¹å‘'
                     string strDirection = "";
                     int nImageIndex = 0;
                     if (direction == 0)
@@ -325,16 +325,16 @@ namespace dp2Catalog
 
             TreeNode node = this.treeView_ber.SelectedNode;
 
-            // ×Ö·û´®
-            menuItem = new ToolStripMenuItem("×Ö·û´®ÄÚÈİ");
+            // å­—ç¬¦ä¸²
+            menuItem = new ToolStripMenuItem("å­—ç¬¦ä¸²å†…å®¹");
             if (node == null || node.Parent == null)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_stringContent_Click);
             contextMenu.Items.Add(menuItem);
 
 
-            // ÕûÊı
-            menuItem = new ToolStripMenuItem("ÕûÊıÄÚÈİ");
+            // æ•´æ•°
+            menuItem = new ToolStripMenuItem("æ•´æ•°å†…å®¹");
             if (node == null || node.Parent == null)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_integerContent_Click);
@@ -342,22 +342,22 @@ namespace dp2Catalog
 
 
             // OID
-            menuItem = new ToolStripMenuItem("OIDÄÚÈİ");
+            menuItem = new ToolStripMenuItem("OIDå†…å®¹");
             if (node == null || node.Parent == null)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_oidContent_Click);
             contextMenu.Items.Add(menuItem);
 
             // BITSTRING
-            menuItem = new ToolStripMenuItem("BITSTRINGÄÚÈİ");
+            menuItem = new ToolStripMenuItem("BITSTRINGå†…å®¹");
             if (node == null || node.Parent == null)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_bitstringContent_Click);
             contextMenu.Items.Add(menuItem);
 
 
-            // ½âÊÍ°ü
-            menuItem = new ToolStripMenuItem("½âÊÍ°ü");
+            // è§£é‡ŠåŒ…
+            menuItem = new ToolStripMenuItem("è§£é‡ŠåŒ…");
             if (TreeNodeLevel(node) != 1)
                 menuItem.Enabled = false;
             menuItem.Click += new EventHandler(menuItem_explainContent_Click);
@@ -377,7 +377,7 @@ namespace dp2Catalog
 
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰å®šèŠ‚ç‚¹");
                 return;
             }
 
@@ -395,7 +395,7 @@ namespace dp2Catalog
 
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰å®šèŠ‚ç‚¹");
                 return;
             }
 
@@ -411,7 +411,7 @@ namespace dp2Catalog
 
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰å®šèŠ‚ç‚¹");
                 return;
             }
 
@@ -427,7 +427,7 @@ EventArgs e)
 
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰å®šèŠ‚ç‚¹");
                 return;
             }
 
@@ -436,7 +436,7 @@ EventArgs e)
             MessageBox.Show(this, "'" + bernode.GetBitstringNodeData() + "'");
         }
 
-        // Ê÷½ÚµãµÄ²ã´ÎÊı
+        // æ ‘èŠ‚ç‚¹çš„å±‚æ¬¡æ•°
         static int TreeNodeLevel(TreeNode node)
         {
             if (node == null)
@@ -452,7 +452,7 @@ EventArgs e)
             return nLevel;
         }
 
-        // ½âÊÍ°ü
+        // è§£é‡ŠåŒ…
         void menuItem_explainContent_Click(object sender,
 EventArgs e)
         {
@@ -460,7 +460,7 @@ EventArgs e)
 
             if (node == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨½Úµã");
+                MessageBox.Show(this, "å°šæœªé€‰å®šèŠ‚ç‚¹");
                 return;
             }
 
@@ -468,7 +468,7 @@ EventArgs e)
 
             if (TreeNodeLevel(node) != 1)
             {
-                MessageBox.Show(this, "±ØĞëÊÇBer°ü¸ù½Úµã");
+                MessageBox.Show(this, "å¿…é¡»æ˜¯BeråŒ…æ ¹èŠ‚ç‚¹");
                 return;
             }
 
@@ -479,7 +479,7 @@ EventArgs e)
 
             if (root.m_uTag == BerTree.z3950_initRequest)
             {
-        // ¹Û²ìInitialÇëÇó°ü
+        // è§‚å¯ŸInitialè¯·æ±‚åŒ…
                 nRet = BerTree.GetInfo_InitRequest(
                     root,
                     out strDebugInfo,
@@ -540,7 +540,7 @@ EventArgs e)
 
         private void button_findLogFilename_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÔ­Ê¼ÎÄ¼şÈ«Â·¾¶
+            // è¯¢é—®åŸå§‹æ–‡ä»¶å…¨è·¯å¾„
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.FileName = this.textBox_logFilename.Text;
