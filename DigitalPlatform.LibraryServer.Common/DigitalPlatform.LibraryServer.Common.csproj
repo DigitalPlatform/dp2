@@ -58,6 +58,10 @@
     <Compile Include="ServerReplicationParam.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
       <Name>DigitalPlatform.IO</Name>

@@ -14,6 +14,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
+using DigitalPlatform.Core;
 
 // MEMO: 订单打印后，可以保留“电子订单” XML 格式，供以后参考。数据库内各种数据可能会后来变化，但电子订单固化记忆了打印瞬间的数据状态
 

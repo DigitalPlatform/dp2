@@ -17,6 +17,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

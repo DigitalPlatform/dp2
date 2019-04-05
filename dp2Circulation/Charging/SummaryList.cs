@@ -7,6 +7,7 @@ using System.Threading;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

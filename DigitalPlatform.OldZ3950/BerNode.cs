@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.OldZ3950
 {

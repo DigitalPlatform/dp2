@@ -18,6 +18,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using System.Threading.Tasks;
 using System.Collections;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

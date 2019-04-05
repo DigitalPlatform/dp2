@@ -25,6 +25,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

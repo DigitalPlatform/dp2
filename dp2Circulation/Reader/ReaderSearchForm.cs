@@ -28,6 +28,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryServer;
 using static dp2Circulation.ReaderInfoForm;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

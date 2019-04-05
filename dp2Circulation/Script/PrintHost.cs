@@ -10,6 +10,7 @@ using System.Web;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

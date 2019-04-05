@@ -7,6 +7,7 @@ using System.Security.Permissions;
 
 namespace DigitalPlatform
 {
+#if REMOVED
     /// <summary>
     /// 线程基础类
     /// </summary>
@@ -144,4 +145,6 @@ namespace DigitalPlatform
         }
 
     }
+
+#endif
 }

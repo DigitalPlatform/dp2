@@ -22,6 +22,7 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

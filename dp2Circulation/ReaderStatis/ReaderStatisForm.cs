@@ -22,6 +22,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

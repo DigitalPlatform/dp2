@@ -1,13 +1,14 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Text;
 using System.Net;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.DTLP
 {
 
-	// Ò»¸ö²ÎÊı¶ÔÏó
+	// ä¸€ä¸ªå‚æ•°å¯¹è±¡
 	public class Param
 	{
 
@@ -15,18 +16,18 @@ namespace DigitalPlatform.DTLP
 		public Int32	m_lValue = 0;
 		public byte []	m_baValue = null;
 
-		public const int STYLE_INT = 0;	// 16Î»ÕûÊı
-		public const int STYLE_LONG = 1;	// 32Î»ÕûÊı
-		public const int STYLE_BUFF = 2;	// »º³åÇø
-		public const int STYLE_STRING = 3;	// ×Ö·û´®
-		public const int STYLE_END = -1;	// ½áÊø
+		public const int STYLE_INT = 0;	// 16ä½æ•´æ•°
+		public const int STYLE_LONG = 1;	// 32ä½æ•´æ•°
+		public const int STYLE_BUFF = 2;	// ç¼“å†²åŒº
+		public const int STYLE_STRING = 3;	// å­—ç¬¦ä¸²
+		public const int STYLE_END = -1;	// ç»“æŸ
 
 		public Param() 
 		{
 
 		}
 
-        // TODO: ÈİÒ×Ôì³É mem leak¡£½¨ÒéÓÃ Dispose() ¸ÄĞ´
+        // TODO: å®¹æ˜“é€ æˆ mem leakã€‚å»ºè®®ç”¨ Dispose() æ”¹å†™
 		~Param() 
 		{
 		}
@@ -35,7 +36,7 @@ namespace DigitalPlatform.DTLP
 
 
 	/// <summary>
-	/// ²ÎÊıÊı×é
+	/// å‚æ•°æ•°ç»„
 	/// </summary>
 	public class DTLPParam : ArrayList
 	{
@@ -46,7 +47,7 @@ namespace DigitalPlatform.DTLP
 			//
 		}
 
-        // TODO: ÈİÒ×Ôì³É mem leak¡£½¨ÒéÓÃ Dispose() ¸ÄĞ´
+        // TODO: å®¹æ˜“é€ æˆ mem leakã€‚å»ºè®®ç”¨ Dispose() æ”¹å†™
 		~DTLPParam()
 		{
 		}
@@ -82,7 +83,7 @@ namespace DigitalPlatform.DTLP
 			return 0;
 		}
 
-		// ´Ó×Ö·ûÊı×éÖĞÖ¸¶¨Î»ÖÃ¿ªÊ¼È¡4byte×ª»»Îª32Î»ÕûÊı
+		// ä»å­—ç¬¦æ•°ç»„ä¸­æŒ‡å®šä½ç½®å¼€å§‹å–4byteè½¬æ¢ä¸º32ä½æ•´æ•°
 		public static Int32 GetInt32(byte [] source,
 			int nStartIndex)
 		{
@@ -132,30 +133,30 @@ namespace DigitalPlatform.DTLP
 			//	char far *lpTarget;
 			Param param = null;
 	
-			Debug.Assert(baPackage != null, "baPackage²ÎÊı²»ÄÜÎª¿Õ");
+			Debug.Assert(baPackage != null, "baPackageå‚æ•°ä¸èƒ½ä¸ºç©º");
 			//		buff = (char *)pPackage;
 	
 			// 0-3     4-7      8-11       12-15 16...
 			// rec_len func_num para_count errno para's
 	
 
-			// È¡µÃ²ÎÊı×ÜÊı
+			// å–å¾—å‚æ•°æ€»æ•°
 			lParaCount = BitConverter.ToInt32(baPackage, 8);
 			lParaCount = IPAddress.NetworkToHostOrder(lParaCount);
 
 
-			// È¡µÃ¹¦ÄÜºÅ
+			// å–å¾—åŠŸèƒ½å·
 			nFuncNum = BitConverter.ToInt32(baPackage, 4);
 			nFuncNum = IPAddress.NetworkToHostOrder(nFuncNum);
 
 
-			// È¡µÃ´íÎóÂë
+			// å–å¾—é”™è¯¯ç 
 			lErrno = BitConverter.ToInt32(baPackage, 12);
 			lErrno = IPAddress.NetworkToHostOrder(lErrno);
 	
 	
 			/*
-			// ĞŞÕı²ÎÊı¸öÊı 2005/4/14
+			// ä¿®æ­£å‚æ•°ä¸ªæ•° 2005/4/14
 			if (lParaCount != this.Count) 
 			{
 				lParaCount = this.Count;
@@ -171,49 +172,49 @@ namespace DigitalPlatform.DTLP
 				param = (Param)this[i];
 				if (param == null) 
 				{
-					Debug.Assert(false, "ParamÊı×éÖĞ³öÏÖ¿ÕÔªËØ");
+					Debug.Assert(false, "Paramæ•°ç»„ä¸­å‡ºç°ç©ºå…ƒç´ ");
 					continue;
 				}
 
-				// È¡µÃ²ÎÊı³ß´ç
+				// å–å¾—å‚æ•°å°ºå¯¸
 				lParaLen = BitConverter.ToInt32(baPackage, nOffs);
 				lParaLen = IPAddress.NetworkToHostOrder(lParaLen);
 		
-				if (param.m_nStyle == Param.STYLE_INT) // 16Î»ÕûÊı
+				if (param.m_nStyle == Param.STYLE_INT) // 16ä½æ•´æ•°
 				{
 					if (lParaLen != 2)  // para length incorrect
 						goto ERROR1;
-					// È¡³ö²ÎÊıÖµ,2byte 16Î»ÕûÊı
+					// å–å‡ºå‚æ•°å€¼,2byte 16ä½æ•´æ•°
 					nParaValue = BitConverter.ToInt16(baPackage, nOffs + 4);
 					nParaValue = IPAddress.NetworkToHostOrder((Int16)nParaValue);
 					param.m_lValue = (Int32)nParaValue;
 					param.m_baValue = null;
 					nOffs += 4+2;
 				}
-				else if (param.m_nStyle == Param.STYLE_LONG) // 32Î»ÕûÊı
+				else if (param.m_nStyle == Param.STYLE_LONG) // 32ä½æ•´æ•°
 				{
 					if (lParaLen != 4L) // para length incorrect
 						goto ERROR1;
-					// È¡³ö²ÎÊıÖµ,4byte 32Î»ÕûÊı
+					// å–å‡ºå‚æ•°å€¼,4byte 32ä½æ•´æ•°
 					lParaValue = BitConverter.ToInt32(baPackage, nOffs + 4);
 					lParaValue = IPAddress.NetworkToHostOrder((Int32)lParaValue);
 					param.m_lValue = lParaValue;
 					param.m_baValue = null;
 					nOffs += 4+4;
 				}
-				else if (param.m_nStyle == Param.STYLE_BUFF) // »º³åÇø
+				else if (param.m_nStyle == Param.STYLE_BUFF) // ç¼“å†²åŒº
 				{
 
-					param.m_lValue = lParaLen;	// ´æ´¢»º³åÇø³ß´ç
+					param.m_lValue = lParaLen;	// å­˜å‚¨ç¼“å†²åŒºå°ºå¯¸
 					if (param.m_baValue != null) 
 					{
 						param.m_baValue = null;
 					}
 
-					param.m_baValue = new byte [Math.Max(lParaLen, 4096)];	// È¡Õû¿é£¬±ÜÃâÄÚ´æËéÆ¬?
+					param.m_baValue = new byte [Math.Max(lParaLen, 4096)];	// å–æ•´å—ï¼Œé¿å…å†…å­˜ç¢ç‰‡?
 					if (param.m_baValue == null) 
 					{
-						Debug.Assert(false, "·ÖÅä»º³åÇøÊ§°Ü");
+						Debug.Assert(false, "åˆ†é…ç¼“å†²åŒºå¤±è´¥");
 						goto ERROR1;
 					}
 
@@ -222,7 +223,7 @@ namespace DigitalPlatform.DTLP
 				}
 				else 
 				{
-					Debug.Assert(false, "Î´ÖªµÄParam·ç¸ñ");
+					Debug.Assert(false, "æœªçŸ¥çš„Paramé£æ ¼");
 				}
 		
 			}
@@ -269,8 +270,8 @@ namespace DigitalPlatform.DTLP
 		public int ParaBuff(byte [] baBuffer,
 			int lLen)
         {
-			Debug.Assert(baBuffer != null, "baBuffer²ÎÊı²»ÄÜÎª¿Õ");
-			Debug.Assert(lLen >= 0, "lLen²ÎÊıÖµ²»ÄÜÎª0»ò¸ºÊı");
+			Debug.Assert(baBuffer != null, "baBufferå‚æ•°ä¸èƒ½ä¸ºç©º");
+			Debug.Assert(lLen >= 0, "lLenå‚æ•°å€¼ä¸èƒ½ä¸º0æˆ–è´Ÿæ•°");
 
 			Param param = new Param();
 			this.Add(param);
@@ -281,7 +282,7 @@ namespace DigitalPlatform.DTLP
 			param.m_baValue = new byte [Math.Max(lLen, 4096)];
             if (param.m_baValue == null) 
 			{
-				Debug.Assert(false, "·ÖÅä»º³åÇøÊ§°Ü");
+				Debug.Assert(false, "åˆ†é…ç¼“å†²åŒºå¤±è´¥");
                 return -1;
 			}
 
@@ -296,7 +297,7 @@ namespace DigitalPlatform.DTLP
 				return Encoding.GetEncoding(936);
 			if (nCharset == DtlpChannel.CHARSET_UTF8)
 				return Encoding.UTF8;
-			Debug.Assert(false, "²»Ö§³ÖµÄ±àÂë·½Ê½");
+			Debug.Assert(false, "ä¸æ”¯æŒçš„ç¼–ç æ–¹å¼");
 			return null;
 		}
 
@@ -304,14 +305,14 @@ namespace DigitalPlatform.DTLP
 		public int ParaString(string strBuffer,
 			int nCharset)
 		{
-			Debug.Assert(strBuffer!=null, "strBuffer²ÎÊı²»ÄÜÎª¿Õ");
+			Debug.Assert(strBuffer!=null, "strBufferå‚æ•°ä¸èƒ½ä¸ºç©º");
 
-			// ÕâÀï¸ºÔğ°Ñ×Ö·û´®·­ÒëÎªÌØ¶¨±àÂë
+			// è¿™é‡Œè´Ÿè´£æŠŠå­—ç¬¦ä¸²ç¿»è¯‘ä¸ºç‰¹å®šç¼–ç 
 
 			byte[] buffer = GetEncoding(nCharset).GetBytes(strBuffer);
 				// GB-2312
 
-			// Îª×Ö·û´®Ä©Î²Ôö¼ÓÒ»¸ö0×Ö·û
+			// ä¸ºå­—ç¬¦ä¸²æœ«å°¾å¢åŠ ä¸€ä¸ª0å­—ç¬¦
 			buffer = ByteArray.EnsureSize(buffer, buffer.Length + 1);
 			buffer[buffer.Length -1] = 0;
 
@@ -326,15 +327,15 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ÌØÊâ°æ±¾
+		// ç‰¹æ®Šç‰ˆæœ¬
 		// Add a Buffer (string) to ParaTable
-		// ½«Â·¾¶ºÍnext×Ö·û´®ÓÃ"||"¼ä¸ôÆ´½ÓÆğÀ´
+		// å°†è·¯å¾„å’Œnextå­—ç¬¦ä¸²ç”¨"||"é—´éš”æ‹¼æ¥èµ·æ¥
 		public int ParaPathString(string strBuffer,
 			int nCharset,
 			byte [] baNext)
 		{
-			Debug.Assert(strBuffer!=null, "strBuffer²ÎÊı²»ÄÜÎª¿Õ");
-			// Ë­¸ºÔğ°Ñ×Ö·û´®·­ÒëÎªAnsi×Ö·û¼¯£¿
+			Debug.Assert(strBuffer!=null, "strBufferå‚æ•°ä¸èƒ½ä¸ºç©º");
+			// è°è´Ÿè´£æŠŠå­—ç¬¦ä¸²ç¿»è¯‘ä¸ºAnsiå­—ç¬¦é›†ï¼Ÿ
 
 			strBuffer += "||";
 			byte[] buffer = GetEncoding(nCharset).GetBytes(strBuffer);
@@ -348,7 +349,7 @@ namespace DigitalPlatform.DTLP
 				Array.Copy(baNext,0,buffer,nOldLength,baNext.Length);
 			}
 
-			// Îª×Ö·û´®Ä©Î²Ôö¼ÓÒ»¸ö0×Ö·û
+			// ä¸ºå­—ç¬¦ä¸²æœ«å°¾å¢åŠ ä¸€ä¸ª0å­—ç¬¦
 			buffer = ByteArray.EnsureSize(buffer, buffer.Length + 1);
 			buffer[buffer.Length -1] = 0;
 
@@ -356,14 +357,14 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ½«long valÖµ·ÅÈëppÖ¸ÏòµÄ»º³åÇøµÄ4×Ö½Ú
-		// ArrayList°æ±¾
+		// å°†long valå€¼æ”¾å…¥ppæŒ‡å‘çš„ç¼“å†²åŒºçš„4å­—èŠ‚
+		// ArrayListç‰ˆæœ¬
 		static int addr_long(ArrayList aPackage,
 			Int32 val)
 		{
 			val= IPAddress.HostToNetworkOrder(val);
 
-			// ×·¼ÓÔÚÊı×éÄ©Î²
+			// è¿½åŠ åœ¨æ•°ç»„æœ«å°¾
 			aPackage.AddRange(BitConverter.GetBytes(val));
 			return 0;
 		}
@@ -376,21 +377,21 @@ namespace DigitalPlatform.DTLP
 
 			byte[] baVal = BitConverter.GetBytes(val);
 
-			// È·±£³ß´ç×ã¹»
+			// ç¡®ä¿å°ºå¯¸è¶³å¤Ÿ
 			aPackage = ByteArray.EnsureSize(aPackage, nStart + baVal.Length);
 
 			Array.Copy(baVal, 0, aPackage, nStart, baVal.Length);
 			return 0;
 		}
 
-		// ½«int valÖµ·ÅÈëppÖ¸ÏòµÄ»º³åÇø2×Ö½Ú
-		// ArrayList°æ±¾
+		// å°†int valå€¼æ”¾å…¥ppæŒ‡å‘çš„ç¼“å†²åŒº2å­—èŠ‚
+		// ArrayListç‰ˆæœ¬
 		static int addr_int(ArrayList aPackage,
 			Int16 val)
 		{
 			val=IPAddress.HostToNetworkOrder(val);
 
-			// ×·¼ÓÔÚÊı×éÄ©Î²
+			// è¿½åŠ åœ¨æ•°ç»„æœ«å°¾
 			aPackage.AddRange(BitConverter.GetBytes(val));
 			return 0;
 		}
@@ -403,7 +404,7 @@ namespace DigitalPlatform.DTLP
 
 			byte[] baVal = BitConverter.GetBytes(val);
 
-			// È·±£³ß´ç×ã¹»
+			// ç¡®ä¿å°ºå¯¸è¶³å¤Ÿ
 			aPackage = ByteArray.EnsureSize(aPackage, nStart + baVal.Length);
 
 			Array.Copy(baVal, 0, aPackage, nStart, baVal.Length);
@@ -411,13 +412,13 @@ namespace DigitalPlatform.DTLP
 			return 0;
 		}
 
-		// ½«buffer valÖµ·ÅÈëppÖ¸ÏòµÄ»º³åÇøn×Ö½Ú
-		// ArrayList°æ±¾
+		// å°†buffer valå€¼æ”¾å…¥ppæŒ‡å‘çš„ç¼“å†²åŒºnå­—èŠ‚
+		// ArrayListç‰ˆæœ¬
 		static int addr_buff(ArrayList aPackage,
 			byte []baBuffer,
 			int nLen)
 		{
-			// ×·¼ÓÔÚÊı×éÄ©Î²
+			// è¿½åŠ åœ¨æ•°ç»„æœ«å°¾
 			if (nLen == baBuffer.Length)
 				aPackage.AddRange(baBuffer);
 			else 
@@ -436,7 +437,7 @@ namespace DigitalPlatform.DTLP
 			int nLen)
 		{
 
-			// È·±£³ß´ç×ã¹»
+			// ç¡®ä¿å°ºå¯¸è¶³å¤Ÿ
 			aPackage = ByteArray.EnsureSize(aPackage, nStart + nLen);
 
 			Array.Copy(baBuffer, 0, aPackage, nStart, nLen);
@@ -462,9 +463,9 @@ namespace DigitalPlatform.DTLP
 			int lErrno,
 			out byte []aTarget)
 		{
-			int i;                 // Ñ­»·¼ÆÊı
-			int par_count = 0;     // ²ÎÊı×Ü¼ÆÊı
-			int whole_len;        // Í¨Ñ¶°üµÄ×Ü³¤¶È
+			int i;                 // å¾ªç¯è®¡æ•°
+			int par_count = 0;     // å‚æ•°æ€»è®¡æ•°
+			int whole_len;        // é€šè®¯åŒ…çš„æ€»é•¿åº¦
 			int slen;
 			Param param = null;
 	
@@ -483,14 +484,14 @@ namespace DigitalPlatform.DTLP
 			//pp=sbuff+16;
 
 			//baPackage.SetSize(sizeof(long)*4, CHUNK_SIZE);
-			// aTarget.AddRange(new char[4*4]);	// Õ¼×¡4*4¸öbyte
+			// aTarget.AddRange(new char[4*4]);	// å ä½4*4ä¸ªbyte
 
-			aTarget = ByteArray.EnsureSize(aTarget, 4*4);	// Õ¼×¡4*4¸öbyte
+			aTarget = ByteArray.EnsureSize(aTarget, 4*4);	// å ä½4*4ä¸ªbyte
 	
 			for(i=0;i<this.Count;i++) {
 				param = (Param)this[i];
 				if (param == null) {
-					Debug.Assert(false, "ParamÊı×éÖĞ³öÏÖ¿ÕÔªËØ");
+					Debug.Assert(false, "Paramæ•°ç»„ä¸­å‡ºç°ç©ºå…ƒç´ ");
 					continue;
 				}
 				if (param.m_nStyle == Param.STYLE_INT) {
@@ -507,19 +508,19 @@ namespace DigitalPlatform.DTLP
 						param.m_lValue);
 				}
 				else {
-					Debug.Assert(false, "Î´ÖªµÄ²ÎÊıÀàĞÍ");	// Î´ÖªµÄ²ÎÊıÀàĞÍ
+					Debug.Assert(false, "æœªçŸ¥çš„å‚æ•°ç±»å‹");	// æœªçŸ¥çš„å‚æ•°ç±»å‹
 				}
 		
 			}
 	
-			// ¼ÆËãÍ¨Ñ¶°üµÄ×Ü³¤¶È
+			// è®¡ç®—é€šè®¯åŒ…çš„æ€»é•¿åº¦
 			whole_len = aTarget.Length;
 	
-			// ·´À¡¸øµ÷ÓÃÕß
+			// åé¦ˆç»™è°ƒç”¨è€…
 			slen = whole_len;
 			whole_len = IPAddress.HostToNetworkOrder((Int32)whole_len);
 
-			// ÉèÖÃÕû¸ö°üµÄ³¤¶È
+			// è®¾ç½®æ•´ä¸ªåŒ…çš„é•¿åº¦
 			Array.Copy(BitConverter.GetBytes((Int32)whole_len),
 				0,
 				aTarget,
@@ -527,7 +528,7 @@ namespace DigitalPlatform.DTLP
 				4);
 
 
-			// ÉèÖÃ¹¦ÄÜºÅ
+			// è®¾ç½®åŠŸèƒ½å·
 			lFuncNum = IPAddress.HostToNetworkOrder((Int32)lFuncNum);
 			Array.Copy(BitConverter.GetBytes((Int32)lFuncNum),
 				0,
@@ -536,7 +537,7 @@ namespace DigitalPlatform.DTLP
 				4);
 
 	
-			// ÉèÖÃ²ÎÊı¸öÊı
+			// è®¾ç½®å‚æ•°ä¸ªæ•°
 			par_count = this.Count;
 			par_count = IPAddress.HostToNetworkOrder((Int32)par_count);
 			Array.Copy(BitConverter.GetBytes((Int32)par_count),
@@ -545,7 +546,7 @@ namespace DigitalPlatform.DTLP
 				8, 
 				4);
 
-			// ÉèÖÃ´íÎóÂë
+			// è®¾ç½®é”™è¯¯ç 
 			lErrno=IPAddress.HostToNetworkOrder((Int32)lErrno);
 			Array.Copy(BitConverter.GetBytes((Int32)lErrno),
 				0,
@@ -553,7 +554,7 @@ namespace DigitalPlatform.DTLP
 				12, 
 				4);
 
-			// ×îÖÕ¸´ÖÆ¸øÊä³ö²ÎÊı
+			// æœ€ç»ˆå¤åˆ¶ç»™è¾“å‡ºå‚æ•°
 			/*
 			baPackage = new byte[aTarget.Count];
 			aTarget.CopyTo(baPackage);
@@ -565,7 +566,7 @@ namespace DigitalPlatform.DTLP
 		public byte [] baValue(int nIndex)
 		{
 			Debug.Assert(nIndex >= 0 && nIndex < this.Count,
-				"nIndex²ÎÊı·Ç·¨");
+				"nIndexå‚æ•°éæ³•");
 
 			return ((Param)this[nIndex]).m_baValue;
 		}
@@ -573,7 +574,7 @@ namespace DigitalPlatform.DTLP
 		public Int32 lValue(int nIndex)
 		{
 				Debug.Assert(nIndex >= 0 && nIndex < this.Count,
-					"nIndex²ÎÊı·Ç·¨");
+					"nIndexå‚æ•°éæ³•");
 
 				return ((Param)this[nIndex]).m_lValue;
 		}

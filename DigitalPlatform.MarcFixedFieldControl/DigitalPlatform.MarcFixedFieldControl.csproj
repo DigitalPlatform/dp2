@@ -105,6 +105,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
       <Name>DigitalPlatform.Core</Name>

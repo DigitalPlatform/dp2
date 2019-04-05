@@ -34,6 +34,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

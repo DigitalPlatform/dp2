@@ -10,6 +10,7 @@ using System.Drawing;
 using ClosedXML.Excel;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.dp2.Statis
 {

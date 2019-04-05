@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
-
+using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryClient

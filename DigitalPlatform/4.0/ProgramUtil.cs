@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform
 {
+#if REMOVED
     public static class ProgramUtil
     {
         [DllImport("SHCore.dll", SetLastError = true)]
@@ -56,4 +57,6 @@ I quickly found out, it is not possible to specify it in the manifest, because C
             }
         }
     }
+
+#endif
 }

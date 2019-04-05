@@ -20,6 +20,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
+using DigitalPlatform.Core;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 

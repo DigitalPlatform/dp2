@@ -11,6 +11,7 @@ using System.IO;
 
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Transports;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.MessageClient
 {

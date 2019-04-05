@@ -10,6 +10,7 @@ using System.Reflection;
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 
