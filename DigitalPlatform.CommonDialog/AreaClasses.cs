@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Range;
 
 namespace DigitalPlatform.CommonDialog
 {

@@ -20,6 +20,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {

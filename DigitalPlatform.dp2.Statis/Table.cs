@@ -1,14 +1,15 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Text;
 using System.Diagnostics;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.dp2.Statis
 {
-    // ĞĞ
+    // è¡Œ
     public class Line : IComparable
     {
         internal object[] cells = null;
@@ -35,10 +36,10 @@ namespace DigitalPlatform.dp2.Statis
             return false;
         }
 
-        // µÃµ½Ò»¸öµ¥ÔªÖµ£¬×Ô¶¯×ª»»Îª×Ö·û´®
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»ØstrDefaultValue
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒå€¼ï¼Œè‡ªåŠ¨è½¬æ¢ä¸ºå­—ç¬¦ä¸²
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›strDefaultValue
         // parameters:
-        //      nIndex  ÁĞË÷Òı¡£Èç¹ûÎª-1£¬±íÊ¾Ï£Íû»ñÈ¡EntryÁĞ
+        //      nIndex  åˆ—ç´¢å¼•ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºå¸Œæœ›è·å–Entryåˆ—
         public string GetString(int nIndex,
             string strDefaultValue)
         {
@@ -72,17 +73,17 @@ namespace DigitalPlatform.dp2.Statis
                         return strDefaultValue;
                     return strText;
                 }
-                throw (new Exception("²»Ö§³ÖµÄÊı¾İÀàĞÍ " + obj.GetType().ToString()));
+                throw (new Exception("ä¸æ”¯æŒçš„æ•°æ®ç±»å‹ " + obj.GetType().ToString()));
             }
 
             return strDefaultValue;
 
         }
 
-        // µÃµ½Ò»¸öµ¥ÔªÖµ£¬×Ô¶¯×ª»»Îª×Ö·û´®
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»Ø""
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒå€¼ï¼Œè‡ªåŠ¨è½¬æ¢ä¸ºå­—ç¬¦ä¸²
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›""
         // parameters:
-        //      nIndex  ÁĞË÷Òı¡£Èç¹ûÎª-1£¬±íÊ¾Ï£Íû»ñÈ¡EntryÁĞ
+        //      nIndex  åˆ—ç´¢å¼•ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºå¸Œæœ›è·å–Entryåˆ—
         public string GetString(int nIndex)
         {
             /*
@@ -98,7 +99,7 @@ namespace DigitalPlatform.dp2.Statis
                      return Convert.ToString((Int64)obj);
                  if (obj is string)
                      return (string)obj;
-                 throw(new Exception("²»Ö§³ÖµÄÊı¾İÀàĞÍ"));
+                 throw(new Exception("ä¸æ”¯æŒçš„æ•°æ®ç±»å‹"));
              }
 
              return "";
@@ -106,7 +107,7 @@ namespace DigitalPlatform.dp2.Statis
             return GetString(nIndex, "");
         }
 
-        // µÃµ½100±¶ÕûÊı½ğ¶îÖµµÄ×Ö·û´®
+        // å¾—åˆ°100å€æ•´æ•°é‡‘é¢å€¼çš„å­—ç¬¦ä¸²
         // Exception:
         //		Exception
         //		???
@@ -117,8 +118,8 @@ namespace DigitalPlatform.dp2.Statis
             return StatisUtil.Int64ToPrice(v);
         }
 
-        // µÃµ½Ò»¸öµ¥ÔªÖµ£¬×Ô¶¯×ª»»ÎªInt64ÀàĞÍ
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»Ø0
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒå€¼ï¼Œè‡ªåŠ¨è½¬æ¢ä¸ºInt64ç±»å‹
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›0
         public Int64 GetInt64(int nIndex)
         {
             if (cells == null)
@@ -139,14 +140,14 @@ namespace DigitalPlatform.dp2.Statis
                 if (obj is string)
                     return Convert.ToInt64((string)obj);
 
-                throw (new Exception("²»Ö§³ÖµÄÊı¾İÀàĞÍ " + obj.GetType().ToString()));
+                throw (new Exception("ä¸æ”¯æŒçš„æ•°æ®ç±»å‹ " + obj.GetType().ToString()));
             }
 
             return (Int64)0;
         }
 
-        // µÃµ½Ò»¸öµ¥ÔªÖµ£¬×Ô¶¯×ª»»ÎªdoubleÀàĞÍ
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»Ø0
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒå€¼ï¼Œè‡ªåŠ¨è½¬æ¢ä¸ºdoubleç±»å‹
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›0
         public double GetDouble(int nIndex)
         {
             if (cells == null)
@@ -158,7 +159,7 @@ namespace DigitalPlatform.dp2.Statis
             if (obj != null)
             {
                 if ((obj is Int32) || (obj is Int64))
-                    return Convert.ToDouble(obj);   // ×¢Òâ£¬ÓÃ(double)Ö±½Ó×ª»»ÊÇ²»ĞĞµÄ
+                    return Convert.ToDouble(obj);   // æ³¨æ„ï¼Œç”¨(double)ç›´æ¥è½¬æ¢æ˜¯ä¸è¡Œçš„
                 else if (obj is double)
                     return (double)obj;
                 else if (obj is decimal)
@@ -168,16 +169,16 @@ namespace DigitalPlatform.dp2.Statis
                     string strText = (string)obj;
                     try
                     {
-                        return Convert.ToDouble(strText);   // BUG!!! ÍüÁËreturn
+                        return Convert.ToDouble(strText);   // BUG!!! å¿˜äº†return
                     }
                     catch (Exception ex)
                     {
                         // 2008/4/24
-                        throw new Exception("×Ö·û´®Öµ '" + strText + "' ÔÚ×ª»»ÎªdoubleÀàĞÍÊ±·¢Éú´íÎó: " + ex.Message);
+                        throw new Exception("å­—ç¬¦ä¸²å€¼ '" + strText + "' åœ¨è½¬æ¢ä¸ºdoubleç±»å‹æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message);
                     }
                 }
                 else
-                    throw (new Exception("²»Ö§³ÖµÄÊı¾İÀàĞÍ " + obj.GetType().ToString()));
+                    throw (new Exception("ä¸æ”¯æŒçš„æ•°æ®ç±»å‹ " + obj.GetType().ToString()));
             }
 
             return (double)0;
@@ -203,8 +204,8 @@ namespace DigitalPlatform.dp2.Statis
         }
 
         // 2008/11/29
-        // µÃµ½Ò»¸öµ¥ÔªÖµ£¬×Ô¶¯×ª»»ÎªdecimalÀàĞÍ
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»Ø0
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒå€¼ï¼Œè‡ªåŠ¨è½¬æ¢ä¸ºdecimalç±»å‹
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›0
         public decimal GetDecimal(int nIndex)
         {
             if (cells == null)
@@ -216,7 +217,7 @@ namespace DigitalPlatform.dp2.Statis
             if (obj != null)
             {
                 if ((obj is Int32) || (obj is Int64))
-                    return Convert.ToDecimal(obj);   // ×¢Òâ£¬ÓÃ(decimal)Ö±½Ó×ª»»ÊÇ²»ĞĞµÄ
+                    return Convert.ToDecimal(obj);   // æ³¨æ„ï¼Œç”¨(decimal)ç›´æ¥è½¬æ¢æ˜¯ä¸è¡Œçš„
                 else if (obj is double)
                     return Convert.ToDecimal((double)obj);
                 else if (obj is decimal)
@@ -231,20 +232,20 @@ namespace DigitalPlatform.dp2.Statis
                     catch (Exception ex)
                     {
                         // 2008/4/24
-                        throw new Exception("×Ö·û´®Öµ '" + strText + "' ÔÚ×ª»»ÎªdecimalÀàĞÍÊ±·¢Éú´íÎó: " + ex.Message);
+                        throw new Exception("å­—ç¬¦ä¸²å€¼ '" + strText + "' åœ¨è½¬æ¢ä¸ºdecimalç±»å‹æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message);
                     }
                 }
                 else
-                    throw (new Exception("²»Ö§³ÖµÄÊı¾İÀàĞÍ " + obj.GetType().ToString()));
+                    throw (new Exception("ä¸æ”¯æŒçš„æ•°æ®ç±»å‹ " + obj.GetType().ToString()));
             }
 
             return (decimal)0;
         }
 
-        // µÃµ½Ò»¸öµ¥ÔªµÄObjectÀàĞÍÖµ¡£
-        // Èç¹ûÒ»¸öµ¥Ôª²»ÔøÉèÖÃ¹ıÊı¾İ£¬Ôò·µ»Ønull
+        // å¾—åˆ°ä¸€ä¸ªå•å…ƒçš„Objectç±»å‹å€¼ã€‚
+        // å¦‚æœä¸€ä¸ªå•å…ƒä¸æ›¾è®¾ç½®è¿‡æ•°æ®ï¼Œåˆ™è¿”å›null
         // parameters:
-        //      nIndex  ÁĞË÷Òı¡£Èç¹ûÎª-1£¬±íÊ¾Ï£Íû»ñÈ¡EntryÁĞ
+        //      nIndex  åˆ—ç´¢å¼•ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºå¸Œæœ›è·å–Entryåˆ—
         public object this[int nIndex]
         {
             get
@@ -273,7 +274,7 @@ namespace DigitalPlatform.dp2.Statis
 
         public int CompareTo(object obj)
         {
-            // Ïàµ±ÓÚthis - objµÄĞ§¹û
+            // ç›¸å½“äºthis - objçš„æ•ˆæœ
 
             if (obj is Line)
             {
@@ -285,7 +286,7 @@ namespace DigitalPlatform.dp2.Statis
             throw new ArgumentException("object is not a Line");
         }
 
-        // ĞĞ±êÌâ×Ö·û´®
+        // è¡Œæ ‡é¢˜å­—ç¬¦ä¸²
         public string Entry
         {
             get
@@ -294,12 +295,12 @@ namespace DigitalPlatform.dp2.Statis
             }
             set
             {
-                // TODO: ¸üĞÂhashtableµÄitem key?
+                // TODO: æ›´æ–°hashtableçš„item key?
                 strKey = value;
             }
         }
 
-        // È·±£ÁĞ¿Õ¼ä×ã¹»
+        // ç¡®ä¿åˆ—ç©ºé—´è¶³å¤Ÿ
         void EnsureCells(int nColumn)
         {
             if (cells == null)
@@ -309,13 +310,13 @@ namespace DigitalPlatform.dp2.Statis
             else if (cells.Length <= nColumn)
             {
                 object[] temp = new object[nColumn + 1];
-                // ¸´ÖÆ
+                // å¤åˆ¶
                 Array.Copy(cells, 0, temp, 0, cells.Length);
                 cells = temp;
             }
         }
 
-        // ÎªÒ»ÁĞÉèÖÃÒ»¸öÖµ
+        // ä¸ºä¸€åˆ—è®¾ç½®ä¸€ä¸ªå€¼
         public void SetValue(int nColumn,
             object value)
         {
@@ -324,11 +325,11 @@ namespace DigitalPlatform.dp2.Statis
             cells[nColumn] = value;
         }
 
-        // ÎªÒ»ÁĞµÄÕûÊıÖµÔöÁ¿
-        // ±¾·½·¨Ö»ÄÜÓ¦ÓÃÔÚInt32»òInt64ÖµÀàĞÍµÄÁĞÉÏ£¬·ñÔò»áÅ×³öÒì³£
+        // ä¸ºä¸€åˆ—çš„æ•´æ•°å€¼å¢é‡
+        // æœ¬æ–¹æ³•åªèƒ½åº”ç”¨åœ¨Int32æˆ–Int64å€¼ç±»å‹çš„åˆ—ä¸Šï¼Œå¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //		createValue	Èç¹ûÁĞµ¥Ôª²»´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ³õÊ¼ÉèÖÃ
-        //		incValue	Èç¹ûÁĞµ¥ÔªÒÑ¾­´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ¼ÓÉÏÔ­À´µÄÖµ£¬ĞŞ¸Ä»Ø
+        //		createValue	å¦‚æœåˆ—å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åˆå§‹è®¾ç½®
+        //		incValue	å¦‚æœåˆ—å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åŠ ä¸ŠåŸæ¥çš„å€¼ï¼Œä¿®æ”¹å›
         public void IncValue(
             int nColumn,
             Int64 createValue,
@@ -357,16 +358,16 @@ namespace DigitalPlatform.dp2.Statis
                 }
                 else
                 {
-                    throw (new Exception("ÁĞ" + Convert.ToString(nColumn) + "ÀàĞÍ±ØĞëÎªInt32»òInt64"));
+                    throw (new Exception("åˆ—" + Convert.ToString(nColumn) + "ç±»å‹å¿…é¡»ä¸ºInt32æˆ–Int64"));
                 }
             }
         }
 
-        // ÎªÒ»ÁĞµÄÕûÊıÖµÔöÁ¿
-        // ±¾·½·¨Ö»ÄÜÓ¦ÓÃÔÚInt32»òInt64ÖµÀàĞÍµÄÁĞÉÏ£¬·ñÔò»áÅ×³öÒì³£
+        // ä¸ºä¸€åˆ—çš„æ•´æ•°å€¼å¢é‡
+        // æœ¬æ–¹æ³•åªèƒ½åº”ç”¨åœ¨Int32æˆ–Int64å€¼ç±»å‹çš„åˆ—ä¸Šï¼Œå¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //		createValue	Èç¹ûÁĞµ¥Ôª²»´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ³õÊ¼ÉèÖÃ
-        //		incValue	Èç¹ûÁĞµ¥ÔªÒÑ¾­´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ¼ÓÉÏÔ­À´µÄÖµ£¬ĞŞ¸Ä»Ø
+        //		createValue	å¦‚æœåˆ—å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åˆå§‹è®¾ç½®
+        //		incValue	å¦‚æœåˆ—å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åŠ ä¸ŠåŸæ¥çš„å€¼ï¼Œä¿®æ”¹å›
         public void IncValue(
             int nColumn,
             double createValue,
@@ -402,17 +403,17 @@ namespace DigitalPlatform.dp2.Statis
                 }
                 else
                 {
-                    throw (new Exception("ÁĞ" + Convert.ToString(nColumn) + "ÀàĞÍ±ØĞëÎªInt32»òInt64»òdouble"));
+                    throw (new Exception("åˆ—" + Convert.ToString(nColumn) + "ç±»å‹å¿…é¡»ä¸ºInt32æˆ–Int64æˆ–double"));
                 }
             }
         }
 
         // 2008/11/29
-        // ÎªÒ»ÁĞµÄÕûÊıÖµÔöÁ¿
-        // ±¾·½·¨Ö»ÄÜÓ¦ÓÃÔÚInt32»òInt64ÖµÀàĞÍµÄÁĞÉÏ£¬·ñÔò»áÅ×³öÒì³£
+        // ä¸ºä¸€åˆ—çš„æ•´æ•°å€¼å¢é‡
+        // æœ¬æ–¹æ³•åªèƒ½åº”ç”¨åœ¨Int32æˆ–Int64å€¼ç±»å‹çš„åˆ—ä¸Šï¼Œå¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //		createValue	Èç¹ûÁĞµ¥Ôª²»´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ³õÊ¼ÉèÖÃ
-        //		incValue	Èç¹ûÁĞµ¥ÔªÒÑ¾­´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ¼ÓÉÏÔ­À´µÄÖµ£¬ĞŞ¸Ä»Ø
+        //		createValue	å¦‚æœåˆ—å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åˆå§‹è®¾ç½®
+        //		incValue	å¦‚æœåˆ—å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åŠ ä¸ŠåŸæ¥çš„å€¼ï¼Œä¿®æ”¹å›
         public void IncValue(
             int nColumn,
             decimal createValue,
@@ -448,16 +449,16 @@ namespace DigitalPlatform.dp2.Statis
                 }
                 else
                 {
-                    throw (new Exception("ÁĞ" + Convert.ToString(nColumn) + "ÀàĞÍ±ØĞëÎªInt32»òInt64»òdecimal"));
+                    throw (new Exception("åˆ—" + Convert.ToString(nColumn) + "ç±»å‹å¿…é¡»ä¸ºInt32æˆ–Int64æˆ–decimal"));
                 }
             }
         }
 
-        // ÎªÒ»ÁĞµÄ×Ö·û´®ÖµÔöÁ¿
-        // ±¾·½·¨Ö»ÄÜÓ¦ÓÃÔÚstringÖµÀàĞÍµÄÁĞÉÏ£¬·ñÔò»áÅ×³öÒì³£
+        // ä¸ºä¸€åˆ—çš„å­—ç¬¦ä¸²å€¼å¢é‡
+        // æœ¬æ–¹æ³•åªèƒ½åº”ç”¨åœ¨stringå€¼ç±»å‹çš„åˆ—ä¸Šï¼Œå¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //		createValue	Èç¹ûÁĞµ¥Ôª²»´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ³õÊ¼ÉèÖÃ
-        //		incValue	Èç¹ûÁĞµ¥ÔªÒÑ¾­´æÔÚ£¬Ôò²ÉÓÃÔ­À´µÄÖµºóÃæ×·¼Ó´ËÖµ£¬ĞŞ¸Ä»Ø
+        //		createValue	å¦‚æœåˆ—å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åˆå§‹è®¾ç½®
+        //		incValue	å¦‚æœåˆ—å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨åŸæ¥çš„å€¼åé¢è¿½åŠ æ­¤å€¼ï¼Œä¿®æ”¹å›
         public void IncValue(
             int nColumn,
             string createValue,
@@ -480,16 +481,16 @@ namespace DigitalPlatform.dp2.Statis
                 }
                 else
                 {
-                    throw (new Exception("ÁĞ" + Convert.ToString(nColumn) + "ÀàĞÍ±ØĞëÎªstring"));
+                    throw (new Exception("åˆ—" + Convert.ToString(nColumn) + "ç±»å‹å¿…é¡»ä¸ºstring"));
                 }
             }
         }
 
-        // ÎªÒ»ÁĞµÄ×Ö·û´®ÖµÔöÁ¿
-        // ±¾·½·¨Ö»ÄÜÓ¦ÓÃÔÚstringÖµÀàĞÍµÄÁĞÉÏ£¬·ñÔò»áÅ×³öÒì³£
+        // ä¸ºä¸€åˆ—çš„å­—ç¬¦ä¸²å€¼å¢é‡
+        // æœ¬æ–¹æ³•åªèƒ½åº”ç”¨åœ¨stringå€¼ç±»å‹çš„åˆ—ä¸Šï¼Œå¦åˆ™ä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //		createValue	Èç¹ûÁĞµ¥Ôª²»´æÔÚ£¬Ôò²ÉÓÃ´ËÖµ³õÊ¼ÉèÖÃ
-        //		incValue	Èç¹ûÁĞµ¥ÔªÒÑ¾­´æÔÚ£¬Ôò²ÉÓÃÔ­À´µÄÖµºóÃæ×·¼Ó´ËÖµ£¬ĞŞ¸Ä»Ø
+        //		createValue	å¦‚æœåˆ—å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨æ­¤å€¼åˆå§‹è®¾ç½®
+        //		incValue	å¦‚æœåˆ—å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™é‡‡ç”¨åŸæ¥çš„å€¼åé¢è¿½åŠ æ­¤å€¼ï¼Œä¿®æ”¹å›
         public void IncCurrency(
             int nColumn,
             string createValue,
@@ -508,27 +509,27 @@ namespace DigitalPlatform.dp2.Statis
                 {
                     string v = (string)oldvalue;
 
-                    // Á¬½ÓÁ½¸ö¼Û¸ñ×Ö·û´®
+                    // è¿æ¥ä¸¤ä¸ªä»·æ ¼å­—ç¬¦ä¸²
                     v = PriceUtil.JoinPriceString(v,
                         incValue);
 
                     string strSumPrices = "";
                     string strError = "";
-                    // ½«ĞÎÈç"-123.4+10.55-20.3"µÄ¼Û¸ñ×Ö·û´®¹é²¢»ã×Ü
+                    // å°†å½¢å¦‚"-123.4+10.55-20.3"çš„ä»·æ ¼å­—ç¬¦ä¸²å½’å¹¶æ±‡æ€»
                     int nRet = PriceUtil.SumPrices(v,
             out strSumPrices,
             out strError);
                     if (nRet == 0)
                         v = strSumPrices;
                     if (nRet == -1)
-                        throw new Exception("»ã×Ü½ğ¶î×Ö·û´® '" + v + "' Ê±³ö´í£º" + strError);
+                        throw new Exception("æ±‡æ€»é‡‘é¢å­—ç¬¦ä¸² '" + v + "' æ—¶å‡ºé”™ï¼š" + strError);
 
                     // v += incValue;
                     cells[nColumn] = v;
                 }
                 else
                 {
-                    throw (new Exception("ÁĞ" + Convert.ToString(nColumn) + "ÀàĞÍ±ØĞëÎªstring"));
+                    throw (new Exception("åˆ—" + Convert.ToString(nColumn) + "ç±»å‹å¿…é¡»ä¸ºstring"));
                 }
             }
         }
@@ -536,7 +537,7 @@ namespace DigitalPlatform.dp2.Statis
     }
 
     /// <summary>
-    /// °ïÖú¹éÀàÍ³¼ÆµÄ2Î¬ÄÚ´æ±í¸ñ
+    /// å¸®åŠ©å½’ç±»ç»Ÿè®¡çš„2ç»´å†…å­˜è¡¨æ ¼
     /// </summary>
     public class Table : IEnumerable
     {
@@ -544,7 +545,7 @@ namespace DigitalPlatform.dp2.Statis
 
         List<Line> sorted = null;
 
-        int m_nColumnsHint = 0;	// °µÊ¾±íµÄÁĞÊı
+        int m_nColumnsHint = 0;	// æš—ç¤ºè¡¨çš„åˆ—æ•°
 
         public int HintColumns
         {
@@ -602,15 +603,15 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-        // Ğ´ÈëÒ»¸öµ¥ÔªµÄÖµ
+        // å†™å…¥ä¸€ä¸ªå•å…ƒçš„å€¼
         public void SetValue(string strEntry,
             int nColumn,
             object value)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.SetValue(nColumn, value);
         }
@@ -646,13 +647,13 @@ namespace DigitalPlatform.dp2.Statis
             lines.Remove(strEntry);
         }
 
-        // É¾³ı´ÓnStart¿ªÊ¼µ½Ä©Î²µÄĞĞ
+        // åˆ é™¤ä»nStartå¼€å§‹åˆ°æœ«å°¾çš„è¡Œ
         public void RemoveLines(int nStart)
         {
             RemoveLines(nStart, lines.Count);   // ?? lines.Count - nStart
         }
 
-        // É¾³ıÖ¸¶¨·¶Î§µÄĞĞ
+        // åˆ é™¤æŒ‡å®šèŒƒå›´çš„è¡Œ
         public void RemoveLines(int nStart,
             int nCount)
         {
@@ -675,14 +676,14 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-        // µÃµ½ĞĞ¶ÔÏó¡£Èç¹û²»´æÔÚ£¬ÔòÁÙÊ±´´½¨Ò»¸ö
+        // å¾—åˆ°è¡Œå¯¹è±¡ã€‚å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™ä¸´æ—¶åˆ›å»ºä¸€ä¸ª
         public Line EnsureLine(string strEntry,
             int nColumnsHint = -1)
         {
             if (strEntry == null)
-                throw new ArgumentException("strEntry ²ÎÊıÖµ²»Ó¦Îª null", "strEntry");
+                throw new ArgumentException("strEntry å‚æ•°å€¼ä¸åº”ä¸º null", "strEntry");
 
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = (Line)lines[strEntry];
 
             if (line == null)
@@ -696,7 +697,7 @@ namespace DigitalPlatform.dp2.Statis
                 lines.Add(strEntry, line);
             }
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
 
             return line;
@@ -710,21 +711,21 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-        // ±ØĞëÅÅĞòºó²ÅÄÜÓÃ
+        // å¿…é¡»æ’åºåæ‰èƒ½ç”¨
         public Line this[int nIndex]
         {
             get
             {
-                // TODO: µ±±íÄÚ¼ÓÈëÁËĞÂµÄĞĞ»òÕßÉ¾³ıÁËĞĞÒÔºó£¬sortedÓ¦¸Ã»Ö¸´null
+                // TODO: å½“è¡¨å†…åŠ å…¥äº†æ–°çš„è¡Œæˆ–è€…åˆ é™¤äº†è¡Œä»¥åï¼Œsortedåº”è¯¥æ¢å¤null
                 if (sorted == null)
                 {
-                    throw (new Exception("Ê¹ÓÃ[int nIndex]Ë÷ÒıÆ÷Ö®Ç°£¬±ØĞëÏÈÓÃSort()·½·¨ÅÅĞò..."));
+                    throw (new Exception("ä½¿ç”¨[int nIndex]ç´¢å¼•å™¨ä¹‹å‰ï¼Œå¿…é¡»å…ˆç”¨Sort()æ–¹æ³•æ’åº..."));
                 }
                 return (Line)sorted[nIndex];
             }
         }
 
-        // °ü×°ºóµÄ°æ±¾ 2015/4/2
+        // åŒ…è£…åçš„ç‰ˆæœ¬ 2015/4/2
         public void IncValue(string strEntry,
             int nColumn,
             Int64 value)
@@ -735,68 +736,68 @@ namespace DigitalPlatform.dp2.Statis
                 value);
         }
 
-        // ÀÛ¼ÓÒ»¸öµ¥ÔªµÄÖµ
-        // createValue	Èç¹ûÖ¸¶¨µÄµ¥Ôª²»´æÔÚ£¬ÔòÒÔ´ËÖµ´´½¨ĞÂµ¥Ôª
-        // incValue	Èç¹ûÖ¸¶¨µÄµ¥ÔªÒÑ¾­´æÔÚ£¬ÔòÔÚÔ­ÖµÉÏµİÔö´ËÖµ¡£
+        // ç´¯åŠ ä¸€ä¸ªå•å…ƒçš„å€¼
+        // createValue	å¦‚æœæŒ‡å®šçš„å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™ä»¥æ­¤å€¼åˆ›å»ºæ–°å•å…ƒ
+        // incValue	å¦‚æœæŒ‡å®šçš„å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™åœ¨åŸå€¼ä¸Šé€’å¢æ­¤å€¼ã€‚
         public void IncValue(string strEntry,
             int nColumn,
             Int64 createValue,
             Int64 incValue)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.IncValue(nColumn, createValue, incValue);
         }
 
-        // ÀÛ¼ÓÒ»¸öµ¥ÔªµÄÖµ
-        // createValue	Èç¹ûÖ¸¶¨µÄµ¥Ôª²»´æÔÚ£¬ÔòÒÔ´ËÖµ´´½¨ĞÂµ¥Ôª
-        // incValue	Èç¹ûÖ¸¶¨µÄµ¥ÔªÒÑ¾­´æÔÚ£¬ÔòÔÚÔ­ÖµÉÏµİÔö´ËÖµ¡£
+        // ç´¯åŠ ä¸€ä¸ªå•å…ƒçš„å€¼
+        // createValue	å¦‚æœæŒ‡å®šçš„å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™ä»¥æ­¤å€¼åˆ›å»ºæ–°å•å…ƒ
+        // incValue	å¦‚æœæŒ‡å®šçš„å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™åœ¨åŸå€¼ä¸Šé€’å¢æ­¤å€¼ã€‚
         public void IncValue(string strEntry,
             int nColumn,
             double createValue,
             double incValue)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.IncValue(nColumn, createValue, incValue);
         }
 
         // 2008/12/1
-        // ÀÛ¼ÓÒ»¸öµ¥ÔªµÄÖµ
-        // createValue	Èç¹ûÖ¸¶¨µÄµ¥Ôª²»´æÔÚ£¬ÔòÒÔ´ËÖµ´´½¨ĞÂµ¥Ôª
-        // incValue	Èç¹ûÖ¸¶¨µÄµ¥ÔªÒÑ¾­´æÔÚ£¬ÔòÔÚÔ­ÖµÉÏµİÔö´ËÖµ¡£
+        // ç´¯åŠ ä¸€ä¸ªå•å…ƒçš„å€¼
+        // createValue	å¦‚æœæŒ‡å®šçš„å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™ä»¥æ­¤å€¼åˆ›å»ºæ–°å•å…ƒ
+        // incValue	å¦‚æœæŒ‡å®šçš„å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™åœ¨åŸå€¼ä¸Šé€’å¢æ­¤å€¼ã€‚
         public void IncValue(string strEntry,
             int nColumn,
             decimal createValue,
             decimal incValue)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.IncValue(nColumn, createValue, incValue);
         }
 
 
-        // ÀÛ¼ÓÒ»¸öµ¥ÔªµÄÖµ
-        // createValue	Èç¹ûÖ¸¶¨µÄµ¥Ôª²»´æÔÚ£¬ÔòÒÔ´ËÖµ´´½¨ĞÂµ¥Ôª
-        // incValue	Èç¹ûÖ¸¶¨µÄµ¥ÔªÒÑ¾­´æÔÚ£¬ÔòÔÚÔ­Öµºó×·¼Ó´ËÖµ¡£
+        // ç´¯åŠ ä¸€ä¸ªå•å…ƒçš„å€¼
+        // createValue	å¦‚æœæŒ‡å®šçš„å•å…ƒä¸å­˜åœ¨ï¼Œåˆ™ä»¥æ­¤å€¼åˆ›å»ºæ–°å•å…ƒ
+        // incValue	å¦‚æœæŒ‡å®šçš„å•å…ƒå·²ç»å­˜åœ¨ï¼Œåˆ™åœ¨åŸå€¼åè¿½åŠ æ­¤å€¼ã€‚
         public void IncValue(string strEntry,
             int nColumn,
             string createValue,
             string incValue)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.IncValue(nColumn, createValue, incValue);
         }
@@ -806,19 +807,19 @@ namespace DigitalPlatform.dp2.Statis
     string createValue,
     string incValue)
         {
-            // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+            // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
             Line line = EnsureLine(strEntry, m_nColumnsHint);
 
-            Debug.Assert(line != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+            Debug.Assert(line != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
             line.IncCurrency(nColumn, createValue, incValue);
         }
 
 
-        // °´ÕÕĞĞ±êÌâ£¬ÉıĞòÅÅĞò
+        // æŒ‰ç…§è¡Œæ ‡é¢˜ï¼Œå‡åºæ’åº
         public void Sort()
         {
-            // °ÑlinesÖĞËùÓĞ¶ÔÏóÖ¸Õë¸´ÖÆµ½ArrayListÖĞ
+            // æŠŠlinesä¸­æ‰€æœ‰å¯¹è±¡æŒ‡é’ˆå¤åˆ¶åˆ°ArrayListä¸­
             if (sorted == null)
             {
                 // sorted = new ArrayList();
@@ -838,10 +839,10 @@ namespace DigitalPlatform.dp2.Statis
 
 #if NO
         // 2009/9/30
-        // ×Ô¶¨Òå¹æÔòÅÅĞò
+        // è‡ªå®šä¹‰è§„åˆ™æ’åº
         public void Sort(IComparer comparer)
         {
-            // °ÑlinesÖĞËùÓĞ¶ÔÏóÖ¸Õë¸´ÖÆµ½ArrayListÖĞ
+            // æŠŠlinesä¸­æ‰€æœ‰å¯¹è±¡æŒ‡é’ˆå¤åˆ¶åˆ°ArrayListä¸­
             if (sorted == null)
             {
                 // sorted = new ArrayList();
@@ -861,7 +862,7 @@ namespace DigitalPlatform.dp2.Statis
 
         public void Sort(IComparer<Line> comparer)
         {
-            // °ÑlinesÖĞËùÓĞ¶ÔÏóÖ¸Õë¸´ÖÆµ½ArrayListÖĞ
+            // æŠŠlinesä¸­æ‰€æœ‰å¯¹è±¡æŒ‡é’ˆå¤åˆ¶åˆ°ArrayListä¸­
             if (sorted == null)
             {
                 // sorted = new ArrayList();
@@ -878,11 +879,11 @@ namespace DigitalPlatform.dp2.Statis
             sorted.Sort(comparer);
         }
 
-        // °´ÕÕ¸´ÔÓÒªÇóÅÅĞò
-        // strColumnList	¶ººÅ·Ö¸îµÄÁĞºÅ×Ö·û´®£¬ÅÅĞò½«°´ÕÕÕâ¸öÓÅÏÈ¼¶½øĞĞ
+        // æŒ‰ç…§å¤æ‚è¦æ±‚æ’åº
+        // strColumnList	é€—å·åˆ†å‰²çš„åˆ—å·å­—ç¬¦ä¸²ï¼Œæ’åºå°†æŒ‰ç…§è¿™ä¸ªä¼˜å…ˆçº§è¿›è¡Œ
         public void Sort(string strColumnList)
         {
-            // °ÑlinesÖĞËùÓĞ¶ÔÏóÖ¸Õë¸´ÖÆµ½ArrayListÖĞ
+            // æŠŠlinesä¸­æ‰€æœ‰å¯¹è±¡æŒ‡é’ˆå¤åˆ¶åˆ°ArrayListä¸­
             if (sorted == null)
             {
                 // sorted = new ArrayList();
@@ -900,7 +901,7 @@ namespace DigitalPlatform.dp2.Statis
             sorted.Sort(new ComparerClass(strColumnList));
         }
 
-        // µÃµ½Ëæ»úµÄµÚÒ»ĞĞ
+        // å¾—åˆ°éšæœºçš„ç¬¬ä¸€è¡Œ
         public Line FirstHashLine()
         {
             foreach (DictionaryEntry item in lines)
@@ -911,7 +912,7 @@ namespace DigitalPlatform.dp2.Statis
             return null;
         }
 
-        #region IComparerÀàComparerClass£¬ÓÃÓÚÅÅĞò
+        #region IComparerç±»ComparerClassï¼Œç”¨äºæ’åº
 
         public class ComparerClass : IComparer<Line>
         {
@@ -937,7 +938,7 @@ namespace DigitalPlatform.dp2.Statis
                 Line line2 = (Line)y;
                 */
                 if (sortstyle == null)
-                    throw (new Exception("sortstyleÉĞÎ´´´½¨"));
+                    throw (new Exception("sortstyleå°šæœªåˆ›å»º"));
 
                 for (int i = 0; i < this.sortstyle.Count; i++)
                 {
@@ -945,7 +946,7 @@ namespace DigitalPlatform.dp2.Statis
 
                     int nRet = 0;
 
-                    // È¡ĞĞ±êÌâ½øĞĞ±È½Ï
+                    // å–è¡Œæ ‡é¢˜è¿›è¡Œæ¯”è¾ƒ
                     if (column.nColumnNumber == -1)
                     {
                         nRet = column.CompareString(line1.strKey, line2.strKey);
@@ -962,7 +963,7 @@ namespace DigitalPlatform.dp2.Statis
                             }
                             else
                             {
-                                // ÓÒ¶ÔÆë?
+                                // å³å¯¹é½?
                                 string s1 = line1.strKey;
                                 string s2 = line2.strKey;
 
@@ -1027,7 +1028,7 @@ namespace DigitalPlatform.dp2.Statis
                             {
                                 try
                                 {
-                                    n1 = Convert.ToInt64((string)o1);	// ¿ÉÄÜÅ×³öÒì³£
+                                    n1 = Convert.ToInt64((string)o1);	// å¯èƒ½æŠ›å‡ºå¼‚å¸¸
                                 }
                                 catch
                                 {
@@ -1065,7 +1066,7 @@ namespace DigitalPlatform.dp2.Statis
 
                             if (bException == true)
                             {
-                                // ¶ÔÆë
+                                // å¯¹é½
                                 int nMaxLength = Math.Max(s1.Length, s2.Length);
                                 s2 = s2.PadLeft(nMaxLength, '0');
                                 s1 = s1.PadLeft(nMaxLength, '0');

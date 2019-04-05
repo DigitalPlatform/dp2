@@ -23,6 +23,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Text.RegularExpressions;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {

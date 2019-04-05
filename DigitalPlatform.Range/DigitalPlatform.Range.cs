@@ -8,6 +8,7 @@ using DigitalPlatform;
 
 namespace DigitalPlatform.Range
 {
+#if REMOVED
     /// <summary>
     /// RangeItem是RangeList集合的成员，表示一个连续的范围
     /// </summary>
@@ -1090,4 +1091,6 @@ namespace DigitalPlatform.Range
         }
 
     } // end of class RangeList
+
+#endif
 }

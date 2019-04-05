@@ -34,6 +34,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using Jint;
 using Jint.Native;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {

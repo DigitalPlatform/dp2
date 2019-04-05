@@ -10,7 +10,6 @@ using System.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.rms;
 
 namespace DigitalPlatform.rms.Client

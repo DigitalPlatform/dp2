@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.dp2.Statis
 {
