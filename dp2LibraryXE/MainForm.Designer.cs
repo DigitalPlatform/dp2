@@ -55,6 +55,7 @@
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_restoreDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_tools = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_enableWindowsMsmq = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_configLibraryXmlMq = new System.Windows.Forms.ToolStripMenuItem();
@@ -85,7 +86,6 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_restoreDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -264,6 +264,13 @@
             this.MenuItem_restartDp2Kernel.Size = new System.Drawing.Size(458, 30);
             this.MenuItem_restartDp2Kernel.Text = "重新启动 dp2Kernel";
             this.MenuItem_restartDp2Kernel.Click += new System.EventHandler(this.MenuItem_restartDp2Kernel_Click);
+            // 
+            // MenuItem_restoreDp2library
+            // 
+            this.MenuItem_restoreDp2library.Name = "MenuItem_restoreDp2library";
+            this.MenuItem_restoreDp2library.Size = new System.Drawing.Size(458, 30);
+            this.MenuItem_restoreDp2library.Text = "从大备份恢复 ...";
+            this.MenuItem_restoreDp2library.Click += new System.EventHandler(this.MenuItem_restoreDp2library_Click);
             // 
             // MenuItem_tools
             // 
@@ -513,13 +520,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(558, 357);
             this.webBrowser1.TabIndex = 7;
-            // 
-            // MenuItem_restoreDp2library
-            // 
-            this.MenuItem_restoreDp2library.Name = "MenuItem_restoreDp2library";
-            this.MenuItem_restoreDp2library.Size = new System.Drawing.Size(458, 30);
-            this.MenuItem_restoreDp2library.Text = "从大备份恢复 ...";
-            this.MenuItem_restoreDp2library.Click += new System.EventHandler(this.MenuItem_restoreDp2library_Click);
             // 
             // MainForm
             // 
