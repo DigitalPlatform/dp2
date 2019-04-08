@@ -1,4 +1,4 @@
-namespace dp2Catalog
+锘縩amespace DigitalPlatform.Z3950
 {
     partial class RecordSyntaxAndEncodingBindingItemDlg
     {
@@ -43,7 +43,7 @@ namespace dp2Catalog
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(99, 15);
             this.label1.TabIndex = 0;
-            this.label1.Text = "数据格式(&S):";
+            this.label1.Text = "鏁版嵁鏍煎紡(&S):";
             // 
             // comboBox_recordSyntax
             // 
@@ -82,7 +82,7 @@ namespace dp2Catalog
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(99, 15);
             this.label2.TabIndex = 2;
-            this.label2.Text = "编码方式(&E):";
+            this.label2.Text = "缂栫爜鏂瑰紡(&E):";
             // 
             // button_OK
             // 
@@ -91,7 +91,7 @@ namespace dp2Catalog
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 28);
             this.button_OK.TabIndex = 4;
-            this.button_OK.Text = "确定";
+            this.button_OK.Text = "纭畾";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -102,7 +102,7 @@ namespace dp2Catalog
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 28);
             this.button_Cancel.TabIndex = 5;
-            this.button_Cancel.Text = "取消";
+            this.button_Cancel.Text = "鍙栨秷";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
@@ -118,7 +118,7 @@ namespace dp2Catalog
             this.Controls.Add(this.comboBox_recordSyntax);
             this.Controls.Add(this.label1);
             this.Name = "RecordSyntaxAndEncodingBindingItemDlg";
-            this.Text = "一个数据格式和编码方式绑定事项";
+            this.Text = "涓�涓暟鎹牸寮忓拰缂栫爜鏂瑰紡缁戝畾浜嬮」";
             this.Load += new System.EventHandler(this.RecordSyntaxAndEncodingBindingItemDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

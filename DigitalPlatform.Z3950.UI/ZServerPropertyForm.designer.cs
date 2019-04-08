@@ -1,4 +1,4 @@
-﻿namespace dp2Catalog
+﻿namespace DigitalPlatform.Z3950
 {
     partial class ZServerPropertyForm
     {
