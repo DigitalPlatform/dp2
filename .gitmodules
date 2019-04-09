@@ -1,3 +1,4 @@
 [submodule "dp-library"]
 	path = dp-library
 	url = https://github.com/DigitalPlatform/dp-library.git
+	branch = master
