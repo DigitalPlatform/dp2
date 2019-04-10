@@ -1062,7 +1062,6 @@ MessageBoxDefaultButton.Button2);
                     container.Remove(newnode);
                     parent_xml_node.RemoveChild(newxmlnode);
                 }
-
             }
 
             if (strType == "dir")
