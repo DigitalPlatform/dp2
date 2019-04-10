@@ -79,6 +79,8 @@ namespace RfidDrivers.First
             List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
             readers.AddRange(EnumComReader("M201"));
 
+            List<Reader> removed = new List<Reader>();
+
             // name --> count
             Hashtable table = new Hashtable();
 
@@ -87,7 +89,14 @@ namespace RfidDrivers.First
             {
                 var fill_result = FillReaderInfo(reader);
                 if (fill_result.Value == -1)
+                {
+                    if (reader.Type == "COM")
+                    {
+                        removed.Add(reader);
+                        continue;
+                    }
                     return fill_result;
+                }
 
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
@@ -110,6 +119,12 @@ namespace RfidDrivers.First
 
                     table[reader.ProductName] = ++count;
                 }
+            }
+
+            // 去掉填充信息阶段报错的那些 reader
+            foreach(Reader reader in removed)
+            {
+                readers.Remove(reader);
             }
 
             _readers = readers;
