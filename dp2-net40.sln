@@ -209,6 +209,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalPlatform.Z3950", "dp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Z3950.UI", "DigitalPlatform.Z3950.UI\DigitalPlatform.Z3950.UI.csproj", "{BC9AE7E9-B22F-4A7C-8763-810F737B579F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMarcEditor", "TestMarcEditor\TestMarcEditor.csproj", "{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1651,6 +1653,24 @@ Global
 		{BC9AE7E9-B22F-4A7C-8763-810F737B579F}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{BC9AE7E9-B22F-4A7C-8763-810F737B579F}.Test|x86.ActiveCfg = Release|Any CPU
 		{BC9AE7E9-B22F-4A7C-8763-810F737B579F}.Test|x86.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Debug|x86.Build.0 = Debug|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|x86.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Release|x86.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|Any CPU.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|x86.ActiveCfg = Release|Any CPU
+		{2CB9F6C9-7CD5-4076-B793-BC0B04DD0C42}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
