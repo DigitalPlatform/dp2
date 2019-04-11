@@ -76,6 +76,12 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            if (string.IsNullOrEmpty(this.GcatDbName))
+            {
+                strError = "当前尚未配置 著者号码 库名";
+                return -1;
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
