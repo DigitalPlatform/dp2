@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.2.*")]
-[assembly: AssemblyFileVersion("3.2.0.0")]
+[assembly: AssemblyVersion("3.3.*")]
+[assembly: AssemblyFileVersion("3.3.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -62,3 +62,4 @@ using System.Runtime.InteropServices;
 // 3.0 2018/6/23 改为用 .NET Framework 4.6.1 编译
 // 3.1 2018/8/13 修正种册窗对象属性页单独修改权限时，保存以后会清除对象内容的 bug
 // 3.2 2019/1/26 增加 RFID 功能。快捷出纳窗可以用 RFID 标签进行借还；种册窗的册登记对话框可以写入 RFID 标签
+// 3.3 2019/4/12 采用最新 dp-library submodule 的版本

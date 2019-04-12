@@ -197,7 +197,7 @@ FormWindowState.Normal);
 
         void DisplayCopyRight()
         {
-            AppendString("[DEV] dp2Installer - dp2 图书馆集成系统 安装实用工具\r\n");
+            AppendString("dp2Installer - dp2 图书馆集成系统 安装实用工具\r\n");
             AppendString("版本: " + Program.ClientVersion + "\r\n");
             AppendString("(C)2015 版权所有 数字平台(北京)软件有限责任公司\r\n"
                 + "2015 年以 Apache License Version 2.0 方式开源\r\n"
@@ -249,7 +249,7 @@ FormWindowState.Normal);
             string strHead = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
     // + "<link rel='stylesheet' href='"+strCssFileName+"' type='text/css'>"
     + "<style media='screen' type='text/css'>"
-    + "body { font-family:Microsoft YaHei; background-color:#550000; color:#eeeeee; } " // background-color:#555555
+    + "body { font-family:Microsoft YaHei; background-color:#555555; color:#eeeeee; } " // background-color:#555555
     + "</style>"
     + "</head><body>";
 

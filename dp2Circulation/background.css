@@ -3,11 +3,11 @@
     margin: 0px;
     padding: 16px;
     font-size: 9pt;
-    background-color: #550000; /* #555555 */
+    background-color: #555555; /* #555555 */
     color: White;
     text-align: center;
 }
 
     body.green {
-        background-color: #660000; /* #002200 */
+        background-color: #002200; /* #002200 */
     }
