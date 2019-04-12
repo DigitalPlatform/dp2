@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;

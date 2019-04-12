@@ -27,6 +27,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Core;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -7643,6 +7644,7 @@ MessageBoxDefaultButton.Button1);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",

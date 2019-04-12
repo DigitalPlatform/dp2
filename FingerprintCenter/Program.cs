@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 

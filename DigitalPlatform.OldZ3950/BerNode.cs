@@ -5,8 +5,9 @@ using System.Diagnostics;
 using System.IO;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.OldZ3950
 {
     public class BerNode
     {

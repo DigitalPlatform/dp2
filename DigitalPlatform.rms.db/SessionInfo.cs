@@ -9,7 +9,7 @@ using System.IO;
 
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms
 {

@@ -15,6 +15,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {

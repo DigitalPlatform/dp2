@@ -8,6 +8,7 @@ using Ionic.Zip;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

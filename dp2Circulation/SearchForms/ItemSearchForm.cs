@@ -26,6 +26,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 
 using ClosedXML.Excel;
+using DigitalPlatform.Core;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -11929,6 +11930,7 @@ out strError);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",

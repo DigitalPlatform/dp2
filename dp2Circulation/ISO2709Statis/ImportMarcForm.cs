@@ -6,9 +6,9 @@ using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using static dp2Circulation.MainForm;
 

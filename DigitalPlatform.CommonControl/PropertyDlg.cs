@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using System.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {

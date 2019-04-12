@@ -11,6 +11,7 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Library
 {

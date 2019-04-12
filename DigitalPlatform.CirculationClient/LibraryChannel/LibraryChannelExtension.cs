@@ -8,7 +8,7 @@ using System.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

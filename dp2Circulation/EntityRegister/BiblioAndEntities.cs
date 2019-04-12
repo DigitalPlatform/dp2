@@ -20,6 +20,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

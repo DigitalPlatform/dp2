@@ -17,6 +17,7 @@ using DigitalPlatform.GUI;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

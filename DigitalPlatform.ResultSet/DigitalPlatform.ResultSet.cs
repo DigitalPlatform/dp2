@@ -11,6 +11,7 @@ using System.Threading;
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.ResultSet
 {

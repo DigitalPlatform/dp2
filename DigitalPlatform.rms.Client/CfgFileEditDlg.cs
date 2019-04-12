@@ -13,6 +13,7 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

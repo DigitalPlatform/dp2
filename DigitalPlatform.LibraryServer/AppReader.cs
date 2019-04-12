@@ -18,11 +18,11 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Marc;
-using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Text.RegularExpressions;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {

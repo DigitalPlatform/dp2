@@ -5,6 +5,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

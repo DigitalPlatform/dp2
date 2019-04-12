@@ -31,6 +31,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using log4net;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

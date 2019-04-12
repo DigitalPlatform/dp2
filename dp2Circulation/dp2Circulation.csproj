@@ -34,7 +34,7 @@
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2circulation\v3\</PublishUrl>
+    <PublishUrl>c:\publish\dp2circulation\dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -44,15 +44,15 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2Circulation/v3/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2Circulation/v3/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/dp2Circulation/dev/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2Circulation/dev/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2内务 V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>112</ApplicationRevision>
+    <ApplicationRevision>123</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -1565,7 +1565,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="background.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="AccountBook\AccountBookForm.resx">
       <DependentUpon>AccountBookForm.cs</DependentUpon>
@@ -3086,6 +3086,10 @@
     <ProjectReference Include="..\DkywInterface\DkywInterface.csproj">
       <Project>{FA8ED8A6-EA29-4188-A45A-A3A829AE3DB9}</Project>
       <Name>DkywInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\PieChart\PieChart.csproj">
       <Project>{696E929A-6A4A-4C6D-A8B2-C4F25F781940}</Project>

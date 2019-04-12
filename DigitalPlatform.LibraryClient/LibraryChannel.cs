@@ -21,9 +21,9 @@ using System.Collections;
 using System.ServiceModel.Description;
 using System.Web;
 
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryClient
 {

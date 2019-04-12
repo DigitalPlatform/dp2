@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace dp2Catalog
+namespace DigitalPlatform.Z3950
 {
     public partial class RecordSyntaxAndEncodingBindingItemDlg : Form
     {
@@ -41,9 +41,9 @@ namespace dp2Catalog
 
         private void RecordSyntaxAndEncodingBindingItemDlg_Load(object sender, EventArgs e)
         {
-            Global.FillEncodingList(this.comboBox_encoding, true);
+            ZServerPropertyForm.FillEncodingList(this.comboBox_encoding, true);
             /*
-            // 补充MARC-8编码方式
+            // 琛ュ厖MARC-8缂栫爜鏂瑰紡
             this.comboBox_encoding.Items.Add("MARC-8");
              * */
 
@@ -53,12 +53,12 @@ namespace dp2Catalog
         {
             if (this.comboBox_encoding.Text == "")
             {
-                MessageBox.Show(this, "尚未选定编码方式");
+                MessageBox.Show(this, "灏氭湭閫夊畾缂栫爜鏂瑰紡");
                 return;
             }
             if (this.comboBox_recordSyntax.Text == "")
             {
-                MessageBox.Show(this, "尚未选定记录格式");
+                MessageBox.Show(this, "灏氭湭閫夊畾璁板綍鏍煎紡");
                 return;
             }
 

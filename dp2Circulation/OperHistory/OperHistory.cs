@@ -20,6 +20,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 // 2013/3/16 添加 XML 注释
 
@@ -1760,7 +1761,8 @@ out strError);
                 + "\"" + strProjectLocate + "\"";
 
             string[] saAddRef = {
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",

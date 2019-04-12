@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
@@ -10,8 +10,8 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Marc
 {
-    // Ä£°åĞĞ
-	public class TemplateLine:IComparable
+    // æ¨¡æ¿è¡Œ
+	public class TemplateLine : IComparable
 	{
 		public TemplateRoot container = null;
 
@@ -25,8 +25,8 @@ namespace DigitalPlatform.Marc
 		internal string m_strName = null;
 		internal string m_strValue = null;
 
-        // public XmlNode ValueListNode1 = null;   // ÓÉTemplateLine.Initial()³õÊ¼»¯
-        public List<XmlNode> ValueListNodes = null;   // ÓÉTemplateLine.Initial()³õÊ¼»¯
+        // public XmlNode ValueListNode1 = null;   // ç”±TemplateLine.Initial()åˆå§‹åŒ–
+        public List<XmlNode> ValueListNodes = null;   // ç”±TemplateLine.Initial()åˆå§‹åŒ–
 
 		public Label Label_label = null;
 		public Label Label_Name = null;
@@ -39,8 +39,8 @@ namespace DigitalPlatform.Marc
         public string DefaultValue = null;
 
 		// parameter:
-		//		node	char½Úµã
-		//		strLang	ÓïÑÔ°æ±¾
+		//		node	charèŠ‚ç‚¹
+		//		strLang	è¯­è¨€ç‰ˆæœ¬
 		public TemplateLine(TemplateRoot templateRoot,
 			XmlNode node,
 			string strLang)
@@ -50,14 +50,14 @@ namespace DigitalPlatform.Marc
 			this.m_strLang = strLang;
 
 			string strError;
-			// Í¨¹ıÒ»¸öChar½Úµã£¬³õÊ¼»¯±¾ĞĞµÄÖµ
+			// é€šè¿‡ä¸€ä¸ªCharèŠ‚ç‚¹ï¼Œåˆå§‹åŒ–æœ¬è¡Œçš„å€¼
 			// parameter:
-			//		node	char½Úµã
-			//		strLang	ÓïÑÔ°æ±¾
-			//		strError	³ö´íĞÅÏ¢
+			//		node	charèŠ‚ç‚¹
+			//		strLang	è¯­è¨€ç‰ˆæœ¬
+			//		strError	å‡ºé”™ä¿¡æ¯
 			// return:
-			//		-1	Ê§°Ü
-			//		0	³É¹¦
+			//		-1	å¤±è´¥
+			//		0	æˆåŠŸ
 			int nRet = this.Initial(this.m_charNode,
 				this.m_strLang,
 				out strError);
@@ -101,25 +101,25 @@ namespace DigitalPlatform.Marc
 		<Char name='0/5'>
 			<Property>
 				<Label xml:lang='en'>?</Label>
-				<Label xml:lang='cn'>¼ÇÂ¼³¤¶È</Label>
+				<Label xml:lang='cn'>è®°å½•é•¿åº¦</Label>
 				<Help xml:lang='cn'></Help>
 				<ValueList name='header_0/5'>
 					<Item>
 						<Value>?????</Value>
-						<Label xml:lang='cn'>ÓÉÈí¼ş×Ô¶¯ÌîĞ´</Label>
+						<Label xml:lang='cn'>ç”±è½¯ä»¶è‡ªåŠ¨å¡«å†™</Label>
 					</Item>
 				</ValueList>
 			</Property>
 		</Char>
 */
-		// Í¨¹ıÒ»¸öChar½Úµã£¬³õÊ¼»¯±¾ĞĞµÄÖµ
+		// é€šè¿‡ä¸€ä¸ªCharèŠ‚ç‚¹ï¼Œåˆå§‹åŒ–æœ¬è¡Œçš„å€¼
 		// parameter:
-		//		node	char½Úµã
-		//		strLang	ÓïÑÔ°æ±¾
-		//		strError	³ö´íĞÅÏ¢
+		//		node	charèŠ‚ç‚¹
+		//		strLang	è¯­è¨€ç‰ˆæœ¬
+		//		strError	å‡ºé”™ä¿¡æ¯
 		// return:
-		//		-1	Ê§°Ü
-		//		0	³É¹¦
+		//		-1	å¤±è´¥
+		//		0	æˆåŠŸ
 		public int Initial(XmlNode node,
 			string strLang,
 			out string strError)
@@ -128,7 +128,7 @@ namespace DigitalPlatform.Marc
 
 			if (node == null)
 			{
-				strError = "µ÷ÓÃ´íÎó£¬node²ÎÊı²»ÄÜÎªnull";
+				strError = "è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°ä¸èƒ½ä¸ºnull";
 				Debug.Assert(false,strError);
 				return -1;
 			}
@@ -136,7 +136,7 @@ namespace DigitalPlatform.Marc
 			this.m_strName = Trim(DomUtil.GetAttr(node,"name"));
 			if (this.m_strName == "")
 			{
-				strError = "<Char>ÔªËØµÄnameÊôĞÔ¿ÉÄÜ²»´æÔÚ»òÕßÖµÎª¿Õ£¬ÅäÖÃÎÄ¼ş²»ºÏ·¨¡£";
+				strError = "<Char>å…ƒç´ çš„nameå±æ€§å¯èƒ½ä¸å­˜åœ¨æˆ–è€…å€¼ä¸ºç©ºï¼Œé…ç½®æ–‡ä»¶ä¸åˆæ³•ã€‚";
 				Debug.Assert(false,strError);
 				return -1;					
 			}
@@ -144,7 +144,7 @@ namespace DigitalPlatform.Marc
 			XmlNode propertyNode = node.SelectSingleNode("Property");
 			if (propertyNode == null)
 			{
-				strError = "<Char>ÔªËØÏÂ¼¶Î´¶¨Òå<Property>ÔªËØ£¬ÅäÖÃÎÄ¼ş²»ºÏ·¨";
+				strError = "<Char>å…ƒç´ ä¸‹çº§æœªå®šä¹‰<Property>å…ƒç´ ï¼Œé…ç½®æ–‡ä»¶ä¸åˆæ³•";
 				Debug.Assert(false,strError);
 				return -1;
 			}
@@ -167,16 +167,16 @@ namespace DigitalPlatform.Marc
             if (nodeDefaultValue != null)
                 this.DefaultValue = nodeDefaultValue.InnerText;
 
-            // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNodeµÄInnerText
+            // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNodeçš„InnerText
             // parameters:
-            //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+            //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
             this.m_strLabel = DomUtil.GetXmlLangedNodeText(
         strLang,
         propertyNode,
         "Label",
         true);
             if (string.IsNullOrEmpty(this.m_strLabel) == true)
-                this.m_strLabel = "<ÉĞÎ´¶¨Òå>";
+                this.m_strLabel = "<å°šæœªå®šä¹‰>";
             else
                 this.m_strLabel = StringUtil.Trim(this.m_strLabel);
 #if NO
@@ -186,7 +186,7 @@ namespace DigitalPlatform.Marc
 			if (labelNode == null
                 || string.IsNullOrEmpty(labelNode.InnerText.Trim()) == true)
 			{
-                // Èç¹ûÕÒ²»µ½£¬ÔòÕÒµ½µÚÒ»¸öÓĞÖµµÄ
+                // å¦‚æœæ‰¾ä¸åˆ°ï¼Œåˆ™æ‰¾åˆ°ç¬¬ä¸€ä¸ªæœ‰å€¼çš„
                 XmlNodeList nodes = propertyNode.SelectNodes("Label", nsmgr);
                 foreach (XmlNode temp_node in nodes)
                 {
@@ -197,15 +197,15 @@ namespace DigitalPlatform.Marc
                     }
                 }
 
-				//Debug.Assert(false,"Ãû³ÆÎª'" + this.m_strName + "'µÄ<char>ÔªËØÎ´¶¨ÒåLabelµÄ'" + strLang + "'ÓïÑÔ°æ±¾µÄÖµ");
+				//Debug.Assert(false,"åç§°ä¸º'" + this.m_strName + "'çš„<char>å…ƒç´ æœªå®šä¹‰Labelçš„'" + strLang + "'è¯­è¨€ç‰ˆæœ¬çš„å€¼");
 			}
             if (labelNode == null)
-                this.m_strLabel = "<ÉĞÎ´¶¨Òå>";
+                this.m_strLabel = "<å°šæœªå®šä¹‰>";
             else
                 this.m_strLabel = Trim(DomUtil.GetNodeText(labelNode));
 #endif
 
-			// ¸øvalue¸³³õÖµ
+			// ç»™valueèµ‹åˆå€¼
 			int nIndex = this.m_strName.IndexOf("/");
 			if (nIndex >= 0)
 			{
@@ -229,7 +229,7 @@ namespace DigitalPlatform.Marc
 		}
 
 
-		// ±È½Ï
+		// æ¯”è¾ƒ
 		public int CompareTo(object obj)
 		{
 			TemplateLine line = (TemplateLine)obj;
@@ -238,7 +238,7 @@ namespace DigitalPlatform.Marc
 		}
 	}
 
-    // Öµ¶ÔÏó
+    // å€¼å¯¹è±¡
     public class ValueItem
     {
         public string Lable = null;
@@ -252,7 +252,7 @@ namespace DigitalPlatform.Marc
         }
     }
 
-    // ĞĞµÄ×´Ì¬
+    // è¡Œçš„çŠ¶æ€
     [Flags]
     public enum LineState
     {

@@ -22,9 +22,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
-using DigitalPlatform.Range;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.OPAC.Server
 {

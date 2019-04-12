@@ -872,7 +872,8 @@ namespace dp2Circulation
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
@@ -1216,8 +1217,9 @@ namespace dp2Circulation
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+									Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",

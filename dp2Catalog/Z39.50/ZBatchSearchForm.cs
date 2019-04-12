@@ -15,7 +15,7 @@ using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 
 using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
@@ -25,6 +25,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -1383,7 +1384,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 RecordInfo record_info = new RecordInfo();
                 record_info.ServerNode = connection.TargetInfo.ServerNode;  // 2013/11/24
                 record_info.QueryLine = line;   // 2013/11/24
-                record_info.Record = (DigitalPlatform.Z3950.Record)v_item.Tag;
+                record_info.Record = (DigitalPlatform.OldZ3950.Record)v_item.Tag;
                 record_info.TargetInfo = connection.TargetInfo;
                 record_info.RecordEncoding = connection.GetRecordsEncoding(
                     this.m_mainForm,
@@ -1477,7 +1478,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             // TODO: 比较浏览信息是否改变?
 
-            record_info.Record = (DigitalPlatform.Z3950.Record)v_item.Tag;
+            record_info.Record = (DigitalPlatform.OldZ3950.Record)v_item.Tag;
             row[0].ImageIndex = v_item.ImageIndex;  // 变为 Full ElementSet
 
             // 更新浏览列
@@ -1600,7 +1601,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
         // 根据不同格式自动创建浏览格式
         public int BuildBrowseText(
             ZConnection connection,
-            DigitalPlatform.Z3950.Record record,
+            DigitalPlatform.OldZ3950.Record record,
             string strStyle,
             out string strBrowseText,
             out int nImageIndex,
@@ -1853,7 +1854,8 @@ out string strError)
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
+                                         this.BinDir + "\\digitalplatform.core.dll",
+                                         this.BinDir + "\\digitalplatform.marcdom.dll",
 										 this.BinDir + "\\digitalplatform.marckernel.dll",
 										 this.BinDir + "\\digitalplatform.dll",
 										 this.BinDir + "\\digitalplatform.Text.dll",
@@ -2082,7 +2084,7 @@ out string strError)
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)
@@ -3158,7 +3160,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
             int nSelectedCount = this.dpTable_records.SelectedRows.Count;
 
             RecordInfo record_info = null;
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             if (nSelectedCount > 0)
             {
                 DpRow row = this.dpTable_records.SelectedRows[0];
@@ -3310,7 +3312,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
                 DpRow row = source_rows[i];
                 RecordInfo record_info = (RecordInfo)row.Tag;
 
-                DigitalPlatform.Z3950.Record record = record_info.Record;
+                DigitalPlatform.OldZ3950.Record record = record_info.Record;
                 if (record == null)
                 {
                     Debug.Assert(false, "");
@@ -3492,7 +3494,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -3605,7 +3607,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -4295,7 +4297,7 @@ MessageBoxDefaultButton.Button1);
 
     public class RecordInfo
     {
-        public DigitalPlatform.Z3950.Record Record = null;
+        public DigitalPlatform.OldZ3950.Record Record = null;
 
         public TargetInfo TargetInfo = null;
         public Encoding RecordEncoding = null;

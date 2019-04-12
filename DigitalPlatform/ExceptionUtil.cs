@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 namespace DigitalPlatform
 {
+#if REMOVED
     public class ExceptionUtil
     {
         // 2015/9/30
@@ -161,4 +162,6 @@ Stack:
         {
         }
     }
+
+#endif
 }

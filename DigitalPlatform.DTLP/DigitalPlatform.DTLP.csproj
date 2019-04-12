@@ -105,6 +105,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>

@@ -17,6 +17,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -64,7 +65,7 @@ namespace dp2Catalog
         }
          * */
 
-        DigitalPlatform.Z3950.Record CurrentRecord = null;
+        DigitalPlatform.OldZ3950.Record CurrentRecord = null;
 
         Encoding CurrentEncoding = Encoding.GetEncoding(936);
 
@@ -502,7 +503,7 @@ namespace dp2Catalog
             this.LinkedSearchForm = searchform;
             this.SavePath = "";
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;
@@ -734,7 +735,7 @@ channel,
                 goto ERROR1;
             }
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;
@@ -2256,8 +2257,9 @@ channel,
             ScriptManager.RemoveRefsBinDirMacro(ref saRef);
 
             string[] saAddRef = {
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+									Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",

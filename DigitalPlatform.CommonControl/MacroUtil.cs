@@ -8,6 +8,7 @@ using System.IO;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CommonControl
 {

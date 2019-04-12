@@ -69,6 +69,7 @@ namespace DigitalPlatform.OPAC.Server
                         }
 
                         string[] saAddRef1 = {
+                                         strBinDir + "\\digitalplatform.core.dll",
                                          strBinDir + "\\digitalplatform.marcdom.dll",
                                          strBinDir + "\\digitalplatform.marckernel.dll",
 										 // strBinDir + "\\digitalplatform.rms.client.dll",
@@ -372,6 +373,7 @@ namespace DigitalPlatform.OPAC.Server
                     () =>
                     {
                         string[] saAddRef1 = {
+                                         this.BinDir + "\\digitalplatform.core.dll",
                                          this.BinDir + "\\digitalplatform.marcdom.dll",
                                          this.BinDir + "\\digitalplatform.marckernel.dll",
                                          this.BinDir + "\\digitalplatform.OPAC.Server.dll",

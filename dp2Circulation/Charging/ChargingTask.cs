@@ -11,6 +11,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

@@ -8,7 +8,6 @@ using System.Xml;
 using System.Diagnostics;
 using System.Drawing;
 
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
@@ -16,6 +15,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

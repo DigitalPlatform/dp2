@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.LibraryClient

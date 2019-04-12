@@ -14,6 +14,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Script
 {

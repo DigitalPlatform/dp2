@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace DigitalPlatform.Text
 {
+#if REMOVED
     public class PriceUtil
     {
 
@@ -1551,4 +1552,6 @@ namespace DigitalPlatform.Text
                 this.Prefix = strPrefix;
         }
     }
+
+#endif
 }

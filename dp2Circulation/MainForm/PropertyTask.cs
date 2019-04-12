@@ -9,6 +9,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using System.Threading.Tasks;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

@@ -7,6 +7,7 @@ using System.IO;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryClient
 {

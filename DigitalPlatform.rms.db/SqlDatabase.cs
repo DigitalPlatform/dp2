@@ -28,10 +28,10 @@ using Ghostscript.NET.Rasterizer;
 
 using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using System.Data.Common;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms
 {
