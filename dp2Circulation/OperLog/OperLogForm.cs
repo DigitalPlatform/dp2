@@ -21,7 +21,6 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
@@ -29,6 +28,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

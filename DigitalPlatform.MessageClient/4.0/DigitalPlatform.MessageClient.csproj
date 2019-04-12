@@ -79,6 +79,10 @@
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{C5B517C1-7344-45A5-89DC-06A9B130AE36}</Project>
+      <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

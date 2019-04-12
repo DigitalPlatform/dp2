@@ -226,7 +226,7 @@ namespace dp2Catalog
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)

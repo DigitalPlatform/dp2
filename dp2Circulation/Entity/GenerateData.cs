@@ -12,6 +12,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -1010,7 +1011,9 @@ out strError);
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    "netstandard.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",

@@ -21,12 +21,12 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Library;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace dp2Batch
 {
@@ -3208,7 +3208,8 @@ this.checkBox_import_fastMode.Checked);
                 + "\"" + strProjectLocate + "\"";
 
             string[] saAddRef = {
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.library.dll",
@@ -3305,7 +3306,8 @@ this.checkBox_import_fastMode.Checked);
                     goto ERROR1;
 
                 string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.library.dll",

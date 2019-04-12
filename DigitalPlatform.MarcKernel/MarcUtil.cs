@@ -11,6 +11,7 @@ using System.Web;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.Marc
 {

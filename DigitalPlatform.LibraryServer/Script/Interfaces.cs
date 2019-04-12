@@ -14,6 +14,8 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class XmlRecord
     {
+        public string Path { get; set; }
+
         internal XmlDocument _dom = null;
 
         // public string RefID { get; set; }

@@ -40,6 +40,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using static dp2Circulation.MyForm;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

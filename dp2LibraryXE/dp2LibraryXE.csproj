@@ -19,7 +19,7 @@
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>c:\publish\dp2libraryxe\v3\</PublishUrl>
+    <PublishUrl>c:\publish\dp2libraryxe\dev\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -29,15 +29,15 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://dp2003.com/dp2LibraryXE/v3/</InstallUrl>
-    <UpdateUrl>http://dp2003.com/dp2LibraryXE/v3/</UpdateUrl>
+    <InstallUrl>http://dp2003.com/dp2LibraryXE/dev/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2LibraryXE/dev/</UpdateUrl>
     <TargetCulture>zh-CN</TargetCulture>
     <ProductName>dp2Library XE V3</ProductName>
     <PublisherName>DigitalPlatform</PublisherName>
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>84</ApplicationRevision>
+    <ApplicationRevision>91</ApplicationRevision>
     <ApplicationVersion>3.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -279,6 +279,10 @@
     <ProjectReference Include="..\DigitalPlatform\4.0\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
+      <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
+      <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

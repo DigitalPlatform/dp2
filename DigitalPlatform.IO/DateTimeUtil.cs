@@ -1,18 +1,19 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 using System.Threading;
 using System.Diagnostics;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.IO
 {
     /// <summary>
-    /// DateTime¹¦ÄÜÀ©Õ¹º¯Êı
+    /// DateTimeåŠŸèƒ½æ‰©å±•å‡½æ•°
     /// </summary>
     public class DateTimeUtil
     {
-        // ·ÖÎöÆÚÏŞ²ÎÊı
+        // åˆ†ææœŸé™å‚æ•°
         public static int ParsePeriodUnit(string strPeriod,
             string strDefaultUnit,
             out long lValue,
@@ -27,7 +28,7 @@ namespace DigitalPlatform.IO
 
             if (String.IsNullOrEmpty(strPeriod) == true)
             {
-                strError = "ÆÚÏŞ×Ö·û´®Îª¿Õ";
+                strError = "æœŸé™å­—ç¬¦ä¸²ä¸ºç©º";
                 return -1;
             }
 
@@ -46,14 +47,14 @@ namespace DigitalPlatform.IO
                 }
             }
 
-            // ½«strValue×ª»»ÎªÊı×Ö
+            // å°†strValueè½¬æ¢ä¸ºæ•°å­—
             try
             {
                 lValue = Convert.ToInt64(strValue);
             }
             catch (Exception)
             {
-                strError = "ÆÚÏŞ²ÎÊıÊı×Ö²¿·Ö'" + strValue + "'¸ñÊ½²»ºÏ·¨";
+                strError = "æœŸé™å‚æ•°æ•°å­—éƒ¨åˆ†'" + strValue + "'æ ¼å¼ä¸åˆæ³•";
                 return -1;
             }
 
@@ -61,21 +62,21 @@ namespace DigitalPlatform.IO
                 strUnit = strDefaultUnit;
 
             if (String.IsNullOrEmpty(strUnit) == true)
-                strUnit = "day";   // È±Ê¡µ¥Î»Îª"Ìì"
+                strUnit = "day";   // ç¼ºçœå•ä½ä¸º"å¤©"
 
-            strUnit = strUnit.ToLower();    // Í³Ò»×ª»»ÎªĞ¡Ğ´
+            strUnit = strUnit.ToLower();    // ç»Ÿä¸€è½¬æ¢ä¸ºå°å†™
             return 0;
         }
 
-        // °´ÕÕÊ±¼äµ¥Î»,°ÑÊ±¼äÖµÁãÍ·È¥³ı,Õı¹æ»¯,±ãÓÚºóÃæ¼ÆËã²î¶î
+        // æŒ‰ç…§æ—¶é—´å•ä½,æŠŠæ—¶é—´å€¼é›¶å¤´å»é™¤,æ­£è§„åŒ–,ä¾¿äºåé¢è®¡ç®—å·®é¢
         /// <summary>
-        /// °´ÕÕÊ±¼ä»ù±¾µ¥Î»£¬È¥µôÁãÍ·£¬±ãÓÚ»¥Ïà¼ÆËã(Õûµ¥Î»µÄ)²î¶î¡£
-        /// Ëã·¨ÊÇÏÈ×ª»»Îª±¾µØÊ±¼ä£¬È¥µôÁãÍ·£¬ÔÙ×ª»»»Ø GMT Ê±¼ä
+        /// æŒ‰ç…§æ—¶é—´åŸºæœ¬å•ä½ï¼Œå»æ‰é›¶å¤´ï¼Œä¾¿äºäº’ç›¸è®¡ç®—(æ•´å•ä½çš„)å·®é¢ã€‚
+        /// ç®—æ³•æ˜¯å…ˆè½¬æ¢ä¸ºæœ¬åœ°æ—¶é—´ï¼Œå»æ‰é›¶å¤´ï¼Œå†è½¬æ¢å› GMT æ—¶é—´
         /// </summary>
-        /// <param name="strUnit">Ê±¼äµ¥Î»¡£day/hourÖ®Ò»¡£Èç¹ûÎª¿Õ£¬Ïàµ±ÓÚ day</param>
-        /// <param name="time">Òª´¦ÀíµÄÊ±¼ä¡£Îª GMT Ê±¼ä</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strUnit">æ—¶é—´å•ä½ã€‚day/hourä¹‹ä¸€ã€‚å¦‚æœä¸ºç©ºï¼Œç›¸å½“äº day</param>
+        /// <param name="time">è¦å¤„ç†çš„æ—¶é—´ã€‚ä¸º GMT æ—¶é—´</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public static int RoundTime(string strUnit,
     ref DateTime time,
     out string strError)
@@ -95,7 +96,7 @@ namespace DigitalPlatform.IO
             }
             else
             {
-                strError = "Î´ÖªµÄÊ±¼äµ¥Î» '" + strUnit + "'";
+                strError = "æœªçŸ¥çš„æ—¶é—´å•ä½ '" + strUnit + "'";
                 return -1;
             }
             time = time.ToUniversalTime();
@@ -118,7 +119,7 @@ namespace DigitalPlatform.IO
         }
 
 
-        // ½«ÈÕÆÚ×Ö·û´®½âÎöÎªÆğÖ¹·¶Î§ÈÕÆÚ
+        // å°†æ—¥æœŸå­—ç¬¦ä¸²è§£æä¸ºèµ·æ­¢èŒƒå›´æ—¥æœŸ
         // throw:
         //      Exception
         public static void ParseDateRange(string strText,
@@ -131,7 +132,7 @@ namespace DigitalPlatform.IO
             int nRet = strText.IndexOf("-");
             if (nRet == -1)
             {
-                // Ã»ÓĞ'-'
+                // æ²¡æœ‰'-'
 
                 if (strText.Length == 4)
                 {
@@ -145,8 +146,8 @@ namespace DigitalPlatform.IO
                     strStartDate = strText + "01";
                     DateTime start = DateTimeUtil.Long8ToDateTime(strStartDate);
                     DateTime end = start.AddMonths(1);
-                    end = new DateTime(end.Year, end.Month, 1); // ÏÂÔÂ1ºÅ
-                    end = end.AddDays(-1);  // ÉÏÔÂ×îºóÒ»ºÅ
+                    end = new DateTime(end.Year, end.Month, 1); // ä¸‹æœˆ1å·
+                    end = end.AddDays(-1);  // ä¸Šæœˆæœ€åä¸€å·
 
                     strEndDate = strText + end.Day;
                     return;
@@ -154,15 +155,15 @@ namespace DigitalPlatform.IO
 
                 if (strText.Length == 8)
                 {
-                    // µ¥ÈÕ
+                    // å•æ—¥
                     strStartDate = strText;
                     strEndDate = "";
                     return;
                 }
 
-                // text-level: ÓÃ»§ÌáÊ¾
+                // text-level: ç”¨æˆ·æç¤º
                 throw new Exception(
-                    string.Format("ÈÕÆÚ×Ö·û´® '{0}' ¸ñÊ½²»ÕıÈ·¡£Ó¦µ±Îª4/6/8×Ö·û",
+                    string.Format("æ—¥æœŸå­—ç¬¦ä¸² '{0}' æ ¼å¼ä¸æ­£ç¡®ã€‚åº”å½“ä¸º4/6/8å­—ç¬¦",
                     strText)
                     );
             }
@@ -176,9 +177,9 @@ namespace DigitalPlatform.IO
 
                 if (strLeft.Length != strRight.Length)
                 {
-                    // text-level: ÓÃ»§ÌáÊ¾
+                    // text-level: ç”¨æˆ·æç¤º
                     throw new Exception(
-                        string.Format("ÈÕÆÚ×Ö·û´® '{0}' ¸ñÊ½²»ÕıÈ·¡£ºá¸Ü×ó±ßµÄ²¿·Ö '{1}' ºÍÓÒ±ßµÄ²¿·Ö '{2}' ×Ö·ûÊıÓ¦ÏàµÈ¡£",
+                        string.Format("æ—¥æœŸå­—ç¬¦ä¸² '{0}' æ ¼å¼ä¸æ­£ç¡®ã€‚æ¨ªæ å·¦è¾¹çš„éƒ¨åˆ† '{1}' å’Œå³è¾¹çš„éƒ¨åˆ† '{2}' å­—ç¬¦æ•°åº”ç›¸ç­‰ã€‚",
                         strText,
                         strLeft,
                         strRight)
@@ -198,8 +199,8 @@ namespace DigitalPlatform.IO
 
                     DateTime start = DateTimeUtil.Long8ToDateTime(strRight + "01");
                     DateTime end = start.AddMonths(1);
-                    end = new DateTime(end.Year, end.Month, 1); // ÏÂÔÂ1ºÅ
-                    end = end.AddDays(-1);  // ÉÏÔÂ×îºóÒ»ºÅ
+                    end = new DateTime(end.Year, end.Month, 1); // ä¸‹æœˆ1å·
+                    end = end.AddDays(-1);  // ä¸Šæœˆæœ€åä¸€å·
 
                     strEndDate = strRight + end.Day;
                     return;
@@ -207,15 +208,15 @@ namespace DigitalPlatform.IO
 
                 if (strLeft.Length == 8)
                 {
-                    // µ¥ÈÕ
+                    // å•æ—¥
                     strStartDate = strLeft;
                     strEndDate = strRight;
                     return;
                 }
 
-                // text-level: ÓÃ»§ÌáÊ¾
+                // text-level: ç”¨æˆ·æç¤º
                 throw new Exception(
-                    string.Format("ÈÕÆÚ×Ö·û´® '{0}' ¸ñÊ½²»ÕıÈ·¡£ºá¸Ü×ó±ß»òÕßÓÒ±ßµÄ²¿·Ö£¬Ó¦µ±Îª4/6/8×Ö·û",
+                    string.Format("æ—¥æœŸå­—ç¬¦ä¸² '{0}' æ ¼å¼ä¸æ­£ç¡®ã€‚æ¨ªæ å·¦è¾¹æˆ–è€…å³è¾¹çš„éƒ¨åˆ†ï¼Œåº”å½“ä¸º4/6/8å­—ç¬¦",
                     strText)
                     );
             }
@@ -255,7 +256,7 @@ namespace DigitalPlatform.IO
                 out parsedBack);
                 if (bRet == false)
                 {
-                    string strError = "Ê±¼ä×Ö·û´® '" + strTime + "' ÎŞ·¨½âÎö";
+                    string strError = "æ—¶é—´å­—ç¬¦ä¸² '" + strTime + "' æ— æ³•è§£æ";
                     throw new Exception(strError);
                 }
             }
@@ -271,7 +272,7 @@ namespace DigitalPlatform.IO
             return strPublishTime;
         }
 
-        // ¹æ·¶»¯8×Ö·ûµÄÈÕÆÚ×Ö·û´®
+        // è§„èŒƒåŒ–8å­—ç¬¦çš„æ—¥æœŸå­—ç¬¦ä¸²
         public static string CanonicalizePublishTimeString(string strText)
         {
             if (strText.Length == 4)
@@ -290,10 +291,10 @@ namespace DigitalPlatform.IO
             if (strText.Length == 10)
                 goto END1;
 
-            throw new Exception("³ö°æÈÕÆÚ×Ö·û´® '" + strText + "' ¸ñÊ½²»ÕıÈ·");
+            throw new Exception("å‡ºç‰ˆæ—¥æœŸå­—ç¬¦ä¸² '" + strText + "' æ ¼å¼ä¸æ­£ç¡®");
 
         END1:
-            // ¼ì²éÒ»ÏÂÊ±¼ä×Ö·û´®ÊÇ·ñÊôÓÚ´æÔÚµÄÊ±¼ä
+            // æ£€æŸ¥ä¸€ä¸‹æ—¶é—´å­—ç¬¦ä¸²æ˜¯å¦å±äºå­˜åœ¨çš„æ—¶é—´
             string strTest = strText.Substring(0, 8);
 
             try
@@ -302,17 +303,17 @@ namespace DigitalPlatform.IO
             }
             catch (System.ArgumentOutOfRangeException /*ex*/)
             {
-                throw new Exception("ÈÕÆÚ×Ö·û´® '" + strText + "' ²»ÕıÈ·: ³öÏÖÁË²»¿ÉÄÜµÄÄê¡¢ÔÂ¡¢ÈÕÖµ");
+                throw new Exception("æ—¥æœŸå­—ç¬¦ä¸² '" + strText + "' ä¸æ­£ç¡®: å‡ºç°äº†ä¸å¯èƒ½çš„å¹´ã€æœˆã€æ—¥å€¼");
             }
             catch (Exception ex)
             {
-                throw new Exception("ÈÕÆÚ×Ö·û´® '" + strText + "' ²»ÕıÈ·: " + ex.Message);
+                throw new Exception("æ—¥æœŸå­—ç¬¦ä¸² '" + strText + "' ä¸æ­£ç¡®: " + ex.Message);
             }
 
             return strText;
         }
 
-        // ±È½ÏHTTP header×Ö¶ÎÀïÃæµÄÊ±¼ä¡£²»±È½Ïmillisecond²¿·Ö
+        // æ¯”è¾ƒHTTP headerå­—æ®µé‡Œé¢çš„æ—¶é—´ã€‚ä¸æ¯”è¾ƒmillisecondéƒ¨åˆ†
         public static long CompareHeaderTime(DateTime time1, DateTime time2)
         {
             time1 = new DateTime(time1.Year, time1.Month, time1.Day, time1.Hour, time1.Minute, time1.Second);
@@ -330,10 +331,10 @@ out string strError)
 
             strOrigin = strOrigin.Replace("-", "");
 
-            // ¸ñÊ½Îª 20060625£¬ ĞèÒª×ª»»Îªrfc
+            // æ ¼å¼ä¸º 20060625ï¼Œ éœ€è¦è½¬æ¢ä¸ºrfc
             if (strOrigin.Length != 8)
             {
-                strError = "Ô´ÈÕÆÚ×Ö·û´® '" + strOrigin + "' ¸ñÊ½²»ÕıÈ·£¬Ó¦Îª8×Ö·û";
+                strError = "æºæ—¥æœŸå­—ç¬¦ä¸² '" + strOrigin + "' æ ¼å¼ä¸æ­£ç¡®ï¼Œåº”ä¸º8å­—ç¬¦";
                 return -1;
             }
 
@@ -347,7 +348,7 @@ out string strError)
             }
             catch
             {
-                strError = "ÈÕÆÚ×Ö·û´® '" + strOrigin + "' ×Ö·û´®×ª»»ÎªDateTime¶ÔÏóÊ±³ö´í";
+                strError = "æ—¥æœŸå­—ç¬¦ä¸² '" + strOrigin + "' å­—ç¬¦ä¸²è½¬æ¢ä¸ºDateTimeå¯¹è±¡æ—¶å‡ºé”™";
                 return -1;
             }
 
@@ -358,7 +359,7 @@ out string strError)
             return 0;
         }
 
-        // ·µ»ØÏÂÒ»ÔÂÈÕÀúÉÏµÄÍ¬Ò»Ìì
+        // è¿”å›ä¸‹ä¸€æœˆæ—¥å†ä¸Šçš„åŒä¸€å¤©
         public static DateTime NextMonth(DateTime start)
         {
             int nDayDelta = 0;
@@ -392,9 +393,9 @@ out string strError)
             }
         }
 
-        // ·µ»ØÏÂÒ»¸öÄê·İ
+        // è¿”å›ä¸‹ä¸€ä¸ªå¹´ä»½
         // parameters:
-        //      strYear 4×Ö·ûµÄÄê·İ
+        //      strYear 4å­—ç¬¦çš„å¹´ä»½
         public static string NextYear(string strYear)
         {
             Debug.Assert(strYear.Length == 4, "");
@@ -403,7 +404,7 @@ out string strError)
         }
 
 
-        // ·µ»ØÏÂÒ»ÄêÈÕÀúÉÏµÄÍ¬Ò»Ìì
+        // è¿”å›ä¸‹ä¸€å¹´æ—¥å†ä¸Šçš„åŒä¸€å¤©
         public static DateTime NextYear(DateTime start)
         {
             int nDelta = 0;
@@ -423,7 +424,7 @@ out string strError)
             }
         }
 
-        // Îª8×Ö·ûÃÜÅÅÈÕÆÚ¸ñÊ½¼ÓÉÏ'-'
+        // ä¸º8å­—ç¬¦å¯†æ’æ—¥æœŸæ ¼å¼åŠ ä¸Š'-'
         public static string AddHyphenToString8(string strDate,
             string strHyphen)
         {
@@ -468,11 +469,11 @@ out string strError)
             return new DateTime(nYear, nMonth, nDay);
         }
 
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public static DateTime Long8ToDateTime(string strDate8)
         {
             if (strDate8.Length != 8)
-                throw new Exception("ÈÕÆÚ×Ö·û´®¸ñÊ½±ØĞëÎª8×Ö·û¡£");
+                throw new Exception("æ—¥æœŸå­—ç¬¦ä¸²æ ¼å¼å¿…é¡»ä¸º8å­—ç¬¦ã€‚");
 
             int nYear = Convert.ToInt32(strDate8.Substring(0, 4));
             int nMonth = Convert.ToInt32(strDate8.Substring(4, 2));
@@ -484,13 +485,13 @@ out string strError)
             }
             catch (System.ArgumentOutOfRangeException ex)
             {
-                throw new ArgumentException("×Ö·û´® '"+strDate8+"' ÊÇÒ»¸ö²»¿ÉÄÜ³öÏÖµÄÈÕÆÚ", ex);
+                throw new ArgumentException("å­—ç¬¦ä¸² '"+strDate8+"' æ˜¯ä¸€ä¸ªä¸å¯èƒ½å‡ºç°çš„æ—¥æœŸ", ex);
             }
         }
 
 #if NO
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØÒ»°ãÊ±¼ä×Ö·û´®
-        // exception: ²»»áÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°ä¸€èˆ¬æ—¶é—´å­—ç¬¦ä¸²
+        // exception: ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
         public static string LocalTime(string strRfc1123Time)
         {
             try
@@ -501,13 +502,13 @@ out string strError)
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "Ê±¼ä×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¶é—´å­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 #endif
 
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØÒ»°ãÊ±¼ä×Ö·û´®
-        // exception: ²»»áÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°ä¸€èˆ¬æ—¶é—´å­—ç¬¦ä¸²
+        // exception: ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
         public static string LocalTime(string strRfc1123Time,
             string strFormat = "G")
         {
@@ -519,12 +520,12 @@ out string strError)
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "Ê±¼ä×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¶é—´å­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØÒ»°ãÈÕÆÚ×Ö·û´®
-        // exception: ²»»áÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°ä¸€èˆ¬æ—¥æœŸå­—ç¬¦ä¸²
+        // exception: ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
         public static string LocalDate(string strRfc1123Time)
         {
             try
@@ -536,12 +537,12 @@ out string strError)
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "ÈÕÆÚ×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¥æœŸå­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 
-        // ·µ»ØÂú×ãRFC1123µÄÊ±¼äÖµ×Ö·û´®
-        // ×¢ÒâtimeÓ¦¸ÃÔÚµ÷ÓÃÇ°×ª»»ÎªgmtÊ±¼äÖµ
+        // è¿”å›æ»¡è¶³RFC1123çš„æ—¶é—´å€¼å­—ç¬¦ä¸²
+        // æ³¨æ„timeåº”è¯¥åœ¨è°ƒç”¨å‰è½¬æ¢ä¸ºgmtæ—¶é—´å€¼
         public static string Rfc1123DateTimeString(DateTime time)
         {
             // System.Globalization.DateTimeFormatInfo info = new System.Globalization.DateTimeFormatInfo();
@@ -564,7 +565,7 @@ out string strError)
         }
 
         // parameters:
-        //      time    localÊ±¼ä£¬²»ÊÇGMTÊ±¼ä
+        //      time    localæ—¶é—´ï¼Œä¸æ˜¯GMTæ—¶é—´
         public static string Rfc1123DateTimeStringEx(DateTime time)
         {
             // System.Globalization.DateTimeFormatInfo info = new System.Globalization.DateTimeFormatInfo();
@@ -593,8 +594,8 @@ out string strError)
 
         public static DateTime FromUTimeString(string strTime)
         {
-            // ×Ô¶¨Òå¸ñÊ½×Ö·û´®Îª¡°yyyy'-'MM'-'dd HH':'mm':'ss'Z'¡±¡£ 
-            // ÎŞ·¨ÃèÊöÊ±Çø¡£Òşº¬±í´ï¡£
+            // è‡ªå®šä¹‰æ ¼å¼å­—ç¬¦ä¸²ä¸ºâ€œyyyy'-'MM'-'dd HH':'mm':'ss'Z'â€ã€‚ 
+            // æ— æ³•æè¿°æ—¶åŒºã€‚éšå«è¡¨è¾¾ã€‚
             IFormatProvider culture = new CultureInfo("zh-CN", true);
             return DateTime.ParseExact(strTime,
                 "u",
@@ -604,7 +605,7 @@ out string strError)
         static TimeSpan GetOffset(string strDigital)
         {
             if (strDigital.Length != 5)
-                throw new Exception("strDigital±ØĞëÎª5×Ö·û");
+                throw new Exception("strDigitalå¿…é¡»ä¸º5å­—ç¬¦");
 
             int hours = Convert.ToInt32(strDigital.Substring(1, 2));
             int minutes = Convert.ToInt32(strDigital.Substring(3, 2));
@@ -615,10 +616,10 @@ out string strError)
             return offset;
         }
 
-        // ½«RFC1123×Ö·û´®ÖĞµÄtimezone²¿·Ö·ÖÀë³öÀ´
+        // å°†RFC1123å­—ç¬¦ä¸²ä¸­çš„timezoneéƒ¨åˆ†åˆ†ç¦»å‡ºæ¥
         // parameters:
-        //      strMain [out]È¥µôtimezoneÒÔºóµÄ×ó±ß²¿·Ö// £¬²¢È¥µô×ó±ß¶ººÅÒÔ×óµÄ²¿·Ö
-        //      strTimeZone [out]timezone²¿·Ö
+        //      strMain [out]å»æ‰timezoneä»¥åçš„å·¦è¾¹éƒ¨åˆ†// ï¼Œå¹¶å»æ‰å·¦è¾¹é€—å·ä»¥å·¦çš„éƒ¨åˆ†
+        //      strTimeZone [out]timezoneéƒ¨åˆ†
         static int SplitRfc1123TimeZoneString(string strTimeParam,
             out string strMain,
             out string strTimeZone,
@@ -634,13 +635,13 @@ out string strError)
             string strTime = strTimeParam.Trim();
 
             /*
-            // È¥µô¶ººÅÒÔ×óµÄ²¿·Ö
+            // å»æ‰é€—å·ä»¥å·¦çš„éƒ¨åˆ†
             int nRet = strTime.IndexOf(",");
             if (nRet != -1)
                 strTime = strTime.Substring(nRet + 1).Trim();
              * */
 
-            // Ò»Î»×ÖÄ¸
+            // ä¸€ä½å­—æ¯
             if (strTime.Length > 2
                 && strTime[strTime.Length - 2] == ' ')
             {
@@ -648,7 +649,7 @@ out string strError)
                 strTimeZone = strTime.Substring(strTime.Length - 1);
                 if (strTimeZone == "J")
                 {
-                    strError = "RFC1123×Ö·û´® '" + strTimeParam + "' ¸ñÊ½´íÎó£º ×îºóÒ»Î»TimeZone×Ö·û£¬²»ÄÜÎª'J'";
+                    strError = "RFC1123å­—ç¬¦ä¸² '" + strTimeParam + "' æ ¼å¼é”™è¯¯ï¼š æœ€åä¸€ä½TimeZoneå­—ç¬¦ï¼Œä¸èƒ½ä¸º'J'";
                     return -1;
                 }
 
@@ -701,7 +702,7 @@ out string strError)
                             "PDT"};
             if (strTime.Length <= 3)
             {
-                strError = "RFC1123×Ö·û´® '" + strTimeParam + "' ¸ñÊ½´íÎó£º ×Ö·ûÊı²»×ã";
+                strError = "RFC1123å­—ç¬¦ä¸² '" + strTimeParam + "' æ ¼å¼é”™è¯¯ï¼š å­—ç¬¦æ•°ä¸è¶³";
                 return -1;
             }
 
@@ -767,7 +768,7 @@ out string strError)
                 }
             }
 
-            strError = "RFC1123×Ö·û´® '" + strTimeParam + "' ¸ñÊ½´íÎó£º TimeZone²¿·Ö²»ºÏ·¨";
+            strError = "RFC1123å­—ç¬¦ä¸² '" + strTimeParam + "' æ ¼å¼é”™è¯¯ï¼š TimeZoneéƒ¨åˆ†ä¸åˆæ³•";
             return -1;
         }
 
@@ -785,22 +786,22 @@ out string strError)
             }
         }
 
-        // °Ñ×Ö·û´®×ª»»ÎªDateTime¶ÔÏó
-        // ×¢Òâ·µ»ØµÄÊÇGMTÊ±¼ä
-        // ×¢Òâ¿ÉÄÜÅ×³öÒì³£
+        // æŠŠå­—ç¬¦ä¸²è½¬æ¢ä¸ºDateTimeå¯¹è±¡
+        // æ³¨æ„è¿”å›çš„æ˜¯GMTæ—¶é—´
+        // æ³¨æ„å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         public static DateTime FromRfc1123DateTimeString(string strTime)
         {
             if (string.IsNullOrEmpty(strTime) == true)
-                throw new Exception("Ê±¼ä×Ö·û´®Îª¿Õ");
+                throw new Exception("æ—¶é—´å­—ç¬¦ä¸²ä¸ºç©º");
 
             string strError = "";
             string strMain = "";
             string strTimeZone = "";
             TimeSpan offset;
-            // ½«RFC1123×Ö·û´®ÖĞµÄtimezone²¿·Ö·ÖÀë³öÀ´
+            // å°†RFC1123å­—ç¬¦ä¸²ä¸­çš„timezoneéƒ¨åˆ†åˆ†ç¦»å‡ºæ¥
             // parameters:
-            //      strMain [out]È¥µôtimezoneÒÔºóµÄ×ó±ß²¿·Ö
-            //      strTimeZone [out]timezone²¿·Ö
+            //      strMain [out]å»æ‰timezoneä»¥åçš„å·¦è¾¹éƒ¨åˆ†
+            //      strTimeZone [out]timezoneéƒ¨åˆ†
             int nRet = SplitRfc1123TimeZoneString(strTime,
             out strMain,
             out strTimeZone,
@@ -824,29 +825,29 @@ out string strError)
                 out parsedBack);
             if (bRet == false)
             {
-                strError = "Ê±¼ä×Ö·û´® '" + strTime + "' ²»ÊÇRFC1123¸ñÊ½";
+                strError = "æ—¶é—´å­—ç¬¦ä¸² '" + strTime + "' ä¸æ˜¯RFC1123æ ¼å¼";
                 throw new Exception(strError);
             }
 
             return parsedBack - offset;
         }
 #if NO
-        // °Ñ×Ö·û´®×ª»»ÎªDateTime¶ÔÏó
-        // ×¢Òâ·µ»ØµÄÊÇGMTÊ±¼ä
-        // ×¢Òâ¿ÉÄÜÅ×³öÒì³£
+        // æŠŠå­—ç¬¦ä¸²è½¬æ¢ä¸ºDateTimeå¯¹è±¡
+        // æ³¨æ„è¿”å›çš„æ˜¯GMTæ—¶é—´
+        // æ³¨æ„å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         public static DateTime FromRfc1123DateTimeString(string strTime)
         {
             if (string.IsNullOrEmpty(strTime) == true)
-                throw new Exception("Ê±¼ä×Ö·û´®Îª¿Õ");
+                throw new Exception("æ—¶é—´å­—ç¬¦ä¸²ä¸ºç©º");
 
             string strError = "";
             string strMain = "";
             string strTimeZone = "";
             TimeSpan offset;
-            // ½«RFC1123×Ö·û´®ÖĞµÄtimezone²¿·Ö·ÖÀë³öÀ´
+            // å°†RFC1123å­—ç¬¦ä¸²ä¸­çš„timezoneéƒ¨åˆ†åˆ†ç¦»å‡ºæ¥
             // parameters:
-            //      strMain [out]È¥µôtimezoneÒÔºóµÄ×ó±ß²¿·Ö
-            //      strTimeZone [out]timezone²¿·Ö
+            //      strMain [out]å»æ‰timezoneä»¥åçš„å·¦è¾¹éƒ¨åˆ†
+            //      strTimeZone [out]timezoneéƒ¨åˆ†
             int nRet = SplitRfc1123TimeZoneString(strTime,
             out strMain,
             out strTimeZone,
@@ -871,8 +872,8 @@ out string strError)
 
 #endif
 
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØ±íÏÖĞÎÌ¬×Ö·û´®
-        // ×¢Òâ¿ÉÄÜÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°è¡¨ç°å½¢æ€å­—ç¬¦ä¸²
+        // æ³¨æ„å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         public static string Rfc1123DateTimeStringToLocal(string strTime)
         {
             if (String.IsNullOrEmpty(strTime) == true)
@@ -899,8 +900,8 @@ out string strError)
 
         }
 
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØ±íÏÖĞÎÌ¬×Ö·û´®
-        // ×¢Òâ¿ÉÄÜÅ×³öÒì³£
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°è¡¨ç°å½¢æ€å­—ç¬¦ä¸²
+        // æ³¨æ„å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         public static string Rfc1123DateTimeStringToLocal(string strTime,
             string strFormat)
         {
@@ -925,7 +926,7 @@ out string strError)
             return localTime.ToString(strFormat);
         }
 
-        // ½«uÊ±¼ä×Ö·û´®×ª»»Îª±¾µØ±íÏÖĞÎÌ¬×Ö·û´®
+        // å°†uæ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°è¡¨ç°å½¢æ€å­—ç¬¦ä¸²
         public static string uDateTimeStringToLocal(string strTime)
         {
             if (String.IsNullOrEmpty(strTime) == true)

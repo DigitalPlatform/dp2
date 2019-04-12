@@ -31,6 +31,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -2925,7 +2926,7 @@ namespace dp2Catalog
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)
@@ -3138,7 +3139,7 @@ namespace dp2Catalog
             out string strOutputPath,
             out string strOutStyle,
             out byte[] baTimestamp,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out string strError)
         {
@@ -3338,7 +3339,7 @@ namespace dp2Catalog
 
                 Debug.Assert(string.IsNullOrEmpty(strRecord) == false, "");
 
-                record = new DigitalPlatform.Z3950.Record();
+                record = new DigitalPlatform.OldZ3950.Record();
                 if (strOutMarcSyntax == "unimarc" || strOutMarcSyntax == "")
                     record.m_strSyntaxOID = "1.2.840.10003.5.1";
                 else if (strOutMarcSyntax == "usmarc")
@@ -3363,7 +3364,7 @@ namespace dp2Catalog
                 strRecord = strXml;
                 strOutStyle = strStyle;
 
-                record = new DigitalPlatform.Z3950.Record();
+                record = new DigitalPlatform.OldZ3950.Record();
                 record.m_strSyntaxOID = "1.2.840.10003.5.109.10";
             }
 
@@ -5223,7 +5224,7 @@ namespace dp2Catalog
                     string strOutputPath = "";
                     string strOutStyle = "";
                     byte[] baTimestamp = null;
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currrentEncoding;
                     string strXmlFragment = "";
 
@@ -5489,7 +5490,7 @@ namespace dp2Catalog
                     string strOutputPath = "";
                     string strOutStyle = "";
                     byte[] baTimestamp = null;
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currrentEncoding;
                     string strXmlFragment = "";
 
@@ -6050,7 +6051,8 @@ MessageBoxDefaultButton.Button2);
                                     // "D:\\Program Files\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.0\\WindowsBase.dll",
                                     ExcelUtil.GetWindowsBaseDllPath(),
 
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
@@ -7242,7 +7244,8 @@ out string strError)
                 goto ERROR1;
 
             string[] saAddRef1 = {
-										 this.BinDir + "\\digitalplatform.marcdom.dll",
+										 this.BinDir + "\\digitalplatform.core.dll",
+                                         this.BinDir + "\\digitalplatform.marcdom.dll",
 										 // this.BinDir + "\\digitalplatform.marckernel.dll",
 										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
 										 this.BinDir + "\\digitalplatform.dll",
@@ -7747,7 +7750,7 @@ out string strError)
                         string strOutputPath = "";
                         string strOutStyle = "";
                         byte[] baTimestamp = null;
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currrentEncoding;
                         string strXmlFragment = "";
                         nRet = InternalGetOneRecord(
@@ -7820,7 +7823,7 @@ out string strError)
                         string strOutputPath = "";
                         string strOutStyle = "";
                         byte[] baTimestamp = null;
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currrentEncoding;
                         string strXmlFragment = "";
                         nRet = InternalGetOneRecord(

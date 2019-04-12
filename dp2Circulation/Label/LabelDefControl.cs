@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

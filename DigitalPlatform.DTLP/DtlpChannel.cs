@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Diagnostics;
 using System.Text;
 using System.Collections;
@@ -9,18 +9,19 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.DTLP
 {
 	/// <summary>
-	/// Ò»¸ötcpsÍ¨Ñ¶Í¨µÀ
+	/// ä¸€ä¸ªtcpsé€šè®¯é€šé“
 	/// </summary>
 	public class DtlpChannel
 	{
 
 		#region DTLP API Definition
 		// --------------------------------
-		// DTLP API ´íÎóÂë
+		// DTLP API é”™è¯¯ç 
 		public const int GL_INVALIDPATH      = 0x0001;
 		public const int GL_OUTOFRANGE       = 0x0003;
 		public const int GL_INVALIDCHANNEL   = 0x0005;
@@ -44,9 +45,9 @@ namespace DigitalPlatform.DTLP
 		public const int GL_RECV             = 0x0044;
 		public const int GL_PARATOPACKAGE    = 0x0045;
 		public const int GL_PACKAGETOPARA    = 0x0046;
-		public const int GL_PACKAGENTOH      = 0x0047;     // ÔÚ½âÊÍ°üÊ±ntoh·¢Éú´íÎó
+		public const int GL_PACKAGENTOH      = 0x0047;     // åœ¨è§£é‡ŠåŒ…æ—¶ntohå‘ç”Ÿé”™è¯¯
 		public const int GL_REENTER          = 0x0048;
-		public const int GL_INTR             = 0x0049;      // TCP/IP²Ù×÷±»ÖĞ¶Ï
+		public const int GL_INTR             = 0x0049;      // TCP/IPæ“ä½œè¢«ä¸­æ–­
 
 
 		//
@@ -161,7 +162,7 @@ namespace DigitalPlatform.DTLP
 		public const int CS_NOTFOUND         = 0xF001;
 
 		// ------------------------------------
-		// ¸÷ÖÖSearch·ç¸ñ
+		// å„ç§Searché£æ ¼
 		public const int JH_STYLE            = 0x0001;
 		public const int Z3950_BRIEF_STYLE	 = 0x0002;	 
 		public const int XX_STYLE            = 0x0003;
@@ -172,12 +173,12 @@ namespace DigitalPlatform.DTLP
 		public const int KEY_STYLE           = 0x000D;
 		public const int RIZHI_STYLE         = 0x000F;
 		public const int SIGMSG_STYLE        = 0x0011;
-		// ·ÖÀëSearchStyle·ç¸ñÓÃµÄÑÚÂë
+		// åˆ†ç¦»SearchStyleé£æ ¼ç”¨çš„æ©ç 
 		public const int MASK_OF_STYLE		=	0x00FF;
-		// ×¢:ÉÏÊö???_STYLEÖµµÄÅĞ¶Ï£¬Òª²ÉÓÃÏÂÃæ·½Ê½£º
+		// æ³¨:ä¸Šè¿°???_STYLEå€¼çš„åˆ¤æ–­ï¼Œè¦é‡‡ç”¨ä¸‹é¢æ–¹å¼ï¼š
 		// if ( (lStyle & MASK_OF_STYLE) == ???_STYLE) {...}
-		// **²»ÄÜ**²ÉÓÃÏÂÃæ·½Ê½£º
-		// if (lStyle & ???_STYLE) {...}	// ÕâÊÇ´íÎóµÄÓÃ·¨
+		// **ä¸èƒ½**é‡‡ç”¨ä¸‹é¢æ–¹å¼ï¼š
+		// if (lStyle & ???_STYLE) {...}	// è¿™æ˜¯é”™è¯¯çš„ç”¨æ³•
 		// -------------------------------------
 
 
@@ -191,7 +192,7 @@ namespace DigitalPlatform.DTLP
 		public const int CONT_RECORD         = 0x8000;
 
 		// ------------------------------------
-		// ¸÷ÖÖWrite·ç¸ñ
+		// å„ç§Writeé£æ ¼
 		public const int APPEND_WRITE		=	0x0001;
 		public const int REPLACE_WRITE		=	0x0003;
 		public const int DELETE_WRITE		=	0x0005;
@@ -199,15 +200,15 @@ namespace DigitalPlatform.DTLP
 		public const int RIZHI_WRITE		=	0x0009;
 		public const int REBUILD_WRITE		=	0x000B;
 		public const int PATPASS_WRITE		=	0x000D;
-		// ·ÖÀëWrite·ç¸ñÓÃµÄÑÚÂë
+		// åˆ†ç¦»Writeé£æ ¼ç”¨çš„æ©ç 
 		public const int MASK_OF_WRITE		=	0x000F;
-		// ×¢:ÉÏÊö???_WRITEÖµµÄÅĞ¶Ï£¬Òª²ÉÓÃÏÂÃæ·½Ê½£º
+		// æ³¨:ä¸Šè¿°???_WRITEå€¼çš„åˆ¤æ–­ï¼Œè¦é‡‡ç”¨ä¸‹é¢æ–¹å¼ï¼š
 		// if ( (lStyle & MASK_OF_WRITE) == ???_WRITE) {...}
-		// **²»ÄÜ**²ÉÓÃÏÂÃæ·½Ê½£º
-		// if (lStyle & ???_WRITE) {...}	// ÕâÊÇ´íÎóµÄÓÃ·¨
+		// **ä¸èƒ½**é‡‡ç”¨ä¸‹é¢æ–¹å¼ï¼š
+		// if (lStyle & ???_WRITE) {...}	// è¿™æ˜¯é”™è¯¯çš„ç”¨æ³•
 		// -------------------------------------
 
-		public const int WRITE_NO_LOG		=	0x0100;	// (DTLP 1.0À©³ä) ²»´´½¨ÈÕÖ¾
+		public const int WRITE_NO_LOG		=	0x0100;	// (DTLP 1.0æ‰©å……) ä¸åˆ›å»ºæ—¥å¿—
 
 
 		//
@@ -225,12 +226,12 @@ namespace DigitalPlatform.DTLP
 		public int	m_lUsrID = 0;
 
 		int	    m_lErrno = 0;
-		//ArrayList	m_baSendBuffer = null;// ·¢ËÍÇëÇóÓÃµÄ»º³åÇø
-		//ArrayList	m_baRecvBuffer = null;// ½ÓÊÕÏìÓ¦ÓÃµÄ»º³åÇø
+		//ArrayList	m_baSendBuffer = null;// å‘é€è¯·æ±‚ç”¨çš„ç¼“å†²åŒº
+		//ArrayList	m_baRecvBuffer = null;// æ¥æ”¶å“åº”ç”¨çš„ç¼“å†²åŒº
 
-		// bool	m_bStop = false;			// ÖĞ¶Ï±ê¼Ç
+		// bool	m_bStop = false;			// ä¸­æ–­æ ‡è®°
 
-		HostArray	m_HostArray = new HostArray();	// Ö÷»úÊı×é,ÓµÓĞ
+		HostArray	m_HostArray = new HostArray();	// ä¸»æœºæ•°ç»„,æ‹¥æœ‰
 
 		int		m_nResponseFuncNum = 0;
 
@@ -247,11 +248,11 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ½«Í¨µÀ×¼±¸¾ÍĞ÷¡£
-		// Èç¹ûÖ÷»úÊÂÏîÃ»ÓĞ£¬¾Í´´½¨²¢Á¬½Ó¡£Èç¹ûÉĞÎ´µÇÂ¼¹ı£¬
-		// ¾Í½øĞĞµÇÂ¼¡£
-		// ·µ»ØÖµ£ºCHostEntryÊÂÏî¡£´ÓCHostEntry::m_lChannelÖĞÒ²¿É»ñµÃÔ¶³ÌChannel
-		//		NULL±íÊ¾Ê§°Ü
+		// å°†é€šé“å‡†å¤‡å°±ç»ªã€‚
+		// å¦‚æœä¸»æœºäº‹é¡¹æ²¡æœ‰ï¼Œå°±åˆ›å»ºå¹¶è¿æ¥ã€‚å¦‚æœå°šæœªç™»å½•è¿‡ï¼Œ
+		// å°±è¿›è¡Œç™»å½•ã€‚
+		// è¿”å›å€¼ï¼šCHostEntryäº‹é¡¹ã€‚ä»CHostEntry::m_lChannelä¸­ä¹Ÿå¯è·å¾—è¿œç¨‹Channel
+		//		NULLè¡¨ç¤ºå¤±è´¥
 		HostEntry PrepareChannel(string strHostName)
 		{
 			HostEntry	entry = null;
@@ -259,11 +260,11 @@ namespace DigitalPlatform.DTLP
 			int nRet;
 
 	
-			// Ñ°ÕÒÒÑÓĞµÄÊÂÏî
+			// å¯»æ‰¾å·²æœ‰çš„äº‹é¡¹
 			entry = m_HostArray.MatchHostEntry(strHostName);
 			if (entry == null) 
 			{
-				// ´´½¨ĞÂÊÂÏî²¢Á¬½Ó
+				// åˆ›å»ºæ–°äº‹é¡¹å¹¶è¿æ¥
 				entry = new HostEntry();
 				Debug.Assert(entry!=null, "new HostEntry Failed ...");
 				if (entry == null)
@@ -273,19 +274,19 @@ namespace DigitalPlatform.DTLP
 
 			}
 
-			// Èç¹ûTCP/IPÁ¬½ÓÉĞÎ´½¨Á¢
+			// å¦‚æœTCP/IPè¿æ¥å°šæœªå»ºç«‹
 			if (entry.client == null) 
 			{
 				nRet = entry.ConnectSocket(strHostName,
 					out nErrorNo);
 				if (nRet == -1) 
 				{
-					// ĞèÒª½¨Á¢³ö´íÂë
-					m_lErrno = GL_CONNECT; // ÏêÏ¸Ô­ÒòÓĞÓòÃû²»´æÔÚ£¬connect()Ê§°ÜµÈ
+					// éœ€è¦å»ºç«‹å‡ºé”™ç 
+					m_lErrno = GL_CONNECT; // è¯¦ç»†åŸå› æœ‰åŸŸåä¸å­˜åœ¨ï¼Œconnect()å¤±è´¥ç­‰
 					return null;
 				}
 			}
-			// Èç¹ûÉĞÎ´ÏòÖ÷»úµÇÂ¼¹ı
+			// å¦‚æœå°šæœªå‘ä¸»æœºç™»å½•è¿‡
 			if (entry.m_lChannel == -1L) 
 			{
 				int nHandle;
@@ -295,11 +296,11 @@ namespace DigitalPlatform.DTLP
 					return null;
 
 				Debug.Assert(entry.m_lChannel != -1,
-					"entry.m_lChannelÖµ²»ÕıÈ·");
+					"entry.m_lChannelå€¼ä¸æ­£ç¡®");
 
 				nHandle = nRet;
 
-				// ×Ö·û¼¯Ğ­ÉÌ¹¦ÄÜ
+				// å­—ç¬¦é›†åå•†åŠŸèƒ½
 				if (PreferUTF8 == true) 
 				{
 					byte [] baResult = null;
@@ -313,7 +314,7 @@ namespace DigitalPlatform.DTLP
 						out baResult);
 					if (nRet == -1) 
 					{
-						// ±íÃ÷ÎªDTLP 0.9£¬²»Ö§³Ö×Ö·û¼¯Ğ­ÉÌ
+						// è¡¨æ˜ä¸ºDTLP 0.9ï¼Œä¸æ”¯æŒå­—ç¬¦é›†åå•†
 						entry.m_nDTLPCharset = CHARSET_DBCS;
 						// m_bForceDBCS = true;
 					}
@@ -327,9 +328,9 @@ namespace DigitalPlatform.DTLP
 							out baResult);
 						if (nRet != -1) 
 						{
-							// Ö§³Ö×Ö·û¼¯ÇĞ»»ÎªUTF8
+							// æ”¯æŒå­—ç¬¦é›†åˆ‡æ¢ä¸ºUTF8
 							entry.m_nDTLPCharset = CHARSET_UTF8;
-							// ´Ó´ËÒÔºó¾ÍĞèÒªÊ¹ÓÃUTF8½øĞĞÍ¨Ñ¶ÁË
+							// ä»æ­¤ä»¥åå°±éœ€è¦ä½¿ç”¨UTF8è¿›è¡Œé€šè®¯äº†
 							// m_bForceDBCS = false;
 
 						}
@@ -351,13 +352,13 @@ namespace DigitalPlatform.DTLP
 
 
 
-		// µÃµ½´íÎóÂë
+		// å¾—åˆ°é”™è¯¯ç 
 		public int GetLastErrno()
 		{
 			return this.m_lErrno;
 		}
 
-		// ·ÅÆúÕıÔÚ½øĞĞµÄ²Ù×÷
+		// æ”¾å¼ƒæ­£åœ¨è¿›è¡Œçš„æ“ä½œ
 		public bool Cancel()
 		{
 			// this.m_bStop = true;
@@ -374,10 +375,10 @@ namespace DigitalPlatform.DTLP
 			return CHARSET_DBCS;
 		}
 
-		// ¼ì²âÒ»¸öÖ÷»úÊÂÏîÊÇ²»ÊÇutf-8±àÂë
+		// æ£€æµ‹ä¸€ä¸ªä¸»æœºäº‹é¡¹æ˜¯ä¸æ˜¯utf-8ç¼–ç 
 		public bool IsHostActiveUTF8(string strHostName)
 		{
-			if (strHostName == "") // ´ú±í±¾¼¶!
+			if (strHostName == "") // ä»£è¡¨æœ¬çº§!
 			{
 				if (PreferUTF8 == true)
 					return true;
@@ -387,7 +388,7 @@ namespace DigitalPlatform.DTLP
 
 			HostEntry	entry = null;
 	
-			// Ñ°ÕÒÒÑÓĞµÄÊÂÏî
+			// å¯»æ‰¾å·²æœ‰çš„äº‹é¡¹
 			entry = m_HostArray.MatchHostEntry(strHostName);
 			if (entry == null) 
 			{
@@ -400,7 +401,7 @@ namespace DigitalPlatform.DTLP
 			return false;
 		}
 
-		// ¼ì²âÒ»¸öÂ·¾¶,·¢ËÍ/·µ»ØÊÇ·ñÎªutf-8±àÂë
+		// æ£€æµ‹ä¸€ä¸ªè·¯å¾„,å‘é€/è¿”å›æ˜¯å¦ä¸ºutf-8ç¼–ç 
 		// return:
 		//		false	is not UTF8 (is DBCS)
 		//		true	is UTF8
@@ -424,7 +425,7 @@ namespace DigitalPlatform.DTLP
 			return IsHostActiveUTF8(strMyPath);
 		}
 
-		// °ÑAPI_IsActiveUTF8()°ü×°Ò»ÏÂ,±ãÓÚÊ¹ÓÃ
+		// æŠŠAPI_IsActiveUTF8()åŒ…è£…ä¸€ä¸‹,ä¾¿äºä½¿ç”¨
 		public Encoding GetPathEncoding(string strPath)
 		{
 			if (API_IsActiveUTF8(strPath) == true)
@@ -433,7 +434,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ³öÏÖ»ã±¨´íÎóµÄ¶Ô»°¿ò
+		// å‡ºç°æ±‡æŠ¥é”™è¯¯çš„å¯¹è¯æ¡†
 		public void ErrorBox(IWin32Window owner,
 			string strTitle,
 			string strText)
@@ -446,8 +447,8 @@ namespace DigitalPlatform.DTLP
             string strHex = "0X" + Convert.ToString(nErrorCode, 16).PadLeft(8, '0');
 
 			strError =	strText
-				+ "\n----------------------------------\n´íÎóÂë"
-				+ strHex + ", Ô­Òò: "
+				+ "\n----------------------------------\né”™è¯¯ç "
+				+ strHex + ", åŸå› : "
 				+ strError;
 
 			MessageBox.Show(owner, strError, strTitle);
@@ -461,8 +462,8 @@ namespace DigitalPlatform.DTLP
 
             string strHex = "0X" + Convert.ToString(nErrorCode, 16).PadLeft(8, '0');
 
-            return "´íÎóÂë"
-                + strHex + ", Ô­Òò: "
+            return "é”™è¯¯ç "
+                + strHex + ", åŸå› : "
                 + strError;
         }
 
@@ -471,62 +472,62 @@ namespace DigitalPlatform.DTLP
 			switch (lErrno) 
 			{
 				case GL_INTR:
-					return "TCP/IPÍ¨Ñ¶ÖĞ¶Ï Communication Interrupted";
+					return "TCP/IPé€šè®¯ä¸­æ–­ Communication Interrupted";
 				case GL_INVALIDPATH:
-					return "ÎŞĞ§²ÎÊı Invalid Parameter";
+					return "æ— æ•ˆå‚æ•° Invalid Parameter";
 				case GL_INVALIDCHANNEL:
-					return "ÎŞĞ§Í¨µÀ Invalid Channel";
+					return "æ— æ•ˆé€šé“ Invalid Channel";
 				case GL_REENTER:
-					return "ÖØÈë Re-Enter";
+					return "é‡å…¥ Re-Enter";
 				case GL_OUTOFRANGE:
-					return "²ÎÊıÖµ³¬³öÓĞĞ§·¶Î§ Parameter Out of Range";
+					return "å‚æ•°å€¼è¶…å‡ºæœ‰æ•ˆèŒƒå›´ Parameter Out of Range";
 				case GL_HANGUP:
-					return "·şÎñÆ÷ÒÑ¾­¹ÒÆğ Server Has Hang Up";
+					return "æœåŠ¡å™¨å·²ç»æŒ‚èµ· Server Has Hang Up";
 				case GL_NORESPOND:
-					return "·şÎñÆ÷Ã»ÓĞÏìÓ¦ Server Not Respond ";
+					return "æœåŠ¡å™¨æ²¡æœ‰å“åº” Server Not Respond ";
 				case GL_ACCESSDENY:
-					return "È¨ÏŞ²»¹», ¾Ü¾ø´æÈ¡ Not Enough Right, Access Denied";
+					return "æƒé™ä¸å¤Ÿ, æ‹’ç»å­˜å– Not Enough Right, Access Denied";
 				case GL_RAP:
-					return "ĞèÒª·´ÏòÇó½â Need Reverse Path";
+					return "éœ€è¦åå‘æ±‚è§£ Need Reverse Path";
 				case GL_NOTEXIST:
-					return "²»´æÔÚ Not Exist";
+					return "ä¸å­˜åœ¨ Not Exist";
 				case GL_NOMEM:
-					return "·µ»Ø²ÎÊıÔ¤Áô¿Õ¼ä²»¹» Not Enough Parameter Memory";
+					return "è¿”å›å‚æ•°é¢„ç•™ç©ºé—´ä¸å¤Ÿ Not Enough Parameter Memory";
 				case GL_NOCHANNEL:
-					return "Í¨µÀ²»¹» Not Enough Channel";
+					return "é€šé“ä¸å¤Ÿ Not Enough Channel";
 				case GL_ERRSIGNATURE:
-					return "Write()²Ù×÷µÄÊ±¼ä´Á²»Æ¥Åä Error Write() Signature";
+					return "Write()æ“ä½œçš„æ—¶é—´æˆ³ä¸åŒ¹é… Error Write() Signature";
 				case GL_NOTLOGIN:
-					return "ÉĞÎ´µÇÂ¼ Not Login";
+					return "å°šæœªç™»å½• Not Login";
 				case GL_OVERFLOW:
-					return "Òç³ö Overflow";
+					return "æº¢å‡º Overflow";
 				case GL_CONNECT:
-					return "Í¨Ñ¶Á¬½ÓÊ§°Ü Connect Fail";
+					return "é€šè®¯è¿æ¥å¤±è´¥ Connect Fail";
 				case GL_SEND:
-					return "Í¨Ñ¶·¢ËÍÊ§°Ü Send Fail";
+					return "é€šè®¯å‘é€å¤±è´¥ Send Fail";
 				case GL_RECV:
-					return "Í¨Ñ¶½ÓÊÕÊ§°Ü Recieve Fail";
+					return "é€šè®¯æ¥æ”¶å¤±è´¥ Recieve Fail";
 				case GL_PARATOPACKAGE:
-					return "°ü×ª»»Ê§°Ü ParaToPackage Fail";
+					return "åŒ…è½¬æ¢å¤±è´¥ ParaToPackage Fail";
 				case GL_NEEDPASS:
-					return "ĞèÒª¼ø±ğĞÅÏ¢ Need Authentication";
+					return "éœ€è¦é‰´åˆ«ä¿¡æ¯ Need Authentication";
 				case LG_BADNAME:
-					return "´íÎóµÄÓÃ»§Ãû Bad Username";
+					return "é”™è¯¯çš„ç”¨æˆ·å Bad Username";
 				case LG_BADPASS:
-					return "´íÎóµÄ¿ÚÁî×Ö Bad Password";
+					return "é”™è¯¯çš„å£ä»¤å­— Bad Password";
 				case AS_NOTEXIST:
-					return "ÕÊ»§²»´æÔÚ Account Not Exist";
+					return "å¸æˆ·ä¸å­˜åœ¨ Account Not Exist";
 				case AS_DUPLICATE:
-					return "ÕÊ»§ÖØ¸´ Account Duplicate";
+					return "å¸æˆ·é‡å¤ Account Duplicate";
 				case AS_FULL:
-					return "ÕÊ»§ÒÑÂú Account Full";
+					return "å¸æˆ·å·²æ»¡ Account Full";
 				case WR_WTDISABLE:
-					return "²»¾ß±¸Ğ´È¨ÏŞ Not Allow Write";
+					return "ä¸å…·å¤‡å†™æƒé™ Not Allow Write";
 				case DR_NOTEXIST:
-					return "É¾³ı¼ÇÂ¼Ê±Ô­¼ÇÂ¼²»´æÔÚ Record Not Exist";
+					return "åˆ é™¤è®°å½•æ—¶åŸè®°å½•ä¸å­˜åœ¨ Record Not Exist";
 				default:
 				{
-					return "Î´Öª´íÎó unknown error [" +  String.Format("0X{0,8:X}",lErrno) +"]";
+					return "æœªçŸ¥é”™è¯¯ unknown error [" +  String.Format("0X{0,8:X}",lErrno) +"]";
 				}
 			}
 		}
@@ -535,7 +536,7 @@ namespace DigitalPlatform.DTLP
 		public int API_ChDir(string strUserName,
 			string strPassword,
 			string strPath,
-			//		int lPathLen, // °üº¬½áÎ²µÄ 0 ×Ö·û
+			//		int lPathLen, // åŒ…å«ç»“å°¾çš„ 0 å­—ç¬¦
 			out byte [] baResult)
 		{
 			// send:long Channel
@@ -581,7 +582,7 @@ namespace DigitalPlatform.DTLP
 			}
 
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 	
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -589,7 +590,7 @@ namespace DigitalPlatform.DTLP
 			param.ParaString(strPassword, entry.m_nDTLPCharset);
 
 			int nDBCSLength = param.ParaString(strOtherPath, entry.m_nDTLPCharset);
-			param.ParaLong(nDBCSLength);	// ParaStringÕıºÃ·µ»ØÁËÕâ¸ö³ß´ç
+			param.ParaLong(nDBCSLength);	// ParaStringæ­£å¥½è¿”å›äº†è¿™ä¸ªå°ºå¯¸
 
 			param.ParaLong(m_nResultMaxLen);
 		
@@ -690,7 +691,7 @@ namespace DigitalPlatform.DTLP
 				return lRet;
 		}
 
-		// *** °ü×°ºóµÄDir£¬¿ÉÒÔ´¦Àí×Ô¶¯µÇÂ¼
+		// *** åŒ…è£…åçš„Dirï¼Œå¯ä»¥å¤„ç†è‡ªåŠ¨ç™»å½•
 		public int Dir(string strPath,
 			out byte [] baResult)
 		{
@@ -705,7 +706,7 @@ namespace DigitalPlatform.DTLP
 				if (nErrorCode == DtlpChannel.GL_NOTLOGIN) 
 				{
 					if (this.Container.HasAskAccountInfoEventHandler == false)
-						return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+						return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 					// string strUserName, strPassword;
 					// IWin32Window owner = null;
@@ -713,7 +714,7 @@ namespace DigitalPlatform.DTLP
                     e.Channel = this;
                     e.Path = strPath;
 
-					// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+					// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 					int nProcRet = 0;
                 INPUT:
 
@@ -752,14 +753,14 @@ namespace DigitalPlatform.DTLP
 						goto INPUT;
                         }
 					}
-					return nRet;	// ÎÊÌâÉÏ½»
+					return nRet;	// é—®é¢˜ä¸Šäº¤
 				}
 			}
 
 			return nRet;
 		}
 
-		// *** Ô­Ê¼DTLP API µÄDir£¬Ã»ÓĞ×÷ÈÎºÎ°ü×°
+		// *** åŸå§‹DTLP API çš„Dirï¼Œæ²¡æœ‰ä½œä»»ä½•åŒ…è£…
 		public int API_Dir(string strPath,
 			out byte [] baResult)
 		{
@@ -795,8 +796,8 @@ namespace DigitalPlatform.DTLP
 	
 			if (strMyPath == "") 
 			{
-				// ÎÒ»¹Ã»ÓĞºÍÔ¶·½Á¬½Ó,Òò´Ë²»ÖªµÀ±ğÈËµÄ×Ö·û¼¯.
-				// µ«ÊÇ×Ô¼ºµÄ×Ö·û¼¯,ÊÇÖªµÀµÄ.
+				// æˆ‘è¿˜æ²¡æœ‰å’Œè¿œæ–¹è¿æ¥,å› æ­¤ä¸çŸ¥é“åˆ«äººçš„å­—ç¬¦é›†.
+				// ä½†æ˜¯è‡ªå·±çš„å­—ç¬¦é›†,æ˜¯çŸ¥é“çš„.
 
 				return this.LocalDir(GetLocalCharset(), out baResult);
 			}
@@ -808,7 +809,7 @@ namespace DigitalPlatform.DTLP
 			}
 
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 	
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -897,7 +898,7 @@ namespace DigitalPlatform.DTLP
 				return lRet;
 		}
 
-		// *** °ü×°ºóµÄSearch£¬¿ÉÒÔ´¦Àí×Ô¶¯µÇÂ¼
+		// *** åŒ…è£…åçš„Searchï¼Œå¯ä»¥å¤„ç†è‡ªåŠ¨ç™»å½•
 		public int Search(string strPath,
 			int lStyle,
 			out byte [] baResult)
@@ -915,11 +916,11 @@ namespace DigitalPlatform.DTLP
 				if (nErrorCode == DtlpChannel.GL_NOTLOGIN) 
 				{
 					if (this.Container.HasAskAccountInfoEventHandler == false)
-						return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+						return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
                     // 2007/7/5
                     if (nRedoCount > 10)
-                        return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+                        return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
@@ -927,7 +928,7 @@ namespace DigitalPlatform.DTLP
                     e.Path = strPath;
 					// string strUserName, strPassword;
 					// IWin32Window owner = null;
-					// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+					// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 					int nProcRet = 0;
                 INPUT:
                     // return:
@@ -968,14 +969,14 @@ namespace DigitalPlatform.DTLP
                         }
 
 					}
-					return nRet;	// ÎÊÌâÉÏ½»
+					return nRet;	// é—®é¢˜ä¸Šäº¤
 				}
 			}
 
 			return nRet;
 		}
 
-		// *** °ü×°ºóµÄSearch£¬¿ÉÒÔ´¦Àí×Ô¶¯µÇÂ¼
+		// *** åŒ…è£…åçš„Searchï¼Œå¯ä»¥å¤„ç†è‡ªåŠ¨ç™»å½•
 		public int Search(string strPath,
 			byte[] baNext,
 			int lStyle,
@@ -994,14 +995,14 @@ namespace DigitalPlatform.DTLP
 				if (nErrorCode == DtlpChannel.GL_NOTLOGIN) 
 				{
 					if (this.Container.HasAskAccountInfoEventHandler == false)
-						return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+						return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
                     e.Channel = this;
                     e.Path = strPath;
 					//string strUserName, strPassword;
 					//IWin32Window owner = null;
-					// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+					// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 					int nProcRet = 0;
                 INPUT:
                     // return:
@@ -1036,16 +1037,16 @@ namespace DigitalPlatform.DTLP
                                 "Login fail ...");
 						goto INPUT;
                         }
-                        // Ô­À´goto INPUT; ÔÚÕâÀï
+                        // åŸæ¥goto INPUT; åœ¨è¿™é‡Œ
 					}
-					return nRet;	// ÎÊÌâÉÏ½»
+					return nRet;	// é—®é¢˜ä¸Šäº¤
 				}
 			}
 
 			return nRet;
 		}
 
-		// *** Ô­Ê¼DTLP API µÄSearch£¬Ã»ÓĞ×÷ÈÎºÎ°ü×°
+		// *** åŸå§‹DTLP API çš„Searchï¼Œæ²¡æœ‰ä½œä»»ä½•åŒ…è£…
 		public int API_Search(string strPath,
 			int lStyle,
 			out byte [] baResult)
@@ -1102,7 +1103,7 @@ namespace DigitalPlatform.DTLP
 	
 
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 	
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -1191,8 +1192,8 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// *** Ô­Ê¼DTLP API µÄSearch£¬Ã»ÓĞ×÷ÈÎºÎ°ü×°
-		// ÌØÊâ°æ±¾£¬¸ø³öbyte[]ÀàĞÍµÄnext×Ö·û´®
+		// *** åŸå§‹DTLP API çš„Searchï¼Œæ²¡æœ‰ä½œä»»ä½•åŒ…è£…
+		// ç‰¹æ®Šç‰ˆæœ¬ï¼Œç»™å‡ºbyte[]ç±»å‹çš„nextå­—ç¬¦ä¸²
 		public int API_Search(string strPath,
 			byte[] baNext,
 			int lStyle,
@@ -1253,7 +1254,7 @@ namespace DigitalPlatform.DTLP
 	
 
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 	
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -1383,7 +1384,7 @@ namespace DigitalPlatform.DTLP
 	
 			if (strMyPath == "") 
 			{
-				// Ö¸³ö´íÎóÔ­Òò
+				// æŒ‡å‡ºé”™è¯¯åŸå› 
 				return -1;
 			}
 	
@@ -1394,7 +1395,7 @@ namespace DigitalPlatform.DTLP
 			}
 	
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -1519,7 +1520,7 @@ namespace DigitalPlatform.DTLP
 	
 			if (strMyPath == "") 
 			{
-				// Ö¸³ö´íÎóÔ­Òò
+				// æŒ‡å‡ºé”™è¯¯åŸå› 
 				this.m_lErrno = GL_ACCESSDENY;
 				return -1;
 			}
@@ -1539,7 +1540,7 @@ namespace DigitalPlatform.DTLP
 			}
 	
 			Debug.Assert(entry.m_lChannel!=-1,
-				"m_lChannel²»ÕıÈ·");
+				"m_lChannelä¸æ­£ç¡®");
 
 			param.Clear();
 			param.ParaLong(entry.m_lChannel);
@@ -1637,13 +1638,13 @@ namespace DigitalPlatform.DTLP
 
             if (baTimestamp == null)
             {
-                strError = "baTimeStamp²ÎÊı²»ÄÜÎªnull";
+                strError = "baTimeStampå‚æ•°ä¸èƒ½ä¸ºnull";
                 return -1;
             }
 
             if (baTimestamp.Length < 9)
             {
-                strError = "baTimeStampÄÚÈİµÄ³¤¶È²»ÄÜĞ¡ÓÚ9 bytes";
+                strError = "baTimeStampå†…å®¹çš„é•¿åº¦ä¸èƒ½å°äº9 bytes";
                 return -1;
             }
 
@@ -1663,13 +1664,13 @@ namespace DigitalPlatform.DTLP
                 if (nErrorCode == DtlpChannel.GL_NOTLOGIN)
                 {
                     if (this.Container.HasAskAccountInfoEventHandler == false)
-                        return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+                        return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
                     e.Channel = this;
                     e.Path = strPath;
-                    // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+                    // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
                     int nProcRet = 0;
                 INPUT:
                     this.Container.CallAskAccountInfo(this, e);
@@ -1693,12 +1694,12 @@ namespace DigitalPlatform.DTLP
                         goto INPUT;
                         }
                     }
-                    return nRet;	// ÎÊÌâÉÏ½»
+                    return nRet;	// é—®é¢˜ä¸Šäº¤
                 } // end if not login
 
                 if (nErrorCode == GL_ERRSIGNATURE)
                 {
-                    // Ê±¼ä´Á²»Æ¥Åä
+                    // æ—¶é—´æˆ³ä¸åŒ¹é…
                 }
 
                 return nRet;
@@ -1719,18 +1720,18 @@ namespace DigitalPlatform.DTLP
 
 			if (baTimeStamp == null) 
 			{
-				strError = "baTimeStamp²ÎÊı²»ÄÜÎªnull";
+				strError = "baTimeStampå‚æ•°ä¸èƒ½ä¸ºnull";
 				return -1;
 			}
 
 			if (baTimeStamp.Length < 9) 
 			{
-				strError = "baTimeStampÄÚÈİµÄ³¤¶È²»ÄÜĞ¡ÓÚ9 bytes";
+				strError = "baTimeStampå†…å®¹çš„é•¿åº¦ä¸èƒ½å°äº9 bytes";
 				return -1;
 			}
 
 
-			// ¹¹ÔìÒªĞ´ÈëµÄÊı¾İ
+			// æ„é€ è¦å†™å…¥çš„æ•°æ®
 			Encoding encoding = this.GetPathEncoding(strPath);
 
             CanonicalizeMARC(ref strRecord);
@@ -1758,7 +1759,7 @@ namespace DigitalPlatform.DTLP
 				if (nErrorCode == DtlpChannel.GL_NOTLOGIN) 
 				{
 					if (this.Container.HasAskAccountInfoEventHandler == false)
-						return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+						return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
@@ -1766,7 +1767,7 @@ namespace DigitalPlatform.DTLP
                     e.Path = strPath;
 					//string strUserName, strPassword;
 					//IWin32Window owner = null;
-					// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+					// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 					int nProcRet = 0;
                 INPUT:
                     // return:
@@ -1802,12 +1803,12 @@ namespace DigitalPlatform.DTLP
 						goto INPUT;
                         }
 					}
-					return nRet;	// ÎÊÌâÉÏ½»
+					return nRet;	// é—®é¢˜ä¸Šäº¤
 				} // end if not login
 
 				if (nErrorCode == GL_ERRSIGNATURE)
 				{
-					// Ê±¼ä´Á²»Æ¥Åä
+					// æ—¶é—´æˆ³ä¸åŒ¹é…
 				}
 
 				return nRet;
@@ -1816,8 +1817,8 @@ namespace DigitalPlatform.DTLP
 			return nRet;
 		}
 
-        // °ÑMARC¼ÇÂ¼Õı¹æ»¯£¬ÒÔ±ã±£´æµ½DTLP·şÎñÆ÷
-        // ¼ì²é¼ÇÂ¼Ä©Î²ÊÇ·ñÓĞ30 29½áÊø·û£¬Èç¹ûÃ»ÓĞ£¬¸ø¼ÓÉÏ
+        // æŠŠMARCè®°å½•æ­£è§„åŒ–ï¼Œä»¥ä¾¿ä¿å­˜åˆ°DTLPæœåŠ¡å™¨
+        // æ£€æŸ¥è®°å½•æœ«å°¾æ˜¯å¦æœ‰30 29ç»“æŸç¬¦ï¼Œå¦‚æœæ²¡æœ‰ï¼Œç»™åŠ ä¸Š
         public static void CanonicalizeMARC(ref string strMARC)
         {
             if (strMARC.Length == 0)
@@ -1844,7 +1845,7 @@ namespace DigitalPlatform.DTLP
             return;
         }
 
-        // ÁíÒ»°æ±¾
+        // å¦ä¸€ç‰ˆæœ¬
         public int WriteMarcRecord(string strPath,
             int nStyle,
             string strRecord,
@@ -1862,18 +1863,18 @@ namespace DigitalPlatform.DTLP
 
             if (baTimeStamp == null)
             {
-                strError = "baTimeStamp²ÎÊı²»ÄÜÎªnull";
+                strError = "baTimeStampå‚æ•°ä¸èƒ½ä¸ºnull";
                 return -1;
             }
 
             if (baTimeStamp.Length < 9)
             {
-                strError = "baTimeStampÄÚÈİµÄ³¤¶È²»ÄÜĞ¡ÓÚ9 bytes";
+                strError = "baTimeStampå†…å®¹çš„é•¿åº¦ä¸èƒ½å°äº9 bytes";
                 return -1;
             }
 
 
-            // ¹¹ÔìÒªĞ´ÈëµÄÊı¾İ
+            // æ„é€ è¦å†™å…¥çš„æ•°æ®
             Encoding encoding = this.GetPathEncoding(strPath);
 
             CanonicalizeMARC(ref strRecord);
@@ -1901,7 +1902,7 @@ namespace DigitalPlatform.DTLP
                 if (nErrorCode == DtlpChannel.GL_NOTLOGIN)
                 {
                     if (this.Container.HasAskAccountInfoEventHandler == false)
-                        return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+                        return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
@@ -1909,7 +1910,7 @@ namespace DigitalPlatform.DTLP
                     e.Path = strPath;
                     //string strUserName, strPassword;
                     //IWin32Window owner = null;
-                    // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+                    // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
                     int nProcRet = 0;
                 INPUT:
                     // return:
@@ -1945,26 +1946,26 @@ namespace DigitalPlatform.DTLP
                         goto INPUT;
                         }
                     }
-                    return nRet;	// ÎÊÌâÉÏ½»
+                    return nRet;	// é—®é¢˜ä¸Šäº¤
                 } // end if not login
 
                 if (nErrorCode == GL_ERRSIGNATURE)
                 {
-                    // Ê±¼ä´Á²»Æ¥Åä
+                    // æ—¶é—´æˆ³ä¸åŒ¹é…
                 }
 
                 // 
-                strError = "API_Write()³ö´í:\r\n"
-                    + "Â·¾¶: " + strPath + "\r\n"
-                    + "´íÎóÂë: " + nErrorCode + "\r\n"
-                    + "´íÎóĞÅÏ¢: " + GetErrorString(nErrorCode) + "\r\n";
+                strError = "API_Write()å‡ºé”™:\r\n"
+                    + "è·¯å¾„: " + strPath + "\r\n"
+                    + "é”™è¯¯ç : " + nErrorCode + "\r\n"
+                    + "é”™è¯¯ä¿¡æ¯: " + GetErrorString(nErrorCode) + "\r\n";
 
                 return nRet;
             }
 
             int nResult = nRet;
 
-            // ·ÖÎö·şÎñÆ÷·µ»ØµÄ¼ÇÂ¼
+            // åˆ†ææœåŠ¡å™¨è¿”å›çš„è®°å½•
             Package package = new Package();
             package.LoadPackage(baResult,
                 encoding);
@@ -2009,7 +2010,7 @@ namespace DigitalPlatform.DTLP
             return -1;
         }
 
-        // »ñµÃÒ»Ìõ¼ÇÂ¼µÄ¼ìË÷µã
+        // è·å¾—ä¸€æ¡è®°å½•çš„æ£€ç´¢ç‚¹
         public int GetAccessPoint(string strPath,
             string strRecord,
             out List<string> results,
@@ -2022,7 +2023,7 @@ namespace DigitalPlatform.DTLP
             int nStyle = GETKEYS_WRITE;
             byte[] baTimeStamp = new byte[9];
 
-            // ¹¹ÔìÒªĞ´ÈëµÄÊı¾İ
+            // æ„é€ è¦å†™å…¥çš„æ•°æ®
             Encoding encoding = this.GetPathEncoding(strPath);
 
             CanonicalizeMARC(ref strRecord);
@@ -2048,7 +2049,7 @@ namespace DigitalPlatform.DTLP
                 if (nErrorCode == DtlpChannel.GL_NOTLOGIN)
                 {
                     if (this.Container.HasAskAccountInfoEventHandler == false)
-                        return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+                        return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
@@ -2056,7 +2057,7 @@ namespace DigitalPlatform.DTLP
                     e.Path = strPath;
                     //string strUserName, strPassword;
                     //IWin32Window owner = null;
-                    // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+                    // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
                     int nProcRet = 0;
                 INPUT:
                     // return:
@@ -2092,25 +2093,25 @@ namespace DigitalPlatform.DTLP
                             goto INPUT;
                         }
                     }
-                    return nRet;	// ÎÊÌâÉÏ½»
+                    return nRet;	// é—®é¢˜ä¸Šäº¤
                 } // end if not login
 
                 if (nErrorCode == GL_ERRSIGNATURE)
                 {
-                    // Ê±¼ä´Á²»Æ¥Åä
+                    // æ—¶é—´æˆ³ä¸åŒ¹é…
                 }
 
                 // 
                 strError = "API_Write:\r\n"
-                    + "Â·¾¶: " + strPath + "\r\n"
-                    + "´íÎóÂë: " + nErrorCode + "\r\n"
-                    + "´íÎóĞÅÏ¢: " + GetErrorString(nErrorCode) + "\r\n";
+                    + "è·¯å¾„: " + strPath + "\r\n"
+                    + "é”™è¯¯ç : " + nErrorCode + "\r\n"
+                    + "é”™è¯¯ä¿¡æ¯: " + GetErrorString(nErrorCode) + "\r\n";
                 return nRet;
             }
 
             int nResult = nRet;
 
-            // ·ÖÎö·şÎñÆ÷·µ»ØµÄ¼ÇÂ¼
+            // åˆ†ææœåŠ¡å™¨è¿”å›çš„è®°å½•
             Package package = new Package();
             package.LoadPackage(baResult,
                 encoding);
@@ -2132,7 +2133,7 @@ namespace DigitalPlatform.DTLP
             return -1;
         }
 
-		// ¼ìË÷Ò»ÌõMARC¼ÇÂ¼
+		// æ£€ç´¢ä¸€æ¡MARCè®°å½•
 		// return:
 		//		-1	error
 		//		0	not found
@@ -2142,7 +2143,7 @@ namespace DigitalPlatform.DTLP
 			int nStyle,
 			out string strRecPath,
 			out string strRecord,
-			out byte[] baTimeStamp,	// ÖÁÉÙ9×Ö·û¿Õ¼ä
+			out byte[] baTimeStamp,	// è‡³å°‘9å­—ç¬¦ç©ºé—´
 			out string strError)
 		{
 			strRecPath = "";
@@ -2168,8 +2169,8 @@ namespace DigitalPlatform.DTLP
 
 				string strHex = String.Format("0X{0,8:X}",nErrorCode);
 
-				strError = "´íÎóÂë"
-					+ strHex + ", Ô­Òò: "
+				strError = "é”™è¯¯ç "
+					+ strHex + ", åŸå› : "
 					+ strText;
 				goto ERROR1;
 			}
@@ -2204,7 +2205,7 @@ namespace DigitalPlatform.DTLP
 			}
 			else 
 			{
-				// ¼ÇÂ¼ÓĞÎÊÌâ£¬·ÅÈëÒ»¸ö¿Õ¼ÇÂ¼?
+				// è®°å½•æœ‰é—®é¢˜ï¼Œæ”¾å…¥ä¸€ä¸ªç©ºè®°å½•?
 			}
 
 			strRecord = GetPathEncoding(strPath).GetString(baMARC);	// ?????
@@ -2216,10 +2217,10 @@ namespace DigitalPlatform.DTLP
             return -1;
         }
 
-        // ±£´æµ½(·şÎñÆ÷¶Ë)ÅäÖÃÎÄ¼ş
+        // ä¿å­˜åˆ°(æœåŠ¡å™¨ç«¯)é…ç½®æ–‡ä»¶
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int WriteCfgFile(string strCfgFilePath,
             string strContent,
             out string strError)
@@ -2229,17 +2230,17 @@ namespace DigitalPlatform.DTLP
             /*
             if (baTimeStamp == null)
             {
-                strError = "baTimeStamp²ÎÊı²»ÄÜÎªnull";
+                strError = "baTimeStampå‚æ•°ä¸èƒ½ä¸ºnull";
                 return -1;
             }
 
             if (baTimeStamp.Length < 9)
             {
-                strError = "baTimeStampÄÚÈİµÄ³¤¶È²»ÄÜĞ¡ÓÚ9 bytes";
+                strError = "baTimeStampå†…å®¹çš„é•¿åº¦ä¸èƒ½å°äº9 bytes";
                 return -1;
             }*/
 
-            // ¹¹ÔìÒªĞ´ÈëµÄÊı¾İ
+            // æ„é€ è¦å†™å…¥çš„æ•°æ®
             Encoding encoding = this.GetPathEncoding(strCfgFilePath);
 
             strContent = strContent.Replace("\r\n", "\r");
@@ -2269,7 +2270,7 @@ namespace DigitalPlatform.DTLP
                 if (nErrorCode == DtlpChannel.GL_NOTLOGIN)
                 {
                     if (this.Container.HasAskAccountInfoEventHandler == false)
-                        return nRet;	// ÎŞ·¨»ñÈ¡ÕË»§ĞÅÏ¢£¬Òò´ËÖ»ºÃ°Ñ´íÎóÉÏ½»
+                        return nRet;	// æ— æ³•è·å–è´¦æˆ·ä¿¡æ¯ï¼Œå› æ­¤åªå¥½æŠŠé”™è¯¯ä¸Šäº¤
 
 
                     AskDtlpAccountInfoEventArgs e = new AskDtlpAccountInfoEventArgs();
@@ -2277,7 +2278,7 @@ namespace DigitalPlatform.DTLP
                     e.Path = strCfgFilePath;
                     //string strUserName, strPassword;
                     //IWin32Window owner = null;
-                    // »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+                    // è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
                     int nProcRet = 0;
                 INPUT:
                     this.Container.CallAskAccountInfo(this, e);
@@ -2301,20 +2302,20 @@ namespace DigitalPlatform.DTLP
                             goto INPUT;
                         }
                     }
-                    return nRet;	// ÎÊÌâÉÏ½»
+                    return nRet;	// é—®é¢˜ä¸Šäº¤
                 } // end if not login
 
                 if (nErrorCode == GL_ERRSIGNATURE)
                 {
-                    // Ê±¼ä´Á²»Æ¥Åä
+                    // æ—¶é—´æˆ³ä¸åŒ¹é…
                 }
 
                 string strText = this.GetErrorString(nErrorCode);
                 string strHex = String.Format("0X{0,8:X}", nErrorCode);
 
-                strError = "±£´æÅäÖÃÎÄ¼ş '" + strCfgFilePath + " ' Ê±·¢Éú´íÎó: "
-                    + "´íÎóÂë"
-                    + strHex + ", Ô­Òò: "
+                strError = "ä¿å­˜é…ç½®æ–‡ä»¶ '" + strCfgFilePath + " ' æ—¶å‘ç”Ÿé”™è¯¯: "
+                    + "é”™è¯¯ç "
+                    + strHex + ", åŸå› : "
                     + strText;
                 return nRet;
             }
@@ -2329,16 +2330,16 @@ namespace DigitalPlatform.DTLP
             string strText = this.GetErrorString(nErrorCode);
             string strHex = String.Format("0X{0,8:X}", nErrorCode);
 
-            return "´íÎóÂë "
-                + strHex + ", Ô­Òò: "
+            return "é”™è¯¯ç  "
+                + strHex + ", åŸå› : "
                 + strText;
         }
 
-        // »ñµÃ(·şÎñÆ÷¶Ë)ÅäÖÃÎÄ¼şÄÚÈİ
+        // è·å¾—(æœåŠ¡å™¨ç«¯)é…ç½®æ–‡ä»¶å†…å®¹
         // return:
-        //      -1  ³ö´í
-        //      0   ÎÄ¼ş²»´æÔÚ
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æ–‡ä»¶ä¸å­˜åœ¨
+        //      1   æˆåŠŸ
         public int GetCfgFile(string strCfgFilePath,
             out string strContent,
             out string strError)
@@ -2385,9 +2386,9 @@ namespace DigitalPlatform.DTLP
 
                     string strHex = String.Format("0X{0,8:X}", nErrorCode);
 
-                    strError = "»ñÈ¡ÅäÖÃÎÄ¼ş '" + strCfgFilePath + " ' Ê±·¢Éú´íÎó: "
-                        +"´íÎóÂë"
-                        + strHex + ", Ô­Òò: "
+                    strError = "è·å–é…ç½®æ–‡ä»¶ '" + strCfgFilePath + " ' æ—¶å‘ç”Ÿé”™è¯¯: "
+                        +"é”™è¯¯ç "
+                        + strHex + ", åŸå› : "
                         + strText;
                     goto ERROR1;
                 }
@@ -2444,7 +2445,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ½«Í¨Ñ¶°üÖĞËùÓĞnetwork byteorderµÄÕûÊı×ª»»Îªlocal byteorder
+		// å°†é€šè®¯åŒ…ä¸­æ‰€æœ‰network byteorderçš„æ•´æ•°è½¬æ¢ä¸ºlocal byteorder
 		public static int NtohLvalueInResult(byte [] baBuffer)
 		{
 			if (baBuffer == null)
@@ -2512,10 +2513,10 @@ namespace DigitalPlatform.DTLP
 			return 0;
 		}
 
-		// ËÆºõ¿ÉÒÔÈÃµ÷Ö÷À´×ö?
+		// ä¼¼ä¹å¯ä»¥è®©è°ƒä¸»æ¥åš?
 
-		// ½«·µ»Ø°ülpPackageÖĞµÄËùÓĞÂ·¾¶¼ÓÉÏlpCurPathÕâÑùÒ»¼¶£¬
-		// ½«½á¹û·ÅÈëlpResultÖĞ¡£
+		// å°†è¿”å›åŒ…lpPackageä¸­çš„æ‰€æœ‰è·¯å¾„åŠ ä¸ŠlpCurPathè¿™æ ·ä¸€çº§ï¼Œ
+		// å°†ç»“æœæ”¾å…¥lpResultä¸­ã€‚
 		static int AddCurPath(
 			byte [] baPackage,
 			// int	lPackageLen,
@@ -2555,7 +2556,7 @@ namespace DigitalPlatform.DTLP
 		
 				if (lPathLen < 4) 
 				{
-					return -1;	// Ô­Ê¼°ü¸ñÊ½³ö´í
+					return -1;	// åŸå§‹åŒ…æ ¼å¼å‡ºé”™
 				}
 
 				s += 4;
@@ -2643,7 +2644,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ½«Â·¾¶ÇĞ¸îÎªÇ°ºóÁ½¸ö²¿·Ö¡£
+		// å°†è·¯å¾„åˆ‡å‰²ä¸ºå‰åä¸¤ä¸ªéƒ¨åˆ†ã€‚
 		public static void SplitPath(string strPath,
 			out string strFirstPart,
 			out string strOtherPart)
@@ -2652,7 +2653,7 @@ namespace DigitalPlatform.DTLP
 			int nRet;
 
 			Debug.Assert(strPath != null, 
-				"strPath²ÎÊı²»ÄÜÎªnull");
+				"strPathå‚æ•°ä¸èƒ½ä¸ºnull");
 
 			nRet = strPath.IndexOf("/",0);
 			if (nRet == -1) 
@@ -2668,7 +2669,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 	
-		// ½«±¾¼¶Ä¿Â¼ÊÂÏî´ò°ü
+		// å°†æœ¬çº§ç›®å½•äº‹é¡¹æ‰“åŒ…
 		int LocalDir(
 			int nCharset,
 			out byte [] baResult)
@@ -2686,7 +2687,7 @@ namespace DigitalPlatform.DTLP
 	
 			if (baResult == null) 
 			{
-				m_lErrno = GL_OVERFLOW; // ÄÚ´æ²»¹»
+				m_lErrno = GL_OVERFLOW; // å†…å­˜ä¸å¤Ÿ
 				return -1;
 			}
 	
@@ -2789,7 +2790,7 @@ namespace DigitalPlatform.DTLP
 			baResult = null;
 
 			byte[] buffer = DTLPParam.GetEncoding(nCharset).GetBytes(strCurDir);
-			// Îª×Ö·û´®Ä©Î²Ôö¼ÓÒ»¸ö0×Ö·û
+			// ä¸ºå­—ç¬¦ä¸²æœ«å°¾å¢åŠ ä¸€ä¸ª0å­—ç¬¦
 			buffer = ByteArray.EnsureSize(buffer, buffer.Length + 1);
 			buffer[buffer.Length -1] = 0;
 
@@ -2832,13 +2833,13 @@ namespace DigitalPlatform.DTLP
 			{
 				entry = (HostEntry)m_HostArray[i];
 				Debug.Assert(entry != null,
-					"HostArrayÖĞ³öÏÖÁË¿ÕµÄÔªËØ");
+					"HostArrayä¸­å‡ºç°äº†ç©ºçš„å…ƒç´ ");
 
 				if (entry.m_strHostName == "")
 					continue;
 
 				// Unicode --> GB
-				// ¼Ù¶¨Êä³ö²»°üº¬½áÎ²µÄ0×Ö·û
+				// å‡å®šè¾“å‡ºä¸åŒ…å«ç»“å°¾çš„0å­—ç¬¦
 				byte[] buffer = 
 					DTLPParam.GetEncoding(nCharset).GetBytes(entry.m_strHostName);
 				// GB-2312
@@ -2862,7 +2863,7 @@ namespace DigitalPlatform.DTLP
 					cur,
 					len);
 
-				// ½áÎ²0
+				// ç»“å°¾0
 				baResult.SetValue((byte)0, baResult.Length - 1);
 				cur += len+1;
 			}
@@ -2871,7 +2872,7 @@ namespace DigitalPlatform.DTLP
 		}
 
 
-		// ¹¹ÔìÒ»¸ö¿ÕµÄ·µ»Ø°ü
+		// æ„é€ ä¸€ä¸ªç©ºçš„è¿”å›åŒ…
 		static int NullPackage(out byte [] baResult)
 		{
 			int t = 0;
@@ -2933,19 +2934,19 @@ namespace DigitalPlatform.DTLP
 			return t;
         }
 
-        #region ºÍdt1000ÈÕÖ¾¸ú×ÙÓĞ¹ØµÄÊµÓÃº¯Êı
+        #region å’Œdt1000æ—¥å¿—è·Ÿè¸ªæœ‰å…³çš„å®ç”¨å‡½æ•°
 
-        // ½«ÈÕÖ¾¼ÇÂ¼Â·¾¶½âÎöÎªÈÕÆÚ¡¢ĞòºÅ¡¢Æ«ÒÆ
-        // Ò»¸öÈÕÖ¾¼ÇÂ¼Â·¾¶µÄÀı×ÓÎª:
+        // å°†æ—¥å¿—è®°å½•è·¯å¾„è§£æä¸ºæ—¥æœŸã€åºå·ã€åç§»
+        // ä¸€ä¸ªæ—¥å¿—è®°å½•è·¯å¾„çš„ä¾‹å­ä¸º:
         // /ip/log/19991231/0@1234~5678
         // parameters:
-        //		strLogPath		´ı½âÎöµÄÈÕÖ¾¼ÇÂ¼Â·¾¶
-        //		strDate			½âÎö³öµÄÈÕÆÚ
-        //		nRecID			½âÎö³öµÄ¼ÇÂ¼ºÅ
-        //		strOffset		½âÎö³öµÄ¼ÇÂ¼Æ«ÒÆ£¬ÀıÈç1234~5678
+        //		strLogPath		å¾…è§£æçš„æ—¥å¿—è®°å½•è·¯å¾„
+        //		strDate			è§£æå‡ºçš„æ—¥æœŸ
+        //		nRecID			è§£æå‡ºçš„è®°å½•å·
+        //		strOffset		è§£æå‡ºçš„è®°å½•åç§»ï¼Œä¾‹å¦‚1234~5678
         // return:
-        //		-1		³ö´í
-        //		0		ÕıÈ·
+        //		-1		å‡ºé”™
+        //		0		æ­£ç¡®
         public static int ParseLogPath(string strLogPath,
             out string strDate,
             out int nRecID,
@@ -2983,7 +2984,7 @@ namespace DigitalPlatform.DTLP
                 }
                 catch
                 {
-                    strError = "Â·¾¶ '" + strLogPath + "' ÖĞ'" + strNumber + "'Ó¦µ±Îª´¿Êı×Ö";
+                    strError = "è·¯å¾„ '" + strLogPath + "' ä¸­'" + strNumber + "'åº”å½“ä¸ºçº¯æ•°å­—";
                     return -1;
                 }
                 strPath = strPath.Substring(0, nRet);
@@ -3009,20 +3010,20 @@ namespace DigitalPlatform.DTLP
             return 0;
         }
 
-        // °Ñdt1000¹¤×÷µ¥¸ñÊ½µÄÈÕÖ¾¼ÇÂ¼£¬×ª»»ÎªMARC»úÄÚ¸ñÊ½
+        // æŠŠdt1000å·¥ä½œå•æ ¼å¼çš„æ—¥å¿—è®°å½•ï¼Œè½¬æ¢ä¸ºMARCæœºå†…æ ¼å¼
         public static string GetDt1000LogRecord(byte[] baContent,
             Encoding encoding)
         {
             string strRecord = encoding.GetString(baContent);
             // int nRet = 0;
 
-            // ½«×ÔÈ»·ûºÅÌæ»»ÎªISO2709×¨ÓÃ·ûºÅ
+            // å°†è‡ªç„¶ç¬¦å·æ›¿æ¢ä¸ºISO2709ä¸“ç”¨ç¬¦å·
             /*
             strRecord = strRecord.Replace("\r\n***\r\n",
                 new string(MarcUtil.FLDEND, 1) + new string(MarcUtil.RECEND, 1));
             if (strRecord[strRecord.Length - 1] != MarcUtil.RECEND)
             {
-                // ²¹¾È
+                // è¡¥æ•‘
                 strRecord += new string(MarcUtil.RECEND, 1);
             }*/
             strRecord = strRecord.Replace("\r\n***\r\n",
@@ -3033,11 +3034,11 @@ namespace DigitalPlatform.DTLP
             strRecord = strRecord.Replace("\r\n", new string(MarcUtil.FLDEND, 1));
             if (strRecord.Length >= 25)
             {
-                strRecord = strRecord.Remove(24, 1);	// É¾³ıÍ·±êÇøºóµÚÒ»¸öFLDEND
+                strRecord = strRecord.Remove(24, 1);	// åˆ é™¤å¤´æ ‡åŒºåç¬¬ä¸€ä¸ªFLDEND
             }
 
             /*
-            // Èç¹ûµ¹ÊıµÚ¶ş¸ö×Ö·û²»ÊÇFLDEND£¬Ôò²åÈëÒ»¸ö
+            // å¦‚æœå€’æ•°ç¬¬äºŒä¸ªå­—ç¬¦ä¸æ˜¯FLDENDï¼Œåˆ™æ’å…¥ä¸€ä¸ª
             int nLen;
             nLen = strRecord.Length;
             if (nLen >= 2)
@@ -3046,7 +3047,7 @@ namespace DigitalPlatform.DTLP
                     strRecord = strRecord.Insert(nLen - 1, new string(MarcUtil.FLDEND, 1));
             }*/
 
-            // Èç¹ûµ¹ÊıµÚÒ»¸ö×Ö·û²»ÊÇFLDEND£¬Ôò²åÈëÒ»¸ö
+            // å¦‚æœå€’æ•°ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸æ˜¯FLDENDï¼Œåˆ™æ’å…¥ä¸€ä¸ª
             if (strRecord[strRecord.Length - 1] != MarcUtil.FLDEND)
             {
                 strRecord += new string(MarcUtil.FLDEND, 1);
@@ -3055,15 +3056,15 @@ namespace DigitalPlatform.DTLP
             return strRecord;
         }
 
-        // ½âÎödt1000ÈÕÖ¾¼ÇÂ¼ÖĞµÄµÄÒªº¦²ÎÊı
+        // è§£ædt1000æ—¥å¿—è®°å½•ä¸­çš„çš„è¦å®³å‚æ•°
         /*
-#define LOG_APPEND		0	// ±íÊ¾×·¼Ó¼ÇÂ¼
-#define LOG_OVERWRITED	1	// ±íÊ¾¸²¸Ç²Ù×÷É¾³ıµÄ¾É¼ÇÂ¼
-#define LOG_DELETE		2	// ±íÊ¾É¾³ı¼ÇÂ¼
-#define LOG_DESTROY_DB	12	// ±íÊ¾³õÊ¼»¯Êı¾İ¿â
+#define LOG_APPEND		0	// è¡¨ç¤ºè¿½åŠ è®°å½•
+#define LOG_OVERWRITED	1	// è¡¨ç¤ºè¦†ç›–æ“ä½œåˆ é™¤çš„æ—§è®°å½•
+#define LOG_DELETE		2	// è¡¨ç¤ºåˆ é™¤è®°å½•
+#define LOG_DESTROY_DB	12	// è¡¨ç¤ºåˆå§‹åŒ–æ•°æ®åº“
  * */
         // parameters:
-        //      strOperPath .rz×Ö¶Î$a×Ó×Ö¶ÎÄÚÈİ£¬Â·¾¶¡£²»¹ı£¬Èç¹ûstrOperCodeÎª¡°12¡±Ê±£¬strOperPathÖĞ·µ»ØµÄÖ»ÊÇÊı¾İ¿âÃû
+        //      strOperPath .rzå­—æ®µ$aå­å­—æ®µå†…å®¹ï¼Œè·¯å¾„ã€‚ä¸è¿‡ï¼Œå¦‚æœstrOperCodeä¸ºâ€œ12â€æ—¶ï¼ŒstrOperPathä¸­è¿”å›çš„åªæ˜¯æ•°æ®åº“å
         public static int ParseDt1000LogRecord(string strMARC,
             out string strOperCode,
             out string strOperComment,
@@ -3080,9 +3081,9 @@ namespace DigitalPlatform.DTLP
             string strNextFieldName = "";
 
             // return:
-            //		-1	³ö´í
-            //		0	ËùÖ¸¶¨µÄ×Ö¶ÎÃ»ÓĞÕÒµ½
-            //		1	ÕÒµ½¡£ÕÒµ½µÄ×Ö¶Î·µ»ØÔÚstrField²ÎÊıÖĞ
+            //		-1	å‡ºé”™
+            //		0	æ‰€æŒ‡å®šçš„å­—æ®µæ²¡æœ‰æ‰¾åˆ°
+            //		1	æ‰¾åˆ°ã€‚æ‰¾åˆ°çš„å­—æ®µè¿”å›åœ¨strFieldå‚æ•°ä¸­
             int nRet = MarcUtil.GetField(strMARC,
                 ".rz",
                 0,
@@ -3102,7 +3103,7 @@ namespace DigitalPlatform.DTLP
 
             if (strField.Length < 5)
             {
-                strError = "'.rz'×Ö¶Î³¤¶ÈĞ¡ÓÚ5...";
+                strError = "'.rz'å­—æ®µé•¿åº¦å°äº5...";
                 goto ERROR1;
             }
 
@@ -3110,37 +3111,37 @@ namespace DigitalPlatform.DTLP
 
 
             if (strOperCode == "00")
-                strOperComment = "×·¼Ó¼ÇÂ¼";
+                strOperComment = "è¿½åŠ è®°å½•";
             else if (strOperCode == "01")
-                strOperComment = "±»¸²¸ÇµÄ¼ÇÂ¼";
+                strOperComment = "è¢«è¦†ç›–çš„è®°å½•";
             else if (strOperCode == "02")
-                strOperComment = "É¾³ı¼ÇÂ¼";
+                strOperComment = "åˆ é™¤è®°å½•";
             else if (strOperCode == "12")
-                strOperComment = "³õÊ¼»¯Êı¾İ¿â";
+                strOperComment = "åˆå§‹åŒ–æ•°æ®åº“";
             else
             {
-                strOperComment = "²»ÄÜÊ¶±ğµÄ²Ù×÷ÀàĞÍ '" + strOperCode + "'";
+                strOperComment = "ä¸èƒ½è¯†åˆ«çš„æ“ä½œç±»å‹ '" + strOperCode + "'";
                 goto ERROR1;
             }
 
             string strSubfield = "";
             string strNextSubfieldName = "";
 
-            // »ñµÃ$a×Ó×Ö¶Î
+            // è·å¾—$aå­å­—æ®µ
 
-            // ´Ó×Ö¶Î»ò×Ó×Ö¶Î×éÖĞµÃµ½Ò»¸ö×Ó×Ö¶Î
+            // ä»å­—æ®µæˆ–å­å­—æ®µç»„ä¸­å¾—åˆ°ä¸€ä¸ªå­å­—æ®µ
             // parameters:
-            //		strText		×Ö¶ÎÄÚÈİ£¬»òÕß×Ó×Ö¶Î×éÄÚÈİ¡£
-            //		textType	±íÊ¾strTextÖĞ°üº¬µÄÊÇ×Ö¶ÎÄÚÈİ»¹ÊÇ×éÄÚÈİ¡£ÈôÎªItemType.Field£¬±íÊ¾strText²ÎÊıÖĞÎª×Ö¶Î£»ÈôÎªItemType.Group£¬±íÊ¾strText²ÎÊıÖĞÎª×Ó×Ö¶Î×é¡£
-            //		strSubfieldName	×Ó×Ö¶ÎÃû£¬ÄÚÈİÎª1Î»×Ö·û¡£Èç¹û==null£¬±íÊ¾ÈÎÒâ×Ó×Ö¶Î
-            //					ĞÎÊ½Îª'a'ÕâÑùµÄ¡£
-            //		nIndex			ÏëÒª»ñµÃÍ¬Ãû×Ó×Ö¶ÎÖĞµÄµÚ¼¸¸ö¡£´Ó0¿ªÊ¼¼ÆËã¡£
-            //		strSubfield		[out]Êä³ö×Ó×Ö¶Î¡£×Ó×Ö¶ÎÃû(1×Ö·û)¡¢×Ó×Ö¶ÎÄÚÈİ¡£
-            //		strNextSubfieldName	[out]ÏÂÒ»¸ö×Ó×Ö¶ÎµÄÃû×Ö£¬ÄÚÈİÒ»¸ö×Ö·û
+            //		strText		å­—æ®µå†…å®¹ï¼Œæˆ–è€…å­å­—æ®µç»„å†…å®¹ã€‚
+            //		textType	è¡¨ç¤ºstrTextä¸­åŒ…å«çš„æ˜¯å­—æ®µå†…å®¹è¿˜æ˜¯ç»„å†…å®¹ã€‚è‹¥ä¸ºItemType.Fieldï¼Œè¡¨ç¤ºstrTextå‚æ•°ä¸­ä¸ºå­—æ®µï¼›è‹¥ä¸ºItemType.Groupï¼Œè¡¨ç¤ºstrTextå‚æ•°ä¸­ä¸ºå­å­—æ®µç»„ã€‚
+            //		strSubfieldName	å­å­—æ®µåï¼Œå†…å®¹ä¸º1ä½å­—ç¬¦ã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºä»»æ„å­å­—æ®µ
+            //					å½¢å¼ä¸º'a'è¿™æ ·çš„ã€‚
+            //		nIndex			æƒ³è¦è·å¾—åŒåå­å­—æ®µä¸­çš„ç¬¬å‡ ä¸ªã€‚ä»0å¼€å§‹è®¡ç®—ã€‚
+            //		strSubfield		[out]è¾“å‡ºå­å­—æ®µã€‚å­å­—æ®µå(1å­—ç¬¦)ã€å­å­—æ®µå†…å®¹ã€‚
+            //		strNextSubfieldName	[out]ä¸‹ä¸€ä¸ªå­å­—æ®µçš„åå­—ï¼Œå†…å®¹ä¸€ä¸ªå­—ç¬¦
             // return:
-            //		-1	³ö´í
-            //		0	ËùÖ¸¶¨µÄ×Ó×Ö¶ÎÃ»ÓĞÕÒµ½
-            //		1	ÕÒµ½¡£ÕÒµ½µÄ×Ó×Ö¶Î·µ»ØÔÚstrSubfield²ÎÊıÖĞ
+            //		-1	å‡ºé”™
+            //		0	æ‰€æŒ‡å®šçš„å­å­—æ®µæ²¡æœ‰æ‰¾åˆ°
+            //		1	æ‰¾åˆ°ã€‚æ‰¾åˆ°çš„å­å­—æ®µè¿”å›åœ¨strSubfieldå‚æ•°ä¸­
 
             nRet = MarcUtil.GetSubfield(strField,
                 DigitalPlatform.Marc.ItemType.Field,
@@ -3150,18 +3151,18 @@ namespace DigitalPlatform.DTLP
                 out strNextSubfieldName);
             if (nRet == -1)
             {
-                strError = "»ñµÃ.rz×Ö¶ÎÖĞµÄ$a×Ó×Ö¶ÎÊ±³ö´í";
+                strError = "è·å¾—.rzå­—æ®µä¸­çš„$aå­å­—æ®µæ—¶å‡ºé”™";
                 goto ERROR1;
             }
             if (nRet == 0)
             {
-                strError = ".rz×Ö¶ÎÖĞµÄ$a×Ó×Ö¶ÎÃ»ÓĞÕÒµ½";
+                strError = ".rzå­—æ®µä¸­çš„$aå­å­—æ®µæ²¡æœ‰æ‰¾åˆ°";
                 goto ERROR1;
             }
 
             if (strSubfield.Length < 1)
             {
-                strError = ".rz×Ö¶ÎÖĞµÄ$a×Ó×Ö¶ÎÄÚÈİÎª¿Õ";
+                strError = ".rzå­—æ®µä¸­çš„$aå­å­—æ®µå†…å®¹ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -3173,16 +3174,16 @@ namespace DigitalPlatform.DTLP
 
                 string strDbName = "";
 
-                // ¿âÃû
+                // åº“å
                 if (nRet == -1)
                 {
-                    // ÕâÖÖÇé¿öÊÇ·ñÒªµ±×÷Êı¾İ²ĞÈ±´¦Àí£¿
+                    // è¿™ç§æƒ…å†µæ˜¯å¦è¦å½“ä½œæ•°æ®æ®‹ç¼ºå¤„ç†ï¼Ÿ
                     strDbName = strContent;
                 }
                 else
                     strDbName = strContent.Substring(0, nRet);
 
-                // '/'ºóÃæµÄÊı¾İ¿âÄÚ²¿´úºÅ±»·ÅÆú²»ÓÃ
+                // '/'åé¢çš„æ•°æ®åº“å†…éƒ¨ä»£å·è¢«æ”¾å¼ƒä¸ç”¨
                 strOperPath = strDbName;
             }
             else
@@ -3199,10 +3200,10 @@ namespace DigitalPlatform.DTLP
 
         #endregion
 
-        // ½âÎö±£´æÂ·¾¶
+        // è§£æä¿å­˜è·¯å¾„
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public static int ParseWritePath(string strPathParam,
             out string strServerAddr,
             out string strDbName,
@@ -3227,7 +3228,7 @@ namespace DigitalPlatform.DTLP
 
             strPath = strPath.Substring(nRet + 1);
 
-            // ¿âÃû
+            // åº“å
             nRet = strPath.IndexOf('/');
             if (nRet == -1)
             {
@@ -3242,7 +3243,7 @@ namespace DigitalPlatform.DTLP
 
             string strTemp = "";
 
-            // '¼ÇÂ¼Ë÷ÒıºÅ'ºº×Ö
+            // 'è®°å½•ç´¢å¼•å·'æ±‰å­—
             nRet = strPath.IndexOf('/');
             if (nRet == -1)
             {
@@ -3252,15 +3253,15 @@ namespace DigitalPlatform.DTLP
 
             strTemp = strPath.Substring(0, nRet);
 
-            if (strTemp != "ctlno" && strTemp != "¼ÇÂ¼Ë÷ÒıºÅ")
+            if (strTemp != "ctlno" && strTemp != "è®°å½•ç´¢å¼•å·")
             {
-                strError = "Â·¾¶ '" + strPathParam + "' ¸ñÊ½²»ÕıÈ·";
+                strError = "è·¯å¾„ '" + strPathParam + "' æ ¼å¼ä¸æ­£ç¡®";
                 return -1;
             }
 
             strPath = strPath.Substring(nRet + 1);
 
-            // ºÅÂë
+            // å·ç 
             nRet = strPath.IndexOf('/');
             if (nRet == -1)
             {
@@ -3273,11 +3274,11 @@ namespace DigitalPlatform.DTLP
             return 0;
         }
 
-        // Õı¹æ»¯±£´æÂ·¾¶
+        // æ­£è§„åŒ–ä¿å­˜è·¯å¾„
         // return:
         //      -1  error
-        //      0   Îª¸²¸Ç·½Ê½µÄÂ·¾¶
-        //      1   Îª×·¼Ó·½Ê½µÄÂ·¾¶
+        //      0   ä¸ºè¦†ç›–æ–¹å¼çš„è·¯å¾„
+        //      1   ä¸ºè¿½åŠ æ–¹å¼çš„è·¯å¾„
         public static int CanonicalizeWritePath(string strPath,
             out string strOutPath,
             out string strError)
@@ -3298,31 +3299,31 @@ namespace DigitalPlatform.DTLP
 
             if (strServerAddr == "")
             {
-                strError = "È±·¦·şÎñÆ÷Ãû²¿·Ö";
+                strError = "ç¼ºä¹æœåŠ¡å™¨åéƒ¨åˆ†";
                 return -1;
             }
 
             if (strDbName == "")
             {
-                strError = "È±·¦Êı¾İ¿âÃû²¿·Ö";
+                strError = "ç¼ºä¹æ•°æ®åº“åéƒ¨åˆ†";
                 return -1;
             }
 
             if (strNumber == "")
             {
-                strNumber = "?";    // ±íÊ¾×·¼Ó
+                strNumber = "?";    // è¡¨ç¤ºè¿½åŠ 
             }
 
             if (strNumber == "?")
             {
-                // ÎªÁË±ÜÃâdt1000/dt1500Ä³¸ö°æ±¾µÄ±£´æºó·µ»ØµÄÂ·¾¶»¹´øÓĞÎÊºÅ£¬ËùÒÔÒª¹¹Ôì³ÉÏÂÁĞÃ»ÓĞÎÊºÅĞÎÊ½µÄÂ·¾¶
+                // ä¸ºäº†é¿å…dt1000/dt1500æŸä¸ªç‰ˆæœ¬çš„ä¿å­˜åè¿”å›çš„è·¯å¾„è¿˜å¸¦æœ‰é—®å·ï¼Œæ‰€ä»¥è¦æ„é€ æˆä¸‹åˆ—æ²¡æœ‰é—®å·å½¢å¼çš„è·¯å¾„
                 strOutPath = strServerAddr + "/" + strDbName;
-                return 1;   // ±íÊ¾Îª×·¼Ó·½Ê½µÄÂ·¾¶
+                return 1;   // è¡¨ç¤ºä¸ºè¿½åŠ æ–¹å¼çš„è·¯å¾„
             }
             else
-                strOutPath = strServerAddr + "/" + strDbName + "/¼ÇÂ¼Ë÷ÒıºÅ/" + strNumber;
+                strOutPath = strServerAddr + "/" + strDbName + "/è®°å½•ç´¢å¼•å·/" + strNumber;
 
-            return 0;   // ±íÊ¾ÎªÆÕÍ¨¸²¸Ç·½Ê½µÄÂ·¾¶
+            return 0;   // è¡¨ç¤ºä¸ºæ™®é€šè¦†ç›–æ–¹å¼çš„è·¯å¾„
         }
     }
 

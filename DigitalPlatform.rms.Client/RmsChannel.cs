@@ -21,10 +21,10 @@ using System.ServiceModel.Security.Tokens;
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {

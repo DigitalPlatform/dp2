@@ -20,11 +20,11 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -3049,6 +3049,10 @@ namespace DigitalPlatform.LibraryServer
                     types.Add(type);
                 }
             }
+
+            string libraryName = DomUtil.GetElementText(this.LibraryCfgDom.DocumentElement, "libraryInfo/libraryName");
+            if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/','\\'}) != -1)
+                errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
 
             if (errors.Count > 0)
             {

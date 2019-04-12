@@ -21,6 +21,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using Newtonsoft.Json;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

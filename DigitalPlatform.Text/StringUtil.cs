@@ -13,6 +13,7 @@ using System.Xml;
 
 namespace DigitalPlatform.Text
 {
+#if REMOVED
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
@@ -4062,4 +4063,5 @@ string strTimestamp)
 
     }
 
+#endif
 }

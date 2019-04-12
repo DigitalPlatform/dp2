@@ -23,7 +23,7 @@ namespace dp2Catalog
 
         int BuildBrowseText(
     ZConnection connection,
-    DigitalPlatform.Z3950.Record record,
+    DigitalPlatform.OldZ3950.Record record,
     string strStyle,
     out string strBrowseText,
     out int nImageIndex,

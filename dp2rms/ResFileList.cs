@@ -13,11 +13,11 @@ using DigitalPlatform;
 //using DigitalPlatform.XmlEditor;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
-using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace dp2rms
 {
@@ -1248,7 +1248,7 @@ namespace dp2rms
 					RangeList rl = new RangeList(ranges[j]);
 					if (rl.Count >= 1) 
 					{
-						double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
+						double ratio = (double)(rl[0]).lStart / (double)fi.Length;
 						strPercent = String.Format("{0,3:N}",ratio * (double)100) + "%";
 					}
 

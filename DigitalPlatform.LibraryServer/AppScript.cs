@@ -21,6 +21,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -201,7 +202,11 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
-            string[] saAddRef = { this.BinDir + "\\" + "digitalplatform.LibraryServer.dll" };
+            string[] saAddRef = {
+                "netstandard.dll",
+                Path.Combine(this.BinDir , "digitalplatform.core.dll"),
+                Path.Combine(this.BinDir , "digitalplatform.LibraryServer.dll"),
+            };
 
             string[] saTemp = new string[saRef.Length + saAddRef.Length];
             Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
@@ -371,6 +376,16 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strWarning = "";
             assembly = null;
+
+
+            // 2019/4/5
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
 
             // CompilerParameters对象
             CompilerParameters compilerParams = new CompilerParameters();

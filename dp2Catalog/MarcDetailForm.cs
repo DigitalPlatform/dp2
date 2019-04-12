@@ -26,6 +26,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -57,8 +58,8 @@ namespace dp2Catalog
         public long RecordVersion = 0; // 当前记录的修改后版本号。0 表示尚未修改过
 
         // 从Z39.50服务器检索过来的原始记录
-        DigitalPlatform.Z3950.Record m_currentRecord = null;
-        public DigitalPlatform.Z3950.Record CurrentRecord
+        DigitalPlatform.OldZ3950.Record m_currentRecord = null;
+        public DigitalPlatform.OldZ3950.Record CurrentRecord
         {
             get
             {
@@ -986,7 +987,7 @@ namespace dp2Catalog
             try
             {
 
-                DigitalPlatform.Z3950.Record record = null;
+                DigitalPlatform.OldZ3950.Record record = null;
                 Encoding currentEncoding = null;
 
                 this.CurrentRecord = null;
@@ -1156,7 +1157,7 @@ namespace dp2Catalog
             }
 #endif
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;
@@ -1655,7 +1656,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 this.LinkedSearchForm = searchform;
                 // this.SavePath = "";  // 2011/5/5 去除
 
-                DigitalPlatform.Z3950.Record record = null;
+                DigitalPlatform.OldZ3950.Record record = null;
                 Encoding currentEncoding = null;
 
                 this.CurrentRecord = null;
@@ -2854,7 +2855,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             this.CurrentRecord = null;
 
-            DigitalPlatform.Z3950.Record record = new DigitalPlatform.Z3950.Record();
+            DigitalPlatform.OldZ3950.Record record = new DigitalPlatform.OldZ3950.Record();
             if (strMarcSyntax == "unimarc" || strMarcSyntax == "")
                 record.m_strSyntaxOID = "1.2.840.10003.5.1";
             else if (strMarcSyntax == "usmarc")
@@ -3577,7 +3578,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                             // 时间戳冲突了
 
                             // 装载目标记录
-                            DigitalPlatform.Z3950.Record record = null;
+                            DigitalPlatform.OldZ3950.Record record = null;
                             Encoding currentEncoding = null;
                             byte[] baTargetTimestamp = null;
                             string strOutStyle = "";
@@ -6111,6 +6112,7 @@ Stack:
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -7453,7 +7455,7 @@ Keys keyData)
                                     "system.windows.forms.dll",
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
-
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
@@ -7575,6 +7577,7 @@ Keys keyData)
                                     "system.drawing.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",

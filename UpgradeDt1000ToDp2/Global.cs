@@ -16,6 +16,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace UpgradeDt1000ToDp2
 {

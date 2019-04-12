@@ -732,7 +732,8 @@ namespace dp2Circulation
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									//Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
@@ -844,8 +845,9 @@ namespace dp2Circulation
 
                 // 一些必要的链接库
                 string[] saAddRef1 = {
-										 Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+										 Environment.CurrentDirectory + "\\digitalplatform.core.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
 										 //Environment.CurrentDirectory + "\\digitalplatform.library.dll",

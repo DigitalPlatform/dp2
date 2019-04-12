@@ -8,6 +8,7 @@ using System.Threading;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

@@ -26,6 +26,7 @@ using DigitalPlatform.CirculationClient;
 
 using dp2Secure;
 using DigitalPlatform.AmazonInterface;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -179,7 +180,7 @@ namespace dp2Catalog
             out string strOutStyle,
             out byte[] baTimestamp,
             out long lVersion,
-            out DigitalPlatform.Z3950.Record record,
+            out DigitalPlatform.OldZ3950.Record record,
             out Encoding currrentEncoding,
             out LoginInfo logininfo,
             out string strError)
@@ -343,7 +344,7 @@ MessageBoxDefaultButton.Button1);
                 info = (ItemInfo)curItem.Tag;
             }
 
-            record = new DigitalPlatform.Z3950.Record();
+            record = new DigitalPlatform.OldZ3950.Record();
             record.m_baRecord = Encoding.UTF8.GetBytes(info.Xml);
             record.m_strDBName = m_searchParameters != null ? m_searchParameters["SearchIndex"] : "";
             record.m_strSyntaxOID = info.PreferSyntaxOID; // ???
@@ -2798,7 +2799,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -2902,7 +2903,7 @@ MessageBoxDefaultButton.Button1);
                         LoginInfo logininfo = null;
                         long lVersion = 0;
                         string strXmlFragment = "";
-                        DigitalPlatform.Z3950.Record record = null;
+                        DigitalPlatform.OldZ3950.Record record = null;
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
@@ -3191,7 +3192,7 @@ MessageBoxDefaultButton.Button1);
                     LoginInfo logininfo = null;
                     long lVersion = 0;
                     string strXmlFragment = "";
-                    DigitalPlatform.Z3950.Record record = null;
+                    DigitalPlatform.OldZ3950.Record record = null;
                     Encoding currentEncoding = null;
                     string strMARC = "";
 

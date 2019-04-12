@@ -11,6 +11,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.CirculationClient
 {

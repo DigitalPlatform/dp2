@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.IO.Compression;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryClient
 {

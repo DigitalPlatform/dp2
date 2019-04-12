@@ -18,9 +18,9 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
-using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

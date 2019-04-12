@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DigitalPlatform.Z3950")]
+[assembly: AssemblyTitle("DigitalPlatform.OldZ3950")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("DigitalPlatform")]
-[assembly: AssemblyProduct("DigitalPlatform.Z3950")]
+[assembly: AssemblyProduct("DigitalPlatform.OldZ3950")]
 [assembly: AssemblyCopyright("Copyright © DigitalPlatform 数字平台北京软件有限责任公司 2006-2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

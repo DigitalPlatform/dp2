@@ -9,7 +9,7 @@ using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.OldZ3950;
 using DigitalPlatform.Xml;
 
 
@@ -2316,7 +2316,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
             if (records == null)
                 return;
 
-            foreach(DigitalPlatform.Z3950.Record record in records)
+            foreach(DigitalPlatform.OldZ3950.Record record in records)
             {
                 // 非诊断记录
                 if (record.m_nDiagCondition == 0)
@@ -2675,7 +2675,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKe
                     }
                 }*/
 
-                DigitalPlatform.Z3950.Record record = records[i];
+                DigitalPlatform.OldZ3950.Record record = records[i];
 
                 VirtualItem item = new VirtualItem(
                     (i + 1).ToString(),

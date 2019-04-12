@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
 using DigitalPlatform.RFID;
 using static dp2Circulation.MyForm;

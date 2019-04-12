@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,7 +15,7 @@ namespace dp2Catalog
 {
     public partial class XmlDetailForm : Form
     {
-        bool m_bDisplayOriginPage = true;   // ÊÇ·ñÏÔÊ¾Ô­Ê¼Êı¾İÊôĞÔÒ³
+        bool m_bDisplayOriginPage = true;   // æ˜¯å¦æ˜¾ç¤ºåŸå§‹æ•°æ®å±æ€§é¡µ
         public bool DisplayOriginPage
         {
             get
@@ -28,7 +28,7 @@ namespace dp2Catalog
 
                 if (value == false)
                 {
-                    // TODO: ÕâÀïÓĞÄÚ´æĞ¹Â©£¬ĞèÒª¸Ä½ø
+                    // TODO: è¿™é‡Œæœ‰å†…å­˜æ³„æ¼ï¼Œéœ€è¦æ”¹è¿›
                     if (this.tabControl_main.TabPages.IndexOf(this.tabPage_originData) != -1)
                         this.tabControl_main.TabPages.Remove(this.tabPage_originData);
                 }
@@ -51,14 +51,14 @@ namespace dp2Catalog
 
         public ISearchForm LinkedSearchForm = null;
 
-        DigitalPlatform.Z3950.Record CurrentRecord = null;
+        DigitalPlatform.OldZ3950.Record CurrentRecord = null;
 
         Encoding CurrentEncoding = Encoding.GetEncoding(936);
 
         public string AutoDetectedMarcSyntaxOID = "";
 
         byte[] CurrentTimestamp = null;
-        // ÓÃÓÚ±£´æ¼ÇÂ¼µÄÂ·¾¶
+        // ç”¨äºä¿å­˜è®°å½•çš„è·¯å¾„
         public string SavePath
         {
             get
@@ -81,7 +81,7 @@ namespace dp2Catalog
         private void XmlDetailForm_Load(object sender, EventArgs e)
         {
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             Global.FillEncodingList(this.comboBox_originDataEncoding,
                 false);
@@ -101,9 +101,9 @@ namespace dp2Catalog
 
         private void XmlDetailForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -125,18 +125,18 @@ namespace dp2Catalog
 
             if (this.LinkedSearchForm == null)
             {
-                strError = "Ã»ÓĞ¹ØÁªµÄ¼ìË÷´°";
+                strError = "æ²¡æœ‰å…³è”çš„æ£€ç´¢çª—";
                 goto ERROR1;
             }
 
             string strPath = this.textBox_tempRecPath.Text;
             if (String.IsNullOrEmpty(strPath) == true)
             {
-                strError = "Â·¾¶Îª¿Õ";
+                strError = "è·¯å¾„ä¸ºç©º";
                 goto ERROR1;
             }
 
-            // ·ÖÀë³ö¸÷¸ö²¿·Ö
+            // åˆ†ç¦»å‡ºå„ä¸ªéƒ¨åˆ†
             string strProtocol = "";
             string strResultsetName = "";
             string strIndex = "";
@@ -148,20 +148,20 @@ namespace dp2Catalog
                 out strError);
             if (nRet == -1)
             {
-                strError = "½âÎöÂ·¾¶ '" + strPath + "' ×Ö·û´®¹ı³ÌÖĞ·¢Éú´íÎó: " + strError;
+                strError = "è§£æè·¯å¾„ '" + strPath + "' å­—ç¬¦ä¸²è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: " + strError;
                 goto ERROR1;
             }
 
 
             if (strProtocol != this.LinkedSearchForm.CurrentProtocol)
             {
-                strError = "¼ìË÷´°µÄĞ­ÒéÒÑ¾­·¢Éú¸Ä±ä";
+                strError = "æ£€ç´¢çª—çš„åè®®å·²ç»å‘ç”Ÿæ”¹å˜";
                 goto ERROR1;
             }
 
             if (strResultsetName != this.LinkedSearchForm.CurrentResultsetPath)
             {
-                strError = "½á¹û¼¯ÒÑ¾­·¢Éú¸Ä±ä";
+                strError = "ç»“æœé›†å·²ç»å‘ç”Ÿæ”¹å˜";
                 goto ERROR1;
             }
 
@@ -175,7 +175,7 @@ namespace dp2Catalog
                 index--;
                 if (index < 0)
                 {
-                    strError = "µ½Í·";
+                    strError = "åˆ°å¤´";
                     goto ERROR1;
                 }
             }
@@ -188,7 +188,7 @@ namespace dp2Catalog
             }
             else
             {
-                strError = "²»ÄÜÊ¶±ğµÄstrDirection²ÎÊıÖµ '" + strDirection + "'";
+                strError = "ä¸èƒ½è¯†åˆ«çš„strDirectionå‚æ•°å€¼ '" + strDirection + "'";
                 goto ERROR1;
             }
 
@@ -198,7 +198,7 @@ namespace dp2Catalog
             return -1;
         }
 
-        // ×°ÔØXML¼ÇÂ¼
+        // è£…è½½XMLè®°å½•
         public int LoadRecord(ISearchForm searchform,
             int index,
             bool bForceFullElementSet = false)
@@ -209,7 +209,7 @@ namespace dp2Catalog
             this.LinkedSearchForm = searchform;
             this.SavePath = "";
 
-            DigitalPlatform.Z3950.Record record = null;
+            DigitalPlatform.OldZ3950.Record record = null;
             Encoding currentEncoding = null;
 
             this.CurrentRecord = null;
@@ -228,7 +228,7 @@ namespace dp2Catalog
 
             int nRet = searchform.GetOneRecord(
                 "xml",
-                index,  // ¼´½«·ÏÖ¹
+                index,  // å³å°†åºŸæ­¢
                 "index:" + index.ToString(),
                 strParameters, // true,
                 out strSavePath,
@@ -252,16 +252,16 @@ namespace dp2Catalog
             this.CurrentEncoding = currentEncoding;
 
 
-            // Ìæ»»µ¥¸ö0x0a
+            // æ›¿æ¢å•ä¸ª0x0a
             strMARC = strMARC.Replace("\r", "");
             strMARC = strMARC.Replace("\n", "\r\n");
 
-            // ×°ÈëXML±à¼­Æ÷
+            // è£…å…¥XMLç¼–è¾‘å™¨
             // this.textBox_xml.Text = strMARC;
-            this.PlainText = strMARC;   // ÄÜ×Ô¶¯Ëõ½ø
+            this.PlainText = strMARC;   // èƒ½è‡ªåŠ¨ç¼©è¿›
             this.textBox_xml.Select(0, 0);
 
-            // ×°ÈëXMLÖ»¶ÁWeb¿Ø¼ş
+            // è£…å…¥XMLåªè¯»Webæ§ä»¶
             {
                 string strTempFileName = MainForm.DataDir + "\\xml.xml";
 
@@ -271,7 +271,7 @@ namespace dp2Catalog
 
                 using (Stream stream = File.Create(strTempFileName))
                 {
-                    // Ğ´ÈëxmlÄÚÈİ
+                    // å†™å…¥xmlå†…å®¹
                     byte[] buffer = Encoding.UTF8.GetBytes(strMARC);
                     stream.Write(buffer, 0, buffer.Length);
                 }
@@ -282,11 +282,11 @@ namespace dp2Catalog
             this.CurrentRecord = record;
             if (this.CurrentRecord != null && this.DisplayOriginPage == true)
             {
-                // ×°Èë¶ş½øÖÆ±à¼­Æ÷
+                // è£…å…¥äºŒè¿›åˆ¶ç¼–è¾‘å™¨
                 this.binaryEditor_originData.SetData(
                     this.CurrentRecord.m_baRecord);
 
-                // ×°ÈëÔ­Ê¼ÎÄ±¾
+                // è£…å…¥åŸå§‹æ–‡æœ¬
                 nRet = this.SetOriginText(this.CurrentRecord.m_baRecord,
                     this.CurrentEncoding,
                     out strError);
@@ -295,14 +295,14 @@ namespace dp2Catalog
                     this.textBox_originData.Text = strError;
                 }
 
-                // Êı¾İ¿âÃû
+                // æ•°æ®åº“å
                 this.textBox_originDatabaseName.Text = this.CurrentRecord.m_strDBName;
 
                 // record syntax OID
                 this.textBox_originMarcSyntaxOID.Text = this.CurrentRecord.m_strSyntaxOID;
             }
 
-            // ¹¹ÔìÂ·¾¶
+            // æ„é€ è·¯å¾„
             string strPath = searchform.CurrentProtocol + ":"
                 + searchform.CurrentResultsetPath
                 + "/" + (index + 1).ToString();
@@ -340,7 +340,7 @@ namespace dp2Catalog
             return 0;
         }
 
-        // ×°Èë XML µ½ textbox µÄÊ±ºòĞèÒªËõ½øĞ§¹ûÃ´?
+        // è£…å…¥ XML åˆ° textbox çš„æ—¶å€™éœ€è¦ç¼©è¿›æ•ˆæœä¹ˆ?
         bool NeedIndentXml
         {
             get
@@ -373,7 +373,7 @@ namespace dp2Catalog
                     out strError);
                 if (nRet == -1)
                 {
-                    // ¿ÉÄÜ²¢²»ÊÇ XML
+                    // å¯èƒ½å¹¶ä¸æ˜¯ XML
                     this.textBox_xml.Text = value;
                     return;
                 }
@@ -425,7 +425,7 @@ namespace dp2Catalog
 
         public void LoadSize()
         {
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
                 SizeStyle.All,
@@ -433,7 +433,7 @@ namespace dp2Catalog
                 MainForm.DefaultMdiWindowHeight);
 
 
-            // »ñµÃsplitContainer_originDataMainµÄ×´Ì¬
+            // è·å¾—splitContainer_originDataMainçš„çŠ¶æ€
             int nValue = MainForm.AppInfo.GetInt(
             "xmldetailform",
             "splitContainer_originDataMain",
@@ -460,7 +460,7 @@ namespace dp2Catalog
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state");
 
-                // ±£´æsplitContainer_originDataMainµÄ×´Ì¬
+                // ä¿å­˜splitContainer_originDataMainçš„çŠ¶æ€
                 MainForm.AppInfo.SetInt(
                     "xmldetailform",
                     "splitContainer_originDataMain",

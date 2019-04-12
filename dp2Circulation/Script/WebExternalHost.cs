@@ -26,6 +26,7 @@ using ZXing.QrCode.Internal;
 using ZXing.Common;
 using System.Drawing.Imaging;
 using DigitalPlatform.IO;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

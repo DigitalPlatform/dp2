@@ -5,20 +5,22 @@ using System.Xml;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;    // GetDp2ResDlg
+using System.Text;
 
-namespace dp2Catalog
+namespace DigitalPlatform.Z3950
 {
     /// <summary>
     /// Z39.50服务器属性对话框
     /// </summary>
     public partial class ZServerPropertyForm : Form
     {
+        public event FindDp2ServerEventHandler FindDp2Server;
+
         public XmlNode XmlNode = null;  // 服务器XML节点
         public string InitialResultInfo = "";
 
-        public MainForm MainForm = null; // 2007/12/16
+        // public MainForm MainForm = null; // 2007/12/16
 
         public ZServerPropertyForm()
         {
@@ -164,7 +166,7 @@ DomUtil.GetAttr(this.XmlNode,
                 }
             }
 
-            Global.FillEncodingList(this.comboBox_defaultEncoding,
+            FillEncodingList(this.comboBox_defaultEncoding,
                 true);
             this.comboBox_defaultEncoding.Text = DomUtil.GetAttr(this.XmlNode,
                 "defaultEncoding");
@@ -173,7 +175,7 @@ DomUtil.GetAttr(this.XmlNode,
             this.comboBox_defaultEncoding.Items.Add("MARC-8");
              * */
 
-            Global.FillEncodingList(this.comboBox_queryTermEncoding,
+            FillEncodingList(this.comboBox_queryTermEncoding,
                 false); // 检索词暂时不让用MARC-8编码方式
             this.comboBox_queryTermEncoding.Text = DomUtil.GetAttr(this.XmlNode,
                 "queryTermEncoding");
@@ -218,6 +220,41 @@ DomUtil.GetAttr(this.XmlNode,
 
         }
 
+        public static void FillEncodingList(ComboBox list,
+    bool bHasMarc8)
+        {
+            list.Items.Clear();
+
+            List<string> encodings = GetEncodingList(bHasMarc8);
+            for (int i = 0; i < encodings.Count; i++)
+            {
+                list.Items.Add(encodings[i]);
+            }
+        }
+
+        // 列出encoding名列表
+        // 需要把gb2312 utf-8等常用的提前
+        public static List<string> GetEncodingList(bool bHasMarc8)
+        {
+            List<string> result = new List<string>();
+
+            EncodingInfo[] infos = Encoding.GetEncodings();
+            for (int i = 0; i < infos.Length; i++)
+            {
+                if (infos[i].GetEncoding().Equals(Encoding.GetEncoding(936)) == true)
+                    result.Insert(0, infos[i].Name);
+                else if (infos[i].GetEncoding().Equals(Encoding.UTF8) == true)
+                    result.Insert(0, infos[i].Name);
+                else
+                    result.Add(infos[i].Name);
+            }
+
+            if (bHasMarc8 == true)
+                result.Add("MARC-8");
+
+            return result;
+        }
+
         /*
         // 将绑定定义字符串设置到listview中
         void SetBinding(string strBindingString)
@@ -253,7 +290,7 @@ DomUtil.GetAttr(this.XmlNode,
             }
         }*/
 
-                // 将绑定定义字符串设置到listview中
+        // 将绑定定义字符串设置到listview中
         void SetBinding(string strBindingString)
         {
             this.listView_recordSyntaxAndEncodingBinding.Items.Clear();
@@ -643,11 +680,11 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
                 return;
 
             // 查重
-            string strNewSyntax = ZTargetControl.GetLeftValue(dlg.RecordSyntax);
+            string strNewSyntax = GetLeftValue(dlg.RecordSyntax);
             for (int i = 0; i < this.listView_recordSyntaxAndEncodingBinding.Items.Count; i++)
             {
                 string strExistSyntax = this.listView_recordSyntaxAndEncodingBinding.Items[i].Text;
-                strExistSyntax = ZTargetControl.GetLeftValue(strExistSyntax);
+                strExistSyntax = GetLeftValue(strExistSyntax);
 
                 if (strNewSyntax == strExistSyntax)
                 {
@@ -717,6 +754,16 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
 
         private void button_unionCatalog_findDp2Server_Click(object sender, EventArgs e)
         {
+            if (this.FindDp2Server != null)
+            {
+                FindDp2ServerEventArgs e1 = new FindDp2ServerEventArgs();
+                e1.Dp2ServerPath = this.textBox_unionCatalog_bindingDp2ServerName.Text;
+                this.FindDp2Server(this, e1);
+                if (e1.Canceled)
+                    return;
+                this.textBox_unionCatalog_bindingDp2ServerName.Text = e1.Dp2ServerPath;
+            }
+#if REMOVED
             dp2SearchForm dp2_searchform = this.MainForm.GetDp2SearchForm();
 
             GetDp2ResDlg dlg = new GetDp2ResDlg();
@@ -737,6 +784,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
                 return;
 
             this.textBox_unionCatalog_bindingDp2ServerName.Text = dlg.Path;
+#endif
         }
 
         private void comboBox_defaultMarcSyntaxOID_SizeChanged(object sender, EventArgs e)
@@ -838,6 +886,166 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
             return dp2_searchform;
         }*/
 
+        // 解析出 '-' 左边的值
+        public static string GetLeftValue(string strText)
+        {
+            int nRet = strText.IndexOf("-");
+            if (nRet != -1)
+                return strText.Substring(0, nRet).Trim();
+            else
+                return strText.Trim();
+        }
+    }
+
+    /// <summary>
+    /// 查找 dp2 服务器
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void FindDp2ServerEventHandler(object sender,
+    FindDp2ServerEventArgs e);
+
+    /// <summary>
+    /// 查找 dp2 服务器事件的参数
+    /// </summary>
+    public class FindDp2ServerEventArgs : EventArgs
+    {
+        // [in][out]
+        public string Dp2ServerPath { get; set; }
+
+        // [out]
+        public bool Canceled { get; set; }
+    }
+
+    // 绑定信息数组
+    public class RecordSyntaxAndEncodingBindingCollection : List<RecordSyntaxAndEncodingBindingItem>
+    {
+        // parameters:
+        //      strBindingString    格式为"syntaxoid1 -- syntaxcomment1|encodingname1 -- encodingcomment1||syntaxoid2 -- syntaxcomment2|encodingname2 -- encodingcomment2"，末尾可能有多余的“||”
+        public void Load(string strBindingString)
+        {
+            this.Clear();
+
+            string[] lines = strBindingString.Split(new string[] { "||" },
+                StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string strSyntax = "";
+                string strEncoding = "";
+                string strLine = lines[i].Trim();
+                if (String.IsNullOrEmpty(strLine) == true)
+                    continue;
+                int nRet = strLine.IndexOf('|');
+                if (nRet != -1)
+                {
+                    strSyntax = strLine.Substring(0, nRet).Trim();
+                    strEncoding = strLine.Substring(nRet + 1).Trim();
+                }
+                else
+                {
+                    strSyntax = strLine;
+                    strEncoding = "";
+                }
+
+                RecordSyntaxAndEncodingBindingItem item = new RecordSyntaxAndEncodingBindingItem();
+                item.RecordSyntax = strSyntax;
+                item.Encoding = strEncoding;
+
+                this.Add(item);
+            }
+        }
+
+        // 返还为字符串形态
+        public string GetString()
+        {
+            string strResult = "";
+            for (int i = 0; i < this.Count; i++)
+            {
+                RecordSyntaxAndEncodingBindingItem item = this[i];
+                strResult += item.RecordSyntax + "|" + item.Encoding + "||";
+            }
+
+            return strResult;
+        }
+
+        public string GetEncodingName(string strRecordSyntaxOID)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                RecordSyntaxAndEncodingBindingItem item = this[i];
+
+                if (item.RecordSyntaxOID == strRecordSyntaxOID)
+                    return item.EncodingName;
+            }
+
+            return null;    // not found
+        }
 
     }
+
+    // 绑定信息元素
+    public class RecordSyntaxAndEncodingBindingItem
+    {
+        public string RecordSyntaxOID = "";
+        public string RecordSyntaxComment = "";
+        public string EncodingName = "";
+        public string EncodingNameComment = "";
+
+        // 将 "value -- comment" 形态的字符串拆分为"value"和"comment"两个部分
+        public static void ParseValueAndComment(string strText,
+            out string strValue,
+            out string strComment)
+        {
+            int nRet = strText.IndexOf("--");
+            if (nRet == -1)
+            {
+                strValue = strText.Trim();
+                strComment = "";
+                return;
+            }
+
+            strValue = strText.Substring(0, nRet).Trim();
+            strComment = strText.Substring(nRet + 2).Trim();
+        }
+
+        public string RecordSyntax
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(this.RecordSyntaxComment) == true)
+                    return this.RecordSyntaxOID;
+
+                return this.RecordSyntaxOID + " -- " + this.RecordSyntaxComment;
+            }
+            set
+            {
+                string strValue = "";
+                string strComment = "";
+
+                ParseValueAndComment(value, out strValue, out strComment);
+                this.RecordSyntaxOID = strValue;
+                this.RecordSyntaxComment = strComment;
+            }
+        }
+
+        public string Encoding
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(this.EncodingNameComment) == true)
+                    return this.EncodingName;
+                return this.EncodingName + " -- " + this.EncodingNameComment;
+            }
+            set
+            {
+                string strValue = "";
+                string strComment = "";
+
+                ParseValueAndComment(value, out strValue, out strComment);
+                this.EncodingName = strValue;
+                this.EncodingNameComment = strComment;
+            }
+        }
+    }
+
 }

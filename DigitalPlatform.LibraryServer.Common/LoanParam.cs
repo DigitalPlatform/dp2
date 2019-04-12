@@ -7,8 +7,8 @@ using DigitalPlatform.Xml;
 using System.Web;
 using System.Drawing;
 
-using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
+using DigitalPlatform.Drawing;
 
 namespace DigitalPlatform.LibraryServer
 {

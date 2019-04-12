@@ -24,11 +24,11 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.Range;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {

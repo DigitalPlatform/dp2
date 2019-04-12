@@ -27,6 +27,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -5320,6 +5321,7 @@ MessageBoxDefaultButton.Button1);
                                     "system.xml.dll",
                                     "System.Runtime.Serialization.dll",
 
+                                    Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
@@ -5628,6 +5630,7 @@ MessageBoxDefaultButton.Button1);
 
             // 一些必要的链接库
             string[] saAddRef1 = {
+                                         Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",

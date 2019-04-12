@@ -5,8 +5,8 @@ using System.IO;
 using System.Xml;
 using System.Diagnostics;
 
-using DigitalPlatform.Range;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.LibraryClient
 {

@@ -4,9 +4,6 @@ using System.Collections;
 using System.Xml;
 using System.Runtime.Serialization;
 
-using DigitalPlatform.Range;
-using DigitalPlatform.IO;
-using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.rms
 {

@@ -24,6 +24,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using ClosedXML.Excel;
+using DigitalPlatform.Core;
 
 // 2017/4/8 从 this.Channel 用法改造为 ChannelPool 用法
 

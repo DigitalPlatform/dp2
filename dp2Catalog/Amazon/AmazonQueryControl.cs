@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {

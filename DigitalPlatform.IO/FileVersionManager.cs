@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.IO
 {

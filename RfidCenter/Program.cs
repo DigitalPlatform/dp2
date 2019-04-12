@@ -14,6 +14,7 @@ using DigitalPlatform.Text;
 using System.Reflection;
 using System.IO;
 using System.Runtime.InteropServices;
+using DigitalPlatform.Core;
 
 namespace RfidCenter
 {

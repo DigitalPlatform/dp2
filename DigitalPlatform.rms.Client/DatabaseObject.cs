@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-
+using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms.Client
 {
