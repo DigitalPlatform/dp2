@@ -3050,6 +3050,10 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            string libraryName = DomUtil.GetElementText(this.LibraryCfgDom.DocumentElement, "libraryInfo/libraryName");
+            if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/','\\'}) != -1)
+                errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
+
             if (errors.Count > 0)
             {
                 strError = "library.xml 发现下列配置错误: " + StringUtil.MakePathList(errors, "; ");
