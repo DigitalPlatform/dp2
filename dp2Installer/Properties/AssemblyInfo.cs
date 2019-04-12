@@ -32,10 +32,11 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.0.*")]
-[assembly: AssemblyFileVersion("3.0.0.0")]
+[assembly: AssemblyVersion("3.1.*")]
+[assembly: AssemblyFileVersion("3.1.0.0")]
 
 // 1.1
 // 1.2 (2016/11/2) 增加安装 Z39.50 服务器功能
 // 1.3 (2017/9/3) 在管理 dp2kernel 和 dp2library 实例的时候，能只停止单个实例
 // 3.0 (2018/6/23) 改为用 .NET Framework 4.6.1 编译
+// 3.1 (2019/4/12) 采用最新 dp-library submodule 的版本
