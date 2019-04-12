@@ -48,6 +48,7 @@ namespace DigitalPlatform.Z3950.UI
 
         }
 
+#if NO
         NormalResult FillList()
         {
             this.listView1.Items.Clear();
@@ -71,5 +72,6 @@ namespace DigitalPlatform.Z3950.UI
 
             XmlNodeList servers = _dom.DocumentElement.SelectNodes("server");
         }
+#endif
     }
 }
