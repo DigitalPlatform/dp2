@@ -15,7 +15,7 @@ namespace DigitalPlatform.Z3950.UI
     /// </summary>
     public class ZServerUtil
     {
-        public NormalResult GetTarget(
+        public static NormalResult GetTarget(
             XmlElement xmlServerNode,
             Marc8Encoding marc8Encoding,
             out TargetInfo targetinfo)

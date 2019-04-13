@@ -1193,7 +1193,7 @@ Keys keyData)
             return StringUtil.MakePathList(results, ",");
         }
 
-        public void DoSearch(bool bOutputKeyCount,
+        public async Task DoSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
             ItemQueryParam input_query = null)
         {
@@ -1373,7 +1373,6 @@ Keys keyData)
                     }
                 }
 
-                string strQueryXml = "";
                 channel.Timeout = new TimeSpan(0, 5, 0);
 
                 long lRet = channel.SearchBiblio(stop,
@@ -1387,7 +1386,7 @@ Keys keyData)
                     "",    // strSearchStyle
                     strOutputStyle,
                     this.GetLocationFilter(),
-                    out strQueryXml,
+                    out string strQueryXml,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -1579,6 +1578,43 @@ Keys keyData)
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
 
+                if (this.SearchZ3950)
+                {
+                    {
+                        string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                        var result = _zsearcher.LoadServer(xmlFileName);
+                        if (result.Value == -1)
+                            this.ShowMessage(result.ErrorInfo, "red", true);
+                    }
+                    this.ShowMessage("等待 Z39.50 检索响应 ...");
+
+                    {
+                        NormalResult result = await _zsearcher.Search(
+        null,   // UseCollection useList,
+        Program.MainForm.IsbnSplitter,
+                        this.textBox_queryWord.Text,
+                        this.MaxSearchResultCount,  // 1000
+                        strFromStyle,
+                        strMatchStyle,
+                        (c, r) =>
+                        {
+                            ListViewItem item = new ListViewItem();
+                            _zchannelTable[c] = item;
+                            ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
+                            ListViewUtil.ChangeItemText(item, 1, $"present result={r.Value}");
+                            this.listView_records.Items.Add(item);
+                        },
+                        (c, r) =>
+                        {
+                            ListViewItem item = (ListViewItem)_zchannelTable[c];
+                            ListViewUtil.ChangeItemText(item, 1, $"present result={r.Value}");
+                        }
+                        );
+                    }
+
+                }
+
+
                 if (bNeedShareSearch == true)
                 {
                     this.ShowMessage("等待共享检索响应 ...");
@@ -1644,6 +1680,10 @@ Keys keyData)
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // zchannel --> ListViewItem
+        Hashtable _zchannelTable = new Hashtable();
+        Z3950Searcher _zsearcher = new Z3950Searcher();
 
         string GetLocationFilter()
         {
@@ -2090,7 +2130,7 @@ out strError);
             return "规范窗";
         }
 
-        private void listView_records_DoubleClick(object sender, EventArgs e)
+        private async void listView_records_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
 
@@ -2214,7 +2254,7 @@ out strError);
                 else
                     this.comboBox_matchStyle.Text = "精确一致";
 
-                DoSearch(false, false, null);
+                await DoSearch(false, false, null);
             }
             return;
             ERROR1:
@@ -4574,7 +4614,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
         // 在一个新开的书目查询窗内检索key
-        void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
+        async void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -4598,7 +4638,7 @@ MessageBoxDefaultButton.Button1);
             input_query.MatchStyle = "精确一致";
 
             // 检索命中记录(而不是key)
-            form.DoSearch(false, false, input_query);
+            await form.DoSearch(false, false, input_query);
         }
 
         string m_strUsedMarcQueryFilename = "";
@@ -9932,9 +9972,9 @@ MessageBoxDefaultButton.Button1);
 
 
         // 普通检索(不返回key部分)
-        private void toolStripButton_search_Click(object sender, EventArgs e)
+        private async void toolStripButton_search_Click(object sender, EventArgs e)
         {
-            DoSearch(false, false);
+            await DoSearch(false, false);
         }
 
 #if NO
@@ -10137,15 +10177,15 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        private void toolStripMenuItem_searchKeyID_Click(object sender, EventArgs e)
+        private async void toolStripMenuItem_searchKeyID_Click(object sender, EventArgs e)
         {
-            DoSearch(false, true);
+            await DoSearch(false, true);
         }
 
         // 尺寸为0,0的按钮，为了满足this.AcceptButton
-        private void button_search_Click(object sender, EventArgs e)
+        private async void button_search_Click(object sender, EventArgs e)
         {
-            DoSearch(false, false);
+            await DoSearch(false, false);
         }
 
         private void dp2QueryControl1_GetList(object sender, DigitalPlatform.CommonControl.GetListEventArgs e)
@@ -10352,9 +10392,9 @@ out strError);
             this.textBox_queryWord.Text = dlg.uString;
         }
 
-        private void toolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
+        private async void toolStripMenuItem_searchKeys_Click(object sender, EventArgs e)
         {
-            DoSearch(true, false);
+            await DoSearch(true, false);
         }
 
         private void toolStripButton_prevQuery_Click(object sender, EventArgs e)
