@@ -1,10 +1,12 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Z3950.UI
 {
@@ -15,6 +17,7 @@ namespace DigitalPlatform.Z3950.UI
     {
         public NormalResult GetTarget(
             XmlElement xmlServerNode,
+            Marc8Encoding marc8Encoding,
             out TargetInfo targetinfo)
         {
             targetinfo = null;
@@ -81,12 +84,9 @@ namespace DigitalPlatform.Z3950.UI
                     if (strDefaultEncodingName.ToLower() == "eacc"
                         || strDefaultEncodingName.ToLower() == "marc-8")
                     {
-                        if (this.Marc8Encoding == null)
-                        {
-                            strError = "尚未初始化this.EaccEncoding成员";
-                            return -1;
-                        }
-                        targetinfo.DefaultRecordsEncoding = this.Marc8Encoding;
+                        if (marc8Encoding == null)
+                            return new NormalResult { Value = -1, ErrorInfo = "尚未初始化this.EaccEncoding成员"};
+                        targetinfo.DefaultRecordsEncoding = marc8Encoding;
                     }
                     else
                         targetinfo.DefaultRecordsEncoding = Encoding.GetEncoding(strDefaultEncodingName);

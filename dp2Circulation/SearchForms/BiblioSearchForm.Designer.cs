@@ -109,7 +109,7 @@
             this.textBox_queryWord.Location = new System.Drawing.Point(134, 6);
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(254, 28);
+            this.textBox_queryWord.Size = new System.Drawing.Size(306, 28);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -213,7 +213,7 @@
             this.comboBox_from.Location = new System.Drawing.Point(134, 83);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(6);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(254, 29);
+            this.comboBox_from.Size = new System.Drawing.Size(306, 29);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -243,7 +243,7 @@
             this.comboBox_matchStyle.Location = new System.Drawing.Point(134, 124);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(6);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(254, 26);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(306, 26);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "前方一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -258,7 +258,7 @@
             this.checkedComboBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(258, 29);
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(310, 29);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -278,11 +278,11 @@
             this.toolStripSeparator1,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(394, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(446, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(206, 40);
+            this.toolStrip_search.Size = new System.Drawing.Size(154, 40);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "检索";
             // 
@@ -323,7 +323,7 @@
             // 
             this.ToolStripMenuItem_continueLoad.Enabled = false;
             this.ToolStripMenuItem_continueLoad.Name = "ToolStripMenuItem_continueLoad";
-            this.ToolStripMenuItem_continueLoad.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_continueLoad.Size = new System.Drawing.Size(218, 30);
             this.ToolStripMenuItem_continueLoad.Text = "继续装入";
             this.ToolStripMenuItem_continueLoad.ToolTipText = "继续装入中断时尚未装入的那些浏览行";
             this.ToolStripMenuItem_continueLoad.Click += new System.EventHandler(this.ToolStripMenuItem_continueLoad_Click);
@@ -331,40 +331,40 @@
             // toolStripMenuItem_searchKeyID
             // 
             this.toolStripMenuItem_searchKeyID.Name = "toolStripMenuItem_searchKeyID";
-            this.toolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(252, 30);
+            this.toolStripMenuItem_searchKeyID.Size = new System.Drawing.Size(218, 30);
             this.toolStripMenuItem_searchKeyID.Text = "带检索点的检索";
             this.toolStripMenuItem_searchKeyID.Click += new System.EventHandler(this.toolStripMenuItem_searchKeyID_Click);
             // 
             // toolStripMenuItem_searchKeys
             // 
             this.toolStripMenuItem_searchKeys.Name = "toolStripMenuItem_searchKeys";
-            this.toolStripMenuItem_searchKeys.Size = new System.Drawing.Size(252, 30);
+            this.toolStripMenuItem_searchKeys.Size = new System.Drawing.Size(218, 30);
             this.toolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.toolStripMenuItem_searchKeys.Click += new System.EventHandler(this.toolStripMenuItem_searchKeys_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(215, 6);
             // 
             // ToolStripMenuItem_searchShareBiblio
             // 
             this.ToolStripMenuItem_searchShareBiblio.Name = "ToolStripMenuItem_searchShareBiblio";
-            this.ToolStripMenuItem_searchShareBiblio.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_searchShareBiblio.Size = new System.Drawing.Size(218, 30);
             this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
             this.ToolStripMenuItem_searchShareBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_searchShareBiblio_Click);
             // 
             // toolStripMenuItem_searchZ3950
             // 
             this.toolStripMenuItem_searchZ3950.Name = "toolStripMenuItem_searchZ3950";
-            this.toolStripMenuItem_searchZ3950.Size = new System.Drawing.Size(252, 30);
+            this.toolStripMenuItem_searchZ3950.Size = new System.Drawing.Size(218, 30);
             this.toolStripMenuItem_searchZ3950.Text = "使用 Z39.50";
             this.toolStripMenuItem_searchZ3950.Click += new System.EventHandler(this.toolStripMenuItem_searchZ3950_Click);
             // 
             // ToolStripMenuItem_filterRecords
             // 
             this.ToolStripMenuItem_filterRecords.Name = "ToolStripMenuItem_filterRecords";
-            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(218, 30);
             this.ToolStripMenuItem_filterRecords.Text = "智能筛选 ...";
             this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
             // 
@@ -448,7 +448,7 @@
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(398, 43);
+            this.button_search.Location = new System.Drawing.Point(450, 43);
             this.button_search.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -465,7 +465,7 @@
             this.comboBox_location.Location = new System.Drawing.Point(134, 162);
             this.comboBox_location.Margin = new System.Windows.Forms.Padding(6);
             this.comboBox_location.Name = "comboBox_location";
-            this.comboBox_location.Size = new System.Drawing.Size(254, 26);
+            this.comboBox_location.Size = new System.Drawing.Size(306, 26);
             this.comboBox_location.TabIndex = 16;
             // 
             // tableLayoutPanel_main

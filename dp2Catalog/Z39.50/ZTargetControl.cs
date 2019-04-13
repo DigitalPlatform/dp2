@@ -11,7 +11,7 @@ using System.Diagnostics;
 using DigitalPlatform.GUI;  // for event SetMenuEventHandle
 using DigitalPlatform.Xml;
 using DigitalPlatform.OldZ3950;
-using DigitalPlatform.Z3950;
+using DigitalPlatform.Z3950.UI;
 using DigitalPlatform.CirculationClient;
 
 namespace dp2Catalog
@@ -747,7 +747,7 @@ DomUtil.GetAttr(xmlServerNode,
             // 格式和编码之间的绑定信息
             string strBindingDef = DomUtil.GetAttr(xmlServerNode,
                 "recordSyntaxAndEncodingBinding");
-            targetinfo.Bindings = new RecordSyntaxAndEncodingBindingCollection();
+            targetinfo.Bindings = new DigitalPlatform.Z3950.RecordSyntaxAndEncodingBindingCollection();
             if (String.IsNullOrEmpty(strBindingDef) == false)
                 targetinfo.Bindings.Load(strBindingDef);
 
@@ -1105,7 +1105,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         private void Dlg_FindDp2Server(object sender, 
-            FindDp2ServerEventArgs e)
+            DigitalPlatform.Z3950.UI.FindDp2ServerEventArgs e)
         {
             dp2SearchForm dp2_searchform = this.MainForm.GetDp2SearchForm();
 
@@ -1564,7 +1564,7 @@ MessageBoxDefaultButton.Button2);
         public Encoding DefaultRecordsEncoding = Encoding.GetEncoding(936);
         public Encoding DefaultQueryTermEncoding = Encoding.GetEncoding(936);
 
-        public RecordSyntaxAndEncodingBindingCollection Bindings = null;
+        public DigitalPlatform.Z3950.RecordSyntaxAndEncodingBindingCollection Bindings = null;
 
         public bool CharNegoUTF8 = true;
         public bool CharNegoRecordsUTF8 = true;
