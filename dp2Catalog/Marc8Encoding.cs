@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -84,7 +85,7 @@ namespace dp2Catalog
             }
         }
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         public Marc8Encoding(CharsetTable eacc_charsettable,
             string strAsciiXmlFileName)
         {
@@ -120,14 +121,14 @@ namespace dp2Catalog
             pageG0 = FindPage(iCodeG0);
             if (pageG0 == null)
             {
-                strError = "²»ÄÜÊ¶±ğµÄG0´úÂëÒ³ 0x" + System.Convert.ToString(iCodeG0, 16);
+                strError = "ä¸èƒ½è¯†åˆ«çš„G0ä»£ç é¡µ 0x" + System.Convert.ToString(iCodeG0, 16);
                 return -1;
             }
 
             pageG1 = FindPage(iCodeG1);
             if (pageG1 == null)
             {
-                strError = "²»ÄÜÊ¶±ğµÄG1´úÂëÒ³ 0x" + System.Convert.ToString(iCodeG1, 16);
+                strError = "ä¸èƒ½è¯†åˆ«çš„G1ä»£ç é¡µ 0x" + System.Convert.ToString(iCodeG1, 16);
                 return -1;
             }
 
@@ -138,7 +139,7 @@ namespace dp2Catalog
 
                 if (b >= 0xa1 && b <= 0xfe)
                 {
-                    // Ó¦ÓÃG1´úÂëÒ³
+                    // åº”ç”¨G1ä»£ç é¡µ
                     // b -= 0x80;
                     u = pageG1.GetUnicode(b);
                     strTarget += (char)u;
@@ -146,7 +147,7 @@ namespace dp2Catalog
                 }
                 else if (b >= 0x21 && b <= 0x7e)
                 {
-                    // Ó¦ÓÃG0´úÂëÒ³
+                    // åº”ç”¨G0ä»£ç é¡µ
                     u = pageG0.GetUnicode(b);
                     strTarget += (char)u;
                 }
@@ -162,7 +163,7 @@ namespace dp2Catalog
 
         public int SetDefaultCodePage(string strField066Value)
         {
-            // ×¢ÒâÃ¿¸ö×Ó×Ö¶Î½áÊø£¬¶¼Ó¦¸´Î»Ò»´Î×´Ì¬£¿
+            // æ³¨æ„æ¯ä¸ªå­å­—æ®µç»“æŸï¼Œéƒ½åº”å¤ä½ä¸€æ¬¡çŠ¶æ€ï¼Ÿ
 
             this.DefaultG0CodePage = 0x42;
             this.DefaultG1CodePage = 0x45;
@@ -182,7 +183,7 @@ namespace dp2Catalog
             string str066b = "";
             string str066c = "";
 
-            // µÃµ½$a $b $c
+            // å¾—åˆ°$a $b $c
             string[] subs = strField066Value.Split(new char[] {(char)MarcUtil.SUBFLD });
 
             for (int i = 0; i < subs.Length; i++)
@@ -271,7 +272,7 @@ Thai for Thai
 #endif
         }
 
-        // ½«MARC-8×Ö·û´®×ª»»ÎªUnicode×Ö·û´®
+        // å°†MARC-8å­—ç¬¦ä¸²è½¬æ¢ä¸ºUnicodeå­—ç¬¦ä¸²
         /*
 (3 for basic Arabic 
 (4 for extended Arabic 
@@ -308,8 +309,8 @@ Thai for Thai
                 {
 
 
-                    // ½«strPartÖĞµÄ´¦Àíµô
-                    // ¿´¿´strPartÖĞÊÇ·ñÓĞ»ıÀÛµÄÄÚÈİ
+                    // å°†strPartä¸­çš„å¤„ç†æ‰
+                    // çœ‹çœ‹strPartä¸­æ˜¯å¦æœ‰ç§¯ç´¯çš„å†…å®¹
                     if (strPart != "")
                     {
                         if (m == 0)
@@ -335,7 +336,7 @@ Thai for Thai
                             }
                             Debug.Assert((strPart.Length % 3) == 0, "");
 
-                            // strPartÖĞ±ØĞë´æ·Å·ÇUnicode×Ö·û´®
+                            // strPartä¸­å¿…é¡»å­˜æ”¾éUnicodeå­—ç¬¦ä¸²
                             nRet = this.EaccCharsetTable.EACCToUnicode(strPart,
                                 out strTemp,
                                 out strError);
@@ -354,13 +355,13 @@ Thai for Thai
                     }
 
                 CONTINUE:
-                    if (i >= baSource.Length)   // ×îºóÒ»´Î
+                    if (i >= baSource.Length)   // æœ€åä¸€æ¬¡
                         break;
 
                     // escape code
 
 
-                    // ¹Û²ìËæºóÒ»Î»
+                    // è§‚å¯Ÿéšåä¸€ä½
                     /*
 Technique 1: Greek Symbols, Subscript, and Superscript Characters
 Three Greek symbols (alpha, beta, and gamma), fourteen subscript characters, and fourteen superscript characters have been placed in three separate character sets that are accessed by a locking escape sequence. The technique for accessing these characters is outside the framework specified in ANSI X3.41 or ISO 2022. These three special sets are designated as G0 sets in codes 21(hex) through 7E(hex) by means of a two-character sequence consisting of the Escape character and an ASCII graphic character. The specific escape sequences for the three special sets are:
@@ -408,12 +409,12 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                         m = 0;
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
 
                         iCodeG0 = baSource[i];
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
                         continue;
                     }
                     else if (b1 == 0x29 || b1 == 0x2d)
@@ -422,20 +423,20 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                         m = 0;
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
 
                         iCodeG1 = baSource[i];
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
                         continue;
                     }
                     else if (baSource[i] == 0x24)
                     {
-                        // »¹ĞèÒªºóÒ»Î»×ÛºÏÅĞ¶Ï
+                        // è¿˜éœ€è¦åä¸€ä½ç»¼åˆåˆ¤æ–­
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
 
                         byte b2 = baSource[i];
 
@@ -447,12 +448,12 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                             m = 1;
                             i++;
                             if (i >= baSource.Length)
-                                break;  // ±£ÏÕ
+                                break;  // ä¿é™©
 
                             iCodeG1 = baSource[i];
                             i++;
                             if (i >= baSource.Length)
-                                break;  // ±£ÏÕ
+                                break;  // ä¿é™©
                             continue;
                         }
                         // 0x24 and next 0x2c
@@ -461,22 +462,22 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                             m = 1;
                             i++;
                             if (i >= baSource.Length)
-                                break;  // ±£ÏÕ
+                                break;  // ä¿é™©
 
                             iCodeG0 = baSource[i];
                             i++;
                             if (i >= baSource.Length)
-                                break;  // ±£ÏÕ
+                                break;  // ä¿é™©
                             continue;
                         }
 
                         // 0x24 and next not 0x2c
                         m = 1;
-                        // i¾Í²»++ÁË
+                        // iå°±ä¸++äº†
                         iCodeG0 = baSource[i];
                         i++;
                         if (i >= baSource.Length)
-                            break;  // ±£ÏÕ
+                            break;  // ä¿é™©
                         continue;
                     }
 
@@ -497,7 +498,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                     continue;
                 }
 
-                // ÆÕÍ¨ÄÚÈİ
+                // æ™®é€šå†…å®¹
                 strPart += (char)baSource[i];
                 i++;
 
@@ -518,11 +519,11 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
             int index,
             int count)
         {
-            throw new Exception("Unicode to MARC-8 ÔİÎ´ÊµÏÖ");
+            throw new Exception("Unicode to MARC-8 æš‚æœªå®ç°");
             // return 0;
         }
 
-        // ½«ÄÚ²¿×Ö·û´®×ª»»ÎªEACC
+        // å°†å†…éƒ¨å­—ç¬¦ä¸²è½¬æ¢ä¸ºEACC
         public override int GetBytes(
     char[] chars,
     int charIndex,
@@ -530,7 +531,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
     byte[] bytes,
     int byteIndex)
         {
-            throw new Exception("Unicode to MARC-8 ÔİÎ´ÊµÏÖ");
+            throw new Exception("Unicode to MARC-8 æš‚æœªå®ç°");
         }
 
         public override int GetMaxCharCount(
@@ -555,7 +556,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
             return strTarget.Length;
         }
 
-        // ½«EACC±àÂë×ª»»ÎªÄÚ²¿×Ö·û´®
+        // å°†EACCç¼–ç è½¬æ¢ä¸ºå†…éƒ¨å­—ç¬¦ä¸²
         public override int GetChars(
     byte[] bytes,
     int byteIndex,
@@ -576,9 +577,9 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
         }
 
         // return:
-        //		-2	MARC¸ñÊ½´í
-        //		-1	Ò»°ã´íÎó
-        //		0	Õı³£
+        //		-2	MARCæ ¼å¼é”™
+        //		-1	ä¸€èˆ¬é”™è¯¯
+        //		0	æ­£å¸¸
         public static int ConvertByteArrayToMarcRecord(byte[] baRecord,
             Encoding encoding,
             bool bForce,
@@ -610,7 +611,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
             if (nRet == -1)
                 return -1;
 
-            if (nRet == -2)  //marc³ö´í
+            if (nRet == -2)  //marcå‡ºé”™
                 return -2;
 
             string[] saField = null;
@@ -639,14 +640,14 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
             return 0;
         }
 
-        // aSourceField:	MARC×Ö¶ÎÊı×é¡£×¢ÒâArrayListÃ¿¸öÔªËØÒªÇóÎªbyte[]ÀàĞÍ
+        // aSourceField:	MARCå­—æ®µæ•°ç»„ã€‚æ³¨æ„ArrayListæ¯ä¸ªå…ƒç´ è¦æ±‚ä¸ºbyte[]ç±»å‹
         static int GetMarcRecordString(List<byte[]> aSourceField,
             Encoding encoding,
             out string[] saTarget)
         {
             string strField066Value = "";
 
-            // ÌáÇ°µÃµ½066×Ö¶Î
+            // æå‰å¾—åˆ°066å­—æ®µ
             for (int j = 1; j < aSourceField.Count; j++)
             {
                 string strField = Encoding.ASCII.GetString((byte[])aSourceField[j]);
@@ -663,7 +664,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                 }
             }
 
-            // ¸ù¾İ066×Ö¶ÎÄÚÈİÌáÊ¾Marc8EncodingÇĞ»»×´Ì¬
+            // æ ¹æ®066å­—æ®µå†…å®¹æç¤ºMarc8Encodingåˆ‡æ¢çŠ¶æ€
             saTarget = new string[aSourceField.Count];
             for (int j = 0; j < aSourceField.Count; j++)
             {
@@ -675,7 +676,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                 }
                 else
                 {
-                    // Ò»°ã±àÂë·½Ê½
+                    // ä¸€èˆ¬ç¼–ç æ–¹å¼
                     saTarget[j] = encoding.GetString((byte[])aSourceField[j]);
                 }
             }
@@ -685,14 +686,14 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
 
     }
 
-    // Ò»¸ö´úÂëÊÂÏî
+    // ä¸€ä¸ªä»£ç äº‹é¡¹
     public class CodeEntry
     {
         public int ASCII = 0;
         public int Unicode = 0;
     }
 
-    // Ò»¸ö´úÂëÒ³
+    // ä¸€ä¸ªä»£ç é¡µ
     public class CodePage : List<CodeEntry>
     {
         public int Code = 0;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.IO;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 
 namespace dp2Catalog
 {
@@ -24,7 +25,7 @@ namespace dp2Catalog
         private void EaccForm_Load(object sender, EventArgs e)
         {
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
 
             this.textBox_unihanFilenames.Text = MainForm.AppInfo.GetString(
@@ -49,12 +50,12 @@ namespace dp2Catalog
 
         private void EaccForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Style = StopStyle.None;    // ĞèÒªÇ¿ÖÆÖĞ¶Ï
+                stop.Style = StopStyle.None;    // éœ€è¦å¼ºåˆ¶ä¸­æ–­
                 stop.DoStop();
 
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -100,12 +101,12 @@ namespace dp2Catalog
             charsettable_e2u.Open(true);
             if (this.textBox_unihanFilenames.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÊäÈëÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šè¾“å…¥æ–‡ä»¶å";
                 return -1;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚ´´½¨Âë±íÎÄ¼ş ...");
+            stop.SetMessage("æ­£åœ¨åˆ›å»ºç è¡¨æ–‡ä»¶ ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -138,7 +139,7 @@ namespace dp2Catalog
                     }
                     catch (Exception ex)
                     {
-                        strError = "ÎÄ¼ş " + strSourceFileName + " ´ò¿ªÊ§°Ü: " + ex.Message;
+                        strError = "æ–‡ä»¶ " + strSourceFileName + " æ‰“å¼€å¤±è´¥: " + ex.Message;
                         return -1;
                     }
 
@@ -150,13 +151,13 @@ namespace dp2Catalog
                     {
                         for (; ; )
                         {
-                            Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                            Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                             if (stop != null)
                             {
                                 if (stop.State != 0)
                                 {
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
                             }
@@ -168,7 +169,7 @@ namespace dp2Catalog
                             if (strLine.Length < 1)
                                 goto CONTINUE;
 
-                            // ×¢ÊÍĞĞ
+                            // æ³¨é‡Šè¡Œ
                             if (strLine[0] == '#')
                                 goto CONTINUE;
 
@@ -177,7 +178,7 @@ namespace dp2Catalog
                             {
                                 nRet = strLine.IndexOf("\t", 0);
                                 if (nRet == -1)
-                                    goto CONTINUE;	// ¸ñÊ½ÓĞÎÊÌâ
+                                    goto CONTINUE;	// æ ¼å¼æœ‰é—®é¢˜
 
                                 string strPart1 = strLine.Substring(0, nRet).Trim().ToUpper();
 
@@ -185,15 +186,15 @@ namespace dp2Catalog
 
                                 nRet = strLine.IndexOf("\t", 0);
                                 if (nRet == -1)
-                                    goto CONTINUE;	// ¸ñÊ½ÓĞÎÊÌâ
+                                    goto CONTINUE;	// æ ¼å¼æœ‰é—®é¢˜
 
                                 string strPart2 = strLine.Substring(0, nRet).Trim();
                                 string strPart3 = strLine.Substring(nRet + 1).Trim().ToUpper();
 
-                                strPart1 = strPart1.Substring(2);	// È¥µô'U+'
+                                strPart1 = strPart1.Substring(2);	// å»æ‰'U+'
 
                                 if (strPart2 != "kEACC")
-                                    goto CONTINUE;	// ²»Ïà¹ØµÄĞĞ
+                                    goto CONTINUE;	// ä¸ç›¸å…³çš„è¡Œ
 
                                 strLine = strPart1 + "\t" + strPart3;
 
@@ -205,7 +206,7 @@ namespace dp2Catalog
 
                                 item = new CharsetItem();
                                 item.Content = strLine;
-                                charsettable_e2u.Add(item); //charsettable_e2u.Add(item);	// ANSI×Ö·û¼¯
+                                charsettable_e2u.Add(item); //charsettable_e2u.Add(item);	// ANSIå­—ç¬¦é›†
 
                                 stop.SetMessage(strLine.Replace("\t", "   "));
                             }
@@ -214,7 +215,7 @@ namespace dp2Catalog
                             {
                                 nRet = strLine.IndexOfAny(new char[] { '\t', ' ' }, 0);
                                 if (nRet == -1)
-                                    goto CONTINUE;	// ¸ñÊ½ÓĞÎÊÌâ
+                                    goto CONTINUE;	// æ ¼å¼æœ‰é—®é¢˜
 
                                 string strPart1 = strLine.Substring(0, nRet).Trim().ToUpper();
 
@@ -230,14 +231,14 @@ namespace dp2Catalog
                                 item = new CharsetItem();
                                 strLine = strPart2 + "\t" + strPart1;
                                 item.Content = strLine;
-                                charsettable_e2u.Add(item); //charsettable_e2u.Add(item);	// ANSI×Ö·û¼¯
+                                charsettable_e2u.Add(item); //charsettable_e2u.Add(item);	// ANSIå­—ç¬¦é›†
 
                                 stop.SetMessage(strLine.Replace("\t", "   "));
                             }
 
 
                         CONTINUE:
-                            // ÏÔÊ¾½ø¶ÈÌõ
+                            // æ˜¾ç¤ºè¿›åº¦æ¡
                             this.MainForm.ToolStripProgressBar.Value = (int)sr.BaseStream.Position;
                         }
 
@@ -249,7 +250,7 @@ namespace dp2Catalog
 
                 }
 
-                stop.SetMessage("ÕıÔÚ¸´ÖÆºÍÅÅĞò...");
+                stop.SetMessage("æ­£åœ¨å¤åˆ¶å’Œæ’åº...");
                 this.Update();
                 this.MainForm.Update();
 
@@ -304,12 +305,12 @@ namespace dp2Catalog
             this.button_begin.Enabled = bEnable;
         }
 
-        // ¸ù¾İEacc±àÂë²é³öUnicode±àÂë
+        // æ ¹æ®Eaccç¼–ç æŸ¥å‡ºUnicodeç¼–ç 
         private void button_searchE2u_Click(object sender, EventArgs e)
         {
             if (this.textBox_e2uFilename.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ e2u Âë±íÎÄ¼ş");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š e2u ç è¡¨æ–‡ä»¶");
                 return;
             }
 
@@ -332,7 +333,7 @@ namespace dp2Catalog
 
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, "Ã»ÓĞÕÒµ½");
+                    MessageBox.Show(this, "æ²¡æœ‰æ‰¾åˆ°");
                 }
                 else
                 {
@@ -351,12 +352,12 @@ namespace dp2Catalog
 
         }
 
-        // ¸ù¾İUnicode±àÂë²é³öEacc±àÂë
+        // æ ¹æ®Unicodeç¼–ç æŸ¥å‡ºEaccç¼–ç 
         private void button_searchU2e_Click(object sender, EventArgs e)
         {
             if (this.textBox_e2uFilename.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ Âë±íÎÄ¼ş");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š ç è¡¨æ–‡ä»¶");
                 return;
             }
 
@@ -379,7 +380,7 @@ namespace dp2Catalog
 
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, "Ã»ÓĞÕÒµ½");
+                    MessageBox.Show(this, "æ²¡æœ‰æ‰¾åˆ°");
                 }
                 else
                 {
@@ -400,7 +401,7 @@ namespace dp2Catalog
         {
             if (this.textBox_e2uFilename.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ e2u Âë±íÎÄ¼ş");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š e2u ç è¡¨æ–‡ä»¶");
                 return;
             }
 

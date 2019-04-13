@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Xml;
+using System.Text;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;    // GetDp2ResDlg
-using System.Text;
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.Z3950.UI
 {
     /// <summary>
     /// Z39.50服务器属性对话框

@@ -23,7 +23,7 @@ namespace dp2Circulation
         // 从 XML 文件中装载服务器配置信息
         NormalResult LoadServer()
         {
-
+            return new NormalResult();
         }
 
         // 首次检索

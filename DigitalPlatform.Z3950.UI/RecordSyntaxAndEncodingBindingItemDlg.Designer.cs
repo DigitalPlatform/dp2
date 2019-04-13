@@ -1,4 +1,4 @@
-﻿namespace DigitalPlatform.Z3950
+﻿namespace DigitalPlatform.Z3950.UI
 {
     partial class RecordSyntaxAndEncodingBindingItemDlg
     {

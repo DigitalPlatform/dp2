@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace DigitalPlatform.Z3950
+namespace DigitalPlatform.Z3950.UI
 {
     public partial class RecordSyntaxAndEncodingBindingItemDlg : Form
     {

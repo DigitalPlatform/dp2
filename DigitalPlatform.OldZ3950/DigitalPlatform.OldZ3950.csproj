@@ -8,8 +8,8 @@
     <ProjectGuid>{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DigitalPlatform.Z3950</RootNamespace>
-    <AssemblyName>DigitalPlatform.Z3950</AssemblyName>
+    <RootNamespace>DigitalPlatform.OldZ3950</RootNamespace>
+    <AssemblyName>DigitalPlatform.OldZ3950</AssemblyName>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>
