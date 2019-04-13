@@ -33,11 +33,11 @@
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_database = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.button_Cancel = new System.Windows.Forms.Button();
-            this.button_OK = new System.Windows.Forms.Button();
             this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
+            this.button_Cancel = new System.Windows.Forms.Button();
+            this.button_OK = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -82,9 +82,40 @@
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // toolStripButton_new
+            // 
+            this.toolStripButton_new.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_new.Image")));
+            this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_new.Name = "toolStripButton_new";
+            this.toolStripButton_new.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_new.Text = "新增";
+            this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
+            // 
+            // toolStripButton_modify
+            // 
+            this.toolStripButton_modify.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modify.Image")));
+            this.toolStripButton_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_modify.Name = "toolStripButton_modify";
+            this.toolStripButton_modify.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_modify.Text = "修改";
+            this.toolStripButton_modify.Click += new System.EventHandler(this.toolStripButton_modify_Click);
+            // 
+            // toolStripButton_delete
+            // 
+            this.toolStripButton_delete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
+            this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_delete.Name = "toolStripButton_delete";
+            this.toolStripButton_delete.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_delete.Text = "删除";
+            this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
+            // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(704, 405);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(84, 33);
@@ -103,33 +134,6 @@
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
-            // 
-            // toolStripButton_new
-            // 
-            this.toolStripButton_new.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_new.Image")));
-            this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_new.Name = "toolStripButton_new";
-            this.toolStripButton_new.Size = new System.Drawing.Size(50, 28);
-            this.toolStripButton_new.Text = "新增";
-            // 
-            // toolStripButton_modify
-            // 
-            this.toolStripButton_modify.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modify.Image")));
-            this.toolStripButton_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_modify.Name = "toolStripButton_modify";
-            this.toolStripButton_modify.Size = new System.Drawing.Size(50, 28);
-            this.toolStripButton_modify.Text = "修改";
-            // 
-            // toolStripButton_delete
-            // 
-            this.toolStripButton_delete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
-            this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_delete.Name = "toolStripButton_delete";
-            this.toolStripButton_delete.Size = new System.Drawing.Size(50, 28);
-            this.toolStripButton_delete.Text = "删除";
             // 
             // ZServerListDialog
             // 

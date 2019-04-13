@@ -16,6 +16,16 @@ namespace DigitalPlatform.LibraryServer
     {
         public string Path { get; set; }
 
+        public string DbName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Path))
+                    return "";
+                return StringUtil.GetDbName(Path);
+            }
+        }
+
         internal XmlDocument _dom = null;
 
         // public string RefID { get; set; }
@@ -24,10 +34,12 @@ namespace DigitalPlatform.LibraryServer
         /// 构造函数
         /// </summary>
         /// <param name="dom">XmlDocument 对象。复制之后使用，以保证安全</param>
-        public XmlRecord(XmlDocument dom)
+        public XmlRecord(XmlDocument dom, string recpath)
         {
             _dom = new XmlDocument();
             _dom.LoadXml(dom.OuterXml);
+
+            Path = recpath;
         }
 
         public string GetField(string name)
@@ -52,7 +64,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class PatronRecord : XmlRecord
     {
-        public PatronRecord(XmlDocument dom) : base(dom)
+        public PatronRecord(XmlDocument dom, string recpath) : base(dom, recpath)
         {
         }
 
@@ -308,7 +320,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class ItemRecord : XmlRecord
     {
-        public ItemRecord(XmlDocument dom) : base(dom)
+        public ItemRecord(XmlDocument dom, string recpath) : base(dom, recpath)
         {
             //this.BookType = DomUtil.GetElementText(dom.DocumentElement, "bookType");
             //this.Barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");

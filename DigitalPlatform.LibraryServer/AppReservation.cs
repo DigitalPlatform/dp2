@@ -395,7 +395,9 @@ namespace DigitalPlatform.LibraryServer
                                 strLibraryCode,
                                 false,
                                 sessioninfo.Account,
+                                strOutputReaderRecPath,
                                 readerdom,
+                                strOutputItemRecPath,
                                 itemdom,
                                 ref debugInfo,
                                 out strError);

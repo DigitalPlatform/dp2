@@ -1456,7 +1456,9 @@ namespace DigitalPlatform.LibraryServer
                         bRenew,
                         strLibraryCode, // 读者记录所在读者库的馆代码
                         strAccessParameters,
+                        strOutputReaderRecPath,
                         ref readerdom,
+                        strOutputItemRecPath,
                         ref itemdom,
                         ref debugInfo,
                         out strError);
@@ -3338,7 +3340,9 @@ start_time_1,
         int CheckCanReturn(
             string strReaderLibraryCode,
             Account account,
+            string reader_recpath,
             XmlDocument readerdom,
+            string item_recpath,
             XmlDocument itemdom,
             ref StringBuilder debugInfo,
             out string strError)
@@ -3461,11 +3465,11 @@ start_time_1,
 
                     SetValue(engine,
                         "patron",
-                        readerdom == null ? null : new PatronRecord(readerdom));
+                        readerdom == null ? null : new PatronRecord(readerdom, reader_recpath));
 
                     SetValue(engine,
     "item",
-    itemdom == null ? null : new ItemRecord(itemdom));
+    itemdom == null ? null : new ItemRecord(itemdom, item_recpath));
 
                     engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
                         + strScript) // execute a statement
@@ -3523,7 +3527,9 @@ start_time_1,
             string strReaderLibraryCode,
             bool bRenew,
             Account account,
+            string reader_recpath,
             XmlDocument readerdom,
+            string item_recpath,
             XmlDocument itemdom,
             ref StringBuilder debugInfo,
             out string strError)
@@ -3660,11 +3666,11 @@ account == null ? null : new AccountRecord(account));
 
                     SetValue(engine,
                         "patron",
-                        readerdom == null ? null : new PatronRecord(readerdom));
+                        readerdom == null ? null : new PatronRecord(readerdom, reader_recpath));
 
                     SetValue(engine,
     "item",
-    itemdom == null ? null : new ItemRecord(itemdom));
+    itemdom == null ? null : new ItemRecord(itemdom, item_recpath));
 
                     engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
                         + strScript) // execute a statement
@@ -3756,7 +3762,9 @@ account == null ? null : new AccountRecord(account));
             bool bRenew,
             string strLibraryCode,
             string strAccessParameters,
+            string reader_recpath,
             ref XmlDocument readerdom,
+            string item_recpath,
             ref XmlDocument itemdom,
             ref StringBuilder debugInfo,
             out string strError)
@@ -3913,7 +3921,9 @@ account == null ? null : new AccountRecord(account));
                 strLibraryCode,
                 bRenew,
                 account,
+                reader_recpath,
                 readerdom,
+                item_recpath,
                 itemdom,
                 ref debugInfo,
                 out strError);
@@ -6078,6 +6088,7 @@ account == null ? null : new AccountRecord(account));
                             ref itemdom,
                             bForce,
                             bItemBarcodeDup,  // 若条码号足以定位，则不记载实体记录路径
+                            strOutputReaderRecPath,
                             strOutputItemRecPath,
                             sessioninfo.UserID, // 还书操作者
                             strOperTime,
@@ -14052,6 +14063,7 @@ out string strError)
             ref XmlDocument itemdom,
             bool bForce,
             bool bItemBarcodeDup,
+            string strReaderRecPath,
             string strItemRecPath,
             string strReturnOperator,
             string strOperTime,
@@ -14209,7 +14221,9 @@ out string strError)
             nRet = CheckCanReturn(
                 strLibraryCode,
                 sessioninfo.Account,
+                strReaderRecPath,
                 readerdom,
+                strItemRecPath,
                 itemdom,
                 ref debugInfo,
                 out strError);

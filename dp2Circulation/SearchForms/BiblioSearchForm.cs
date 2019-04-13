@@ -250,8 +250,8 @@ namespace dp2Circulation
             if (Program.MainForm != null)
                 Program.MainForm.FixedSelectedPageChanged += new EventHandler(MainForm_FixedSelectedPageChanged);
 
-            UpdateMenu();
-
+            UpdateSearchShareMenu();
+            UpdateZ3950Menu();
 #if NO
             if (Program.MainForm.NormalDbProperties == null
                 || Program.MainForm.BiblioDbFromInfos == null
@@ -10951,11 +10951,11 @@ MessageBoxDefaultButton.Button1);
             else
                 this.SearchShareBiblio = false;
 
-            UpdateMenu();
+            UpdateSearchShareMenu();
         }
 
         // 更新菜单状态
-        void UpdateMenu()
+        void UpdateSearchShareMenu()
         {
             this.ToolStripMenuItem_searchShareBiblio.Checked = this.SearchShareBiblio;
             if (Program.MainForm != null && Program.MainForm.MessageHub != null)
@@ -11101,6 +11101,25 @@ MessageBoxDefaultButton.Button1);
             }, out string strError);
 
             this.ClearMessage();
+        }
+
+        private void toolStripMenuItem_searchZ3950_Click(object sender, EventArgs e)
+        {
+            if (this.SearchZ3950 == false)
+            {
+                // TODO: 检查当前是否配置了 Z39.50 服务器列表。如果没有配置，提醒进行配置
+
+                this.SearchZ3950 = true;
+            }
+            else
+                this.SearchZ3950 = false;
+
+            this.UpdateZ3950Menu();
+        }
+
+        void UpdateZ3950Menu()
+        {
+            this.toolStripMenuItem_searchZ3950.Checked = this.SearchZ3950;
         }
     }
 

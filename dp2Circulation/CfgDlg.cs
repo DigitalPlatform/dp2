@@ -11,6 +11,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.Z3950.UI;
 
 namespace dp2Circulation
 {
@@ -1737,6 +1738,16 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             this.textBox_cardReader_rfidCenterUrl.Text = strDefaultValue;
+        }
+
+        // 服务器列表 对话框
+        private void button_z3950_servers_Click(object sender, EventArgs e)
+        {
+            ZServerListDialog dlg = new ZServerListDialog();
+
+            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+            dlg.StartPosition = FormStartPosition.CenterParent;
+            dlg.ShowDialog(this);
         }
     }
 

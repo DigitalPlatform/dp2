@@ -175,6 +175,9 @@
             this.tabPage_accept = new System.Windows.Forms.TabPage();
             this.checkBox_accept_singleClickLoadDetail = new System.Windows.Forms.CheckBox();
             this.tabPage_cardReader = new System.Windows.Forms.TabPage();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.button_cardReader_setRfidUrlDefaultValue = new System.Windows.Forms.Button();
+            this.textBox_cardReader_rfidCenterUrl = new System.Windows.Forms.TextBox();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.button_cardReader_setIdcardUrlDefaultValue = new System.Windows.Forms.Button();
             this.textBox_cardReader_idcardReaderUrl = new System.Windows.Forms.TextBox();
@@ -224,9 +227,8 @@
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.groupBox11 = new System.Windows.Forms.GroupBox();
-            this.button_cardReader_setRfidUrlDefaultValue = new System.Windows.Forms.Button();
-            this.textBox_cardReader_rfidCenterUrl = new System.Windows.Forms.TextBox();
+            this.tabPage_z3950 = new System.Windows.Forms.TabPage();
+            this.button_z3950_servers = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -259,6 +261,7 @@
             this.tabPage_amerce.SuspendLayout();
             this.tabPage_accept.SuspendLayout();
             this.tabPage_cardReader.SuspendLayout();
+            this.groupBox11.SuspendLayout();
             this.groupBox8.SuspendLayout();
             this.tabPage_patron.SuspendLayout();
             this.tabPage_operLog.SuspendLayout();
@@ -269,7 +272,7 @@
             this.groupBox7.SuspendLayout();
             this.tabPage_labelPrint.SuspendLayout();
             this.tabPage_message.SuspendLayout();
-            this.groupBox11.SuspendLayout();
+            this.tabPage_z3950.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -296,6 +299,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_fingerprint);
             this.tabControl_main.Controls.Add(this.tabPage_labelPrint);
             this.tabControl_main.Controls.Add(this.tabPage_message);
+            this.tabControl_main.Controls.Add(this.tabPage_z3950);
             this.tabControl_main.Location = new System.Drawing.Point(15, 15);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_main.Multiline = true;
@@ -466,11 +470,11 @@
             this.tabPage_defaultAccount.Controls.Add(this.textBox_defaultAccount_userName);
             this.tabPage_defaultAccount.Controls.Add(this.label3);
             this.tabPage_defaultAccount.Controls.Add(this.label2);
-            this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 28);
             this.tabPage_defaultAccount.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_defaultAccount.Name = "tabPage_defaultAccount";
             this.tabPage_defaultAccount.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage_defaultAccount.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_defaultAccount.Size = new System.Drawing.Size(739, 438);
             this.tabPage_defaultAccount.TabIndex = 1;
             this.tabPage_defaultAccount.Text = "默认帐户 ";
             this.tabPage_defaultAccount.UseVisualStyleBackColor = true;
@@ -580,9 +584,9 @@
             this.tabPage_cacheManage.Controls.Add(this.button_reloadBiblioDbProperties);
             this.tabPage_cacheManage.Controls.Add(this.button_reloadBiblioDbFromInfos);
             this.tabPage_cacheManage.Controls.Add(this.button_clearValueTableCache);
-            this.tabPage_cacheManage.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_cacheManage.Location = new System.Drawing.Point(4, 28);
             this.tabPage_cacheManage.Name = "tabPage_cacheManage";
-            this.tabPage_cacheManage.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_cacheManage.Size = new System.Drawing.Size(739, 438);
             this.tabPage_cacheManage.TabIndex = 2;
             this.tabPage_cacheManage.Text = " 缓存管理 ";
             this.tabPage_cacheManage.UseVisualStyleBackColor = true;
@@ -679,9 +683,9 @@
             this.tabPage_charging.Controls.Add(this.label5);
             this.tabPage_charging.Controls.Add(this.numericUpDown_charging_infoDlgOpacity);
             this.tabPage_charging.Controls.Add(this.checkBox_charging_force);
-            this.tabPage_charging.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_charging.Location = new System.Drawing.Point(4, 28);
             this.tabPage_charging.Name = "tabPage_charging";
-            this.tabPage_charging.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_charging.Size = new System.Drawing.Size(739, 438);
             this.tabPage_charging.TabIndex = 3;
             this.tabPage_charging.Text = "出纳";
             this.tabPage_charging.UseVisualStyleBackColor = true;
@@ -912,10 +916,10 @@
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_speakNameWhenLoadReaderRecord);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_noBorrowHistory);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_verifyBarcode);
-            this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 28);
             this.tabPage_quickCharging.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_quickCharging.Name = "tabPage_quickCharging";
-            this.tabPage_quickCharging.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_quickCharging.Size = new System.Drawing.Size(739, 438);
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
@@ -1080,9 +1084,9 @@
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_searchDupWhenSaving);
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_cataloging);
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_verifyItemBarcode);
-            this.tabPage_itemManagement.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_itemManagement.Location = new System.Drawing.Point(4, 28);
             this.tabPage_itemManagement.Name = "tabPage_itemManagement";
-            this.tabPage_itemManagement.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_itemManagement.Size = new System.Drawing.Size(739, 438);
             this.tabPage_itemManagement.TabIndex = 5;
             this.tabPage_itemManagement.Text = "种册";
             this.tabPage_itemManagement.UseVisualStyleBackColor = true;
@@ -1206,9 +1210,9 @@
             this.tabPage_ui.Controls.Add(this.checkBox_ui_hideFixedPanel);
             this.tabPage_ui.Controls.Add(this.comboBox_ui_fixedPanelDock);
             this.tabPage_ui.Controls.Add(this.label6);
-            this.tabPage_ui.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_ui.Location = new System.Drawing.Point(4, 28);
             this.tabPage_ui.Name = "tabPage_ui";
-            this.tabPage_ui.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_ui.Size = new System.Drawing.Size(739, 438);
             this.tabPage_ui.TabIndex = 4;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
@@ -1303,9 +1307,9 @@
             this.tabPage_passgate.AutoScroll = true;
             this.tabPage_passgate.Controls.Add(this.numericUpDown_passgate_maxListItemsCount);
             this.tabPage_passgate.Controls.Add(this.label8);
-            this.tabPage_passgate.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_passgate.Location = new System.Drawing.Point(4, 28);
             this.tabPage_passgate.Name = "tabPage_passgate";
-            this.tabPage_passgate.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_passgate.Size = new System.Drawing.Size(739, 438);
             this.tabPage_passgate.TabIndex = 6;
             this.tabPage_passgate.Text = "入馆登记";
             this.tabPage_passgate.UseVisualStyleBackColor = true;
@@ -1351,9 +1355,9 @@
             this.tabPage_search.Controls.Add(this.groupBox3);
             this.tabPage_search.Controls.Add(this.groupBox2);
             this.tabPage_search.Controls.Add(this.groupBox1);
-            this.tabPage_search.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_search.Location = new System.Drawing.Point(4, 28);
             this.tabPage_search.Name = "tabPage_search";
-            this.tabPage_search.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_search.Size = new System.Drawing.Size(739, 438);
             this.tabPage_search.TabIndex = 7;
             this.tabPage_search.Text = "检索";
             this.tabPage_search.UseVisualStyleBackColor = true;
@@ -1734,9 +1738,9 @@
             this.tabPage_print.Controls.Add(this.comboBox_print_prnPort);
             this.tabPage_print.Controls.Add(this.label12);
             this.tabPage_print.Controls.Add(this.toolStrip_print);
-            this.tabPage_print.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_print.Location = new System.Drawing.Point(4, 52);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_print.Size = new System.Drawing.Size(739, 414);
             this.tabPage_print.TabIndex = 8;
             this.tabPage_print.Text = "凭条打印";
             this.tabPage_print.UseVisualStyleBackColor = true;
@@ -1866,9 +1870,9 @@
             this.tabPage_amerce.Controls.Add(this.label22);
             this.tabPage_amerce.Controls.Add(this.comboBox_amerce_interface);
             this.tabPage_amerce.Controls.Add(this.label15);
-            this.tabPage_amerce.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_amerce.Location = new System.Drawing.Point(4, 52);
             this.tabPage_amerce.Name = "tabPage_amerce";
-            this.tabPage_amerce.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_amerce.Size = new System.Drawing.Size(739, 414);
             this.tabPage_amerce.TabIndex = 10;
             this.tabPage_amerce.Text = "违约/交费";
             this.tabPage_amerce.UseVisualStyleBackColor = true;
@@ -1920,9 +1924,9 @@
             // 
             this.tabPage_accept.AutoScroll = true;
             this.tabPage_accept.Controls.Add(this.checkBox_accept_singleClickLoadDetail);
-            this.tabPage_accept.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_accept.Location = new System.Drawing.Point(4, 52);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_accept.Size = new System.Drawing.Size(739, 414);
             this.tabPage_accept.TabIndex = 11;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1942,13 +1946,50 @@
             this.tabPage_cardReader.AutoScroll = true;
             this.tabPage_cardReader.Controls.Add(this.groupBox11);
             this.tabPage_cardReader.Controls.Add(this.groupBox8);
-            this.tabPage_cardReader.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_cardReader.Location = new System.Drawing.Point(4, 52);
             this.tabPage_cardReader.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cardReader.Name = "tabPage_cardReader";
-            this.tabPage_cardReader.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_cardReader.Size = new System.Drawing.Size(739, 414);
             this.tabPage_cardReader.TabIndex = 12;
             this.tabPage_cardReader.Text = "读卡器";
             this.tabPage_cardReader.UseVisualStyleBackColor = true;
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox11.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
+            this.groupBox11.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
+            this.groupBox11.Location = new System.Drawing.Point(4, 176);
+            this.groupBox11.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox11.Size = new System.Drawing.Size(675, 132);
+            this.groupBox11.TabIndex = 1;
+            this.groupBox11.TabStop = false;
+            this.groupBox11.Text = " RFID 读卡器接口 URL ";
+            // 
+            // button_cardReader_setRfidUrlDefaultValue
+            // 
+            this.button_cardReader_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(508, 70);
+            this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(4);
+            this.button_cardReader_setRfidUrlDefaultValue.Name = "button_cardReader_setRfidUrlDefaultValue";
+            this.button_cardReader_setRfidUrlDefaultValue.Size = new System.Drawing.Size(158, 34);
+            this.button_cardReader_setRfidUrlDefaultValue.TabIndex = 1;
+            this.button_cardReader_setRfidUrlDefaultValue.Text = "设为常用值";
+            this.button_cardReader_setRfidUrlDefaultValue.UseVisualStyleBackColor = true;
+            this.button_cardReader_setRfidUrlDefaultValue.Click += new System.EventHandler(this.button_cardReader_setRfidUrlDefaultValue_Click);
+            // 
+            // textBox_cardReader_rfidCenterUrl
+            // 
+            this.textBox_cardReader_rfidCenterUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_cardReader_rfidCenterUrl.Location = new System.Drawing.Point(9, 30);
+            this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(4);
+            this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
+            this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(655, 28);
+            this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
             // 
             // groupBox8
             // 
@@ -1994,10 +2035,10 @@
             this.tabPage_patron.Controls.Add(this.checkBox_patron_autoRetryReaderCard);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_verifyBarcode);
             this.tabPage_patron.Controls.Add(this.checkBox_patron_displaySetReaderBarcodeDialog);
-            this.tabPage_patron.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_patron.Location = new System.Drawing.Point(4, 52);
             this.tabPage_patron.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_patron.Name = "tabPage_patron";
-            this.tabPage_patron.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_patron.Size = new System.Drawing.Size(739, 414);
             this.tabPage_patron.TabIndex = 13;
             this.tabPage_patron.Text = "读者";
             this.tabPage_patron.UseVisualStyleBackColor = true;
@@ -2053,10 +2094,10 @@
             this.tabPage_operLog.Controls.Add(this.button_operLog_clearCacheDirectory);
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayItemBorrowHistory);
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayReaderBorrowHistory);
-            this.tabPage_operLog.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_operLog.Location = new System.Drawing.Point(4, 52);
             this.tabPage_operLog.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_operLog.Name = "tabPage_operLog";
-            this.tabPage_operLog.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_operLog.Size = new System.Drawing.Size(739, 414);
             this.tabPage_operLog.TabIndex = 15;
             this.tabPage_operLog.Text = "日志";
             this.tabPage_operLog.UseVisualStyleBackColor = true;
@@ -2135,10 +2176,10 @@
             this.tabPage_global.Controls.Add(this.label26);
             this.tabPage_global.Controls.Add(this.checkBox_global_autoSelPinyin);
             this.tabPage_global.Controls.Add(this.checkBox_global_displayScriptErrorDialog);
-            this.tabPage_global.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_global.Location = new System.Drawing.Point(4, 52);
             this.tabPage_global.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_global.Name = "tabPage_global";
-            this.tabPage_global.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_global.Size = new System.Drawing.Size(739, 414);
             this.tabPage_global.TabIndex = 14;
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
@@ -2204,10 +2245,10 @@
             this.tabPage_fingerprint.Controls.Add(this.groupBox9);
             this.tabPage_fingerprint.Controls.Add(this.groupBox7);
             this.tabPage_fingerprint.Controls.Add(this.button_fingerprint_clearLocalCacheFiles);
-            this.tabPage_fingerprint.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_fingerprint.Location = new System.Drawing.Point(4, 52);
             this.tabPage_fingerprint.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_fingerprint.Name = "tabPage_fingerprint";
-            this.tabPage_fingerprint.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_fingerprint.Size = new System.Drawing.Size(739, 414);
             this.tabPage_fingerprint.TabIndex = 16;
             this.tabPage_fingerprint.Text = "指纹和人脸";
             this.tabPage_fingerprint.UseVisualStyleBackColor = true;
@@ -2222,7 +2263,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox10.Size = new System.Drawing.Size(380, 126);
+            this.groupBox10.Size = new System.Drawing.Size(354, 126);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2230,7 +2271,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(214, 70);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(188, 70);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2246,7 +2287,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(360, 28);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(334, 28);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2312,7 +2353,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox7.Size = new System.Drawing.Size(380, 126);
+            this.groupBox7.Size = new System.Drawing.Size(354, 126);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2320,7 +2361,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(214, 70);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(188, 70);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2336,7 +2377,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(360, 28);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(334, 28);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2354,10 +2395,10 @@
             // 
             this.tabPage_labelPrint.Controls.Add(this.comboBox_labelPrint_accessNoSource);
             this.tabPage_labelPrint.Controls.Add(this.label28);
-            this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 52);
             this.tabPage_labelPrint.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_labelPrint.Name = "tabPage_labelPrint";
-            this.tabPage_labelPrint.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_labelPrint.Size = new System.Drawing.Size(739, 414);
             this.tabPage_labelPrint.TabIndex = 18;
             this.tabPage_labelPrint.Text = "标签打印";
             this.tabPage_labelPrint.UseVisualStyleBackColor = true;
@@ -2522,42 +2563,25 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // groupBox11
+            // tabPage_z3950
             // 
-            this.groupBox11.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox11.Controls.Add(this.button_cardReader_setRfidUrlDefaultValue);
-            this.groupBox11.Controls.Add(this.textBox_cardReader_rfidCenterUrl);
-            this.groupBox11.Location = new System.Drawing.Point(4, 176);
-            this.groupBox11.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox11.Size = new System.Drawing.Size(675, 132);
-            this.groupBox11.TabIndex = 1;
-            this.groupBox11.TabStop = false;
-            this.groupBox11.Text = " RFID 读卡器接口 URL ";
+            this.tabPage_z3950.Controls.Add(this.button_z3950_servers);
+            this.tabPage_z3950.Location = new System.Drawing.Point(4, 76);
+            this.tabPage_z3950.Name = "tabPage_z3950";
+            this.tabPage_z3950.Size = new System.Drawing.Size(739, 390);
+            this.tabPage_z3950.TabIndex = 20;
+            this.tabPage_z3950.Text = "Z39.50";
+            this.tabPage_z3950.UseVisualStyleBackColor = true;
             // 
-            // button_cardReader_setRfidUrlDefaultValue
+            // button_z3950_servers
             // 
-            this.button_cardReader_setRfidUrlDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_cardReader_setRfidUrlDefaultValue.Location = new System.Drawing.Point(508, 70);
-            this.button_cardReader_setRfidUrlDefaultValue.Margin = new System.Windows.Forms.Padding(4);
-            this.button_cardReader_setRfidUrlDefaultValue.Name = "button_cardReader_setRfidUrlDefaultValue";
-            this.button_cardReader_setRfidUrlDefaultValue.Size = new System.Drawing.Size(158, 34);
-            this.button_cardReader_setRfidUrlDefaultValue.TabIndex = 1;
-            this.button_cardReader_setRfidUrlDefaultValue.Text = "设为常用值";
-            this.button_cardReader_setRfidUrlDefaultValue.UseVisualStyleBackColor = true;
-            this.button_cardReader_setRfidUrlDefaultValue.Click += new System.EventHandler(this.button_cardReader_setRfidUrlDefaultValue_Click);
-            // 
-            // textBox_cardReader_rfidCenterUrl
-            // 
-            this.textBox_cardReader_rfidCenterUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_cardReader_rfidCenterUrl.Location = new System.Drawing.Point(9, 30);
-            this.textBox_cardReader_rfidCenterUrl.Margin = new System.Windows.Forms.Padding(4);
-            this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
-            this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(655, 28);
-            this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
+            this.button_z3950_servers.Location = new System.Drawing.Point(3, 24);
+            this.button_z3950_servers.Name = "button_z3950_servers";
+            this.button_z3950_servers.Size = new System.Drawing.Size(532, 37);
+            this.button_z3950_servers.TabIndex = 0;
+            this.button_z3950_servers.Text = "服务器列表 ...";
+            this.button_z3950_servers.UseVisualStyleBackColor = true;
+            this.button_z3950_servers.Click += new System.EventHandler(this.button_z3950_servers_Click);
             // 
             // CfgDlg
             // 
@@ -2631,6 +2655,8 @@
             this.tabPage_accept.ResumeLayout(false);
             this.tabPage_accept.PerformLayout();
             this.tabPage_cardReader.ResumeLayout(false);
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
             this.tabPage_patron.ResumeLayout(false);
@@ -2650,8 +2676,7 @@
             this.tabPage_labelPrint.PerformLayout();
             this.tabPage_message.ResumeLayout(false);
             this.tabPage_message.PerformLayout();
-            this.groupBox11.ResumeLayout(false);
-            this.groupBox11.PerformLayout();
+            this.tabPage_z3950.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2856,5 +2881,7 @@
         private System.Windows.Forms.GroupBox groupBox11;
         private System.Windows.Forms.Button button_cardReader_setRfidUrlDefaultValue;
         private System.Windows.Forms.TextBox textBox_cardReader_rfidCenterUrl;
+        private System.Windows.Forms.TabPage tabPage_z3950;
+        private System.Windows.Forms.Button button_z3950_servers;
     }
 }

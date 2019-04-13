@@ -1521,6 +1521,35 @@ out string strError)
             }
         }
 
+        public bool SearchZ3950
+        {
+            get
+            {
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                    return Program.MainForm.AppInfo.GetBoolean(
+        "biblio_search_form",
+        "search_z3950",
+        false);
+                return false;
+            }
+            set
+            {
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                {
+                    Program.MainForm.AppInfo.SetBoolean(
+        "biblio_search_form",
+        "search_z3950",
+        value);
+                    if (value == true)
+                        this.ShowMessage("使用 Z39.50", "");
+                    else
+                        this.ShowMessage("不使用 Z39.50", "");
+
+                    this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
+                }
+            }
+        }
+
         // 获得当前用户能管辖的全部馆代码
         public List<string> GetOwnerLibraryCodes()
         {
