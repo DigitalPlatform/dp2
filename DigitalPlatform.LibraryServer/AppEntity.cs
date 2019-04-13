@@ -1857,6 +1857,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = AddOpacInfos(
                             sessioninfo,
                             strLang,
+                            record.Path,
                             ref itemdom,
                             out strError);
                         if (nRet == -1)
@@ -1912,6 +1913,7 @@ namespace DigitalPlatform.LibraryServer
         int AddOpacInfos(
             SessionInfo sessioninfo,
             string strLang,
+            string item_recpath,
             ref XmlDocument item_dom,
             out string strError)
         {
@@ -1990,7 +1992,9 @@ namespace DigitalPlatform.LibraryServer
                 strItemLibraryCode, // 读者的 librarycode?
                 false,
                 sessioninfo.Account,
+                sessioninfo.Account?.ReaderDomPath,
                 sessioninfo.Account?.PatronDom,
+                item_recpath,
                 item_dom,
                 ref debugInfo,
                 out strError);

@@ -62,6 +62,7 @@
     <Compile Include="ZServerPropertyForm.designer.cs">
       <DependentUpon>ZServerPropertyForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ZServerUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RecordSyntaxAndEncodingBindingItemDlg.resx">
@@ -91,6 +92,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.Z3950\DigitalPlatform.Z3950.csproj">
+      <Project>{0a64722f-5f1b-4540-ac95-2e5c6b7a3ba8}</Project>
+      <Name>DigitalPlatform.Z3950</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

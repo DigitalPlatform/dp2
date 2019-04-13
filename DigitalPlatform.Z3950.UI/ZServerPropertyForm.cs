@@ -917,6 +917,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
         public bool Canceled { get; set; }
     }
 
+#if REMOVED
     // 绑定信息数组
     public class RecordSyntaxAndEncodingBindingCollection : List<RecordSyntaxAndEncodingBindingItem>
     {
@@ -983,6 +984,9 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
 
     }
 
+#endif
+
+#if REMOVED
     // 绑定信息元素
     public class RecordSyntaxAndEncodingBindingItem
     {
@@ -1048,4 +1052,5 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
         }
     }
 
+#endif
 }

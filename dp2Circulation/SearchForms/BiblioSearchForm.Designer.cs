@@ -46,13 +46,15 @@
             this.checkedComboBox_biblioDbNames = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.toolStrip_search = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_search = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDropDownButton_searchKeys = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_continueLoad = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeyID = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_searchShareBiblio = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem_searchZ3950 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_filterRecords = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_uSingle = new System.Windows.Forms.ToolStripMenuItem();
@@ -74,7 +76,6 @@
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ToolStripMenuItem_filterRecords = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_biblioDb.SuspendLayout();
             this.tableLayoutPanel_query.SuspendLayout();
             this.toolStrip_search.SuspendLayout();
@@ -271,8 +272,8 @@
             this.toolStrip_search.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_search.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_search,
-            this.toolStripDropDownButton_searchKeys,
             this.toolStripSeparator3,
+            this.toolStripDropDownButton_searchKeys,
             this.toolStripDropDownButton_inputTimeString,
             this.toolStripSeparator1,
             this.toolStripButton_prevQuery,
@@ -295,6 +296,11 @@
             this.toolStripButton_search.Text = "检索";
             this.toolStripButton_search.Click += new System.EventHandler(this.toolStripButton_search_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 40);
+            // 
             // toolStripDropDownButton_searchKeys
             // 
             this.toolStripDropDownButton_searchKeys.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.None;
@@ -304,6 +310,7 @@
             this.toolStripMenuItem_searchKeys,
             this.toolStripSeparator4,
             this.ToolStripMenuItem_searchShareBiblio,
+            this.toolStripMenuItem_searchZ3950,
             this.ToolStripMenuItem_filterRecords});
             this.toolStripDropDownButton_searchKeys.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_searchKeys.Image")));
             this.toolStripDropDownButton_searchKeys.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
@@ -347,10 +354,19 @@
             this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
             this.ToolStripMenuItem_searchShareBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_searchShareBiblio_Click);
             // 
-            // toolStripSeparator3
+            // toolStripMenuItem_searchZ3950
             // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 40);
+            this.toolStripMenuItem_searchZ3950.Name = "toolStripMenuItem_searchZ3950";
+            this.toolStripMenuItem_searchZ3950.Size = new System.Drawing.Size(252, 30);
+            this.toolStripMenuItem_searchZ3950.Text = "使用 Z39.50";
+            this.toolStripMenuItem_searchZ3950.Click += new System.EventHandler(this.toolStripMenuItem_searchZ3950_Click);
+            // 
+            // ToolStripMenuItem_filterRecords
+            // 
+            this.ToolStripMenuItem_filterRecords.Name = "ToolStripMenuItem_filterRecords";
+            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_filterRecords.Text = "智能筛选 ...";
+            this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
             // 
             // toolStripDropDownButton_inputTimeString
             // 
@@ -583,13 +599,6 @@
             this.columnHeader_1.Text = "1";
             this.columnHeader_1.Width = 300;
             // 
-            // ToolStripMenuItem_filterRecords
-            // 
-            this.ToolStripMenuItem_filterRecords.Name = "ToolStripMenuItem_filterRecords";
-            this.ToolStripMenuItem_filterRecords.Size = new System.Drawing.Size(252, 30);
-            this.ToolStripMenuItem_filterRecords.Text = "智能筛选 ...";
-            this.ToolStripMenuItem_filterRecords.Click += new System.EventHandler(this.ToolStripMenuItem_filterRecords_Click);
-            // 
             // BiblioSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -669,5 +678,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox comboBox_location;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_filterRecords;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_searchZ3950;
     }
 }
