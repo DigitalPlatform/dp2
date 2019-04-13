@@ -7,6 +7,7 @@ using System.Text;
 
 namespace DigitalPlatform.IO
 {
+#if REMOVED
     public static class StreamExtention
     {
         public static void FastSeek(this Stream stream, long lOffset)
@@ -689,4 +690,6 @@ FileShare.ReadWrite))
             return 0;
         }
     } // end of class StreamUtil
+
+#endif
 }
