@@ -59,8 +59,10 @@ namespace DigitalPlatform.IO
 	}
 #endif
 
-	public delegate bool FlushOutput();
+#if REMOVED
+    public delegate bool FlushOutput();
 	public delegate bool ProgressOutput(long lCur);
+#endif
 
 	// 在对照表中宏不存在
 	public class MacroNotFoundException : Exception

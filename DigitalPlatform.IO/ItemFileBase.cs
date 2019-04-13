@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace DigitalPlatform.IO
 {
-
+#if REMOVED
     // 数据事项
     public class Item : IComparable
     {
@@ -1812,4 +1812,6 @@ namespace DigitalPlatform.IO
         }
 
     }
+
+#endif
 }

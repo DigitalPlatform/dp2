@@ -17,6 +17,7 @@
 // https://github.com/AutoItConsulting/text-encoding-detect
 namespace AutoIt.Common
 {
+#if REMOVED
     public class TextEncodingDetect
     {
         private readonly byte[] _utf16BeBom =
@@ -405,4 +406,6 @@ namespace AutoIt.Common
             return onlySawAsciiRange ? Encoding.Ascii : Encoding.Utf8Nobom;
         }
     }
+
+#endif
 }

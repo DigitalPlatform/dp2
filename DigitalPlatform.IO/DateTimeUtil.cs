@@ -8,6 +8,7 @@ using DigitalPlatform.Core;
 
 namespace DigitalPlatform.IO
 {
+#if REMOVED
     /// <summary>
     /// DateTime功能扩展函数
     /// </summary>
@@ -998,4 +999,6 @@ out string strError)
 
     }
 
+
+#endif
 }

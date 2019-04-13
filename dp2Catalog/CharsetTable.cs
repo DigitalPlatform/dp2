@@ -8,6 +8,7 @@ using DigitalPlatform.IO;
 
 namespace dp2Catalog
 {
+#if REMOVED
     /// <summary>
     /// 字符集码表
     /// </summary>
@@ -396,4 +397,6 @@ namespace dp2Catalog
             return String.Compare(this.Name, item.Name);
         }
     }
+
+#endif
 }
