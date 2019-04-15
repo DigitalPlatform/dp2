@@ -1606,6 +1606,7 @@ namespace DigitalPlatform.MarcDom
                 temp.Add("netstandard.dll");
                 refs = temp.ToArray();
             }
+
             // CompilerParameters对象
             System.CodeDom.Compiler.CompilerParameters compilerParams;
             compilerParams = new CompilerParameters();

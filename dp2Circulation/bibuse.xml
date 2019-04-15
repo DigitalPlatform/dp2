@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <item name = "Title" value="4" uni_name = "Title" comment="题名" />
+  <item name = "Author" value="1003" uni_name = "Author-name" comment="著者"/>
+  <item name = "ISBN" value="7" uni_name = "Identifier-ISBN"/>
+  <item name = "ISSN" value="8" uni_name = "Identifier-ISSN"/>
+  <item name = "Publisher" value="1018" uni_name = "Name-publisher" comment="出版者"/>
+  <item name = "Personal name" value="1" uni_name = "Name-personal" comment="个人名称"/>
+  <item name = "LC card number" value="9" uni_name = "Control number-LC" comment="国会图书馆卡片号"/>
+  <item name = "Local number" value="12" uni_name = "Control number-local" comment="本地控制号"/>
+  <item name = "Dewey classification" value="13" uni_name = "Classification-Dewey" comment="杜威分类号"/>
+  <item name = "LC call number" value="16" uni_name = "Classification-LC" comment="国会图书馆索取号"/>
+  <item name = "Local classification" value="20" uni_name = "Classification-local" comment="本地分类号"/>
+  <item name = "Subject heading" value="21" uni_name = "Subject" comment="主题"/>
+  <item name = "LC subject heading" value="27" uni_name = "Subject-LC" comment="LC主题标目"/>
+  <item name = "Date" value="30" uni_name = "Date" comment="日期"/>
+  <item name = "Date of publication" value="31" uni_name = "Date-publication" comment="出版日期"/>
+  <item name = "CODEN" value="60" uni_name = "Identifier-CODEN"/>
+  <item name = "Abstract" value="62" uni_name = "Abstract" comment="摘要"/>
+  <item name = "Note" value="63" uni_name = "Note" comment="注释"/>
+  <item name = "Name" value="1002" uni_name = "Name" comment="名称"/>
+  <item name = "Any" value="1016" uni_name = "Any" comment="任意"/>
+  <item name = "Editor" value="1020" uni_name = "Name-editor" comment="编辑"/>
+</root>

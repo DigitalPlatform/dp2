@@ -142,8 +142,12 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-            string[] saAddRef = {this.BinDir + "\\" + "digitalplatform.rms.dll",
-                                this.BinDir + "\\" + "digitalplatform.text.dll"};
+            string[] saAddRef = {
+                // "netstandard.dll",
+                Path.Combine(this.BinDir, "digitalplatform.core.dll"),
+                Path.Combine(this.BinDir, "digitalplatform.rms.dll"),
+                Path.Combine(this.BinDir, "digitalplatform.text.dll")
+            };
 
             string[] saTemp = new string[saRef.Length + saAddRef.Length];
             Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
@@ -235,6 +239,15 @@ namespace DigitalPlatform.rms
             strWarning = "";
             assembly = null;
 
+            // 2019/4/15
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
+
             // CompilerParameters对象
             CompilerParameters compilerParams = new CompilerParameters();
 
@@ -288,9 +301,7 @@ namespace DigitalPlatform.rms
             if (nErrorCount != 0)
                 return -1;
 
-
             assembly = results.CompiledAssembly;// compilerParams.OutputAssembly;
-
             return 0;
         }
 
