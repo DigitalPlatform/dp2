@@ -9,6 +9,7 @@ using System.CodeDom.Compiler;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
+using System.Collections.Generic;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -68,9 +69,18 @@ namespace DigitalPlatform.rms.Client
 			// System.Reflection.Assembly compiledAssembly = null;
 			strErrorInfo = "";
 			strWarningInfo = "";
- 
-			// CompilerParameters对象
-			System.CodeDom.Compiler.CompilerParameters compilerParams;
+
+            // 2019/4/15
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
+
+            // CompilerParameters对象
+            System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
 			compilerParams.GenerateInMemory = true; //Assembly is created in memory
@@ -150,9 +160,18 @@ namespace DigitalPlatform.rms.Client
 			// System.Reflection.Assembly compiledAssembly = null;
 			strErrorInfo = "";
 			strWarningInfo = "";
- 
-			// CompilerParameters对象
-			System.CodeDom.Compiler.CompilerParameters compilerParams;
+
+            // 2019/4/15
+            if (refs != null
+                && Array.IndexOf(refs, "netstandard.dll") == -1)
+            {
+                List<string> temp = new List<string>(refs);
+                temp.Add("netstandard.dll");
+                refs = temp.ToArray();
+            }
+
+            // CompilerParameters对象
+            System.CodeDom.Compiler.CompilerParameters compilerParams;
 			compilerParams = new CompilerParameters();
 
 			compilerParams.GenerateInMemory = true; //Assembly is created in memory

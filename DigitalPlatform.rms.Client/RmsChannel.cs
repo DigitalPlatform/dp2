@@ -1428,10 +1428,12 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
+            // DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
+            DigitalPlatform.rms.LogicNameItem[] logicnames = new DigitalPlatform.rms.LogicNameItem[logicNames.Count];
             for (int i = 0; i < logicnames.Length; i++)
             {
-                logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
+                // logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
+                logicnames[i] = new DigitalPlatform.rms.LogicNameItem();
                 string[] cols = (string[])logicNames[i];
                 logicnames[i].Lang = cols[1];
                 logicnames[i].Value = cols[0];
@@ -1532,9 +1534,10 @@ namespace DigitalPlatform.rms.Client
             strKeysDef = "";
             strBrowseDef = "";
 
-            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = null;
+            // DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = null;
+            DigitalPlatform.rms.LogicNameItem[] logicnames = null;
 
-        REDO:
+            REDO:
             try
             {
             REDOCREATE:
@@ -1588,8 +1591,6 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 }
 
-
-
                 for (int i = 0; i < logicnames.Length; i++)
                 {
                     string[] cols = new string[2];
@@ -1632,10 +1633,12 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
+            // DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[] logicnames = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem[logicNames.Count];
+            DigitalPlatform.rms.LogicNameItem[] logicnames = new DigitalPlatform.rms.LogicNameItem[logicNames.Count];
             for (int i = 0; i < logicnames.Length; i++)
             {
-                logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
+                // logicnames[i] = new DigitalPlatform.rms.Client.rmsws_localhost.LogicNameItem();
+                logicnames[i] = new DigitalPlatform.rms.LogicNameItem();
                 string[] cols = (string[])logicNames[i];
                 logicnames[i].Lang = cols[1];
                 logicnames[i].Value = cols[0];

@@ -41,6 +41,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using static dp2Circulation.MyForm;
 using DigitalPlatform.Core;
+using DigitalPlatform.Z3950;
 
 namespace dp2Circulation
 {
@@ -158,6 +159,8 @@ namespace dp2Circulation
         /// 为 C# 脚本所准备
         /// </summary>
         public Hashtable ParamTable = new Hashtable();
+
+        public UseCollection UseList = null;
 
         /// <summary>
         /// 快速加拼音对象
@@ -5878,6 +5881,56 @@ out strError);
             catch (Exception ex)
             {
                 strError = "装载本地四角号码文件发生错误 :" + ex.Message;
+                return -1;
+            }
+
+            return 1;
+        }
+
+        public int LoadUseList(bool bAutoDownload,
+    out string strError)
+        {
+            strError = "";
+
+            // 优化
+            if (this.UseList != null)
+                return 0;
+
+            string strFileName = Path.Combine(this.DataDir, "bibuse.xml");
+
+            if (File.Exists(strFileName) == false)
+            {
+                if (bAutoDownload == true)
+                {
+                    string strError1 = "";
+                    int nRet = this.DownloadDataFile(Path.GetFileName(strFileName),    // "isbn.xml"
+                        out strError1);
+                    if (nRet == -1)
+                    {
+                        strError = strError + "\r\n自动下载文件。\r\n" + strError1;
+                        return -1;
+                    }
+                }
+                else
+                {
+                    strError = $"文件 {strFileName} 不存在";
+                    return -1;
+                }
+            }
+
+            try
+            {
+                this.UseList = new UseCollection();
+                var result = this.UseList.Load(strFileName);
+                if (result.Value == -1)
+                {
+                    strError = result.ErrorInfo;
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "装载 bibuse.xml 文件发生错误 :" + ex.Message;
                 return -1;
             }
 

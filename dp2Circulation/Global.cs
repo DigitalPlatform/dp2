@@ -2503,18 +2503,20 @@ namespace dp2Circulation
         /// <param name="list">ListViewControl1 对象</param>
         /// <param name="strID">左边第一列内容</param>
         /// <param name="others">其余列内容</param>
+        /// <param name="insert_pos">插入位置</param>
         /// <returns>新创建的 ListViewItem 对象</returns>
         public static ListViewItem InsertNewLine(
             ListViewControl1 list,
             string strID,
-            string[] others)
+            string[] others,
+            int insert_pos = 0)
         {
             if (others != null)
                 ListViewUtil.EnsureColumns(list, others.Length + 1);
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Insert(0, item);
+            list.Items.Insert(insert_pos, item);
 
             if (others != null)
             {
@@ -2524,8 +2526,7 @@ namespace dp2Circulation
                 }
             }
 
-            list.UpdateItem(0);
-
+            list.UpdateItem(insert_pos);
             return item;
         }
 
@@ -2570,18 +2571,20 @@ namespace dp2Circulation
         /// <param name="list">ListView 对象</param>
         /// <param name="strID">左边第一列内容</param>
         /// <param name="others">其余列内容</param>
+        /// <param name="insert_pos"></param>
         /// <returns>新创建的 ListViewItem 对象</returns>
         public static ListViewItem InsertNewLine(
             ListView list,
             string strID,
-            string[] others)
+            string[] others,
+            int insert_pos = 0)
         {
             if (others != null)
                 ListViewUtil.EnsureColumns(list, others.Length + 1);
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            list.Items.Insert(0, item);
+            list.Items.Insert(insert_pos, item);
 
             if (others != null)
             {

@@ -145,7 +145,7 @@ namespace dp2Circulation
                 }
 
                 searchCompleted?.Invoke(channel, search_result);
-
+                channel._resultCount = search_result.ResultCount;
                 await FetchRecords(channel, presentCompleted);
             }
 

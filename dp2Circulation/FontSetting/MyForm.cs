@@ -1341,7 +1341,7 @@ out string strError)
         // 创建MARC格式记录的浏览格式
         // paramters:
         //      strMARC MARC机内格式
-        public int BuildMarcBrowseText(
+        public static int BuildMarcBrowseText(
             string strMarcSyntax,
             string strMARC,
             out string strBrowseText,
@@ -1360,7 +1360,7 @@ out string strError)
 
             string strFilterFileName = Path.Combine(Program.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
 
-            int nRet = this.PrepareMarcFilter(
+            int nRet = PrepareMarcFilter(
                 host,
                 strFilterFileName,
                 out filter,
@@ -1392,7 +1392,7 @@ out string strError)
             return -1;
         }
 
-        public int PrepareMarcFilter(
+        public static int PrepareMarcFilter(
 FilterHost host,
 string strFilterFileName,
 out BrowseFilterDocument filter,
@@ -1483,7 +1483,6 @@ out string strError)
             }
 
             filter.Assembly = assembly;
-
             return 0;
             ERROR1:
             return -1;

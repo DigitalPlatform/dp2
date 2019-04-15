@@ -27,7 +27,6 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -1267,7 +1266,7 @@ Keys keyData)
             LibraryChannel channel = this.GetChannel(".",
                 ",",
                 GetChannelStyle.GUI,
-                "test:127.0.0.1");  // ?
+                "");  // ? "test:127.0.0.1"
 
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1580,6 +1579,10 @@ Keys keyData)
 
                 if (this.SearchZ3950)
                 {
+                    nRet = Program.MainForm.LoadUseList(true, out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
                     {
                         string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
                         var result = _zsearcher.LoadServer(xmlFileName);
@@ -1590,7 +1593,7 @@ Keys keyData)
 
                     {
                         NormalResult result = await _zsearcher.Search(
-        null,   // UseCollection useList,
+        Program.MainForm.UseList,   // UseCollection useList,
         Program.MainForm.IsbnSplitter,
                         this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,  // 1000
@@ -1601,12 +1604,16 @@ Keys keyData)
                             ListViewItem item = new ListViewItem();
                             _zchannelTable[c] = item;
                             ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
-                            ListViewUtil.ChangeItemText(item, 1, $"present result={r.Value}");
+                            ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
                             this.listView_records.Items.Add(item);
                         },
                         (c, r) =>
                         {
                             ListViewItem item = (ListViewItem)_zchannelTable[c];
+                            FillList(c._fetched,
+                                c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
+                                c.TargetInfo.HostName,
+                                r.Records, item);
                             ListViewUtil.ChangeItemText(item, 1, $"present result={r.Value}");
                         }
                         );
@@ -1681,9 +1688,112 @@ Keys keyData)
             MessageBox.Show(this, strError);
         }
 
+        void FillBrowse(DigitalPlatform.Z3950.RecordCollection records,
+            ListViewItem insert_pos)
+        {
+            int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+            foreach (var record in records)
+            {
+                ListViewItem item = new ListViewItem();
+                ListViewUtil.ChangeItemText(item, 0, "new");
+                insert_pos.ListView.Items.Insert(index, item);
+            }
+        }
+
         // zchannel --> ListViewItem
         Hashtable _zchannelTable = new Hashtable();
         Z3950Searcher _zsearcher = new Z3950Searcher();
+
+        void FillList(int start,
+            Encoding encoding,
+            string strLibraryName,
+            DigitalPlatform.Z3950.RecordCollection records,
+            ListViewItem insert_pos)
+        {
+            int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+
+            int i = 0;
+            foreach (var record in records)
+            {
+                string strRecPath = $"{start + i}@{strLibraryName}";
+
+                // 把byte[]类型的MARC记录转换为机内格式
+                // return:
+                //		-2	MARC格式错
+                //		-1	一般错误
+                //		0	正常
+                int nRet = MarcLoader.ConvertIso2709ToMarcString(record.m_baRecord,
+                    encoding == null ? Encoding.GetEncoding(936) : encoding,
+                    true,
+                    out string strMARC,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    AddErrorLine("记录 " + strRecPath + " 转换为 MARC 机内格式时出错: " + strError);
+                    goto CONTINUE;
+                }
+
+                string strMarcSyntax = "";
+                if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
+                    strMarcSyntax = "unimarc";
+                else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
+                    strMarcSyntax = "usmarc";
+                nRet = MyForm.BuildMarcBrowseText(
+    strMarcSyntax,
+    strMARC,
+    out string strBrowseText,
+    out string strColumnTitles,
+    out strError);
+                if (nRet == -1)
+                {
+                    AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出错: " + strError);
+                    goto CONTINUE;
+                }
+
+                _browseTitleTable[strMarcSyntax] = strColumnTitles;
+
+                // 将书目记录放入 m_biblioTable
+                {
+                    // TODO: MARC 格式转换为 XML 格式
+                    string strXml = "";
+
+                    BiblioInfo info = new BiblioInfo();
+                    info.OldXml = strXml;
+                    info.RecPath = strRecPath;
+                    info.Timestamp = null;
+                    info.Format = strMarcSyntax;
+                    lock (this.m_biblioTable)
+                    {
+                        this.m_biblioTable[strRecPath] = info;
+                    }
+                }
+
+                List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                string[] cols = new string[column_list.Count];
+                column_list.CopyTo(cols);
+
+                ListViewItem item = null;
+                this.Invoke((Action)(() =>
+                {
+                    item = Global.InsertNewLine(
+this.listView_records,
+strRecPath,
+cols,
+index + i);
+                }
+                ));
+
+                if (item != null)
+                    item.BackColor = Color.LightGreen;
+
+                CONTINUE:
+                i++;
+            }
+
+            // Debug.Assert(e.Start == _searchParam._searchCount, "");
+            return;
+        }
+
 
         string GetLocationFilter()
         {
@@ -1937,13 +2047,10 @@ out strError);
 
                     string strXml = record.Data;
 
-                    string strMarcSyntax = "";
-                    string strBrowseText = "";
-                    string strColumnTitles = "";
                     int nRet = BuildBrowseText(strXml,
-    out strBrowseText,
-    out strMarcSyntax,
-    out strColumnTitles,
+    out string strBrowseText,
+    out string strMarcSyntax,
+    out string strColumnTitles,
     out strError);
                     if (nRet == -1)
                     {
@@ -11114,9 +11221,10 @@ MessageBoxDefaultButton.Button1);
         {
             int nBiblioCount = 0;
 
-            int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) => {
+            int nRet = ProcessBiblio((strBiblioRecPath, biblio_dom, biblio_timestamp, item) =>
+            {
                 this.ShowMessage("正在过滤书目记录 " + strBiblioRecPath);
-                
+
                 // 将XML格式转换为MARC格式
                 // 自动从数据记录中获得MARC语法
                 nRet = MarcUtil.Xml2Marc(biblio_dom.OuterXml,
