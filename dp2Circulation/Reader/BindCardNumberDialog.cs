@@ -102,33 +102,35 @@ namespace dp2Circulation
 
         private void button_add14443_Click(object sender, EventArgs e)
         {
-            RfidToolForm dialog = new RfidToolForm();
-            dialog.Text = "选择 ISO14443A 读者卡";
-            dialog.OkCancelVisible = true;
-            dialog.LayoutVertical = false;
-            dialog.AutoCloseDialog = false;
-            dialog.ProtocolFilter = InventoryInfo.ISO14443A;
-
-            // dialog.SelectedPII = auto_select_pii;
-            // dialog.AutoSelectCondition = "auto_or_blankPII";
-            Program.MainForm.AppInfo.LinkFormState(dialog, "select14443TagDialog_formstate");
-            dialog.ShowDialog(this);
-
-            if (dialog.DialogResult == DialogResult.Cancel)
-                return;
-
-            string result = dialog.SelectedID;
-            if (result.StartsWith("uid:"))
-                result = result.Substring("uid:".Length);
-
-            // 查重
-            if (this.listBox1.Items.IndexOf(result) == -1)
+            using (RfidToolForm dialog = new RfidToolForm())
             {
-                this.listBox1.Items.Add(result);
-                this.listBox1.SelectedItem = result;
+                dialog.Text = "选择 ISO14443A 读者卡";
+                dialog.OkCancelVisible = true;
+                dialog.LayoutVertical = false;
+                dialog.AutoCloseDialog = false;
+                dialog.ProtocolFilter = InventoryInfo.ISO14443A;
+
+                // dialog.SelectedPII = auto_select_pii;
+                // dialog.AutoSelectCondition = "auto_or_blankPII";
+                Program.MainForm.AppInfo.LinkFormState(dialog, "select14443TagDialog_formstate");
+                dialog.ShowDialog(this);
+
+                if (dialog.DialogResult == DialogResult.Cancel)
+                    return;
+
+                string result = dialog.SelectedID;
+                if (result.StartsWith("uid:"))
+                    result = result.Substring("uid:".Length);
+
+                // 查重
+                if (this.listBox1.Items.IndexOf(result) == -1)
+                {
+                    this.listBox1.Items.Add(result);
+                    this.listBox1.SelectedItem = result;
+                }
+                else
+                    MessageBox.Show(this, $"号码 {result} 已经存在了");
             }
-            else
-                MessageBox.Show(this, $"号码 {result} 已经存在了");
         }
     }
 }

@@ -5,10 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
-using System.Collections;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
@@ -60,6 +60,8 @@ namespace dp2Circulation
         /// 打开详细窗
         /// </summary>
         public event OpenDetailEventHandler OpenDetail = null;
+
+        public event LoadNextBatchEventHandler LoadNext = null;
 
         /// <summary>
         /// 显示记录的ListView窗
@@ -229,7 +231,7 @@ namespace dp2Circulation
                 BiblioInfo info = m_biblioTable[strPath] as BiblioInfo;
                 if (info == null)
                 {
-                    strError = "路径为 '"+strPath+"' 的事项在 m_biblioTable 中没有找到";
+                    strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
                     goto ERROR1;
                 }
 
@@ -253,7 +255,7 @@ namespace dp2Circulation
                 this.Close();
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -314,7 +316,7 @@ namespace dp2Circulation
             DoOpenDetail(args);
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -325,11 +327,50 @@ namespace dp2Circulation
             this.Close();
             OnLoadDetail();
 #endif
+            if (this.listView_records.SelectedItems.Count == 1)
+            {
+                string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
+
+                if (this.LoadNext != null
+                    && BiblioSearchForm.IsCmdLine(strPath))
+                {
+                    LoadNextBatchEventArgs e1 = new LoadNextBatchEventArgs { All = false };
+                    this.LoadNext(this, e1);
+                    return;
+                }
+            }
+
             button_OK_Click(sender, e);
+        }
+
+        int _currentIndex = -1;
+
+        List<string> _recpaths = new List<string>();
+
+        public List<string> RecPaths
+        {
+            get
+            {
+                return _recpaths;
+            }
+        }
+
+        public void StoreList()
+        {
+            _recpaths.Clear();
+            foreach (ListViewItem item in this.listView_records.Items)
+            {
+                _recpaths.Add(ListViewUtil.GetItemText(item, 0));
+            }
         }
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (this.listView_records.SelectedIndices.Count == 0)
+                _currentIndex = -1;
+            else
+                _currentIndex = this.listView_records.SelectedIndices[0];
+
             if (this.listView_records.SelectedItems.Count > 0)
                 this.button_OK.Enabled = true;
             else
@@ -338,7 +379,6 @@ namespace dp2Circulation
             ListViewUtil.OnSelectedIndexChanged(this.listView_records,
                 0,
                 null);
-
         }
 
         private void BrowseSearchResultForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -366,6 +406,135 @@ namespace dp2Circulation
             ListViewUtil.OnColumnClick(this.listView_records, e);
         }
 
+        private void listView_records_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            int nSelectedItemCount = this.listView_records.SelectedItems.Count;
+            string strFirstColumn = "";
+            if (nSelectedItemCount > 0)
+            {
+                strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+            }
+
+            if (nSelectedItemCount == 1 && BiblioSearchForm.IsCmdLine(strFirstColumn))
+            {
+                CommandPopupMenu(sender, e);
+                return;
+            }
+        }
+
+        // 浏览行 为命令时候，应当出现的弹出菜单
+        private void CommandPopupMenu(object sender, MouseEventArgs e)
+        {
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            int nSelectedItemCount = this.listView_records.SelectedItems.Count;
+            string strFirstColumn = "";
+            if (nSelectedItemCount > 0)
+            {
+                strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+            }
+
+            menuItem = new MenuItem("载入下一批浏览行(&N)");
+            menuItem.DefaultItem = true;
+            menuItem.Click += new System.EventHandler(this.menu_loadNextBatch_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("载入余下全部浏览行(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_loadRestAllBatch_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+#if NO
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+#endif
+
+            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        void menu_loadNextBatch_Click(object sender, EventArgs e)
+        {
+            if (this.LoadNext != null)
+            {
+                LoadNextBatchEventArgs e1 = new LoadNextBatchEventArgs { All = false };
+                this.LoadNext(this, e1);
+            }
+        }
+
+        void menu_loadRestAllBatch_Click(object sender, EventArgs e)
+        {
+            if (this.LoadNext != null)
+            {
+                LoadNextBatchEventArgs e1 = new LoadNextBatchEventArgs { All = true };
+                this.LoadNext(this, e1);
+            }
+        }
+
+#if NO
+        public string GetPrevNextRecPath(string strStyle)
+        {
+            REDO:
+            ListViewItem item = BiblioSearchForm.MoveSelectedItem(this.listView_records, strStyle);
+            if (item == null)
+                return "";
+            string text = ListViewUtil.GetItemText(item, 0);
+            // 遇到 Z39.50 命令行，要跳过去
+            if (BiblioSearchForm.IsCmdLine(text))
+                goto REDO;
+            return text;
+        }
+#endif
+
+        public string GetPrevNextRecPath(string strStyle)
+        {
+            if (_recpaths.Count == 0)
+                return "";
+
+            while(true)
+            {
+                if (strStyle == "prev")
+                    _currentIndex--;
+                else
+                    _currentIndex++;
+                if (_currentIndex >= _recpaths.Count
+                    || _currentIndex < 0)
+                    return "";
+                string recpath = _recpaths[_currentIndex];
+                // 遇到 Z39.50 命令行，要跳过去
+                if (BiblioSearchForm.IsCmdLine(recpath) == false)
+                    return recpath;
+            }
+        }
+        public BiblioInfo GetBiblioInfo(string strPath)
+        {
+            string strError = "";
+            if (this.m_biblioTable == null)
+            {
+                strError = "m_biblioTable == null";
+                throw new Exception(strError);
+            }
+
+            return this.m_biblioTable[strPath] as BiblioInfo;
+        }
+    }
+
+    public delegate void LoadNextBatchEventHandler(object sender,
+LoadNextBatchEventArgs e);
+
+    /// <summary>
+    /// 打开详细窗事件的参数
+    /// </summary>
+    public class LoadNextBatchEventArgs : EventArgs
+    {
+        // [in] 是否要获取余下的全部记录
+        public bool All { get; set; }
     }
 
     /// <summary>

@@ -1203,7 +1203,7 @@ Keys keyData)
             if (bOutputKeyCount == true
     && bOutputKeyID == true)
             {
-                strError = "bOutputKeyCount和bOutputKeyID不能同时为true";
+                strError = "bOutputKeyCount 和 bOutputKeyID 不能同时为 true";
                 goto ERROR1;
             }
 
@@ -1602,19 +1602,22 @@ Keys keyData)
                         (c, r) =>
                         {
                             ListViewItem item = new ListViewItem();
+                            item.Tag = c;
                             _zchannelTable[c] = item;
-                            ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
-                            ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
+                            //ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
+                            //ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
                             this.listView_records.Items.Add(item);
+                            UpdateCommandLine(item, c, r);
                         },
                         (c, r) =>
                         {
                             ListViewItem item = (ListViewItem)_zchannelTable[c];
-                            FillList(c._fetched,
-                                c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
-                                c.TargetInfo.HostName,
-                                r.Records, item);
-                            ListViewUtil.ChangeItemText(item, 1, $"present result={r.Value}");
+                            if (r.Records != null)
+                                FillList(c._fetched,
+                                    c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
+                                    c.TargetInfo.HostName,
+                                    r.Records, item);
+                            UpdateCommandLine(item, c, r);
                         }
                         );
                     }
@@ -1688,6 +1691,7 @@ Keys keyData)
             MessageBox.Show(this, strError);
         }
 
+#if NO
         void FillBrowse(DigitalPlatform.Z3950.RecordCollection records,
             ListViewItem insert_pos)
         {
@@ -1699,11 +1703,13 @@ Keys keyData)
                 insert_pos.ListView.Items.Insert(index, item);
             }
         }
+#endif
 
         // zchannel --> ListViewItem
         Hashtable _zchannelTable = new Hashtable();
         Z3950Searcher _zsearcher = new Z3950Searcher();
 
+        // (Z39.50)填入浏览记录
         void FillList(int start,
             Encoding encoding,
             string strLibraryName,
@@ -1715,7 +1721,7 @@ Keys keyData)
             int i = 0;
             foreach (var record in records)
             {
-                string strRecPath = $"{start + i}@{strLibraryName}";
+                string strRecPath = $"{start + i + 1}@{strLibraryName}";
 
                 // 把byte[]类型的MARC记录转换为机内格式
                 // return:
@@ -1755,13 +1761,23 @@ Keys keyData)
                 // 将书目记录放入 m_biblioTable
                 {
                     // TODO: MARC 格式转换为 XML 格式
-                    string strXml = "";
+                    nRet = MarcUtil.Marc2Xml(strMARC,
+                        strMarcSyntax,
+                        out string strXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        AddErrorLine("记录 " + strRecPath + " 转换为 XML 格式时出错: " + strError);
+                        goto CONTINUE;
+                    }
 
-                    BiblioInfo info = new BiblioInfo();
-                    info.OldXml = strXml;
-                    info.RecPath = strRecPath;
-                    info.Timestamp = null;
-                    info.Format = strMarcSyntax;
+                    BiblioInfo info = new BiblioInfo
+                    {
+                        OldXml = strXml,
+                        RecPath = strRecPath,
+                        Timestamp = null,
+                        Format = strMarcSyntax
+                    };
                     lock (this.m_biblioTable)
                     {
                         this.m_biblioTable[strRecPath] = info;
@@ -2237,6 +2253,11 @@ out strError);
             return "规范窗";
         }
 
+        public static bool IsCmdLine(string strFirstColumn)
+        {
+            return strFirstColumn.StartsWith("Z39.50:");
+        }
+
         private async void listView_records_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
@@ -2249,49 +2270,29 @@ out strError);
 
             string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
 
-            if (String.IsNullOrEmpty(strPath) == false)
+            if (IsCmdLine(strPath))
             {
-#if NO
-                EntityForm form = null;
-                EntityForm exist_fixed = Program.MainForm.FixedEntityForm;
+                menu_loadNextBatch_Click(sender, e);
+                return;
+            }
 
-                if (this.LoadToExistDetailWindow == true)
+            try
+            {
+                if (String.IsNullOrEmpty(strPath) == false)
                 {
-                    form = MainForm.GetTopChildWindow<EntityForm>();
-                    if (form != null)
-                        Global.Activate(form);
-
-                }
-
-                if (form == null)
-                {
-                    form = new EntityForm();
-
-                    form.MdiParent = Program.MainForm;
-
-                    form.MainForm = Program.MainForm;
-                    form.Show();
-                    if (strStyle == "fixed")
-                        Program.MainForm.SetFixedPosition(form, "left");
-                    else
+                    if (this._dbType == "biblio")
                     {
-                        // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
-                        if (exist_fixed != null)
+                        EntityForm form = OpenEntityForm(true, false);
+                        Debug.Assert(form != null, "");
+
+                        if (strPath.IndexOf("@") == -1)
                         {
-                            Program.MainForm.SetFixedPosition(form, "right");
+                            form.CloseBrowseWindow();
+                            form.LoadRecordOld(strPath, "", true);
                         }
-                    }
-                }
-#endif
-                if (this._dbType == "biblio")
-                {
-                    EntityForm form = OpenEntityForm(true, false);
-                    Debug.Assert(form != null, "");
-
-                    if (strPath.IndexOf("@") == -1)
-                        form.LoadRecordOld(strPath, "", true);
-                    else
-                    {
+                        else
+                        {
+#if NO
                         // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
                         if (this.m_biblioTable == null)
                         {
@@ -2305,67 +2306,109 @@ out strError);
                             strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
                             goto ERROR1;
                         }
+#endif
+                            var info = GetBiblioInfo(strPath);
+                            if (info == null)
+                            {
+                                strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                                goto ERROR1;
+                            }
 
-                        int nRet = form.LoadRecord(info,
-                            true,
-                            out strError);
-                        if (nRet != 1)
+                            form.CloseBrowseWindow();
+                            int nRet = form.LoadRecord(info,
+                                true,
+                                out strError);
+                            if (nRet != 1)
+                                goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        AuthorityForm form = OpenAuthorityForm(true, false);
+                        Debug.Assert(form != null, "");
+
+                        if (strPath.IndexOf("@") == -1)
+                            form.LoadRecordOld(strPath, "", true);
+                        else
+                        {
+#if NO
+                        // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
+                        if (this.m_biblioTable == null)
+                        {
+                            strError = "m_biblioTable == null";
                             goto ERROR1;
+                        }
+
+                        BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
+                        if (info == null)
+                        {
+                            strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                            goto ERROR1;
+                        }
+#endif
+                            var info = GetBiblioInfo(strPath);
+                            if (info == null)
+                            {
+                                strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                                goto ERROR1;
+                            }
+
+                            int nRet = form.LoadRecord(info,
+                                true,
+                                out strError);
+                            if (nRet != 1)
+                                goto ERROR1;
+                        }
                     }
                 }
                 else
                 {
-                    AuthorityForm form = OpenAuthorityForm(true, false);
-                    Debug.Assert(form != null, "");
+                    ItemQueryParam query = (ItemQueryParam)this.listView_records.SelectedItems[0].Tag;
+                    Debug.Assert(query != null, "");
 
-                    if (strPath.IndexOf("@") == -1)
-                        form.LoadRecordOld(strPath, "", true);
-                    else
+                    this.textBox_queryWord.Text = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
+                    if (query != null)
                     {
-                        // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
-                        if (this.m_biblioTable == null)
-                        {
-                            strError = "m_biblioTable == null";
-                            goto ERROR1;
-                        }
-
-                        BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
-                        if (info == null)
-                        {
-                            strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
-                            goto ERROR1;
-                        }
-
-                        int nRet = form.LoadRecord(info,
-                            true,
-                            out strError);
-                        if (nRet != 1)
-                            goto ERROR1;
+                        this.checkedComboBox_biblioDbNames.Text = query.DbNames;
+                        this.comboBox_from.Text = query.From;
                     }
+
+                    if (this.textBox_queryWord.Text == "")
+                        this.comboBox_matchStyle.Text = "空值";
+                    else
+                        this.comboBox_matchStyle.Text = "精确一致";
+
+                    await DoSearch(false, false, null);
                 }
             }
-            else
+            catch(Exception ex)
             {
-                ItemQueryParam query = (ItemQueryParam)this.listView_records.SelectedItems[0].Tag;
-                Debug.Assert(query != null, "");
-
-                this.textBox_queryWord.Text = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
-                if (query != null)
-                {
-                    this.checkedComboBox_biblioDbNames.Text = query.DbNames;
-                    this.comboBox_from.Text = query.From;
-                }
-
-                if (this.textBox_queryWord.Text == "")
-                    this.comboBox_matchStyle.Text = "空值";
-                else
-                    this.comboBox_matchStyle.Text = "精确一致";
-
-                await DoSearch(false, false, null);
+                strError = ex.Message;
+                goto ERROR1;
             }
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        public BiblioInfo GetBiblioInfo(string strPath)
+        {
+            string strError = "";
+            // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
+            if (this.m_biblioTable == null)
+            {
+                strError = "m_biblioTable == null";
+                throw new Exception(strError);
+            }
+
+            return this.m_biblioTable[strPath] as BiblioInfo;
+            /*
+            if (info == null)
+            {
+                strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                goto ERROR1;
+            }
+            */
         }
 
         // 装入左侧固定的种册窗
@@ -2580,6 +2623,134 @@ out strError);
             }
         }
 
+        // 浏览行 为命令时候，应当出现的弹出菜单
+        private void CommandPopupMenu(object sender, MouseEventArgs e)
+        {
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            int nSelectedItemCount = this.listView_records.SelectedItems.Count;
+            string strFirstColumn = "";
+            if (nSelectedItemCount > 0)
+            {
+                strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+            }
+
+            menuItem = new MenuItem("载入下一批浏览行(&N)");
+            menuItem.DefaultItem = true;
+            menuItem.Click += new System.EventHandler(this.menu_loadNextBatch_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("载入余下全部浏览行(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_loadRestAllBatch_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+#if NO
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+#endif
+
+            contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        async Task LoadNextBatch(bool all)
+        {
+            if (this.listView_records.SelectedItems.Count != 1)
+                return;
+
+            _zsearcher.InSearching = true;
+            this.EnableControlsInSearching(false);
+            stop.OnStop += OnZ3950LoadStop;
+            stop.Initial("正在装载 Z39.50 检索内容 ...");
+            stop.BeginLoop();
+            try
+            {
+                ListViewItem item = this.listView_records.SelectedItems[0];
+                ZClientChannel channel = (ZClientChannel)item.Tag;
+
+                if (channel._fetched >= channel._resultCount)
+                {
+                    this.ShowMessage("已经全部载入", "yellow", true);
+                    return;
+                }
+
+                while (channel._fetched < channel._resultCount)
+                {
+                    if (_zsearcher.InSearching == false)
+                        break;
+
+                    stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+
+                    var present_result = await Z3950Searcher.FetchRecords(channel,
+                        all ? 50 : 10);
+
+                    {
+                        if (present_result.Records != null)
+                            FillList(channel._fetched,
+                channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
+                channel.TargetInfo.HostName,
+                present_result.Records, item);
+                        UpdateCommandLine(item, channel, present_result);
+                    }
+
+                    if (present_result.Value == -1)
+                        break;
+                    else
+                        channel._fetched += present_result.Records.Count;
+
+                    if (all == false)
+                        break;
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= OnZ3950LoadStop;
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControlsInSearching(true);
+                _zsearcher.InSearching = false;
+            }
+        }
+
+        private void OnZ3950LoadStop(object sender, StopEventArgs e)
+        {
+            _zsearcher.GraceStop();
+        }
+
+        async void menu_loadNextBatch_Click(object sender, EventArgs e)
+        {
+            await LoadNextBatch(false);
+        }
+
+        public static void UpdateCommandLine(ListViewItem item,
+    ZClientChannel c,
+    DigitalPlatform.Z3950.ZClient.SearchResult r)
+        {
+            ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
+            if (r.Value == -1)
+                ListViewUtil.ChangeItemText(item, 1, $"检索出错 {r.ErrorInfo}");
+            else
+                ListViewUtil.ChangeItemText(item, 1, $"检索命中 {r.ResultCount} 条");
+        }
+
+        public static void UpdateCommandLine(ListViewItem item,
+            ZClientChannel c,
+            DigitalPlatform.Z3950.ZClient.PresentResult r)
+        {
+            if (r.Value == -1)
+                ListViewUtil.ChangeItemText(item, 1, $"Present 出错 {r.ErrorInfo}");
+            else
+                ListViewUtil.ChangeItemText(item, 1, $"检索命中 {c._resultCount} 条，已装入 {c._fetched + r.Records.Count}");
+        }
+
+        async void menu_loadRestAllBatch_Click(object sender, EventArgs e)
+        {
+            await LoadNextBatch(true);
+        }
+
         // listview上的右鼠标键菜单
         private void listView_records_MouseUp(object sender, MouseEventArgs e)
         {
@@ -2594,6 +2765,12 @@ out strError);
             if (nSelectedItemCount > 0)
             {
                 strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
+            }
+
+            if (nSelectedItemCount == 1 && IsCmdLine(strFirstColumn))
+            {
+                CommandPopupMenu(sender, e);
+                return;
             }
 
             menuItem = new MenuItem("装入已打开的种册窗(&E)");
@@ -11115,31 +11292,33 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 前移或后移 Selection Item
-        public ListViewItem MoveSelectedItem(string strStyle)
+        public static ListViewItem MoveSelectedItem(
+            ListView list,
+            string strStyle)
         {
-            if (this.listView_records.Items.Count == 0)
+            if (list.Items.Count == 0)
                 return null;
             ListViewItem item = null;
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (list.SelectedItems.Count == 0)
             {
-                item = this.listView_records.Items[0];
+                item = list.Items[0];
                 item.Selected = true;
                 return item;
             }
 
-            item = this.listView_records.SelectedItems[0];
-            if (this.listView_records.SelectedItems.Count > 1)
+            item = list.SelectedItems[0];
+            if (list.SelectedItems.Count > 1)
                 ListViewUtil.SelectLine(item, true);
 
             bool bRet = ListViewUtil.MoveSelectedUpDown(
-                this.listView_records,
+                list,
                 strStyle == "prev" ? true : false);
             if (bRet == false)
                 return null;
-            return this.listView_records.SelectedItems[0];
+            return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11208,7 +11387,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

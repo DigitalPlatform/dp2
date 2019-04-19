@@ -19,6 +19,20 @@ namespace dp2Circulation
     /// </summary>
     public class Z3950Searcher
     {
+        bool _searching = false;
+
+        public bool InSearching
+        {
+            get
+            {
+                return _searching;
+            }
+            set
+            {
+                _searching = value;
+            }
+        }
+
         // 通道集合
         List<ZClientChannel> _channels = new List<ZClientChannel>();
 
@@ -59,6 +73,11 @@ namespace dp2Circulation
             return new NormalResult();
         }
 
+        public void GraceStop()
+        {
+            this._searching = false;
+        }
+
         public delegate void delegate_searchCompleted(ZClientChannel channel, SearchResult result);
         public delegate void delegate_presentCompleted(ZClientChannel channel, PresentResult result);
 
@@ -73,117 +92,116 @@ namespace dp2Circulation
             delegate_searchCompleted searchCompleted,
             delegate_presentCompleted presentCompleted)
         {
-            foreach (ZClientChannel channel in _channels)
+            _searching = true;
+            try
             {
-                var _targetInfo = channel.TargetInfo;
-                IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo
+                foreach (ZClientChannel channel in _channels)
                 {
-                    IsbnSplitter = isbnSplitter,
-                    ConvertStyle =
-    (_targetInfo.IsbnAddHyphen == true ? "addhyphen," : "")
-    + (_targetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
-    + (_targetInfo.IsbnForce10 == true ? "force10," : "")
-    + (_targetInfo.IsbnForce13 == true ? "force13," : "")
-    + (_targetInfo.IsbnWild == true ? "wild," : "")
-    // TODO:
-    + (_targetInfo.IssnForce8 == true ? "issnforce8," : "")
-                };
-
-                string strQueryString = "";
-                {
-                    // 创建只包含一个检索词的简单 XML 检索式
-                    // 注：这种 XML 检索式不是 Z39.50 函数库必需的。只是用它来方便构造 API 检索式的过程
-                    string strQueryXml = BuildQueryXml(strQueryWord, strFromStyle);
-                    // 将 XML 检索式变化为 API 检索式
-                    var result = ZClient.ConvertQueryString(
-                        useList,
-                        strQueryXml,
-                        isbnconvertinfo,
-                        out strQueryString);
-                    if (result.Value == -1)
+                    if (_searching == false)
+                        break;
+                    var _targetInfo = channel.TargetInfo;
+                    IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo
                     {
-                        return new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
+                        IsbnSplitter = isbnSplitter,
+                        ConvertStyle =
+        (_targetInfo.IsbnAddHyphen == true ? "addhyphen," : "")
+        + (_targetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
+        + (_targetInfo.IsbnForce10 == true ? "force10," : "")
+        + (_targetInfo.IsbnForce13 == true ? "force13," : "")
+        + (_targetInfo.IsbnWild == true ? "wild," : "")
+        // TODO:
+        + (_targetInfo.IssnForce8 == true ? "issnforce8," : "")
+                    };
+
+                    string strQueryString = "";
+                    {
+                        // 创建只包含一个检索词的简单 XML 检索式
+                        // 注：这种 XML 检索式不是 Z39.50 函数库必需的。只是用它来方便构造 API 检索式的过程
+                        string strQueryXml = BuildQueryXml(strQueryWord, strFromStyle);
+                        // 将 XML 检索式变化为 API 检索式
+                        var result = ZClient.ConvertQueryString(
+                            useList,
+                            strQueryXml,
+                            isbnconvertinfo,
+                            out strQueryString);
+                        if (result.Value == -1)
+                        {
+                            searchCompleted?.Invoke(channel, new SearchResult(result));
+                            return new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
+                        }
                     }
 
-                }
-
-                REDO_SEARCH:
-                {
-                    // return Value:
-                    //      -1  出错
-                    //      0   成功
-                    //      1   调用前已经是初始化过的状态，本次没有进行初始化
-                    // InitialResult result = _zclient.TryInitialize(_targetInfo).GetAwaiter().GetResult();
-                    // InitialResult result = _zclient.TryInitialize(_targetInfo).Result;
-                    InitialResult result = await channel.ZClient.TryInitialize(_targetInfo);
-                    if (result.Value == -1)
+                    REDO_SEARCH:
                     {
-                        return new NormalResult { Value = -1, ErrorInfo = "Initialize error: " + result.ErrorInfo };
+                        // return Value:
+                        //      -1  出错
+                        //      0   成功
+                        //      1   调用前已经是初始化过的状态，本次没有进行初始化
+                        // InitialResult result = _zclient.TryInitialize(_targetInfo).GetAwaiter().GetResult();
+                        // InitialResult result = _zclient.TryInitialize(_targetInfo).Result;
+                        InitialResult result = await channel.ZClient.TryInitialize(_targetInfo);
+                        if (result.Value == -1)
+                        {
+                            searchCompleted?.Invoke(channel, new SearchResult(result));
+                            return new NormalResult { Value = -1, ErrorInfo = "Initialize error: " + result.ErrorInfo };
+                        }
                     }
-                }
 
-                // result.Value:
-                //		-1	error
-                //		0	fail
-                //		1	succeed
-                // result.ResultCount:
-                //      命中结果集内记录条数 (当 result.Value 为 1 时)
-                SearchResult search_result = await channel.ZClient.Search(
-        strQueryString,
-        _targetInfo.DefaultQueryTermEncoding,
-        _targetInfo.DbNames,
-        _targetInfo.PreferredRecordSyntax,
-        "default");
-                if (search_result.Value == -1 || search_result.Value == 0)
-                {
-                    if (search_result.ErrorCode == "ConnectionAborted")
+                    // result.Value:
+                    //		-1	error
+                    //		0	fail
+                    //		1	succeed
+                    // result.ResultCount:
+                    //      命中结果集内记录条数 (当 result.Value 为 1 时)
+                    SearchResult search_result = await channel.ZClient.Search(
+            strQueryString,
+            _targetInfo.DefaultQueryTermEncoding,
+            _targetInfo.DbNames,
+            _targetInfo.PreferredRecordSyntax,
+            "default");
+                    if (search_result.Value == -1 || search_result.Value == 0)
                     {
-                        // 自动重试检索
-                        goto REDO_SEARCH;
+                        if (search_result.ErrorCode == "ConnectionAborted")
+                        {
+                            // 自动重试检索
+                            goto REDO_SEARCH;
+                        }
+                        // TODO: 显示出错
                     }
-                    // TODO: 显示出错
+
+                    searchCompleted?.Invoke(channel, search_result);
+                    channel._resultCount = search_result.ResultCount;
+                    var present_result = await FetchRecords(channel, 10);
+
+                    presentCompleted?.Invoke(channel, present_result);
+
+                    if (present_result.Value != -1)
+                        channel._fetched += present_result.Records.Count;
                 }
 
-                searchCompleted?.Invoke(channel, search_result);
-                channel._resultCount = search_result.ResultCount;
-                await FetchRecords(channel, presentCompleted);
+                return new NormalResult();
             }
-
-            return new NormalResult();
+            finally
+            {
+                _searching = false;
+            }
         }
 
-        async Task FetchRecords(ZClientChannel channel,
-            delegate_presentCompleted presentCompleted)
+        public static async Task<PresentResult> FetchRecords(ZClientChannel channel,
+            long count)
         {
             if (channel._resultCount - channel._fetched > 0)
             {
-                PresentResult present_result = await channel.ZClient.Present(
+                return await channel.ZClient.Present(
                     "default",
                     channel._fetched,
-                    Math.Min((int)channel._resultCount - channel._fetched, 10),
+                    Math.Min((int)channel._resultCount - channel._fetched, (int)count),
                     10,
                     "F",
                     channel.TargetInfo.PreferredRecordSyntax);
-                presentCompleted?.Invoke(channel, present_result);
-
-                if (present_result.Value != -1)
-                    channel._fetched += present_result.Records.Count;
-
-#if NO
-                if (present_result.Value == -1)
-                {
-                    this.Invoke((Action)(() => MessageBox.Show(this, present_result.ToString())));
-                }
-                else
-                {
-                    // 把 MARC 记录显示出来
-                    AppendMarcRecords(present_result.Records,
-                        _zclient.ForcedRecordsEncoding == null ? targetinfo.DefaultRecordsEncoding : _zclient.ForcedRecordsEncoding,
-                        _fetched);
-                    channel._fetched += present_result.Records.Count;
-                }
-#endif
             }
+
+            return new PresentResult { Value = -1, ErrorInfo = "已经获取完成" };
         }
 
 
