@@ -145,13 +145,21 @@ namespace DigitalPlatform.CommonControl
 
         public CheckedComboBox()
         {
-            this.m_bInitial = true;
-            InitializeComponent();
-            this.m_bInitial = false;
+            try
+            {
+                this.m_bInitial = true;
+                InitializeComponent();
+                this.m_bInitial = false;
 
-            m_oldTextBoxLocation = this.textBox_text.Location;
-
-            OnTextBoxHeightChanged();   // 初始化高度
+                m_oldTextBoxLocation = this.textBox_text.Location;
+                OnTextBoxHeightChanged();   // 初始化高度
+            }
+            catch (Exception ex)
+            {
+                // 2019/4/19
+                //if (this.DesignMode == false)
+                //    throw ex;
+            }
         }
 
 #if NO
@@ -516,14 +524,14 @@ namespace DigitalPlatform.CommonControl
         }
 
         public new Control.ControlCollection Controls
-        { 
+        {
             get
             {
                 if (this.m_bInitial == false)
                     return new ControlCollection(this);
                 else
                     return base.Controls;
-            } 
+            }
         }
 
         private void CheckedComboBox_MouseClick(object sender, MouseEventArgs e)

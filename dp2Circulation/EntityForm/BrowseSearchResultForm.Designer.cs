@@ -1,4 +1,4 @@
-namespace dp2Circulation
+锘縩amespace dp2Circulation
 {
     partial class BrowseSearchResultForm
     {
@@ -40,11 +40,12 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(334, 243);
+            this.button_Cancel.Location = new System.Drawing.Point(501, 364);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 22);
+            this.button_Cancel.Size = new System.Drawing.Size(112, 33);
             this.button_Cancel.TabIndex = 5;
-            this.button_Cancel.Text = "取消";
+            this.button_Cancel.Text = "鍙栨秷";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
@@ -52,11 +53,12 @@ namespace dp2Circulation
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
-            this.button_OK.Location = new System.Drawing.Point(254, 243);
+            this.button_OK.Location = new System.Drawing.Point(381, 364);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 22);
+            this.button_OK.Size = new System.Drawing.Size(112, 33);
             this.button_OK.TabIndex = 4;
-            this.button_OK.Text = "确定";
+            this.button_OK.Text = "纭畾";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -70,19 +72,21 @@ namespace dp2Circulation
             this.columnHeader2});
             this.listView_records.FullRowSelect = true;
             this.listView_records.HideSelection = false;
-            this.listView_records.Location = new System.Drawing.Point(10, 10);
+            this.listView_records.Location = new System.Drawing.Point(15, 15);
+            this.listView_records.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.listView_records.Name = "listView_records";
-            this.listView_records.Size = new System.Drawing.Size(401, 227);
+            this.listView_records.Size = new System.Drawing.Size(600, 338);
             this.listView_records.TabIndex = 3;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
             this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
             this.listView_records.DoubleClick += new System.EventHandler(this.listView_records_DoubleClick);
+            this.listView_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_records_MouseUp);
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "记录路径";
+            this.columnHeader1.Text = "璁板綍璺緞";
             this.columnHeader1.Width = 150;
             // 
             // columnHeader2
@@ -93,15 +97,14 @@ namespace dp2Circulation
             // BrowseSearchResultForm
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(419, 276);
+            this.ClientSize = new System.Drawing.Size(628, 414);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.listView_records);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "BrowseSearchResultForm";
             this.ShowInTaskbar = false;
             this.Text = "BrowseSearchResultForm";

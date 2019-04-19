@@ -1,15 +1,15 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
-
-using DigitalPlatform.GUI;
+using System.Collections;
 using System.Xml;
 using System.IO;
+
+using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Collections;
 using DigitalPlatform.dp2.Statis;
 
 namespace dp2Catalog
@@ -33,7 +33,7 @@ namespace dp2Catalog
                 string strIndex = (string)param_table["index"];
                 if (Int32.TryParse(strIndex, out index) == false)
                 {
-                    strError = "strPath ²ÎÊıÖµ '" + strPathParam + "' ¸ñÊ½´íÎó¡£index Ó¦¸ÃÎª´¿Êı×Ö";
+                    strError = "strPath å‚æ•°å€¼ '" + strPathParam + "' æ ¼å¼é”™è¯¯ã€‚index åº”è¯¥ä¸ºçº¯æ•°å­—";
                     return -1;
                 }
 
@@ -49,7 +49,7 @@ namespace dp2Catalog
             return 0;
         }
 
-        // ²»Ö§³ÖÒì²½µ÷ÓÃ
+        // ä¸æ”¯æŒå¼‚æ­¥è°ƒç”¨
         public static void WriteHtml(WebBrowser webBrowser,
     string strHtml)
         {
@@ -65,12 +65,12 @@ namespace dp2Catalog
             // doc = doc.OpenNew(true);
             doc.Write(strHtml);
 
-            // ±£³ÖÄ©ĞĞ¿É¼û
+            // ä¿æŒæœ«è¡Œå¯è§
             // ScrollToEnd(webBrowser);
         }
 
-        // °Ñ XML ×Ö·û´®×°ÈëÒ»¸öWebä¯ÀÀÆ÷¿Ø¼ş
-        // Õâ¸öº¯ÊıÄÜ¹»ÊÊÓ¦"<root ... />"ÕâÑùµÄÃ»ÓĞprologµÄXMLÄÚÈİ
+        // æŠŠ XML å­—ç¬¦ä¸²è£…å…¥ä¸€ä¸ªWebæµè§ˆå™¨æ§ä»¶
+        // è¿™ä¸ªå‡½æ•°èƒ½å¤Ÿé€‚åº”"<root ... />"è¿™æ ·çš„æ²¡æœ‰prologçš„XMLå†…å®¹
         public static void SetXmlToWebbrowser(WebBrowser webBrowser,
             string strDataDir,
             string strTempFileType,
@@ -97,7 +97,7 @@ namespace dp2Catalog
     false,	// append
     System.Text.Encoding.UTF8))
                 {
-                    sw.Write("XMLÄÚÈİ×°ÈëDOMÊ±³ö´í: " + ex.Message + "\r\n\r\n" + strXml);
+                    sw.Write("XMLå†…å®¹è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message + "\r\n\r\n" + strXml);
                 }
                 webBrowser.Navigate(strTargetFileName);
                 return;
@@ -139,11 +139,11 @@ namespace dp2Catalog
 
             if (String.IsNullOrEmpty(strDataDir) == true)
             {
-                webBrowser.DocumentText = "(¿Õ)";
+                webBrowser.DocumentText = "(ç©º)";
                 return;
             }
             string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
-            string strHtml = "<html><body><img src='" + strImageUrl + "' width='64' height='64' alt='¿Õ'></body></html>";
+            string strHtml = "<html><body><img src='" + strImageUrl + "' width='64' height='64' alt='ç©º'></body></html>";
             webBrowser.DocumentText = strHtml;
             /*
             string strTempFilename = strDataDir + "\\temp_blank_page.html";
@@ -173,7 +173,7 @@ namespace dp2Catalog
             webBrowser.Navigate(strTempFilename);
         }
 
-        // °ÑListViewItemÎÄ±¾ÄÚÈİ¹¹ÔìÎªtab×Ö·û·Ö¸îµÄ×Ö·û´®
+        // æŠŠListViewItemæ–‡æœ¬å†…å®¹æ„é€ ä¸ºtabå­—ç¬¦åˆ†å‰²çš„å­—ç¬¦ä¸²
         public static string BuildLine(ListViewItem item)
         {
             string strLine = "";
@@ -187,10 +187,10 @@ namespace dp2Catalog
             return strLine;
         }
 
-        // ¸ù¾İ×Ö·û´®¹¹ÔìListViewItem¡£
-        // ×Ö·û´®µÄ¸ñÊ½Îª\t¼ä¸ôµÄ
+        // æ ¹æ®å­—ç¬¦ä¸²æ„é€ ListViewItemã€‚
+        // å­—ç¬¦ä¸²çš„æ ¼å¼ä¸º\té—´éš”çš„
         // parameters:
-        //      list    ¿ÉÒÔÎªnull¡£Èç¹ûÎªnull£¬¾ÍÃ»ÓĞ×Ô¶¯À©Õ¹ÁĞ±êÌâÊıÄ¿µÄ¹¦ÄÜ
+        //      list    å¯ä»¥ä¸ºnullã€‚å¦‚æœä¸ºnullï¼Œå°±æ²¡æœ‰è‡ªåŠ¨æ‰©å±•åˆ—æ ‡é¢˜æ•°ç›®çš„åŠŸèƒ½
         public static ListViewItem BuildListViewItem(
             ListView list,
             string strLine)
@@ -201,7 +201,7 @@ namespace dp2Catalog
             {
                 ListViewUtil.ChangeItemText(item, i, parts[i]);
 
-                // È·±£ÁĞ±êÌâÊıÄ¿¹»
+                // ç¡®ä¿åˆ—æ ‡é¢˜æ•°ç›®å¤Ÿ
                 if (list != null)
                     ListViewUtil.EnsureColumns(list, parts.Length, 100);
             }
@@ -209,9 +209,9 @@ namespace dp2Catalog
             return item;
         }
 
-        // ´Ó¼ôÌù°åÖĞPasteĞĞ²åÈëµ½ListViewÖĞµ±Ç°Ñ¡¶¨µÄÎ»ÖÃ
+        // ä»å‰ªè´´æ¿ä¸­Pasteè¡Œæ’å…¥åˆ°ListViewä¸­å½“å‰é€‰å®šçš„ä½ç½®
         // parameters:
-        //      bInsertBefore   ÊÇ·ñÇ°²å? Èç¹û==trueÇ°²å£¬·ñÔòºó²å
+        //      bInsertBefore   æ˜¯å¦å‰æ’? å¦‚æœ==trueå‰æ’ï¼Œå¦åˆ™åæ’
         public static void PasteLinesFromClipboard(Form form,
             string strFormatList,
             ListView list,
@@ -221,18 +221,18 @@ namespace dp2Catalog
             if (ido.GetDataPresent(DataFormats.UnicodeText) == false
                 && ido.GetDataPresent(typeof(MemLineCollection)) == false)
             {
-                MessageBox.Show(form, "¼ôÌù°åÖĞÃ»ÓĞÄÚÈİ");
+                MessageBox.Show(form, "å‰ªè´´æ¿ä¸­æ²¡æœ‰å†…å®¹");
                 return;
             }
 
-            // ÓÅÏÈÊ¹ÓÃ×¨ÓÃ¸ñÊ½
+            // ä¼˜å…ˆä½¿ç”¨ä¸“ç”¨æ ¼å¼
             if (ido.GetDataPresent(typeof(MemLineCollection)) == true)
             {
                 MemLineCollection mem_lines = (MemLineCollection)ido.GetData(typeof(MemLineCollection));
 
                 if (StringUtil.IsInList(mem_lines.Format, strFormatList) == false)
                 {
-                    MessageBox.Show(form, "¼ôÌù°åÖĞµÄÄÚÈİ¸ñÊ½²»·ûºÏµ±Ç°´°¿ÚÒªÇó£¬ÎŞ·¨Õ³Ìù");
+                    MessageBox.Show(form, "å‰ªè´´æ¿ä¸­çš„å†…å®¹æ ¼å¼ä¸ç¬¦åˆå½“å‰çª—å£è¦æ±‚ï¼Œæ— æ³•ç²˜è´´");
                     return;
                 }
 
@@ -319,15 +319,15 @@ namespace dp2Catalog
     Form form,
     ListView list)
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨ÒªÊä³öµÄ Excel ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦è¾“å‡ºçš„ Excel æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = true;
             // dlg.FileName = this.ExportExcelFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel ÎÄ¼ş (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+            dlg.Filter = "Excel æ–‡ä»¶ (*.xlsx)|*.xlsx|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -394,9 +394,9 @@ namespace dp2Catalog
             form.Cursor = oldCursor;
         }
 
-        // ¸´ÖÆ»òÕß¼ôÇĞListViewÖĞÑ¡¶¨µÄÊÂÏîµ½Clipboard
+        // å¤åˆ¶æˆ–è€…å‰ªåˆ‡ListViewä¸­é€‰å®šçš„äº‹é¡¹åˆ°Clipboard
         // parameters:
-        //      bCut    ÊÇ·ñÎª¼ôÇĞ
+        //      bCut    æ˜¯å¦ä¸ºå‰ªåˆ‡
         public static void CopyLinesToClipboard(
             Form form,
             string strFormat,
@@ -447,9 +447,9 @@ namespace dp2Catalog
             form.Cursor = oldCursor;
         }
 
-        // ¸´ÖÆ»òÕß¼ôÇĞListViewÖĞÑ¡¶¨µÄÊÂÏîµ½Clipboard
+        // å¤åˆ¶æˆ–è€…å‰ªåˆ‡ListViewä¸­é€‰å®šçš„äº‹é¡¹åˆ°Clipboard
         // parameters:
-        //      bCut    ÊÇ·ñÎª¼ôÇĞ
+        //      bCut    æ˜¯å¦ä¸ºå‰ªåˆ‡
         public static void CopyLinesToClipboard(
             Form form,
             int nColumnIndex,
@@ -489,8 +489,8 @@ namespace dp2Catalog
             form.Cursor = oldCursor;
         }
 
-        // °ÑÕı×°µÄdp2libraryÂ·¾¶±ä»»Îªµ¹×°ĞÎÌ¬
-        // ÀıÈç£º´Ó¡°±¾µØ·şÎñÆ÷/ÖĞÎÄÍ¼Êé/1¡±±ä»»Îª"ÖĞÎÄÍ¼Êé/1@±¾µØ·şÎñÆ÷"
+        // æŠŠæ­£è£…çš„dp2libraryè·¯å¾„å˜æ¢ä¸ºå€’è£…å½¢æ€
+        // ä¾‹å¦‚ï¼šä»â€œæœ¬åœ°æœåŠ¡å™¨/ä¸­æ–‡å›¾ä¹¦/1â€å˜æ¢ä¸º"ä¸­æ–‡å›¾ä¹¦/1@æœ¬åœ°æœåŠ¡å™¨"
         public static string GetBackStyleDp2Path(string strPath)
         {
             int nRet = strPath.IndexOf("/");
@@ -503,8 +503,8 @@ namespace dp2Catalog
             return strPurePath + "@" + strServerName;
         }
 
-        // °Ñµ¹×°µÄdp2libraryÂ·¾¶±ä»»ÎªÕı×°ĞÎÌ¬
-        // ÀıÈç£º´Ó"ÖĞÎÄÍ¼Êé/1@±¾µØ·şÎñÆ÷"±ä»»Îª¡°±¾µØ·şÎñÆ÷/ÖĞÎÄÍ¼Êé/1¡±
+        // æŠŠå€’è£…çš„dp2libraryè·¯å¾„å˜æ¢ä¸ºæ­£è£…å½¢æ€
+        // ä¾‹å¦‚ï¼šä»"ä¸­æ–‡å›¾ä¹¦/1@æœ¬åœ°æœåŠ¡å™¨"å˜æ¢ä¸ºâ€œæœ¬åœ°æœåŠ¡å™¨/ä¸­æ–‡å›¾ä¹¦/1â€
         public static string GetForwardStyleDp2Path(string strPath)
         {
             int nRet = strPath.IndexOf("@");
@@ -537,16 +537,16 @@ namespace dp2Catalog
                 return strPinyin;
             }
 
-            Debug.Assert(false, "Î´¶¨ÒåµÄÆ´Òô·ç¸ñ");
+            Debug.Assert(false, "æœªå®šä¹‰çš„æ‹¼éŸ³é£æ ¼");
             return strPinyin;
         }
 #endif
 
-        // ´ÓISBNºÅÖĞÈ¡µÃ³ö°æÉçºÅ²¿·Ö
-        // ±¾º¯Êı¿ÉÒÔ×Ô¶¯ÊÊÓ¦ÓĞ978Ç°×ºµÄĞÂĞÍISBNºÅ
-        // ×¢ÒâISBNºÅÖĞ±ØĞëÓĞºá¸Ü
+        // ä»ISBNå·ä¸­å–å¾—å‡ºç‰ˆç¤¾å·éƒ¨åˆ†
+        // æœ¬å‡½æ•°å¯ä»¥è‡ªåŠ¨é€‚åº”æœ‰978å‰ç¼€çš„æ–°å‹ISBNå·
+        // æ³¨æ„ISBNå·ä¸­å¿…é¡»æœ‰æ¨ªæ 
         // parameters:
-        //      strPublisherNumber  ³ö°æÉçºÅÂë¡£²»°üº¬978-²¿·Ö
+        //      strPublisherNumber  å‡ºç‰ˆç¤¾å·ç ã€‚ä¸åŒ…å«978-éƒ¨åˆ†
         public static int GetPublisherNumber(string strISBN,
             out string strPublisherNumber,
             out string strError)
@@ -557,7 +557,7 @@ namespace dp2Catalog
 
             if (strISBN == null)
             {
-                strError = "ISBNÎª¿Õ";
+                strError = "ISBNä¸ºç©º";
                 return -1;
             }
 
@@ -565,19 +565,19 @@ namespace dp2Catalog
 
             if (String.IsNullOrEmpty(strISBN) == true)
             {
-                strError = "ISBNÎª¿Õ";
+                strError = "ISBNä¸ºç©º";
                 return -1;
             }
 
-            // ÊÔÌ½Ç°ÃæÊÇ²»ÊÇ978
+            // è¯•æ¢å‰é¢æ˜¯ä¸æ˜¯978
             nRet = strISBN.IndexOf("-");
             if (nRet == -1)
             {
-                strError = "ISBN×Ö·û´® '" + strISBN + "' ÖĞÃ»ÓĞºá¸Ü·ûºÅ£¬ Òò´ËÎŞ·¨³éÈ¡³ö°æÉçºÅÂë²¿·Ö";
+                strError = "ISBNå­—ç¬¦ä¸² '" + strISBN + "' ä¸­æ²¡æœ‰æ¨ªæ ç¬¦å·ï¼Œ å› æ­¤æ— æ³•æŠ½å–å‡ºç‰ˆç¤¾å·ç éƒ¨åˆ†";
                 return -1;
             }
 
-            int nStart = 0; // ¿ªÊ¼È¡ºÅµÄÎ»ÖÃ
+            int nStart = 0; // å¼€å§‹å–å·çš„ä½ç½®
             string strFirstPart = strISBN.Substring(0, nRet);
 
             if (strFirstPart == "978")
@@ -588,17 +588,17 @@ namespace dp2Catalog
 
                 if (nRet == -1)
                 {
-                    strError = "ISBNºÅÖĞÈ±·¦µÚ¶ş¸öºá¸Ü£¬Òò´ËÎŞ·¨³éÈ¡³ö°æÉçºÅ";
+                    strError = "ISBNå·ä¸­ç¼ºä¹ç¬¬äºŒä¸ªæ¨ªæ ï¼Œå› æ­¤æ— æ³•æŠ½å–å‡ºç‰ˆç¤¾å·";
                     return -1;
                 }
 
-                // ´ËÊ±nRetÔÚ978-7-µÄµÚ¶ş¸öºá¸ÜÉÏÃæ
+                // æ­¤æ—¶nRetåœ¨978-7-çš„ç¬¬äºŒä¸ªæ¨ªæ ä¸Šé¢
             }
             else
             {
                 nStart = 0;
 
-                // ´ËÊ±nRetÔÚ7-µÄºá¸ÜÉÏÃæ
+                // æ­¤æ—¶nRetåœ¨7-çš„æ¨ªæ ä¸Šé¢
             }
 
             nRet = strISBN.IndexOf("-", nRet + 1);
@@ -615,7 +615,7 @@ namespace dp2Catalog
         }
 
         /*
-        // ·ÖÎödp2libraryÂ·¾¶
+        // åˆ†ædp2libraryè·¯å¾„
         public static int ParseDp2Path(string strFullPath,
             out string strServerUrl,
             out string strLocalPath,
@@ -628,7 +628,7 @@ namespace dp2Catalog
             int nRet = strFullPath.IndexOf("@");
             if (nRet == -1)
             {
-                strError = "È±·¦@";
+                strError = "ç¼ºä¹@";
                 return -1;
             }
 
@@ -639,7 +639,7 @@ namespace dp2Catalog
             return 0;
         }*/
 
-        // ·ÖÎöÂ·¾¶
+        // åˆ†æè·¯å¾„
         public static int ParsePath(string strFullPath,
             out string strProtocol,
             out string strPath,
@@ -652,12 +652,12 @@ namespace dp2Catalog
             int nRet = strFullPath.IndexOf(":");
             if (nRet == -1)
             {
-                strError = "È«Â·¾¶ '"+strFullPath+"' ÖĞÈ±·¦×Ö·û ':'";
+                strError = "å…¨è·¯å¾„ '"+strFullPath+"' ä¸­ç¼ºä¹å­—ç¬¦ ':'";
                 return -1;
             }
 
-            strProtocol = strFullPath.Substring(0, nRet).ToLower(); // Ğ­ÒéÃû¹æ·¶ÎªĞ¡Ğ´×Ö·ûĞÎÌ¬
-            // È¥µô":"
+            strProtocol = strFullPath.Substring(0, nRet).ToLower(); // åè®®åè§„èŒƒä¸ºå°å†™å­—ç¬¦å½¢æ€
+            // å»æ‰":"
             strPath = strFullPath.Substring(nRet + 1);
 
             return 0;
@@ -684,8 +684,8 @@ namespace dp2Catalog
              * */
         }
 
-        // ÁĞ³öencodingÃûÁĞ±í
-        // ĞèÒª°Ñgb2312 utf-8µÈ³£ÓÃµÄÌáÇ°
+        // åˆ—å‡ºencodingååˆ—è¡¨
+        // éœ€è¦æŠŠgb2312 utf-8ç­‰å¸¸ç”¨çš„æå‰
         public static List<string> GetEncodingList(bool bHasMarc8)
         {
             List<string> result = new List<string>();
@@ -710,7 +710,7 @@ namespace dp2Catalog
 
     public class WebBrowserInfo
     {
-        public bool Cleared = false;    // ÊÇ·ñ±»Ê¹ÓÃ¹ı
+        public bool Cleared = false;    // æ˜¯å¦è¢«ä½¿ç”¨è¿‡
     }
 
     [Serializable]

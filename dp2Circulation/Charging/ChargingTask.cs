@@ -1050,16 +1050,18 @@ end_time);
                     string text = strError;
                     this.Container.Invoke((Action)(() =>
                     {
-                        RfidToolForm dlg = new RfidToolForm();
-                        dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
-                        dlg.Mode = "auto_fix_eas";
-                        dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
-                        dlg.ProtocolFilter = InventoryInfo.ISO15693;
-                        dlg.ShowDialog(this.Container);
-                        eas_fixed = dlg.EasFixed;
-                        // 2019/1/23
-                        // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
-                        this.Container.OpenRfidCapture(true);
+                        using (RfidToolForm dlg = new RfidToolForm())
+                        {
+                            dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
+                            dlg.Mode = "auto_fix_eas";
+                            dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                            dlg.ProtocolFilter = InventoryInfo.ISO15693;
+                            dlg.ShowDialog(this.Container);
+                            eas_fixed = dlg.EasFixed;
+                            // 2019/1/23
+                            // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
+                            this.Container.OpenRfidCapture(true);
+                        }
                     }));
 
                     if (eas_fixed == true)

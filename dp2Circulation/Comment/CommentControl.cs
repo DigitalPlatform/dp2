@@ -61,7 +61,16 @@ namespace dp2Circulation
         /// </summary>
         public CommentControl()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch(Exception ex)
+            {
+                // 2019/4/19
+                //if (this.DesignMode == false)
+                //    throw ex;
+            }
 
             this.m_listView = this.listView;
             this.ItemType = "comment";

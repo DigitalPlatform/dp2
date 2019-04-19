@@ -203,40 +203,69 @@ namespace dp2Circulation
                 REDO:
                 // 出现对话框让选择一个
                 // SelectTagDialog dialog = new SelectTagDialog();
-                RfidToolForm dialog = new RfidToolForm();
-                dialog.Text = "选择 RFID 读者卡";
-                dialog.OkCancelVisible = true;
-                dialog.LayoutVertical = false;
-                dialog.AutoCloseDialog = auto_close_dialog;
-                dialog.SelectedPII = auto_select_pii;
-                dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
-                dialog.ProtocolFilter = InventoryInfo.ISO15693;
-                Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
-                dialog.ShowDialog(this);
-
-                if (dialog.DialogResult == DialogResult.Cancel)
+                using (RfidToolForm dialog = new RfidToolForm())
                 {
-                    strError = "放弃装载 RFID 读者卡内容";
-                    return 0;
-                }
+                    dialog.Text = "选择 RFID 读者卡";
+                    dialog.OkCancelVisible = true;
+                    dialog.LayoutVertical = false;
+                    dialog.AutoCloseDialog = auto_close_dialog;
+                    dialog.SelectedPII = auto_select_pii;
+                    dialog.AutoSelectCondition = "auto_or_blankPII";    // 2019/1/30
+                    dialog.ProtocolFilter = InventoryInfo.ISO15693;
+                    Program.MainForm.AppInfo.LinkFormState(dialog, "selectTagDialog_formstate");
+                    dialog.ShowDialog(this);
 
-                {
-                    var old_chip = LogicChipItem.FromTagInfo(dialog.SelectedTag.TagInfo);
-
-                    // 首先检查 typeOfUsage 是否为 8X
-                    if (old_chip.IsBlank() == false && IsPatronUsage(old_chip) == false)
+                    if (dialog.DialogResult == DialogResult.Cancel)
                     {
-                        strError = "当前 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型";
-                        string message = $"您所选择的 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载";
+                        strError = "放弃装载 RFID 读者卡内容";
+                        return 0;
+                    }
+
+                    {
+                        var old_chip = LogicChipItem.FromTagInfo(dialog.SelectedTag.TagInfo);
+
+                        // 首先检查 typeOfUsage 是否为 8X
+                        if (old_chip.IsBlank() == false && IsPatronUsage(old_chip) == false)
+                        {
+                            strError = "当前 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型";
+                            string message = $"您所选择的 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将这一种不吻合的 RFID 标签装载进来\r\n[取消]放弃装载";
+                            if (saving)
+                                message = $"您所选择的 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 标签中(危险)\r\n[取消]放弃保存";
+
+                            DialogResult temp_result = MessageBox.Show(this,
+    message,
+    "RfidPatronCardDialog",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            if (temp_result == DialogResult.Yes)
+                                goto REDO;
+                            if (temp_result == DialogResult.Cancel)
+                            {
+                                strError = "放弃装载 RFID 读者卡内容";
+                                return 0;
+                            }
+                            if (saving == false)
+                                MessageBox.Show(this, "警告：您刚装入了一个可疑的读者卡，极有可能不是读者卡而是图书 RFID 标签。待会儿保存读者卡内容的时候，有可能会张冠李戴覆盖了它。保存读者卡内容前，请务必反复仔细检查");
+                        }
+                    }
+
+                    if (auto_close_dialog == false
+                        // && string.IsNullOrEmpty(auto_select_pii) == false
+                        && dialog.SelectedPII != auto_select_pii
+                        && string.IsNullOrEmpty(dialog.SelectedPII) == false
+                        )
+                    {
+                        string message = $"您所选择的读者卡其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将这一种不吻合的 RFID 读者卡装载进来\r\n[取消]放弃装载";
                         if (saving)
-                            message = $"您所选择的 RFID 标签是图书类型，不是读者卡类型。请小心不要弄混这两种类型。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 标签中(危险)\r\n[取消]放弃保存";
+                            message = $"您所选择的读者卡其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 读者卡中(危险)\r\n[取消]放弃保存";
 
                         DialogResult temp_result = MessageBox.Show(this,
-message,
-"RfidPatronCardDialog",
-MessageBoxButtons.YesNoCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+        message,
+        "RfidPatronCardDialog",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
                         if (temp_result == DialogResult.Yes)
                             goto REDO;
                         if (temp_result == DialogResult.Cancel)
@@ -245,58 +274,31 @@ MessageBoxDefaultButton.Button1);
                             return 0;
                         }
                         if (saving == false)
-                            MessageBox.Show(this, "警告：您刚装入了一个可疑的读者卡，极有可能不是读者卡而是图书 RFID 标签。待会儿保存读者卡内容的时候，有可能会张冠李戴覆盖了它。保存读者卡内容前，请务必反复仔细检查");
+                            MessageBox.Show(this, "警告：您刚装入了一个可疑的读者卡，极有可能不是当前读者记录对应的读者卡。待会儿保存读者卡内容的时候，有可能会张冠李戴覆盖了它。保存读者卡内容前，请务必反复仔细检查");
                     }
-                }
 
-                if (auto_close_dialog == false
-                    // && string.IsNullOrEmpty(auto_select_pii) == false
-                    && dialog.SelectedPII != auto_select_pii
-                    && string.IsNullOrEmpty(dialog.SelectedPII) == false
-                    )
-                {
-                    string message = $"您所选择的读者卡其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将这一种不吻合的 RFID 读者卡装载进来\r\n[取消]放弃装载";
-                    if (saving)
-                        message = $"您所选择的读者卡其 PII 为 '{dialog.SelectedPII}'，和期待的 '{auto_select_pii}' 不吻合。请小心检查是否正确。\r\n\r\n是否重新选择?\r\n\r\n[是]重新选择 RFID 读者卡;\r\n[否]将信息覆盖保存到这一种不吻合的 RFID 读者卡中(危险)\r\n[取消]放弃保存";
+                    var tag_info = dialog.SelectedTag.TagInfo;
+                    _tagExisting = dialog.SelectedTag;
 
-                    DialogResult temp_result = MessageBox.Show(this,
-    message,
-    "RfidPatronCardDialog",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                    if (temp_result == DialogResult.Yes)
-                        goto REDO;
-                    if (temp_result == DialogResult.Cancel)
+                    var chip = LogicChipItem.FromTagInfo(tag_info);
+                    this.chipEditor_existing.LogicChipItem = chip;
+
+                    if (adjust_right)
                     {
-                        strError = "放弃装载 RFID 读者卡内容";
-                        return 0;
+                        int nRet = Merge(this.chipEditor_existing.LogicChipItem,
+        this.chipEditor_editing.LogicChipItem,
+        out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        // 让右侧编辑器感受到 readonly 和 text 的变化
+                        var save = this.chipEditor_editing.LogicChipItem;
+                        this.chipEditor_editing.LogicChipItem = null;
+                        this.chipEditor_editing.LogicChipItem = save;
                     }
-                    if (saving == false)
-                        MessageBox.Show(this, "警告：您刚装入了一个可疑的读者卡，极有可能不是当前读者记录对应的读者卡。待会儿保存读者卡内容的时候，有可能会张冠李戴覆盖了它。保存读者卡内容前，请务必反复仔细检查");
+
+                    return 1;
                 }
-
-                var tag_info = dialog.SelectedTag.TagInfo;
-                _tagExisting = dialog.SelectedTag;
-
-                var chip = LogicChipItem.FromTagInfo(tag_info);
-                this.chipEditor_existing.LogicChipItem = chip;
-
-                if (adjust_right)
-                {
-                    int nRet = Merge(this.chipEditor_existing.LogicChipItem,
-    this.chipEditor_editing.LogicChipItem,
-    out strError);
-                    if (nRet == -1)
-                        return -1;
-
-                    // 让右侧编辑器感受到 readonly 和 text 的变化
-                    var save = this.chipEditor_editing.LogicChipItem;
-                    this.chipEditor_editing.LogicChipItem = null;
-                    this.chipEditor_editing.LogicChipItem = save;
-                }
-
-                return 1;
             }
             catch (Exception ex)
             {
