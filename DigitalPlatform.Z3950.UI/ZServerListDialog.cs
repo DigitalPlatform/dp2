@@ -115,28 +115,31 @@ namespace DigitalPlatform.Z3950.UI
             _dom.DocumentElement.AppendChild(server);
             server.SetAttribute("recsperbatch", "10");
 
-            ZServerPropertyForm dlg = new ZServerPropertyForm();
-            GuiUtil.SetControlFont(dlg, this.Font);
-            dlg.XmlNode = server;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
-
-            if (dlg.DialogResult == DialogResult.Cancel)
+            using (ZServerPropertyForm dlg = new ZServerPropertyForm())
             {
-                server.ParentNode.RemoveChild(server);
-                return;
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.UnionCatalogPageVisible = false;
+                dlg.XmlNode = server;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                {
+                    server.ParentNode.RemoveChild(server);
+                    return;
+                }
+
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Tag = server;
+                    ListViewUtil.ChangeItemText(item, COLUMN_NAME, server.GetAttribute("name"));
+                    ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
+
+                    this.listView1.Items.Add(item);
+                }
+
+                this.Changed = true;
             }
-
-            {
-                ListViewItem item = new ListViewItem();
-                item.Tag = server;
-                ListViewUtil.ChangeItemText(item, COLUMN_NAME, server.GetAttribute("name"));
-                ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
-
-                this.listView1.Items.Add(item);
-            }
-
-            this.Changed = true;
         }
 
         private void toolStripButton_modify_Click(object sender, EventArgs e)
@@ -151,22 +154,25 @@ namespace DigitalPlatform.Z3950.UI
 
             XmlElement server = (XmlElement)item.Tag;
 
-            ZServerPropertyForm dlg = new ZServerPropertyForm();
-            GuiUtil.SetControlFont(dlg, this.Font);
-            dlg.XmlNode = server;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
-
-            if (dlg.DialogResult == DialogResult.Cancel)
-                return;
-
+            using (ZServerPropertyForm dlg = new ZServerPropertyForm())
             {
-                ListViewUtil.ChangeItemText(item, COLUMN_NAME, server.GetAttribute("name"));
-                ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
-            }
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.UnionCatalogPageVisible = false;
+                dlg.XmlNode = server;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
 
-            this.Changed = true;
-            return;
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
+
+                {
+                    ListViewUtil.ChangeItemText(item, COLUMN_NAME, server.GetAttribute("name"));
+                    ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
+                }
+
+                this.Changed = true;
+                return;
+            }
             ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -195,6 +201,23 @@ namespace DigitalPlatform.Z3950.UI
             MessageBox.Show(this, strError);
         }
 
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.listView1.SelectedItems.Count > 0)
+            {
+                this.toolStripButton_delete.Enabled = true;
+                this.toolStripButton_modify.Enabled = true;
+            }
+            else
+            {
+                this.toolStripButton_delete.Enabled = false;
+                this.toolStripButton_modify.Enabled = false;
+            }
+        }
 
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            toolStripButton_modify_Click(sender, e);
+        }
     }
 }

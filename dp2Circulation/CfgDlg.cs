@@ -1743,11 +1743,13 @@ MessageBoxDefaultButton.Button2);
         // 服务器列表 对话框
         private void button_z3950_servers_Click(object sender, EventArgs e)
         {
-            ZServerListDialog dlg = new ZServerListDialog();
-
-            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
-            dlg.StartPosition = FormStartPosition.CenterParent;
-            dlg.ShowDialog(this);
+            using (ZServerListDialog dlg = new ZServerListDialog())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(this);
+            }
         }
     }
 

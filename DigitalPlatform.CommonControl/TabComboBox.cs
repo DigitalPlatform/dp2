@@ -54,7 +54,14 @@ namespace DigitalPlatform.CommonControl
 
         public TabComboBox()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch
+            {
+
+            }
         }
 
         private void TabComboBox_DrawItem(object sender, DrawItemEventArgs e)

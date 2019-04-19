@@ -27,6 +27,24 @@ namespace DigitalPlatform.Z3950.UI
             InitializeComponent();
         }
 
+        public bool UnionCatalogPageVisible
+        {
+            get
+            {
+                return this.tabControl_main.TabPages.Contains(this.tabPage_unionCatalog);
+            }
+            set
+            {
+                if (value == true)
+                {
+                    if (this.tabControl_main.TabPages.Contains(this.tabPage_unionCatalog) == false)
+                        this.tabControl_main.TabPages.Add(this.tabPage_unionCatalog);
+                }
+                else
+                    this.tabControl_main.TabPages.Remove(this.tabPage_unionCatalog);
+            }
+        }
+
         public static string GetPassword(string strEncrypted)
         {
             if (String.IsNullOrEmpty(strEncrypted) == true)
@@ -89,7 +107,7 @@ namespace DigitalPlatform.Z3950.UI
 
             this.checkBox_autoDetectEACC.Checked = GetBool(
                 DomUtil.GetAttr(this.XmlNode,
-                "converteacc") );
+                "converteacc"));
 
             this.checkBox_alwaysUseFullElementSet.Checked =
                 GetBool(DomUtil.GetAttr(this.XmlNode,
@@ -299,7 +317,7 @@ DomUtil.GetAttr(this.XmlNode,
             RecordSyntaxAndEncodingBindingCollection bindings = new RecordSyntaxAndEncodingBindingCollection();
             bindings.Load(strBindingString);
 
-            for(int i=0;i<bindings.Count;i++)
+            for (int i = 0; i < bindings.Count; i++)
             {
                 RecordSyntaxAndEncodingBindingItem binding = bindings[i];
 
@@ -310,7 +328,7 @@ DomUtil.GetAttr(this.XmlNode,
                 this.listView_recordSyntaxAndEncodingBinding.Items.Add(item);
             }
         }
-        
+
 
         // 获得绑定字符串
         string GetBindingString()
@@ -428,7 +446,7 @@ DomUtil.GetAttr(this.XmlNode,
                 strError = "尚未指定检索词编码方式";
                 goto ERROR1;
             }*/
-            
+
 
             DomUtil.SetAttr(this.XmlNode,
                 "name", this.textBox_serverName.Text);
@@ -564,7 +582,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
 
                 XmlNode newxmlnode = this.XmlNode.OwnerDocument.CreateElement("database");
                 this.XmlNode.AppendChild(newxmlnode);
-                DomUtil.SetAttr(newxmlnode, "name", 
+                DomUtil.SetAttr(newxmlnode, "name",
                     strName);
 
                 if (exclude_dbnames.IndexOf(strName) != -1)
@@ -604,7 +622,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -663,7 +681,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
                 return;
 
             item.Text = dlg.RecordSyntax;
-            item.SubItems[1].Text= dlg.Encoding;
+            item.SubItems[1].Text = dlg.Encoding;
         }
 
         private void button_newBindingItem_Click(object sender, EventArgs e)
@@ -688,7 +706,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
 
                 if (strNewSyntax == strExistSyntax)
                 {
-                    MessageBox.Show(this, "数据格式 '" + strNewSyntax + "' 已经存在(第 "+(i+1).ToString()+" 行)，不能重复加入");
+                    MessageBox.Show(this, "数据格式 '" + strNewSyntax + "' 已经存在(第 " + (i + 1).ToString() + " 行)，不能重复加入");
                     return;
                 }
             }
@@ -860,7 +878,7 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
         private void textBox_serverName_TextChanged(object sender, EventArgs e)
         {
             string strName = this.textBox_serverName.Text;
-            this.Text = "Z39.50服务器属性" 
+            this.Text = "Z39.50服务器属性"
                 + (string.IsNullOrEmpty(strName) == false ? " -- " + strName : "");
         }
 

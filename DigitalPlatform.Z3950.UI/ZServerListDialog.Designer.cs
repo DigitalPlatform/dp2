@@ -57,6 +57,8 @@
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
             // 
             // columnHeader_name
             // 
@@ -95,6 +97,7 @@
             // toolStripButton_modify
             // 
             this.toolStripButton_modify.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_modify.Enabled = false;
             this.toolStripButton_modify.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_modify.Image")));
             this.toolStripButton_modify.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_modify.Name = "toolStripButton_modify";
@@ -105,6 +108,7 @@
             // toolStripButton_delete
             // 
             this.toolStripButton_delete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_delete.Enabled = false;
             this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
             this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_delete.Name = "toolStripButton_delete";
