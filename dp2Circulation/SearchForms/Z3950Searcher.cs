@@ -127,7 +127,10 @@ namespace dp2Circulation
                         if (result.Value == -1)
                         {
                             searchCompleted?.Invoke(channel, new SearchResult(result));
-                            return new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
+                            var final_result = new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
+                            if (result.ErrorCode == "notFound")
+                                final_result.ErrorCode = "useNotFound";
+                            return final_result;
                         }
                     }
 
@@ -143,6 +146,7 @@ namespace dp2Circulation
                         if (result.Value == -1)
                         {
                             searchCompleted?.Invoke(channel, new SearchResult(result));
+                            // TODO: 是否继续向后检索其他 Z39.50 服务器?
                             return new NormalResult { Value = -1, ErrorInfo = "Initialize error: " + result.ErrorInfo };
                         }
                     }

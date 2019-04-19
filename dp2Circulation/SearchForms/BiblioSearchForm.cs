@@ -27,6 +27,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.Z3950.UI;
 
 namespace dp2Circulation
 {
@@ -1621,9 +1622,7 @@ Keys keyData)
                         }
                         );
                     }
-
                 }
-
 
                 if (bNeedShareSearch == true)
                 {
@@ -11447,6 +11446,17 @@ MessageBoxDefaultButton.Button1);
         void UpdateZ3950Menu()
         {
             this.toolStripMenuItem_searchZ3950.Checked = this.SearchZ3950;
+        }
+
+        private void ToolStripMenuItem_z3950ServerList_Click(object sender, EventArgs e)
+        {
+            using (ZServerListDialog dlg = new ZServerListDialog())
+            {
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(this);
+            }
         }
     }
 
