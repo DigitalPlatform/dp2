@@ -17,7 +17,7 @@ namespace dp2Circulation
     /// 用于 Z39.50 检索的工具类
     /// 它管理了若干个 Z39.50 通道
     /// </summary>
-    public class Z3950Searcher
+    public class Z3950Searcher : IDisposable
     {
         bool _searching = false;
 
@@ -39,10 +39,25 @@ namespace dp2Circulation
         // Z39.50 服务器定义 XML 文件的文件名
         public string XmlFileName { get; set; }
 
+        public void Dispose()
+        {
+            this.Clear();
+        }
+
+        public void Clear()
+        {
+            foreach(ZClientChannel channel in this._channels)
+            {
+                if (channel != null)
+                    channel.Dispose();
+            }
+            this._channels.Clear();
+        }
+
         // 从 XML 文件中装载服务器配置信息
         public NormalResult LoadServer(string xmlFileName)
         {
-            this._channels.Clear();
+            this.Clear();
 
             this.XmlFileName = xmlFileName;
 
@@ -67,6 +82,7 @@ namespace dp2Circulation
                 ZClientChannel channel = new ZClientChannel();
                 channel.ZClient = new ZClient();
                 channel.TargetInfo = targetInfo;
+                channel.Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true);
                 _channels.Add(channel);
             }
 
@@ -99,6 +115,10 @@ namespace dp2Circulation
                 {
                     if (_searching == false)
                         break;
+
+                    if (channel.Enabled == false)
+                        continue;
+
                     var _targetInfo = channel.TargetInfo;
                     IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo
                     {
@@ -170,11 +190,16 @@ namespace dp2Circulation
                             // 自动重试检索
                             goto REDO_SEARCH;
                         }
-                        // TODO: 显示出错
                     }
 
                     searchCompleted?.Invoke(channel, search_result);
                     channel._resultCount = search_result.ResultCount;
+
+                    if (search_result.Value == -1
+                        || search_result.Value == 0
+                        || search_result.ResultCount == 0)
+                        continue;
+
                     var present_result = await FetchRecords(channel, 10);
 
                     presentCompleted?.Invoke(channel, present_result);
@@ -245,14 +270,22 @@ namespace dp2Circulation
 #endif
     }
 
-    public class ZClientChannel
+    public class ZClientChannel : IDisposable
     {
         public ZClient ZClient { get; set; }
 
         public TargetInfo TargetInfo { get; set; }
 
+        // 服务器是否启用了
+        public bool Enabled { get; set; }
+
         internal long _resultCount = 0;   // 检索命中条数
         internal int _fetched = 0;   // 已经 Present 获取的条数
 
+        public void Dispose()
+        {
+            if (ZClient != null)
+                ZClient.Dispose();
+        }
     }
 }

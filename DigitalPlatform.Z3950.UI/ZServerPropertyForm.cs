@@ -76,7 +76,7 @@ namespace DigitalPlatform.Z3950.UI
             this.textBox_homepage.Text = DomUtil.GetAttr(this.XmlNode,
                 "homepage");
 
-            ///
+            // authmethod 默认 "0"
             string strAuthMethod = DomUtil.GetAttr(this.XmlNode,
                 "authmethod");
             int nAuthMethod = 0;
@@ -103,43 +103,55 @@ namespace DigitalPlatform.Z3950.UI
                 "username");
             string strPassword = DomUtil.GetAttr(this.XmlNode,
             "password");
-            this.textBox_password.Text = GetPassword(strPassword);
+            if (string.IsNullOrEmpty(strPassword) == false)
+                this.textBox_password.Text = GetPassword(strPassword);
+            else
+                this.textBox_password.Text = "";
 
+            // converteacc 缺省值为 "0"
             this.checkBox_autoDetectEACC.Checked = GetBool(
                 DomUtil.GetAttr(this.XmlNode,
-                "converteacc"));
+                "converteacc"), false);
 
+            // firstfull 缺省值为 "0"
             this.checkBox_alwaysUseFullElementSet.Checked =
                 GetBool(DomUtil.GetAttr(this.XmlNode,
-                "firstfull"));
+                "firstfull"), false);
 
+            // detectmarcsyntax 缺省值为 "0"
             this.checkBox_autoDetectMarcSyntax.Checked =
                 GetBool(DomUtil.GetAttr(this.XmlNode,
-                "detectmarcsyntax"));
+                "detectmarcsyntax"), false);
 
+            // ignorereferenceid 缺省值为 "0"
             this.checkBox_ignoreRerenceID.Checked = GetBool(
 DomUtil.GetAttr(this.XmlNode,
-"ignorereferenceid"));
+"ignorereferenceid"), false);
 
             // 对ISBN的预处理
             this.m_nDisableCheckIsbnParameters++;
             try
             {
+                // isbn_force13 缺省值为 "0"
                 this.checkBox_isbn_forceIsbn13.Checked = GetBool(
     DomUtil.GetAttr(this.XmlNode,
-    "isbn_force13"));
+    "isbn_force13"), false);
+                // isbn_force10 缺省值为 "0"
                 this.checkBox_isbn_forceIsbn10.Checked = GetBool(
     DomUtil.GetAttr(this.XmlNode,
-    "isbn_force10"));
+    "isbn_force10"), false);
+                // isbn_addhyphen 缺省值为 "0"
                 this.checkBox_isbn_addHyphen.Checked = GetBool(
     DomUtil.GetAttr(this.XmlNode,
-    "isbn_addhyphen"));
+    "isbn_addhyphen"), false);
+                // isbn_removehyphen 缺省值为 "0"
                 this.checkBox_isbn_removeHyphen.Checked = GetBool(
     DomUtil.GetAttr(this.XmlNode,
-    "isbn_removehyphen"));
+    "isbn_removehyphen"), false);
+                // isbn_wild 缺省值为 "0"
                 this.checkBox_isbn_wild.Checked = GetBool(
 DomUtil.GetAttr(this.XmlNode,
-"isbn_wild"));
+"isbn_wild"), false);
 
             }
             finally
@@ -148,13 +160,17 @@ DomUtil.GetAttr(this.XmlNode,
             }
 
             // 2018/8/25
+            // issn_force8 缺省值为 "1"
             string strValue = DomUtil.GetAttr(this.XmlNode, "issn_force8");
-            if (string.IsNullOrEmpty(strValue))
-                strValue = "1"; // 缺省值为 1
-            this.checkBox_forceIssn8.Checked = GetBool(strValue);
+            //if (string.IsNullOrEmpty(strValue))
+            //    strValue = "1"; // 缺省值为 1
+            this.checkBox_forceIssn8.Checked = GetBool(strValue, true);
 
+            // recsperbatch 缺省值为 "10"
             this.textBox_presentPerCount.Text = DomUtil.GetAttr(this.XmlNode,
                 "recsperbatch");
+            //if (string.IsNullOrEmpty(this.textBox_presentPerCount.Text))
+            //    this.textBox_presentPerCount.Text = "10";
 
             // 数据库名
             XmlNodeList nodes = this.XmlNode.SelectNodes("database");
@@ -198,8 +214,6 @@ DomUtil.GetAttr(this.XmlNode,
             this.comboBox_queryTermEncoding.Text = DomUtil.GetAttr(this.XmlNode,
                 "queryTermEncoding");
 
-
-
             this.comboBox_defaultMarcSyntaxOID.Text = DomUtil.GetAttr(this.XmlNode,
                 "defaultMarcSyntaxOID");
 
@@ -212,10 +226,12 @@ DomUtil.GetAttr(this.XmlNode,
 
 
             // 字符集协商
+            // charNegoUtf8 缺省值为 "0"
             this.checkBox_charNegoUTF8.Checked = GetBool(DomUtil.GetAttr(this.XmlNode,
-                "charNegoUtf8"));
+                "charNegoUtf8"), false);
+            // charNego_recordsInSeletedCharsets 缺省值为 "0"
             this.checkBox_charNegoRecordsInSelectedCharSets.Checked = GetBool(DomUtil.GetAttr(this.XmlNode,
-                "charNego_recordsInSeletedCharsets"));
+                "charNego_recordsInSeletedCharsets"), false);
 
             checkBox_charNegoUTF8_CheckedChanged(null, null);
 
@@ -235,7 +251,6 @@ DomUtil.GetAttr(this.XmlNode,
 
             this.textBox_unionCatalog_bindingUcServerUrl.Text = DomUtil.GetAttr(
     this.XmlNode, "unionCatalog_bindingUcServerUrl");
-
         }
 
         public static void FillEncodingList(ComboBox list,
@@ -313,7 +328,6 @@ DomUtil.GetAttr(this.XmlNode,
         {
             this.listView_recordSyntaxAndEncodingBinding.Items.Clear();
 
-
             RecordSyntaxAndEncodingBindingCollection bindings = new RecordSyntaxAndEncodingBindingCollection();
             bindings.Load(strBindingString);
 
@@ -344,8 +358,11 @@ DomUtil.GetAttr(this.XmlNode,
             return strResult;
         }
 
-        public static bool GetBool(string strText)
+        public static bool GetBool(string strText, bool default_value)
         {
+            if (string.IsNullOrEmpty(strText))
+                return default_value;
+
             if (strText == "1")
                 return true;
             if (strText.ToLower() == "y"
@@ -370,48 +387,61 @@ DomUtil.GetAttr(this.XmlNode,
         {
             string strError = "";
 
-            if (this.textBox_serverName.Text == "")
+            // 服务器名应该必备
+            if (string.IsNullOrEmpty(this.textBox_serverName.Text))
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
                 strError = "尚未指定服务器名";
                 goto ERROR1;
             }
-            if (this.textBox_serverAddr.Text == "")
+
+            // 服务器地址应该必备
+            // TODO: 检查是否输入了 http:// 这样的不合法地址
+            if (string.IsNullOrEmpty(this.textBox_serverAddr.Text))
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
                 strError = "尚未指定服务器地址";
                 goto ERROR1;
             }
 
-            if (this.textBox_serverPort.Text == "")
+            // TODO: 端口号似乎应该允许缺省，缺省值为 210
+#if NO
+            if (string.IsNullOrEmpty(this.textBox_serverPort.Text))
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
                 strError = "尚未指定服务器端口号";
                 goto ERROR1;
             }
+#endif
 
-            if (StringUtil.IsNumber(this.textBox_serverPort.Text) == false)
+            if (string.IsNullOrEmpty(this.textBox_serverPort.Text) == false
+                && StringUtil.IsNumber(this.textBox_serverPort.Text) == false)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_general;
                 strError = "服务器端口号必须为纯数字";
                 goto ERROR1;
             }
 
-            if (this.textBox_presentPerCount.Text == "")
+            // TODO: 每批记录条数应默认为 10
+#if NO
+            if (string.IsNullOrEmpty(this.textBox_presentPerCount.Text))
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
                 strError = "尚未指定每批记录条数";
                 goto ERROR1;
             }
+#endif
 
-            if (StringUtil.IsNumber(this.textBox_presentPerCount.Text) == false)
+            if (string.IsNullOrEmpty(this.textBox_presentPerCount.Text) == false
+                && StringUtil.IsNumber(this.textBox_presentPerCount.Text) == false)
             {
                 this.tabControl_main.SelectedTab = this.tabPage_search;
                 strError = "每批记录条数必须为纯数字";
                 goto ERROR1;
             }
 
-            if (this.textBox_databaseNames.Text == "")
+            // 数据库名应该必备
+            if (string.IsNullOrEmpty(this.textBox_databaseNames.Text))
             {
                 this.tabControl_main.SelectedTab = this.tabPage_database;
                 strError = "尚未指定数据库名";
@@ -434,34 +464,25 @@ DomUtil.GetAttr(this.XmlNode,
                 goto ERROR1;
             }
 
-            /*
-            if (this.comboBox_defaultEncoding.Text == "")
-            {
-                strError = "尚未指定缺省编码方式";
-                goto ERROR1;
-            }
-
-            if (this.comboBox_queryTermEncoding.Text == "")
-            {
-                strError = "尚未指定检索词编码方式";
-                goto ERROR1;
-            }*/
-
-
             DomUtil.SetAttr(this.XmlNode,
                 "name", this.textBox_serverName.Text);
             DomUtil.SetAttr(this.XmlNode,
                 "addr", this.textBox_serverAddr.Text);
-            DomUtil.SetAttr(this.XmlNode,
-                "port", this.textBox_serverPort.Text);
-            DomUtil.SetAttr(this.XmlNode,
-                "homepage", this.textBox_homepage.Text);
+            if (string.IsNullOrEmpty(this.textBox_serverPort.Text) == false)
+                DomUtil.SetAttr(this.XmlNode,
+                    "port", this.textBox_serverPort.Text);
+            if (string.IsNullOrEmpty(this.textBox_homepage.Text) == false)
+                DomUtil.SetAttr(this.XmlNode,
+                    "homepage", this.textBox_homepage.Text);
 
-
+            // authmethod 默认 "0"
             if (this.radioButton_authenStyeOpen.Checked == true)
             {
-                DomUtil.SetAttr(this.XmlNode,
-                "authmethod", "0");
+                // 删除属性，减小 XML 尺寸
+                DomUtil.SetAttr(this.XmlNode, "authmethod", null);
+
+                // DomUtil.SetAttr(this.XmlNode,
+                // "authmethod", "0");
             }
             else
             {
@@ -469,15 +490,20 @@ DomUtil.GetAttr(this.XmlNode,
                 "authmethod", "1");
             }
 
-            DomUtil.SetAttr(this.XmlNode,
-                "groupid", this.textBox_groupID.Text);
-            DomUtil.SetAttr(this.XmlNode,
-                "username", this.textBox_userName.Text);
+            SetTextAttr("groupid", this.textBox_groupID.Text);
 
-            string strPassword = GetEncryptedPassword(this.textBox_password.Text);
-            DomUtil.SetAttr(this.XmlNode,
-                "password", strPassword);
+            SetTextAttr("username", this.textBox_userName.Text);
 
+            if (string.IsNullOrEmpty(this.textBox_password.Text) == false)
+            {
+                string strPassword = GetEncryptedPassword(this.textBox_password.Text);
+                DomUtil.SetAttr(this.XmlNode,
+                    "password", strPassword);
+            }
+            else
+                DomUtil.SetAttr(this.XmlNode, "password", null);
+
+            // converteacc 缺省值为 "0"
             if (this.checkBox_autoDetectEACC.Checked == true)
             {
                 DomUtil.SetAttr(this.XmlNode,
@@ -485,77 +511,96 @@ DomUtil.GetAttr(this.XmlNode,
             }
             else
             {
-                DomUtil.SetAttr(this.XmlNode,
-                "converteacc", "0");
+                // 节省 XML 文件尺寸
+                DomUtil.SetAttr(this.XmlNode, "converteacc", null);
+                // DomUtil.SetAttr(this.XmlNode,
+                // "converteacc", "0");
             }
 
+            // firstfull 缺省值为 "0"
             if (this.checkBox_alwaysUseFullElementSet.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                 "firstfull", "1");
             else
+            {
                 DomUtil.SetAttr(this.XmlNode,
-"firstfull", "0");
+"firstfull", null);
+                // DomUtil.SetAttr(this.XmlNode,
+                // "firstfull", "0");
+            }
 
+            // detectmarcsyntax 缺省值为 "0"
             if (this.checkBox_autoDetectMarcSyntax.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                 "detectmarcsyntax", "1");
             else
+            {
                 DomUtil.SetAttr(this.XmlNode,
-"detectmarcsyntax", "0");
+"detectmarcsyntax", null);
 
+                //DomUtil.SetAttr(this.XmlNode,
+                //"detectmarcsyntax", "0");
+            }
+
+            // ignorereferenceid 缺省值为 "0"
             if (this.checkBox_ignoreRerenceID.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                 "ignorereferenceid", "1");
             else
+            {
                 DomUtil.SetAttr(this.XmlNode,
-"ignorereferenceid", "0");
+"ignorereferenceid", null);
+                //DomUtil.SetAttr(this.XmlNode,
+                //"ignorereferenceid", "0");
+            }
 
             // 对ISBN的预处理
+
+            // isbn_force13 缺省值为 "0"
             DomUtil.SetAttr(this.XmlNode,
             "isbn_force13",
-            this.checkBox_isbn_forceIsbn13.Checked == true ? "1" : "0");
+            this.checkBox_isbn_forceIsbn13.Checked == true ? "1" : null);
 
+            // isbn_force10 缺省值为 "0"
             DomUtil.SetAttr(this.XmlNode,
             "isbn_force10",
-            this.checkBox_isbn_forceIsbn10.Checked == true ? "1" : "0");
+            this.checkBox_isbn_forceIsbn10.Checked == true ? "1" : null);
 
+            // isbn_addhyphen 缺省值为 "0"
             DomUtil.SetAttr(this.XmlNode,
             "isbn_addhyphen",
-            this.checkBox_isbn_addHyphen.Checked == true ? "1" : "0");
+            this.checkBox_isbn_addHyphen.Checked == true ? "1" : null);
 
+            // isbn_removehyphen 缺省值为 "0"
             DomUtil.SetAttr(this.XmlNode,
             "isbn_removehyphen",
-            this.checkBox_isbn_removeHyphen.Checked == true ? "1" : "0");
+            this.checkBox_isbn_removeHyphen.Checked == true ? "1" : null);
 
+            // isbn_wild 缺省值为 "0"
             DomUtil.SetAttr(this.XmlNode,
 "isbn_wild",
-this.checkBox_isbn_wild.Checked == true ? "1" : "0");
+this.checkBox_isbn_wild.Checked == true ? "1" : null);
 
             // 2018/8/25
+            // issn_force8 缺省值为 "1"
             DomUtil.SetAttr(this.XmlNode,
 "issn_force8",
-this.checkBox_forceIssn8.Checked == true ? "1" : "0");
+this.checkBox_forceIssn8.Checked == true ? null : "0");
 
-            DomUtil.SetAttr(this.XmlNode,
-                "recsperbatch", this.textBox_presentPerCount.Text);
+            // recsperbatch 缺省值为 "10"
+            SetTextAttr("recsperbatch", this.textBox_presentPerCount.Text);
 
-            DomUtil.SetAttr(this.XmlNode,
-                "defaultEncoding",
+            SetTextAttr("defaultEncoding",
                 this.comboBox_defaultEncoding.Text);
 
-            DomUtil.SetAttr(this.XmlNode,
-    "queryTermEncoding",
+            SetTextAttr("queryTermEncoding",
     this.comboBox_queryTermEncoding.Text);
 
-
-            DomUtil.SetAttr(this.XmlNode,
-                "defaultMarcSyntaxOID",
+            SetTextAttr("defaultMarcSyntaxOID",
                 this.comboBox_defaultMarcSyntaxOID.Text);
 
-            DomUtil.SetAttr(this.XmlNode,
-    "defaultElementSetName",
+            SetTextAttr("defaultElementSetName",
     this.comboBox_defaultElementSetName.Text);
-
 
             // 先删除原有的下级数据库
             XmlNodeList nodes = this.XmlNode.SelectNodes("database");
@@ -590,40 +635,55 @@ this.checkBox_forceIssn8.Checked == true ? "1" : "0");
             }
 
             string strBindingDef = GetBindingString();
-            DomUtil.SetAttr(this.XmlNode,
-                    "recordSyntaxAndEncodingBinding",
+            SetTextAttr("recordSyntaxAndEncodingBinding",
                     strBindingDef);
 
             // 字符集协商
+            // charNegoUtf8 缺省值为 "0"
             if (this.checkBox_charNegoUTF8.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                     "charNegoUtf8", "1");
             else
+            {
                 DomUtil.SetAttr(this.XmlNode,
-                    "charNegoUtf8", "0");
+                    "charNegoUtf8", null);
+                //DomUtil.SetAttr(this.XmlNode,
+                //    "charNegoUtf8", "0");
+            }
 
+            // charNego_recordsInSeletedCharsets 缺省值为 "0"
             if (this.checkBox_charNegoRecordsInSelectedCharSets.Checked == true)
                 DomUtil.SetAttr(this.XmlNode,
                     "charNego_recordsInSeletedCharsets", "1");
             else
+            {
                 DomUtil.SetAttr(this.XmlNode,
-                    "charNego_recordsInSeletedCharsets", "0");
+                    "charNego_recordsInSeletedCharsets", null);
+                //DomUtil.SetAttr(this.XmlNode,
+                //    "charNego_recordsInSeletedCharsets", "0");
+            }
 
             // 联合编目
-            DomUtil.SetAttr(this.XmlNode,
-                "unionCatalog_bindingDp2ServerName",
+            SetTextAttr("unionCatalog_bindingDp2ServerName",
                 this.textBox_unionCatalog_bindingDp2ServerName.Text);
 
-            DomUtil.SetAttr(this.XmlNode,
-    "unionCatalog_bindingUcServerUrl",
+            SetTextAttr("unionCatalog_bindingUcServerUrl",
     this.textBox_unionCatalog_bindingUcServerUrl.Text);
-
 
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
             ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void SetTextAttr(string name, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                DomUtil.SetAttr(this.XmlNode, name, null);
+            else
+                DomUtil.SetAttr(this.XmlNode,
+                    name, value);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)

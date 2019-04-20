@@ -35,8 +35,8 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>5D84AA275C8456823F499315101CB43DC0EC1012</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Batch_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
+    <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
@@ -125,6 +125,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
@@ -340,6 +343,7 @@
     <None Include="dp2Batch_1_TemporaryKey.pfx" />
     <None Include="dp2Batch_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
+    <None Include="代码签名证书-2019.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

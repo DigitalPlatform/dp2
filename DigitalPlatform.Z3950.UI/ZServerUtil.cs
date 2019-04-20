@@ -43,35 +43,47 @@ namespace DigitalPlatform.Z3950.UI
             if (String.IsNullOrEmpty(strAuthenticationMethod) == false)
                 targetinfo.AuthenticationMethod = Convert.ToInt32(strAuthenticationMethod);
 
+            // converteacc 缺省值为 "0"
             targetinfo.ConvertEACC = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("converteacc"));
+                xmlServerNode.GetAttribute("converteacc"), false);
+            // firstfull 缺省值为 "0"
             targetinfo.FirstFull = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("firstfull"));
+                xmlServerNode.GetAttribute("firstfull"), false);
+            // detectmarcsyntax 缺省值为 "0"
             targetinfo.DetectMarcSyntax = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("detectmarcsyntax"));
+                xmlServerNode.GetAttribute("detectmarcsyntax"), false);
 
+            // ignorereferenceid 缺省值为 "0"
             targetinfo.IgnoreReferenceID = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("ignorereferenceid"));
+                xmlServerNode.GetAttribute("ignorereferenceid"), false);
 
             // 对ISBN的预处理
+            // isbn_force13 缺省值为 "0"
             targetinfo.IsbnForce13 = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("isbn_force13"));
+                xmlServerNode.GetAttribute("isbn_force13"), false);
+            // isbn_force10 缺省值为 "0"
             targetinfo.IsbnForce10 = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("isbn_force10"));
+                xmlServerNode.GetAttribute("isbn_force10"), false);
+            // isbn_addhyphen 缺省值为 "0"
             targetinfo.IsbnAddHyphen = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("isbn_addhyphen"));
+                xmlServerNode.GetAttribute("isbn_addhyphen"), false);
+            // isbn_removehyphen 缺省值为 "0"
             targetinfo.IsbnRemoveHyphen = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("isbn_removehyphen"));
+                xmlServerNode.GetAttribute("isbn_removehyphen"), false);
+            // isbn_wild 缺省值为 "0"
             targetinfo.IsbnWild = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("isbn_wild"));
+                xmlServerNode.GetAttribute("isbn_wild"), false);
 
+            // issn_force8 缺省值为 "1"
             targetinfo.IssnForce8 = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("issn_force8"));
+                xmlServerNode.GetAttribute("issn_force8"), true);
 
             string strPresentPerBatchCount = xmlServerNode.GetAttribute("recsperbatch");
 
             if (String.IsNullOrEmpty(strPresentPerBatchCount) == false)
                 targetinfo.PresentPerBatchCount = Convert.ToInt32(strPresentPerBatchCount);
+            else
+                targetinfo.PresentPerBatchCount = 10;
 
             // 缺省编码方式
             string strDefaultEncodingName = xmlServerNode.GetAttribute("defaultEncoding");
@@ -132,10 +144,12 @@ namespace DigitalPlatform.Z3950.UI
                 targetinfo.Bindings.Load(strBindingDef);
 
             // charset nego
+            // charNegoUtf8 缺省值为 "0"
             targetinfo.CharNegoUTF8 = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("charNegoUtf8"));
+                xmlServerNode.GetAttribute("charNegoUtf8"), false);
+            // charNego_recordsInSeletedCharsets 缺省值为 "0"
             targetinfo.CharNegoRecordsUTF8 = ZServerPropertyForm.GetBool(
-                xmlServerNode.GetAttribute("charNego_recordsInSeletedCharsets"));
+                xmlServerNode.GetAttribute("charNego_recordsInSeletedCharsets"), false);
 
             targetinfo.UnionCatalogBindingDp2ServerName =
                 xmlServerNode.GetAttribute("unionCatalog_bindingDp2ServerName");

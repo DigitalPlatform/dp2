@@ -63,10 +63,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>831E14EA86AF91153C3AC6D52A4737AD234A91F4</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>StackRoomEditor_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>false</GenerateManifests>
@@ -79,6 +79,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/rfc3161</ManifestTimestampUrl>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -206,6 +209,7 @@
     <AppDesigner Include="Properties\" />
     <None Include="StackRoomEditor_1_TemporaryKey.pfx" />
     <None Include="StackRoomEditor_TemporaryKey.pfx" />
+    <None Include="代码签名证书-2019.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="deleted.txt" />
