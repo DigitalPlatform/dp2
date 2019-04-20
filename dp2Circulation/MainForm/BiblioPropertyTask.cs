@@ -49,6 +49,8 @@ namespace dp2Circulation
             int nRet = 0;
 
             BiblioInfo info = this.BiblioInfo;
+            if (info == null)
+                return true;
             string strRecPath = this.BiblioInfo.RecPath;
 
             if (string.IsNullOrEmpty(info.OldXml) == true)
@@ -64,8 +66,6 @@ namespace dp2Circulation
 
                     ShowData();
 
-                    string[] results = null;
-                    byte[] baTimestamp = null;
                     // 获得书目记录
                     channel.Timeout = new TimeSpan(0, 0, 10);
                     long lRet = channel.GetBiblioInfos(
@@ -73,13 +73,13 @@ namespace dp2Circulation
                         strRecPath,
                         "",
                         new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
+                        out string[] results,
+                        out byte[] baTimestamp,
                         out strError);
                     if (lRet == 0)
                     {
                         nRet = -1;
-                        strError = "获取书目记录 "+strRecPath+" 时出错: " + strError;
+                        strError = "获取书目记录 " + strRecPath + " 时出错: " + strError;
                     }
                     else if (lRet == -1)
                     {
@@ -139,7 +139,6 @@ namespace dp2Circulation
     "</body></html>";
 
             this.XML = BiblioSearchForm.MergeXml(strXml1, strXml2);
-
             return true;
         }
 
@@ -156,8 +155,8 @@ namespace dp2Circulation
 
             if (Program.MainForm.m_commentViewer != null)
             {
-                Program.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo.RecPath + "'";
-                Program.MainForm.m_commentViewer.HtmlString = this.HTML;
+                Program.MainForm.m_commentViewer.Text = "MARC内容 '" + this.BiblioInfo?.RecPath + "'";
+                Program.MainForm.m_commentViewer.HtmlString = string.IsNullOrEmpty(this.HTML) ? "<html><body></body></html>" : this.HTML;
                 Program.MainForm.m_commentViewer.XmlString = this.XML;
                 return true;
             }

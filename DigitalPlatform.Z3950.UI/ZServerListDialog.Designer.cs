@@ -38,6 +38,15 @@
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.columnHeader_enabled = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_enabled = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_moveUp = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_moveDown = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_export = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_import = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,7 +57,8 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_name,
-            this.columnHeader_database});
+            this.columnHeader_database,
+            this.columnHeader_enabled});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(13, 34);
@@ -76,7 +86,15 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_new,
             this.toolStripButton_modify,
-            this.toolStripButton_delete});
+            this.toolStripButton_delete,
+            this.toolStripSeparator1,
+            this.toolStripButton_enabled,
+            this.toolStripSeparator2,
+            this.toolStripButton_moveUp,
+            this.toolStripButton_moveDown,
+            this.toolStripSeparator3,
+            this.toolStripButton_export,
+            this.toolStripButton_import});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -139,6 +157,81 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
+            // columnHeader_enabled
+            // 
+            this.columnHeader_enabled.Text = "是否启用";
+            this.columnHeader_enabled.Width = 100;
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripButton_enabled
+            // 
+            this.toolStripButton_enabled.CheckOnClick = true;
+            this.toolStripButton_enabled.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_enabled.Enabled = false;
+            this.toolStripButton_enabled.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_enabled.Image")));
+            this.toolStripButton_enabled.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_enabled.Name = "toolStripButton_enabled";
+            this.toolStripButton_enabled.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_enabled.Text = "启用";
+            this.toolStripButton_enabled.Click += new System.EventHandler(this.toolStripButton_enabled_Click);
+            // 
+            // toolStripButton_moveUp
+            // 
+            this.toolStripButton_moveUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_moveUp.Enabled = false;
+            this.toolStripButton_moveUp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_moveUp.Image")));
+            this.toolStripButton_moveUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_moveUp.Name = "toolStripButton_moveUp";
+            this.toolStripButton_moveUp.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_moveUp.Text = "上移";
+            this.toolStripButton_moveUp.Click += new System.EventHandler(this.toolStripButton_moveUp_Click);
+            // 
+            // toolStripButton_moveDown
+            // 
+            this.toolStripButton_moveDown.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_moveDown.Enabled = false;
+            this.toolStripButton_moveDown.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_moveDown.Image")));
+            this.toolStripButton_moveDown.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_moveDown.Name = "toolStripButton_moveDown";
+            this.toolStripButton_moveDown.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_moveDown.Text = "下移";
+            this.toolStripButton_moveDown.Click += new System.EventHandler(this.toolStripButton_moveDown_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripButton_export
+            // 
+            this.toolStripButton_export.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_export.Enabled = false;
+            this.toolStripButton_export.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_export.Image")));
+            this.toolStripButton_export.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_export.Name = "toolStripButton_export";
+            this.toolStripButton_export.Size = new System.Drawing.Size(67, 28);
+            this.toolStripButton_export.Text = "导出 ...";
+            this.toolStripButton_export.Click += new System.EventHandler(this.toolStripButton_export_Click);
+            // 
+            // toolStripButton_import
+            // 
+            this.toolStripButton_import.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_import.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_import.Image")));
+            this.toolStripButton_import.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_import.Name = "toolStripButton_import";
+            this.toolStripButton_import.Size = new System.Drawing.Size(67, 28);
+            this.toolStripButton_import.Text = "导入 ...";
+            this.toolStripButton_import.Click += new System.EventHandler(this.toolStripButton_import_Click);
+            // 
             // ZServerListDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -174,5 +267,14 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_new;
         private System.Windows.Forms.ToolStripButton toolStripButton_modify;
         private System.Windows.Forms.ToolStripButton toolStripButton_delete;
+        private System.Windows.Forms.ColumnHeader columnHeader_enabled;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_enabled;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton toolStripButton_moveUp;
+        private System.Windows.Forms.ToolStripButton toolStripButton_moveDown;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton toolStripButton_export;
+        private System.Windows.Forms.ToolStripButton toolStripButton_import;
     }
 }

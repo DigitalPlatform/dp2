@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <item name = "Title" value="4" uni_name = "Title" comment="题名" />
-  <item name = "Author" value="1003" uni_name = "Author-name" comment="著者"/>
+  <item name = "Contributor" value="1003" uni_name = "Author-name" comment="著者"/>
   <item name = "ISBN" value="7" uni_name = "Identifier-ISBN"/>
   <item name = "ISSN" value="8" uni_name = "Identifier-ISSN"/>
   <item name = "Publisher" value="1018" uni_name = "Name-publisher" comment="出版者"/>
@@ -11,7 +11,7 @@
   <item name = "Dewey classification" value="13" uni_name = "Classification-Dewey" comment="杜威分类号"/>
   <item name = "LC call number" value="16" uni_name = "Classification-LC" comment="国会图书馆索取号"/>
   <item name = "Local classification" value="20" uni_name = "Classification-local" comment="本地分类号"/>
-  <item name = "Subject heading" value="21" uni_name = "Subject" comment="主题"/>
+  <item name = "Subject" value="21" uni_name = "Subject" comment="主题"/>
   <item name = "LC subject heading" value="27" uni_name = "Subject-LC" comment="LC主题标目"/>
   <item name = "Date" value="30" uni_name = "Date" comment="日期"/>
   <item name = "Date of publication" value="31" uni_name = "Date-publication" comment="出版日期"/>

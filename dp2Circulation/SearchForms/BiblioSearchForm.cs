@@ -465,6 +465,8 @@ this.splitContainer_main,
 
         private void BiblioSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _zsearcher?.Dispose();
+
             if (this.commander != null)
                 this.commander.Destroy();
 
@@ -2729,7 +2731,7 @@ out strError);
     DigitalPlatform.Z3950.ZClient.SearchResult r)
         {
             ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
-            if (r.Value == -1)
+            if (r.Value == -1 || r.Value == 0)
                 ListViewUtil.ChangeItemText(item, 1, $"检索出错 {r.ErrorInfo}");
             else
                 ListViewUtil.ChangeItemText(item, 1, $"检索命中 {r.ResultCount} 条");
@@ -10866,6 +10868,13 @@ out strError);
             string strRecPath = item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
                 return;
+
+            // TODO: 可触发显示检索式详情
+            if (IsCmdLine(strRecPath))
+            {
+                Program.MainForm.PropertyTaskList.AddTask(new BiblioPropertyTask { Stop = this.stop }, true);
+                return;
+            }
 
             // 存储所获得书目记录 XML
             BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
