@@ -646,38 +646,38 @@ namespace dp2Catalog
 
             targetinfo.ConvertEACC = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "converteacc"));
+                "converteacc"),false);
             targetinfo.FirstFull = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "firstfull"));
+                "firstfull"), false);
             targetinfo.DetectMarcSyntax = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "detectmarcsyntax"));
+                "detectmarcsyntax"), false);
 
             targetinfo.IgnoreReferenceID = ZServerPropertyForm.GetBool(
     DomUtil.GetAttr(xmlServerNode,
-    "ignorereferenceid"));
+    "ignorereferenceid"), false);
 
             // 对ISBN的预处理
             targetinfo.IsbnForce13 = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"isbn_force13"));
+"isbn_force13"), false);
             targetinfo.IsbnForce10 = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"isbn_force10"));
+"isbn_force10"), false);
             targetinfo.IsbnAddHyphen = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"isbn_addhyphen"));
+"isbn_addhyphen"), false);
             targetinfo.IsbnRemoveHyphen = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"isbn_removehyphen"));
+"isbn_removehyphen"), false);
             targetinfo.IsbnWild = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"isbn_wild"));
+"isbn_wild"), false);
 
             targetinfo.IssnForce8 = ZServerPropertyForm.GetBool(
 DomUtil.GetAttr(xmlServerNode,
-"issn_force8"));
+"issn_force8"), true);
 
             string strPresentPerBatchCount = DomUtil.GetAttr(xmlServerNode,
                 "recsperbatch");
@@ -754,10 +754,10 @@ DomUtil.GetAttr(xmlServerNode,
             // charset nego
             targetinfo.CharNegoUTF8 = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "charNegoUtf8"));
+                "charNegoUtf8"), false);
             targetinfo.CharNegoRecordsUTF8 = ZServerPropertyForm.GetBool(
                 DomUtil.GetAttr(xmlServerNode,
-                "charNego_recordsInSeletedCharsets"));
+                "charNego_recordsInSeletedCharsets"), false);
 
             targetinfo.UnionCatalogBindingDp2ServerName =
                 DomUtil.GetAttr(xmlServerNode,

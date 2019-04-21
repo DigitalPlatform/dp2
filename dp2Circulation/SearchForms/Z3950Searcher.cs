@@ -46,7 +46,7 @@ namespace dp2Circulation
 
         public void Clear()
         {
-            foreach(ZClientChannel channel in this._channels)
+            foreach (ZClientChannel channel in this._channels)
             {
                 if (channel != null)
                     channel.Dispose();
@@ -95,9 +95,18 @@ namespace dp2Circulation
             this._searching = false;
         }
 
+        public void Stop()
+        {
+            foreach (ZClientChannel channel in _channels)
+            {
+                channel.ZClient.CloseConnection();
+            }
+        }
+
         public delegate void delegate_searchCompleted(ZClientChannel channel, SearchResult result);
         public delegate void delegate_presentCompleted(ZClientChannel channel, PresentResult result);
 
+#if NO
         // 首次检索
         public async Task<NormalResult> Search(
             UseCollection useList,
@@ -215,6 +224,160 @@ namespace dp2Circulation
             {
                 _searching = false;
             }
+        }
+#endif
+        // 独立 Task 版本
+        // 首次检索
+        public async Task<NormalResult> Search(
+            UseCollection useList,
+            IsbnSplitter isbnSplitter,
+            string strQueryWord,
+            int nMax,
+            string strFromStyle,
+            string strMatchStyle,
+            delegate_searchCompleted searchCompleted,
+            delegate_presentCompleted presentCompleted)
+        {
+            _searching = true;
+            try
+            {
+                List<Task> tasks = new List<Task>();
+                foreach (ZClientChannel channel in _channels)
+                {
+                    if (_searching == false)
+                        break;
+
+                    if (channel.Enabled == false)
+                        continue;
+
+                    var task = Task.Factory.StartNew<NormalResult>(
+                        () =>
+                        {
+                            return SearchOne(channel,
+                                   useList,
+                                   isbnSplitter,
+                                   strQueryWord,
+                                   nMax,
+                                   strFromStyle,
+                                   strMatchStyle,
+                                   searchCompleted,
+                                   presentCompleted);
+                        });
+                    tasks.Add(task);
+                }
+
+                await Task.Run(() =>
+                {
+                    Task.WaitAll(tasks.ToArray(), TimeSpan.FromMinutes(1));
+                });
+                return new NormalResult();
+            }
+            finally
+            {
+                _searching = false;
+            }
+        }
+
+        NormalResult SearchOne(
+            ZClientChannel channel,
+            UseCollection useList,
+            IsbnSplitter isbnSplitter,
+            string strQueryWord,
+            int nMax,
+            string strFromStyle,
+            string strMatchStyle,
+            delegate_searchCompleted searchCompleted,
+            delegate_presentCompleted presentCompleted)
+        {
+            var _targetInfo = channel.TargetInfo;
+            IsbnConvertInfo isbnconvertinfo = new IsbnConvertInfo
+            {
+                IsbnSplitter = isbnSplitter,
+                ConvertStyle =
+    (_targetInfo.IsbnAddHyphen == true ? "addhyphen," : "")
+    + (_targetInfo.IsbnRemoveHyphen == true ? "removehyphen," : "")
+    + (_targetInfo.IsbnForce10 == true ? "force10," : "")
+    + (_targetInfo.IsbnForce13 == true ? "force13," : "")
+    + (_targetInfo.IsbnWild == true ? "wild," : "")
+    // TODO:
+    + (_targetInfo.IssnForce8 == true ? "issnforce8," : "")
+            };
+
+            string strQueryString = "";
+            {
+                // 创建只包含一个检索词的简单 XML 检索式
+                // 注：这种 XML 检索式不是 Z39.50 函数库必需的。只是用它来方便构造 API 检索式的过程
+                string strQueryXml = BuildQueryXml(strQueryWord, strFromStyle);
+                // 将 XML 检索式变化为 API 检索式
+                var result = ZClient.ConvertQueryString(
+                    useList,
+                    strQueryXml,
+                    isbnconvertinfo,
+                    out strQueryString);
+                if (result.Value == -1)
+                {
+                    searchCompleted?.Invoke(channel, new SearchResult(result));
+                    var final_result = new NormalResult { Value = result.Value, ErrorInfo = result.ErrorInfo };
+                    if (result.ErrorCode == "notFound")
+                        final_result.ErrorCode = "useNotFound";
+                    return final_result;
+                }
+            }
+
+            REDO_SEARCH:
+            {
+                // return Value:
+                //      -1  出错
+                //      0   成功
+                //      1   调用前已经是初始化过的状态，本次没有进行初始化
+                // InitialResult result = _zclient.TryInitialize(_targetInfo).GetAwaiter().GetResult();
+                // InitialResult result = _zclient.TryInitialize(_targetInfo).Result;
+                InitialResult result = channel.ZClient.TryInitialize(_targetInfo).Result;
+                if (result.Value == -1)
+                {
+                    searchCompleted?.Invoke(channel, new SearchResult(result));
+                    // TODO: 是否继续向后检索其他 Z39.50 服务器?
+                    return new NormalResult { Value = -1, ErrorInfo = "Initialize error: " + result.ErrorInfo };
+                }
+            }
+
+            // result.Value:
+            //		-1	error
+            //		0	fail
+            //		1	succeed
+            // result.ResultCount:
+            //      命中结果集内记录条数 (当 result.Value 为 1 时)
+            SearchResult search_result = channel.ZClient.Search(
+    strQueryString,
+    _targetInfo.DefaultQueryTermEncoding,
+    _targetInfo.DbNames,
+    _targetInfo.PreferredRecordSyntax,
+    "default").Result;
+            if (search_result.Value == -1 || search_result.Value == 0)
+            {
+                if (search_result.ErrorCode == "ConnectionAborted")
+                {
+                    // 自动重试检索
+                    goto REDO_SEARCH;
+                }
+            }
+
+            searchCompleted?.Invoke(channel, search_result);
+            channel._resultCount = search_result.ResultCount;
+
+            if (search_result.Value == -1
+                || search_result.Value == 0
+                || search_result.ResultCount == 0)
+                return new NormalResult();  // continue
+
+            var present_result = FetchRecords(channel, 10).Result;
+
+            presentCompleted?.Invoke(channel, present_result);
+
+            if (present_result.Value != -1)
+                channel._fetched += present_result.Records.Count;
+
+            return new NormalResult();
         }
 
         public static async Task<PresentResult> FetchRecords(ZClientChannel channel,

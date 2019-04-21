@@ -1272,7 +1272,7 @@ Keys keyData)
                 "");  // ? "test:127.0.0.1"
 
             stop.Style = StopStyle.None;
-            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.OnStop += Stop_OnStop1;
             stop.Initial("正在检索 '" + this.textBox_queryWord.Text + "' ...");
             stop.BeginLoop();
 
@@ -1604,23 +1604,29 @@ Keys keyData)
                         strMatchStyle,
                         (c, r) =>
                         {
-                            ListViewItem item = new ListViewItem();
-                            item.Tag = c;
-                            _zchannelTable[c] = item;
-                            //ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
-                            //ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
-                            this.listView_records.Items.Add(item);
-                            UpdateCommandLine(item, c, r);
+                            this.Invoke((Action)(() =>
+                            {
+                                ListViewItem item = new ListViewItem();
+                                item.Tag = c;
+                                _zchannelTable[c] = item;
+                                //ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
+                                //ListViewUtil.ChangeItemText(item, 1, $"search result={r.Value} resultCount={r.ResultCount}");
+                                this.listView_records.Items.Add(item);
+                                UpdateCommandLine(item, c, r);
+                            }));
                         },
                         (c, r) =>
                         {
-                            ListViewItem item = (ListViewItem)_zchannelTable[c];
-                            if (r.Records != null)
-                                FillList(c._fetched,
-                                    c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
-                                    c.ServerName,
-                                    r.Records, item);
-                            UpdateCommandLine(item, c, r);
+                            this.Invoke((Action)(() =>
+                            {
+                                ListViewItem item = (ListViewItem)_zchannelTable[c];
+                                if (r.Records != null)
+                                    FillList(c._fetched,
+                                        c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
+                                        c.ServerName,
+                                        r.Records, item);
+                                UpdateCommandLine(item, c, r);
+                            }));
                         }
                         );
                     }
@@ -1668,29 +1674,50 @@ Keys keyData)
                 else
                     this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
             }
+            catch (Exception ex)
+            {
+                strError = "检索出现异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
             finally
             {
                 if (bDisplayClickableError == false
-                    && this._floatingMessage.InDelay() == false)
+                    && this._floatingMessage?.InDelay() == false)
                     this.ClearMessage();
                 if (Program.MainForm.MessageHub != null)
                     Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                if (stop != null)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= Stop_OnStop1;
+                    stop.Initial("");
+                    stop.HideProgress();
+                    stop.Style = StopStyle.None;
+                }
 
                 this.ReturnChannel(channel);
-
                 this.EnableControlsInSearching(true);
             }
 
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            try
+            {
+                MessageBox.Show(this, strError);
+            }
+            catch
+            {
+
+            }
         }
+
+        private void Stop_OnStop1(object sender, StopEventArgs e)
+        {
+            _zsearcher.Stop();
+            this.DoStop(sender, e);
+        }
+
 
 #if NO
         void FillBrowse(DigitalPlatform.Z3950.RecordCollection records,
@@ -2718,7 +2745,7 @@ out strError);
 
         private void OnZ3950LoadStop(object sender, StopEventArgs e)
         {
-            _zsearcher.GraceStop();
+            _zsearcher.Stop();
         }
 
         async void menu_loadNextBatch_Click(object sender, EventArgs e)
