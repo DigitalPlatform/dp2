@@ -1580,7 +1580,7 @@ Keys keyData)
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
 
-                if (this.SearchZ3950)
+                if (this.SearchZ3950 && string.IsNullOrEmpty(this.textBox_queryWord.Text) == false)
                 {
                     nRet = Program.MainForm.LoadUseList(true, out strError);
                     if (nRet == -1)
@@ -1618,7 +1618,7 @@ Keys keyData)
                             if (r.Records != null)
                                 FillList(c._fetched,
                                     c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
-                                    c.TargetInfo.HostName,
+                                    c.ServerName,
                                     r.Records, item);
                             UpdateCommandLine(item, c, r);
                         }
@@ -2690,7 +2690,7 @@ out strError);
                         if (present_result.Records != null)
                             FillList(channel._fetched,
                 channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
-                channel.TargetInfo.HostName,
+                channel.ServerName,
                 present_result.Records, item);
                         UpdateCommandLine(item, channel, present_result);
                     }
@@ -2730,7 +2730,7 @@ out strError);
     ZClientChannel c,
     DigitalPlatform.Z3950.ZClient.SearchResult r)
         {
-            ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.TargetInfo.HostName}");
+            ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.ServerName}");
             if (r.Value == -1 || r.Value == 0)
                 ListViewUtil.ChangeItemText(item, 1, $"检索出错 {r.ErrorInfo}");
             else
