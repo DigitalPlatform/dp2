@@ -4979,7 +4979,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 channel.Timeout = TimeSpan.FromMinutes(2);
 
                 Progress.Style = StopStyle.EnableHalfStop;
-                Progress.OnStop += new StopEventHandler(this.DoStop);
+                Progress.OnStop += Progress_OnStop;
                 Progress.Initial("正在检索 ...");
                 Progress.BeginLoop();
 
@@ -5199,21 +5199,27 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                             strMatchStyle,
                             (c, r) =>
                             {
-                                ListViewItem item = new ListViewItem();
-                                item.Tag = c;
-                                _zchannelTable[c] = item;
-                                this.browseWindow.RecordsList.Items.Add(item);
-                                BiblioSearchForm.UpdateCommandLine(item, c, r);
+                                this.Invoke((Action)(() =>
+                                {
+                                    ListViewItem item = new ListViewItem();
+                                    item.Tag = c;
+                                    _zchannelTable[c] = item;
+                                    this.browseWindow.RecordsList.Items.Add(item);
+                                    BiblioSearchForm.UpdateCommandLine(item, c, r);
+                                }));
                             },
                             (c, r) =>
                             {
-                                ListViewItem item = (ListViewItem)_zchannelTable[c];
-                                if (r.Records != null)
-                                    FillList(c._fetched,
-                                        c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
-                                        c.TargetInfo.HostName,
-                                        r.Records, item);
-                                BiblioSearchForm.UpdateCommandLine(item, c, r);
+                                this.Invoke((Action)(() =>
+                                {
+                                    ListViewItem item = (ListViewItem)_zchannelTable[c];
+                                    if (r.Records != null)
+                                        FillList(c._fetched,
+                                            c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
+                                            c.ServerName,
+                                            r.Records, item);
+                                    BiblioSearchForm.UpdateCommandLine(item, c, r);
+                                }));
                             }
                             );
                         }
@@ -5286,7 +5292,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
                     Progress.EndLoop();
-                    Progress.OnStop -= new StopEventHandler(this.DoStop);
+                    Progress.OnStop -= Progress_OnStop;
                     Progress.Initial("");
                     Progress.Style = StopStyle.None;
 
@@ -5347,6 +5353,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             this.textBox_queryWord.SelectAll();
              * */
             this.SwitchFocus(BIBLIO_SEARCHTEXT);
+        }
+
+        private void Progress_OnStop(object sender, StopEventArgs e)
+        {
+            _zsearcher.Stop();
+            this.DoStop(sender, e);
         }
 
         // zchannel --> ListViewItem
@@ -5416,7 +5428,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
         private void OnZ3950LoadStop(object sender, StopEventArgs e)
         {
-            _zsearcher.GraceStop();
+            _zsearcher.Stop();
         }
 
         async void menu_loadNextBatch_Click(object sender, EventArgs e)
@@ -5997,6 +6009,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
         {
             if (browseWindow != null)
             {
+                if (_zsearcher.InSearching)
+                    _zsearcher.Stop();
                 this.browseWindow.StoreList();
                 Program.MainForm.AppInfo.UnlinkFormState(browseWindow);
                 // this.browseWindow = null;
@@ -6030,7 +6044,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 BiblioInfo info = e.BiblioInfos[0];
                 Debug.Assert(info != null, "");
 
-                if (this.stop.IsInLoop == true)
+                bool is_z3950 = info.RecPath.IndexOf("@") != -1;
+                if (this.stop.IsInLoop == true
+                    && is_z3950 == false)
                 {
                     this.AddToPendingList(info.RecPath, "");
                     return;
