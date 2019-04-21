@@ -122,45 +122,6 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        private void toolStripButton_new_Click(object sender, EventArgs e)
-        {
-            XmlElement server = _dom.CreateElement("server");
-            _dom.DocumentElement.AppendChild(server);
-            // server.SetAttribute("recsperbatch", "10");
-
-            using (ZServerPropertyForm dlg = new ZServerPropertyForm())
-            {
-                GuiUtil.SetControlFont(dlg, this.Font);
-                dlg.UnionCatalogPageVisible = false;
-                dlg.XmlNode = server;
-                dlg.StartPosition = FormStartPosition.CenterScreen;
-                dlg.ShowDialog(this);
-
-                if (dlg.DialogResult == DialogResult.Cancel)
-                {
-                    server.ParentNode.RemoveChild(server);
-                    return;
-                }
-
-                // 对 server name 进行查重
-                string name = server.GetAttribute("name");
-                if (SearchDup(ref name, null) == true)
-                    server.SetAttribute("name", name);
-
-                {
-                    ListViewItem item = new ListViewItem();
-                    item.Tag = server;
-                    ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
-                    ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
-                    ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, "是");
-
-                    this.listView1.Items.Add(item);
-                }
-
-                this.Changed = true;
-            }
-        }
-
         private void toolStripButton_modify_Click(object sender, EventArgs e)
         {
             string strError;
@@ -523,6 +484,112 @@ MessageBoxDefaultButton.Button2);
                 }
                 number = name[i] + number;
             }
+        }
+
+        private void toolStripSplitButton_new1_ButtonClick(object sender, EventArgs e)
+        {
+            XmlElement server = _dom.CreateElement("server");
+            _dom.DocumentElement.AppendChild(server);
+            // server.SetAttribute("recsperbatch", "10");
+
+            using (ZServerPropertyForm dlg = new ZServerPropertyForm())
+            {
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.UnionCatalogPageVisible = false;
+                dlg.XmlNode = server;
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                {
+                    server.ParentNode.RemoveChild(server);
+                    return;
+                }
+
+                // 对 server name 进行查重
+                string name = server.GetAttribute("name");
+                if (SearchDup(ref name, null) == true)
+                    server.SetAttribute("name", name);
+
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Tag = server;
+                    ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
+                    ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
+                    ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, "是");
+
+                    this.listView1.Items.Add(item);
+                }
+
+                this.Changed = true;
+            }
+        }
+
+        private void ToolStripMenuItem_new_hongniba_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<server 
+name='红泥巴数字平台云' 
+addr='hnbclub.cn' 
+port='210'>
+    <database name='cbook' />
+    <database name='ebook' />
+</server>";
+
+            CreateServer(server_xml);
+        }
+
+        void CreateServer(string server_xml)
+        {
+            XmlElement server = _dom.CreateElement("server");
+            _dom.DocumentElement.AppendChild(server);
+            server = DomUtil.SetElementOuterXml(server, server_xml);
+
+            {
+                // 对 server name 进行查重
+                string name = server.GetAttribute("name");
+                if (SearchDup(ref name, null) == true)
+                    server.SetAttribute("name", name);
+
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Tag = server;
+                    ListViewUtil.ChangeItemText(item, COLUMN_NAME, name);
+                    ListViewUtil.ChangeItemText(item, COLUMN_DATABASE, ZServerUtil.GetDatabaseList(server));
+                    ListViewUtil.ChangeItemText(item, COLUMN_ENABLED, "是");
+
+                    this.listView1.Items.Add(item);
+                }
+
+                this.Changed = true;
+            }
+        }
+
+        private void ToolStripMenuItem_new_nlc_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<server 
+name='国图联编(UCS01)' 
+addr='202.96.31.28' 
+port='9991'>
+    <database name='UCS01' />
+</server>";
+
+            CreateServer(server_xml);
+
+            MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
+        }
+
+        private void ToolStripMenuItem_wangzhong_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<server 
+name='网众' 
+addr='118.25.225.224' 
+port='2100'>
+    <database name='uc_bib' />
+    <database name='cipmarc' />
+    <database name='ucs09' />
+</server>";
+
+            CreateServer(server_xml);
         }
     }
 }

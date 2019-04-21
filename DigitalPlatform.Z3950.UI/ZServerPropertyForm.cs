@@ -184,13 +184,11 @@ DomUtil.GetAttr(this.XmlNode,
                 this.textBox_databaseNames.Text += strDatabaseName;
 
                 // 全选时候要排除的数据库名
-                bool bValue = false;
-                string strError = "";
                 DomUtil.GetBooleanParam(nodes[i],
                     "notInAll",
                     false,
-                    out bValue,
-                    out strError);
+                    out bool bValue,
+                    out string strError);
                 if (bValue == true)
                 {
                     if (this.textBox_notInAllDatabaseNames.Text != "")
@@ -972,6 +970,15 @@ this.checkBox_forceIssn8.Checked == true ? null : "0");
                 return strText.Substring(0, nRet).Trim();
             else
                 return strText.Trim();
+        }
+
+        private void textBox_serverAddr_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (this.textBox_serverAddr.Text.IndexOfAny(new char[] { ':' }) != -1)
+            {
+                MessageBox.Show(this, $"所输入的值 '{this.textBox_serverAddr.Text}' 不合法。不允许包含冒号。请重新输入");
+                e.Cancel = true;
+            }
         }
     }
 

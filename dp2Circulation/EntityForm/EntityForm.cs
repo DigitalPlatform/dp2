@@ -10337,6 +10337,7 @@ MessageBoxDefaultButton.Button1);
             // 源记录就是 ？
             if (bSaveAs == true)
             {
+                // TODO: 注意检查目标书目库的 MARC 格式是否和当前 MARC 记录相同
                 this.BiblioRecPath = dlg.RecPath;
 
                 // 提交所有保存请求

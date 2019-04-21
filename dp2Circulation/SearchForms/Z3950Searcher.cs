@@ -80,6 +80,7 @@ namespace dp2Circulation
                 if (result.Value == -1)
                     return result;
                 ZClientChannel channel = new ZClientChannel();
+                channel.ServerName = server.GetAttribute("name");
                 channel.ZClient = new ZClient();
                 channel.TargetInfo = targetInfo;
                 channel.Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true);
@@ -272,6 +273,9 @@ namespace dp2Circulation
 
     public class ZClientChannel : IDisposable
     {
+        // 用户显示的服务器名字
+        public string ServerName { get; set; }
+
         public ZClient ZClient { get; set; }
 
         public TargetInfo TargetInfo { get; set; }

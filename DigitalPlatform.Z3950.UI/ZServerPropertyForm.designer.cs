@@ -59,6 +59,7 @@
             this.radioButton_authenStyleIdpass = new System.Windows.Forms.RadioButton();
             this.radioButton_authenStyeOpen = new System.Windows.Forms.RadioButton();
             this.tabPage_search = new System.Windows.Forms.TabPage();
+            this.label20 = new System.Windows.Forms.Label();
             this.checkBox_forceIssn8 = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.checkBox_isbn_wild = new System.Windows.Forms.CheckBox();
@@ -100,7 +101,6 @@
             this.label17 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.label20 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_general.SuspendLayout();
             this.tabPage_database.SuspendLayout();
@@ -231,6 +231,7 @@
             this.textBox_serverAddr.Name = "textBox_serverAddr";
             this.textBox_serverAddr.Size = new System.Drawing.Size(410, 28);
             this.textBox_serverAddr.TabIndex = 3;
+            this.textBox_serverAddr.Validating += new System.ComponentModel.CancelEventHandler(this.textBox_serverAddr_Validating);
             // 
             // label2
             // 
@@ -455,6 +456,15 @@
             this.tabPage_search.TabIndex = 2;
             this.tabPage_search.Text = "检索/获取";
             this.tabPage_search.UseVisualStyleBackColor = true;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(320, 21);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(107, 18);
+            this.label20.TabIndex = 16;
+            this.label20.Text = "(缺省为 10)";
             // 
             // checkBox_forceIssn8
             // 
@@ -938,15 +948,6 @@
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(320, 21);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(107, 18);
-            this.label20.TabIndex = 16;
-            this.label20.Text = "(缺省为 10)";
             // 
             // ZServerPropertyForm
             // 

@@ -49,7 +49,7 @@ namespace dp2Circulation
             comboBox_biblioDbName_TextChanged(null, null);
 
             if (this.SuppressAutoClipboard == false)
-            TrySetRecPathFromClipboard();
+                TrySetRecPathFromClipboard();
         }
 
         private void BiblioSaveToDlg_FormClosed(object sender, FormClosedEventArgs e)
@@ -62,6 +62,19 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.comboBox_biblioDbName.Text) == true)
             {
                 MessageBox.Show(this, "尚未指定书目库名");
+                return;
+            }
+
+            // 2019/4/21
+            // 确保书目库名字下拉列表有内容
+            comboBox_biblioDbName_DropDown(this, new EventArgs());
+
+            // 2019/4/21
+            // 检查书目库名字是否合法
+            if (this.comboBox_biblioDbName.Items.Count > 0
+                && this.comboBox_biblioDbName.Items.IndexOf(this.comboBox_biblioDbName.Text) == -1)
+            {
+                MessageBox.Show(this, $"书目库名 '{this.comboBox_biblioDbName.Text}' 不符合当前格式要求。请重新选择");
                 return;
             }
 
@@ -108,7 +121,7 @@ namespace dp2Circulation
                 else
                 {
                     this.comboBox_biblioDbName.Text = value.Substring(0, nRet);
-                    this.textBox_recordID.Text = value.Substring(nRet+1);
+                    this.textBox_recordID.Text = value.Substring(nRet + 1);
                 }
             }
         }
@@ -191,7 +204,7 @@ namespace dp2Circulation
             if (this.textBox_recordID.Text != "?"
                 && StringUtil.IsPureNumber(this.textBox_recordID.Text) == false)
             {
-                MessageBox.Show(this, "记录ID '"+this.textBox_recordID.Text+"' 不合法。必须为'?'或纯数字(注:均需为半角)");
+                MessageBox.Show(this, "记录ID '" + this.textBox_recordID.Text + "' 不合法。必须为'?'或纯数字(注:均需为半角)");
                 e.Cancel = true;
                 return;
             }
