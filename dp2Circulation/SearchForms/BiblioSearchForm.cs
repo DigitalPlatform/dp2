@@ -2382,7 +2382,7 @@ out strError);
                     await DoSearch(false, false, null);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 goto ERROR1;
@@ -4409,11 +4409,9 @@ out strError);
                     if (info.RecPath.IndexOf("@") != -1)
                         goto CONTINUE;
 
-                    string strOutputPath = "";
 
                     stop.SetMessage("正在保存书目记录 " + strRecPath);
 
-                    byte[] baNewTimestamp = null;
 
                     long lRet = channel.SetBiblioInfo(
                         stop,
@@ -4423,8 +4421,8 @@ out strError);
                         info.NewXml,
                         info.Timestamp,
                         "",
-                        out strOutputPath,
-                        out baNewTimestamp,
+                        out string strOutputPath,
+                        out byte[] baNewTimestamp,
                         out strError);
                     if (lRet == -1)
                     {
@@ -4442,14 +4440,13 @@ out strError);
                                 goto CONTINUE;
 
                             // 重新装载书目记录到 OldXml
-                            string[] results = null;
                             // byte[] baTimestamp = null;
                             lRet = channel.GetBiblioInfos(
                                 stop,
                                 strRecPath,
                                 "",
                                 new string[] { "xml" },   // formats
-                                out results,
+                                out string[] results,
                                 out baNewTimestamp,
                                 out strError);
                             if (lRet == 0)
@@ -4487,14 +4484,13 @@ MessageBoxDefaultButton.Button1);
                         if (result == System.Windows.Forms.DialogResult.No)
                             goto CONTINUE;
                         // 重新装载书目记录到 OldXml
-                        string[] results = null;
                         // byte[] baTimestamp = null;
                         lRet = channel.GetBiblioInfos(
                             stop,
                             strRecPath,
                             "",
                             new string[] { "xml" },   // formats
-                            out results,
+                            out string[] results,
                             out baNewTimestamp,
                             out strError);
                         if (lRet == 0)
@@ -6267,24 +6263,60 @@ MessageBoxDefaultButton.Button1);
                     channel.Timeout = new TimeSpan(0, 40, 0);   // 复制的时候可能需要复制对象，所需时间一般很长
 
                     REDO:
-                    // result.Value:
-                    //      -1  出错
-                    //      0   成功，没有警告信息。
-                    //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
-                    long lRet = channel.CopyBiblioInfo(
-                        this.stop,
-                        strAction,
-                        strRecPath,
-                        "xml",
-                        null,
-                        null,    // this.BiblioTimestamp,
-                        dlg.RecPath,
-                        null,   // strXml,
-                        "file_reserve_source",  // 2017/4/19
-                        out strOutputBiblio,
-                        out strOutputBiblioRecPath,
-                        out baOutputTimestamp,
-                        out strError);
+                    long lRet = 0;
+                    if (strRecPath.IndexOf("@") != -1)
+                    {
+                        // TODO: 如果是移动操作，需要警告一下操作被转换为复制执行？
+                        BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                        if (info == null)
+                            goto CONTINUE;
+                        string strXml = info.NewXml;
+                        if (string.IsNullOrEmpty(strXml))
+                            strXml = info.OldXml;
+                        if (string.IsNullOrEmpty(strXml) == true)
+                            goto CONTINUE;
+                        lRet = channel.SetBiblioInfo(
+stop,
+"new",
+dlg.RecPath,
+"xml",
+strXml,
+info.Timestamp,
+"",
+out string strOutputPath,
+out byte[] baNewTimestamp,
+out strError);
+                        info.Timestamp = baNewTimestamp;
+                        if (lRet != -1)
+                        {
+                            if (info.NewXml == strXml)
+                            {
+                                info.OldXml = strXml;
+                                info.NewXml = "";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // result.Value:
+                        //      -1  出错
+                        //      0   成功，没有警告信息。
+                        //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
+                        lRet = channel.CopyBiblioInfo(
+                            this.stop,
+                            strAction,
+                            strRecPath,
+                            "xml",
+                            null,
+                            null,    // this.BiblioTimestamp,
+                            dlg.RecPath,
+                            null,   // strXml,
+                            "file_reserve_source",  // 2017/4/19
+                            out strOutputBiblio,
+                            out strOutputBiblioRecPath,
+                            out baOutputTimestamp,
+                            out strError);
+                    }
                     if (lRet == -1)
                     {
                         /*
@@ -11326,7 +11358,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-#region 停靠
+        #region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11395,7 +11427,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-#endregion
+        #endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
