@@ -5949,9 +5949,11 @@ MessageBoxDefaultButton.Button1);
                 nPageNo = _pageCount - 1;
             }
 
-            int nRet = LoadBorrowHistory(this.toolStripTextBox_barcode.Text,
-     nPageNo,
-     out strError);
+            string strBarcode = this.toolStripTextBox_barcode.Text;
+            int nRet = LoadBorrowHistory(
+                string.IsNullOrEmpty(strBarcode) == true ? "!all" : strBarcode,
+                nPageNo,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
             return;

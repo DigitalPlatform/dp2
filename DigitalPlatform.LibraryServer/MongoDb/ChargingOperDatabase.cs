@@ -151,7 +151,13 @@ namespace DigitalPlatform.LibraryServer
             string itemRefIdPrefix = "@itemRefID:";
 
             IMongoQuery patron_query = null;
-            if (patronBarcode != null
+            if (patronBarcode == "!all")    // 所有读者和图书的借阅历史
+                patron_query = Query.Or(Query.Exists("PatronBarcode"), Query.Exists("ItemBarcode"));
+            else if (patronBarcode == "!patron")    // 所有读者的借阅历史
+                patron_query = Query.Exists("PatronBarcode");
+            else if (patronBarcode == "!item")  // 所有图书的借阅历史
+                patron_query = Query.Exists("ItemBarcode");
+            else if (patronBarcode != null
                 && patronBarcode.StartsWith(itemBarcodePrefix) == true)
                 patron_query = Query.EQ("ItemBarcode", patronBarcode.Substring(itemBarcodePrefix.Length));
             else if (patronBarcode != null

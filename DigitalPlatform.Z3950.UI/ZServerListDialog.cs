@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
 using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.Z3950.UI
@@ -41,7 +35,20 @@ namespace DigitalPlatform.Z3950.UI
 
         private void ZServerListDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            if (this.Changed)
+            {
+                DialogResult result = MessageBox.Show(this,
+"当前有修改尚未保存。\r\n\r\n确实要放弃保存修改?\r\n\r\n[是]放弃修改，对话框关闭；[否]不关闭对话框",
+"ZServerListDialog",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
         }
 
         private void ZServerListDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -63,17 +70,6 @@ namespace DigitalPlatform.Z3950.UI
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-            if (this.Changed)
-            {
-                DialogResult result = MessageBox.Show(this,
-"当前有修改尚未保存。\r\n\r\n确实要放弃保存修改?",
-"ZServerListDialog",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-                if (result == DialogResult.No)
-                    return;
-            }
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
@@ -81,6 +77,7 @@ MessageBoxDefaultButton.Button2);
         NormalResult Save()
         {
             _dom.Save(this.XmlFileName);
+            this.Changed = false;
             return new NormalResult();
         }
 
@@ -223,9 +220,10 @@ MessageBoxDefaultButton.Button2);
             }
             else
             {
+                // 多个事项
                 this.toolStripButton_enabled.Enabled = true;
 
-                this.toolStripButton_enabled.CheckState = CheckState.Indeterminate;
+                this.toolStripButton_enabled.CheckState = GetCheckState(this.listView1.SelectedItems.Cast<ListViewItem>());
             }
 
             if (this.listView1.SelectedItems.Count == 1)
@@ -275,6 +273,26 @@ MessageBoxDefaultButton.Button2);
         {
             XmlElement server = (XmlElement)item.Tag;
             return IsEnabled(server.GetAttribute("enabled"), true);
+        }
+
+        // 获得若干个事项的“启用状态”
+        static CheckState GetCheckState(IEnumerable<ListViewItem> items)
+        {
+            string last_state = "";
+            foreach (ListViewItem item in items)
+            {
+                string current_state = IsEnabled(item) ? "enabled" : "disabled";
+                if (string.IsNullOrEmpty(last_state) == false
+                    && current_state != last_state)
+                    return CheckState.Indeterminate;
+
+                last_state = current_state;
+            }
+
+            if (string.IsNullOrEmpty(last_state))
+                return CheckState.Indeterminate;
+
+            return last_state == "enabled" ? CheckState.Checked : CheckState.Unchecked;
         }
 
         private void toolStripButton_moveUp_Click(object sender, EventArgs e)

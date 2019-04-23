@@ -4,63 +4,64 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
+
 using DigitalPlatform;
 using DigitalPlatform.Text;
 
 namespace dp2Catalog
 {
-	/// <summary>
-	/// Summary description for CopyrightDlg.
-	/// </summary>
-	public class CopyrightDlg : System.Windows.Forms.Form
-	{
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.LinkLabel linkLabel1;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Label label_copyright;
-		private System.Windows.Forms.TextBox textBox_environment;
+    /// <summary>
+    /// Summary description for CopyrightDlg.
+    /// </summary>
+    public class CopyrightDlg : System.Windows.Forms.Form
+    {
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Label label_copyright;
+        private System.Windows.Forms.TextBox textBox_environment;
         private PictureBox pictureBox1;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
-		public CopyrightDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public CopyrightDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-			// this.Opacity = 0.75;
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+            // this.Opacity = 0.75;
 
-		}
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CopyrightDlg));
             this.label1 = new System.Windows.Forms.Label();
             this.label_copyright = new System.Windows.Forms.Label();
@@ -73,7 +74,7 @@ namespace dp2Catalog
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.BackColor = System.Drawing.Color.Honeydew;
             this.label1.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -86,7 +87,7 @@ namespace dp2Catalog
             // 
             // label_copyright
             // 
-            this.label_copyright.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.label_copyright.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_copyright.BackColor = System.Drawing.Color.PaleGreen;
             this.label_copyright.Location = new System.Drawing.Point(20, 260);
@@ -99,7 +100,7 @@ namespace dp2Catalog
             // 
             // linkLabel1
             // 
-            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabel1.Location = new System.Drawing.Point(20, 354);
             this.linkLabel1.Name = "linkLabel1";
@@ -124,8 +125,8 @@ namespace dp2Catalog
             // 
             // textBox_environment
             // 
-            this.textBox_environment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_environment.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_environment.BackColor = System.Drawing.Color.Honeydew;
             this.textBox_environment.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -140,7 +141,7 @@ namespace dp2Catalog
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.InitialImage = null;
@@ -176,59 +177,38 @@ namespace dp2Catalog
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            Close();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
+        {
             /*
-			for(int i = 0; i<100; i++) 
-			{
-				System.Threading.Thread.Sleep(10);
-
-				this.Opacity = (double)1 - ((double)i/(double)100);
-				this.Update();
-				//Application.DoEvents();
-			}*/
-
-			Close();
-		}
-
-		private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
-		{
-			/*
 			// Determine which link was clicked within the LinkLabel.
 			MessageBox.Show(linkLabel1.Links[0].ToString());
 			return;
 			*/
-			System.Diagnostics.Process.Start("iexplore",linkLabel1.Text);
-		
-		}
+            System.Diagnostics.Process.Start(// "iexplore",
+                linkLabel1.Text);
+        }
 
-		private void CopyrightDlg_Load(object sender, System.EventArgs e)
-		{
-			// label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+        private void CopyrightDlg_Load(object sender, System.EventArgs e)
+        {
+            // label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
             label_copyright.Text = @"(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司; 
 2015 年以 Apache 2.0 License 开源:
 http://github.com/DigitalPlatform/dp2";
 
             Assembly myAssembly;
 
-			myAssembly = Assembly.GetAssembly(this.GetType());
-			textBox_environment.Text = "本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
-				+ "\r\n本软件: " + myAssembly.FullName
+            myAssembly = Assembly.GetAssembly(this.GetType());
+            textBox_environment.Text = "本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
+                + "\r\n本软件: " + myAssembly.FullName
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
-
-			/*
-			for(int i = 0; i<100; i++) 
-			{
-				System.Threading.Thread.Sleep(10);
-
-				this.Opacity = ((double)(i+1)/(double)100);
-				this.Update();
-
-			}
-			*/	
-		}
-	}
+        }
+    }
 }
