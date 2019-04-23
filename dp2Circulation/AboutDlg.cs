@@ -152,34 +152,18 @@ namespace dp2Circulation
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
         #endregion
 
         private void button_OK_Click(object sender, System.EventArgs e)
         {
-            /*
-			for(int i = 0; i<100; i++) 
-			{
-				System.Threading.Thread.Sleep(10);
-
-				this.Opacity = (double)1 - ((double)i/(double)100);
-				this.Update();
-				//Application.DoEvents();
-			}*/
-
             Close();
         }
 
         private void linkLabel1_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
         {
-            /*
-            // Determine which link was clicked within the LinkLabel.
-            MessageBox.Show(linkLabel1.Links[0].ToString());
-            return;
-            */
-            System.Diagnostics.Process.Start("iexplore", linkLabel1.Text);
-
+            System.Diagnostics.Process.Start(// "iexplore",
+                linkLabel1.Text);
         }
 
         private void CopyrightDlg_Load(object sender, System.EventArgs e)
@@ -194,19 +178,8 @@ namespace dp2Circulation
                 + "\r\n当前连接的 dp2Library (位于 " + Program.MainForm.LibraryServerUrl + "): " + Program.MainForm.ServerVersion.ToString() + " UID:" + Program.MainForm.ServerUID + " 失效期:" + Program.MainForm.ExpireDate
                 + "\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress())
-                + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871")
+                // + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871")
                 + "\r\n是否 ClickOnce 安装: " + ApplicationDeployment.IsNetworkDeployed;
-
-            /*
-            for(int i = 0; i<100; i++) 
-            {
-                System.Threading.Thread.Sleep(10);
-
-                this.Opacity = ((double)(i+1)/(double)100);
-                this.Update();
-
-            }
-            */
         }
     }
 }

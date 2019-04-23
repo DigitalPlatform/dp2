@@ -1051,7 +1051,8 @@ namespace DigitalPlatform.Marc
                 MarcNodeList subfields = fields[0].select("subfield[@name='" + strSubfieldName + "']");
                 if (subfields.count == 0)
                 {
-                    fields[0].ChildNodes.insertSequence(new MarcSubfield("a", strContent));
+                    fields[0].ChildNodes.insertSequence(new MarcSubfield(strSubfieldName, // bug "a", 
+                        strContent));
                 }
                 else
                 {

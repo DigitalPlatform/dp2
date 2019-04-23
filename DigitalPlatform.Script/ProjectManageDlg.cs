@@ -1151,7 +1151,8 @@ namespace DigitalPlatform.Script
 
         void button_installVisualStudioCode_Click(object sender, System.EventArgs e)
         {
-            System.Diagnostics.Process.Start("iexplore", "https://code.visualstudio.com//");
+            System.Diagnostics.Process.Start(// "iexplore",
+                "https://code.visualstudio.com//");
         }
 
 

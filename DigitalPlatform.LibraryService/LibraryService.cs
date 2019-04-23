@@ -2359,7 +2359,6 @@ namespace dp2Library
                 DateTime endTime = string.IsNullOrEmpty(strEnd) ? new DateTime(0) : DateTime.Parse(strEnd);
 
                 string strError = "";
-                long totalCount = 0;
                 IEnumerable<ChargingOperItem> collection = app.ChargingOperDatabase.Find(
                     patronBarcode,
                     startTime,
@@ -2367,7 +2366,7 @@ namespace dp2Library
                     actions,
                     order,
                     (int)start,
-                    out totalCount);
+                    out long totalCount);
                 if (collection == null)
                 {
                     strError = "ChargingOperDatabase 尚未启用";

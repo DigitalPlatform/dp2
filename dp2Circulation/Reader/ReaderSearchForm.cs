@@ -7084,6 +7084,7 @@ dlg.UiState);
         }
 
         // 将 20120101 - 20151231 这样的日期字符串形态转换为 SearchCharging() API 能接受的时间范围字符串形态
+        // 注意 SearchCharging() API 要的时间范围字符串，中间是一个波浪号而不是横杠
         static string GetTimeRange(string strText)
         {
             string strStart = "";

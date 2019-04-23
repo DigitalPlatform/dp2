@@ -812,7 +812,8 @@ this.checkBox_forceIssn8.Checked == true ? null : "0");
 
         private void button_gotoHomepage_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("iexplore", this.textBox_homepage.Text);
+            System.Diagnostics.Process.Start(// "iexplore", 
+                this.textBox_homepage.Text);
         }
 
         private void checkBox_charNegoUTF8_CheckedChanged(object sender, EventArgs e)
