@@ -10426,13 +10426,13 @@ MessageBoxDefaultButton.Button1);
                         out strError);
                     if (lRet == -1)
                     {
-                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已装入 " + lStart.ToString() + " 条，" + strError;
+                        this.label_message.Text = "检索 dp2 共命中 " + lHitCount.ToString() + " 条书目记录，已装入 " + lStart.ToString() + " 条，" + strError;
                         goto ERROR1;
                     }
 
                     if (lRet == 0)
                     {
-                        MessageBox.Show(this, "未命中");
+                        MessageBox.Show(this, "dp2 未命中");
                         return;
                     }
 
