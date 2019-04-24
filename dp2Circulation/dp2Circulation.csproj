@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>3.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -96,7 +96,7 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ClosedXML, Version=0.94.2.0, Culture=neutral, processorArchitecture=MSIL">
