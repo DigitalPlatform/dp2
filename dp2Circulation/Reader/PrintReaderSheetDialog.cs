@@ -1,7 +1,9 @@
 ﻿using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -86,6 +88,54 @@ namespace dp2Circulation
             this.CardPhotoPath = strCardPhotoPath;
         }
 
+        /*
+         * libraryName: 图书馆名字
+         * barcode: 读者证条码号
+         * department: 单位
+         * name: 读者姓名
+         * readerType: 读者类型
+         * expire: 证失效期。本地时间格式，注意和 expireDate 元素内容不同
+         * cardPhotoPath: 证件照片图像文件路径
+         * */
+        // parameters:
+        //      strTemplate 模板。定义了如何输出读者信息中的每一行
+        public void OutputByTemplate(StreamWriter sw, 
+            string strTemplate)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(this.Xml);
+
+            string strLibraryName = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
+
+            if (string.IsNullOrEmpty(strLibraryName))
+                strLibraryName = Program.MainForm.LibraryName;
+
+            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
+            string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
+            string strGender = DomUtil.GetElementText(dom.DocumentElement, "gender");
+
+            string strReaderType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
+            string strExpire = DomUtil.GetElementText(dom.DocumentElement, "expireDate");
+            if (string.IsNullOrEmpty(strExpire) == false)
+                strExpire = DateTimeUtil.LocalDate(strExpire);
+
+            Hashtable macro_table = new Hashtable();
+            macro_table["%libraryName%"] = strLibraryName;
+            macro_table["%barcode%"] = strBarcode;
+            macro_table["%department%"] = strDepartment;
+            macro_table["%name%"] = strName;
+            macro_table["%gender%"] = strGender;
+            macro_table["%readerType%"] = strReaderType;
+            macro_table["%expire%"] = strExpire;
+            macro_table["%cardPhotoPath%"] = this.CardPhotoPath;
+
+            string strResult = StringUtil.MacroString(macro_table,
+    strTemplate);
+            sw.WriteLine(strResult);
+            sw.WriteLine("***");
+        }
+
         public void Output(StreamWriter sw, string strSheetDefName)
         {
             XmlDocument dom = new XmlDocument();
@@ -168,6 +218,13 @@ namespace dp2Circulation
             }
         }
 
+        public void OutputByTemplate(StreamWriter sw, string strTemplate)
+        {
+            foreach (ReaderSheetItem item in Items)
+            {
+                item.OutputByTemplate(sw, strTemplate);
+            }
+        }
     }
 
     public class ReaderSheetCollection : List<ReaderSheetInfo>

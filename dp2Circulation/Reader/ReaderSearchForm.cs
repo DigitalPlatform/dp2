@@ -6233,6 +6233,8 @@ dlg.UiState);
         }
 
         // 创建读者账簿
+        // parameters:
+        //      strSheetDefName 打印方案名称
         // return:
         //      -1  出错
         //      0   用户中断
@@ -6268,8 +6270,34 @@ dlg.UiState);
             }
 
             ReaderSheetCollection sheets = new ReaderSheetCollection();
-
             string strTempDataFileName = Path.Combine(Program.MainForm.UserTempDir, "~readersheetdata.txt");
+
+            //      strTemplate 模板文件内容。如果为 null 表示不使用模板文件
+            string strTemplate = "";
+
+            {
+
+                string strTemplateFileName = Path.Combine(Program.MainForm.DataDir, "patronSheetLayout\\" + strSheetDefName + ".template");
+                if (File.Exists(strTemplateFileName) == false)
+                    strTemplateFileName = Path.Combine(Program.MainForm.UserDir, "patronSheetLayout\\" + strSheetDefName + ".template");
+
+                if (File.Exists(strTemplateFileName) == false)
+                    strTemplate = null;
+                else
+                {
+                    // 根据模板打印
+                    // 能自动识别文件内容的编码方式的读入文本文件内容模块
+                    // return:
+                    //      -1  出错
+                    //      0   文件不存在
+                    //      1   文件存在
+                    nRet = Global.ReadTextFileContent(strTemplateFileName,
+                        out strTemplate,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
 
             try
             {
@@ -6339,7 +6367,10 @@ dlg.UiState);
                     {
                         foreach (ReaderSheetInfo info in sheets)
                         {
-                            info.Output(sw, strSheetDefName);
+                            if (string.IsNullOrEmpty(strTemplate))
+                                info.Output(sw, strSheetDefName);
+                            else
+                                info.OutputByTemplate(sw, strTemplate);
 
                             if (sheets.IsTail(info) == false)   // 最后一个元素末尾不需要换页
                             {

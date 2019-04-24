@@ -213,7 +213,9 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
-                this.App.WriteErrorLog("日志恢复 任务启动。");
+                this.App.WriteErrorLog($"日志恢复 任务启动。恢复级别为: {this.RecoverLevel}");
+
+                this.AppendResultText($"日志恢复级别为: {this.RecoverLevel}\r\n");
 
                 // 当为容错恢复级别时，检查当前全部读者库的检索点是否符合要求
                 if (this.RecoverLevel == LibraryServer.RecoverLevel.Robust)
@@ -241,6 +243,8 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bClearFirst == true)
                 {
+                    this.AppendResultText("清除全部数据库记录\r\n");
+
                     nRet = this.App.ClearAllDbs(this.RmsChannels,
                         out strError);
                     if (nRet == -1)
@@ -256,7 +260,6 @@ namespace DigitalPlatform.LibraryServer
                     // 做所有文件
                     bStart = true;
                 }
-
 
                 // 列出所有日志文件
                 DirectoryInfo di = new DirectoryInfo(this.App.OperLog.Directory);
@@ -309,7 +312,7 @@ namespace DigitalPlatform.LibraryServer
                 // TODO: 可以考虑从 result 文本文件中搜集所有错误信息行，放入 ErrorInfo 中，不过得有个极限行数限制
                 return;
 
-            ERROR1:
+                ERROR1:
                 this.ErrorInfo = strError;
                 return;
             }
