@@ -24,6 +24,7 @@ using System.Web;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using System.Net;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -516,6 +517,18 @@ out strError);
 
         static string CLIENT_IP = "_clientip";
 
+        static bool _initialized = false;
+
+        static void Initial()
+        {
+            if (_initialized == false)
+            {
+                System.Net.ServicePointManager.SecurityProtocol =
+        SecurityProtocolType.Ssl3;
+                _initialized = true;
+            }
+        }
+
         // public localhost.LibraryWse ws
         /// <summary>
         /// 获取 localhost.dp2libraryClient 对象。这是 WCF 层的通道对象
@@ -530,6 +543,8 @@ out strError);
         {
             get
             {
+                // Initial();
+
                 if (m_ws == null)
                 {
                     string strUrl = this.Url;

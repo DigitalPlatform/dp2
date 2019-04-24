@@ -1266,10 +1266,13 @@ Keys keyData)
 
             this.label_message.Text = "";
 
+#if NO
             LibraryChannel channel = this.GetChannel(".",
                 ",",
                 GetChannelStyle.GUI,
                 "");  // ? "test:127.0.0.1"
+#endif
+            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.None;
             stop.OnStop += Stop_OnStop1;
@@ -11385,7 +11388,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11454,7 +11457,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
