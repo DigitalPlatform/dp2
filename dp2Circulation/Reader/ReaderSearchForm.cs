@@ -1340,14 +1340,38 @@ out strError);
         {
             try
             {
-                string strDirectory = Path.Combine(Program.MainForm.DataDir, "reader");
+                // 标配部分
+                string strDirectory = Path.Combine(Program.MainForm.DataDir, "patronSheetLayout");
+                List<string> results = getPatronSheetNames(strDirectory);
+
+                // 2019/4/23
+                // 定制部分
+                strDirectory = Path.Combine(Program.MainForm.UserDir, "patronSheetLayout");
+                results.AddRange(getPatronSheetNames(strDirectory));
+
+                return results;
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        List<string> getPatronSheetNames(string strDirectory)
+        {
+            try
+            {
                 DirectoryInfo di = new DirectoryInfo(strDirectory);
-                FileInfo[] fis = di.GetFiles("patronSheetLayout*.xml");
+                FileInfo[] fis = di.GetFiles("*.xml");  // patronSheetLayout
                 List<string> results = new List<string>();
                 foreach (FileInfo fi in fis)
                 {
+                    /*
                     List<string> parts = StringUtil.ParseTwoPart(fi.Name, "_");
                     parts = StringUtil.ParseTwoPart(parts[1], ".");
+                    results.Add(parts[0]);
+                    */
+                    var parts = StringUtil.ParseTwoPart(fi.Name, ".");
                     results.Add(parts[0]);
                 }
 
@@ -6329,7 +6353,8 @@ dlg.UiState);
                 }
 
                 LabelPrintForm labelPrintForm = Program.MainForm.EnsureLabelPrintForm();
-                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout_" + strSheetDefName + ".xml");
+                // labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout_" + strSheetDefName + ".xml");
+                labelPrintForm.LabelDefFilename = GetLabelDefFileName(strSheetDefName);
                 labelPrintForm.LabelFilename = strTempDataFileName;
                 labelPrintForm.MdiParent = Program.MainForm;
                 labelPrintForm.Show();
@@ -6346,6 +6371,14 @@ dlg.UiState);
 
             // TODO: sheet 可以按照单位来区分。例如按照班级
             return 1;
+        }
+
+        string GetLabelDefFileName(string strSheetDefName)
+        {
+            string filename = Path.Combine(Program.MainForm.DataDir, "patronSheetLayout\\" + strSheetDefName + ".xml");
+            if (File.Exists(filename) == false)
+                filename = Path.Combine(Program.MainForm.UserDir, "patronSheetLayout\\" + strSheetDefName + ".xml");
+            return filename;
         }
 
 #if NO

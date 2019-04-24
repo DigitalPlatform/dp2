@@ -8850,7 +8850,8 @@ Stack:
             string strError = "";
             resultInfo = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("BatchTask", true, true, true);
+            bool check_hangup = strAction == "getinfo" || strAction == "stop" ? false : true;
+            LibraryServerResult result = this.PrepareEnvironment("BatchTask", true, true, check_hangup);
             if (result.Value == -1)
                 return result;
 
