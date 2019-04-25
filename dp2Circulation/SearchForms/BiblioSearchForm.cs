@@ -1679,7 +1679,8 @@ Keys keyData)
             }
             catch (Exception ex)
             {
-                strError = "检索出现异常: " + ExceptionUtil.GetDebugText(ex);
+                // 注: ExceptionUtil.GetExceptionText 可以处理好 AggregationException 的显示
+                strError = "检索出现异常: " + ExceptionUtil.GetExceptionText(ex);
                 goto ERROR1;
             }
             finally
