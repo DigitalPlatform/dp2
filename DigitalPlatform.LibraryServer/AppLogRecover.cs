@@ -4726,6 +4726,7 @@ strElementName);
   <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
+注: 2019/4/25 以前的代码存在 bug，少写入了 readerBarcode 和 newPassword 元素。但此二元素可以从 readerRecord 里面找出来
          * */
         public int RecoverChangeReaderPassword(
             RmsChannelCollection Channels,
@@ -4738,7 +4739,6 @@ strElementName);
             // 暂时把Robust当作Logic处理
             if (level == RecoverLevel.Robust)
                 level = RecoverLevel.Logic;
-
 
             long lRet = 0;
             int nRet = 0;
@@ -4755,10 +4755,9 @@ strElementName);
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
             {
-                XmlNode node = null;
                 string strReaderXml = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerRecord",
-                    out node);
+                    out XmlNode node);
                 if (node == null)
                 {
                     strError = "日志记录中缺<readerRecord>元素";
@@ -4767,8 +4766,6 @@ strElementName);
                 string strReaderRecPath = DomUtil.GetAttr(node, "recPath");
 
                 byte[] timestamp = null;
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
 
                 // 写读者记录
                 lRet = channel.DoSaveTextRes(strReaderRecPath,
@@ -4776,8 +4773,8 @@ strElementName);
     false,
     "content,ignorechecktimestamp",
     timestamp,
-    out output_timestamp,
-    out strOutputPath,
+    out byte[] output_timestamp,
+    out string strOutputPath,
     out strError);
                 if (lRet == -1)
                 {
@@ -4798,7 +4795,7 @@ strElementName);
                     "readerBarcode");
                 if (String.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    strError = "日志记录中缺乏<readerBarcode>元素";
+                    strError = "日志记录中缺乏 <readerBarcode> 元素";
                     goto ERROR1;
                 }
 
@@ -4806,22 +4803,18 @@ strElementName);
                     "newPassword");
                 if (String.IsNullOrEmpty(strNewPassword) == true)
                 {
-                    strError = "日志记录中缺乏<newPassword>元素";
+                    strError = "日志记录中缺乏 <newPassword> 元素";
                     goto ERROR1;
                 }
 
                 // 读入读者记录
-                string strReaderXml = "";
-                string strOutputReaderRecPath = "";
-                byte[] reader_timestamp = null;
-
                 nRet = this.GetReaderRecXml(
                     // Channels,
                     channel,
                     strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
+                    out string strReaderXml,
+                    out string strOutputReaderRecPath,
+                    out byte[] reader_timestamp,
                     out strError);
                 if (nRet == 0)
                 {
@@ -4834,9 +4827,8 @@ strElementName);
                     goto ERROR1;
                 }
 
-                XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
+                    out XmlDocument readerdom,
                     out strError);
                 if (nRet == -1)
                 {
@@ -4848,8 +4840,6 @@ strElementName);
                 DomUtil.SetElementText(readerdom.DocumentElement,
                     "password", strNewPassword);
 
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -4857,8 +4847,8 @@ strElementName);
                     false,
                     "content,ignorechecktimestamp",
                     reader_timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
+                    out byte[] output_timestamp,
+                    out string strOutputPath,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;

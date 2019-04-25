@@ -12470,7 +12470,6 @@ strLibraryCode);    // 读者所在的馆代码
                 goto ERROR1;
 
             // byte[] output_timestamp = null;
-            string strOutputPath = "";
 
             // 保存读者记录
             long lRet = channel.DoSaveTextRes(strReaderRecPath,
@@ -12479,7 +12478,7 @@ strLibraryCode);    // 读者所在的馆代码
                 "content", // "content,ignorechecktimestamp",
                 timestamp,   // timestamp,
                 out output_timestamp,
-                out strOutputPath,
+                out string strOutputPath,
                 out strError);
             if (lRet == -1)
             {
@@ -12487,13 +12486,11 @@ strLibraryCode);    // 读者所在的馆代码
                     && nRedoCount < 10)
                 {
                     // 重新装载读者记录
-                    string strXml = "";
-                    string strMetaData = "";
                     timestamp = null;
 
                     lRet = channel.GetRes(strReaderRecPath,
-                        out strXml,
-                        out strMetaData,
+                        out string strXml,
+                        out string strMetaData,
                         out timestamp,
                         out strOutputPath,
                         out strError);
@@ -12519,12 +12516,29 @@ strLibraryCode);    // 读者所在的馆代码
                 goto ERROR1;
             }
 
+            // ChangeReaderPassword() API 恢复动作
+            /*
+    <root>
+      <operation>changeReaderPassword</operation> 
+      <readerBarcode>...</readerBarcode>	读者证条码号
+      <newPassword>5npAUJ67/y3aOvdC0r+Dj7SeXGE=</newPassword> 
+      <operator>test</operator> 
+      <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 
+      <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+    </root>
+             * */
+
             // 写入日志
-            string strReaderBarcode = DomUtil.GetElementText(domOperLog.DocumentElement, "barcode");
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode"); // 2019/4/25 修改 bug。原来为 domOperLog.Document
+            string strNewPassword = DomUtil.GetElementText(readerdom.DocumentElement, "password"); // 2019/4/25 增加
 
             // 读者证条码号
             DomUtil.SetElementText(domOperLog.DocumentElement,
                 "readerBarcode", strReaderBarcode);
+
+            // 新密码(hash 形态)
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "newPassword", strNewPassword);
 
             // 读者记录
             XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,

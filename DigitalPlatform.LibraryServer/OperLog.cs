@@ -1120,7 +1120,8 @@ namespace DigitalPlatform.LibraryServer
             // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
             // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
             // 1.07 (2018/3/7) passgate 日志记录中增加了 readerRefID 元素
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.07");
+            // 1.08 (2019/4/25) changeReaderPassword 日志此前版本中少了 readerBarcode 和 newPassword 元素。现在补上
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.08");
 
             if (start_time != new DateTime(0))
             {

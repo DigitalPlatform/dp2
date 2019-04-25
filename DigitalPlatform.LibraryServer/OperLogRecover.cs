@@ -313,6 +313,10 @@ namespace DigitalPlatform.LibraryServer
                 return;
 
                 ERROR1:
+                // 2019/4/25
+                this.AppendResultText($"{strError}\r\n");
+                this.App.WriteErrorLog($"*** 日志恢复任务出错: {strError}");
+
                 this.ErrorInfo = strError;
                 return;
             }
