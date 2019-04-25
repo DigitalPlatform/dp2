@@ -18,7 +18,6 @@ using Ionic.Zip;
 using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 
-using DigitalPlatform;
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;

@@ -1291,7 +1291,6 @@ out strError);
         // 关闭
         public void Close()
         {
-            string strError = "";
             int nRet = 0;
 
 #if NO
@@ -1319,7 +1318,7 @@ out strError);
             }
 #endif
 
-            nRet = this.CloseUser(out strError);
+            nRet = this.CloseUser(out string strError);
             if (nRet == -1)
             {
                 try

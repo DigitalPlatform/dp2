@@ -70,7 +70,14 @@ namespace DigitalPlatform.EasyMarc
         {
             this.DoubleBuffered = true;
 
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch
+            {
+
+            }
         }
 
         /// <summary>
