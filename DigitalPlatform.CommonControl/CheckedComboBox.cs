@@ -37,6 +37,18 @@ namespace DigitalPlatform.CommonControl
                 base.TextChanged -= value;
             }
         }
+
+        public bool ReadOnly
+        {
+            get
+            {
+                return this.textBox_text.ReadOnly;
+            }
+            set
+            {
+                this.textBox_text.ReadOnly = value;
+            }
+        }
 #if NO
         public new event EventHandler TextChanged
         {

@@ -394,7 +394,14 @@ namespace dp2Circulation
         /// </summary>
         public EntityForm()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch
+            {
+
+            }
 
             this.MemoNumbers = new List<CallNumberForm.MemoTailNumber>();
         }
@@ -10774,13 +10781,16 @@ MessageBoxDefaultButton.Button1);
 
         void LoadPrevNextRecord(string direction)
         {
-            if (Control.ModifierKeys == Keys.Control
-                || string.IsNullOrEmpty(this.BiblioRecPath) == true)
+            bool resultSet = !(Control.ModifierKeys == Keys.Control);
+            //if (Control.ModifierKeys == Keys.Control
+            //    || string.IsNullOrEmpty(this.BiblioRecPath) == true)
+            if (resultSet)
             {
+                // 在检索命中结果中翻看
                 this.ClearMessage();
                 string strRecPath = GetPrevNextRecPath(direction);
                 if (string.IsNullOrEmpty(strRecPath))
-                    this.ShowMessage("无法移动", "yellow", true);
+                    this.ShowMessage("无法前后翻动", "yellow", true);
                 else
                 {
                     if (strRecPath.IndexOf("@") == -1)
@@ -10798,7 +10808,7 @@ MessageBoxDefaultButton.Button1);
                             BiblioSearchForm form = Program.MainForm.GetTopChildWindow<BiblioSearchForm>();
                             if (form == null)
                             {
-                                this.ShowMessage("无法移动 1", "yellow", true);
+                                this.ShowMessage("无法前后翻动 1", "yellow", true);
                                 return;
                             }
                             else
@@ -10814,6 +10824,13 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
+                if (string.IsNullOrEmpty(this.BiblioRecPath) == true)
+                {
+                    this.ShowMessage("无法前后翻动(因记录路径为空)", "yellow", true);
+                    return;
+                }
+
+                // 在同一数据库中按照 ID 前后翻看
                 this.LoadRecordOld(this.BiblioRecPath, direction, true);
             }
         }

@@ -1393,8 +1393,11 @@ namespace dp2Circulation
                             param["margin"] = "0";
                             using (Image image = BuildQrCodeImage(param))
                             {
-                                RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
-                                g.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                                if (image != null)
+                                {
+                                    RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
+                                    g.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                                }
                             }
 
                             if (textFontHeight > 0)
@@ -1935,6 +1938,9 @@ string strText,
 
         // parameters:
         //      strType 39 / 空 / 
+        // return:
+        //      null    
+        //      其他
         static Image BuildQrCodeImage(Hashtable param_table)
         {
             // Hashtable param_table = StringUtil.ParseParameters(path, ',', '=', "url");

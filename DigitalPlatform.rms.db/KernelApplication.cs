@@ -4,9 +4,9 @@ using System.Reflection;
 using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 using DigitalPlatform.IO;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms
 {
@@ -32,6 +32,7 @@ namespace DigitalPlatform.rms
                 return version.ToString();
             }
         }
+
         // private string m_strLogFileName = "";	//日志文件名称
         private string m_strDebugFileName = "";	// 
         public bool DebugMode = false;
@@ -65,6 +66,9 @@ namespace DigitalPlatform.rms
         {
             // TODO: 加入 this.Close()。还需要进行一些改造
             this.Close();   // 2018/10/12
+
+            // 2019/4/25
+            this.ResultSets?.Dispose();
 
             eventClose.Dispose();
             eventActive.Dispose();

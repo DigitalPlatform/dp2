@@ -298,6 +298,7 @@
             this.checkedComboBox_biblioDbNames.TabIndex = 12;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_dbName_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_dbName_ItemChecked);
+            this.checkedComboBox_biblioDbNames.ReadOnly = true;
             // 
             // comboBox_from
             // 
@@ -308,6 +309,7 @@
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(121, 20);
             this.comboBox_from.TabIndex = 1;
+            this.comboBox_from.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             // 
             // comboBox_matchStyle
             // 
@@ -324,6 +326,7 @@
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
             this.comboBox_matchStyle.Size = new System.Drawing.Size(121, 20);
             this.comboBox_matchStyle.TabIndex = 11;
+            this.comboBox_matchStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             // 
             // label1
             // 

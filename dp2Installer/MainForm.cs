@@ -10,6 +10,7 @@ using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -27,7 +28,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using System.Threading.Tasks;
 
 namespace dp2Installer
 {

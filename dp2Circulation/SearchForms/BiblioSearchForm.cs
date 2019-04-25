@@ -6249,6 +6249,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             bool bHideMessageBox = false;
+            bool bHideMessageBox1 = false;
+            DialogResult copy_result = DialogResult.Cancel;
 
             LibraryChannel channel = this.GetChannel();
 
@@ -6297,7 +6299,33 @@ MessageBoxDefaultButton.Button1);
                     long lRet = 0;
                     if (strRecPath.IndexOf("@") != -1)
                     {
-                        // TODO: 如果是移动操作，需要警告一下操作被转换为复制执行？
+                        // 如果是移动操作，需要警告一下操作被转换为复制执行
+                        if (bCopy == false)
+                        {
+                            if (bHideMessageBox1 == false)
+                            {
+                                copy_result = MessageDialog.Show(this,
+                "不能移动书目记录 '" + strRecPath + " --> " + dlg.RecPath + "'(注: 可以用复制方式保存)。\r\n\r\n是否改为复制方式保存? (Yes 改为复制方式保存; No 跳过此条、继续后面处理；Cancel 放弃未完成的操作)",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxDefaultButton.Button1,
+                "不再出现此对话框",
+                ref bHideMessageBox1,
+                new string[] { "改为复制方式", "跳过此条继续", "放弃" });
+                            }
+
+                            if (copy_result == System.Windows.Forms.DialogResult.Yes)
+                            {
+                                // 要保存此条
+                            }
+                            else if (copy_result == System.Windows.Forms.DialogResult.No)
+                                goto CONTINUE;
+                            else
+                            {
+                                strError = "中断处理";
+                                goto ERROR1;
+                            }
+                        }
+
                         BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
                         if (info == null)
                             goto CONTINUE;
@@ -11389,7 +11417,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-#region 停靠
+        #region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11458,7 +11486,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-#endregion
+        #endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

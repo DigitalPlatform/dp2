@@ -13,7 +13,7 @@ namespace DigitalPlatform.rms
     /// <summary>
     /// 结果集的集合
     /// </summary>
-    public class ResultSetTable : Hashtable
+    public class ResultSetTable : Hashtable, IDisposable
     {
         public string ResultsetDir = "";
 
@@ -30,6 +30,29 @@ namespace DigitalPlatform.rms
                     return true;
 
                 return false;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
+                throw new ApplicationException("为 全局结果集集合 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
+            try
+            {
+                foreach (string key in this.Keys)
+                {
+                    var resultset = (DpResultSet)this[key];
+                    if (resultset != null)
+                    {
+                        resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
+                        resultset.Close();
+                    }
+                }
+                this.Clear();
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
             }
         }
 
@@ -340,10 +363,12 @@ namespace DigitalPlatform.rms
                 resultset.Close();
             }
 
-            proc_writeToLog?.Invoke(string.Format("结束清理全局结果集，删除结果集总数 {0}。", 
+            proc_writeToLog?.Invoke(string.Format("结束清理全局结果集，删除结果集总数 {0}。",
                 delete_resultsets.Count));
 
             return delete_resultsets.Count;
         }
+
+
     }
 }
