@@ -2079,7 +2079,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (antecendent.IsFaulted == true)
                     {
-                        this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
+                        this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetExceptionText(antecendent.Exception))));
                         return;
                     }
                     if (bRunningChanged)

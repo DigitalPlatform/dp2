@@ -129,6 +129,20 @@ namespace dp2Circulation
                 return;
             }
 
+            if (this.listView_records.SelectedItems.Count == 1)
+            {
+                string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
+
+                if (this.LoadNext != null
+                    && BiblioSearchForm.IsCmdLine(strPath))
+                {
+                    LoadNextBatchEventArgs e1 = new LoadNextBatchEventArgs { All = false };
+                    this.LoadNext(this, e1);
+                    this.button_OK.Enabled = true;
+                    return;
+                }
+            }
+
             OnLoadDetail();
 
             this.DialogResult = DialogResult.OK;
@@ -322,11 +336,7 @@ namespace dp2Circulation
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
-#if NO
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-            OnLoadDetail();
-#endif
+            /*
             if (this.listView_records.SelectedItems.Count == 1)
             {
                 string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
@@ -339,6 +349,7 @@ namespace dp2Circulation
                     return;
                 }
             }
+            */
 
             button_OK_Click(sender, e);
         }

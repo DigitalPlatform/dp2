@@ -3630,6 +3630,7 @@ handle.CancelTokenSource.Token).Result;
             else
 #endif
             {
+                // 注意: SQLite 这里的连接字符串是和具体数据库关联的
                 connection = new Connection(this,
     this.m_strConnString);
                 connection.TryOpen();

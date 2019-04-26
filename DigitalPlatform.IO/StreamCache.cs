@@ -12,7 +12,7 @@ namespace DigitalPlatform.IO
     /// <summary>
     /// Stream 对象的缓存。用于加快连续读、写时候打开文件和移动文件指针操作的速度
     /// </summary>
-    public class StreamCache
+    public class StreamCache : IDisposable
     {
         int MAX_ITEMS = 100;
 
@@ -122,9 +122,11 @@ namespace DigitalPlatform.IO
             if (bAddToCollection && _items.Count > MAX_ITEMS)
                 ClearAll();
 
-            StreamItem item = new StreamItem();
-            item.Fly = !bAddToCollection;
-            item.FileAccess = access;
+            StreamItem item = new StreamItem
+            {
+                Fly = !bAddToCollection,
+                FileAccess = access
+            };
             item.Touch();
             item.FilePath = strFilePath;
             item.FileStream = File.Open(
@@ -284,6 +286,11 @@ namespace DigitalPlatform.IO
                 item.FileStream.Close();
                 item.FileStream = null;
             }
+        }
+
+        public void Dispose()
+        {
+            ClearAll();
         }
     }
 

@@ -337,7 +337,7 @@ namespace DigitalPlatform.rms
             }
             else if (this._dom.DocumentElement.Prefix == "xsl")
             {
-                if (this.m_xt == null)
+                // if (this.m_xt == null)
                 {
                     // <col>元素下的<title>元素要去掉
                     XmlDocument temp = new XmlDocument();
@@ -379,29 +379,31 @@ namespace DigitalPlatform.rms
                         resultDom.LoadXml(strResultXml);
                     else
                         resultDom.LoadXml("<root />");
+
+                    XmlNodeList colList = resultDom.DocumentElement.SelectNodes("//col");
+                    foreach (XmlNode colNode in colList)
+                    {
+                        string strColText = colNode.InnerText.Trim();  // 2012/2/16
+
+                        // 2008/12/18
+                        string strConvert = DomUtil.GetAttr(colNode, "convert");
+                        List<string> convert_methods = GetMethods(strConvert);
+
+                        // 2008/12/18
+                        if (String.IsNullOrEmpty(strConvert) == false)
+                            strColText = ConvertText(convert_methods, strColText);
+
+                        //if (strColText != "")  //空内容也要算作一列
+                        col_array.Add(strColText);
+                        nResultLength += strColText.Length;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    strError = "browse 角色文件生成的结果文件加载到 XMLDOM 时出错：" + ex.Message;
-                    return -1;
-                }
-
-                XmlNodeList colList = resultDom.DocumentElement.SelectNodes("//col");
-                foreach (XmlNode colNode in colList)
-                {
-                    string strColText = colNode.InnerText.Trim();  // 2012/2/16
-
-                    // 2008/12/18
-                    string strConvert = DomUtil.GetAttr(colNode, "convert");
-                    List<string> convert_methods = GetMethods(strConvert);
-
-                    // 2008/12/18
-                    if (String.IsNullOrEmpty(strConvert) == false)
-                        strColText = ConvertText(convert_methods, strColText);
-
-                    //if (strColText != "")  //空内容也要算作一列
-                    col_array.Add(strColText);
-                    nResultLength += strColText.Length;
+                    strError = "!error: browse XSLT 生成的结果文件加载到 XMLDOM 时出错：" + ex.Message;
+                    // return -1;
+                    col_array.Add(strError);
+                    nResultLength += strError.Length;
                 }
             }
             else

@@ -797,6 +797,8 @@ namespace DigitalPlatform.LibraryServer
                 if (this.IsEnabled() == false)
                 {
                     strError = "操作日志系统尚未准备就绪";
+                    // 2019/4/26
+                    this.App?.WriteErrorLog($"WriteEnventLog() error:{strError} strXmlBody:{strXmlBody}");
                     return -1;
                 }
 
