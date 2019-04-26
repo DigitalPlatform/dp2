@@ -1623,13 +1623,12 @@ RestoreLibraryParam param
                     {
                         if (stop != null)
                             stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
-                        string strQuickModeError = "";
                         nRet = ManageKeysIndex(
                             channel,
                             url,
                             "endfastappend",
                             "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
-                            out strQuickModeError);
+                            out string strQuickModeError);
                         if (nRet == -1)
                             throw new Exception(strQuickModeError);
                     }

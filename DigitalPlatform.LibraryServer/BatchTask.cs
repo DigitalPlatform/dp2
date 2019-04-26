@@ -496,7 +496,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(this.ProgressFileName) == false)
             {
                 // File.Delete(this.ProgressFileName);
-                this.App._physicalFileCache.FileDelete(this.ProgressFileName);
+                this.App._physicalFileCache?.FileDelete(this.ProgressFileName);
                 this.ProgressFileVersion++;
             }
         }

@@ -4695,13 +4695,20 @@ out strError);
         {
             Task.Factory.StartNew(() =>
             {
-                TestBorrowAndReturn("");
+                TestBorrowAndReturn("", "R0000001", "0000001");
+            });
+
+            Task.Factory.StartNew(() =>
+            {
+                TestBorrowAndReturn("", "R0000002", "0000002");
             });
         }
 
         // parameters:
         //      strStyle    风格
-        void TestBorrowAndReturn(string strStyle)
+        void TestBorrowAndReturn(string strStyle,
+            string strReaderBarcode,
+            string strItemBarcode)
         {
             string strError = "";
             int nRet = 0;
@@ -4728,8 +4735,6 @@ out strError);
                     if (stop?.State != 0)
                         break;
 
-                    string strReaderBarcode = "R0000001";
-                    string strItemBarcode = "0000001";
                     long lRet = 0;
 
                     // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下

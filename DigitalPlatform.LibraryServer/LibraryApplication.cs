@@ -612,7 +612,6 @@ namespace DigitalPlatform.LibraryServer
                     app.PatronReplicationDir = strPatronReplicationDir;
                     PathUtil.TryCreateDir(app.PatronReplicationDir);	// 确保目录创建
 
-
                     // statis 统计文件
                     app.StatisDir = strStatisDir;
                     PathUtil.TryCreateDir(app.StatisDir);	// 确保目录创建
@@ -3920,6 +3919,8 @@ namespace DigitalPlatform.LibraryServer
                     this.BatchTasks = null;
                 }
 
+                // 2019/4/26
+                this._physicalFileCache.Dispose();
             }
             catch (Exception ex)
             {

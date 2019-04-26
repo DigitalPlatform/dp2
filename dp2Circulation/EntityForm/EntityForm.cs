@@ -5224,7 +5224,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                                         FillList(c._fetched,
                                             c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                             c.ServerName,
-                                            r.Records, item);
+                                            r.Records,
+                                            item);
                                     BiblioSearchForm.UpdateCommandLine(item, c, r);
                                 }));
                             }
@@ -5455,7 +5456,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
             DigitalPlatform.Z3950.RecordCollection records,
             ListViewItem insert_pos)
         {
-            int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+            // int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
             int i = 0;
             foreach (var record in records)
@@ -5532,11 +5533,13 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 ListViewItem item = null;
                 this.Invoke((Action)(() =>
                 {
+                    int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+
                     item = Global.InsertNewLine(
 this.browseWindow.RecordsList,
 strRecPath,
 cols,
-index + i);
+index);// index + i
                 }
                 ));
 
@@ -5550,7 +5553,6 @@ index + i);
             // Debug.Assert(e.Start == _searchParam._searchCount, "");
             return;
         }
-
 
         // 开始检索共享书目
         // return:
