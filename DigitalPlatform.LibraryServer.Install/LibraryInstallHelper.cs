@@ -12,6 +12,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -452,7 +453,7 @@ namespace DigitalPlatform.LibraryServer
             dlg.ServerUrl = "实例 '" + strInstanceName + "'";
             dlg.UserName = info.SupervisorUserName;
             dlg.StartPosition = FormStartPosition.CenterScreen;
-        REDO_LOGIN:
+            REDO_LOGIN:
             dlg.ShowDialog(owner);
 
             if (dlg.DialogResult == DialogResult.Cancel)
@@ -1623,14 +1624,30 @@ RestoreLibraryParam param
                     {
                         if (stop != null)
                             stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
-                        nRet = ManageKeysIndex(
-                            channel,
-                            url,
-                            "endfastappend",
-                            "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
-                            out string strQuickModeError);
-                        if (nRet == -1)
-                            throw new Exception(strQuickModeError);
+
+                        LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
+                        try
+                        {
+                            // TODO: 在错误日志中记载开始和结束时间
+                            // 如果捕获到异常，还要记载一下尚未来得及处理的 url
+                            nRet = ManageKeysIndex(
+                                channel,
+                                url,
+                                "endfastappend",
+                                "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+                                out string strQuickModeError);
+                            if (nRet == -1)
+                                throw new Exception(strQuickModeError);
+                        }
+                        catch (Exception ex)
+                        {
+                            LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
+                            throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                        }
+                        finally
+                        {
+                            LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
+                        }
                     }
                     if (stop != null)
                         stop.SetMessage("");

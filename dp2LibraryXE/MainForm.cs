@@ -5232,7 +5232,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 {
                     this.Invoke((Action)(() =>
                     {
-                        MessageBox.Show(this, result.ErrorInfo);
+                        MessageDlg.Show(this, result.ErrorInfo, "大备份恢复");
                     }));
                 }
             }
@@ -5402,6 +5402,11 @@ MessageBoxDefaultButton.Button2);
 
                 strError = "恢复实例 '" + param_base.DataDir + "' 完成";
                 return new NormalResult { Value = 1, ErrorInfo = strError };
+            }
+            catch(Exception ex)
+            {
+                strError = $"大备份恢复过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
+                goto ERROR1;
             }
             finally
             {

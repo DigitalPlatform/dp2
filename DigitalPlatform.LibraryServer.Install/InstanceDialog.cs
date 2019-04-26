@@ -2079,7 +2079,10 @@ MessageBoxDefaultButton.Button2);
 
                     if (antecendent.IsFaulted == true)
                     {
-                        this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetExceptionText(antecendent.Exception))));
+                        this.Invoke((Action)(() =>
+                        MessageDlg.Show(this, ExceptionUtil.GetExceptionText(antecendent.Exception), "大备份恢复过程出现异常")
+                        // MessageBox.Show(this, ExceptionUtil.GetExceptionText(antecendent.Exception))
+                        ));
                         return;
                     }
                     if (bRunningChanged)

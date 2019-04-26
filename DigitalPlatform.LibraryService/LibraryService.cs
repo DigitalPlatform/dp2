@@ -119,6 +119,13 @@ namespace dp2Library
             START:
             lock (info.LockObject)
             {
+                // 2019/4/27 避免重复 new LibraryApplication
+                if (info.App != null)
+                {
+                    this.app = info.App;
+                    return 0;
+                }
+
                 info.App = new LibraryApplication();
 
                 info.App.TestMode = info.TestMode;
