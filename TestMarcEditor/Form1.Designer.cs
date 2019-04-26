@@ -29,10 +29,11 @@
         private void InitializeComponent()
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.marcEditor1 = new DigitalPlatform.Marc.MarcEditor();
-            this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -46,6 +47,12 @@
             this.menuStrip1.Size = new System.Drawing.Size(800, 32);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // MenuItem_file
+            // 
+            this.MenuItem_file.Name = "MenuItem_file";
+            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
+            this.MenuItem_file.Text = "文件";
             // 
             // toolStrip1
             // 
@@ -67,24 +74,23 @@
             // 
             // marcEditor1
             // 
-            this.marcEditor1.CaptionFont = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.marcEditor1.CaptionFont = null;
             this.marcEditor1.ContentBackColor = System.Drawing.SystemColors.Window;
             this.marcEditor1.ContentTextColor = System.Drawing.SystemColors.WindowText;
             this.marcEditor1.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.marcEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.marcEditor1.DocumentOrgX = 0;
             this.marcEditor1.DocumentOrgY = 0;
-            this.marcEditor1.FieldNameCaptionWidth = 100;
-            this.marcEditor1.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
+            this.marcEditor1.FieldNameCaptionWidth = 0;
+            this.marcEditor1.FixedSizeFont = null;
             this.marcEditor1.FocusedField = null;
-            this.marcEditor1.FocusedFieldIndex = -1;
+            this.marcEditor1.FocusedFieldIndex = 0;
             this.marcEditor1.HorzGridColor = System.Drawing.Color.LightGray;
             this.marcEditor1.IndicatorBackColor = System.Drawing.SystemColors.Window;
             this.marcEditor1.IndicatorBackColorDisabled = System.Drawing.SystemColors.Control;
             this.marcEditor1.IndicatorTextColor = System.Drawing.Color.Green;
             this.marcEditor1.Lang = "zh";
             this.marcEditor1.Location = new System.Drawing.Point(0, 57);
-            this.marcEditor1.Marc = "";
+            this.marcEditor1.Marc = null;
             this.marcEditor1.MarcDefDom = null;
             this.marcEditor1.Name = "marcEditor1";
             this.marcEditor1.NameBackColor = System.Drawing.SystemColors.Window;
@@ -93,25 +99,27 @@
             this.marcEditor1.NameTextColor = System.Drawing.Color.Blue;
             this.marcEditor1.ReadOnly = false;
             this.marcEditor1.SelectionStart = -1;
-            this.marcEditor1.Size = new System.Drawing.Size(800, 371);
+            this.marcEditor1.Size = new System.Drawing.Size(407, 310);
             this.marcEditor1.TabIndex = 3;
             this.marcEditor1.Text = "marcEditor1";
-            this.marcEditor1.UiState = "{\"FieldNameCaptionWidth\":100}";
+            this.marcEditor1.UiState = "{\"FieldNameCaptionWidth\":0}";
             this.marcEditor1.VertGridColor = System.Drawing.Color.LightGray;
             this.marcEditor1.GetConfigFile += new DigitalPlatform.Marc.GetConfigFileEventHandle(this.marcEditor1_GetConfigFile);
             this.marcEditor1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.marcEditor1_GetConfigDom);
             // 
-            // MenuItem_file
+            // textBox1
             // 
-            this.MenuItem_file.Name = "MenuItem_file";
-            this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
-            this.MenuItem_file.Text = "文件";
+            this.textBox1.Location = new System.Drawing.Point(502, 207);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 28);
+            this.textBox1.TabIndex = 4;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.marcEditor1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStrip1);
@@ -133,6 +141,7 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private DigitalPlatform.Marc.MarcEditor marcEditor1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
 

@@ -1314,7 +1314,7 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog("INFO: OperLog.Initial");
 #endif
 
-                        // oper log
+                        // 注：OperLog 对象在 Initial() 之前，应该处于不可用状态。这样可以避免修复以前写入内容造成混乱
                         nRet = this.OperLog.Initial(this,
                             strOperLogDir,
                             out strError);

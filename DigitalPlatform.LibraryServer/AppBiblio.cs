@@ -4920,7 +4920,7 @@ out strError);
 
                     if (cfg.BiblioDbSyntax != strMarcSyntax)
                     {
-                        strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和" + strDbTypeCaption + " '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
+                        strError = $"所提交保存的 MARC 格式为 '{strMarcSyntax}'，和{strDbTypeCaption} '{strBiblioDbName}' 的 MARC 格式 '{cfg.BiblioDbSyntax}' 不符合";
                         goto ERROR1;
                     }
                 }
