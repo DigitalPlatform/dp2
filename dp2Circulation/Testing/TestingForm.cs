@@ -11,6 +11,8 @@ using System.Xml;
 using System.Collections;
 using System.Web;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
@@ -20,8 +22,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
-using Newtonsoft.Json;
-using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -4690,6 +4690,137 @@ out strError);
             ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void ToolStripMenuItem_borrowAndReturn_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                TestBorrowAndReturn("");
+            });
+        }
+
+        // parameters:
+        //      strStyle    风格
+        void TestBorrowAndReturn(string strStyle)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+
+            Progress.Style = StopStyle.EnableHalfStop;
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在进行测试 ...");
+            Progress.BeginLoop();
+
+            this.Invoke((Action)(() =>
+                EnableControls(false)
+                ));
+            try
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始进行密集借书还书测试</div>");
+
+                for (; ; )
+                {
+                    if (stop?.State != 0)
+                        break;
+
+                    string strReaderBarcode = "R0000001";
+                    string strItemBarcode = "0000001";
+                    long lRet = 0;
+
+                    // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
+                    Progress.SetMessage("正在借 ...");
+                    {
+                        lRet = channel.Borrow(
+                            stop,
+                            false,
+                            strReaderBarcode,
+                            strItemBarcode,
+                            "", // strConfirmItemRecPath,
+                            false,
+                            null,   // saBorrowedItemBarcode,
+                            "", // strStyle,
+                            "", // strItemFormatList,
+                            out string[] item_records,
+                            "", // strReaderFormatList,
+                            out string[] reader_records,
+                            "", // strBiblioFormatList,
+                            out string[] biblio_records,
+                            out string[] aDupPath,
+                            out string strOutputReaderBarcode,
+                            out BorrowInfo borrow_info,
+                            out strError);
+                    }
+                    if (lRet == -1)
+                    {
+                        //if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                        //    goto ERROR1;
+                        DisplayError($"读者 {strReaderBarcode} 借书 {strItemBarcode} 失败: {strError}");
+                    }
+                    else
+                        DisplayOK($"读者 {strReaderBarcode} 借书 {strItemBarcode} 成功");
+
+
+                    Progress.SetMessage("正在还 ...");
+                    {
+                        lRet = channel.Return(
+                            stop,
+                            "return",
+                            strReaderBarcode,
+                            strItemBarcode,
+                            null,   // strConfirmItemRecPath,
+                            false,
+                            "", // strStyle,
+                            "", // strItemFormatList,
+                            out string[] item_records,
+                            "", // strReaderFormatList,
+                            out string[] reader_records,
+                            "", // strBiblioFormatList,
+                            out string[] biblio_records,
+                            out string[] aDupPath,
+                            out string strOutputReaderBarcode,
+                            out ReturnInfo return_info,
+                            out strError);
+                    }
+
+                    if (lRet == -1)
+                        DisplayError($"读者 {strReaderBarcode} 还书 {strItemBarcode} 失败: {strError}");
+                    else
+                        DisplayOK($"读者 {strReaderBarcode} 还书 {strItemBarcode} 成功");
+
+                }
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束密集借书还书测试</div>");
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "TestBorrowAndReturn() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                Progress.HideProgress();
+
+                this.Invoke((Action)(() =>
+                    EnableControls(true)
+                    ));
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+            ERROR1:
+            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            this.ShowMessage(strError, "red", true);
+        }
+
     }
 
     // 验证异常

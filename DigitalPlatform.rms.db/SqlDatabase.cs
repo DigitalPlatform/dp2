@@ -3714,7 +3714,8 @@ handle.CancelTokenSource.Token).Result;
             }
             catch (Exception ex)
             {
-                strError = "SearchByUnion() exception: " + ExceptionUtil.GetDebugText(ex);
+                // 注意这里可能捕获到 AggregationException，所以要用 ExceptionUtil.GetExceptionText() 来输出异常信息
+                strError = "ExecuteQueryFillResultSet() exception: " + ExceptionUtil.GetExceptionText(ex);
                 return -1;
             }
             finally // 连接
@@ -5933,7 +5934,8 @@ handle.CancelTokenSource.Token).Result;
                  * */
 
                 string strOrderBy = "";
-                if (string.IsNullOrEmpty(searchItem.OrderBy) == false)
+                if (string.IsNullOrEmpty(searchItem.OrderBy) == false
+                    && bSearchNull == false)    // 检索空的时候，列里面只有 id，没有 keystring 列，所以无法进行排序
                 {
                     strOrderBy = " ORDER BY " + searchItem.OrderBy + " ";
 

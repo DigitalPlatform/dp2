@@ -1385,7 +1385,7 @@ Keys keyData)
                     this.textBox_queryWord.Text,
                     this.MaxSearchResultCount,  // 1000
                     strFromStyle,
-                    strMatchStyle,  // "left",
+                    strMatchStyle,  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
                     this.Lang,
                     null,   // strResultSetName
                     "",    // strSearchStyle
@@ -1393,6 +1393,22 @@ Keys keyData)
                     this.GetLocationFilter(),
                     out string strQueryXml,
                     out strError);
+
+#if NO
+                long lRet = channel.SearchBiblio(stop,
+    this.checkedComboBox_biblioDbNames.Text,
+    this.textBox_queryWord.Text,
+    this.MaxSearchResultCount,  // 1000
+    strFromStyle,
+    "exact",  // "left", TODO: "exact" 和 strSearchStyle "desc" 组合 dp2library 会抛出异常
+    this.Lang,
+    null,   // strResultSetName
+    "",    // strSearchStyle
+    strOutputStyle,
+    this.GetLocationFilter(),
+    out string strQueryXml,
+    out strError);
+#endif
                 if (lRet == -1)
                     goto ERROR1;
 
@@ -1627,7 +1643,8 @@ Keys keyData)
                                     FillList(c._fetched,
                                         c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
                                         c.ServerName,
-                                        r.Records, item);
+                                        r.Records,
+                                        item);
                                 UpdateCommandLine(item, c, r);
                             }));
                         }
@@ -1748,98 +1765,103 @@ Keys keyData)
             DigitalPlatform.Z3950.RecordCollection records,
             ListViewItem insert_pos)
         {
-            int index = insert_pos.ListView.Items.IndexOf(insert_pos);
-
-            int i = 0;
-            foreach (var record in records)
+            // 2019/4/26
+            // 锁定，让整个批操作不会被并发的同名函数执行影响
+            lock (this.listView_records)
             {
-                string strRecPath = $"{start + i + 1}@{strLibraryName}";
+                int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
-                // 把byte[]类型的MARC记录转换为机内格式
-                // return:
-                //		-2	MARC格式错
-                //		-1	一般错误
-                //		0	正常
-                int nRet = MarcLoader.ConvertIso2709ToMarcString(record.m_baRecord,
-                    encoding == null ? Encoding.GetEncoding(936) : encoding,
-                    true,
-                    out string strMARC,
-                    out string strError);
-                if (nRet == -1)
+                int i = 0;
+                foreach (var record in records)
                 {
-                    AddErrorLine("记录 " + strRecPath + " 转换为 MARC 机内格式时出错: " + strError);
-                    goto CONTINUE;
-                }
+                    string strRecPath = $"{start + i + 1}@{strLibraryName}";
 
-                string strMarcSyntax = "";
-                if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
-                    strMarcSyntax = "unimarc";
-                else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
-                    strMarcSyntax = "usmarc";
-                nRet = MyForm.BuildMarcBrowseText(
-    strMarcSyntax,
-    strMARC,
-    out string strBrowseText,
-    out string strColumnTitles,
-    out strError);
-                if (nRet == -1)
-                {
-                    AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出错: " + strError);
-                    goto CONTINUE;
-                }
-
-                _browseTitleTable[strMarcSyntax] = strColumnTitles;
-
-                // 将书目记录放入 m_biblioTable
-                {
-                    // TODO: MARC 格式转换为 XML 格式
-                    nRet = MarcUtil.Marc2Xml(strMARC,
-                        strMarcSyntax,
-                        out string strXml,
-                        out strError);
+                    // 把byte[]类型的MARC记录转换为机内格式
+                    // return:
+                    //		-2	MARC格式错
+                    //		-1	一般错误
+                    //		0	正常
+                    int nRet = MarcLoader.ConvertIso2709ToMarcString(record.m_baRecord,
+                        encoding ?? Encoding.GetEncoding(936),
+                        true,
+                        out string strMARC,
+                        out string strError);
                     if (nRet == -1)
                     {
-                        AddErrorLine("记录 " + strRecPath + " 转换为 XML 格式时出错: " + strError);
+                        AddErrorLine("记录 " + strRecPath + " 转换为 MARC 机内格式时出错: " + strError);
                         goto CONTINUE;
                     }
 
-                    BiblioInfo info = new BiblioInfo
+                    string strMarcSyntax = "";
+                    if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
+                        strMarcSyntax = "unimarc";
+                    else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
+                        strMarcSyntax = "usmarc";
+                    nRet = MyForm.BuildMarcBrowseText(
+        strMarcSyntax,
+        strMARC,
+        out string strBrowseText,
+        out string strColumnTitles,
+        out strError);
+                    if (nRet == -1)
                     {
-                        OldXml = strXml,
-                        RecPath = strRecPath,
-                        Timestamp = null,
-                        Format = strMarcSyntax
-                    };
-                    lock (this.m_biblioTable)
-                    {
-                        this.m_biblioTable[strRecPath] = info;
+                        AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出错: " + strError);
+                        goto CONTINUE;
                     }
+
+                    _browseTitleTable[strMarcSyntax] = strColumnTitles;
+
+                    // 将书目记录放入 m_biblioTable
+                    {
+                        // TODO: MARC 格式转换为 XML 格式
+                        nRet = MarcUtil.Marc2Xml(strMARC,
+                            strMarcSyntax,
+                            out string strXml,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            AddErrorLine("记录 " + strRecPath + " 转换为 XML 格式时出错: " + strError);
+                            goto CONTINUE;
+                        }
+
+                        BiblioInfo info = new BiblioInfo
+                        {
+                            OldXml = strXml,
+                            RecPath = strRecPath,
+                            Timestamp = null,
+                            Format = strMarcSyntax
+                        };
+                        lock (this.m_biblioTable)
+                        {
+                            this.m_biblioTable[strRecPath] = info;
+                        }
+                    }
+
+                    List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                    string[] cols = new string[column_list.Count];
+                    column_list.CopyTo(cols);
+
+                    ListViewItem item = null;
+                    this.Invoke((Action)(() =>
+                    {
+                        item = Global.InsertNewLine(
+    this.listView_records,
+    strRecPath,
+    cols,
+    index + i);
+                    }
+                    ));
+
+                    if (item != null)
+                        item.BackColor = Color.LightGreen;
+
+                    CONTINUE:
+                    i++;
                 }
 
-                List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
-                string[] cols = new string[column_list.Count];
-                column_list.CopyTo(cols);
-
-                ListViewItem item = null;
-                this.Invoke((Action)(() =>
-                {
-                    item = Global.InsertNewLine(
-this.listView_records,
-strRecPath,
-cols,
-index + i);
-                }
-                ));
-
-                if (item != null)
-                    item.BackColor = Color.LightGreen;
-
-                CONTINUE:
-                i++;
+                // Debug.Assert(e.Start == _searchParam._searchCount, "");
+                return;
             }
-
-            // Debug.Assert(e.Start == _searchParam._searchCount, "");
-            return;
         }
 
 
@@ -6406,6 +6428,7 @@ MessageBoxDefaultButton.Button1);
                             goto REDO;
                         if (result == System.Windows.Forms.DialogResult.No)
                             goto CONTINUE;
+                        strError = $"已放弃处理。原因: {strError}";
                         goto ERROR1;
                     }
 
@@ -11417,7 +11440,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11486,7 +11509,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {
