@@ -556,7 +556,14 @@ namespace DigitalPlatform.LibraryServer
             this.LockForWrite();    // 2016/10/16
             try
             {
+                string strLogDir = PathUtil.MergePath(strDataDir, "log");
+                // log
+                app.LogDir = strLogDir; // 日志存储目录
+                PathUtil.TryCreateDir(app.LogDir);  // 确保目录创建
 
+                this.WriteErrorLog("*********");
+                this.WriteErrorLog($"LoadCfg() Begin. bReload={bReload}");
+                
                 // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
                 // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
 #if NO
@@ -578,7 +585,6 @@ namespace DigitalPlatform.LibraryServer
                     string strBinDir = strHostDir;  //  PathUtil.MergePath(strHostDir, "bin");
                     string strCfgDir = PathUtil.MergePath(strDataDir, "cfgs");
                     string strCfgMapDir = PathUtil.MergePath(strDataDir, "cfgsmap");
-                    string strLogDir = PathUtil.MergePath(strDataDir, "log");
                     string strOperLogDir = PathUtil.MergePath(strDataDir, "operlog");
                     string strZhengyuanDir = PathUtil.MergePath(strDataDir, "zhengyuan");
                     string strDkywDir = PathUtil.MergePath(strDataDir, "dkyw");
@@ -595,10 +601,6 @@ namespace DigitalPlatform.LibraryServer
 
                     app.CfgMapDir = strCfgMapDir;
                     PathUtil.TryCreateDir(app.CfgMapDir);	// 确保目录创建
-
-                    // log
-                    app.LogDir = strLogDir;	// 日志存储目录
-                    PathUtil.TryCreateDir(app.LogDir);	// 确保目录创建
 
                     // zhengyuan 一卡通
                     app.ZhengyuanDir = strZhengyuanDir;
@@ -652,6 +654,9 @@ namespace DigitalPlatform.LibraryServer
                     if (PathUtil.TryClearDir(app.TempDir) == false)
                         app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
 #endif
+#if LOG_INFO
+                        app.WriteErrorLog($"INFO: 清除临时文件目录 {app.TempDir}");
+#endif
                         try
                         {
                             PathUtil.ClearDir(app.TempDir);
@@ -674,8 +679,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.WriteErrorLog("序列号许可的功能: '" + this.Function + "' (" + GetFunctionDescription(this.Function) + ")");
-
-                    this.WriteErrorLog("*********");
 
                     if (bReload == true)
                         app.WriteErrorLog("library (" + FullVersion + ") application 开始重新装载 " + this.m_strFileName);
@@ -1873,6 +1876,11 @@ namespace DigitalPlatform.LibraryServer
 
                 return 0;
             }
+            catch(Exception ex)
+            {
+                // 2019/4/26
+                this.WriteErrorLog($"LoadCfg() 出现异常: {ExceptionUtil.GetExceptionText(ex)}");
+            }
             finally
             {
                 // this.m_lock.ReleaseWriterLock();
@@ -2739,6 +2747,8 @@ namespace DigitalPlatform.LibraryServer
                 // 稍微延时一下，避免很快地重装、正好和 尚在改写library.xml文件的的进程发生冲突
                 Thread.Sleep(500);
 
+                this.WriteErrorLog("watcher 触发了 LoadCfg() ...");
+
                 nRet = this.LoadCfg(
                     true,
                     this.DataDir,
@@ -3050,7 +3060,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string libraryName = DomUtil.GetElementText(this.LibraryCfgDom.DocumentElement, "libraryInfo/libraryName");
-            if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/','\\'}) != -1)
+            if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/', '\\' }) != -1)
                 errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
 
             if (errors.Count > 0)

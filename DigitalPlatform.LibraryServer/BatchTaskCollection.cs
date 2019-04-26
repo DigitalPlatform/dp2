@@ -18,7 +18,21 @@ namespace DigitalPlatform.LibraryServer
 
         public new void Clear()
         {
-            this.Close();
+            for (int i = 0; i < this.Count; i++)
+            {
+                BatchTask task = this[i];
+                try
+                {
+                    task.Close();
+                    task.Dispose();
+                }
+                catch
+                {
+
+                }
+            }
+
+            base.Clear();
         }
 
         public void Close()
@@ -26,11 +40,18 @@ namespace DigitalPlatform.LibraryServer
             for (int i = 0; i < this.Count; i++)
             {
                 BatchTask task = this[i];
-                task.Close();
-                task.Dispose();
+                try
+                {
+                    task.Close();
+                    // task.Dispose();
+                }
+                catch
+                {
+
+                }
             }
 
-            base.Clear();
+            // base.Clear();
         }
 
         // 根据任务名获得一个任务对象

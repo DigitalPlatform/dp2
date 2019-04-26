@@ -337,7 +337,7 @@ namespace DigitalPlatform.rms
             }
             else if (this._dom.DocumentElement.Prefix == "xsl")
             {
-                // if (this.m_xt == null)
+                if (this.m_xt == null)
                 {
                     // <col>元素下的<title>元素要去掉
                     XmlDocument temp = new XmlDocument();

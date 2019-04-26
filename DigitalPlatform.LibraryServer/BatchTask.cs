@@ -84,10 +84,15 @@ namespace DigitalPlatform.LibraryServer
 
             RmsChannels.Dispose();
 
-            eventClose.Dispose();
-            eventActive.Dispose();
-            eventFinished.Dispose();
-            eventStarted.Dispose();
+            DisposeEvents();
+        }
+
+        void DisposeEvents()
+        {
+            eventClose?.Dispose();
+            eventActive?.Dispose();
+            eventFinished?.Dispose();
+            eventStarted?.Dispose();
         }
 
         public void Activate()
@@ -485,12 +490,20 @@ namespace DigitalPlatform.LibraryServer
             this.eventClose.Set();
             this.m_bClosed = true;
 #endif
-            this.Stop();
+            try
+            {
+                this.Stop();
+            }
+            catch
+            {
+
+            }
 
             if (this.m_stream != null)
             {
                 this.m_stream.Close();
                 this.m_stream = null;
+
             }
 
             if (String.IsNullOrEmpty(this.ProgressFileName) == false)
@@ -505,7 +518,7 @@ namespace DigitalPlatform.LibraryServer
         {
             // this.eventStarted.Reset();
 
-            this.eventClose.Set();
+            this.eventClose?.Set();
 
             //this.m_bClosed = true;
             this.Stopped = true;
@@ -787,7 +800,6 @@ namespace DigitalPlatform.LibraryServer
                         eventActive.Reset();
                         Worker();
                         eventActive.Reset();    // 2013/11/23 只让堵住的时候发挥作用
-
                     }
                     else if (index == 0)
                     {
@@ -837,7 +849,6 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_bClosed = true;
                 this.Stopped = true;
             }
-
         }
 
         // 工作线程每一轮循环的实质性工作
