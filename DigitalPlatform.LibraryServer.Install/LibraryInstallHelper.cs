@@ -1516,8 +1516,10 @@ RestoreLibraryParam param
 
                         // if (dlg.ImportObject)
                         {
-                            List<UploadRecord> temp = new List<UploadRecord>();
-                            temp.Add(record);
+                            List<UploadRecord> temp = new List<UploadRecord>
+                            {
+                                record
+                            };
                             // 上载对象
                             // return:
                             //      -1  出错
@@ -1618,6 +1620,7 @@ RestoreLibraryParam param
             }// close import util
             finally
             {
+#if NO
                 if (bFastMode == true)
                 {
                     foreach (string url in target_dburls)
@@ -1652,9 +1655,77 @@ RestoreLibraryParam param
                     if (stop != null)
                         stop.SetMessage("");
                 }
-
+#endif
+                if (bFastMode == true)
+                {
+                    EndFastAppend(stop,
+    channel,
+    target_dburls);
+                }
                 import_util.End();
             }
+        }
+
+        static void EndFastAppend(Stop stop,
+            RmsChannel channel,
+            List<string> target_dburls)
+        {
+            int nRet = 0;
+            foreach (string url in target_dburls)
+            {
+                if (stop?.State != 0)
+                    throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+
+                if (stop != null)
+                    stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
+
+                LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
+                try
+                {
+                    // TODO: 在错误日志中记载开始和结束时间
+                    // 如果捕获到异常，还要记载一下尚未来得及处理的 url
+                    //                  start_endfastappend 启动“结束快速追加”任务。返回 0 表示任务启动并已经完成；返回 1 表示任务启动成功，但还需要后面用探寻功能来观察它是否结束
+                    nRet = ManageKeysIndex(
+                        channel,
+                        url,
+                        "start_endfastappend",
+                        "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
+                        out string strQuickModeError);
+                    if (nRet == -1)
+                        throw new Exception(strQuickModeError);
+                    if (nRet == 1)
+                    {
+                        while (true)
+                        {
+                            if (stop?.State != 0)
+                                throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+
+                            //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
+                            nRet = ManageKeysIndex(
+        channel,
+        url,
+        "detect_endfastappend",
+        "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+        out strQuickModeError);
+                            if (nRet == -1)
+                                throw new Exception(strQuickModeError);
+                            if (nRet == 1)
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
+                    throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                }
+                finally
+                {
+                    LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
+                }
+            }
+            if (stop != null)
+                stop.SetMessage("");
         }
 
         static string GetDbUrl(string strLongPath)
@@ -1702,7 +1773,8 @@ RestoreLibraryParam param
                     strError = "管理数据库 '" + respath.Path + "' 时出错: " + strError;
                     return -1;
                 }
-
+                // 2019/4/27
+                return (int)lRet;
             }
             finally
             {
@@ -1710,9 +1782,7 @@ RestoreLibraryParam param
                 {
                     channel.Timeout = old_timeout;
                 }
-
             }
-            return 0;
         }
 
     }

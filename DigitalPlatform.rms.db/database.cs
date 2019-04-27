@@ -16,12 +16,16 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.ResultSet;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms
 {
     // 数据库基类
     public class Database
     {
+        // 快速导入的结束阶段任务
+        internal List<Task<NormalResult>> _tasks = new List<Task<NormalResult>>();
+
         public RecordIDStorage RebuildIDs = null;
 
         // 数据库锁
