@@ -1216,6 +1216,9 @@ namespace dp2Kernel
                     return result;
                 }
 
+                // 2019/4/27
+                result.Value = nRet;
+                result.ErrorString = strError;
                 return result;
             }
             catch (Exception ex)
