@@ -107,6 +107,10 @@
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -142,10 +146,6 @@
     <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
       <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
       <Name>DigitalPlatform.MarcKernel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
-      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
-      <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>

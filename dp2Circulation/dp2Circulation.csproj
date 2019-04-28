@@ -3183,10 +3183,6 @@
       <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
       <Name>DigitalPlatform.MarcKernel</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
-      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
-      <Name>DigitalPlatform.MarcQuery</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.MessageClient.GUI\DigitalPlatform.MessageClient.GUI.csproj">
       <Project>{5add6b7b-9dad-4482-aa19-7b5846549630}</Project>
       <Name>DigitalPlatform.MessageClient.GUI</Name>
@@ -3242,6 +3238,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
     <ProjectReference Include="..\dp-library\DigitalPlatform.Net\DigitalPlatform.Net.csproj">
       <Project>{345ef978-173d-4873-8c76-02daf97b090b}</Project>

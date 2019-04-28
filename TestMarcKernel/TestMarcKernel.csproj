@@ -74,10 +74,6 @@
       <Project>{74242530-ef96-457e-852d-5c21a3ea8449}</Project>
       <Name>DigitalPlatform.MarcKernel</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
-      <Project>{57fe2fb1-4134-409b-876c-8a1c0776b498}</Project>
-      <Name>DigitalPlatform.MarcQuery</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
       <Name>DigitalPlatform.Text</Name>
@@ -85,6 +81,10 @@
     <ProjectReference Include="..\dp-library\DigitalPlatform.Core\DigitalPlatform.Core.csproj">
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -159,6 +159,10 @@
       <Project>{c5b517c1-7344-45a5-89dc-06a9b130ae36}</Project>
       <Name>DigitalPlatform.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\dp-library\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{623ea980-be0a-46bb-9e3e-dd8d0fe54f6f}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -174,10 +178,6 @@
     <ProjectReference Include="..\DiffPlex\DiffPlex.csproj">
       <Project>{42ED3F62-53C5-4880-B9B8-F8B78F575353}</Project>
       <Name>DiffPlex</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
-      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
-      <Name>DigitalPlatform.MarcQuery</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
