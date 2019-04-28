@@ -15,18 +15,18 @@ namespace DigitalPlatform.Marc
     /// 字段对象
     /// </summary>
 	public class Field
-	{
+    {
         /// <summary>
         /// 容器，也就是当前字段对象所从属的字段对象数组
         /// </summary>
 		internal FieldCollection container = null;
 
-		internal string m_strName = "";
-		internal string m_strIndicator = "";
-		internal string m_strValue = "";
-		internal string m_strNameCaption = "字段说明";
+        internal string m_strName = "";
+        internal string m_strIndicator = "";
+        internal string m_strValue = "";
+        internal string m_strNameCaption = "字段说明";
 
-		internal int PureHeight = 20;
+        internal int PureHeight = 20;
 
         /// <summary>
         /// 当前对象是否处在选中状态
@@ -37,111 +37,111 @@ namespace DigitalPlatform.Marc
         /// 构造函数
         /// </summary>
 		public Field()
-		{
-		}
+        {
+        }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="field_collection">拥有本对象的字段对象数组</param>
 		public Field(FieldCollection field_collection)
-		{
-			this.container = field_collection;
-		}
+        {
+            this.container = field_collection;
+        }
 
-		// 字段名
+        // 字段名
         /// <summary>
         /// 获取或设置字段名
         /// </summary>
-		public string Name
-		{
-			get
-			{
-				return this.m_strName;
-			}
-			set
-			{
-				if (this.m_strName != value)
-				{
-					this.m_strName = value;
+        public string Name
+        {
+            get
+            {
+                return this.m_strName;
+            }
+            set
+            {
+                if (this.m_strName != value)
+                {
+                    this.m_strName = value;
 
                     if (this.container == null)
                         return;
 
-					this.m_strNameCaption = this.container.MarcEditor.GetLabel(this.m_strName);
+                    this.m_strNameCaption = this.container.MarcEditor.GetLabel(this.m_strName);
 
-					if (this.container.MarcEditor.FocusedField == this
-						&& this.container.MarcEditor.m_nFocusCol == 1)
-					{
-						this.container.MarcEditor.curEdit.Text = this.m_strName;
-					}
+                    if (this.container.MarcEditor.FocusedField == this
+                        && this.container.MarcEditor.m_nFocusCol == 1)
+                    {
+                        this.container.MarcEditor.curEdit.Text = this.m_strName;
+                    }
 
-					// 失效???用不到判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
-					Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
-						1,
-						BoundsPortion.Field);
-					this.container.MarcEditor.Invalidate(rect);
+                    // 失效???用不到判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
+                    Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
+                        1,
+                        BoundsPortion.Field);
+                    this.container.MarcEditor.Invalidate(rect);
 
-					// 文档发生改变
-					this.container.MarcEditor.FireTextChanged();
+                    // 文档发生改变
+                    this.container.MarcEditor.FireTextChanged();
 
-				}
-			}
-		}
+                }
+            }
+        }
 
         internal void RefreshNameCaption()
         {
             this.m_strNameCaption = this.container.MarcEditor.GetLabel(this.m_strName);
         }
 
-		// 字段指示符
+        // 字段指示符
         /// <summary>
         /// 获取或设置字段指示符
         /// </summary>
-		public string Indicator
-		{
-			get
-			{
-				return this.m_strIndicator;
-			}
-			set
-			{
-				if (this.m_strIndicator != value)
-				{
-					this.m_strIndicator = value;
+        public string Indicator
+        {
+            get
+            {
+                return this.m_strIndicator;
+            }
+            set
+            {
+                if (this.m_strIndicator != value)
+                {
+                    this.m_strIndicator = value;
 
                     if (this.container == null)
                         return;
 
 
-					if (this.container != null
+                    if (this.container != null
                         && this.container.MarcEditor.FocusedField == this
-						&& this.container.MarcEditor.m_nFocusCol == 2
-						&& Record.IsControlFieldName(this.Name) == false)
-					{
-						this.container.MarcEditor.curEdit.Text = this.m_strIndicator;
-					}
+                        && this.container.MarcEditor.m_nFocusCol == 2
+                        && Record.IsControlFieldName(this.Name) == false)
+                    {
+                        this.container.MarcEditor.curEdit.Text = this.m_strIndicator;
+                    }
 
 
-					// 失效???用不用判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
-					Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
-						1,
-						BoundsPortion.Field);
-					this.container.MarcEditor.Invalidate(rect);
+                    // 失效???用不用判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
+                    Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
+                        1,
+                        BoundsPortion.Field);
+                    this.container.MarcEditor.Invalidate(rect);
 
-					// 文档发生改变
-					this.container.MarcEditor.FireTextChanged();
-				}
-			}
-		}
+                    // 文档发生改变
+                    this.container.MarcEditor.FireTextChanged();
+                }
+            }
+        }
 
-		// 字段值。get没有替换^符号
-		internal string ValueKernel
-		{
-			get
-			{
-				return this.m_strValue;
-			}
+        // 字段值。get没有替换^符号
+        internal string ValueKernel
+        {
+            get
+            {
+                return this.m_strValue;
+            }
             /*
 			set
 			{
@@ -174,7 +174,7 @@ namespace DigitalPlatform.Marc
 				}
 			}
              */
-		}
+        }
 
         /// <summary>
         /// 获取或设置 字段指示符联合字段内容
@@ -249,62 +249,62 @@ namespace DigitalPlatform.Marc
                 }
             }
         }
-		
-		// 字段名称说明
-		internal string NameCaption
-		{
-			get
-			{
-				return this.m_strNameCaption;
-			}
-		}
 
-		// 本字段总高度
+        // 字段名称说明
+        internal string NameCaption
+        {
+            get
+            {
+                return this.m_strNameCaption;
+            }
+        }
+
+        // 本字段总高度
         /// <summary>
         /// 获取本字段的显示区域的高度
         /// </summary>
-		public int TotalHeight
-		{
-			get
-			{
-				return this.container.record.GridHorzLineHeight 
-					+ this.container.record.CellTopBlank 
-					+ this.PureHeight
-					+ this.container.record.CellBottomBlank;
-			}
-		}
+        public int TotalHeight
+        {
+            get
+            {
+                return this.container.record.GridHorzLineHeight
+                    + this.container.record.CellTopBlank
+                    + this.PureHeight
+                    + this.container.record.CellBottomBlank;
+            }
+        }
 
         /// <summary>
         /// 获取或设置本字段的 MARC 字符串 (机内格式)
         /// </summary>
 		public string Text
-		{
-			get
-			{
-				return this.GetFieldMarc(false);
-			}
-			set
-			{
-				this.SetFieldMarc(value);
+        {
+            get
+            {
+                return this.GetFieldMarc(false);
+            }
+            set
+            {
+                this.SetFieldMarc(value);
 
                 if (this.container == null)
                     return;
                 if (this.container.MarcEditor == null)
                     return;
 
-				// 失效???用不到判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
-				Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
-					-1,
-					BoundsPortion.FieldAndBottom);
+                // 失效???用不到判断当前元素是末尾元素从而使用BoundsPortion.FieldAndBottom
+                Rectangle rect = this.container.MarcEditor.GetItemBounds(this.container.IndexOf(this),
+                    -1,
+                    BoundsPortion.FieldAndBottom);
 
-				// 应把失效区域计算出来，进行优化
-				InvalidateRect iRect = new InvalidateRect();
-				iRect.bAll = false;
-				iRect.rect  = rect;
-				this.container.MarcEditor.AfterDocumentChanged(ScrollBarMember.Vert,
-					iRect);
-			}
-		}
+                // 应把失效区域计算出来，进行优化
+                InvalidateRect iRect = new InvalidateRect();
+                iRect.bAll = false;
+                iRect.rect = rect;
+                this.container.MarcEditor.AfterDocumentChanged(ScrollBarMember.Vert,
+                    iRect);
+            }
+        }
 
         // 获得字段的MARC格式
         // parameters:
@@ -317,49 +317,49 @@ namespace DigitalPlatform.Marc
         /// <param name="bAddFLDEND">是否包含字段结束符</param>
         /// <returns>MARC 字符串</returns>
 		public string GetFieldMarc(bool bAddFLDEND)
-		{
-			if (this.Name == "###") // 头标区
-			{
+        {
+            if (this.Name == "###") // 头标区
+            {
                 this.m_strValue = this.m_strValue.PadRight(24, '?');
-				return this.m_strValue;
-			}
+                return this.m_strValue;
+            }
 
 
-			if (Record.IsControlFieldName(this.m_strName) == true) // 控制字段
-			{
-				if (this.Indicator != "")
-				{
-					//Debug.Assert(false,"不可能的情况，控制字段无字段指示符");
-					this.m_strIndicator = "";
-				}
-			}
-			else
-			{
-				if(this.Indicator.Length != 2)
-				{
-					//Debug.Assert(false,"不可能的情况，字段指示符1必须是两位");
+            if (Record.IsControlFieldName(this.m_strName) == true) // 控制字段
+            {
+                if (this.Indicator != "")
+                {
+                    //Debug.Assert(false,"不可能的情况，控制字段无字段指示符");
+                    this.m_strIndicator = "";
+                }
+            }
+            else
+            {
+                if (this.Indicator.Length != 2)
+                {
+                    //Debug.Assert(false,"不可能的情况，字段指示符1必须是两位");
 
-					if (this.m_strIndicator.Length > 2)
-						this.m_strIndicator = this.m_strIndicator.Substring(0,2);
-					else
-						this.m_strIndicator = this.m_strIndicator.PadLeft(2,' ');
-				}
+                    if (this.m_strIndicator.Length > 2)
+                        this.m_strIndicator = this.m_strIndicator.Substring(0, 2);
+                    else
+                        this.m_strIndicator = this.m_strIndicator.PadLeft(2, ' ');
+                }
 
-			}
-			string strFieldMarc = this.m_strName + this.m_strIndicator + this.m_strValue;
+            }
+            string strFieldMarc = this.m_strName + this.m_strIndicator + this.m_strValue;
 
-			if (bAddFLDEND == true)
-				strFieldMarc += Record.FLDEND;
+            if (bAddFLDEND == true)
+                strFieldMarc += Record.FLDEND;
 
 
             strFieldMarc = strFieldMarc.Replace(Record.KERNEL_SUBFLD, Record.SUBFLD);
 #if BIDI_SUPPORT
-           strFieldMarc = strFieldMarc.Replace("\x200e", "");
+            strFieldMarc = strFieldMarc.Replace("\x200e", "");
 #endif
             return strFieldMarc;
-		}
+        }
 
-                /// <summary>
+        /// <summary>
         /// 设置本字段的 MARC 字符串 (机内格式)
         /// </summary>
         /// <param name="strFieldMarc">本字段的 MARC 字符串</param>
@@ -374,74 +374,74 @@ namespace DigitalPlatform.Marc
         /// <param name="strFieldMarc">本字段的 MARC 字符串</param>
         /// <param name="bFlushEdit">是否自动刷新小 Edit</param>
 		internal void SetFieldMarc(string strFieldMarc, bool bFlushEdit)
-		{
+        {
             if (this.container == null)
                 return;
 
             int index = this.container.IndexOf(this);
 
-			if (index == 0)
-			{
-				this.m_strValue = strFieldMarc;
+            if (index == 0)
+            {
+                this.m_strValue = strFieldMarc;
                 // 2011/4/21
                 this.CalculateHeight(null,
     true);
-				return;
-			}
+                return;
+            }
 
-			if (strFieldMarc.Length < 3)
-				strFieldMarc = strFieldMarc + new string(' ',3-strFieldMarc.Length);
+            if (strFieldMarc.Length < 3)
+                strFieldMarc = strFieldMarc + new string(' ', 3 - strFieldMarc.Length);
 
-			string strName = "";
-			string strIndicator = "";
-			string strValue = "";
+            string strName = "";
+            string strIndicator = "";
+            string strValue = "";
 
-			strName = strFieldMarc.Substring(0,3);
-			if (Record.IsControlFieldName(strName) == true)
-			{
-				strIndicator = "";
-				strValue = strFieldMarc.Substring(3);
-			}
-			else
-			{
-				if (strFieldMarc.Length < 5)
-					strFieldMarc = strFieldMarc + new string(' ',5-strFieldMarc.Length);
+            strName = strFieldMarc.Substring(0, 3);
+            if (Record.IsControlFieldName(strName) == true)
+            {
+                strIndicator = "";
+                strValue = strFieldMarc.Substring(3);
+            }
+            else
+            {
+                if (strFieldMarc.Length < 5)
+                    strFieldMarc = strFieldMarc + new string(' ', 5 - strFieldMarc.Length);
 
-				strIndicator = strFieldMarc.Substring(3,2);
+                strIndicator = strFieldMarc.Substring(3, 2);
 
-				strValue = strFieldMarc.Substring(5);
-			}
+                strValue = strFieldMarc.Substring(5);
+            }
 
-			string strCaption = this.container.MarcEditor.GetLabel(strName);
+            string strCaption = this.container.MarcEditor.GetLabel(strName);
 
             strValue = strValue.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
-			this.m_strNameCaption = strCaption;
-			this.m_strName = strName;
-			this.m_strIndicator = strIndicator;
-			this.m_strValue = strValue;
-			if (this.container.MarcEditor.FocusedField == this)
-			{
+            this.m_strNameCaption = strCaption;
+            this.m_strName = strName;
+            this.m_strIndicator = strIndicator;
+            this.m_strValue = strValue;
+            if (this.container.MarcEditor.FocusedField == this)
+            {
                 /*
                 if (this.container.MarcEditor.m_nFocusCol == 2)
     				this.container.MarcEditor.curEdit.Text = this.m_strValue;
                  * */
                 if (bFlushEdit == true) // 2014/7/10
                     this.container.MarcEditor.ItemTextToEditControl();  // 2009/3/6 changed
-			}
-			this.CalculateHeight(null,
-				true);
+            }
+            this.CalculateHeight(null,
+                true);
 
-			this.container.MarcEditor.FireTextChanged();
-		}
+            this.container.MarcEditor.FireTextChanged();
+        }
 
-		// 计算行的高度
-		//		g	Graphics对象，如果为null，则自动找
-		//		bIgnoreEdit	是否忽略小edit控件 false不忽略
-		internal void CalculateHeight(Graphics g_param, bool bIgnoreEdit)
-		{
+        // 计算行的高度
+        //		g	Graphics对象，如果为null，则自动找
+        //		bIgnoreEdit	是否忽略小edit控件 false不忽略
+        internal void CalculateHeight(Graphics g_param, bool bIgnoreEdit)
+        {
             Graphics g = g_param;
-			if (g == null)
-				g = Graphics.FromHwnd(this.container.MarcEditor.Handle);
+            if (g == null)
+                g = Graphics.FromHwnd(this.container.MarcEditor.Handle);
 
             try
             {
@@ -545,111 +545,111 @@ namespace DigitalPlatform.Marc
                 if (g_param == null)
                     g.Dispose();
             }
-		}
+        }
 
-		// 把本行绘制出来
-		// parameters:
-		//		pe	用PaintEventArgs对象而不用Graphics对象的目的是为了其有ClipRectangle成员，所以使绘制优化
-		//		nBaseX	x坐标
-		//		nBaseY	y坐标
-		// return:
-		//		void
-		internal void Paint(PaintEventArgs pe, 
-			int nBaseX, 
-			int nBaseY)
-		{
-			// -----------------------------------------
-			// 计算出本行的总共区域
-			// 每行区域中包括左上的线，不包括右下的线
-			Rectangle totalRect = new Rectangle(
-				nBaseX,
-				nBaseY,
-				this.container.record.TotalLineWidth,
-				this.TotalHeight);
+        // 把本行绘制出来
+        // parameters:
+        //		pe	用PaintEventArgs对象而不用Graphics对象的目的是为了其有ClipRectangle成员，所以使绘制优化
+        //		nBaseX	x坐标
+        //		nBaseY	y坐标
+        // return:
+        //		void
+        internal void Paint(PaintEventArgs pe,
+            int nBaseX,
+            int nBaseY)
+        {
+            // -----------------------------------------
+            // 计算出本行的总共区域
+            // 每行区域中包括左上的线，不包括右下的线
+            Rectangle totalRect = new Rectangle(
+                nBaseX,
+                nBaseY,
+                this.container.record.TotalLineWidth,
+                this.TotalHeight);
 
             // 优化
-			if (totalRect.IntersectsWith(pe.ClipRectangle )== false)
-				return;
+            if (totalRect.IntersectsWith(pe.ClipRectangle) == false)
+                return;
 
-			// -----------------------------------------
-			// 每个单元格包括左上的线，不包括右下的线
+            // -----------------------------------------
+            // 每个单元格包括左上的线，不包括右下的线
 
-			// 绘NameCaption
-			Rectangle nameCaptionRect = new Rectangle(
-				nBaseX,
-				nBaseY,
-				this.container.record.NameCaptionTotalWidth,
-				this.TotalHeight);
-			if (nameCaptionRect.IntersectsWith(pe.ClipRectangle )== true)
-			{
-				this.DrawCell(pe.Graphics,
-					0,
-					nameCaptionRect);
-			}
+            // 绘NameCaption
+            Rectangle nameCaptionRect = new Rectangle(
+                nBaseX,
+                nBaseY,
+                this.container.record.NameCaptionTotalWidth,
+                this.TotalHeight);
+            if (nameCaptionRect.IntersectsWith(pe.ClipRectangle) == true)
+            {
+                this.DrawCell(pe.Graphics,
+                    0,
+                    nameCaptionRect);
+            }
 
-			// 绘Name
-			Rectangle nameRect = new Rectangle(
-				nBaseX + this.container.record.NameCaptionTotalWidth,
-				nBaseY,
-				this.container.record.NameTotalWidth,
-				this.TotalHeight);
-			if (nameRect.IntersectsWith(pe.ClipRectangle )== true)
-			{
-				this.DrawCell(pe.Graphics,
-					1,
-					nameRect);
-			}
+            // 绘Name
+            Rectangle nameRect = new Rectangle(
+                nBaseX + this.container.record.NameCaptionTotalWidth,
+                nBaseY,
+                this.container.record.NameTotalWidth,
+                this.TotalHeight);
+            if (nameRect.IntersectsWith(pe.ClipRectangle) == true)
+            {
+                this.DrawCell(pe.Graphics,
+                    1,
+                    nameRect);
+            }
 
-			// 绘Indicator
-			Rectangle indicatorRect = new Rectangle(
-				nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth,
-				nBaseY,
-				this.container.record.IndicatorTotalWidth,
-				this.TotalHeight);
-			if (indicatorRect.IntersectsWith(pe.ClipRectangle )== true)
-			{
-				this.DrawCell(pe.Graphics,
-					2,
-					indicatorRect);
-			}
-			// 绘m_strValue
-			Rectangle valueRect = new Rectangle(
-				nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth + this.container.record.IndicatorTotalWidth /*+ this.container.Indicator2TotalWidth*/,
-				nBaseY,
-				this.container.record.ValueTotalWidth,
-				this.TotalHeight);
-			if (valueRect.IntersectsWith(pe.ClipRectangle )== true)
-			{
-				this.DrawCell(pe.Graphics,
-					3,
-					valueRect);
-			}
-		}
+            // 绘Indicator
+            Rectangle indicatorRect = new Rectangle(
+                nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth,
+                nBaseY,
+                this.container.record.IndicatorTotalWidth,
+                this.TotalHeight);
+            if (indicatorRect.IntersectsWith(pe.ClipRectangle) == true)
+            {
+                this.DrawCell(pe.Graphics,
+                    2,
+                    indicatorRect);
+            }
+            // 绘m_strValue
+            Rectangle valueRect = new Rectangle(
+                nBaseX + this.container.record.NameCaptionTotalWidth + this.container.record.NameTotalWidth + this.container.record.IndicatorTotalWidth /*+ this.container.Indicator2TotalWidth*/,
+                nBaseY,
+                this.container.record.ValueTotalWidth,
+                this.TotalHeight);
+            if (valueRect.IntersectsWith(pe.ClipRectangle) == true)
+            {
+                this.DrawCell(pe.Graphics,
+                    3,
+                    valueRect);
+            }
+        }
 
-		// 画单元格，包括背景，文字 和 左上线条
-		// parameter:
-		//		g	Graphics对象
-		//		nCol	列号 
-		//				0 字段说明;
-		//				1 字段名;
-		//				2 字段指示符 
-		//				3 字段内容
-		//		rect	区域 如果为null，则自动根据列号计算 但目前不支持
-		// return:
-		//		void
-		internal void DrawCell(Graphics g,
-			int nCol,
-			Rectangle rect)
-		{
-			Debug.Assert(g != null,"g参数不能为null");
+        // 画单元格，包括背景，文字 和 左上线条
+        // parameter:
+        //		g	Graphics对象
+        //		nCol	列号 
+        //				0 字段说明;
+        //				1 字段名;
+        //				2 字段指示符 
+        //				3 字段内容
+        //		rect	区域 如果为null，则自动根据列号计算 但目前不支持
+        // return:
+        //		void
+        internal void DrawCell(Graphics g,
+            int nCol,
+            Rectangle rect)
+        {
+            Debug.Assert(g != null, "g参数不能为null");
 
-			string strText = "";
-			int nWidth = 0;
+            string strText = "";
+            int nWidth = 0;
 
             bool bEnabled = this.container.MarcEditor.Enabled;
             bool bReadOnly = this.container.MarcEditor.ReadOnly;
 
-			Brush brush = null;
+            Brush brush = null;
             try
             {
                 if (nCol == 0)
@@ -816,18 +816,24 @@ namespace DigitalPlatform.Marc
                     if (nCol == 0)
                     {
                         font = this.container.MarcEditor.CaptionFont;
-                        Debug.Assert(font != null, "");
+                        //Debug.Assert(font != null, "");
                     }
                     else if (nCol == 1 || nCol == 2)
                     {
                         font = this.container.MarcEditor.FixedSizeFont;
-                        Debug.Assert(font != null, "");
+                        //Debug.Assert(font != null, "");
                     }
                     else
                     {
                         font = this.container.MarcEditor.Font;
-                        Debug.Assert(font != null, "");
+                        // Debug.Assert(font != null, "");
                     }
+
+                    if (font == null)
+                        font = this.container.MarcEditor.Font;
+
+                    Debug.Assert(font != null, "");
+
 
                     // System.Drawing.Text.TextRenderingHint oldrenderhint = g.TextRenderingHint;
                     // g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
@@ -905,44 +911,44 @@ namespace DigitalPlatform.Marc
             if (linGrBrush != null)
                 linGrBrush.Dispose();
 #endif
-		}
+        }
 
         // 获得反相颜色
         static Color ReverseColor(Color color)
         {
-            return Color.FromArgb(255-color.R, 255-color.G, 255-color.B);
+            return Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B);
         }
-		
-		// 画线条
-		internal static void DrawLines(Graphics g,
-			Rectangle myRect,
-			int nTopBorderHeight,
-			int nBottomBorderHeight,
-			int nLeftBorderWidth,
-			int nRightBorderWidth,
-			Color color)
-		{
-			if (nTopBorderHeight < 0
-				|| nBottomBorderHeight < 0
-				|| nLeftBorderWidth < 0
-				|| nRightBorderWidth < 0)
-				return;
 
-			if (nTopBorderHeight > myRect.Height 
-				|| nBottomBorderHeight > myRect.Height)
-				return;
+        // 画线条
+        internal static void DrawLines(Graphics g,
+            Rectangle myRect,
+            int nTopBorderHeight,
+            int nBottomBorderHeight,
+            int nLeftBorderWidth,
+            int nRightBorderWidth,
+            Color color)
+        {
+            if (nTopBorderHeight < 0
+                || nBottomBorderHeight < 0
+                || nLeftBorderWidth < 0
+                || nRightBorderWidth < 0)
+                return;
 
-			if (nLeftBorderWidth > myRect.Width
-				|| nRightBorderWidth > myRect.Width)
-				return;
+            if (nTopBorderHeight > myRect.Height
+                || nBottomBorderHeight > myRect.Height)
+                return;
 
-			//左边垂直钢笔
-			using(Pen penLeft = new Pen(color,nLeftBorderWidth))
-			//右边垂直钢笔
-			using(Pen penRight = new Pen(color,nRightBorderWidth))
-			//上方的水平钢笔
-			using(Pen penTop = new Pen(color,nTopBorderHeight))
-			//下方的水平钢笔
+            if (nLeftBorderWidth > myRect.Width
+                || nRightBorderWidth > myRect.Width)
+                return;
+
+            //左边垂直钢笔
+            using (Pen penLeft = new Pen(color, nLeftBorderWidth))
+            //右边垂直钢笔
+            using (Pen penRight = new Pen(color, nRightBorderWidth))
+            //上方的水平钢笔
+            using (Pen penTop = new Pen(color, nTopBorderHeight))
+            //下方的水平钢笔
             using (Pen penBottom = new Pen(color, nBottomBorderHeight))
             {
                 int nLeftDelta = nLeftBorderWidth / 2;
@@ -1121,7 +1127,7 @@ namespace DigitalPlatform.Marc
 			penTop.Dispose ();
 			penBottom.Dispose ();
 #endif
-		}
+        }
 
         // 子字段集合
         // 通过get得到的集合，remove其中的subfield对象，field中不能兑现。
@@ -1129,23 +1135,23 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 获取或设置子字段对象集合
         /// </summary>
-		public SubfieldCollection Subfields 
-		{
-			get 
-			{
-				if (Record.IsControlFieldName(this.m_strName) == true)
-					return null;
-				return SubfieldCollection.BuildSubfields(this);
-			}
-			set 
-			{
+		public SubfieldCollection Subfields
+        {
+            get
+            {
+                if (Record.IsControlFieldName(this.m_strName) == true)
+                    return null;
+                return SubfieldCollection.BuildSubfields(this);
+            }
+            set
+            {
                 if (value != null)
                 {
                     value.Container = this;
 
                     value.Flush();  // Flush()中必定作了针对this的事情
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 }

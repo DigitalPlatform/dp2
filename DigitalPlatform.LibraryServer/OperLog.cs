@@ -1226,7 +1226,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-
+        // 注: 这个函数旧版本的缺点是，每次都要重新打开一下文件。新版本改用了 CacheFileItem
         // 原先版本
         // 获得一个日志记录
         // parameters:
@@ -1262,7 +1262,12 @@ namespace DigitalPlatform.LibraryServer
 
             int nRet = 0;
 
+#if OLD
             Stream stream = null;
+#else
+            Stream stream = null;
+            CacheFileItem cache_item = null;
+#endif
 
             if (string.IsNullOrEmpty(this.m_strDirectory) == true)
             {
@@ -1275,11 +1280,17 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
+
+#if OLD
                 stream = File.Open(
                     strFilePath,
                     FileMode.Open,
                     FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
                     FileShare.ReadWrite);
+#else
+                cache_item = this.Cache.Open(strFilePath);
+                stream = cache_item.Stream;
+#endif
             }
             catch (FileNotFoundException /*ex*/)
             {
@@ -1425,7 +1436,11 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+#if OLD
                 stream.Close();
+#else
+                this.Cache.Close(cache_item);
+#endif
             }
         }
 

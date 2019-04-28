@@ -164,7 +164,6 @@ namespace DigitalPlatform.LibraryServer
             this.App.AddHangup("LogRecover");
             try
             {
-                string strError = "";
 
                 BatchTaskStartInfo startinfo = this.StartInfo;
                 if (startinfo == null)
@@ -175,7 +174,7 @@ namespace DigitalPlatform.LibraryServer
                 int nRet = ParseLogRecoverStart(startinfo.Start,
                     out lStartIndex,
                     out strStartFileName,
-                    out strError);
+                    out string strError);
                 if (nRet == -1)
                 {
                     this.AppendErrorText("启动失败: " + strError + "\r\n");
@@ -183,16 +182,11 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 //
-                string strRecoverLevel = "";
-                bool bClearFirst = false;
-                bool bContinueWhenError = false;
-                string strStyle = "";
-
                 nRet = ParseLogRecoverParam(startinfo.Param,
-                    out strRecoverLevel,
-                    out bClearFirst,
-                    out bContinueWhenError,
-                    out strStyle,
+                    out string strRecoverLevel,
+                    out bool bClearFirst,
+                    out bool bContinueWhenError,
+                    out string strStyle,
                     out strError);
                 if (nRet == -1)
                 {
@@ -301,7 +295,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         lStartIndex = 0;    // 第一个文件以后的文件就全做了
                     }
-
                 }
 
                 this.AppendResultText("循环结束\r\n");
@@ -393,7 +386,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // Debug.Assert(!(lIndex == 182 && strFileName == "20071225.log"), "");
 
-                        long lAttachmentLength = 0;
+                        // long lAttachmentLength = 0;
                         // 获得一个日志记录
                         // parameters:
                         //      strFileName 纯文件名,不含路径部分
