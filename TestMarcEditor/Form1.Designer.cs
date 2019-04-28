@@ -34,6 +34,8 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.marcEditor1 = new DigitalPlatform.Marc.MarcEditor();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.marcEditor2 = new DigitalPlatform.Marc.MarcEditor();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -74,14 +76,13 @@
             // 
             // marcEditor1
             // 
-            this.marcEditor1.CaptionFont = null;
+            this.marcEditor1.CaptionFont = new System.Drawing.Font("宋体", 9F);
             this.marcEditor1.ContentBackColor = System.Drawing.SystemColors.Window;
             this.marcEditor1.ContentTextColor = System.Drawing.SystemColors.WindowText;
             this.marcEditor1.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.marcEditor1.DocumentOrgX = 0;
             this.marcEditor1.DocumentOrgY = 0;
-            this.marcEditor1.FieldNameCaptionWidth = 0;
-            this.marcEditor1.FixedSizeFont = null;
+            this.marcEditor1.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
             this.marcEditor1.FocusedField = null;
             this.marcEditor1.FocusedFieldIndex = 0;
             this.marcEditor1.HorzGridColor = System.Drawing.Color.LightGray;
@@ -90,7 +91,7 @@
             this.marcEditor1.IndicatorTextColor = System.Drawing.Color.Green;
             this.marcEditor1.Lang = "zh";
             this.marcEditor1.Location = new System.Drawing.Point(0, 57);
-            this.marcEditor1.Marc = null;
+            this.marcEditor1.Marc = "????????????????????????";
             this.marcEditor1.MarcDefDom = null;
             this.marcEditor1.Name = "marcEditor1";
             this.marcEditor1.NameBackColor = System.Drawing.SystemColors.Window;
@@ -102,7 +103,7 @@
             this.marcEditor1.Size = new System.Drawing.Size(407, 310);
             this.marcEditor1.TabIndex = 3;
             this.marcEditor1.Text = "marcEditor1";
-            this.marcEditor1.UiState = "{\"FieldNameCaptionWidth\":0}";
+            this.marcEditor1.UiState = "{\"FieldNameCaptionWidth\":100}";
             this.marcEditor1.VertGridColor = System.Drawing.Color.LightGray;
             this.marcEditor1.GetConfigFile += new DigitalPlatform.Marc.GetConfigFileEventHandle(this.marcEditor1_GetConfigFile);
             this.marcEditor1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.marcEditor1_GetConfigDom);
@@ -114,11 +115,52 @@
             this.textBox1.Size = new System.Drawing.Size(100, 28);
             this.textBox1.TabIndex = 4;
             // 
+            // marcEditor2
+            // 
+            this.marcEditor2.CaptionFont = new System.Drawing.Font("宋体", 9F);
+            this.marcEditor2.ContentBackColor = System.Drawing.SystemColors.Window;
+            this.marcEditor2.ContentTextColor = System.Drawing.SystemColors.WindowText;
+            this.marcEditor2.CurrentImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.marcEditor2.DocumentOrgX = 0;
+            this.marcEditor2.DocumentOrgY = 0;
+            this.marcEditor2.FixedSizeFont = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Bold);
+            this.marcEditor2.FocusedField = null;
+            this.marcEditor2.FocusedFieldIndex = 0;
+            this.marcEditor2.HorzGridColor = System.Drawing.Color.LightGray;
+            this.marcEditor2.IndicatorBackColor = System.Drawing.SystemColors.Window;
+            this.marcEditor2.IndicatorBackColorDisabled = System.Drawing.SystemColors.Control;
+            this.marcEditor2.IndicatorTextColor = System.Drawing.Color.Green;
+            this.marcEditor2.Lang = "zh";
+            this.marcEditor2.Location = new System.Drawing.Point(487, 282);
+            this.marcEditor2.Marc = "?????nam0 22?????3i 45  ";
+            this.marcEditor2.MarcDefDom = null;
+            this.marcEditor2.Name = "marcEditor2";
+            this.marcEditor2.NameBackColor = System.Drawing.SystemColors.Window;
+            this.marcEditor2.NameCaptionBackColor = System.Drawing.SystemColors.Info;
+            this.marcEditor2.NameCaptionTextColor = System.Drawing.SystemColors.InfoText;
+            this.marcEditor2.NameTextColor = System.Drawing.Color.Blue;
+            this.marcEditor2.ReadOnly = false;
+            this.marcEditor2.SelectionStart = -1;
+            this.marcEditor2.Size = new System.Drawing.Size(263, 130);
+            this.marcEditor2.TabIndex = 7;
+            this.marcEditor2.Text = "marcEditor2";
+            this.marcEditor2.UiState = "{\"FieldNameCaptionWidth\":100}";
+            this.marcEditor2.VertGridColor = System.Drawing.Color.LightGray;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(530, 134);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(100, 28);
+            this.textBox2.TabIndex = 8;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.marcEditor2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.marcEditor1);
             this.Controls.Add(this.statusStrip1);
@@ -142,6 +184,8 @@
         private DigitalPlatform.Marc.MarcEditor marcEditor1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
         private System.Windows.Forms.TextBox textBox1;
+        private DigitalPlatform.Marc.MarcEditor marcEditor2;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 
