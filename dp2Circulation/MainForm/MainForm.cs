@@ -2775,6 +2775,16 @@ false);
                         "default_account",
                         "username",
                         "");
+
+#if NO
+                    // 2019/4/28
+                    LibraryChannel channel = (LibraryChannel)sender;
+                    if (channel != null)
+                    {
+                        channel.UserName = e.UserName;
+                    }
+#endif
+
                     e.Password = AppInfo.GetString(
                         "default_account",
                         "password",
@@ -3879,7 +3889,7 @@ Stack:
             return -1;
         }
 
-        #region EnsureXXXForm ...
+#region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4167,7 +4177,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-        #endregion
+#endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -7841,7 +7851,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-        #region 序列号机制
+#region 序列号机制
 
         bool _testMode = false;
 
@@ -8160,7 +8170,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
@@ -8267,7 +8277,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-        #region servers.xml
+#region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -8281,7 +8291,8 @@ Keys keyData)
 
         static string _baseCfg = @"
 <root>
-  <server name='红泥巴.数字平台中心' type='dp2library' url='http://hnbclub.cn/dp2library' userName='public'/>
+  <server name='网众' type='dp2library' url='net.tcp://118.25.225.224:8002/dp2library/' userName='?'/>
+  <server name='红泥巴.数字平台中心' type='dp2library' url='net.tcp://58.87.101.80:101/hnb/' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
 
@@ -8436,6 +8447,28 @@ Keys keyData)
                     }
                 }
 
+                /*
+                // TODO: 询问账户名和密码(账户名第一字符为 ~ 表示这是一个读者账户)。并验证。可以放弃加入此服务器节点
+                string strWangzhongUrl = "";
+                {
+                    XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='网众']") as XmlElement;
+                    if (server != null)
+                        strWangzhongUrl = server.GetAttribute("url");
+
+                    // return:
+                    //      -1  出错
+                    //      0   不是同一个服务器
+                    //      1   是同一个服务器
+                    nRet = IsSameDp2libraryServer(this.LibraryServerUrl, strWangzhongUrl, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                    {
+                        server.ParentNode.RemoveChild(server);
+                    }
+                }
+                */
+
                 dom.Save(strCfgFileName);
                 return 0;
             }
@@ -8565,7 +8598,7 @@ Keys keyData)
             return this._currentUserRights;
         }
 
-        #endregion // servers.xml
+#endregion // servers.xml
 
         void EnableFingerprintSendKey(bool enable)
         {
@@ -8629,7 +8662,7 @@ Keys keyData)
 #endif
         }
 
-        #region 消息过滤
+#region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -8659,7 +8692,7 @@ Keys keyData)
 
 #endif
 
-        #endregion
+#endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名

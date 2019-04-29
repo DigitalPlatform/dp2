@@ -20,11 +20,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections;
 using System.ServiceModel.Description;
 using System.Web;
+using System.Net;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
-using System.Net;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -71,6 +71,26 @@ namespace DigitalPlatform.LibraryClient
         /// dp2Library 服务器的 URL
         /// </summary>
         public string Url = "";
+
+#if NO
+        string _clientIP = null;
+
+        public string ClientIP
+        {
+            get
+            {
+                return _clientIP;
+            }
+            set
+            {
+                _clientIP = value;
+                if (_clientIP != null)
+                {
+                    Debugger.Break();
+                }
+            }
+        }
+#endif
 
         /// <summary>
         /// 发出 dp2library 请求位置的上一个节点的 IP。格式为 节点名:IP 地址
@@ -548,6 +568,7 @@ out strError);
                 if (m_ws == null)
                 {
                     string strUrl = this.Url;
+                    LibraryChannelManager.Log?.Debug($"Url={strUrl}");
 
                     bool bWs0 = false;
                     Uri uri = new Uri(strUrl);
@@ -635,8 +656,10 @@ out strError);
                     }
                     else
                     {
+#if NO
                         if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
                             bWs0 = true;
+#endif
 
                         if (bWs0 == false)
                         {
@@ -644,6 +667,12 @@ out strError);
                             EndpointAddress address = null;
 
                             {
+#if NO
+                                address =
+               new EndpointAddress(
+                  uri,
+                  EndpointIdentity.CreateDnsIdentity(uri.DnsSafeHost));
+#endif
                                 address = new EndpointAddress(strUrl);
                                 this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
 
@@ -757,7 +786,6 @@ out strError);
 #endif
 
                 this.WcfException = null;
-
                 return m_ws;
             }
         }
@@ -10050,13 +10078,20 @@ Stack:
         void SetInnerChannelOperationTimeout(TimeSpan timeout)
         {
             if (this.m_ws is localhost.dp2libraryClient)
+            {
+                LibraryChannelManager.Log?.Debug($"SetInnerChannelOperationTimeout({timeout}) dp2libraryClient");
                 (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout = timeout;
+            }
 #if BASIC_HTTP
             else if (this.m_ws is localhost.dp2libraryRESTClient)
+            {
+                LibraryChannelManager.Log?.Debug($"SetInnerChannelOperationTimeout({timeout}) dp2libraryRESTClient");
                 (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout = timeout;
+            }
 #endif
             else
             {
+                LibraryChannelManager.Log?.Debug($"SetInnerChannelOperationTimeout({timeout}) IContextChannel");
                 // http://stackoverflow.com/questions/4695656/add-operationtimeout-to-channel-implemented-in-code
                 ((IContextChannel)this.m_ws).OperationTimeout = timeout;
             }
@@ -10260,7 +10295,7 @@ Stack:
                 }
 
                 // 2018/6/26
-                // 如果 Dns 事项没有找到，再尝试找 Name 事项。这一般是有问题的 Windows 7 换进该
+                // 如果 Dns 事项没有找到，再尝试找 Name 事项。这一般是有问题的 Windows 7 环境
                 claims = claimSet.FindClaims(ClaimTypes.Name, Rights.PossessProperty);
                 foreach (Claim claim in claims)
                 {

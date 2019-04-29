@@ -1272,7 +1272,12 @@ Keys keyData)
                 GetChannelStyle.GUI,
                 "");  // ? "test:127.0.0.1"
 #endif
-            LibraryChannel channel = this.GetChannel();
+            LibraryChannel channel = this.GetChannel(".",
+    ".",
+    GetChannelStyle.None,
+    "");  // ? "test:127.0.0.1"
+
+            //            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.None;
             stop.OnStop += Stop_OnStop1;
@@ -2780,6 +2785,7 @@ out strError);
     ZClientChannel c,
     DigitalPlatform.Z3950.ZClient.SearchResult r)
         {
+            item.BackColor = Color.Yellow;
             ListViewUtil.ChangeItemText(item, 0, $"Z39.50:{c.ServerName}");
             if (r.Value == -1 || r.Value == 0)
                 ListViewUtil.ChangeItemText(item, 1, $"检索出错 {r.ErrorInfo}");
@@ -11437,7 +11443,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-        #region 停靠
+#region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11506,7 +11512,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-        #endregion
+#endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

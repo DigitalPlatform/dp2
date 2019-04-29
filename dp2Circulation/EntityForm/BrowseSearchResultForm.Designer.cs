@@ -34,6 +34,7 @@
             this.listView_records = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.label_message = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button_Cancel
@@ -41,7 +42,7 @@
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(501, 364);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(4);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(112, 33);
             this.button_Cancel.TabIndex = 5;
@@ -54,7 +55,7 @@
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
             this.button_OK.Location = new System.Drawing.Point(381, 364);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(4);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(112, 33);
             this.button_OK.TabIndex = 4;
@@ -73,7 +74,7 @@
             this.listView_records.FullRowSelect = true;
             this.listView_records.HideSelection = false;
             this.listView_records.Location = new System.Drawing.Point(15, 15);
-            this.listView_records.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.listView_records.Margin = new System.Windows.Forms.Padding(4);
             this.listView_records.Name = "listView_records";
             this.listView_records.Size = new System.Drawing.Size(600, 338);
             this.listView_records.TabIndex = 3;
@@ -94,6 +95,16 @@
             this.columnHeader2.Text = "1";
             this.columnHeader2.Width = 200;
             // 
+            // label_message
+            // 
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_message.AutoSize = true;
+            this.label_message.Location = new System.Drawing.Point(15, 364);
+            this.label_message.Name = "label_message";
+            this.label_message.Size = new System.Drawing.Size(0, 18);
+            this.label_message.TabIndex = 6;
+            // 
             // BrowseSearchResultForm
             // 
             this.AcceptButton = this.button_OK;
@@ -101,6 +112,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(628, 414);
+            this.Controls.Add(this.label_message);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.listView_records);
@@ -111,6 +123,7 @@
             this.TopMost = true;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.BrowseSearchResultForm_FormClosed);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -121,5 +134,6 @@
         private DigitalPlatform.GUI.ListViewNF listView_records;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.Label label_message;
     }
 }

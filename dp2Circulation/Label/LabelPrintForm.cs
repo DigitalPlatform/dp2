@@ -3237,60 +3237,64 @@ out string strError);
         {
             // string strError = "";
 
-#if NO
-            if (string.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)
+            this.ShowMessage("正在打开标签设计对话框 ...");
+            Application.DoEvents();
+            try
             {
-                strError = "请先指定标签定义文件名";
-                goto ERROR1;
+                string strOldFileName = this.textBox_labelDefFilename.Text;
+
+                using (LabelDesignForm dlg = new LabelDesignForm())
+                {
+                    MainForm.SetControlFont(dlg, this.Font, false);
+                    dlg.DefFileName = this.textBox_labelDefFilename.Text;
+                    if (string.IsNullOrEmpty(this.textBox_labelFile_content.Text) == false)
+                        dlg.SampleLabelText = this.textBox_labelFile_content.Text;
+
+                    dlg.UiState = Program.MainForm.AppInfo.GetString(
+                            "label_print_form",
+                            "LabelDesignForm_uiState",
+                            "");
+
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "LabelDesignForm_state");
+                    dlg.ShowDialog(this);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                    Program.MainForm.AppInfo.SetString(
+                "label_print_form",
+                "LabelDesignForm_uiState",
+                dlg.UiState);
+
+                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        return;
+
+                    // 文件名在设计对话框中发生了变化
+                    if (string.IsNullOrEmpty(strOldFileName) == false
+                        && strOldFileName != dlg.DefFileName)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+        "您在标签设计对话框中装载了新的标签定义文件名 '" + dlg.DefFileName + "'。\r\n\r\n请问要把这个标签定义文件应用到当前窗口么? \r\n\r\n(Yes: 应用新的文件名; No: 保持以前的文件名不变)",
+        "LabePrintForm",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.Yes)
+                            this.textBox_labelDefFilename.Text = dlg.DefFileName;
+                    }
+                    else
+                        this.textBox_labelDefFilename.Text = dlg.DefFileName;
+
+                    // 即便前后文件名没有变化，也要触发一次刷新
+                    if (strOldFileName == this.textBox_labelDefFilename.Text)
+                    {
+                        textBox_labelDefFilename_TextChanged(this, new EventArgs());
+                    }
+                    return;
+                }
             }
-#endif
-            string strOldFileName = this.textBox_labelDefFilename.Text;
-
-            LabelDesignForm dlg = new LabelDesignForm();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.DefFileName = this.textBox_labelDefFilename.Text;
-            if (string.IsNullOrEmpty(this.textBox_labelFile_content.Text) == false)
-                dlg.SampleLabelText = this.textBox_labelFile_content.Text;
-
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-                    "label_print_form",
-                    "LabelDesignForm_uiState",
-                    "");
-
-            Program.MainForm.AppInfo.LinkFormState(dlg, "LabelDesignForm_state");
-            dlg.ShowDialog(this);
-            Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-            Program.MainForm.AppInfo.SetString(
-        "label_print_form",
-        "LabelDesignForm_uiState",
-        dlg.UiState);
-
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                return;
-
-            // 文件名在设计对话框中发生了变化
-            if (string.IsNullOrEmpty(strOldFileName) == false
-                && strOldFileName != dlg.DefFileName)
+            finally
             {
-                DialogResult result = MessageBox.Show(this,
-"您在标签设计对话框中装载了新的标签定义文件名 '" + dlg.DefFileName + "'。\r\n\r\n请问要把这个标签定义文件应用到当前窗口么? \r\n\r\n(Yes: 应用新的文件名; No: 保持以前的文件名不变)",
-"LabePrintForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                    this.textBox_labelDefFilename.Text = dlg.DefFileName;
+                this.ShowMessage("");
             }
-            else
-                this.textBox_labelDefFilename.Text = dlg.DefFileName;
-
-            // 即便前后文件名没有变化，也要触发一次刷新
-            if (strOldFileName == this.textBox_labelDefFilename.Text)
-            {
-                textBox_labelDefFilename_TextChanged(this, new EventArgs());
-            }
-            return;
 #if NO
         ERROR1:
             MessageBox.Show(this, strError);

@@ -508,7 +508,7 @@ namespace dp2Circulation
             if (_recpaths.Count == 0)
                 return "";
 
-            while(true)
+            while (true)
             {
                 if (strStyle == "prev")
                     _currentIndex--;
@@ -533,6 +533,32 @@ namespace dp2Circulation
             }
 
             return this.m_biblioTable[strPath] as BiblioInfo;
+        }
+
+        public void ShowMessage(string strMessage,
+    string strColor = "",
+    bool bClickClose = false)
+        {
+            if (this.InvokeRequired)
+                this.BeginInvoke(new Action(() =>
+                {
+                    this.label_message.Text = strMessage;
+                }));
+            else
+                this.label_message.Text = strMessage;
+
+        }
+
+        public void ShowMessageBox(string text)
+        {
+            if (this.InvokeRequired)
+                this.BeginInvoke(new Action(() =>
+                {
+                    MessageBox.Show(this, text);
+                }));
+            else
+                MessageBox.Show(this, text);
+
         }
     }
 
