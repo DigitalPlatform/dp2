@@ -69,6 +69,8 @@ namespace dp2Circulation
             }
         }
 
+        public bool ServersDomChanged { get; set; }
+
         public EntityRegisterBase()
         {
             this._channelPool.BeforeLogin += new BeforeLoginEventHandle(_channelPool_BeforeLogin);
@@ -84,6 +86,8 @@ namespace dp2Circulation
 
         void _channelPool_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
+            bool bIsReader = false;
+
             if (e.FirstTry == true)
             {
                 Debug.Assert(_currentAccount != null, "");
@@ -92,8 +96,6 @@ namespace dp2Circulation
                     e.LibraryServerUrl = Program.MainForm.LibraryServerUrl;
                 else
                     e.LibraryServerUrl = _currentAccount.ServerUrl;
-
-                bool bIsReader = false;
 
                 if (IsDot(_currentAccount.UserName) == true)
                 {
@@ -160,7 +162,64 @@ false);
             }
 
             // TODO: 可以出现对话框，但要注意跨线程的问题
-            e.Cancel = true;
+
+            DialogResult result = (DialogResult)Program.MainForm.Invoke((Func<DialogResult>)(() =>
+            {
+                using (LoginDlg dlg = new LoginDlg())
+                {
+                    Hashtable table = StringUtil.ParseParameters(e.Parameters, ',', '=');
+                    string type = (string)table["type"];
+                    bIsReader = type == "reader";
+                    // TODO: Url 不让修改
+                    dlg.UserName = bIsReader ? "~" + e.UserName : e.UserName;
+                    dlg.Comment = e.ErrorInfo;
+                    dlg.SavePassword = e.SavePasswordLong;
+                    dlg.ServerUrl = e.LibraryServerUrl;
+                    dlg.ShowDialog(Program.MainForm);
+                    if (dlg.DialogResult == DialogResult.OK)
+                    {
+                        if (dlg.UserName.StartsWith("~"))
+                        {
+                            e.UserName = dlg.UserName.Substring(1);
+                            bIsReader = true;
+                        }
+                        else
+                        {
+                            e.UserName = dlg.UserName;
+                            bIsReader = false;
+                        }
+                        e.Password = dlg.Password;
+                        e.SavePasswordLong = dlg.SavePassword;
+
+                        // 同步到当前账户
+                        if (IsDot(_currentAccount.UserName) == false)
+                        {
+                            _currentAccount.UserName = e.UserName;
+                            _currentAccount.Password = e.Password;
+                            _currentAccount.IsReader = bIsReader ? "yes" : "no";
+                        }
+
+                        // 长期保存密码，写回到 servers.xml 中
+                        if (e.SavePasswordLong)
+                        {
+                            // 保存对账户的修改
+                            var changed = SaveAccountInfo(this._servers_dom, _currentAccount);
+                            if (changed == true)
+                                this.ServersDomChanged = true;
+                        }
+
+                        table["type"] = bIsReader ? "reader" : "worker";
+                        e.Parameters = StringUtil.BuildParameterString(table, ',', '=');
+                    }
+                    return dlg.DialogResult;
+                }
+            }));
+
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+                return;
+            }
         }
 
         public LibraryChannel GetChannel(string strServerUrl,
@@ -231,6 +290,35 @@ false);
             }
         }
 
+        // 保存对账户的修改
+        public static bool SaveAccountInfo(XmlDocument dom, AccountInfo account)
+        {
+            bool changed = false;
+            XmlElement server = dom.DocumentElement.SelectSingleNode($"server[@name='{account.ServerName}']") as XmlElement;
+            if (server == null)
+                throw new Exception($"服务器 '{account.ServerName}' 在 servers.xml 文件中没有找到");
+
+            if (account.UserName != server.GetAttribute("userName"))
+            {
+                server.SetAttribute("userName", account.UserName);
+                changed = true;
+            }
+
+            var password = Program.MainForm.EncryptPassword(account.Password);
+            if (password != server.GetAttribute("password"))
+            {
+                server.SetAttribute("password", password);
+                changed = true;
+            }
+
+            if (account.IsReader != server.GetAttribute("isReader"))
+            {
+                server.SetAttribute("isReader", account.IsReader);
+                changed = true;
+            }
+            return changed;
+        }
+
         public static AccountInfo GetAccountInfo(XmlElement server)
         {
             AccountInfo account = new AccountInfo();
@@ -238,7 +326,9 @@ false);
             account.ServerType = server.GetAttribute("type");
             account.ServerUrl = server.GetAttribute("url");
             account.UserName = server.GetAttribute("userName");
-            account.Password = server.GetAttribute("password");
+            var password = server.GetAttribute("password");
+            account.Password = Program.MainForm.DecryptPasssword(password);
+
             account.IsReader = server.GetAttribute("isReader");
             account.ServerNode = server;
             return account;

@@ -979,6 +979,19 @@ namespace dp2Circulation
                                         (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right - 1,
                                         (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
 
+                                if (label_param.PrintBorder)
+                                {
+                                    // 标签边界
+                                    using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
+                                    {
+                                        e.Graphics.DrawRectangle(pen,
+                                            rectLabel.X,
+                                            rectLabel.Y,
+                                            rectLabel.Width,
+                                            rectLabel.Height);
+                                    }
+                                }
+
                                 // 绘制标签边界
                                 // 灰色
                                 if (bTestingGrid == true)
@@ -993,18 +1006,20 @@ namespace dp2Circulation
                                     }
 
                                     // 标签边界
-                                    using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
+                                    if (label_param.PrintBorder == false)
                                     {
-                                        e.Graphics.DrawRectangle(pen,
-                                            rectLabel.X,
-                                            rectLabel.Y,
-                                            rectLabel.Width,
-                                            rectLabel.Height);
+                                        using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
+                                        {
+                                            e.Graphics.DrawRectangle(pen,
+                                                rectLabel.X,
+                                                rectLabel.Y,
+                                                rectLabel.Width,
+                                                rectLabel.Height);
+                                        }
                                     }
 
                                     // 绘制标签内部文字区域边界
                                     // 淡红色
-
                                     using (Pen pen = new Pen(Color.FromArgb(255, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
                                     {
                                         e.Graphics.DrawRectangle(pen,

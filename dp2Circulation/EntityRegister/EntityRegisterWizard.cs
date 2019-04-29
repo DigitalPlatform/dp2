@@ -499,6 +499,8 @@ MessageBoxDefaultButton.Button1);
 
         private void EntityRegisterWizard_FormClosed(object sender, FormClosedEventArgs e)
         {
+            SaveServerXml();
+
             if (_searchParam != null)
             {
                 try
@@ -624,6 +626,21 @@ MessageBoxDefaultButton.Button1);
             ERROR1:
             this.ShowMessage(strError, "red", true);
         }
+
+        void SaveServerXml()
+        {
+            // string strError = "";
+            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
+
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
+
+            if (_base?.ServersDom != null && _base.ServersDomChanged)
+                _base.ServersDom.Save(strFileName);
+            return;
+            //ERROR1:
+            //this.ShowMessage(strError, "red", true);
+        }
+
 
         string _originTitle = "";
 
@@ -1501,7 +1518,6 @@ false);
                     }
                 }
 
-                ServerInfo server_info = null;
 
                 //if (line != null)
                 //    line.BiblioSummary = "正在获取服务器 " + account.ServerName + " 的配置信息 ...";
@@ -1512,7 +1528,7 @@ false);
                 nRet = _base.GetServerInfo(
                     current_channel,
                     account,
-                    out server_info,
+                    out ServerInfo server_info,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;    // 可以不报错 ?
@@ -1520,7 +1536,6 @@ false);
                 this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
                     "progress", false);
 
-                string strQueryXml = "";
                 long lRet = current_channel.SearchBiblio(Progress,
                     server_info == null ? "<全部>" : server_info.GetBiblioDbNames(),    // "<全部>",
                     strQueryWord,   // this.textBox_queryWord.Text,
@@ -1532,7 +1547,7 @@ false);
                     "",    // strSearchStyle
                     "", // strOutputStyle
                     "",
-                    out strQueryXml,
+                    out string strQueryXml,
                     out strError);
                 if (lRet == -1)
                 {
@@ -1590,12 +1605,14 @@ false);
 
                     {
                         // 获得书目记录
-                        BiblioLoader loader = new BiblioLoader();
-                        loader.Channel = current_channel;
-                        loader.Stop = this.Progress;
-                        loader.Format = "xml";
-                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
-                        loader.RecPaths = biblio_recpaths;
+                        BiblioLoader loader = new BiblioLoader
+                        {
+                            Channel = current_channel,
+                            Stop = this.Progress,
+                            Format = "xml",
+                            GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp,
+                            RecPaths = biblio_recpaths
+                        };
 
                         try
                         {
@@ -1616,9 +1633,6 @@ false);
 
                                 string strXml = item.Content;
 
-                                string strMarcSyntax = "";
-                                string strBrowseText = "";
-                                string strColumnTitles = "";
 #if NO
                                 string strMARC = "";
                                 // 将XML格式转换为MARC格式
@@ -1647,9 +1661,9 @@ false);
                                 }
 #endif
                                 nRet = BuildBrowseText(strXml,
-            out strBrowseText,
-            out strMarcSyntax,
-            out strColumnTitles,
+            out string strBrowseText,
+            out string strMarcSyntax,
+            out string strColumnTitles,
             out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
@@ -2253,7 +2267,7 @@ out strError);
                 // 2019/1/17
                 if (string.IsNullOrEmpty(strStartServerName)
                     && string.IsNullOrEmpty(strStartRecPath)
-                    && string.IsNullOrEmpty(strServerName) 
+                    && string.IsNullOrEmpty(strServerName)
                     && string.IsNullOrEmpty(strBiblioRecPath))
                 {
                     strError = "试图新建记录，但当前用户没有可供写入的书目库";
@@ -2711,7 +2725,7 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-#region 册记录相关
+        #region 册记录相关
 
         // 将一条书目记录下属的若干册记录装入列表
         // return:
@@ -3072,9 +3086,9 @@ int nCount)
                 this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
-#endregion
+        #endregion
 
-#region 保存书目记录
+        #region 保存书目记录
 
         // 保存书目记录和下属的册记录
         // return:
@@ -3602,9 +3616,9 @@ int nCount)
             return 0;
         }
 
-#endregion
+        #endregion
 
-#region 删除书目记录
+        #region 删除书目记录
 
         // return:
         //      -1  出错
@@ -3793,7 +3807,7 @@ int nCount)
             }
         }
 
-#endregion
+        #endregion
 
         private void flowLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -4413,7 +4427,7 @@ MessageBoxDefaultButton.Button2);
             this.DeleteBiblioRecord();
         }
 
-#region 键盘输入面板
+        #region 键盘输入面板
 
         KeyboardForm _keyboardForm = null;
 
@@ -4559,7 +4573,7 @@ MessageBoxDefaultButton.Button2);
             // this.easyMarcControl1.HideSelection = true;
         }
 
-#endregion
+        #endregion
 
         private void EntityRegisterWizard_Move(object sender, EventArgs e)
         {

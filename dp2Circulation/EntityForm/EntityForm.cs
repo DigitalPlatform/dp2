@@ -4973,6 +4973,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                 int nRet = 0;
                 bool bDisplayClickableError = false;
                 long lHitCount = 0;
+                bool browse_visible = false;
 
                 _willCloseBrowseWindow = false;
                 // _browseWindowSelected = false;
@@ -5114,7 +5115,10 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         }
 
                         if (lHitCount > 1)
+                        {
                             this.ShowBrowseWindow(-1);
+                            browse_visible = true;
+                        }
 
                         // 从此位置以后，_willCloseBrowseWindow 如果变为 true 则表示要立即终止循环和处理
 
@@ -5195,6 +5199,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                                 this.ShowMessage(result.ErrorInfo, "red", true);
                         }
                         this.ShowMessage("等待 Z39.50 检索响应 ...");
+                        this.browseWindow?.ShowMessage("等待 Z39.50 检索响应 ...");
 
                         {
                             NormalResult result = await _zsearcher.Search(
@@ -5206,6 +5211,14 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                             strMatchStyle,
                             (c, r) =>
                             {
+                                lHitCount += r.ResultCount;
+
+                                if (r.ResultCount > 0 && browse_visible == false)
+                                {
+                                    TryShowBrowseWindow();
+                                    browse_visible = true;
+                                }
+
                                 this.Invoke((Action)(() =>
                                 {
                                     ListViewItem item = new ListViewItem();
@@ -5296,6 +5309,8 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         && this._floatingMessage.InDelay() == false)
                         this.ClearMessage();
 
+                    this.browseWindow?.ShowMessage("");
+
                     if (Program.MainForm.MessageHub != null)
                         Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
@@ -5329,7 +5344,6 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         bDisplayClickableError = true;
                     }
                 }
-
 
                 if (_willCloseBrowseWindow == true)
                     CloseBrowseWindow();
@@ -5390,7 +5404,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                 if (channel._fetched >= channel._resultCount)
                 {
-                    this.ShowMessage("已经全部载入", "yellow", true);
+                    this.browseWindow.ShowMessageBox($"{channel.ServerName} 的命中结果已经全部载入");
                     return;
                 }
 
@@ -5408,7 +5422,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
                         if (present_result.Records != null)
                             FillList(channel._fetched,
                 channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
-                channel.TargetInfo.HostName,
+                channel.ServerName,
                 present_result.Records, item);
                         BiblioSearchForm.UpdateCommandLine(item, channel, present_result);
                     }
@@ -5878,6 +5892,14 @@ out strError);
                 this.browseWindow.Close();
                 this.browseWindow = null;
             }
+        }
+
+        void TryShowBrowseWindow()
+        {
+            this.BeginInvoke(new Action(() =>
+            {
+                ShowBrowseWindow(-1);
+            }));
         }
 
         // 显示 浏览小窗口

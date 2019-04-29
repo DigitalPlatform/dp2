@@ -43,6 +43,10 @@ namespace dp2Circulation
         // public bool Landscape = false;
         public int RotateDegree = 0;
 
+        // 2019/4/29
+        // 是否打印标签外框
+        public bool PrintBorder = false;
+
         // 一页纸张的宏观定义信息
         // 页边距 单位为百分之一英寸
         public DecimalPadding PageMargins = new DecimalPadding(0, 0, 0, 0);
@@ -200,8 +204,11 @@ namespace dp2Circulation
                         return -1;
                     }
                 }
-            }
 
+                label_param.PrintBorder = DomUtil.GetBooleanParam(label,
+                    "printBorder",
+                    false);
+            }
 
             XmlNode page = dom.DocumentElement.SelectSingleNode("page");
             if (page != null)
@@ -480,6 +487,12 @@ namespace dp2Circulation
                 DomUtil.SetAttr(label, "font", Global.GetBarcodeFontString(this.Font));
             else
                 DomUtil.SetAttr(label, "font", FontUtil.GetFontString(this.Font));
+
+            if (this.PrintBorder == true)
+                DomUtil.SetAttr(label, "printBorder", "yes");
+            else
+                DomUtil.SetAttr(label, "printBorder", null);
+
             DomUtil.SetAttr(label, "lineSep", this.LineSep.ToString());
 
             // <lineFormats>

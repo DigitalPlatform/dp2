@@ -547,7 +547,7 @@ MessageBoxDefaultButton.Button2);
         {
             string server_xml = @"<server 
 name='红泥巴数字平台云' 
-addr='hnbclub.cn' 
+addr='58.87.101.80' 
 port='210'>
     <database name='cbook' />
     <database name='ebook' />
