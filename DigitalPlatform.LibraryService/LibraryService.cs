@@ -3376,6 +3376,23 @@ namespace dp2Library
                     return result;
                 }
 
+                Int64 limit_maxCount = -1;
+                // 根据权限，决定如何限定最大命中数
+                if (StringUtil.IsInList("searchbiblio_unlimited", sessioninfo.RightsOrigin) == false)
+                {
+                    // library.xml 中配置一个 SearchBiblio() API 的常规限制极限命中数
+                    limit_maxCount = app.BiblioSearchMaxCount;
+                }
+
+                if (limit_maxCount != -1)
+                {
+                    if (nPerMax == -1 || nPerMax > limit_maxCount)
+                    {
+                        // nPerMax = (int)limit_maxCount;
+                        strError = $"检索被拒绝。因前端请求针对书目检索的最大命中结果数 {nPerMax} 超过 {limit_maxCount} 限制";
+                        goto ERROR1;
+                    }
+                }
 #if NO
                 List<string> dbnames = new List<string>();
 
@@ -3546,13 +3563,13 @@ namespace dp2Library
                     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 #endif
 
-                // 构造检索书目库的 XML 检索式
-                // return:
-                //      -2  没有找到指定风格的检索途径
-                //      -1  出错
-                //      0   没有发现任何书目库定义
-                //      1   成功
-                int nRet = app.BuildSearchBiblioQuery(
+                    // 构造检索书目库的 XML 检索式
+                    // return:
+                    //      -2  没有找到指定风格的检索途径
+                    //      -1  出错
+                    //      0   没有发现任何书目库定义
+                    //      1   成功
+                    int nRet = app.BuildSearchBiblioQuery(
             strBiblioDbNames,
             strQueryWord,
             nPerMax,

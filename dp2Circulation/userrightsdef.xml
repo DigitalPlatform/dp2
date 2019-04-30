@@ -80,6 +80,10 @@
     <comment lang='zh'>检索书目库</comment>
     <comment lang='en'>search biblio</comment>
   </property>
+  <property name='searchbiblio_unlimited'>
+    <comment lang='zh'>不限制检索书目库的最大命中数</comment>
+    <comment lang='en'>unlimited result count of search biblio</comment>
+  </property>
   <property name='getbiblioinfo'>
     <comment lang='zh'>获得书目信息</comment>
     <comment lang='en'>get biblio info</comment>
