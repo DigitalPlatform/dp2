@@ -8291,7 +8291,9 @@ Keys keyData)
 
         static string _baseCfg = @"
 <root>
+<!--
   <server name='网众' type='dp2library' url='net.tcp://118.25.225.224:8002/dp2library/' userName='?'/>
+-->
   <server name='红泥巴.数字平台中心' type='dp2library' url='net.tcp://58.87.101.80:101/hnb/' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";

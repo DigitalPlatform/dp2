@@ -35,6 +35,8 @@ namespace DigitalPlatform.LibraryServer
         // 是否允许删除带有下级记录的书目记录
         public bool DeleteBiblioSubRecords = true;
 
+        public Int64 BiblioSearchMaxCount = -1;
+
         // 获得目标记录路径。998$t
         // return:
         //      -1  error

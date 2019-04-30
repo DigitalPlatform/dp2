@@ -563,7 +563,7 @@ namespace DigitalPlatform.LibraryServer
 
                 this.WriteErrorLog("*********");
                 this.WriteErrorLog($"LoadCfg() Begin. bReload={bReload}");
-                
+
                 // 装载配置文件的过程，只能消除以前的 StartError 挂起状态，其他状态是无法消除的
                 // 本函数过程也约定好，只进行 StartError 挂起，不做其他挂起
 #if NO
@@ -1052,10 +1052,25 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                             app.WriteErrorLog(strError);
                         this.DeleteBiblioSubRecords = bValue;
+
+                        // 2019/4/30
+                        var value = node.GetAttribute("biblioSearchMaxCount");
+                        if (string.IsNullOrEmpty(value))
+                            this.BiblioSearchMaxCount = -1;
+                        else
+                        {
+                            if (Int64.TryParse(value, out Int64 nValue) == false)
+                            {
+                                app.WriteErrorLog($"cataloging/@biblioSearchMaxCount 值'{value}' 格式错误。应为一个整数");
+                                this.BiblioSearchMaxCount = -1;
+                            }
+                            this.BiblioSearchMaxCount = nValue;
+                        }
                     }
                     else
                     {
                         this.DeleteBiblioSubRecords = true;
+                        this.BiblioSearchMaxCount = -1;
                     }
 
                     // 入馆登记
@@ -1876,7 +1891,7 @@ namespace DigitalPlatform.LibraryServer
 
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2019/4/26
                 this.WriteErrorLog($"LoadCfg() 出现异常: {ExceptionUtil.GetExceptionText(ex)}");

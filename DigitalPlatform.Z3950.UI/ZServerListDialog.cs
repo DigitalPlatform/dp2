@@ -548,7 +548,8 @@ MessageBoxDefaultButton.Button2);
             string server_xml = @"<server 
 name='红泥巴数字平台云' 
 addr='58.87.101.80' 
-port='210'>
+port='210'
+username='@hnb'>
     <database name='cbook' />
     <database name='ebook' />
 </server>";
@@ -608,6 +609,8 @@ port='2100'>
 </server>";
 
             CreateServer(server_xml);
+
+            MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
         }
     }
 }
