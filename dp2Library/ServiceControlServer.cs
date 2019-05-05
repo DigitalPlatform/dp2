@@ -65,6 +65,7 @@ namespace dp2Library
         }
 
         // 获得一个实例的信息
+        // 当 result.Value 返回值为 -1 或 0 时，info 可能返回 null
         public ServiceControlResult GetInstanceInfo(string strInstanceName,
             out InstanceInfo info)
         {

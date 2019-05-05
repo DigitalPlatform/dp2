@@ -170,6 +170,7 @@ namespace dp2LibraryXE
                 }
             }
 
+#if NO
             {
                 string strMetadataUrl = "http://localhost:8001/dp2kernel/xe/";
                 if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
@@ -183,6 +184,7 @@ namespace dp2LibraryXE
 
                 this.MetadataUrl = strMetadataUrl;
             }
+#endif
 
             if (_host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
             {

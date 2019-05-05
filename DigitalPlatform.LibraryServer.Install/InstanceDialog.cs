@@ -2340,6 +2340,8 @@ MessageBoxDefaultButton.Button2);
                     out strError);
                 if (nRet == -1)
                 {
+                    // 2019/5/3
+                    MessageBox.Show(this, strError);
                     // 只要出错一次，后面就不再调用 dp2library_serviceControl()
                     bError = true;
                     item.ImageIndex = IMAGEINDEX_STOPPED;
@@ -2396,10 +2398,9 @@ MessageBoxDefaultButton.Button2);
                 try
                 {
                     ServiceControlResult result = null;
-                    InstanceInfo info = null;
                     // 获得一个实例的信息
                     result = ipc.Server.GetInstanceInfo(".",
-        out info);
+        out InstanceInfo info);
                     if (result.Value == -1)
                         return false;
                     if (info != null)
@@ -2442,17 +2443,19 @@ MessageBoxDefaultButton.Button2);
                         result = ipc.Server.StopInstance(strInstanceName);
                     else if (strCommand == "getState")
                     {
-                        InstanceInfo info = null;
                         // 获得一个实例的信息
+                        // 当 result.Value 返回值为 -1 或 0 时，info 可能返回 null
                         result = ipc.Server.GetInstanceInfo(strInstanceName,
-            out info);
+            out InstanceInfo info);
                         if (result.Value == -1)
                         {
                             strError = result.ErrorInfo;
                             return -1;
                         }
                         else
-                            strError = info.State;
+                        {
+                            strError = info?.State;
+                        }
                         return result.Value;
                     }
                     else
@@ -2467,7 +2470,6 @@ MessageBoxDefaultButton.Button2);
                     }
                     strError = result.ErrorInfo;
                     return 0;
-
                 }
                 finally
                 {
@@ -2476,7 +2478,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
+                strError = $"dp2library_serviceControl() strCommand='{strCommand}', strInstacneName='{strInstanceName}' 出现异常: {ExceptionUtil.GetExceptionText(ex)}";
                 return -1;
             }
         }
@@ -2558,7 +2560,7 @@ MessageBoxDefaultButton.Button2);
 
 #endif
 
-        #endregion
+#endregion
 
     }
 

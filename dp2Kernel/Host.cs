@@ -585,19 +585,22 @@ EventLogEntryType.Error);
                     m_hosts.Count == 1
                     && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
                 {
+                    // https://stackoverflow.com/questions/7967674/wcf-platformnotsupportedexception-when-running-server-projects
                     string strWsHostUrl = FindUrl("http", existing_urls);
+                    if (string.IsNullOrEmpty(strWsHostUrl) == false)
+                    {
+                        string strMetadataUrl = strWsHostUrl;
+                        if (String.IsNullOrEmpty(strMetadataUrl) == true)
+                            strMetadataUrl = "http://localhost:8001/dp2kernel/";
+                        if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
+                            strMetadataUrl += "/";
+                        strMetadataUrl += "metadata";
 
-                    string strMetadataUrl = strWsHostUrl;
-                    if (String.IsNullOrEmpty(strMetadataUrl) == true)
-                        strMetadataUrl = "http://localhost:8001/dp2kernel/";
-                    if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
-                        strMetadataUrl += "/";
-                    strMetadataUrl += "metadata";
-
-                    ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
-                    behavior.HttpGetEnabled = true;
-                    behavior.HttpGetUrl = new Uri(strMetadataUrl);
-                    host.Description.Behaviors.Add(behavior);
+                        ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
+                        behavior.HttpGetEnabled = true;
+                        behavior.HttpGetUrl = new Uri(strMetadataUrl);
+                        host.Description.Behaviors.Add(behavior);
+                    }
                 }
 
                 // 直接用默认值即可
@@ -754,7 +757,7 @@ EventLogEntryType.Error);
             wshttp_binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
             // wshttp_binding.Security.Message.NegotiateServiceCredential = false;
             // wshttp_binding.Security.Message.EstablishSecurityContext = false;
-            
+
             wshttp_binding.MaxReceivedMessageSize = 1024 * 1024;
             wshttp_binding.MessageEncoding = WSMessageEncoding.Mtom;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -907,7 +910,7 @@ EventLogEntryType.Error);
             EndRemotingServer();
         }
 
-#region Windows Service 控制命令设施
+        #region Windows Service 控制命令设施
 
         IpcServerChannel m_serverChannel = null;
 
@@ -949,7 +952,7 @@ EventLogEntryType.Error);
             }
         }
 
-#endregion
+        #endregion
 
     }
 
