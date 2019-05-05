@@ -64,6 +64,7 @@ namespace dp2Kernel
         }
 
         // 获得一个实例的信息
+        // 当 result.Value 返回值为 -1 或 0 时，info 可能返回 null
         public ServiceControlResult GetInstanceInfo(string strInstanceName,
             out InstanceInfo info)
         {
@@ -74,9 +75,11 @@ namespace dp2Kernel
             {
                 if (strInstanceName == ".")
                 {
-                    info = new InstanceInfo();
-                    info.InstanceName = strInstanceName;
-                    info.State = "running";
+                    info = new InstanceInfo
+                    {
+                        InstanceName = strInstanceName,
+                        State = "running"
+                    };
                     result.Value = 1;   // 表示 dp2kernel 正在运行状态
                     return result;
                 }
@@ -96,9 +99,11 @@ namespace dp2Kernel
                     return result;
                 }
 
-                info = new InstanceInfo();
-                info.InstanceName = host_info.InstanceName;
-                info.State = "running";
+                info = new InstanceInfo
+                {
+                    InstanceName = host_info.InstanceName,
+                    State = "running"
+                };
                 result.Value = 1;
                 return result;
             }

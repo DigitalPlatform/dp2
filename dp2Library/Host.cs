@@ -20,6 +20,7 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
 using System.Runtime.Serialization.Formatters;
+using System.Threading.Tasks;
 
 using Microsoft.Win32;
 
@@ -27,7 +28,6 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Threading.Tasks;
 
 namespace dp2Library
 {
@@ -706,19 +706,22 @@ EventLogEntryType.Error);
                     m_hosts.Count == 1
                     && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
                 {
+                    // https://stackoverflow.com/questions/7967674/wcf-platformnotsupportedexception-when-running-server-projects
                     string strWsHostUrl = FindUrl("http", existing_urls);
+                    if (string.IsNullOrEmpty(strWsHostUrl) == false)
+                    {
+                        string strMetadataUrl = strWsHostUrl;
+                        if (String.IsNullOrEmpty(strMetadataUrl) == true)
+                            strMetadataUrl = "http://localhost:8001/dp2library/";
+                        if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
+                            strMetadataUrl += "/";
+                        strMetadataUrl += "metadata";
 
-                    string strMetadataUrl = strWsHostUrl;
-                    if (String.IsNullOrEmpty(strMetadataUrl) == true)
-                        strMetadataUrl = "http://localhost:8001/dp2library/";
-                    if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
-                        strMetadataUrl += "/";
-                    strMetadataUrl += "metadata";
-
-                    ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
-                    behavior.HttpGetEnabled = true;
-                    behavior.HttpGetUrl = new Uri(strMetadataUrl);
-                    host.Description.Behaviors.Add(behavior);
+                        ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
+                        behavior.HttpGetEnabled = true;
+                        behavior.HttpGetUrl = new Uri(strMetadataUrl);
+                        host.Description.Behaviors.Add(behavior);
+                    }
                 }
 
                 // 直接用默认值即可
