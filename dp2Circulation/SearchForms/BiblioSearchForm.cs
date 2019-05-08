@@ -1272,12 +1272,8 @@ Keys keyData)
                 GetChannelStyle.GUI,
                 "");  // ? "test:127.0.0.1"
 #endif
-            LibraryChannel channel = this.GetChannel(".",
-    ".",
-    GetChannelStyle.None,
-    "");  // ? "test:127.0.0.1"
 
-            //            LibraryChannel channel = this.GetChannel();
+            LibraryChannel channel = this.GetChannel();
 
             stop.Style = StopStyle.None;
             stop.OnStop += Stop_OnStop1;

@@ -779,11 +779,14 @@ VerifyFull - Always use SSL. Fail if the host name is not correct.
 
             try
             {
+#if NO
                 if (this.RebuildIDs != null && this.RebuildIDs.Count > 0)
                 {
                     this.RebuildIDs.Delete();
                     this.RebuildIDs = null;
                 }
+#endif
+                DeleteRebuildIDs();
 
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                 {
@@ -1578,7 +1581,7 @@ ex);
                     if (nRet == -1)
                         return -1;
 
-                    #region MS SQL Server
+#region MS SQL Server
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
                     {
                         using (SqlCommand command = new SqlCommand(strCommand,
@@ -1614,9 +1617,9 @@ ex);
                             }
                         } // end of using command
                     }
-                    #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-                    #region SQLite
+#region SQLite
                     else if (connection.SqlServerType == SqlServerType.SQLite)
                     {
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
@@ -1638,9 +1641,9 @@ ex);
                             }
                         } // end of using command
                     }
-                    #endregion // SQLite
+#endregion // SQLite
 
-                    #region MySql
+#region MySql
                     else if (connection.SqlServerType == SqlServerType.MySql)
                     {
 
@@ -1674,9 +1677,9 @@ ex);
                             }
                         } // end of using command
                     }
-                    #endregion // MySql
+#endregion // MySql
 
-                    #region Oracle
+#region Oracle
                     else if (connection.SqlServerType == SqlServerType.Oracle)
                     {
                         using (OracleCommand command = new OracleCommand("",
@@ -1717,7 +1720,7 @@ ex);
                             }
                         } // end of using command
                     }
-                    #endregion // Oracle
+#endregion // Oracle
                 }
                 finally
                 {
@@ -2033,7 +2036,7 @@ ex);
             strCommand = "";
             strError = "";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 // 创建records表
@@ -2092,9 +2095,9 @@ ex);
                 strCommand += " use master " + "\n";
                 return 0;
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 // 创建records表
@@ -2144,9 +2147,9 @@ ex);
 
                 return 0;
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
                 string strCharset = " CHARACTER SET utf8 "; // COLLATE utf8_bin ";
@@ -2198,9 +2201,9 @@ ex);
                 }
                 return 0;
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 // 创建records表
@@ -2269,7 +2272,7 @@ ex);
                 }
                 return 0;
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -2581,7 +2584,7 @@ ex);
             if (string.IsNullOrEmpty(strAction) == true)
                 strAction = "create";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 strCommand = "use " + this.m_strSqlDbName + "\n";
@@ -2664,9 +2667,9 @@ ex);
 
                 strCommand += " use master " + "\n";
             }
-            #endregion MS SQL Server
+#endregion MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 if (StringUtil.IsInList("records", strIndexTypeList) == true)
@@ -2705,9 +2708,9 @@ ex);
                     }
                 }
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
                 // https://stackoverflow.com/questions/28329134/drop-index-query-is-slow
@@ -2751,9 +2754,9 @@ ex);
                 }
 
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 /*
@@ -2804,7 +2807,7 @@ ex);
                     }
                 }
             }
-            #endregion // Oracle
+#endregion // Oracle
 
             return 0;
         }
@@ -2827,7 +2830,7 @@ ex);
             if (string.IsNullOrEmpty(strAction) == true)
                 strAction = "delete";
 
-            #region MS SQL Server
+#region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
                 strCommand = "use " + this.m_strSqlDbName + "\n";
@@ -2888,9 +2891,9 @@ ex);
 
                 strCommand += " use master " + "\n";
             }
-            #endregion // MS SQL Server
+#endregion // MS SQL Server
 
-            #region SQLite
+#region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
                 strCommand = "";
@@ -2919,9 +2922,9 @@ ex);
                     }
                 }
             }
-            #endregion // SQLite
+#endregion // SQLite
 
-            #region MySql
+#region MySql
             else if (strSqlServerType == SqlServerType.MySql)
             {
                 strCommand = "use " + this.m_strSqlDbName + " ;\n";
@@ -2953,9 +2956,9 @@ ex);
                     }
                 }
             }
-            #endregion // MySql
+#endregion // MySql
 
-            #region Oracle
+#region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
                 strCommand = "";
@@ -2995,7 +2998,7 @@ ex);
                     }
                 }
             }
-            #endregion
+#endregion
 
             return 0;
         }
@@ -7707,7 +7710,7 @@ handle.CancelTokenSource.Token).Result;
                 PageItem item = _pageCache.GetPage(strRecPath, 0, 0, "object_file",
                     () =>
                     {
-                        string strTempFileName = this.container.GetTempFileName();
+                        string strTempFileName = this.container.GetTempFileName("obj");
                         // 先把整个对象文件写入一个对象文件
                         using (SqlImageStream source = new SqlImageStream(connection,
                         this.m_strSqlDbName,
@@ -7848,7 +7851,7 @@ handle.CancelTokenSource.Token).Result;
                     () =>
                     {
                         int nTotalPage = 0;
-                        string strTempFileName = this.container.GetTempFileName();
+                        string strTempFileName = this.container.GetTempFileName("pgi");
                         using (GhostscriptRasterizer rasterizer = new GhostscriptRasterizer())
                         {
                             rasterizer.Open(strPdfFileName, DatabaseCollection.gvi, false);
@@ -10451,7 +10454,7 @@ handle.CancelTokenSource.Token).Result;
                 nRet = this.container.DelayTables.Write(
                     this.m_strSqlDbName,
                     total_newkeys,
-                    (dbname, tablename) => { return this.container.GetTempFileName(); },
+                    (dbname, tablename) => { return this.container.GetTempFileName("ukr"); },
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -10584,7 +10587,7 @@ handle.CancelTokenSource.Token).Result;
                 nRet = this.container.DelayTables.Write(
                     this.m_strSqlDbName,
                     total_oldkeys,
-                    (dbname, tablename) => { return this.container.GetTempFileName(); },
+                    (dbname, tablename) => { return this.container.GetTempFileName("ukr"); },
                     out strError);
                 if (nRet == -1)
                     return -1;

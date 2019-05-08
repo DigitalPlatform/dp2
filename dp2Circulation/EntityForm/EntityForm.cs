@@ -4484,15 +4484,12 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
         /// <returns>-1: 有错。此时不排除有些信息保存成功。0: 成功。</returns>
         public int DoSaveAll(string strStyle = "displaysuccess,verifydata,searchdup")
         {
-            // bool bBiblioSaved = false;
             int nRet = 0;
-            // string strText = "";
-            // int nErrorCount = 0;
+
             SavedInfo info = new SavedInfo();
 
             bool bDisplaySuccess = StringUtil.IsInList("displaysuccess", strStyle);
             bool bVerifyData = StringUtil.IsInList("verifydata", strStyle);
-            // bool bForceVerifyData = StringUtil.IsInList("forceverifydata", strStyle);
 
             bool bVerified = false;
 
@@ -10384,6 +10381,8 @@ MessageBoxDefaultButton.Button1);
             // 源记录就是 ？
             if (bSaveAs == true)
             {
+                string strOldBiblioDbName = this.BiblioDbName;
+
                 // TODO: 注意检查目标书目库的 MARC 格式是否和当前 MARC 记录相同
                 this.BiblioRecPath = dlg.RecPath;
 
@@ -10398,6 +10397,10 @@ MessageBoxDefaultButton.Button1);
                     strError = "保存操作出错";
                     goto ERROR1;
                 }
+
+                // 2019/5/8
+                if (this.BiblioDbName != strOldBiblioDbName)
+                    LoadRecordOld(this.BiblioRecPath, "", false);
 
                 return;
             }

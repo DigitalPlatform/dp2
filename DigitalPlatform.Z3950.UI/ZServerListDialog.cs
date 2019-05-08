@@ -612,5 +612,21 @@ port='2100'>
 
             MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
         }
+  
+        private void ToolStripMenuItem_new_calis_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<root>
+  <server name='CALIS' addr='zserver1.calis.edu.cn' port='2200'>
+    <database name='cn_cat' />
+    <database name='we_cat' />
+    <database name='jp_cat' />
+    <database name='ru_cat' />
+  </server>
+</root>";
+
+            CreateServer(server_xml);
+
+            MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
+        }
     }
 }

@@ -1532,7 +1532,6 @@ dlg.UiState);
                         return -1;
                     }
 
-                    string strDebugInfo = "";
 
                     // 修改一个订购记录 XmlDocument
                     // return:
@@ -1544,7 +1543,7 @@ dlg.UiState);
                         actions,
                         ref dom,
                         now,
-                        out strDebugInfo,
+                        out string strDebugInfo,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -1686,13 +1685,12 @@ dlg.UiState);
                         strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
                         return -1;
                     }
-                    string strResult = "";
                     // 解析宏
                     nRet = MacroUtil.Parse(
                         false,
                         strFieldValue,
                         ParseOneMacro,
-                        out strResult,
+                        out string strResult,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1717,10 +1715,8 @@ dlg.UiState);
                     }
                     else
                     {
-                        string strElement = "";
-                        string strAttrName = "";
 
-                        ParseElementName(strElementName, out strElement, out strAttrName);
+                        ParseElementName(strElementName, out string strElement, out string strAttrName);
                         ChangeField(ref dom,
 strElement,
 strAttrName,

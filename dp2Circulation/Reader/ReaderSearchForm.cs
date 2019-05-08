@@ -1203,7 +1203,6 @@ out strError);
                 subMenuItem = new MenuItem("宏定义 (&M)");
                 subMenuItem.Click += new System.EventHandler(this.menu_macroDef_Click);
                 menuItem.MenuItems.Add(subMenuItem);
-
             }
 
 #if NO

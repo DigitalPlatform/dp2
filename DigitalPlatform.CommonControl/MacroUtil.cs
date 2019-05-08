@@ -124,10 +124,9 @@ namespace DigitalPlatform.CommonControl
             string strOldValue = node.InnerText;
             string strNodeName = DomUtil.GetAttr(node, "name");
 
-            int nDelta = 0;
-            bool bOperFirst = false;    // 是否先操作、然后返回值。否则就是先返回值，后操作
+            // 是否先操作、然后返回值。否则就是先返回值，后操作
             // 如果有增/减量要求
-            if (HasIncDecChar(strName, out nDelta, out bOperFirst) == true
+            if (HasIncDecChar(strName, out int nDelta, out bool bOperFirst) == true
                 || HasIncDecChar(strNodeName, out nDelta, out bOperFirst) == true)
             {
                 if (string.IsNullOrEmpty(strOldValue) == true)
@@ -136,12 +135,11 @@ namespace DigitalPlatform.CommonControl
                 if (bOperFirst == false)
                     strValue = strOldValue;
 
-                string strNewValue = "";
                 // 给一个被字符引导的数字增加一个数量。
                 // 例如 B019X + 1 变成 B020X
                 nRet = StringUtil.IncreaseNumber(strOldValue,
                     nDelta,
-            out strNewValue,
+            out string strNewValue,
             out strError);
                 if (nRet == -1)
                 {
