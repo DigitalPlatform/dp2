@@ -218,7 +218,7 @@ namespace DigitalPlatform.rms
 
 
             // 对象文件目录
-            string strObjectDir = this.DataDir + "\\object";
+            string strObjectDir = Path.Combine(this.DataDir, "object");
             try
             {
                 PathUtil.TryCreateDir(strObjectDir);
@@ -381,12 +381,17 @@ namespace DigitalPlatform.rms
             }
         }
 
-        public string GetTempFileName()
+        public string _getTempFileName()
+        {
+            return GetTempFileName("rslt");
+        }
+            public string GetTempFileName(string prefix)
         {
             Debug.Assert(string.IsNullOrEmpty(this.TempDir) == false, "");
             while (true)
             {
-                string strFilename = PathUtil.MergePath(this.TempDir, Guid.NewGuid().ToString());
+                string strFilename = Path.Combine(this.TempDir, 
+                    prefix + "_" + Guid.NewGuid().ToString());    // dbc_ 前缀是为了便于识别这里创建的临时文件
                 if (File.Exists(strFilename) == false)
                 {
                     using (FileStream s = File.Create(strFilename))
@@ -464,14 +469,12 @@ namespace DigitalPlatform.rms
             {
                 try
                 {
-                    string strError = "";
-                    List<RecordBody> results = null;
                     int nRet = this.API_WriteRecords(
                         null,
                         null,
                         "flushkeys",
-                        out results,
-                        out strError);
+                        out List<RecordBody> results,
+                        out string strError);
                     if (nRet == -1)
                     {
                         this.KernelApplication.WriteErrorLog("DatabaseCollection.Close() flushkeys 出错：" + strError);
@@ -490,6 +493,13 @@ namespace DigitalPlatform.rms
             }
             // 保存内存对象到文件
             this.SaveXmlSafety(true);
+
+            // 2019/5/8
+            if (this.DelayTables != null)
+            {
+                this.DelayTables.Dispose();
+                this.DelayTables = null;
+            }
         }
 
         // 把错误信息写到日志文件里
@@ -1648,11 +1658,10 @@ namespace DigitalPlatform.rms
                 return -5;
             }
 
-            string strExistRights = "";
             bool bHasRight = user.HasRights(db.GetCaption("zh-CN"),
                 ResType.Database,
                 "clear",
-                out strExistRights);
+                out string strExistRights);
             if (bHasRight == false)
             {
                 strError = "您的帐户名为 '" + user.Name + "'，对 '" + strDbName + "' 数据库没有'初始化或刷新定义(clear)'权限，目前的权限值为'" + strExistRights + "'。";
@@ -1716,8 +1725,9 @@ namespace DigitalPlatform.rms
                 if (db.RebuildIDs == null)
                 {
                     db.RebuildIDs = new RecordIDStorage();
-                    if (db.RebuildIDs.Open(this.GetTempFileName(), out strError) == -1)
+                    if (db.RebuildIDs.Open(this.GetTempFileName("rbd"), out strError) == -1)
                         return -1;
+                    Debug.WriteLine($"数据库 {db.GetCaption("zh-CN")} 的 RebuildIDs 打开了");
                 }
 
 #if NO
@@ -1895,7 +1905,7 @@ namespace DigitalPlatform.rms
             }
 
             if (error_count == 0)
-                return new NormalResult { ErrorInfo = StringUtil.MakePathList(messages, "; ")};
+                return new NormalResult { ErrorInfo = StringUtil.MakePathList(messages, "; ") };
 
             return new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(messages, "; ") };
         }
@@ -1909,19 +1919,25 @@ namespace DigitalPlatform.rms
             {
                 Debug.Assert(db.FastAppendTaskCount == 0, "");
 
-                // 如果需要刷新检索点
-                // 这是因为快速模式中间如果遇到覆盖的情况，当时不方便处理检索点，所以存储下来ID最后处理
-                if (db.RebuildIDs != null && db.RebuildIDs.Count > 0)
                 {
-                    nRet = db.RebuildKeys(
-                        "fastmode", // 不需要 deletekeys，因为每条的过程中已经把旧记录的 keys 都删除过了
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    // 如果需要刷新检索点
+                    // 这是因为快速模式中间如果遇到覆盖的情况，当时不方便处理检索点，所以存储下来ID最后处理
+                    if (db.RebuildIDs != null && db.RebuildIDs.Count > 0)
+                    {
+                        nRet = db.RebuildKeys(
+                            "fastmode", // 不需要 deletekeys，因为每条的过程中已经把旧记录的 keys 都删除过了
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-                    // 将所有延迟堆积的行成批写入相关 keys 表
-                    int nKeysCount = nRet;
+
+                        // 将所有延迟堆积的行成批写入相关 keys 表
+                        int nKeysCount = nRet;
+                    }
+                    // 2019/5/8
+                    db.DeleteRebuildIDs();
                 }
+
 
                 // 将所有延迟堆积的行成批写入相关 keys 表
                 // TODO: 根据是否有 delaytable 来决定 Buikcopy 是否进行。因为删除 B+ 树然后 Buikcopy 动作较大(特别是原有库中记录很多但本次追加的其实不多的情况)，如果可能应尽量避免
@@ -6522,7 +6538,7 @@ namespace DigitalPlatform.rms
 
         void resultset_GetTempFilename(object sender, GetTempFilenameEventArgs e)
         {
-            e.TempFilename = GetTempFileName();
+            e.TempFilename = GetTempFileName("rslt");
         }
 
         // 根据用户名从库中查找用户记录，得到用户对象
@@ -6547,54 +6563,57 @@ namespace DigitalPlatform.rms
 
             DpRecord record = null;
 
-            DpResultSet resultSet = new DpResultSet(GetTempFileName);
-            resultSet.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
-
-            try
+            // 2019/5/6 增加 using
+            using (DpResultSet resultSet = new DpResultSet(_getTempFileName))
             {
-                //*********对帐户库集合加读锁***********
-                m_container_lock.AcquireReaderLock(m_nContainerLockTimeOut);
+                resultSet.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
+
+                try
+                {
+                    //*********对帐户库集合加读锁***********
+                    m_container_lock.AcquireReaderLock(m_nContainerLockTimeOut);
 #if DEBUG_LOCK
 			this.WriteDebugInfo("ShearchUser()，对数据库集合加读锁。");
 #endif
-                try
-                {
-                    // return:
-                    //		-1	出错
-                    //		0	成功
-                    nRet = this.SearchUserInternal(strUserName,
-                        resultSet,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                }
-                finally
-                {
-                    //*********对帐户库集合解读锁*************
-                    m_container_lock.ReleaseReaderLock();
+                    try
+                    {
+                        // return:
+                        //		-1	出错
+                        //		0	成功
+                        nRet = this.SearchUserInternal(strUserName,
+                            resultSet,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                    finally
+                    {
+                        //*********对帐户库集合解读锁*************
+                        m_container_lock.ReleaseReaderLock();
 #if DEBUG_LOCK
 				this.WriteDebugInfo("ShearchUser()，对数据库集合解读锁。");
 #endif
+                    }
+
+                    // 根据用户名没找到对应的帐户记录
+                    long lCount = resultSet.Count;
+                    if (lCount == 0)
+                        return 0;
+
+                    if (lCount > 1)
+                    {
+                        strError = "用户名'" + strUserName + "'对应多条记录";
+                        return -1;
+                    }
+
+                    // 按第一个帐户算
+                    record = (DpRecord)resultSet[0];
                 }
-
-                // 根据用户名没找到对应的帐户记录
-                long lCount = resultSet.Count;
-                if (lCount == 0)
-                    return 0;
-
-                if (lCount > 1)
+                finally
                 {
-                    strError = "用户名'" + strUserName + "'对应多条记录";
-                    return -1;
+                    // 2016/1/23 卸载事件
+                    resultSet.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
                 }
-
-                // 按第一个帐户算
-                record = (DpRecord)resultSet[0];
-            }
-            finally
-            {
-                // 2016/1/23 卸载事件
-                resultSet.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
             }
 
             DbPath path = new DbPath(record.ID);
@@ -6608,13 +6627,12 @@ namespace DigitalPlatform.rms
             }
 
             // 从帐户库中找到记录
-            string strXml = "";
             // return:
             //      -1  出错
             //      -4  记录不存在
             //      0   正确
             nRet = db.GetXmlDataSafety(path.ID,
-                out strXml,
+                out string strXml,
                 out strError);
             if (nRet <= -1)  // 将-4与-1都作为-1返回
                 return -1;

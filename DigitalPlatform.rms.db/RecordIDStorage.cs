@@ -41,7 +41,6 @@ namespace DigitalPlatform.rms
             FileMode.OpenOrCreate,
             FileAccess.ReadWrite,
             FileShare.ReadWrite);
-
                 }
                 catch (Exception ex)
                 {
@@ -84,7 +83,7 @@ namespace DigitalPlatform.rms
             }
         }
 
-            // 删除
+        // 删除
         public void Delete()
         {
             Close();
