@@ -1934,10 +1934,12 @@ namespace DigitalPlatform.rms
                         // 将所有延迟堆积的行成批写入相关 keys 表
                         int nKeysCount = nRet;
                     }
+                    // 2019/5/12
+                    if (db is SqlDatabase)
+                        ((SqlDatabase)db).FastMode = false;
                     // 2019/5/8
                     db.DeleteRebuildIDs();
                 }
-
 
                 // 将所有延迟堆积的行成批写入相关 keys 表
                 // TODO: 根据是否有 delaytable 来决定 Buikcopy 是否进行。因为删除 B+ 树然后 Buikcopy 动作较大(特别是原有库中记录很多但本次追加的其实不多的情况)，如果可能应尽量避免

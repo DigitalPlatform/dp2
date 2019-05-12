@@ -5191,7 +5191,7 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                         {
                             string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
-                            var result = _zsearcher.LoadServer(xmlFileName);
+                            var result = _zsearcher.LoadServer(xmlFileName, Program.MainForm.Marc8Encoding);
                             if (result.Value == -1)
                                 this.ShowMessage(result.ErrorInfo, "red", true);
                         }

@@ -25,7 +25,8 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.Core;
+using System.Collections;
+using System.Text;
 
 namespace dp2Circulation
 {
@@ -740,9 +741,9 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 检索
-        private void button_search_Click(object sender, EventArgs e)
+        private async void button_search_Click(object sender, EventArgs e)
         {
-            DoSearch(this.textBox_queryWord.Text, this.comboBox_from.Text);
+            await DoSearch(this.textBox_queryWord.Text, this.comboBox_from.Text);
         }
 
         public string QueryWord
@@ -759,7 +760,7 @@ MessageBoxDefaultButton.Button1);
 
         // parameters:
         //      bAutoFocus  是否要自动设置控件输入焦点?
-        public void DoSearch(string strQueryWord,
+        public async Task DoSearch(string strQueryWord,
             string strFrom,
             bool bAutoSetFocus = true)
         {
@@ -861,6 +862,94 @@ MessageBoxDefaultButton.Button1);
                     else
                         nHitCount += nRet;
                 }
+
+                if (this.SearchZ3950
+                    && string.IsNullOrEmpty(this.textBox_queryWord.Text) == false)
+                {
+                    nRet = Program.MainForm.LoadUseList(true, out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    {
+                        string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
+                        var result = _zsearcher.LoadServer(xmlFileName, Program.MainForm.Marc8Encoding);
+                        if (result.Value == -1)
+                            this.ShowMessage(result.ErrorInfo, "red", true);
+                    }
+                    this.ShowMessage("等待 Z39.50 检索响应 ...");
+
+                    string strFromStyle = "";
+
+                    if (string.IsNullOrEmpty(strFrom) == true)
+                        strFrom = "ISBN";
+
+                    if (strFrom == "书名" || strFrom == "题名")
+                        strFromStyle = "title";
+                    else if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
+                        strFromStyle = "contributor";
+                    else if (strFrom == "出版社" || strFrom == "出版者")
+                        strFromStyle = "publisher";
+                    else if (strFrom == "出版日期")
+                        strFromStyle = "publishtime";
+                    else if (strFrom == "主题词")
+                        strFromStyle = "subject";
+
+                    if (string.IsNullOrEmpty(strFromStyle) == true)
+                    {
+                        try
+                        {
+                            strFromStyle = BiblioSearchForm.GetBiblioFromStyle(strFrom);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "EntityRegisterWizard GetBiblioFromStyle() {D6B49099-CB3F-4B76-84EC-7548981B2E47} exception: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        if (String.IsNullOrEmpty(strFromStyle) == true)
+                        {
+                            strError = "GetFromStyle()没有找到 '" + strFrom + "' 对应的 style 字符串";
+                            goto ERROR1;
+                        }
+                    }
+
+                    int nMaxSearchResultCount = 1000;
+                    {
+                        NormalResult result = await _zsearcher.Search(
+        Program.MainForm.UseList,   // UseCollection useList,
+        Program.MainForm.IsbnSplitter,
+                        this.textBox_queryWord.Text,
+                        nMaxSearchResultCount,  // 1000
+                        strFromStyle,
+                        "left", // strMatchStyle,
+                        (c, r) =>
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                DpRow row = CreateCommandLine(TYPE_INFO, c);
+                                UpdateCommandLine(row, c, r);
+                            }));
+                        },
+                        (c, r) =>
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                var item = (DpRow)_zchannelTable[c];
+                                if (r.Records != null)
+                                    FillList(c._fetched,
+                                        c.ZClient.ForcedRecordsEncoding == null ? c.TargetInfo.DefaultRecordsEncoding : c.ZClient.ForcedRecordsEncoding,
+                                        c.ServerName,
+                                        r.Records,
+                                        item);
+                                UpdateCommandLine(item, c, r);
+                            }));
+                        }
+                        );
+                    }
+
+                    this.ClearMessage();
+                }
+
 
                 if (string.IsNullOrEmpty(strTotalError) == false)
                     this.ShowMessage(strError, "red", true);
@@ -1022,6 +1111,8 @@ MessageBoxDefaultButton.Button1);
             Application.DoEvents(); // 等待过程中出让界面控制权
         }
 
+        int _lineNumber = 0;
+
         // 针对亚马逊服务器检索，装入一个浏览行的回调函数
         int appendBrowseLine(string strRecPath,
             string strRecord,
@@ -1061,10 +1152,9 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
-            string strXml = "";
             nRet = MarcUtil.Marc2Xml(strMARC,
     "unimarc",
-    out strXml,
+    out string strXml,
     out strError);
             if (nRet == -1)
                 return -1;
@@ -1076,6 +1166,7 @@ MessageBoxDefaultButton.Button1);
             info.MarcSyntax = "unimarc";
             AddBiblioBrowseLine(
                 TYPE_AMAZON,  // -1,
+                GetLineNumber(),
                 info.RecPath,
                 StringUtil.MakePathList(cols, "\t"),
                 info,
@@ -1084,6 +1175,124 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        string GetLineNumber()
+        {
+            return (++_lineNumber).ToString();
+        }
+
+        #endregion
+
+        #region 针对 Z39.50 服务器的检索
+
+        // zchannel --> ListViewItem
+        Hashtable _zchannelTable = new Hashtable();
+        Z3950Searcher _zsearcher = new Z3950Searcher();
+
+        // (Z39.50)填入浏览记录
+        void FillList(int start,
+            Encoding encoding,
+            string strLibraryName,
+            DigitalPlatform.Z3950.RecordCollection records,
+            DpRow insert_pos)
+        {
+            // int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+
+            int i = 0;
+            foreach (var record in records)
+            {
+                string strRecPath = $"{start + i + 1}@{strLibraryName}";
+
+                // 把byte[]类型的MARC记录转换为机内格式
+                // return:
+                //		-2	MARC格式错
+                //		-1	一般错误
+                //		0	正常
+                int nRet = MarcLoader.ConvertIso2709ToMarcString(record.m_baRecord,
+                    encoding ?? Encoding.GetEncoding(936),
+                    true,
+                    out string strMARC,
+                    out string strError);
+                if (nRet == -1)
+                {
+                    AddErrorLine("记录 " + strRecPath + " 转换为 MARC 机内格式时出错: " + strError);
+                    goto CONTINUE;
+                }
+
+                string strMarcSyntax = "";
+                if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
+                    strMarcSyntax = "unimarc";
+                else if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
+                    strMarcSyntax = "usmarc";
+                nRet = MyForm.BuildMarcBrowseText(
+    strMarcSyntax,
+    strMARC,
+    out string strBrowseText,
+    out string strColumnTitles,
+    out strError);
+                if (nRet == -1)
+                {
+                    AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出错: " + strError);
+                    goto CONTINUE;
+                }
+
+                // 将书目记录放入 m_biblioTable
+                {
+                    // TODO: MARC 格式转换为 XML 格式
+                    nRet = MarcUtil.Marc2Xml(strMARC,
+                        strMarcSyntax,
+                        out string strXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        AddErrorLine("记录 " + strRecPath + " 转换为 XML 格式时出错: " + strError);
+                        goto CONTINUE;
+                    }
+
+                    int image_index = -1;
+                    image_index = TYPE_CLOUD;
+
+                    RegisterBiblioInfo info = new RegisterBiblioInfo();
+                    info.OldXml = strXml;   // strMARC;
+                    info.Timestamp = null;  // ByteArray.GetTimeStampByteArray(record.Timestamp);
+                    info.RecPath = strRecPath;
+                    info.MarcSyntax = strMarcSyntax;
+
+                    this.Invoke((Action)(() =>
+                    {
+                        // TODO: 在 insert_pos 前面插入一个新行
+                        int index = dpTable_browseLines.Rows.IndexOf(insert_pos);
+                        AddBiblioBrowseLine(
+                            image_index,    // -1,
+                            $"{start + i + 1}",
+                            info.RecPath,
+                            strBrowseText,
+                            info,
+                            false,  // _searchParam?._autoSetFocus,
+                            index);
+                    }));
+                }
+
+                CONTINUE:
+                i++;
+            }
+
+            return;
+        }
+
+        // 加入一个错误文本行
+        void AddErrorLine(string strError)
+        {
+            this.Invoke((Action)(() =>
+            {
+                AddBiblioBrowseLine(
+TYPE_ERROR,
+"",
+"", // item.RecPath,
+strError,
+null,
+false);
+            }));
+        }
 
         #endregion
 
@@ -1336,6 +1545,7 @@ out strError);
             // 加入一个文本行
             AddBiblioBrowseLine(
                 TYPE_ERROR,
+                "",
                 "", // item.RecPath,
                 strError,
                 null,
@@ -1381,12 +1591,12 @@ out strError);
                     {
                         AddBiblioBrowseLine(
                             image_index,    // -1,
+                GetLineNumber(),
                             info.RecPath,
                             strBrowseText,
                             info,
                             _searchParam._autoSetFocus);
-                    }
-));
+                    }));
 
                 }
             }
@@ -1396,12 +1606,12 @@ out strError);
             {
                 AddBiblioBrowseLine(
 TYPE_ERROR,
+"",
 "", // item.RecPath,
 strError,
 null,
 false);
-            }
-));
+            }));
         }
 
         #endregion
@@ -1623,6 +1833,7 @@ false);
                                 {
                                     AddBiblioBrowseLine(
                                         TYPE_ERROR,
+                                        "",
                                         item.RecPath,
                                         item.ErrorInfo,
                                         null,
@@ -1679,6 +1890,7 @@ false);
                                 info.MarcSyntax = strMarcSyntax;
                                 AddBiblioBrowseLine(
                                     image_index,    // -1,
+                GetLineNumber(),
                                     info.RecPath,
                                     strBrowseText,
                                     info,
@@ -1749,29 +1961,108 @@ false);
             // this._biblioRegister.AddBiblioBrowseLine(strText, nType);
             this.AddBiblioBrowseLine(
     nType,
+                GetLineNumber(),
     strText,
     "",
     null,
     bAutoSetFocus);
         }
 
+        DpRow CreateCommandLine(
+            int nType,
+            ZClientChannel c)
+        {
+
+            DpRow row = new DpRow();
+            _zchannelTable[c] = row;
+
+            // 序号
+            DpCell cell = new DpCell();
+            cell.Alignment = DpTextAlignment.Far;
+            cell.Font = new Font(this.Font.FontFamily, this.Font.Size * 2);
+            cell.Text = "";
+            {
+                cell.ImageIndex = nType;
+                if (nType == TYPE_ERROR)
+                    cell.BackColor = Color.Red;
+                else if (nType == TYPE_INFO)
+                    cell.BackColor = Color.DarkOrange;
+            }
+            row.Add(cell);
+
+            // 记录路径
+            cell = new DpCell();
+            cell.Text = ""; // strBiblioRecPath;
+            row.Add(cell);
+
+            // 封面
+            cell = new DpCell();
+            cell.Text = "";
+            row.Add(cell);
+
+            row.Tag = c;
+            this.dpTable_browseLines.Rows.Add(row);
+
+            return row;
+        }
+
+        public static void UpdateCommandLine(DpRow item,
+ZClientChannel c,
+DigitalPlatform.Z3950.ZClient.SearchResult r)
+        {
+            int index = 2;
+            // item.BackColor = Color.Yellow;
+            item[1].Text = $"Z39.50:{c.ServerName}";
+            if (r.Value == -1 || r.Value == 0)
+            {
+                item[index].Text = $"检索出错 {r.ErrorInfo}";
+                item[index].BackColor = Color.DarkRed;
+            }
+            else
+            {
+                item[index].Text = $"检索命中 {r.ResultCount} 条";
+                item[index].BackColor = Color.Transparent;
+            }
+        }
+
+        public static void UpdateCommandLine(DpRow item,
+    ZClientChannel c,
+    DigitalPlatform.Z3950.ZClient.PresentResult r)
+        {
+            int index = 2;
+            if (r.Value == -1)
+            {
+                item[index].Text = $"Present 出错 {r.ErrorInfo}";
+                item[index].BackColor = Color.DarkRed;
+            }
+            else
+            {
+                item[index].Text = $"检索命中 {c._resultCount} 条，已装入 {c._fetched + r.Records.Count}";
+                item[index].BackColor = Color.Transparent;
+            }
+        }
+
         // 加入一个浏览行
         public void AddBiblioBrowseLine(
             int nType,
+            string line_number,
             string strBiblioRecPath,
             string strBrowseText,
             RegisterBiblioInfo info,
-            bool bAutoSetFocus)
+            bool bAutoSetFocus,
+            int insert_index = -1)
         {
             if (this.dpTable_browseLines.InvokeRequired)
             {
                 // 事件是在多线程上下文中触发的，需要 Invoke 显示信息
-                this.BeginInvoke(new Action<int, string, string, RegisterBiblioInfo, bool>(AddBiblioBrowseLine),
+                this.BeginInvoke(new Action<int, string, string, string, RegisterBiblioInfo, bool, int>(AddBiblioBrowseLine),
                     nType,
+                    line_number,
                     strBiblioRecPath,
                     strBrowseText,
                     info,
-                    bAutoSetFocus);
+                    bAutoSetFocus,
+                    insert_index);
                 return;
             }
 
@@ -1782,7 +2073,8 @@ false);
             DpCell cell = new DpCell();
             cell.Alignment = DpTextAlignment.Far;
             cell.Font = new Font(this.Font.FontFamily, this.Font.Size * 2);
-            cell.Text = (this.dpTable_browseLines.Rows.Count + 1).ToString();
+            // cell.Text = (this.dpTable_browseLines.Rows.Count + 1).ToString();
+            cell.Text = line_number;
             {
                 cell.ImageIndex = nType;
                 if (nType == TYPE_ERROR)
@@ -1810,7 +2102,10 @@ false);
             }
 
             row.Tag = info;
-            this.dpTable_browseLines.Rows.Add(row);
+            if (insert_index == -1)
+                this.dpTable_browseLines.Rows.Add(row);
+            else
+                this.dpTable_browseLines.Rows.Insert(insert_index, row);
 
             // 当插入第一行的时候，顺便选中它
             if (this.dpTable_browseLines.Rows.Count == 1)
@@ -1931,6 +2226,8 @@ false);
 
         public void ClearList()
         {
+            this._lineNumber = 0;
+
             if (this._imageManager != null)
                 this._imageManager.ClearList();
 
@@ -2209,7 +2506,7 @@ out strError);
             public string BiblioRecPath = "";   // 书目记录路径
         }
 
-        #endregion
+#endregion
 
         int SetBiblio(RegisterBiblioInfo info,
             bool bAutoSetFocus,
@@ -2725,7 +3022,7 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-        #region 册记录相关
+#region 册记录相关
 
         // 将一条书目记录下属的若干册记录装入列表
         // return:
@@ -3086,9 +3383,9 @@ int nCount)
                 this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
-        #endregion
+#endregion
 
-        #region 保存书目记录
+#region 保存书目记录
 
         // 保存书目记录和下属的册记录
         // return:
@@ -3616,9 +3913,9 @@ int nCount)
             return 0;
         }
 
-        #endregion
+#endregion
 
-        #region 删除书目记录
+#region 删除书目记录
 
         // return:
         //      -1  出错
@@ -3807,7 +4104,7 @@ int nCount)
             }
         }
 
-        #endregion
+#endregion
 
         private void flowLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -4427,7 +4724,7 @@ MessageBoxDefaultButton.Button2);
             this.DeleteBiblioRecord();
         }
 
-        #region 键盘输入面板
+#region 键盘输入面板
 
         KeyboardForm _keyboardForm = null;
 
@@ -4573,7 +4870,7 @@ MessageBoxDefaultButton.Button2);
             // this.easyMarcControl1.HideSelection = true;
         }
 
-        #endregion
+#endregion
 
         private void EntityRegisterWizard_Move(object sender, EventArgs e)
         {

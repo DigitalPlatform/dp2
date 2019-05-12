@@ -129,35 +129,47 @@ namespace DigitalPlatform.rms.Client
             // ISO2709文件需要预先准备条件
             else if (this.FileType == ExportFileType.ISO2709File)
             {
-                // 询问encoding和marcsyntax
-                OpenMarcFileDlg dlg = new OpenMarcFileDlg();
-                Font font = GuiUtil.GetDefaultFont();
-                if (font != null)
-                    dlg.Font = font;
-
-                dlg.Text = "请指定要导入的 ISO2709 文件属性";
-                dlg.FileName = strInputFileName;
-
-                if (this.AppInfo != null)
-                    this.AppInfo.LinkFormState(dlg, "restree_OpenMarcFileDlg_input_state");
-                dlg.ShowDialog(this.m_owner);
-                if (this.AppInfo != null)
-                    this.AppInfo.UnlinkFormState(dlg);
-
-                if (dlg.DialogResult != DialogResult.OK)
+                string temp = "";
+                int nRet = (int)Application.OpenForms[0].Invoke(new Func<int>(() =>
                 {
-                    strError = "用户取消";
-                    return 1;
+                    // 询问encoding和marcsyntax
+                    using (OpenMarcFileDlg dlg = new OpenMarcFileDlg())
+                    {
+                        Font font = GuiUtil.GetDefaultFont();
+                        if (font != null)
+                            dlg.Font = font;
+
+                        dlg.Text = "请指定要导入的 ISO2709 文件属性";
+                        dlg.FileName = strInputFileName;
+
+                        if (this.AppInfo != null)
+                            this.AppInfo.LinkFormState(dlg, "restree_OpenMarcFileDlg_input_state");
+                        dlg.ShowDialog(this.m_owner);
+                        if (this.AppInfo != null)
+                            this.AppInfo.UnlinkFormState(dlg);
+
+                        if (dlg.DialogResult != DialogResult.OK)
+                        {
+                            temp = "用户取消";
+                            return 1;
+                        }
+
+                        this.FileName = dlg.FileName;
+
+                        this.Stream = File.Open(this.FileName,
+            FileMode.Open,
+            FileAccess.Read);
+
+                        this.MarcSyntax = dlg.MarcSyntax;
+                        this.Encoding = dlg.Encoding;
+                        return 0;
+                    }
+                }));
+                if (nRet != 0)
+                {
+                    strError = temp;
+                    return nRet;
                 }
-
-                this.FileName = dlg.FileName;
-
-                this.Stream = File.Open(this.FileName,
-    FileMode.Open,
-    FileAccess.Read);
-
-                this.MarcSyntax = dlg.MarcSyntax;
-                this.Encoding = dlg.Encoding;
             }
 
             return 0;
@@ -387,7 +399,7 @@ namespace DigitalPlatform.rms.Client
                 styles.Add("ifnotexist");   // 记录不存在才决定写入
             string strStyle = StringUtil.MakePathList(styles);
 
-        REDO:
+            REDO:
             RecordBody[] results = null;
             long lRet = channel.DoWriteRecords(stop,
                 inputs,
@@ -443,13 +455,20 @@ namespace DigitalPlatform.rms.Client
             {
                 if (bDontPromptTimestampMismatchWhenOverwrite == false)
                 {
-                    DialogResult result = MessageDlg.Show(owner,
+                    bool temp = bDontPromptTimestampMismatchWhenOverwrite;
+                    DialogResult result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageDlg.Show(owner,
                         strMessageTimestamp + "\r\n---\r\n\r\n是否重试以新时间戳强行覆盖保存?\r\n\r\n注：\r\n[重试] 重试强行覆盖\r\n[跳过] 忽略当前记录或资源保存，但继续后面的处理\r\n[中断] 中断整个批处理",
                         "导入数据",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxDefaultButton.Button1,
-                        ref bDontPromptTimestampMismatchWhenOverwrite,
-                        new string[] { "重试", "跳过", "中断" });
+                        ref temp,
+                        new string[] { "重试", "跳过", "中断" },
+                        "下次不再询问");
+                    }));
+                    bDontPromptTimestampMismatchWhenOverwrite = temp;
+
                     if (result == DialogResult.Cancel)
                     {
                         strError = strMessageTimestamp;
@@ -546,7 +565,7 @@ namespace DigitalPlatform.rms.Client
                     string strObjectPath = record.RecordBody.Path + "/object/" + strID;
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 上载一个res
                     // parameters:
                     //      strRecordPath   主记录的路径
@@ -629,35 +648,6 @@ namespace DigitalPlatform.rms.Client
                 return 0;	// 空包不需上载
             }
 
-#if NO
-                // 2.为上载做准备
-                XmlDocument metadataDom = new XmlDocument();
-                try
-                {
-                    metadataDom.LoadXml(res.MetadataXml);
-                }
-                catch (Exception ex)
-                {
-                    strError = "加载 metadataxml 到 DOM 时出错: " + ex.Message;
-                    goto ERROR1;
-                }
-
-                XmlNode node = metadataDom.DocumentElement;
-
-                string strResPath = DomUtil.GetAttr(node, "path");
-
-                string strTargetPath = "";
-
-
-
-
-                // string strLocalPath = DomUtil.GetAttr(node,"localpath");
-                // string strMimeType = DomUtil.GetAttr(node,"mimetype");
-                string strTimeStamp = DomUtil.GetAttr(node, "timestamp");
-                // 注意,strLocalPath并不是要上载的body文件,它只用来作元数据\
-                // body文件为strBodyTempFileName
-#endif
-
             // string strTargetPath = strRecordPath;
 
             // 3.将body文件拆分成片断进行上载
@@ -685,25 +675,28 @@ namespace DigitalPlatform.rms.Client
             byte[] timestamp = res.Timestamp;
             byte[] output_timestamp = null;
 
-        REDOWHOLESAVE:
+            REDOWHOLESAVE:
             string strOutputPath = "";
             string strWarning = "";
 
             for (int j = 0; j < ranges.Length; j++)
             {
-            REDOSINGLESAVE:
+                REDOSINGLESAVE:
 
                 channel.DoIdle();
                 // Application.DoEvents();	// 出让界面控制权
 
                 if (stop != null && stop.State != 0)
                 {
-                    DialogResult result = MessageBox.Show(owner,
+                    DialogResult result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(owner,
                         "确实要中断当前批处理操作?",
                         "导入数据",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    }));
                     if (result == DialogResult.Yes)
                     {
                         strError = "用户中断";
@@ -776,15 +769,23 @@ namespace DigitalPlatform.rms.Client
                             goto REDOWHOLESAVE;
                         }
 
-
-                        DialogResult result = MessageDlg.Show(owner,
+                        string temp = strError;
+                        bool bTemp = bDontPromptTimestampMismatchWhenOverwrite;
+                        DialogResult result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageDlg.Show(owner,
                             "保存 '" + strDisplayRecPath + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(res.Length)
                             + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                            + strError + "\r\n---\r\n\r\n是否以新时间戳强行覆盖保存?\r\n注：\r\n[是] 强行覆盖保存\r\n[否] 忽略当前记录或资源保存，但继续后面的处理\r\n[取消] 中断整个批处理",
+                            + temp + "\r\n---\r\n\r\n是否以新时间戳强行覆盖保存?\r\n注：\r\n[是] 强行覆盖保存\r\n[否] 忽略当前记录或资源保存，但继续后面的处理\r\n[取消] 中断整个批处理",
                             "导入数据",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxDefaultButton.Button1,
-                            ref bDontPromptTimestampMismatchWhenOverwrite);
+                            ref bTemp,
+                            new string[] { "是", "否", "取消" },
+                            "下次不再询问");
+                        }));
+                        bDontPromptTimestampMismatchWhenOverwrite = bTemp;
+
                         if (result == DialogResult.Yes)
                         {
 
@@ -827,8 +828,7 @@ namespace DigitalPlatform.rms.Client
                 strRecordPath = strOutputPath;
 
             return 0;
-
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1074,7 +1074,7 @@ namespace DigitalPlatform.rms.Client
             respath.MakeDbName();
             string strSourceDbPath = respath.FullPath;
 
-        REDO:
+            REDO:
 
             DbNameMapItem mapItem = null;
 
@@ -1089,14 +1089,22 @@ namespace DigitalPlatform.rms.Client
                 {
                     string strText = "源数据文件中记录 " + lIndex.ToString() + " 没有来源数据库。\r\n请问对所有这样的数据，将作如何处理?";
                     // WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                    nRet = DbNameMapItemDlg.AskNullOriginBox(
-                        owner,
-                        AppInfo,
-                        Servers,
-                        Channels,
-                        strText,
-                        strSelectedLongPath,
-                        map);
+
+                    {
+                        var temp_map = map;
+                        nRet = (int)Application.OpenForms[0].Invoke(new Func<int>(() =>
+                        {
+                            return DbNameMapItemDlg.AskNullOriginBox(
+                            owner,
+                            AppInfo,
+                            Servers,
+                            Channels,
+                            strText,
+                            strSelectedLongPath,
+                            temp_map);
+                        }));
+                        map = temp_map;
+                    }
                     // WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
 
                     if (nRet == 0)
@@ -1111,16 +1119,25 @@ namespace DigitalPlatform.rms.Client
                 else
                 {
                     string strText = "源数据文件中记录 " + lIndex.ToString() + " 的来源数据库 '" + strSourceDbPath + "' 没有明确的对应规则。\r\n请问对所有这样的数据，将作如何处理?";    // 没有找到对应的目标库
-                    // WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                    nRet = DbNameMapItemDlg.AskNotMatchOriginBox(
-                        owner,
+                                                                                                                                                // WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
+
+                    {
+                        var temp_map = map;
+                        nRet = (int)Application.OpenForms[0].Invoke(new Func<int>(() =>
+                        {
+                            return DbNameMapItemDlg.AskNotMatchOriginBox(
+                                owner,
                         AppInfo,
                         Servers,
                         Channels,
                         strText,
                         strSelectedLongPath,
                         strSourceDbPath/*strResPath*/,
-                        map);
+                        temp_map);
+                        }));
+                        map = temp_map;
+                    }
+
                     // WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (nRet == 0)
                     {
@@ -1132,7 +1149,7 @@ namespace DigitalPlatform.rms.Client
                 }
             }
 
-        MAPITEMOK:
+            MAPITEMOK:
 
             if (mapItem.Style == "skip")
                 return 2;
@@ -1289,7 +1306,7 @@ namespace DigitalPlatform.rms.Client
             string strTargetPath = record.RecordBody.Path;
             byte[] output_timestamp = null;
             string strOutputPath = "";
-        REDOSAVE:
+            REDOSAVE:
             // 保存Xml记录
             long lRet = channel.DoSaveTextRes(strTargetPath,
                 record.RecordBody.Xml,
@@ -1329,7 +1346,9 @@ namespace DigitalPlatform.rms.Client
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxDefaultButton.Button1,
-                        ref bDontPromptTimestampMismatchWhenOverwrite);
+                        ref bDontPromptTimestampMismatchWhenOverwrite,
+                        new string[] { "是", "否", "取消" },
+                        "下次不再询问");
                     //WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result == DialogResult.Yes)
                     {
@@ -1356,13 +1375,15 @@ namespace DigitalPlatform.rms.Client
                         + " 时发生错误。详细情况如下：\r\n---\r\n"
                         + strError + "\r\n---\r\n\r\n是否重试?\r\n注：(是)重试 (否)不重试，但继续后面的处理 (取消)中断整个批处理";
                     //WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-
-                    DialogResult result1 = MessageBox.Show(owner,
+                    DialogResult result1 = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(owner,
                         strText,
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    }));
                     //WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result1 == DialogResult.Yes)
                         goto REDOSAVE;

@@ -16,6 +16,8 @@ using System.Web;
 using System.Threading.Tasks;
 using System.Net;
 
+using log4net;
+
 using Ionic.Zip;
 using AsyncPluggableProtocol;
 
@@ -30,7 +32,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
-using log4net;
 using DigitalPlatform.Core;
 
 namespace dp2Circulation
@@ -40,6 +41,9 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        public CharsetTable EaccCharsetTable = null;
+        public Marc8Encoding Marc8Encoding = null;
+
         public void ReportError(string strTitle,
     string strError)
         {
@@ -1456,6 +1460,24 @@ MessageBoxDefaultButton.Button1);
             ProtocolFactory.Register("barcode", () => new BarcodeProtocol());
 
             SetPrintLabelMode();
+
+            {
+                // MARC-8字符表
+                this.EaccCharsetTable = new CharsetTable();
+                try
+                {
+                    this.EaccCharsetTable.Attach(Path.Combine(this.DataDir, "eacc_charsettable"),
+                        Path.Combine(this.DataDir, "eacc_charsettable.index"));
+                    this.EaccCharsetTable.ReadOnly = true;  // 避免Close()的时候删除文件
+
+                    this.Marc8Encoding = new Marc8Encoding(this.EaccCharsetTable,
+                        Path.Combine(this.DataDir, "asciicodetables.xml"));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
+                }
+            }
 
             // 设置窗口尺寸状态
             if (AppInfo != null)

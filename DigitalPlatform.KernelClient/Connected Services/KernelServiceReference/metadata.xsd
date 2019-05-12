@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://dp2003.com/dp2kernel/" elementFormDefault="qualified" targetNamespace="http://dp2003.com/dp2kernel/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:8001/dp2kernel/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:import schemaLocation="http://localhost:8001/dp2kernel/metadata?xsd=xsd2" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:import schemaLocation="http://localhost:8001/dp2kernel/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" />
+  <xs:element name="DoTest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strText" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DoTestResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="DoTestResult" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetVersion">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetVersionResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetVersionResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="Result">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ErrorCode" type="tns:ErrorCodeValue" />
+      <xs:element minOccurs="0" name="ErrorString" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Value" type="xs:long" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Result" nillable="true" type="tns:Result" />
+  <xs:simpleType name="ErrorCodeValue">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NoError" />
+      <xs:enumeration value="CommonError" />
+      <xs:enumeration value="NotLogin" />
+      <xs:enumeration value="UserNameEmpty" />
+      <xs:enumeration value="UserNameOrPasswordMismatch" />
+      <xs:enumeration value="NotHasEnoughRights" />
+      <xs:enumeration value="TimestampMismatch">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">9</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NotFound">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">10</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="EmptyContent">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">11</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NotFoundDb">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">12</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PathError">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">14</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PartNotFound">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">15</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ExistDbInfo">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">16</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AlreadyExist">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">17</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AlreadyExistOtherType">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">18</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ApplicationStartError">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">19</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NotFoundSubRes">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">20</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Canceled">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">21</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="AccessDenied">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">22</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="PartialDenied">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">23</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="NotFoundObjectFile">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">24</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="Compressed">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">25</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="RequestError">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">100</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="RequestTimeOut">
+        <xs:annotation>
+          <xs:appinfo>
+            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">112</EnumerationValue>
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ErrorCodeValue" nillable="true" type="tns:ErrorCodeValue" />
+  <xs:element name="Login">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strUserName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strPassword" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="LoginResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="LoginResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Logout">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="LogoutResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="LogoutResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Search">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strQuery" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strResultSetName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strOutputStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SearchResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SearchResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SearchEx">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strQuery" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strResultSetName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strSearchStyle" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="lRecordCount" type="xs:long" />
+        <xs:element minOccurs="0" name="strLang" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRecordStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SearchExResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SearchExResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="records" nillable="true" type="tns:ArrayOfRecord" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfRecord">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Record" nillable="true" type="tns:Record" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRecord" nillable="true" type="tns:ArrayOfRecord" />
+  <xs:complexType name="Record">
+    <xs:sequence>
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q1:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyFrom" />
+      <xs:element minOccurs="0" name="Path" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RecordBody" nillable="true" type="tns:RecordBody" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Record" nillable="true" type="tns:Record" />
+  <xs:complexType name="ArrayOfKeyFrom">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="KeyFrom" nillable="true" type="tns:KeyFrom" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfKeyFrom" nillable="true" type="tns:ArrayOfKeyFrom" />
+  <xs:complexType name="KeyFrom">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="From" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Key" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Logic" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="KeyFrom" nillable="true" type="tns:KeyFrom" />
+  <xs:complexType name="RecordBody">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Metadata" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Path" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Result" nillable="true" type="tns:Result" />
+      <xs:element minOccurs="0" name="Timestamp" nillable="true" type="xs:base64Binary" />
+      <xs:element minOccurs="0" name="Xml" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RecordBody" nillable="true" type="tns:RecordBody" />
+  <xs:element name="Stop">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ChangePassword">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strNewPassword" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ChangePasswordResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="ChangePasswordResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ChangeOtherPassword">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strUserName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strNewPassword" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ChangeOtherPasswordResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="ChangeOtherPasswordResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Dir">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="lStart" type="xs:long" />
+        <xs:element minOccurs="0" name="lLength" type="xs:long" />
+        <xs:element minOccurs="0" name="strLang" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DirResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="DirResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="items" nillable="true" type="tns:ArrayOfResInfoItem" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfResInfoItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ResInfoItem" nillable="true" type="tns:ResInfoItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfResInfoItem" nillable="true" type="tns:ArrayOfResInfoItem" />
+  <xs:complexType name="ResInfoItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="HasChildren" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Names" nillable="true" type="q2:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Style" type="xs:int" />
+      <xs:element minOccurs="0" name="Type" type="xs:int" />
+      <xs:element minOccurs="0" name="TypeString" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ResInfoItem" nillable="true" type="tns:ResInfoItem" />
+  <xs:element name="InitializeDb">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strDbName" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="InitializeDbResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="InitializeDbResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RefreshDb">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strDbName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="bClearAllKeyTables" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RefreshDbResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="RefreshDbResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetRecords">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResultSetName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="lStart" type="xs:long" />
+        <xs:element minOccurs="0" name="lLength" type="xs:long" />
+        <xs:element minOccurs="0" name="strLang" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetRecordsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetRecordsResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="records" nillable="true" type="tns:ArrayOfRecord" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetBrowse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="paths" nillable="true" type="q3:ArrayOfstring" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetBrowseResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetBrowseResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="records" nillable="true" type="tns:ArrayOfRecord" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetRichRecords">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResultSetName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRanges" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strLang" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetRichRecordsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetRichRecordsResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="richRecords" nillable="true" type="tns:ArrayOfRichRecord" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfRichRecord">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="RichRecord" nillable="true" type="tns:RichRecord" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRichRecord" nillable="true" type="tns:ArrayOfRichRecord" />
+  <xs:complexType name="RichRecord">
+    <xs:sequence>
+      <xs:element xmlns:q4="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q4:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Path" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Result" nillable="true" type="tns:Result" />
+      <xs:element minOccurs="0" name="Xml" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="baTimestamp" nillable="true" type="xs:base64Binary" />
+      <xs:element minOccurs="0" name="strMetadata" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RichRecord" nillable="true" type="tns:RichRecord" />
+  <xs:element name="GetRes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="nStart" type="xs:long" />
+        <xs:element minOccurs="0" name="nLength" type="xs:int" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetResResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetResResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="baContent" nillable="true" type="xs:base64Binary" />
+        <xs:element minOccurs="0" name="strMetadata" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strOutputResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WriteRes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRanges" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="lTotalLength" type="xs:long" />
+        <xs:element minOccurs="0" name="baContent" nillable="true" type="xs:base64Binary" />
+        <xs:element minOccurs="0" name="strMetadata" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="baInputTimestamp" nillable="true" type="xs:base64Binary" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WriteResResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="WriteResResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="strOutputResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="WriteRecords">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="inputs" nillable="true" type="tns:ArrayOfRecordBody" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfRecordBody">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="RecordBody" nillable="true" type="tns:RecordBody" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRecordBody" nillable="true" type="tns:ArrayOfRecordBody" />
+  <xs:element name="WriteRecordsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="WriteRecordsResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="results" nillable="true" type="tns:ArrayOfRecordBody" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteRes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="baInputTimestamp" nillable="true" type="xs:base64Binary" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteResResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="DeleteResResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="baOutputTimestamp" nillable="true" type="xs:base64Binary" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RebuildResKeys">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strResPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RebuildResKeysResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="RebuildResKeysResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="strOutputResPath" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetDbInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strDbName" nillable="true" type="xs:string" />
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" minOccurs="0" name="logicNames" nillable="true" type="q5:ArrayOfLogicNameItem" />
+        <xs:element minOccurs="0" name="strType" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strSqlDbName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strKeysText" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strBrowseText" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetDbInfoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SetDbInfoResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetDbInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strDbName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetDbInfoResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetDbInfoResult" nillable="true" type="tns:Result" />
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" minOccurs="0" name="logicNames" nillable="true" type="q6:ArrayOfLogicNameItem" />
+        <xs:element minOccurs="0" name="strType" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strSqlDbName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strKeysText" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strBrowseText" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CreateDb">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/DigitalPlatform.rms" minOccurs="0" name="logicNames" nillable="true" type="q7:ArrayOfLogicNameItem" />
+        <xs:element minOccurs="0" name="strType" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strSqlDbName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strKeysDefault" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strBrowseDefault" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CreateDbResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CreateDbResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteDb">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strDbName" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteDbResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="DeleteDbResult" nillable="true" type="tns:Result" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CreateKeys">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strXml" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRecPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="lStart" type="xs:int" />
+        <xs:element minOccurs="0" name="lLength" type="xs:int" />
+        <xs:element minOccurs="0" name="strLang" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CreateKeysResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CreateKeysResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="keys" nillable="true" type="tns:ArrayOfKeyInfo" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfKeyInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="KeyInfo" nillable="true" type="tns:KeyInfo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfKeyInfo" nillable="true" type="tns:ArrayOfKeyInfo" />
+  <xs:complexType name="KeyInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="FromName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FromValue" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ID" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Key" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="KeyNoProcess" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Num" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="KeyInfo" nillable="true" type="tns:KeyInfo" />
+  <xs:element name="CopyRecord">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strOriginRecordPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strTargetRecordPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="bDeleteOriginRecord" type="xs:boolean" />
+        <xs:element minOccurs="0" name="strMergeStyle" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CopyRecordResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="CopyRecordResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="strIdChangeList" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strOutputRecordPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="baOutputRecordTimestamp" nillable="true" type="xs:base64Binary" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="BatchTask">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strName" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="info" nillable="true" type="tns:TaskInfo" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="TaskInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ID" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MaxResultBytes" type="xs:int" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ProgressText" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ResultOffset" type="xs:long" />
+      <xs:element minOccurs="0" name="ResultText" nillable="true" type="xs:base64Binary" />
+      <xs:element minOccurs="0" name="ResultTotalLength" type="xs:long" />
+      <xs:element minOccurs="0" name="ResultVersion" type="xs:long" />
+      <xs:element minOccurs="0" name="StartInfo" nillable="true" type="tns:BatchTaskStartInfo" />
+      <xs:element minOccurs="0" name="State" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="TaskInfo" nillable="true" type="tns:TaskInfo" />
+  <xs:complexType name="BatchTaskStartInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="BreakPoint" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Count" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Param" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Start" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="BatchTaskStartInfo" nillable="true" type="tns:BatchTaskStartInfo" />
+  <xs:element name="BatchTaskResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="BatchTaskResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="results" nillable="true" type="tns:ArrayOfTaskInfo" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfTaskInfo">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="TaskInfo" nillable="true" type="tns:TaskInfo" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfTaskInfo" nillable="true" type="tns:ArrayOfTaskInfo" />
+  <xs:element name="GetProperty">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPropertyResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetPropertyResult" nillable="true" type="tns:Result" />
+        <xs:element minOccurs="0" name="strProperty" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
