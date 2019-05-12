@@ -18,13 +18,13 @@ using System.Diagnostics;
 
 using static FingerprintCenter.FingerPrint;
 
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.IO;
-using DigitalPlatform.Interfaces;
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.Interfaces;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CirculationClient;
 using static DigitalPlatform.CirculationClient.BioUtil;
 
 namespace FingerprintCenter
@@ -297,6 +297,7 @@ bool bClickClose = false)
                     // 开始捕捉指纹
                     FingerPrint.StartCapture(_cancel.Token);
                     // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
+                    // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
                     if (result.ErrorCode == "RequestError")
                         StartTimer();
                     return result;

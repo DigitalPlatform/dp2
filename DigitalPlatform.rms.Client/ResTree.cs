@@ -17,30 +17,31 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms.Client
 {
-	/// <summary>
-	/// Summary description for ResTree.
-	/// </summary>
-	public class ResTree : System.Windows.Forms.TreeView
-	{
-		public ApplicationInfo AppInfo = null;
+    /// <summary>
+    /// Summary description for ResTree.
+    /// </summary>
+    public class ResTree : System.Windows.Forms.TreeView
+    {
+        public ApplicationInfo AppInfo = null;
 
-		public DigitalPlatform.StopManager stopManager = null;
+        public DigitalPlatform.StopManager stopManager = null;
 
-		RmsChannel channel = null;
+        RmsChannel channel = null;
 
-		#region	资源类型。可作Icon下标用
+        #region	资源类型。可作Icon下标用
 
-		public const int RESTYPE_SERVER = 2;
-		public const int RESTYPE_DB = 0;
-		public const int RESTYPE_FROM = 1;
-		public const int RESTYPE_LOADING = 3;
-		public const int RESTYPE_FOLDER = 4;
-		public const int RESTYPE_FILE = 5;
+        public const int RESTYPE_SERVER = 2;
+        public const int RESTYPE_DB = 0;
+        public const int RESTYPE_FROM = 1;
+        public const int RESTYPE_LOADING = 3;
+        public const int RESTYPE_FOLDER = 4;
+        public const int RESTYPE_FILE = 5;
 
-		#endregion
+        #endregion
 
         #region 资源风格
         public const int RESSTYLE_USERDATABASE = 0x01;
@@ -49,50 +50,50 @@ namespace DigitalPlatform.rms.Client
 
         public string Lang = "zh";
 
-		public int[] EnabledIndices = null;	// null表示全部发黑。如果对象存在，但是元素个数为0，表示全部发灰
+        public int[] EnabledIndices = null; // null表示全部发黑。如果对象存在，但是元素个数为0，表示全部发灰
 
-		public ServerCollection Servers = null;	// 引用
-		public RmsChannelCollection Channels = null;
+        public ServerCollection Servers = null; // 引用
+        public RmsChannelCollection Channels = null;
 
-		public event GuiAppendMenuEventHandle OnSetMenu;
+        public event GuiAppendMenuEventHandle OnSetMenu;
 
-		private System.Windows.Forms.ImageList imageList_resIcon;
-		private System.ComponentModel.IContainer components;
+        private System.Windows.Forms.ImageList imageList_resIcon;
+        private System.ComponentModel.IContainer components;
 
-		public ResTree()
-		{
-			// This call is required by the Windows.Forms Form Designer.
-			InitializeComponent();
+        public ResTree()
+        {
+            // This call is required by the Windows.Forms Form Designer.
+            InitializeComponent();
 
-			this.ImageList = imageList_resIcon;
+            this.ImageList = imageList_resIcon;
 
-		}
+        }
 
-		/// <summary> 
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
 
-				DoStop(null, null); 
+                DoStop(null, null);
 
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Component Designer generated code
-		/// <summary> 
-		/// Required method for Designer support - do not modify 
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Component Designer generated code
+        /// <summary> 
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ResTree));
             this.imageList_resIcon = new System.Windows.Forms.ImageList(this.components);
@@ -118,8 +119,8 @@ namespace DigitalPlatform.rms.Client
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ResTree_MouseDown);
             this.ResumeLayout(false);
 
-		}
-		#endregion
+        }
+        #endregion
 
         public int Fill(TreeNode node)
         {
@@ -142,61 +143,61 @@ namespace DigitalPlatform.rms.Client
             return nRet;
         }
 
-		// 递归
-		public int Fill(TreeNode node,
+        // 递归
+        public int Fill(TreeNode node,
             out string strError)
-		{
+        {
             strError = "";
-			TreeNodeCollection children = null;
+            TreeNodeCollection children = null;
 
-			if (node == null) 
-			{
-				children = this.Nodes;
-			}
-			else 
-			{
-				children = node.Nodes;
-			}
+            if (node == null)
+            {
+                children = this.Nodes;
+            }
+            else
+            {
+                children = node.Nodes;
+            }
 
-			int i;
-
-
-			// 填充根
-			if (node == null) 
-			{
-				children.Clear();
-
-				for(i=0;i<Servers.Count;i++) 
-				{
-					Server server = (Server)Servers[i];
-					TreeNode nodeNew = new TreeNode(server.Url, RESTYPE_SERVER, RESTYPE_SERVER);
-					SetLoading(nodeNew);
-
-					if (EnabledIndices != null
-						&& StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-						nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
-
-					children.Add(nodeNew);
-				}
-
-				return 0;
-			}
+            int i;
 
 
-			// 根以下的节点类型
-			ResPath respath = new ResPath(node);
+            // 填充根
+            if (node == null)
+            {
+                children.Clear();
 
-			this.channel = Channels.GetChannel(respath.Url);
+                for (i = 0; i < Servers.Count; i++)
+                {
+                    Server server = (Server)Servers[i];
+                    TreeNode nodeNew = new TreeNode(server.Url, RESTYPE_SERVER, RESTYPE_SERVER);
+                    SetLoading(nodeNew);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+                    if (EnabledIndices != null
+                        && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                        nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-			/*
+                    children.Add(nodeNew);
+                }
+
+                return 0;
+            }
+
+
+            // 根以下的节点类型
+            ResPath respath = new ResPath(node);
+
+            this.channel = Channels.GetChannel(respath.Url);
+
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+
+            /*
 			int nStart = 0;
 			int nPerCount = -1;
 			int nCount = 0;
 			*/
 
-			ResInfoItem [] items = null;
+            ResInfoItem[] items = null;
 
 #if NO
 			DigitalPlatform.Stop stop = null;
@@ -239,10 +240,10 @@ namespace DigitalPlatform.rms.Client
 			}
 #endif
 
-			this.channel = null;
+            this.channel = null;
 
-			if (lRet == -1) 
-			{
+            if (lRet == -1)
+            {
 #if NO
 				try 
 				{
@@ -254,22 +255,22 @@ namespace DigitalPlatform.rms.Client
 					return -1;
 				}
 #endif
-				if (node != null) 
-				{
-					SetLoading(node);	// 出错的善后处理，重新出现+号
-					node.Collapse();
-				}
-				return -1;
-			}
+                if (node != null)
+                {
+                    SetLoading(node);   // 出错的善后处理，重新出现+号
+                    node.Collapse();
+                }
+                return -1;
+            }
 
 
-			if (items != null) 
-			{
-				children.Clear();
+            if (items != null)
+            {
+                children.Clear();
 
-				//for(i=0;i<items.Length;i++) 
-                foreach(ResInfoItem res_item in items)
-				{
+                //for(i=0;i<items.Length;i++) 
+                foreach (ResInfoItem res_item in items)
+                {
                     // ResInfoItem res_item = items[i];
 
                     TreeNode nodeNew = new TreeNode(res_item.Name, res_item.Type, res_item.Type);
@@ -297,18 +298,18 @@ namespace DigitalPlatform.rms.Client
                     }
 
                     if (res_item.HasChildren)
-						SetLoading(nodeNew);
+                        SetLoading(nodeNew);
 
-					if (EnabledIndices != null
-						&& StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
-						nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+                    if (EnabledIndices != null
+                        && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                        nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
-					children.Add(nodeNew);
-				}
-			}
+                    children.Add(nodeNew);
+                }
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
         // return:
         //      -1  出错，不希望继续以后的操作
@@ -370,39 +371,39 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-		// 回调函数
-		void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        // 回调函数
+        void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		// 在一个节点下级插入"loading..."，以便出现+号
-		public static void SetLoading(TreeNode node)
-		{
+        // 在一个节点下级插入"loading..."，以便出现+号
+        public static void SetLoading(TreeNode node)
+        {
             if (node == null)
                 return;
 
-			// 新node
-			TreeNode nodeNew = new TreeNode("loading...", RESTYPE_LOADING, RESTYPE_LOADING);
+            // 新node
+            TreeNode nodeNew = new TreeNode("loading...", RESTYPE_LOADING, RESTYPE_LOADING);
 
-			node.Nodes.Clear();
-			node.Nodes.Add(nodeNew);
-		}
+            node.Nodes.Clear();
+            node.Nodes.Add(nodeNew);
+        }
 
-		// 下级是否包含loading...?
-		public static bool IsLoading(TreeNode node)
-		{
-			if (node.Nodes.Count == 0)
-				return false;
+        // 下级是否包含loading...?
+        public static bool IsLoading(TreeNode node)
+        {
+            if (node.Nodes.Count == 0)
+                return false;
 
-			if (node.Nodes[0].Text == "loading...")
-				return true;
+            if (node.Nodes[0].Text == "loading...")
+                return true;
 
-			return false;
-		}
+            return false;
+        }
 
-		private void ResTree_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void ResTree_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
                 return;
@@ -627,7 +628,7 @@ namespace DigitalPlatform.rms.Client
             if (node == null)
                 return;
 
-            foreach(TreeNode current in node.Nodes)
+            foreach (TreeNode current in node.Nodes)
             {
                 current.Checked = true;
             }
@@ -636,7 +637,6 @@ namespace DigitalPlatform.rms.Client
         // 测试超时
         void menuItem_testTimeout_Click(object sender, EventArgs e)
         {
-
             ResPath respath = new ResPath(this.SelectedNode);
 
             this.channel = Channels.GetChannel(respath.Url);
@@ -667,7 +667,7 @@ namespace DigitalPlatform.rms.Client
             if (this.SelectedNode != null)
                 this.SelectedNode.Expand();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             return;
         }
@@ -715,7 +715,7 @@ namespace DigitalPlatform.rms.Client
                 out strError);
 
             return nRet;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -737,7 +737,7 @@ namespace DigitalPlatform.rms.Client
             this.channel = Channels.GetChannel(strServerUrl);
             Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-        REDO:
+            REDO:
 
 #if NO
             DigitalPlatform.Stop stop = null;
@@ -813,9 +813,9 @@ namespace DigitalPlatform.rms.Client
             return 0;
         }
 
-		// 刷新
-		public void menu_refresh(object sender, System.EventArgs e)
-		{
+        // 刷新
+        public void menu_refresh(object sender, System.EventArgs e)
+        {
             /*
 			if (this.SelectedNode == null) 
 			{
@@ -835,7 +835,7 @@ namespace DigitalPlatform.rms.Client
 			ExpandPath(OldPath);
              */
             this.Refresh(RefreshStyle.All);
-		}
+        }
 
         // 刷新风格
         public enum RefreshStyle
@@ -858,10 +858,10 @@ namespace DigitalPlatform.rms.Client
             }
 
             // 刷新服务器级
-            if ((style & RefreshStyle.Servers) == RefreshStyle.Servers) 
-			{
-				this.Fill(null);
-			}
+            if ((style & RefreshStyle.Servers) == RefreshStyle.Servers)
+            {
+                this.Fill(null);
+            }
 
 
             // 刷新当前选择的节点
@@ -882,89 +882,89 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-		// 新增一个服务器节点
-		void menu_newServer(object sender, System.EventArgs e)
-		{
-			ServerNameDlg dlg = new ServerNameDlg();
+        // 新增一个服务器节点
+        void menu_newServer(object sender, System.EventArgs e)
+        {
+            ServerNameDlg dlg = new ServerNameDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
-			dlg.ShowDialog(this);
+            dlg.ShowDialog(this);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			int nRet = Servers.NewServer(dlg.textBox_url.Text, -1);
-			if (nRet == 1) 
-			{
-				MessageBox.Show(this, "服务器 " + dlg.textBox_url.Text + " 已经存在...");
-				return;
-			}
+            int nRet = Servers.NewServer(dlg.textBox_url.Text, -1);
+            if (nRet == 1)
+            {
+                MessageBox.Show(this, "服务器 " + dlg.textBox_url.Text + " 已经存在...");
+                return;
+            }
 
-			// 刷新
-			this.Fill(null);
+            // 刷新
+            this.Fill(null);
 
-			// 刷新后恢复原来选择的node
-		}
+            // 刷新后恢复原来选择的node
+        }
 
-		// 登录
-		void menu_login(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null) 
-			{
-				MessageBox.Show(this, "尚未选择节点");
-				return;
-			}
+        // 登录
+        void menu_login(object sender, System.EventArgs e)
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(this.SelectedNode);
+            ResPath respath = new ResPath(this.SelectedNode);
 
-			this.channel = Channels.GetChannel(respath.Url);
+            this.channel = Channels.GetChannel(respath.Url);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
-			string strError;
-			// return:
-			//		-1	error
-			//		0	login failed
-			//		1	login succeed
-			int nRet = channel.UiLogin(
-				null,
-				respath.Path,
-				LoginStyle.FillDefaultInfo,
-				out strError);
+            string strError;
+            // return:
+            //		-1	error
+            //		0	login failed
+            //		1	login succeed
+            int nRet = channel.UiLogin(
+                null,
+                respath.Path,
+                LoginStyle.FillDefaultInfo,
+                out strError);
 
 
-			this.channel = null;
+            this.channel = null;
 
-			if (nRet == -1 || nRet == 0) 
-			{
-				MessageBox.Show(this, strError);
-				return;
-			}
+            if (nRet == -1 || nRet == 0)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
 
-			// 刷新
-			ResPath OldPath = new ResPath(this.SelectedNode);
+            // 刷新
+            ResPath OldPath = new ResPath(this.SelectedNode);
 
-			respath.Path = "";
-			ExpandPath(respath);	// 选中服务器，以下节点清除
-			SetLoading(this.SelectedNode);
+            respath.Path = "";
+            ExpandPath(respath);    // 选中服务器，以下节点清除
+            SetLoading(this.SelectedNode);
 
-			ExpandPath(OldPath);
+            ExpandPath(OldPath);
 
-		}
+        }
 
-		// 登出
-		void menu_logout(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null) 
-			{
-				MessageBox.Show(this, "尚未选择节点");
-				return;
-			}
+        // 登出
+        void menu_logout(object sender, System.EventArgs e)
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(this.SelectedNode);
+            ResPath respath = new ResPath(this.SelectedNode);
 
-			this.channel = Channels.GetChannel(respath.Url);
+            this.channel = Channels.GetChannel(respath.Url);
 
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 
 #if NO
 			DigitalPlatform.Stop stop = null;
@@ -983,13 +983,13 @@ namespace DigitalPlatform.rms.Client
 #endif
             DigitalPlatform.Stop stop = PrepareStop("正在登出: " + respath.FullPath);
 
-			string strError;
-			// return:
-			//		-1	error
-			//		0	login failed
-			//		1	login succeed
-			long nRet = channel.DoLogout(
-				out strError);
+            string strError;
+            // return:
+            //		-1	error
+            //		0	login failed
+            //		1	login succeed
+            long nRet = channel.DoLogout(
+                out strError);
 
             EndStop(stop);
 #if NO
@@ -1003,26 +1003,26 @@ namespace DigitalPlatform.rms.Client
 			}
 #endif
 
-			this.channel = null;
+            this.channel = null;
 
-			if (nRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-				return;
-			}
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
 
-			// 刷新
-			//ResPath OldPath = new ResPath(this.SelectedNode);
+            // 刷新
+            //ResPath OldPath = new ResPath(this.SelectedNode);
 
-			respath.Path = "";
-			ExpandPath(respath);	// 选中服务器，以下节点清除
-			SetLoading(this.SelectedNode);
-			if (this.SelectedNode != null)
-				this.SelectedNode.Collapse();
+            respath.Path = "";
+            ExpandPath(respath);    // 选中服务器，以下节点清除
+            SetLoading(this.SelectedNode);
+            if (this.SelectedNode != null)
+                this.SelectedNode.Collapse();
 
-			//ExpandPath(OldPath);
+            //ExpandPath(OldPath);
 
-		}
+        }
 
         void menu_deleteKeysIndex(object sender, System.EventArgs e)
         {
@@ -1057,7 +1057,7 @@ namespace DigitalPlatform.rms.Client
                 goto ERROR1;
             MessageBox.Show(this, "操作成功");
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1119,6 +1119,7 @@ namespace DigitalPlatform.rms.Client
 
             try
             {
+                // TODO: 改造为新的查询任务是否完成的用法
                 long lRet = channel.DoRefreshDB(
                     strAction,
                     respath.Path,
@@ -1152,22 +1153,29 @@ namespace DigitalPlatform.rms.Client
                 this.channel = null;
             }
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
         // 快速导入
         void menu_quickImport(object sender, System.EventArgs e)
         {
-            ImportData(true);
+            Task.Factory.StartNew(() =>
+            {
+                ImportData(true);
+            });
         }
 
         // 慢速导入数据
         void menu_import(object sender, System.EventArgs e)
         {
-            ImportData(false);
+            Task.Factory.StartNew(() =>
+            {
+                ImportData(false);
+            });
         }
 
+        // TODO: 改造为可以在非界面线程运行
         // 导入数据
         int ImportData(bool bFastMode = false)
         {
@@ -1175,13 +1183,18 @@ namespace DigitalPlatform.rms.Client
             string strTimeMessage = "";
             int CHUNK_SIZE = 150 * 1024;    // 70
 
-            if (this.SelectedNode == null)
+            TreeNode selectedNode = (TreeNode)this.Invoke(new Func<TreeNode>(() =>
+            {
+                return this.SelectedNode;
+            }));
+
+            if (selectedNode == null)
             {
                 strError = "尚未选择要要导入数据的数据库节点";
                 goto ERROR0;
             }
 
-            if (this.SelectedNode.ImageIndex != RESTYPE_DB)
+            if (selectedNode.ImageIndex != RESTYPE_DB)
             {
                 strError = "所选择的节点不是数据库类型。请选择要导入数据的数据库节点。";
                 goto ERROR0;
@@ -1189,12 +1202,15 @@ namespace DigitalPlatform.rms.Client
 
             if (bFastMode == true)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                {
+                    return MessageBox.Show(this,
         "警告：\r\n在快速导入期间，相关数据库会进入一种锁定状态，对数据库的其他检索和修改操作暂时会被禁止，直到处理完成。\r\n\r\n请问确实要进行快速导入么?",
         "导入数据",
         MessageBoxButtons.YesNo,
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button2);
+                }));
                 if (result == DialogResult.No)
                     return 0;
             }
@@ -1212,39 +1228,58 @@ namespace DigitalPlatform.rms.Client
                 return 0;
             }
 #endif
-            ImportDataDialog dlg = new ImportDataDialog();
-            dlg.Font = GuiUtil.GetDefaultFont();
-            dlg.FileName = "";
+            string fileName = "";
+            bool importDataRecord = false;
+            bool insertMissing = false;
+            bool importObject = false;
 
-            if (this.AppInfo != null)
+            int nRet = (int)this.Invoke(new Func<int>(() =>
             {
-                this.AppInfo.LinkFormState(dlg, "ImportDataDialog_state");
+                using (ImportDataDialog dlg = new ImportDataDialog())
+                {
+                    dlg.Font = GuiUtil.GetDefaultFont();
+                    dlg.FileName = "";
 
-                dlg.UiState = this.AppInfo.GetString(
-                    "ResTree",
-                    "ImportDataDialog_uiState",
-                    "");
-            }
+                    if (this.AppInfo != null)
+                    {
+                        this.AppInfo.LinkFormState(dlg, "ImportDataDialog_state");
 
-            dlg.ShowDialog(this);
+                        dlg.UiState = this.AppInfo.GetString(
+                            "ResTree",
+                            "ImportDataDialog_uiState",
+                            "");
+                    }
 
-            if (this.AppInfo != null)
-            {
-                this.AppInfo.SetString(
-                    "ResTree",
-                    "ImportDataDialog_uiState",
-                    dlg.UiState);
-            }
+                    dlg.ShowDialog(this);
 
-            if (dlg.DialogResult != DialogResult.OK)
+                    if (this.AppInfo != null)
+                    {
+                        this.AppInfo.SetString(
+                            "ResTree",
+                            "ImportDataDialog_uiState",
+                            dlg.UiState);
+                    }
+
+                    if (dlg.DialogResult != DialogResult.OK)
+                        return 0;
+
+                    fileName = dlg.FileName;
+                    importDataRecord = dlg.ImportDataRecord;
+                    insertMissing = dlg.InsertMissing;
+                    importObject = dlg.ImportObject;
+
+                    return 1;
+                }
+            }));
+            if (nRet == 0)
                 return 0;
 
             long lTotalCount = 0;
 
             ImportUtil import_util = new ImportUtil();
-            int nRet = import_util.Begin(this,
+            nRet = import_util.Begin(this,
                 this.AppInfo,
-                dlg.FileName,
+                fileName,   // dlg.FileName,
                 out strError);
             if (nRet == -1 || nRet == 1)
                 goto ERROR0;
@@ -1255,25 +1290,13 @@ namespace DigitalPlatform.rms.Client
             Debug.Assert(channel != null, "Channels.GetChannel() 异常");
 #endif
             // 缺省的目标数据库路径
-            ResPath default_target_respath = new ResPath(this.SelectedNode);
+
+            ResPath default_target_respath = new ResPath(selectedNode);
             RmsChannel cur_channel = Channels.CreateTempChannel(default_target_respath.Url);
             Debug.Assert(cur_channel != null, "Channels.GetChannel() 异常");
 
             List<string> target_dburls = new List<string>();
-#if NO
-            DigitalPlatform.Stop stop = null;
 
-            if (stopManager != null)
-            {
-                stop = new DigitalPlatform.Stop();
-
-                stop.Register(this.stopManager, true);	// 和容器关联
-
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在导入数据 " + respath.FullPath);
-                stop.BeginLoop();
-            }
-#endif
             DigitalPlatform.Stop stop = PrepareStop("正在导入数据 ...");  // + default_target_respath.FullPath);
             stop.OnStop -= new StopEventHandler(this.DoStop);   // 去掉缺省的回调函数
             stop.OnStop += (sender1, e1) =>
@@ -1298,16 +1321,19 @@ namespace DigitalPlatform.rms.Client
                 int nBatchSize = 0;
                 for (int index = 0; ; index++)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (stop.State != 0)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
                             "确实要中断当前批处理操作?",
                             "导入数据",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             strError = "用户中断";
@@ -1319,11 +1345,6 @@ namespace DigitalPlatform.rms.Client
                         }
                     }
 
-                    //string strXml = "";
-                    //string strResPath = "";
-                    //string strTimeStamp = "";
-                    UploadRecord record = null;
-
                     if (import_util.FileType == ExportFileType.BackupFile)
                     {
                         if (lSaveOffs != -1 && import_util.Stream.Position != lSaveOffs)
@@ -1333,7 +1354,7 @@ namespace DigitalPlatform.rms.Client
                         }
                     }
 
-                    nRet = import_util.ReadOneRecord(out record,
+                    nRet = import_util.ReadOneRecord(out UploadRecord record,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1347,40 +1368,11 @@ namespace DigitalPlatform.rms.Client
                     }
 
                     Debug.Assert(record != null, "");
-#if NO
-                    XmlDocument dom = new XmlDocument();
-                    try
-                    {
-                        dom.LoadXml(strXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "XML装入DOM时出错: " + ex.Message;
-                        goto ERROR1;
-                    }
-                    string strResPath = DomUtil.GetAttr(DpNs.dprms, dom.DocumentElement, "path");
-                    string strTimeStamp = DomUtil.GetAttr(DpNs.dprms, dom.DocumentElement, "timestamp");
-#endif
 
                     // 准备目标路径
                     {
                         string strLongPath = record.Url + "?" + record.RecordBody.Path;
-#if NO
-                        // 根据原始路径准备即将写入的路径
-                        // return:
-                        //      -1  出错
-                        //      0   用户放弃
-                        //      1   成功
-                        nRet = ImportUtil.PrepareOverwritePath(
-                this.Servers,
-                this.Channels,
-                this,
-                ref map,
-                ref strLongPath,
-                out strError);
-                        if (nRet == 0 || nRet == -1)
-                            goto ERROR1;
-#endif
+
                         // 根据原始路径准备即将写入的路径
                         // return:
                         //      -1  出错
@@ -1455,7 +1447,7 @@ namespace DigitalPlatform.rms.Client
                         List<UploadRecord> save_records = new List<UploadRecord>();
                         save_records.AddRange(records);
 
-                        if (dlg.ImportDataRecord)
+                        if (importDataRecord)
                         {
                             while (records.Count > 0)
                             {
@@ -1468,7 +1460,7 @@ namespace DigitalPlatform.rms.Client
                                     stop,
                                     cur_channel,
                                     bFastMode,
-                                    dlg.InsertMissing,
+                                    insertMissing,
                                     records,
                                     ref bDontPromptTimestampMismatchWhenOverwrite,
                                     out strError);
@@ -1491,7 +1483,7 @@ namespace DigitalPlatform.rms.Client
                             records.Clear();
                         }
 
-                        if (dlg.ImportObject)
+                        if (importObject)
                         {
                             // 上载对象
                             // return:
@@ -1526,7 +1518,7 @@ namespace DigitalPlatform.rms.Client
                             record.Url,
                             cur_channel);
 
-                        if (dlg.ImportDataRecord)
+                        if (importDataRecord)
                         {
                             // 写入一条 XML 记录
                             // return:
@@ -1547,7 +1539,7 @@ namespace DigitalPlatform.rms.Client
                                 goto ERROR1;
                         }
 
-                        if (dlg.ImportObject)
+                        if (importObject)
                         {
                             List<UploadRecord> temp = new List<UploadRecord>();
                             temp.Add(record);
@@ -1588,7 +1580,7 @@ namespace DigitalPlatform.rms.Client
                     List<UploadRecord> save_records = new List<UploadRecord>();
                     save_records.AddRange(records);
 
-                    if (dlg.ImportDataRecord)
+                    if (importDataRecord)
                     {
                         while (records.Count > 0)
                         {
@@ -1601,7 +1593,7 @@ namespace DigitalPlatform.rms.Client
                                 stop,
                                 cur_channel,
                                 bFastMode,
-                                dlg.InsertMissing,
+                                insertMissing,
                                 records,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
                                 out strError);
@@ -1623,7 +1615,7 @@ namespace DigitalPlatform.rms.Client
                         records.Clear();
                     }
 
-                    if (dlg.ImportObject)
+                    if (importObject)
                     {
                         // 上载对象
                         // return:
@@ -1650,20 +1642,27 @@ namespace DigitalPlatform.rms.Client
                     nBatchSize = 0;
                 }
             }// close import util
+            catch(Exception ex)
+            {
+                strError = $"导入数据过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
+                goto ERROR1;
+            }
             finally
             {
                 if (bFastMode == true)
                 {
+                    EndFastAppend(stop, target_dburls);
+#if NO
                     foreach (string url in target_dburls)
                     {
-                        string strQuickModeError = "";
                         nRet = ManageKeysIndex(url,
                             "endfastappend",
                             "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
-                            out strQuickModeError);
+                            out string strQuickModeError);
                         if (nRet == -1)
-                            MessageBox.Show(this, strQuickModeError);
+                            MessageBoxShow(strQuickModeError);
                     }
+#endif
                 }
 
                 EndStop(stop);
@@ -1685,21 +1684,96 @@ namespace DigitalPlatform.rms.Client
 
             strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
             // TODO: 对话框可能超高
-            MessageBox.Show(this, "文件 " + dlg.FileName + " 内的数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
+            MessageBoxShow("文件 " + fileName + " 内的数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
             return 0;
-        ERROR0:
+            ERROR0:
             // TODO: 内容太高时候要改进对话框显示方式
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
             return -1;
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            MessageBoxShow(strError);
             // 使用了 lTotalCount 和 estimate 以后的报错
             if (lTotalCount > 0)
             {
                 strTimeMessage = "总共耗费时间: " + estimate.GetTotalTime().ToString();
-                MessageBox.Show(this, "文件 " + dlg.FileName + " 内的部分数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
+                MessageBoxShow("文件 " + fileName + " 内的部分数据已经成功导入下列数据库:\r\n\r\n" + StringUtil.MakePathList(target_dburls, "\r\n") + "\r\n\r\n共导入记录 " + lTotalCount.ToString() + " 条。\r\n\r\n" + strTimeMessage);
             }
             return -1;
+        }
+
+        // TODO: 根据 dp2kernel 版本，决定是否用 start_endfastappend 方法
+        void EndFastAppend(Stop stop,
+    List<string> target_dburls)
+        {
+            int nRet = 0;
+            foreach (string url in target_dburls)
+            {
+                if (stop?.State != 0)
+                    throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+
+                if (stop != null)
+                    stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
+
+                //LibraryChannelManager.Log?.Debug($"开始对数据库{url}进行快速导入模式的最后收尾工作");
+                try
+                {
+                    nRet = ManageKeysIndex(url,
+                        "start_endfastappend",
+                        "正在对数据库 " + url + " 启动快速导入模式的收尾工作，请耐心等待 ...",
+    out string strQuickModeError);
+                    //if (nRet == -1)
+                    //    MessageBoxShow(strQuickModeError);
+                    if (nRet == -1)
+                        throw new Exception(strQuickModeError);
+                    if (nRet == 1)
+                    {
+                        while (true)
+                        {
+                            if (stop?.State != 0)
+                                throw new Exception("快速导入收尾阶段被强行中断，恢复没有完成");
+
+                            //                  detect_endfastappend 探寻任务的状态。返回 0 表示任务尚未结束; 1 表示任务已经结束
+                            nRet = ManageKeysIndex(
+        url,
+        "detect_endfastappend",
+        "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+        out strQuickModeError);
+                            if (nRet == -1)
+                                throw new Exception(strQuickModeError);
+                            if (nRet == 1)
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //LibraryChannelManager.Log?.Debug($"对数据库{url}进行快速导入模式的最后收尾工作阶段出现异常: {ExceptionUtil.GetExceptionText(ex)}\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}");
+                    // throw new Exception($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}", ex);
+                    MessageBoxShow($"对数据库 {url} 进行收尾时候出现异常。\r\n(其后的 URL 没有被收尾)全部数据库 URL:{StringUtil.MakePathList(target_dburls, "; ")}。\r\n异常信息{ExceptionUtil.GetExceptionText(ex)}");
+                }
+                finally
+                {
+                    //LibraryChannelManager.Log?.Debug($"结束对数据库{url}进行快速导入模式的最后收尾工作");
+                }
+            }
+            if (stop != null)
+                stop.SetMessage("");
+        }
+
+        public void MessageBoxShow(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
         }
 
 #if NO
@@ -1776,7 +1850,7 @@ namespace DigitalPlatform.rms.Client
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1950,7 +2024,7 @@ out strError);
                                 strStyle = "id,xml,timestamp,metadata";
 
                             nRedoGetCount = 0;
-                        REDO_GET:
+                            REDO_GET:
                             Record[] searchresults = null;
                             lRet = cur_channel.DoGetSearchResult(
                                 "default",
@@ -2012,11 +2086,11 @@ out strError);
                                 nRedoOneCount = 0;
 
                                 // 2017/5/18
-                                if (record.RecordBody == null 
+                                if (record.RecordBody == null
                                     || string.IsNullOrEmpty(record.RecordBody.Xml))
                                     continue;
 
-                            REDO_ONE:
+                                REDO_ONE:
                                 nRet = export_util.ExportOneRecord(
                                     cur_channel,
                                     stop,
@@ -2100,7 +2174,7 @@ out strError);
             }
             MessageBox.Show(this, "数据库 '" + StringUtil.MakePathList(paths) + "' 内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条。" + strTimeMessage);
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             if (lExportCount > 0)
                 MessageBox.Show(this, "数据库内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条");
@@ -2136,64 +2210,64 @@ out strError);
 
 
         void menu_changePassword(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null)
-			{
-				MessageBox.Show(this, "尚未选择服务器 ...");
-				return;
-			}
-			ChangePasswordDlg dlg = new ChangePasswordDlg();
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择服务器 ...");
+                return;
+            }
+            ChangePasswordDlg dlg = new ChangePasswordDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
             ResPath respath = new ResPath(this.SelectedNode);
 
-			dlg.Channels = this.Channels;
-			dlg.Url = respath.Url;
-			if (Servers != null)
-			{
-				Server server = Servers[respath.Url];
-				if (server != null)
-					dlg.UserName = server.DefaultUserName;
-			}
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.ShowDialog(this);
-		}
-		
-		// 编辑配置文件
-		void menu_editCfgFile(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null)
-			{
-				MessageBox.Show(this, "尚未选择要编辑的配置文件节点");
-				return;
-			}
-			
-			if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
-			{
-				MessageBox.Show(this, "所选择的节点不是配置文件类型。请选择要编辑的配置文件节点。");
-				return;
-			}
+            dlg.Channels = this.Channels;
+            dlg.Url = respath.Url;
+            if (Servers != null)
+            {
+                Server server = Servers[respath.Url];
+                if (server != null)
+                    dlg.UserName = server.DefaultUserName;
+            }
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+        }
 
-			ResPath respath = new ResPath(this.SelectedNode);
+        // 编辑配置文件
+        void menu_editCfgFile(object sender, System.EventArgs e)
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择要编辑的配置文件节点");
+                return;
+            }
 
-			// 编辑配置文件
-			CfgFileEditDlg dlg = new CfgFileEditDlg();
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                MessageBox.Show(this, "所选择的节点不是配置文件类型。请选择要编辑的配置文件节点。");
+                return;
+            }
+
+            ResPath respath = new ResPath(this.SelectedNode);
+
+            // 编辑配置文件
+            CfgFileEditDlg dlg = new CfgFileEditDlg();
             dlg.Font = GuiUtil.GetDefaultFont();
 
-			dlg.Initial(this.Servers,
-				this.Channels,
-				this.stopManager,
-				respath.Url,
-				respath.Path);
+            dlg.Initial(this.Servers,
+                this.Channels,
+                this.stopManager,
+                respath.Url,
+                respath.Path);
 
-			if (this.AppInfo != null)
-				this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
-			dlg.ShowDialog(this);
+            if (this.AppInfo != null)
+                this.AppInfo.LinkFormState(dlg, "CfgFileEditDlg_state");
+            dlg.ShowDialog(this);
 #if NO
 			if (this.AppInfo != null)
 				this.AppInfo.UnlinkFormState(dlg);
 #endif
 
-			/*
+            /*
 			if (dlg.DialogResult != DialogResult.OK)
 				goto FINISH;
 			*/
@@ -2201,47 +2275,47 @@ out strError);
 
 
 
-		}
+        }
 
-		// 初始化数据库
-		void menu_initialDB(object sender, System.EventArgs e)
-		{
-			if (this.SelectedNode == null)
-			{
-				MessageBox.Show(this, "尚未选择要初始化的数据库节点");
-				return;
-			}
-			
-			if (this.SelectedNode.ImageIndex != RESTYPE_DB)
-			{
-				MessageBox.Show(this, "所选择的节点不是数据库类型。请选择要初始化的数据库节点。");
-				return;
-			}
+        // 初始化数据库
+        void menu_initialDB(object sender, System.EventArgs e)
+        {
+            if (this.SelectedNode == null)
+            {
+                MessageBox.Show(this, "尚未选择要初始化的数据库节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(this.SelectedNode);
+            if (this.SelectedNode.ImageIndex != RESTYPE_DB)
+            {
+                MessageBox.Show(this, "所选择的节点不是数据库类型。请选择要初始化的数据库节点。");
+                return;
+            }
 
-			string strText = "你确实要初始化位于服务器 '"+respath.Url+"' 上的数据库 '"+respath.Path + "' 吗?\r\n\r\n警告：数据库一旦被初始化，其中包含的原有数据将全部被摧毁，并且无法恢复！";
+            ResPath respath = new ResPath(this.SelectedNode);
 
-			DialogResult msgResult = MessageBox.Show(this,
-				strText,
-				"初始化数据库",
-				MessageBoxButtons.OKCancel,
-				MessageBoxIcon.Question,
-				MessageBoxDefaultButton.Button2);
-				
-			if (msgResult != DialogResult.OK) 
-			{
-				MessageBox.Show(this, "初始化数据库操作被放弃...");
-				return;
-			}
+            string strText = "你确实要初始化位于服务器 '" + respath.Url + "' 上的数据库 '" + respath.Path + "' 吗?\r\n\r\n警告：数据库一旦被初始化，其中包含的原有数据将全部被摧毁，并且无法恢复！";
 
+            DialogResult msgResult = MessageBox.Show(this,
+                strText,
+                "初始化数据库",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
 
-			this.channel = Channels.GetChannel(respath.Url);
-
-			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+            if (msgResult != DialogResult.OK)
+            {
+                MessageBox.Show(this, "初始化数据库操作被放弃...");
+                return;
+            }
 
 
-			string strError = "";
+            this.channel = Channels.GetChannel(respath.Url);
+
+            Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+
+
+            string strError = "";
 
 #if NO
 			DigitalPlatform.Stop stop = null;
@@ -2260,7 +2334,7 @@ out strError);
 #endif
             DigitalPlatform.Stop stop = PrepareStop("正在初始化数据库: " + respath.FullPath);
 
-			long lRet = channel.DoInitialDB(respath.Path, out strError);
+            long lRet = channel.DoInitialDB(respath.Path, out strError);
 
             EndStop(stop);
 #if NO
@@ -2274,17 +2348,17 @@ out strError);
 			}
 #endif
 
-			this.channel = null;
+            this.channel = null;
 
-			if (lRet == -1) 
-			{
-				MessageBox.Show(this, strError);
-			}
-			else 
-			{
-				MessageBox.Show(this, "位于服务器'"+respath.Url+"'上的数据库 '"+respath.Path+"' 被成功初始化。");
-			}
-		}
+            if (lRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+            else
+            {
+                MessageBox.Show(this, "位于服务器'" + respath.Url + "'上的数据库 '" + respath.Path + "' 被成功初始化。");
+            }
+        }
 
         // 刷新数据库定义(不清除原有keys)
         void menu_refreshDB(object sender, System.EventArgs e)
@@ -2411,96 +2485,96 @@ out strError);
             this.ClearChildrenCheck(null);
         }
 
-		void menu_toggleCheckBoxes(object sender, System.EventArgs e)
-		{
-			if (this.CheckBoxes == true)
-				this.CheckBoxes = false;
-			else
-				this.CheckBoxes = true;
-		}
+        void menu_toggleCheckBoxes(object sender, System.EventArgs e)
+        {
+            if (this.CheckBoxes == true)
+                this.CheckBoxes = false;
+            else
+                this.CheckBoxes = true;
+        }
 
-		delegate int Delegate_Fill(TreeNode node);
+        delegate int Delegate_Fill(TreeNode node);
 
-		private void ResTree_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			
-			TreeNode node = e.Node;
+        private void ResTree_AfterExpand(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
 
-			if (node == null)
-				return;
+            TreeNode node = e.Node;
 
-			// 需要展开
-			if (IsLoading(node) == true) 
-			{
-				//Fill(node);
+            if (node == null)
+                return;
 
-				object[] pList = new object []  { node };
+            // 需要展开
+            if (IsLoading(node) == true)
+            {
+                //Fill(node);
 
-				this.BeginInvoke(new Delegate_Fill(this.Fill), pList);
+                object[] pList = new object[] { node };
 
-			}
-			
-		}
+                this.BeginInvoke(new Delegate_Fill(this.Fill), pList);
 
+            }
 
+        }
 
 
-		// 根据路径,设置一个node的checked状态
-		public bool CheckNode(ResPath respath,
-			bool bChecked)
-		{
-			TreeNode node = this.GetTreeNode(respath);
-			if (node == null)
-				return false;
-
-			node.Checked = bChecked;
-			return true;
-		}
-
-		// 根据路径得到node节点对象
-		public TreeNode GetTreeNode(ResPath respath)
-		{
-
-			string[] aName = respath.Path.Split(new Char [] {'/'});
-
-			TreeNode node = null;
-			TreeNode nodeThis = null;
 
 
-			string[] temp = new string[aName.Length + 1];
-			Array.Copy(aName,0, temp, 1, aName.Length);
-			temp[0] = respath.Url;
+        // 根据路径,设置一个node的checked状态
+        public bool CheckNode(ResPath respath,
+            bool bChecked)
+        {
+            TreeNode node = this.GetTreeNode(respath);
+            if (node == null)
+                return false;
 
-			aName = temp;
+            node.Checked = bChecked;
+            return true;
+        }
 
-			for(int i=0;i<aName.Length;i++)
-			{
-				TreeNodeCollection nodes = null;
+        // 根据路径得到node节点对象
+        public TreeNode GetTreeNode(ResPath respath)
+        {
 
-				if (node == null)
-					nodes = this.Nodes;
-				else 
-					nodes = node.Nodes;
+            string[] aName = respath.Path.Split(new Char[] { '/' });
 
-				bool bFound = false;
-				for(int j=0;j<nodes.Count;j++)
-				{
-					if (aName[i] == nodes[j].Text) 
-					{
-						bFound = true;
-						nodeThis = nodes[j];
-						break;
-					}
-				}
-				if (bFound == false)
-					return null;
+            TreeNode node = null;
+            TreeNode nodeThis = null;
 
-				node = nodeThis;
 
-			}
+            string[] temp = new string[aName.Length + 1];
+            Array.Copy(aName, 0, temp, 1, aName.Length);
+            temp[0] = respath.Url;
 
-			return nodeThis;
-		}
+            aName = temp;
+
+            for (int i = 0; i < aName.Length; i++)
+            {
+                TreeNodeCollection nodes = null;
+
+                if (node == null)
+                    nodes = this.Nodes;
+                else
+                    nodes = node.Nodes;
+
+                bool bFound = false;
+                for (int j = 0; j < nodes.Count; j++)
+                {
+                    if (aName[i] == nodes[j].Text)
+                    {
+                        bFound = true;
+                        nodeThis = nodes[j];
+                        break;
+                    }
+                }
+                if (bFound == false)
+                    return null;
+
+                node = nodeThis;
+
+            }
+
+            return nodeThis;
+        }
 
         // 正规化绝对URI (指不包括query部分的左边部分)
         static string CanonicalizeAbsoluteUri(string s)
@@ -2539,34 +2613,34 @@ out strError);
             }
         }
 
-		// 根据路径逐步展开
+        // 根据路径逐步展开
         // return:
         //      true    最末一级找到
         //      false   没有找到(至少有一级没有找到)
-		public bool ExpandPath(ResPath respath)
-		{
-			string[] aName = respath.Path.Split(new Char [] {'/'});
+        public bool ExpandPath(ResPath respath)
+        {
+            string[] aName = respath.Path.Split(new Char[] { '/' });
 
-			TreeNode node = null;
-			TreeNode nodeThis = null;
+            TreeNode node = null;
+            TreeNode nodeThis = null;
 
-			string[] temp = new string[aName.Length + 1];
-			Array.Copy(aName,0, temp, 1, aName.Length);
-			temp[0] = respath.Url;
+            string[] temp = new string[aName.Length + 1];
+            Array.Copy(aName, 0, temp, 1, aName.Length);
+            temp[0] = respath.Url;
 
-			aName = temp;
+            aName = temp;
 
             bool bBreak = false;    // 是否因某级没有找到在中间中断了?
-			for(int i=0;i<aName.Length;i++)
-			{
-				TreeNodeCollection nodes = null;
+            for (int i = 0; i < aName.Length; i++)
+            {
+                TreeNodeCollection nodes = null;
 
-				if (node == null)
-					nodes = this.Nodes;
-				else 
-					nodes = node.Nodes;
+                if (node == null)
+                    nodes = this.Nodes;
+                else
+                    nodes = node.Nodes;
 
-				bool bFound = false;
+                bool bFound = false;
                 for (int j = 0; j < nodes.Count; j++)
                 {
                     if (aName[i] == nodes[j].Text
@@ -2583,27 +2657,27 @@ out strError);
                     break;
                 }
 
-				node = nodeThis;
+                node = nodeThis;
 
-				// 需要展开
-				if (IsLoading(node) == true) 
-				{
-					Fill(node);
-				}
+                // 需要展开
+                if (IsLoading(node) == true)
+                {
+                    Fill(node);
+                }
                 node.Expand();  // 2006/1/20     即便最终层次没有找到，也要展开中间层次
-			}
+            }
 
-			if (nodeThis!= null && nodeThis.Parent != null)
-				nodeThis.Parent.Expand();
+            if (nodeThis != null && nodeThis.Parent != null)
+                nodeThis.Parent.Expand();
 
-			this.SelectedNode = nodeThis;
+            this.SelectedNode = nodeThis;
 
             // 2009/3/3
             if (bBreak == true)
                 return false;
 
             return true;
-		}
+        }
 
 
         // 根据路径逐步check下去。check不是检查的意思，而是勾选的意思
@@ -2672,99 +2746,99 @@ out strError);
             return true;
         }
 
-		// 第一阶段。负责产生TargetItem的Url和Target内容
-		// 根据树上的选择状态生成检索目标字符串
-		// 不同的服务器中的字符串分开放
-		public TargetItemCollection GetSearchTarget()
-		{
-			string strDb = "";
+        // 第一阶段。负责产生TargetItem的Url和Target内容
+        // 根据树上的选择状态生成检索目标字符串
+        // 不同的服务器中的字符串分开放
+        public TargetItemCollection GetSearchTarget()
+        {
+            string strDb = "";
 
-			TargetItemCollection aText = new TargetItemCollection();
+            TargetItemCollection aText = new TargetItemCollection();
 
-			if (this.CheckBoxes == false) 
-			{
-				ArrayList aNode = new ArrayList();
-				TreeNode node = this.SelectedNode;
-				if (node == null)
-					return aText;
+            if (this.CheckBoxes == false)
+            {
+                ArrayList aNode = new ArrayList();
+                TreeNode node = this.SelectedNode;
+                if (node == null)
+                    return aText;
 
-				for(;node!=null;) 
-				{
-					aNode.Insert(0, node);
-					node = node.Parent;
-				}
+                for (; node != null;)
+                {
+                    aNode.Insert(0, node);
+                    node = node.Parent;
+                }
 
-				if (aNode.Count == 0)
-					goto END1;
+                if (aNode.Count == 0)
+                    goto END1;
 
 
-				TargetItem item = new TargetItem();
-				item.Lang = this.Lang;
+                TargetItem item = new TargetItem();
+                item.Lang = this.Lang;
 
-				aText.Add(item);
+                aText.Add(item);
 
-				item.Url = ((TreeNode)aNode[0]).Text;
+                item.Url = ((TreeNode)aNode[0]).Text;
 
-				if (aNode.Count == 1)
-					goto END1;
+                if (aNode.Count == 1)
+                    goto END1;
 
-				item.Target = ((TreeNode)aNode[1]).Text;
-				
-				if (aNode.Count == 2)
-					goto END1;
+                item.Target = ((TreeNode)aNode[1]).Text;
 
-				item.Target += ":" + ((TreeNode)aNode[2]).Text;
+                if (aNode.Count == 2)
+                    goto END1;
 
-				END1:
-				return aText;
-			}
+                item.Target += ":" + ((TreeNode)aNode[2]).Text;
 
-			// 找选中的服务器
-			foreach(TreeNode nodeServer in this.Nodes )
-			{
-				if (nodeServer.Checked == false)
-					continue;
+                END1:
+                return aText;
+            }
 
-				// 找选中的数据库
-				foreach(TreeNode nodeDb in nodeServer.Nodes )
-				{
-					if (nodeDb.Checked == false)
-						continue;
+            // 找选中的服务器
+            foreach (TreeNode nodeServer in this.Nodes)
+            {
+                if (nodeServer.Checked == false)
+                    continue;
+
+                // 找选中的数据库
+                foreach (TreeNode nodeDb in nodeServer.Nodes)
+                {
+                    if (nodeDb.Checked == false)
+                        continue;
 
                     if (nodeDb.ImageIndex != RESTYPE_DB)
                         continue;   // 2006/6/16 因为可能有配置文件目录或者文件对象需要跳过
 
-					if (strDb != "")
-						strDb += ";";
-					strDb += nodeDb.Text + ":";
+                    if (strDb != "")
+                        strDb += ";";
+                    strDb += nodeDb.Text + ":";
 
-					//用一个strFrom新变量，可以很好地处理逗号
-					string strFrom = "";
-					//找选中的from
-					foreach(TreeNode nodeFrom in nodeDb.Nodes )
-					{
-						if (nodeFrom.Checked == true)
-						{
-							if (strFrom != "")
-								strFrom += ",";
-							strFrom += nodeFrom.Text ;
-						}
-					}
-					strDb += strFrom;
-				}
+                    //用一个strFrom新变量，可以很好地处理逗号
+                    string strFrom = "";
+                    //找选中的from
+                    foreach (TreeNode nodeFrom in nodeDb.Nodes)
+                    {
+                        if (nodeFrom.Checked == true)
+                        {
+                            if (strFrom != "")
+                                strFrom += ",";
+                            strFrom += nodeFrom.Text;
+                        }
+                    }
+                    strDb += strFrom;
+                }
 
-				TargetItem item = new TargetItem();
-				item.Url = nodeServer.Text;
-				item.Target = strDb;
-				item.Lang = this.Lang;
+                TargetItem item = new TargetItem();
+                item.Url = nodeServer.Text;
+                item.Target = strDb;
+                item.Lang = this.Lang;
 
-				aText.Add(item);
+                aText.Add(item);
 
-				strDb = "";
-			}
+                strDb = "";
+            }
 
-			return aText;
-		}
+            return aText;
+        }
 
         // 获得当前选中的一个或若干个数据库对象的全路径
         public List<string> GetCheckedDatabaseList()
@@ -2880,10 +2954,10 @@ out strError);
         }
 
         private void ResTree_AfterCheck(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			TreeNode node = e.Node;
-			if (node == null)
-				return;
+        {
+            TreeNode node = e.Node;
+            if (node == null)
+                return;
 
             // 2008/11/17
             if (node.Checked == true)
@@ -2897,31 +2971,31 @@ out strError);
                 node.BackColor = SystemColors.Window;
             }
 
-			if (node.Checked == false) 
-			{
-				ClearOneLevelChildrenCheck(node);
-			}
-			else 
-			{
-				if (node.Parent != null)
-					node.Parent.Checked = true;
-			}
+            if (node.Checked == false)
+            {
+                ClearOneLevelChildrenCheck(node);
+            }
+            else
+            {
+                if (node.Parent != null)
+                    node.Parent.Checked = true;
+            }
 
-			// 注：事件自己会递归
-		
-		}
+            // 注：事件自己会递归
 
-		// 清除下级所有的选中的项(不包括自己)
-		public void ClearOneLevelChildrenCheck(TreeNode nodeStart)
-		{
-			if (nodeStart == null)
-				return;
-			foreach(TreeNode node in nodeStart.Nodes )
-			{
-				node.Checked = false;
-				// ClearChildrenCheck(node);	// 暂时不递归
-			}
-		}
+        }
+
+        // 清除下级所有的选中的项(不包括自己)
+        public void ClearOneLevelChildrenCheck(TreeNode nodeStart)
+        {
+            if (nodeStart == null)
+                return;
+            foreach (TreeNode node in nodeStart.Nodes)
+            {
+                node.Checked = false;
+                // ClearChildrenCheck(node);	// 暂时不递归
+            }
+        }
 
         // 2008/11/17
         // 清除下级所有的选中的项(不包括自己)
@@ -2944,17 +3018,17 @@ out strError);
             }
         }
 
-		private void ResTree_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			
-			TreeNode curSelectedNode = this.GetNodeAt(e.X, e.Y);
+        private void ResTree_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
 
-			if (this.SelectedNode != curSelectedNode)
-				this.SelectedNode = curSelectedNode;
-			
-		}
+            TreeNode curSelectedNode = this.GetNodeAt(e.X, e.Y);
 
-		/*
+            if (this.SelectedNode != curSelectedNode)
+                this.SelectedNode = curSelectedNode;
+
+        }
+
+        /*
 		// 循环，依次把父亲节点选中(不包括自己)
 		public void CheckParent(TreeNode node)
 		{
@@ -3033,7 +3107,7 @@ out strError);
 
             return null;
         }
-	}
+    }
 
     public class ItemProperty
     {
@@ -3046,79 +3120,79 @@ out strError);
         public List<string> ColumnNames = new List<string>();
     }
 
-	// 检索目标事项
-	public class TargetItem
-	{
-		public string Lang = "";
-		public string Url = "";
-		public string Target = "";	// 检索目标字符串，例如"库1:from1,from2;库2:from1,from2"
+    // 检索目标事项
+    public class TargetItem
+    {
+        public string Lang = "";
+        public string Url = "";
+        public string Target = "";  // 检索目标字符串，例如"库1:from1,from2;库2:from1,from2"
 
-		public string Words = "";	// 原始态的检索词,尚未切割
-		public string[] aWord = null;	// MakeWordPhrases()加工后的字符串
-		public string Xml = "";
-		public int MaxCount = -1;	// 检索的最大条数
-	}
+        public string Words = "";   // 原始态的检索词,尚未切割
+        public string[] aWord = null;   // MakeWordPhrases()加工后的字符串
+        public string Xml = "";
+        public int MaxCount = -1;   // 检索的最大条数
+    }
 
-	// 检索目标容器
-	public class TargetItemCollection : ArrayList
-	{
+    // 检索目标容器
+    public class TargetItemCollection : ArrayList
+    {
 
-		// 第二阶段: 根据每个TargetItem中Words中原始形态的检索词，切割为string[] aWord
-		// 调用本函数前，应当为每个TargetItem对象设置好Words成员值
-		// 第二阶段和第一阶段先后顺序不重要。
-		public int MakeWordPhrases(
+        // 第二阶段: 根据每个TargetItem中Words中原始形态的检索词，切割为string[] aWord
+        // 调用本函数前，应当为每个TargetItem对象设置好Words成员值
+        // 第二阶段和第一阶段先后顺序不重要。
+        public int MakeWordPhrases(
             bool bSplitWords,
             bool bAutoDetectRange,
-			bool bAutoDetectRelation)
-		{
-			for(int i=0;i<this.Count;i++)
-			{
-				TargetItem item = (TargetItem)this[i];
-				item.aWord = MakeWordPhrases(item.Words,
+            bool bAutoDetectRelation)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                TargetItem item = (TargetItem)this[i];
+                item.aWord = MakeWordPhrases(item.Words,
                     bSplitWords,
-					bAutoDetectRange,
+                    bAutoDetectRange,
                     bAutoDetectRelation);
-			}
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
 
-		// 第三阶段：根据每个TargetItem中的Target和aWord，构造出Xml内容
-		public int MakeXml()
-		{
-			string strText = "";
-			for(int i=0;i<this.Count;i++)
-			{
-				TargetItem item = (TargetItem)this[i];
+        // 第三阶段：根据每个TargetItem中的Target和aWord，构造出Xml内容
+        public int MakeXml()
+        {
+            string strText = "";
+            for (int i = 0; i < this.Count; i++)
+            {
+                TargetItem item = (TargetItem)this[i];
 
-				strText = "";
+                strText = "";
 
-				string strCount = "";
+                string strCount = "";
 
-				if (item.MaxCount != -1)
-					strCount = "<maxCount>" + Convert.ToString(item.MaxCount) + "</maxCount>";
+                if (item.MaxCount != -1)
+                    strCount = "<maxCount>" + Convert.ToString(item.MaxCount) + "</maxCount>";
 
-				for(int j=0;j<item.aWord.Length;j++) 
-				{
-					if (j != 0) 
-					{
-						strText += "<operator value='OR' />";
-					}
+                for (int j = 0; j < item.aWord.Length; j++)
+                {
+                    if (j != 0)
+                    {
+                        strText += "<operator value='OR' />";
+                    }
 
                     strText += "<item>" + item.aWord[j] + strCount + "</item>";
-				}
+                }
 
-				strText = "<target list='"
+                strText = "<target list='"
                     + StringUtil.GetXmlStringSimple(item.Target)       // 2007/9/14
-                    + "'>" + strText 
-					+ "<lang>"+ item.Lang +"</lang></target>";
+                    + "'>" + strText
+                    + "<lang>" + item.Lang + "</lang></target>";
 
-				item.Xml = strText;
-			}
+                item.Xml = strText;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
         // 匹配左右括号
         static bool MatchTailQuote(char left, char right)
@@ -3162,7 +3236,7 @@ out strError);
                     }
                 }
 
-                if ( ( strWords[i] == ' ' || strWords[i] == '　')
+                if ((strWords[i] == ' ' || strWords[i] == '　')
                     && bInQuote == false
                     && String.IsNullOrEmpty(strWord) == false)
                 {
@@ -3191,35 +3265,35 @@ out strError);
         // 最终构成完整的<item>字符串
         public static string[] MakeWordPhrases(string strWords,
             bool bSplitWords,
-			bool bAutoDetectRange,
-			bool bAutoDetectRelation)
-		{
+            bool bAutoDetectRange,
+            bool bAutoDetectRelation)
+        {
             /*
 			string[] aWord;
 			aWord = strWords.Split(new Char [] {' '});
              */
             List<string> aWord = null;
-            
+
             if (bSplitWords == true)
                 aWord = SplitWords(strWords);
-	
-			if (aWord == null || aWord.Count == 0) 
-			{
-				aWord = new List<string>();
-				aWord.Add(strWords);
-			}
-	
-			string strXml = "";
-			string strWord = "";
-			string strMatch = "";
-			string strRelation = "";
-			string strDataType = "";	
 
-			ArrayList aResult = new ArrayList();
+            if (aWord == null || aWord.Count == 0)
+            {
+                aWord = new List<string>();
+                aWord.Add(strWords);
+            }
 
-			foreach(string strOneWord in aWord)
-			{
-				/*
+            string strXml = "";
+            string strWord = "";
+            string strMatch = "";
+            string strRelation = "";
+            string strDataType = "";
+
+            ArrayList aResult = new ArrayList();
+
+            foreach (string strOneWord in aWord)
+            {
+                /*
 				strRelation = "";
 				strDataType = "";	
 				strWord = "";
@@ -3227,73 +3301,73 @@ out strError);
 				*/
 
 
-				if (bAutoDetectRange == true) 
-				{
-					string strID1;
-					string strID2;
+                if (bAutoDetectRange == true)
+                {
+                    string strID1;
+                    string strID2;
 
-					QueryClient.SplitRangeID(strOneWord,out strID1, out strID2);
-					if (StringUtil.IsNum(strID1)==true 
-						&& StringUtil.IsNum(strID2) && strOneWord!="")
-					{
-						strWord = strOneWord;
-						strMatch = "exact";
-						strRelation = "range";  // 2012/3/29
-						strDataType = "number";
-						goto CONTINUE;
-					}
-				}
-
-
-				if (bAutoDetectRelation == true)
-				{
-					string strOperatorTemp;
-					string strRealText;
-				
-					int ret;
-					ret = QueryClient.GetPartCondition(strOneWord,
-						out strOperatorTemp,
-						out strRealText);
-				
-					if (ret == 0 && strOneWord!="")
-					{
-						strWord = strRealText;
-						strMatch = "exact";
-						strRelation = strOperatorTemp;
-						if(StringUtil.IsNum(strRealText) == true)
-							strDataType = "number";					
-						else
-							strDataType = "string";
-						goto CONTINUE;
-					}
-				}
-
-					strWord = strOneWord;
-					strMatch = "left";
-					strRelation = "=";
-					strDataType = "string";					
+                    QueryClient.SplitRangeID(strOneWord, out strID1, out strID2);
+                    if (StringUtil.IsNum(strID1) == true
+                        && StringUtil.IsNum(strID2) && strOneWord != "")
+                    {
+                        strWord = strOneWord;
+                        strMatch = "exact";
+                        strRelation = "range";  // 2012/3/29
+                        strDataType = "number";
+                        goto CONTINUE;
+                    }
+                }
 
 
-			
-			CONTINUE:
+                if (bAutoDetectRelation == true)
+                {
+                    string strOperatorTemp;
+                    string strRealText;
+
+                    int ret;
+                    ret = QueryClient.GetPartCondition(strOneWord,
+                        out strOperatorTemp,
+                        out strRealText);
+
+                    if (ret == 0 && strOneWord != "")
+                    {
+                        strWord = strRealText;
+                        strMatch = "exact";
+                        strRelation = strOperatorTemp;
+                        if (StringUtil.IsNum(strRealText) == true)
+                            strDataType = "number";
+                        else
+                            strDataType = "string";
+                        goto CONTINUE;
+                    }
+                }
+
+                strWord = strOneWord;
+                strMatch = "left";
+                strRelation = "=";
+                strDataType = "string";
+
+
+
+                CONTINUE:
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
-				strXml += "<word>"
+                strXml += "<word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word>"
-					+ "<match>"+ strMatch +	"</match>"
-					+ "<relation>" + strRelation + "</relation>"
-					+ "<dataType>" + strDataType + "</dataType>";
+                    + "<match>" + strMatch + "</match>"
+                    + "<relation>" + strRelation + "</relation>"
+                    + "<dataType>" + strDataType + "</dataType>";
 
-				aResult.Add(strXml);
+                aResult.Add(strXml);
 
-				strXml = "";
-			}
+                strXml = "";
+            }
 
-			return ConvertUtil.GetStringArray(0, aResult);
-		}
+            return ConvertUtil.GetStringArray(0, aResult);
+        }
 
 
-	}
+    }
 
 }

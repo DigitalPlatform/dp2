@@ -773,7 +773,6 @@ namespace DigitalPlatform.LibraryServer
 
             if (string.IsNullOrEmpty(strReaderBarcode) == false)
             {
-                string strOutputCode = "";
                 // 把二维码字符串转换为读者证条码号
                 // parameters:
                 //      strReaderBcode  [out]读者证条码号
@@ -782,7 +781,7 @@ namespace DigitalPlatform.LibraryServer
                 //      0       所给出的字符串不是读者证号二维码
                 //      1       成功      
                 nRet = DecodeQrCode(strReaderBarcode,
-                    out strOutputCode,
+                    out string strOutputCode,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1194,14 +1193,13 @@ namespace DigitalPlatform.LibraryServer
                     // 检查评估模式下书目记录路径
                     if (this.TestMode == true || sessioninfo.TestMode == true)
                     {
-                        string strBiblioDbName = "";
                         // 根据实体库名, 找到对应的书目库名
                         // return:
                         //      -1  出错
                         //      0   没有找到
                         //      1   找到
                         nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
-                            out strBiblioDbName,
+                            out string strBiblioDbName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -1371,14 +1369,13 @@ namespace DigitalPlatform.LibraryServer
                     string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                         "readerType");
 
-                    Calendar calendar = null;
                     // return:
                     //      -1  出错
                     //      0   没有找到日历
                     //      1   找到日历
                     nRet = GetReaderCalendar(strReaderType,
                         strLibraryCode,
-                        out calendar,
+                        out Calendar calendar,
                         out strError);
                     if (nRet == -1 || nRet == 0)
                         goto ERROR1;
@@ -4212,8 +4209,6 @@ account == null ? null : new AccountRecord(account));
                 int nThisTypeCount = nodes.Count;
 
                 // 得到该类图书的册数限制配置
-                MatchResult matchresult;
-                string strParamValue = "";
                 // return:
                 //      reader和book类型均匹配 算4分
                 //      只有reader类型匹配，算3分
@@ -4225,8 +4220,8 @@ account == null ? null : new AccountRecord(account));
                     strReaderType,
                     strBookType,
                     "可借册数",
-                    out strParamValue,
-                    out matchresult,
+                    out string strParamValue,
+                    out MatchResult matchresult,
                     out strError);
                 if (nRet == -1 || nRet < 4)
                 {
@@ -4413,10 +4408,8 @@ account == null ? null : new AccountRecord(account));
             if (prices.Count == 0)
                 return 0;   // 都没有价格字符串，也就无法进行计算了
 
-            List<string> results = null;
-
             nRet = PriceUtil.TotalPrice(prices,
-                out results,
+                out List<string> results,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -4426,7 +4419,6 @@ account == null ? null : new AccountRecord(account));
                 strError = "TotalPrice()出错。册价格汇总后居然为空。";
                 return -1;
             }
-
 
             if (results.Count > 1)
             {

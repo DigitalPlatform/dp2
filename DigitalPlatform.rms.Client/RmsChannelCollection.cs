@@ -170,6 +170,4 @@ namespace DigitalPlatform.rms.Client
         //		0	dialog return Cancel
         //		-1	other error
     }
-
-
 }

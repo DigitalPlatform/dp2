@@ -15,6 +15,7 @@ using System.Xml;
 
 using System.Reflection;
 using System.Deployment.Application;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -340,7 +341,7 @@ namespace dp2Batch
             this.tabControl_main.Location = new System.Drawing.Point(0, 32);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(634, 273);
+            this.tabControl_main.Size = new System.Drawing.Size(713, 329);
             this.tabControl_main.TabIndex = 1;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -348,10 +349,10 @@ namespace dp2Batch
             // 
             this.tabPage_range.BackColor = System.Drawing.Color.Transparent;
             this.tabPage_range.Controls.Add(this.panel_range);
-            this.tabPage_range.Location = new System.Drawing.Point(8, 43);
+            this.tabPage_range.Location = new System.Drawing.Point(4, 31);
             this.tabPage_range.Name = "tabPage_range";
             this.tabPage_range.Padding = new System.Windows.Forms.Padding(6);
-            this.tabPage_range.Size = new System.Drawing.Size(618, 222);
+            this.tabPage_range.Size = new System.Drawing.Size(705, 294);
             this.tabPage_range.TabIndex = 0;
             this.tabPage_range.Text = "按记录ID导出";
             this.tabPage_range.UseVisualStyleBackColor = true;
@@ -364,7 +365,7 @@ namespace dp2Batch
             this.panel_range.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_range.Location = new System.Drawing.Point(6, 6);
             this.panel_range.Name = "panel_range";
-            this.panel_range.Size = new System.Drawing.Size(606, 210);
+            this.panel_range.Size = new System.Drawing.Size(693, 282);
             this.panel_range.TabIndex = 8;
             // 
             // panel_resdirtree
@@ -374,7 +375,7 @@ namespace dp2Batch
             this.panel_resdirtree.Location = new System.Drawing.Point(317, 0);
             this.panel_resdirtree.Name = "panel_resdirtree";
             this.panel_resdirtree.Padding = new System.Windows.Forms.Padding(0, 4, 4, 4);
-            this.panel_resdirtree.Size = new System.Drawing.Size(289, 210);
+            this.panel_resdirtree.Size = new System.Drawing.Size(376, 282);
             this.panel_resdirtree.TabIndex = 6;
             // 
             // treeView_rangeRes
@@ -386,7 +387,7 @@ namespace dp2Batch
             this.treeView_rangeRes.Location = new System.Drawing.Point(0, 4);
             this.treeView_rangeRes.Name = "treeView_rangeRes";
             this.treeView_rangeRes.SelectedImageIndex = 0;
-            this.treeView_rangeRes.Size = new System.Drawing.Size(285, 202);
+            this.treeView_rangeRes.Size = new System.Drawing.Size(372, 274);
             this.treeView_rangeRes.TabIndex = 0;
             this.treeView_rangeRes.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterCheck);
             this.treeView_rangeRes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterSelect);
@@ -395,7 +396,7 @@ namespace dp2Batch
             // 
             this.splitter_range.Location = new System.Drawing.Point(309, 0);
             this.splitter_range.Name = "splitter_range";
-            this.splitter_range.Size = new System.Drawing.Size(8, 210);
+            this.splitter_range.Size = new System.Drawing.Size(8, 282);
             this.splitter_range.TabIndex = 8;
             this.splitter_range.TabStop = false;
             // 
@@ -412,7 +413,7 @@ namespace dp2Batch
             this.panel_rangeParams.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel_rangeParams.Location = new System.Drawing.Point(0, 0);
             this.panel_rangeParams.Name = "panel_rangeParams";
-            this.panel_rangeParams.Size = new System.Drawing.Size(309, 210);
+            this.panel_rangeParams.Size = new System.Drawing.Size(309, 282);
             this.panel_rangeParams.TabIndex = 7;
             // 
             // checkBox_export_fastMode
@@ -420,7 +421,7 @@ namespace dp2Batch
             this.checkBox_export_fastMode.AutoSize = true;
             this.checkBox_export_fastMode.Location = new System.Drawing.Point(144, 198);
             this.checkBox_export_fastMode.Name = "checkBox_export_fastMode";
-            this.checkBox_export_fastMode.Size = new System.Drawing.Size(172, 33);
+            this.checkBox_export_fastMode.Size = new System.Drawing.Size(131, 26);
             this.checkBox_export_fastMode.TabIndex = 7;
             this.checkBox_export_fastMode.Text = "快速模式(&F)";
             this.checkBox_export_fastMode.UseVisualStyleBackColor = true;
@@ -444,12 +445,12 @@ namespace dp2Batch
             // 
             // textBox_dbPath
             // 
-            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dbPath.Location = new System.Drawing.Point(75, 6);
             this.textBox_dbPath.Name = "textBox_dbPath";
             this.textBox_dbPath.ReadOnly = true;
-            this.textBox_dbPath.Size = new System.Drawing.Size(193, 36);
+            this.textBox_dbPath.Size = new System.Drawing.Size(193, 29);
             this.textBox_dbPath.TabIndex = 2;
             this.textBox_dbPath.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -463,7 +464,7 @@ namespace dp2Batch
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.textBox_endNo);
             this.groupBox1.Controls.Add(this.label3);
@@ -480,11 +481,11 @@ namespace dp2Batch
             // 
             // textBox_endNo
             // 
-            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_endNo.Location = new System.Drawing.Point(165, 95);
             this.textBox_endNo.Name = "textBox_endNo";
-            this.textBox_endNo.Size = new System.Drawing.Size(81, 36);
+            this.textBox_endNo.Size = new System.Drawing.Size(81, 29);
             this.textBox_endNo.TabIndex = 5;
             this.textBox_endNo.TextChanged += new System.EventHandler(this.textBox_endNo_TextChanged);
             // 
@@ -498,11 +499,11 @@ namespace dp2Batch
             // 
             // textBox_startNo
             // 
-            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startNo.Location = new System.Drawing.Point(165, 63);
             this.textBox_startNo.Name = "textBox_startNo";
-            this.textBox_startNo.Size = new System.Drawing.Size(81, 36);
+            this.textBox_startNo.Size = new System.Drawing.Size(81, 29);
             this.textBox_startNo.TabIndex = 3;
             this.textBox_startNo.TextChanged += new System.EventHandler(this.textBox_startNo_TextChanged);
             // 
@@ -516,7 +517,7 @@ namespace dp2Batch
             // 
             // radioButton_startEnd
             // 
-            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_startEnd.Checked = true;
             this.radioButton_startEnd.Location = new System.Drawing.Point(21, 38);
@@ -528,7 +529,7 @@ namespace dp2Batch
             // 
             // radioButton_all
             // 
-            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_all.Location = new System.Drawing.Point(21, 19);
             this.radioButton_all.Name = "radioButton_all";
@@ -548,9 +549,9 @@ namespace dp2Batch
             // tabPage_resultset
             // 
             this.tabPage_resultset.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage_resultset.Location = new System.Drawing.Point(8, 43);
+            this.tabPage_resultset.Location = new System.Drawing.Point(4, 31);
             this.tabPage_resultset.Name = "tabPage_resultset";
-            this.tabPage_resultset.Size = new System.Drawing.Size(618, 222);
+            this.tabPage_resultset.Size = new System.Drawing.Size(626, 238);
             this.tabPage_resultset.TabIndex = 1;
             this.tabPage_resultset.Text = "按结果集导出";
             this.tabPage_resultset.UseVisualStyleBackColor = true;
@@ -569,9 +570,9 @@ namespace dp2Batch
             this.tabPage_import.Controls.Add(this.button_import_dbMap);
             this.tabPage_import.Controls.Add(this.textBox_import_dbMap);
             this.tabPage_import.Controls.Add(this.label4);
-            this.tabPage_import.Location = new System.Drawing.Point(8, 43);
+            this.tabPage_import.Location = new System.Drawing.Point(4, 31);
             this.tabPage_import.Name = "tabPage_import";
-            this.tabPage_import.Size = new System.Drawing.Size(618, 222);
+            this.tabPage_import.Size = new System.Drawing.Size(626, 238);
             this.tabPage_import.TabIndex = 2;
             this.tabPage_import.Text = "导入";
             this.tabPage_import.UseVisualStyleBackColor = true;
@@ -581,18 +582,18 @@ namespace dp2Batch
             this.checkBox_import_fastMode.AutoSize = true;
             this.checkBox_import_fastMode.Location = new System.Drawing.Point(119, 61);
             this.checkBox_import_fastMode.Name = "checkBox_import_fastMode";
-            this.checkBox_import_fastMode.Size = new System.Drawing.Size(172, 33);
+            this.checkBox_import_fastMode.Size = new System.Drawing.Size(131, 26);
             this.checkBox_import_fastMode.TabIndex = 8;
             this.checkBox_import_fastMode.Text = "快速模式(&F)";
             this.checkBox_import_fastMode.UseVisualStyleBackColor = true;
             // 
             // textBox_import_range
             // 
-            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_range.Location = new System.Drawing.Point(119, 33);
             this.textBox_import_range.Name = "textBox_import_range";
-            this.textBox_import_range.Size = new System.Drawing.Size(379, 36);
+            this.textBox_import_range.Size = new System.Drawing.Size(379, 29);
             this.textBox_import_range.TabIndex = 7;
             // 
             // label6
@@ -600,7 +601,7 @@ namespace dp2Batch
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(9, 36);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(150, 29);
+            this.label6.Size = new System.Drawing.Size(113, 22);
             this.label6.TabIndex = 6;
             this.label6.Text = "导入范围(&R):";
             // 
@@ -616,11 +617,11 @@ namespace dp2Batch
             // 
             // textBox_import_fileName
             // 
-            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_fileName.Location = new System.Drawing.Point(119, 8);
             this.textBox_import_fileName.Name = "textBox_import_fileName";
-            this.textBox_import_fileName.Size = new System.Drawing.Size(379, 36);
+            this.textBox_import_fileName.Size = new System.Drawing.Size(379, 29);
             this.textBox_import_fileName.TabIndex = 4;
             // 
             // label5
@@ -628,7 +629,7 @@ namespace dp2Batch
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(9, 10);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(124, 29);
+            this.label5.Size = new System.Drawing.Size(93, 22);
             this.label5.TabIndex = 3;
             this.label5.Text = "文件名(&F):";
             // 
@@ -644,8 +645,8 @@ namespace dp2Batch
             // 
             // textBox_import_dbMap
             // 
-            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_dbMap.Location = new System.Drawing.Point(12, 104);
             this.textBox_import_dbMap.Multiline = true;
@@ -659,7 +660,7 @@ namespace dp2Batch
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(9, 87);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(197, 29);
+            this.label4.Size = new System.Drawing.Size(149, 22);
             this.label4.TabIndex = 0;
             this.label4.Text = "库名映射规则(&T):";
             // 
@@ -675,7 +676,7 @@ namespace dp2Batch
             this.toolBar_main.Location = new System.Drawing.Point(0, 0);
             this.toolBar_main.Name = "toolBar_main";
             this.toolBar_main.ShowToolTips = true;
-            this.toolBar_main.Size = new System.Drawing.Size(634, 32);
+            this.toolBar_main.Size = new System.Drawing.Size(713, 32);
             this.toolBar_main.TabIndex = 2;
             this.toolBar_main.ButtonClick += new System.Windows.Forms.ToolBarButtonClickEventHandler(this.toolBar1_ButtonClick);
             // 
@@ -705,17 +706,17 @@ namespace dp2Batch
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
             this.toolStripProgressBar_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 305);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 361);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.statusStrip_main.Size = new System.Drawing.Size(634, 22);
+            this.statusStrip_main.Size = new System.Drawing.Size(713, 22);
             this.statusStrip_main.TabIndex = 4;
             this.statusStrip_main.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(445, 17);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(524, 17);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
@@ -725,9 +726,9 @@ namespace dp2Batch
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 29F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(634, 327);
+            this.ClientSize = new System.Drawing.Size(713, 383);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.statusStrip_main);
             this.Controls.Add(this.toolBar_main);
@@ -797,7 +798,7 @@ namespace dp2Batch
             }
             catch (SerializationException ex)
             {
-                MessageBox.Show(this, ex.Message);
+                MessageBoxShow(ex.Message);
                 Servers = new ServerCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = this.DataDir
@@ -814,7 +815,7 @@ namespace dp2Batch
             if (nRet == -1)
             {
                 if (IsFirstRun == false)
-                    MessageBox.Show(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
+                    MessageBoxShow(strError + "\r\n\r\n程序稍后会尝试自动创建这个文件");
             }
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
@@ -1032,7 +1033,7 @@ namespace dp2Batch
             string strError;
             int nRet = cfgCache.Save(null, out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+                MessageBoxShow(strError);
 
 
             // 保存窗口尺寸状态
@@ -1209,26 +1210,194 @@ this.checkBox_import_fastMode.Checked);
                     "lastNoneProjectState",
                     Convert.ToInt32(dlg.NoneProject));
 
-
-
                 if (tabControl_main.SelectedTab == this.tabPage_range)
                 {
-                    this.DoExport(strProjectName, strLocate);
+                    Task.Factory.StartNew(() =>
+                    {
+                        this.DoExport(strProjectName, strLocate);
+                    });
                 }
                 else if (tabControl_main.SelectedTab == this.tabPage_import)
                 {
-                    this.DoImport(strProjectName, strLocate);
+                    Task.Factory.StartNew(() =>
+                    {
+                        this.DoImport(strProjectName, strLocate);
+                    });
                 }
-
             }
 
             return;
+            ERROR1:
+            MessageBoxShow(strError);
+        }
 
-        ERROR1:
-            MessageBox.Show(this, strError);
+        public string StartNo
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_startNo.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_startNo.Text = value;
+                }));
+            }
+        }
+
+        public string EndNo
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_endNo.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_endNo.Text = value;
+                }));
+            }
         }
 
 
+        public string DbPath
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_dbPath.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_dbPath.Text = value;
+                }));
+            }
+        }
+
+        public bool VerifyNumber
+        {
+            get
+            {
+                return (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_verifyNumber.Checked;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.checkBox_verifyNumber.Checked = value;
+                }));
+            }
+        }
+
+        public bool All
+        {
+            get
+            {
+                return (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.radioButton_all.Checked;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.radioButton_all.Checked = value;
+                }));
+            }
+        }
+
+
+        public string ImportRange
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_import_range.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_import_range.Text = value;
+                }));
+            }
+        }
+
+
+        public string ImportDbMap
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_import_dbMap.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_import_dbMap.Text = value;
+                }));
+            }
+        }
+
+
+        public bool ImportFastMode
+        {
+            get
+            {
+                return (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_import_fastMode.Checked;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.checkBox_import_fastMode.Checked = value;
+                }));
+            }
+        }
+
+        public string ImportFileName
+        {
+            get
+            {
+                return (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_import_fileName.Text;
+                }));
+            }
+            set
+            {
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_import_fileName.Text = value;
+                }));
+            }
+        }
+
+        // 2019/5/11 改造为可以在非界面线程中执行
         void DoImport(string strProjectName,
             string strProjectLocate)
         {
@@ -1270,54 +1439,52 @@ this.checkBox_import_fastMode.Checked);
             {
                 BatchEventArgs args = new BatchEventArgs();
                 batchObj.OnInitial(this, args);
-                /*
-                if (args.Continue == ContinueType.SkipBeginMiddle)
-                    goto END1;
-                if (args.Continue == ContinueType.SkipMiddle) 
-                {
-                    strError = "OnInitial()中args.Continue不能使用ContinueType.SkipMiddle.应使用ContinueType.SkipBeginMiddle";
-                    goto ERROR1;
-                }
-                */
                 if (args.Continue == ContinueType.SkipAll)
                     goto END1;
             }
 
-
-            if (this.textBox_import_fileName.Text == "")
+            string importFileName = this.ImportFileName;
+            if (string.IsNullOrEmpty(importFileName))
             {
                 strError = "尚未指定输入文件名...";
                 goto ERROR1;
             }
-            FileInfo fi = new FileInfo(this.textBox_import_fileName.Text);
+            FileInfo fi = new FileInfo(importFileName);
             if (fi.Exists == false)
             {
-                strError = "文件" + this.textBox_import_fileName.Text + "不存在...";
+                strError = "文件" + importFileName + "不存在...";
                 goto ERROR1;
             }
 
-            OpenMarcFileDlg dlg = null;
+            Encoding encoding = Encoding.UTF8;
 
             // ISO2709文件需要预先准备条件
             if (String.Compare(fi.Extension, ".iso", true) == 0
                 || String.Compare(fi.Extension, ".mrc", true) == 0)
             {
-                // 询问encoding和marcsyntax
-                dlg = new OpenMarcFileDlg();
-                MainForm.SetControlFont(dlg, this.DefaultFont);
+                this.Invoke((Action)(() =>
+                {
+                    // 询问encoding和marcsyntax
+                    using (OpenMarcFileDlg dlg = new OpenMarcFileDlg())
+                    {
+                        MainForm.SetControlFont(dlg, this.DefaultFont);
 
-                dlg.Text = "请指定要导入的 ISO2709 文件属性";
-                dlg.FileName = this.textBox_import_fileName.Text;
+                        dlg.Text = "请指定要导入的 ISO2709 文件属性";
+                        dlg.FileName = importFileName;
 
-                this.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_input_state");
-                dlg.ShowDialog(this);
-                this.AppInfo.UnlinkFormState(dlg);
+                        this.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_input_state");
+                        dlg.ShowDialog(this);
+                        this.AppInfo.UnlinkFormState(dlg);
 
-                if (dlg.DialogResult != DialogResult.OK)
-                    return;
+                        if (dlg.DialogResult != DialogResult.OK)
+                            return;
 
-                this.textBox_import_fileName.Text = dlg.FileName;
-                this.CurMarcSyntax = dlg.MarcSyntax;
+                        importFileName = dlg.FileName;
+                        this.ImportFileName = importFileName;
+                        this.CurMarcSyntax = dlg.MarcSyntax;
+                        encoding = dlg.Encoding;
+                    }
+                }));
             }
 
             // 触发Script中OnBegin()代码
@@ -1326,22 +1493,16 @@ this.checkBox_import_fastMode.Checked);
             {
                 BatchEventArgs args = new BatchEventArgs();
                 batchObj.OnBegin(this, args);
-                /*
-                if (args.Continue == ContinueType.SkipMiddle)
-                    goto END1;
-                if (args.Continue == ContinueType.SkipBeginMiddle)
-                    goto END1;
-                */
                 if (args.Continue == ContinueType.SkipAll)
                     goto END1;
             }
 
             if (String.Compare(fi.Extension, ".dp2bak", true) == 0)
-                nRet = this.DoImportBackup(this.textBox_import_fileName.Text,
+                nRet = this.DoImportBackup(importFileName,
                     out strError);
 
             else if (String.Compare(fi.Extension, ".xml", true) == 0)
-                nRet = this.DoImportXml(this.textBox_import_fileName.Text,
+                nRet = this.DoImportXml(importFileName,
                     out strError);
 
             else if (String.Compare(fi.Extension, ".iso", true) == 0
@@ -1352,25 +1513,23 @@ this.checkBox_import_fastMode.Checked);
 
                 try
                 {
-                    nRet = this.DoImportIso2709(dlg.FileName,
-                        dlg.MarcSyntax,
-                        dlg.Encoding,
+                    nRet = this.DoImportIso2709(
+                        importFileName,  // dlg.FileName,
+                        this.CurMarcSyntax, // dlg.MarcSyntax,
+                        encoding,   // dlg.Encoding,
                         out strError);
                 }
                 finally
                 {
                     this.CheckTargetDb -= new CheckTargetDbEventHandler(CheckTargetDbCallBack);
                 }
-
             }
             else
             {
                 strError = "未知的文件类型...";
                 goto ERROR1;
             }
-
-
-        END1:
+            END1:
             // 触发Script的OnEnd()代码
             if (batchObj != null)
             {
@@ -1385,22 +1544,36 @@ this.checkBox_import_fastMode.Checked);
             if (filter != null)
                 filter.Assembly = null;
 
-
-            if (strError != "")
-                MessageBox.Show(this, strError);
+            if (string.IsNullOrEmpty(strError) == false)
+                MessageBoxShow(strError);
 
             this.MarcFilter = null;
             return;
 
-        ERROR1:
+            ERROR1:
             this.AssemblyMain = null;
             this.AssemblyFilter = null;
             if (filter != null)
                 filter.Assembly = null;
 
             this.MarcFilter = null;
+            MessageBoxShow(strError);
+        }
 
-            MessageBox.Show(this, strError);
+        public void MessageBoxShow(string strText)
+        {
+            if (this.IsHandleCreated)
+                this.Invoke((Action)(() =>
+                {
+                    try
+                    {
+                        MessageBox.Show(this, strText);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
+                    }
+                }));
         }
 
 
@@ -1494,16 +1667,19 @@ this.checkBox_import_fastMode.Checked);
                     bool bSkip = false;
                     nReadRet = 0;
 
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (stop.State != 0)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
                             "确实要中断当前批处理操作?",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             strError = "用户中断";
@@ -1515,7 +1691,6 @@ this.checkBox_import_fastMode.Checked);
                             stop.Continue();
                         }
                     }
-
 
                     //检索当前记录是否在处理范围内
                     if (rl != null)
@@ -1540,15 +1715,6 @@ this.checkBox_import_fastMode.Checked);
                         stop.SetMessage(((bSkip == true) ? "正在跳过 " : "正在处理")
                             + Convert.ToString(lCount + 1));
                     }
-
-                    /*
-                    if (nReadRet == 2)
-                        goto CONTINUE;
-
-                    if (bSkip == true)
-                        goto CONTINUE;
-                    */
-
 
                     /*
                     // 防止一条记录也没有的情况,所以把这个句写到前面
@@ -1583,7 +1749,7 @@ this.checkBox_import_fastMode.Checked);
             }
 
             WriteLog("结束导入XML数据");  // TODO: 是否要放入 finally 中
-        END1:
+            END1:
 
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -1593,7 +1759,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-        ERROR1:
+            ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -1606,6 +1772,7 @@ this.checkBox_import_fastMode.Checked);
             return -1;
         }
 
+        // TODO: 改造为可以在非界面线程运行
         // 导入ISO2709数据
         // parameter: 
         //		strFileName: 要导入的源ISO2709文件
@@ -1617,14 +1784,14 @@ this.checkBox_import_fastMode.Checked);
             int nRet;
             strError = "";
 
-            bool bFastMode = this.checkBox_import_fastMode.Checked;
+            bool bFastMode = this.ImportFastMode;
 
             this.CurMarcSyntax = strMarcSyntax;	// 为C#脚本调用GetMarc()等函数提供条件
 
             this.bNotAskTimestampMismatchWhenOverwrite = false;	// 要询问
 
             // 准备库名对照表
-            DbNameMap map = DbNameMap.Build(this.textBox_import_dbMap.Text.Replace("\r\n", ";"),
+            DbNameMap map = DbNameMap.Build(this.ImportDbMap.Replace("\r\n", ";"),
                 out strError);
             if (map == null)
             {
@@ -1645,9 +1812,9 @@ this.checkBox_import_fastMode.Checked);
             string strCount = "";
 
             //范围
-            if (textBox_import_range.Text != "")
+            if (this.ImportRange != "")
             {
-                rl = new RangeList(textBox_import_range.Text);
+                rl = new RangeList(this.ImportRange);
                 rl.Sort();
                 rl.Merge();
                 lMin = rl.min();
@@ -1670,22 +1837,24 @@ this.checkBox_import_fastMode.Checked);
 
                 this.m_nRecordCount = 0;
 
-
                 for (long lCount = 0; ; lCount++)
                 {
                     bool bSkip = false;
                     nReadRet = 0;
 
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (stop.State != 0)
                     {
-                        DialogResult result = MessageBox.Show(this,
-                            "确实要中断当前批处理操作?",
-                            "dp2batch",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
+                                "确实要中断当前批处理操作?",
+                                "dp2batch",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             strError = "用户中断";
@@ -1728,8 +1897,6 @@ this.checkBox_import_fastMode.Checked);
                         break;
                     */
 
-                    string strMARC = "";
-
                     // 从ISO2709文件中读入一条MARC记录
                     // return:
                     //	-2	MARC格式错
@@ -1741,20 +1908,22 @@ this.checkBox_import_fastMode.Checked);
                         encoding,
                         true,	// bRemoveEndCrLf,
                         true,	// bForce,
-                        out strMARC,
+                        out string strMARC,
                         out strError);
                     if (nRet == -2 || nRet == -1)
                     {
-                        DialogResult result = MessageBox.Show(this,
-                            "读入MARC记录(" + lCount.ToString() + ")出错: " + strError + "\r\n\r\n确实要中断当前批处理操作?",
+                        string temp = strError;
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
+                            "读入MARC记录(" + lCount.ToString() + ")出错: " + temp + "\r\n\r\n确实要中断当前批处理操作?",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == DialogResult.Yes)
-                        {
                             break;
-                        }
                         else
                             continue;
                     }
@@ -1769,12 +1938,10 @@ this.checkBox_import_fastMode.Checked);
                         batchObj.MarcSyntax = strMarcSyntax;
                     }
 
-                    string strXml = "";
-
                     // 将MARC记录转换为xml格式
                     nRet = MarcUtil.Marc2Xml(strMARC,
                         strMarcSyntax,
-                        out strXml,
+                        out string strXml,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -1822,7 +1989,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-        ERROR1:
+            ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -1954,7 +2121,7 @@ this.checkBox_import_fastMode.Checked);
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-            REDOSAVE:
+                REDOSAVE:
 
                 // 保存Xml记录
                 long lRet = channel.DoSaveTextRes(respath.Path,
@@ -1985,15 +2152,18 @@ this.checkBox_import_fastMode.Checked);
                             goto REDOSAVE;
                         }
 
-
-                        DialogResult result = MessageDlg.Show(this,
+                        string temp = strError;
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageDlg.Show(this,
                             "上载 '" + strDisplayRecPath
                             + " 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                            + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
+                            + temp + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
                             "dp2batch",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxDefaultButton.Button1,
                             ref this.bNotAskTimestampMismatchWhenOverwrite);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             timestamp = new byte[output_timestamp.Length];
@@ -2015,25 +2185,28 @@ this.checkBox_import_fastMode.Checked);
                     }
 
                     // 询问是否重试
-                    DialogResult result1 = MessageBox.Show(this,
+                    var temp1 = strError;
+                    DialogResult result1 = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(this,
                         "上载 '" + respath.Path
                         + " 时发生错误。详细情况如下：\r\n---\r\n"
-                        + strError + "\r\n---\r\n\r\n是否重试?\r\n注：(是)重试 (否)不重试，但继续后面的处理 (取消)中断整个批处理",
+                        + temp1 + "\r\n---\r\n\r\n是否重试?\r\n注：(是)重试 (否)不重试，但继续后面的处理 (取消)中断整个批处理",
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    }));
                     if (result1 == DialogResult.Yes)
                         goto REDOSAVE;
                     if (result1 == DialogResult.No)
                         return 0;	// 继续作后面的资源
 
-
                     goto ERROR1;
                 }
 
                 return 0;
-            ERROR1:
+                ERROR1:
                 return -1;
             }
             finally
@@ -2042,6 +2215,7 @@ this.checkBox_import_fastMode.Checked);
             }
         }
 
+        // TODO: 改造为可以在非界面线程运行
         // 上载一个item
         // parameter:
         //		strError: error info
@@ -2093,10 +2267,9 @@ this.checkBox_import_fastMode.Checked);
                 strSourceDbPath = respath0.FullPath;
             }
 
-        REDO:
+            REDO:
 
             DbNameMapItem mapItem = null;
-
 
             mapItem = map.MatchItem(strSourceDbPath/*strResPath*/);
             if (mapItem != null)
@@ -2104,17 +2277,20 @@ this.checkBox_import_fastMode.Checked);
 
             if (mapItem == null)
             {
-
                 if (strSourceDbPath/*strResPath*/ == "")
                 {
                     string strText = "源数据文件中记录 " + Convert.ToString(this.m_nRecordCount) + " 没有来源数据库,对所有这样的数据,将作如何处理?";
                     WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                    nRet = DbNameMapItemDlg.AskNullOriginBox(
+
+                    nRet = (int)this.Invoke(new Func<int>(() =>
+                    {
+                        return DbNameMapItemDlg.AskNullOriginBox(
                         this,
                         this.AppInfo,
                         strText,
                         this.SearchPanel,
                         map);
+                    }));
                     WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
 
                     if (nRet == 0)
@@ -2124,19 +2300,21 @@ this.checkBox_import_fastMode.Checked);
                     }
 
                     goto REDO;
-
                 }
                 else
                 {
                     string strText = "源数据文件中记录 " + Convert.ToString(this.m_nRecordCount) + " 的来源数据库 '" + strSourceDbPath/*strResPath*/ + "' 没有找到对应的目标库, 对所有这样的数据,将作如何处理?";
                     WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                    nRet = DbNameMapItemDlg.AskNotMatchOriginBox(
+                    nRet = (int)this.Invoke(new Func<int>(() =>
+                    {
+                        return DbNameMapItemDlg.AskNotMatchOriginBox(
                         this,
                         this.AppInfo,
                         strText,
                         this.SearchPanel,
                         strSourceDbPath/*strResPath*/,
                         map);
+                    }));
                     WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (nRet == 0)
                     {
@@ -2148,7 +2326,7 @@ this.checkBox_import_fastMode.Checked);
                 }
             }
 
-        MAPITEMOK:
+            MAPITEMOK:
 
             if (mapItem.Style == "skip")
                 return 0;
@@ -2188,13 +2366,14 @@ this.checkBox_import_fastMode.Checked);
 
             respath = new ResPath(strTargetFullPath);
 
-
             // 需要检查目标库所允许的MARC格式
             if (CheckTargetDb != null)
             {
-                CheckTargetDbEventArgs e = new CheckTargetDbEventArgs();
-                e.DbFullPath = strTargetFullPath;
-                e.CurrentMarcSyntax = this.CurMarcSyntax;
+                CheckTargetDbEventArgs e = new CheckTargetDbEventArgs
+                {
+                    DbFullPath = strTargetFullPath,
+                    CurrentMarcSyntax = this.CurMarcSyntax
+                };
                 this.CheckTargetDb(this, e);
                 if (e.Cancel == true)
                 {
@@ -2204,9 +2383,7 @@ this.checkBox_import_fastMode.Checked);
                         strError = e.ErrorInfo;
                     return -1;
                 }
-
             }
-
 
             strTargetPath = respath.Path + "/" + strID;
             // strRecordPath = strTargetPath;
@@ -2218,8 +2395,6 @@ this.checkBox_import_fastMode.Checked);
             byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimeStamp);
 
             // 2012/5/29
-            string strOutMarcSyntax = "";
-            string strMARC = "";
             // 将MARCXML格式的xml记录转换为marc机内格式字符串
             // parameters:
             //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
@@ -2228,8 +2403,8 @@ this.checkBox_import_fastMode.Checked);
             nRet = MarcUtil.Xml2Marc(strXml,
                 false,
                 "",
-                out strOutMarcSyntax,
-                out strMARC,
+                out string strOutMarcSyntax,
+                out string strMARC,
                 out strError);
             /*
             if (nRet == -1)
@@ -2243,7 +2418,6 @@ this.checkBox_import_fastMode.Checked);
                 batchObj.MarcRecord = strMARC;
                 batchObj.MarcRecordChanged = false;	// 为本轮Script运行准备初始状态
             }
-
 
             if (this.MarcFilter != null)
             {
@@ -2268,13 +2442,11 @@ this.checkBox_import_fastMode.Checked);
                 //batchObj.MarcRecord = strMarc;	// MARC记录体
                 //batchObj.MarcRecordChanged = false;	// 为本轮Script运行准备初始状态
 
-
                 batchObj.SearchPanel.ServerUrl = channel.Url;
                 batchObj.ServerUrl = channel.Url;
                 batchObj.RecPath = strTargetPath;	// 记录路径
                 batchObj.RecIndex = m_nRecordCount;	// 当前记录在一批中的序号
                 batchObj.TimeStamp = timestamp;
-
 
                 BatchEventArgs args = new BatchEventArgs();
 
@@ -2289,12 +2461,9 @@ this.checkBox_import_fastMode.Checked);
                     return 0;	// 继续处理后面的
             }
 
-
             string strWarning = "";
-            byte[] output_timestamp = null;
-            string strOutputPath = "";
 
-        REDOSAVE:
+            REDOSAVE:
             if (stop != null)
             {
                 if (strTargetPath.IndexOf("?") == -1)
@@ -2304,15 +2473,14 @@ this.checkBox_import_fastMode.Checked);
                 }
             }
 
-
             // 保存Xml记录
             long lRet = channel.DoSaveTextRes(strTargetPath,
                 strXml,
                 false,	// bIncludePreamble
-                    bFastMode == true ? "fastmode" : "",//strStyle,
+                bFastMode == true ? "fastmode" : "",//strStyle,
                 timestamp,
-                out output_timestamp,
-                out strOutputPath,
+                out byte[] output_timestamp,
+                out string strOutputPath,
                 out strError);
 
             if (lRet == -1)
@@ -2338,12 +2506,16 @@ this.checkBox_import_fastMode.Checked);
                         + " 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
                         + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理";
                     WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                    DialogResult result = MessageDlg.Show(this,
+
+                    DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageDlg.Show(this,
                         strText,
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxDefaultButton.Button1,
                         ref this.bNotAskTimestampMismatchWhenOverwrite);
+                    }));
                     WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result == DialogResult.Yes)
                     {
@@ -2354,9 +2526,7 @@ this.checkBox_import_fastMode.Checked);
                     }
 
                     if (result == DialogResult.No)
-                    {
                         return 0;	// 继续作后面的资源
-                    }
 
                     if (result == DialogResult.Cancel)
                     {
@@ -2372,12 +2542,15 @@ this.checkBox_import_fastMode.Checked);
                         + strError + "\r\n---\r\n\r\n是否重试?\r\n注：(是)重试 (否)不重试，但继续后面的处理 (取消)中断整个批处理";
                     WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
 
-                    DialogResult result1 = MessageBox.Show(this,
+                    DialogResult result1 = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(this,
                         strText,
                         "dp2batch",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    }));
                     WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                     if (result1 == DialogResult.Yes)
                         goto REDOSAVE;
@@ -2399,18 +2572,6 @@ this.checkBox_import_fastMode.Checked);
                 BatchEventArgs args = new BatchEventArgs();
 
                 batchObj.Inputed(this, args);
-                /*
-                if (args.Continue == ContinueType.SkipMiddle)
-                {
-                    strError = "脚本中断SkipMiddle";
-                    goto END1;
-                }
-                if (args.Continue == ContinueType.SkipBeginMiddle)
-                {
-                    strError = "脚本中断SkipBeginMiddle";
-                    goto END1;
-                }
-                */
                 if (args.Continue == ContinueType.SkipAll)
                 {
                     strError = "脚本中断SkipAll";
@@ -2425,15 +2586,12 @@ this.checkBox_import_fastMode.Checked);
                 stop.SetMessage("已上载成功 '"
                     + strOutputPath + "' " + strCount);
             }
-
-
             // strRecordPath = strOutputPath;
-
             return 0;
-        END1:
-        END2:
+            END1:
+            END2:
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2501,16 +2659,19 @@ this.checkBox_import_fastMode.Checked);
                     bool bSkip = false;
                     nReadRet = 0;
 
-                    Application.DoEvents();	// 出让界面控制权
+                    // Application.DoEvents();	// 出让界面控制权
 
                     if (stop.State != 0)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
                             "确实要中断当前批处理操作?",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             strError = "用户中断";
@@ -2522,7 +2683,6 @@ this.checkBox_import_fastMode.Checked);
                             stop.Continue();
                         }
                     }
-
 
                     //检索当前记录是否在处理范围内
                     if (rl != null)
@@ -2564,7 +2724,6 @@ this.checkBox_import_fastMode.Checked);
                     Debug.Assert(file.Position <= file.Length,
                         "经过DoBackupItemUpload()方法后, file的当前位置处在非法位置");
 
-
                     if (bSkip)
                         lSkipCount++;
 
@@ -2575,7 +2734,6 @@ this.checkBox_import_fastMode.Checked);
 
                     if (nReadRet == 1 || nReadRet == 2)  //判断大文件结束
                         break;
-
                 }
             }
             finally
@@ -2593,7 +2751,7 @@ this.checkBox_import_fastMode.Checked);
 
             strError = "恢复数据文件 '" + strFileName + "' 完成。";
             return 0;
-        ERROR1:
+            ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -2604,11 +2762,7 @@ this.checkBox_import_fastMode.Checked);
             else
                 strError = "恢复数据文件 '" + strFileName + "' 出错: " + strError;
             return -1;
-
-
-
         }
-
 
         // 上载一个item
         // parameter:
@@ -2652,16 +2806,19 @@ this.checkBox_import_fastMode.Checked);
 
             for (int i = 0; ; i++)
             {
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
 
                 if (stop.State != 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(this,
                         "确实要中断当前批处理操作?",
                         "dp2batch",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    }));
                     if (result == DialogResult.Yes)
                     {
                         strError = "用户中断";
@@ -2673,10 +2830,8 @@ this.checkBox_import_fastMode.Checked);
                     }
                 }
 
-
                 // progressBar_main.Value = (int)((file.Position)/ProgressRatio);
                 stop.SetProgressValue(file.Position);
-
 
                 if (file.Position - lStart >= lLength + 8)    // 2006/8/29 changed
                     break;
@@ -2696,7 +2851,6 @@ this.checkBox_import_fastMode.Checked);
 
             return 0;
         }
-
 
         // 上载一个res
         // parameter: 
@@ -2762,7 +2916,7 @@ this.checkBox_import_fastMode.Checked);
                 ResPath respath = new ResPath(strResPath);
                 respath.MakeDbName();
 
-            REDO:
+                REDO:
                 DbNameMapItem mapItem = (DbNameMapItem)map["*"];
                 if (mapItem != null)
                 {
@@ -2888,24 +3042,27 @@ this.checkBox_import_fastMode.Checked);
             byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimeStamp);
             byte[] output_timestamp = null;
 
-        REDOWHOLESAVE:
+            REDOWHOLESAVE:
             string strOutputPath = "";
             string strWarning = "";
 
             for (int j = 0; j < ranges.Length; j++)
             {
-            REDOSINGLESAVE:
+                REDOSINGLESAVE:
 
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
 
                 if (stop.State != 0)
                 {
-                    DialogResult result = MessageBox.Show(this,
+                    DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(this,
                         "确实要中断当前批处理操作?",
                         "dp2batch",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    }));
                     if (result == DialogResult.Yes)
                     {
                         strError = "用户中断";
@@ -2916,7 +3073,6 @@ this.checkBox_import_fastMode.Checked);
                         stop.Continue();
                     }
                 }
-
 
                 string strWaiting = "";
                 if (j == ranges.Length - 1)
@@ -2934,7 +3090,6 @@ this.checkBox_import_fastMode.Checked);
                     stop.SetMessage("正在上载 " + ranges[j] + "/"
                         + Convert.ToString(lBodyLength)
                         + " " + strPercent + " " + strTargetPath + strWarning + strWaiting + " " + strCount);
-
 
                 inputfile.Seek(lBodyStart, SeekOrigin.Begin);
 
@@ -2973,15 +3128,18 @@ this.checkBox_import_fastMode.Checked);
                             goto REDOWHOLESAVE;
                         }
 
-
-                        DialogResult result = MessageDlg.Show(this,
+                        var temp = strError;
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageDlg.Show(this,
                             "上载 '" + strDisplayRecPath + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(lBodyLength)
                             + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                            + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
+                            + temp + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
                             "dp2batch",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxDefaultButton.Button1,
                             ref this.bNotAskTimestampMismatchWhenOverwrite);
+                        }));
                         if (result == DialogResult.Yes)
                         {
 
@@ -3012,7 +3170,6 @@ this.checkBox_import_fastMode.Checked);
                         }
                     }
 
-
                     goto ERROR1;
                 }
 
@@ -3024,11 +3181,9 @@ this.checkBox_import_fastMode.Checked);
                 strRecordPath = strOutputPath;
 
             return 0;
-
-        ERROR1:
+            ERROR1:
             return -1;
         }
-
 
         // 从输入流中得到一个res的metadata和body
         // parameter:
@@ -3124,7 +3279,7 @@ this.checkBox_import_fastMode.Checked);
                 out strError);
             if (dlg.DbNameMap == null)
             {
-                MessageBox.Show(this, strError);
+                MessageBoxShow(strError);
                 return;
             }
 
@@ -3138,37 +3293,11 @@ this.checkBox_import_fastMode.Checked);
             this.textBox_import_dbMap.Text = dlg.DbNameMap.ToString(true).Replace(";", "\r\n");
         }
 
-
-        /*
-        void oldfindTargetDB()
-        {
-            OpenResDlg dlg = new OpenResDlg();
-
-            dlg.Text = "请选择目标数据库";
-            dlg.EnabledIndices = new int[] { ResTree.RESTYPE_DB };
-            dlg.ap = this.applicationInfo;
-            dlg.ApCfgTitle = "pageimport_openresdlg";
-            dlg.MultiSelect = true;
-            dlg.Paths = textBox_import_targetDB.Text;
-            dlg.Initial( this.Servers,
-                this.Channels);	
-            // dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.ShowDialog(this);
-
-            if (dlg.DialogResult != DialogResult.OK)
-                return;
-
-            textBox_import_targetDB.Text = dlg.Paths;
-        }
-        */
-
-
         void DoStop(object sender, StopEventArgs e)
         {
             if (this.channel != null)
                 this.channel.Abort();
         }
-
 
         private void button_import_findFileName_Click(object sender, System.EventArgs e)
         {
@@ -3210,14 +3339,14 @@ this.checkBox_import_fastMode.Checked);
             string[] saAddRef = {
                                     Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                     Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.library.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.rms.Client.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 									// Environment.CurrentDirectory + "\\digitalplatform.statis.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                    Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2batch.exe"};
 
@@ -3241,7 +3370,7 @@ this.checkBox_import_fastMode.Checked);
             {
                 if (strWarning == "")
                     goto ERROR1;
-                MessageBox.Show(this, strWarning);
+                MessageBoxShow(strWarning);
             }
 
             assemblyMain = Assembly.LoadFrom(strMainCsDllName);
@@ -3308,17 +3437,17 @@ this.checkBox_import_fastMode.Checked);
                 string[] saAddRef1 = {
                                          Environment.CurrentDirectory + "\\digitalplatform.core.dll",
                                          Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.library.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.library.dll",
 										 // this.DataDir + "\\digitalplatform.statis.dll",
 										 Environment.CurrentDirectory + "\\digitalplatform.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-										 Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
+                                         Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
 										 // Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 										 Environment.CurrentDirectory + "\\dp2batch.exe",
-										 strMainCsDllName};
+                                         strMainCsDllName};
 
                 string strfilterCsDllName = strProjectLocate + "\\~marcfilter_" + Convert.ToString(m_nAssemblyVersion++) + ".dll";
 
@@ -3340,7 +3469,7 @@ this.checkBox_import_fastMode.Checked);
                     {
                         goto ERROR1;
                     }
-                    MessageBox.Show(this, strWarning);
+                    MessageBoxShow(strWarning);
                 }
 
 
@@ -3358,7 +3487,7 @@ this.checkBox_import_fastMode.Checked);
 
             return 0;
 
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -3370,6 +3499,7 @@ this.checkBox_import_fastMode.Checked);
                 strText);
         }
 
+        // TODO: 改造为可以在非界面线程运行
         // 输出
         void DoExport(string strProjectName,
             string strProjectLocate)
@@ -3381,7 +3511,6 @@ this.checkBox_import_fastMode.Checked);
             MyFilterDocument filter = null;
             batchObj = null;
             m_nRecordCount = -1;
-
 
             // 准备脚本
             if (strProjectName != "" && strProjectName != null)
@@ -3400,9 +3529,7 @@ this.checkBox_import_fastMode.Checked);
                     this.AssemblyFilter = filter.Assembly;
                 else
                     this.AssemblyFilter = null;
-
             }
-
 
             // 执行脚本的OnInitial()
 
@@ -3412,28 +3539,19 @@ this.checkBox_import_fastMode.Checked);
             {
                 BatchEventArgs args = new BatchEventArgs();
                 batchObj.OnInitial(this, args);
-                /*
-                if (args.Continue == ContinueType.SkipBeginMiddle)
-                    goto END1;
-                if (args.Continue == ContinueType.SkipMiddle) 
-                {
-                    strError = "OnInitial()中args.Continue不能使用ContinueType.SkipMiddle.应使用ContinueType.SkipBeginMiddle";
-                    goto ERROR1;
-                }
-                */
                 if (args.Continue == ContinueType.SkipAll)
                     goto END1;
             }
 
             string strOutputFileName = "";
 
-            if (textBox_dbPath.Text == "")
+            if (string.IsNullOrEmpty(this.DbPath))
             {
-                MessageBox.Show(this, "尚未选择源库...");
+                MessageBoxShow("尚未选择源库...");
                 return;
             }
 
-            string[] dbpaths = this.textBox_dbPath.Text.Split(new char[] { ';' });
+            string[] dbpaths = this.DbPath.Split(new char[] { ';' });
 
             Debug.Assert(dbpaths.Length != 0, "");
 
@@ -3448,22 +3566,22 @@ this.checkBox_import_fastMode.Checked);
                 string strDbName = respath.Path;
 
                 // 校验起止号
-                if (checkBox_verifyNumber.Checked == true)
+                if (this.VerifyNumber == true)
                 {
                     nRet = VerifyRange(channel,
                         strDbName,
                         out strError);
                     if (nRet == -1)
-                        MessageBox.Show(this, strError);
+                        MessageBoxShow(strError);
                 }
                 else
                 {
-                    if (this.textBox_startNo.Text == "")
+                    if (this.StartNo == "")
                     {
                         strError = "尚未指定起始号";
                         goto ERROR1;
                     }
-                    if (this.textBox_endNo.Text == "")
+                    if (this.EndNo == "")
                     {
                         strError = "尚未指定结束号";
                         goto ERROR1;
@@ -3473,63 +3591,79 @@ this.checkBox_import_fastMode.Checked);
             else
             {
                 // 多库输出。修改界面要素，表示针对每个库都是全库处理
-                this.radioButton_all.Checked = true;
-                this.textBox_startNo.Text = "1";
-                this.textBox_endNo.Text = "9999999999";
+                this.All = true;
+                this.StartNo = "1";
+                this.EndNo = "9999999999";
             }
 
-
-            SaveFileDialog dlg = null;
+            bool dialog_opened = false;
+            int filterIndex = 0;
 
             if (checkBox_export_delete.Checked == true)
             {
-                DialogResult result = MessageBox.Show(this,
+                DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                {
+                    return MessageBox.Show(this,
                         "确实要(在输出的同时)删除数据库记录?\r\n\r\n---------\r\n(确定)删除 (放弃)放弃批处理",
                         "dp2batch",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                }));
                 if (result != DialogResult.OK)
                 {
                     strError = "放弃处理...";
                     goto ERROR1;
                 }
 
-                result = MessageBox.Show(this,
+                result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                {
+                    return MessageBox.Show(this,
                     "在删除记录的同时, 是否将记录输出到文件?\r\n\r\n--------\r\n(是)一边删除一边输出 (否)只删除不输出",
                     "dp2batch",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1);
+                }));
                 if (result != DialogResult.Yes)
                     goto SKIPASKFILENAME;
             }
 
-
-            // 获得输出文件名
-            dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要保存的备份文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = false;
-            dlg.FileName = strLastOutputFileName;
-            dlg.FilterIndex = nLastOutputFilterIndex;
-
-            dlg.Filter = "备份文件 (*.dp2bak)|*.dp2bak|XML文件 (*.xml)|*.xml|ISO2709文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog(this) != DialogResult.OK)
+            nRet = (int)this.Invoke(new Func<int>(() =>
             {
-                strError = "放弃处理...";
+                // 获得输出文件名
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Title = "请指定要保存的备份文件名";
+                    dlg.CreatePrompt = false;
+                    dlg.OverwritePrompt = false;
+                    dlg.FileName = strLastOutputFileName;
+                    dlg.FilterIndex = nLastOutputFilterIndex;
+
+                    dlg.Filter = "备份文件 (*.dp2bak)|*.dp2bak|XML文件 (*.xml)|*.xml|ISO2709文件 (*.iso;*.mrc)|*.iso;*.mrc|All files (*.*)|*.*";
+
+                    dlg.RestoreDirectory = true;
+
+                    if (dlg.ShowDialog(this) != DialogResult.OK)
+                    {
+                        strError = "放弃处理...";
+                        return 0;
+                    }
+
+                    strLastOutputFileName = dlg.FileName;
+                    nLastOutputFilterIndex = dlg.FilterIndex;
+                    strOutputFileName = dlg.FileName;
+                    filterIndex = dlg.FilterIndex;
+
+                    dialog_opened = true;
+                    return 1;
+                }
+            }));
+            if (nRet == 0)
                 goto ERROR1;
-            }
 
-            strLastOutputFileName = dlg.FileName;
-            nLastOutputFilterIndex = dlg.FilterIndex;
-            strOutputFileName = dlg.FileName;
 
-        SKIPASKFILENAME:
+            SKIPASKFILENAME:
 
             // 触发Script中OnBegin()代码
             // OnBegin()中仍然有修改MainForm面板的自由
@@ -3547,34 +3681,31 @@ this.checkBox_import_fastMode.Checked);
                     goto END1;
             }
 
-
-
-            if (dlg == null || dlg.FilterIndex == 1)
+            if (dialog_opened == false || filterIndex == 1)
                 nRet = DoExportFile(
                     dbpaths,
                     strOutputFileName,
                     ExportFileType.BackupFile,
                     null,
                     out strError);
-            else if (dlg.FilterIndex == 2)
+            else if (filterIndex == 2)
                 nRet = DoExportFile(
                     dbpaths,
                     strOutputFileName,
                     ExportFileType.XmlFile,
                     null,
                     out strError);
-            else if (dlg.FilterIndex == 3)
+            else if (filterIndex == 3)
             {
                 ResPath respath = new ResPath(dbpaths[0]);
 
-                string strMarcSyntax = "";
                 // 从marcdef配置文件中获得marc格式定义
                 // return:
                 //		-1	出错
                 //		0	没有找到
                 //		1	找到
                 nRet = this.SearchPanel.GetMarcSyntax(respath.FullPath,
-                    out strMarcSyntax,
+                    out string strMarcSyntax,
                     out strError);
                 if (nRet == 0 || nRet == -1)
                 {
@@ -3590,14 +3721,13 @@ this.checkBox_import_fastMode.Checked);
                     {
                         ResPath current_respath = new ResPath(dbpaths[i]);
 
-                        string strPerMarcSyntax = "";
                         // 从marcdef配置文件中获得marc格式定义
                         // return:
                         //		-1	出错
                         //		0	没有找到
                         //		1	找到
                         nRet = this.SearchPanel.GetMarcSyntax(current_respath.FullPath,
-                            out strPerMarcSyntax,
+                            out string strPerMarcSyntax,
                             out strError);
                         if (nRet == 0 || nRet == -1)
                         {
@@ -3631,47 +3761,56 @@ this.checkBox_import_fastMode.Checked);
                     }
                 }
 
-                OpenMarcFileDlg marcdlg = new OpenMarcFileDlg();
-                MainForm.SetControlFont(marcdlg, this.DefaultFont);
-                marcdlg.IsOutput = true;
-                marcdlg.Text = "请指定要输出的 ISO2709 文件属性";
-                marcdlg.FileName = strOutputFileName;
-                marcdlg.MarcSyntax = strMarcSyntax;
-                marcdlg.EnableMarcSyntax = false;   // 不允许用户选择marc syntax，因为这是数据库配置好了的属性 2007/8/18
+                Encoding encoding = Encoding.UTF8;
 
-                marcdlg.CrLf = this.OutputCrLf;
-                marcdlg.AddG01 = this.AddG01;
-                marcdlg.RemoveField998 = this.Remove998;
-
-
-                this.AppInfo.LinkFormState(marcdlg, "OpenMarcFileDlg_output_state");
-                marcdlg.ShowDialog(this);
-                this.AppInfo.UnlinkFormState(marcdlg);
-
-
-                if (marcdlg.DialogResult != DialogResult.OK)
+                nRet = (int)this.Invoke(new Func<int>(() =>
                 {
-                    strError = "放弃处理...";
+                    using (OpenMarcFileDlg marcdlg = new OpenMarcFileDlg())
+                    {
+                        MainForm.SetControlFont(marcdlg, this.DefaultFont);
+                        marcdlg.IsOutput = true;
+                        marcdlg.Text = "请指定要输出的 ISO2709 文件属性";
+                        marcdlg.FileName = strOutputFileName;
+                        marcdlg.MarcSyntax = strMarcSyntax;
+                        marcdlg.EnableMarcSyntax = false;   // 不允许用户选择marc syntax，因为这是数据库配置好了的属性 2007/8/18
+
+                        marcdlg.CrLf = this.OutputCrLf;
+                        marcdlg.AddG01 = this.AddG01;
+                        marcdlg.RemoveField998 = this.Remove998;
+
+                        this.AppInfo.LinkFormState(marcdlg, "OpenMarcFileDlg_output_state");
+                        marcdlg.ShowDialog(this);
+                        this.AppInfo.UnlinkFormState(marcdlg);
+
+                        if (marcdlg.DialogResult != DialogResult.OK)
+                        {
+                            strError = "放弃处理...";
+                            return 0;
+                        }
+
+                        if (marcdlg.AddG01 == true)
+                        {
+                            MessageBoxShow("您选择了在导出的ISO2709记录中加入-01字段。请注意dp2Batch在将来导入这样的ISO2709文件的时候，记录中-01字段***起不到***覆盖定位的作用。“加入-01字段”功能是为了将导出的ISO2709文件应用到dt1000系统而设计的。\r\n\r\n如果您这样做的目的是为了对dp2系统书目库中的数据进行备份，请改用.xml格式或.dp2bak格式。");
+                        }
+
+                        strOutputFileName = marcdlg.FileName;
+                        this.CurMarcSyntax = strMarcSyntax;
+                        this.OutputCrLf = marcdlg.CrLf;
+                        this.AddG01 = marcdlg.AddG01;
+                        this.Remove998 = marcdlg.RemoveField998;
+                        encoding = marcdlg.Encoding;
+
+                        return 1;
+                    }
+                }));
+                if (nRet == 0)
                     goto ERROR1;
-                }
-
-                if (marcdlg.AddG01 == true)
-                {
-                    MessageBox.Show(this, "您选择了在导出的ISO2709记录中加入-01字段。请注意dp2Batch在将来导入这样的ISO2709文件的时候，记录中-01字段***起不到***覆盖定位的作用。“加入-01字段”功能是为了将导出的ISO2709文件应用到dt1000系统而设计的。\r\n\r\n如果您这样做的目的是为了对dp2系统书目库中的数据进行备份，请改用.xml格式或.dp2bak格式。");
-                }
-
-
-                strOutputFileName = marcdlg.FileName;
-                this.CurMarcSyntax = strMarcSyntax;
-                this.OutputCrLf = marcdlg.CrLf;
-                this.AddG01 = marcdlg.AddG01;
-                this.Remove998 = marcdlg.RemoveField998;
 
                 nRet = DoExportFile(
                     dbpaths,
-                    marcdlg.FileName,
+                    strOutputFileName,  // marcdlg.FileName,
                     ExportFileType.ISO2709File,
-                    marcdlg.Encoding,
+                    encoding,    // marcdlg.Encoding,
                     out strError);
             }
             else
@@ -3686,7 +3825,7 @@ this.checkBox_import_fastMode.Checked);
             */
             if (nRet == -1)
                 goto ERROR1;
-        END1:
+            END1:
             // 触发Script的OnEnd()代码
             if (batchObj != null)
             {
@@ -3703,21 +3842,18 @@ this.checkBox_import_fastMode.Checked);
             this.MarcFilter = null;
 
             if (String.IsNullOrEmpty(strError) == false)
-                MessageBox.Show(this, strError);
+                MessageBoxShow(strError);
             return;
 
-        ERROR1:
+            ERROR1:
             this.AssemblyMain = null;
             this.AssemblyFilter = null;
             if (filter != null)
                 filter.Assembly = null;
             this.MarcFilter = null;
 
-
-            MessageBox.Show(this, strError);
-
+            MessageBoxShow(strError);
         }
-
 
 #if NNNNN
 		void DoExportXmlFile(string strOutputFileName)
@@ -4103,12 +4239,15 @@ this.checkBox_import_fastMode.Checked);
                     if (exportType == ExportFileType.BackupFile
                         || exportType == ExportFileType.ISO2709File)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
                             "文件 '" + strOutputFileName + "' 已存在，是否追加?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)中断处理",
                             "dp2batch",
                             MessageBoxButtons.YesNoCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        }));
                         if (result == DialogResult.Yes)
                         {
                             bAppend = true;
@@ -4125,20 +4264,21 @@ this.checkBox_import_fastMode.Checked);
                     }
                     else if (exportType == ExportFileType.XmlFile)
                     {
-                        DialogResult result = MessageBox.Show(this,
+                        DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(this,
                             "文件 '" + strOutputFileName + "' 已存在，是否覆盖?\r\n\r\n--------------------\r\n注：(是)覆盖  (否)中断处理",
                             "dp2batch",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button2);
+                        }));
                         if (result != DialogResult.Yes)
                         {
                             strError = "放弃处理...";
                             goto ERROR1;
                         }
                     }
-
-
                 }
 
                 // 打开文件
@@ -4176,7 +4316,6 @@ this.checkBox_import_fastMode.Checked);
 
             try
             {
-
                 // string[] dbpaths = textBox_dbPath.Text.Split(new char[] { ';' });
 
                 for (int f = 0; f < dbpaths.Length; f++)
@@ -4196,51 +4335,33 @@ this.checkBox_import_fastMode.Checked);
                     string strRealStartNo = "";
                     string strRealEndNo = "";
 
-                    /*
-                    DialogResult result;
-                    if (checkBox_export_delete.Checked == true)
-                    {
-                        result = MessageBox.Show(this,
-                            "确实要删除 '" + respath.Path + "' 内指定范围的记录?\r\n\r\n---------\r\n(是)删除 (否)放弃批处理",
-                            "dp2batch",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result != DialogResult.Yes)
-                            continue;
-                    }
-                     * 
-                     * */
-
-
-                    //channel = this.Channels.GetChannel(respath.Url);
-
-                    //string strDbName = respath.Path;
-
                     // 如果为多库输出
                     if (dbpaths.Length > 0)
                     {
                         // 如果为全选
-                        if (this.radioButton_all.Checked == true)
+                        if (this.All == true)
                         {
                             // 恢复为最大范围
-                            this.textBox_startNo.Text = "1";
-                            this.textBox_endNo.Text = "9999999999";
+                            this.StartNo = "1";
+                            this.EndNo = "9999999999";
                         }
 
                         // 校验起止号
-                        if (checkBox_verifyNumber.Checked == true)
+                        if (this.VerifyNumber == true)
                         {
                             nRet = VerifyRange(channel,
                                 strDbName,
                                 out strError);
                             if (nRet == -1)
-                                MessageBox.Show(this, strError);
+                                MessageBoxShow(strError);
 
                             if (nRet == 0)
                             {
                                 // 库中无记录
-                                AutoCloseMessageBox.Show(this, "数据库 " + strDbName + " 中无记录。");
+                                this.Invoke((Action)(() =>
+                                {
+                                    AutoCloseMessageBox.Show(this, "数据库 " + strDbName + " 中无记录。");
+                                }));
                                 strInfo += "(无记录)";
                                 WriteLog("发现数据库 " + strDbName + " 中无记录");
                                 continue;
@@ -4248,12 +4369,12 @@ this.checkBox_import_fastMode.Checked);
                         }
                         else
                         {
-                            if (this.textBox_startNo.Text == "")
+                            if (this.StartNo == "")
                             {
                                 strError = "尚未指定起始号";
                                 goto ERROR1;
                             }
-                            if (this.textBox_endNo.Text == "")
+                            if (this.EndNo == "")
                             {
                                 strError = "尚未指定结束号";
                                 goto ERROR1;
@@ -4264,7 +4385,7 @@ this.checkBox_import_fastMode.Checked);
                     string strOutputStartNo = "";
                     string strOutputEndNo = "";
                     // 虽然界面不让校验起止号，但是也要校验，为了设置好进度条
-                    if (checkBox_verifyNumber.Checked == false)
+                    if (this.VerifyNumber == false)
                     {
                         // 校验起止号
                         // return:
@@ -4272,15 +4393,12 @@ this.checkBox_import_fastMode.Checked);
                         //      1   存在记录
                         nRet = VerifyRange(channel,
                             strDbName,
-                            this.textBox_startNo.Text,
-                            this.textBox_endNo.Text,
+                            this.StartNo,
+                            this.EndNo,
                             out strOutputStartNo,
                             out strOutputEndNo,
                             out strError);
                     }
-
-                    //try
-                    //{
 
                     Int64 nStart = 0;
                     Int64 nEnd = 0;
@@ -4288,15 +4406,15 @@ this.checkBox_import_fastMode.Checked);
                     bool bAsc = true;
 
                     bAsc = GetDirection(
-                        this.textBox_startNo.Text,
-                        this.textBox_endNo.Text,
+                        this.StartNo,
+                        this.EndNo,
                         out nStart,
                         out nEnd);
 
                     // 探测到的号码
                     long nOutputEnd = 0;
                     long nOutputStart = 0;
-                    if (checkBox_verifyNumber.Checked == false)
+                    if (this.VerifyNumber == false)
                     {
                         GetDirection(
                             strOutputStartNo,
@@ -4306,23 +4424,13 @@ this.checkBox_import_fastMode.Checked);
                     }
 
                     // 设置进度条范围
-                    if (checkBox_verifyNumber.Checked == true)
+                    if (this.VerifyNumber == true)
                     {
-
                         Int64 nMax = nEnd - nStart;
                         if (nMax < 0)
                             nMax *= -1;
                         nMax++;
 
-                        /*
-                        ProgressRatio = nMax / 10000;
-                        if (ProgressRatio < 1.0)
-                            ProgressRatio = 1.0;
-
-                        progressBar_main.Minimum = 0;
-                        progressBar_main.Maximum = (int)(nMax / ProgressRatio);
-                        progressBar_main.Value = 0;
-                         * */
                         stop.SetProgressRange(0, nMax);
                     }
                     else
@@ -4333,7 +4441,6 @@ this.checkBox_import_fastMode.Checked);
                         nMax++;
                         stop.SetProgressRange(0, nMax);
                     }
-
 
                     bool bFirst = true;	// 是否为第一次取记录
 
@@ -4362,17 +4469,20 @@ this.checkBox_import_fastMode.Checked);
                     // 循环
                     for (; ; )
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        // Application.DoEvents();	// 出让界面控制权
 
                         if (stop.State != 0)
                         {
                             WriteLog("打开对话框 '确实要中断当前批处理操作?'");
-                            DialogResult result = MessageBox.Show(this,
+                            DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                            {
+                                return MessageBox.Show(this,
                                 "确实要中断当前批处理操作?",
                                 "dp2batch",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Question,
                                 MessageBoxDefaultButton.Button2);
+                            }));
                             WriteLog("关闭对话框 '确实要中断当前批处理操作?'");
                             if (result == DialogResult.Yes)
                             {
@@ -4410,7 +4520,6 @@ this.checkBox_import_fastMode.Checked);
                             }
                         }
 
-
                         string strPath = strDbName + "/" + strID;
                         string strXmlBody = "";
                         string strMetaData = "";
@@ -4421,7 +4530,7 @@ this.checkBox_import_fastMode.Checked);
 
                         bool bNeedRetry = true;
 
-                    REDO_GETRES:
+                        REDO_GETRES:
                         // 获得资源
                         // return:
                         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
@@ -4445,7 +4554,10 @@ this.checkBox_import_fastMode.Checked);
                                     {
                                         string strText = "记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n按 确认 继续。";
                                         WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                                        AutoCloseMessageBox.Show(this, strText);
+                                        this.Invoke((Action)(() =>
+                                        {
+                                            AutoCloseMessageBox.Show(this, strText);
+                                        }));
                                         WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
 
                                         bFirst = false;
@@ -4456,7 +4568,10 @@ this.checkBox_import_fastMode.Checked);
                                         // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
                                         string strText = "您为数据库 " + strDbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...";
                                         WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                                        AutoCloseMessageBox.Show(this, strText);
+                                        this.Invoke((Action)(() =>
+                                        {
+                                            AutoCloseMessageBox.Show(this, strText);
+                                        }));
                                         WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
 
                                         bFirst = false;
@@ -4486,12 +4601,11 @@ this.checkBox_import_fastMode.Checked);
                                         bNeedRetry = false; // 单库情况，也没有必要出现重试对话框
 
                                         WriteLog("打开对话框 '" + strError.Replace("\r\n", "\\n") + "'");
-                                        MessageBox.Show(this, strError);
+                                        MessageBoxShow(strError);
                                         WriteLog("关闭对话框 '" + strError.Replace("\r\n", "\\n") + "'");
                                         break;
                                     }
                                 }
-
                             }
                             else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
                             {
@@ -4500,7 +4614,6 @@ this.checkBox_import_fastMode.Checked);
                                 // 把id解析出来
                                 strID = ResPath.GetRecordId(strOutputPath);
                                 goto CONTINUE;
-
                             }
 
                             // 允许重试
@@ -4508,12 +4621,15 @@ this.checkBox_import_fastMode.Checked);
                             {
                                 string strText = "获取记录 '" + strPath + "' (style='" + strStyle + "')时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)";
                                 WriteLog("打开对话框 '" + strText.Replace("\r\n", "\\n") + "'");
-                                DialogResult redo_result = MessageBox.Show(this,
+                                DialogResult redo_result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                                {
+                                    return MessageBox.Show(this,
                                     strText,
                                     "dp2batch",
                                     MessageBoxButtons.RetryCancel,
                                     MessageBoxIcon.Question,
                                     MessageBoxDefaultButton.Button1);
+                                }));
                                 WriteLog("关闭对话框 '" + strText.Replace("\r\n", "\\n") + "'");
                                 if (redo_result == DialogResult.Cancel)
                                     goto ERROR1;
@@ -4551,7 +4667,7 @@ this.checkBox_import_fastMode.Checked);
 
                         strRealEndNo = strID;
 
-                    CONTINUE:
+                        CONTINUE:
 
                         // 是否超过循环范围
                         try
@@ -4564,7 +4680,7 @@ this.checkBox_import_fastMode.Checked);
                             nCur = 0;
                         }
 
-                        if (checkBox_verifyNumber.Checked == false)
+                        if (this.VerifyNumber == false)
                         {
                             // 如果当前记录号码突破预计的头部和尾部
                             if (nCur > nOutputEnd
@@ -4637,7 +4753,6 @@ this.checkBox_import_fastMode.Checked);
                             batchObj.RecIndex = m_nRecordCount;	// 当前记录在一批中的序号
                             batchObj.TimeStamp = baOutputTimeStamp;
 
-
                             BatchEventArgs args = new BatchEventArgs();
 
                             batchObj.Outputing(this, args);
@@ -4657,7 +4772,6 @@ this.checkBox_import_fastMode.Checked);
                             // 观察XML记录是否被改变
                             if (batchObj.XmlRecordChanged == true)
                                 strXmlBody = batchObj.XmlRecord;
-
                         }
 
                         if (bFoundRecord == true
@@ -4713,7 +4827,6 @@ this.checkBox_import_fastMode.Checked);
                                     respathtemp.Url = channel.Url;
                                     respathtemp.Path = strOutputPath;
 
-
                                     // DomUtil.SetAttr(dom.DocumentElement, "xmlns:dprms", DpNs.dprms);
                                     // 给根元素设置几个参数
                                     DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, respathtemp.FullPath);
@@ -4728,7 +4841,6 @@ this.checkBox_import_fastMode.Checked);
                                     // 询问是否继续
                                     goto ERROR1;
                                 }
-
                             }
                         }
 
@@ -4755,7 +4867,6 @@ this.checkBox_import_fastMode.Checked);
                         if (bFoundRecord == true)
                             m_nRecordCount++;
 
-
                         if (bAsc == true)
                         {
                             //progressBar_main.Value = (int)((nCur - nStart + 1) / ProgressRatio);
@@ -4774,8 +4885,6 @@ this.checkBox_import_fastMode.Checked);
                             break;
                         if (bAsc == false && nCur <= nEnd)
                             break;
-
-
                     } // end of for one database
 
                     stop.EndLoop();
@@ -4784,13 +4893,9 @@ this.checkBox_import_fastMode.Checked);
 
                     EnableControls(true);
 
-                //}
-
-            CONTINUEDBS:
+                    CONTINUEDBS:
                     strInfo += " : " + m_nRecordCount.ToString() + "条 (ID " + strRealStartNo + "-" + strRealEndNo + ")";
-
                 }   // end of dbpaths loop
-
 
             }   // end of try
             finally
@@ -4821,7 +4926,7 @@ this.checkBox_import_fastMode.Checked);
             WriteLog("结束输出");
 
             return 0;
-        ERROR1:
+            ERROR1:
             stop.EndLoop();
             stop.OnStop -= new StopEventHandler(this.DoStop);
             stop.Initial("");
@@ -4975,11 +5080,9 @@ this.checkBox_import_fastMode.Checked);
 
             long lStart = outputfile.Position;	// 记忆起始位置
 
-
             ResPath respath = new ResPath();
             respath.Url = channel.Url;
             respath.Path = strPath;
-
 
             // 去除MARC记录中的所有-01字段
             // return:
@@ -5011,7 +5114,6 @@ this.checkBox_import_fastMode.Checked);
                 strMarc = record.Text;
             }
 
-            byte[] baResult = null;
             // 将MARC机内格式转换为ISO2709格式
             // parameters:
             //		nMARCType	[in]MARC格式类型。0为UNIMARC 1为USMARC
@@ -5023,7 +5125,7 @@ this.checkBox_import_fastMode.Checked);
                 strMarc,
                 this.CurMarcSyntax,
                 targetEncoding,
-                out baResult,
+                out byte[] baResult,
                 out strError);
 
             if (nRet == -1)
@@ -5039,13 +5141,7 @@ this.checkBox_import_fastMode.Checked);
                 outputfile.Write(baResult, 0, 2);
             }
 
-
             return 0;
-
-            /*
-            ERROR1:
-                return -1;
-            */
         }
 
         // 将主记录和相关资源写入备份文件
@@ -5099,11 +5195,9 @@ this.checkBox_import_fastMode.Checked);
 
             // 其余
 
-            string[] ids = null;
-
             // 得到Xml记录中所有<file>元素的id属性值
             int nRet = ExportUtil.GetFileIds(strXmlBody,
-                out ids,
+                out string[] ids,
                 out strError);
             if (nRet == -1)
             {
@@ -5111,7 +5205,6 @@ this.checkBox_import_fastMode.Checked);
                 strError = "GetFileIds()出错，无法获得 XML 记录中的 <dprms:file>元素的 id 属性， 因此保存记录失败，原因: " + strError;
                 goto ERROR1;
             }
-
 
             nRet = WriteResToBackupFile(
                 this,
@@ -5129,8 +5222,6 @@ this.checkBox_import_fastMode.Checked);
             }
 
             ///
-
-
             // 写入总长度
             long lTotalLength = outputfile.Position - lStart - 8;
             byte[] data = BitConverter.GetBytes(lTotalLength);
@@ -5145,7 +5236,7 @@ this.checkBox_import_fastMode.Checked);
             outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -5161,21 +5252,23 @@ this.checkBox_import_fastMode.Checked);
         {
             strError = "";
 
-
             long lRet;
 
             for (int i = 0; i < res_ids.Length; i++)
             {
-                Application.DoEvents();	// 出让界面控制权
+                // Application.DoEvents();	// 出让界面控制权
 
                 if (stop.State != 0)
                 {
-                    DialogResult result = MessageBox.Show(owner,
+                    DialogResult result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(owner,
                         "确实要中断当前批处理操作?",
                         "dp2batch",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
+                    }));
                     if (result == DialogResult.Yes)
                     {
                         strError = "用户中断";
@@ -5199,7 +5292,6 @@ this.checkBox_import_fastMode.Checked);
                 if (stop != null)
                     stop.SetMessage("正在下载 " + strResPath);
 
-                long lResStart = 0;
                 // 写res的头。
                 // 如果不能预先确知整个res的长度，可以用随便一个lTotalLength值调用本函数，
                 // 但是需要记忆下函数所返回的lStart，最后调用EndWriteResToBackupFile()。
@@ -5207,12 +5299,12 @@ this.checkBox_import_fastMode.Checked);
                 lRet = Backup.BeginWriteResToBackupFile(
                     outputfile,
                     0,	// 未知
-                    out lResStart);
+                    out long lResStart);
 
                 byte[] baOutputTimeStamp = null;
                 string strOutputPath;
 
-            REDO_GETRES:
+                REDO_GETRES:
                 lRet = channel.GetRes(strResPath,
                     (Stream)null,	// 故意不获取资源体
                     stop,
@@ -5225,12 +5317,16 @@ this.checkBox_import_fastMode.Checked);
                 if (lRet == -1)
                 {
                     // TODO: 允许重试
-                    DialogResult redo_result = MessageBox.Show(owner,
-                        "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
+                    var temp = strError;
+                    DialogResult redo_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                    {
+                        return MessageBox.Show(owner,
+                        "获取记录 '" + strResPath + "' 时出现错误: " + temp + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
                         "dp2batch",
                         MessageBoxButtons.RetryCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
+                    }));
                     if (redo_result == DialogResult.Cancel)
                         return -1;
                     goto
@@ -5258,7 +5354,6 @@ this.checkBox_import_fastMode.Checked);
                 if (lRet == -1)
                     return -1;
 
-                long lBodyStart = 0;
                 // 写res body的头。
                 // 如果不能预先确知body的长度，可以用随便一个lBodyLength值调用本函数，
                 // 但是需要记忆下函数所返回的lBodyStart，最后调用EndWriteResBodyToBackupFile()。
@@ -5266,14 +5361,14 @@ this.checkBox_import_fastMode.Checked);
                 lRet = Backup.BeginWriteResBodyToBackupFile(
                     outputfile,
                     0, // 未知
-                    out lBodyStart);
+                    out long lBodyStart);
                 if (lRet == -1)
                     return -1;
 
                 if (stop != null)
                     stop.SetMessage("正在下载 " + strResPath + " 的数据体");
 
-            REDO_GETRES_1:
+                REDO_GETRES_1:
                 lRet = channel.GetRes(strResPath,
                     outputfile,
                     stop,
@@ -5292,12 +5387,16 @@ this.checkBox_import_fastMode.Checked);
                     else
                     {
                         // TODO: 允许重试
-                        DialogResult redo_result = MessageBox.Show(owner,
-                            "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
+                        var temp = strError;
+                        DialogResult redo_result = (DialogResult)Application.OpenForms[0].Invoke(new Func<DialogResult>(() =>
+                        {
+                            return MessageBox.Show(owner,
+                            "获取记录 '" + strResPath + "' 时出现错误: " + temp + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
                             "dp2batch",
                             MessageBoxButtons.RetryCancel,
                             MessageBoxIcon.Question,
                             MessageBoxDefaultButton.Button1);
+                        }));
                         if (redo_result == DialogResult.Cancel)
                             return -1;
                         goto
@@ -5321,17 +5420,10 @@ this.checkBox_import_fastMode.Checked);
                     lResStart);
                 if (lRet == -1)
                     return -1;
-
             }
-
-            /*
-            if (stop != null)
-                stop.SetMessage("保存资源到备份文件全部完成");
-            */
 
             return 0;
         }
-
 
         // return:
         //		true	起始号为小号
@@ -5436,12 +5528,10 @@ this.checkBox_import_fastMode.Checked);
             if (strInputEndNo == "")
                 strInputEndNo = "9999999999";
 
-
             bool bAsc = true;
 
             Int64 nStart = 0;
             Int64 nEnd = 9999999999;
-
 
             try
             {
@@ -5504,7 +5594,6 @@ this.checkBox_import_fastMode.Checked);
                 }
                 else
                     strError += "校验startno时出错： " + strError0 + " ";
-
             }
             else
             {
@@ -5539,7 +5628,6 @@ this.checkBox_import_fastMode.Checked);
                 out strError0);
             if (lRet == -1)
             {
-
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
                     strEndID = strInputEndNo;
@@ -5549,7 +5637,6 @@ this.checkBox_import_fastMode.Checked);
                 {
                     strError += "校验endno时出错： " + strError0 + " ";
                 }
-
             }
             else
             {
@@ -5597,11 +5684,7 @@ this.checkBox_import_fastMode.Checked);
                 strOutputStartNo = strStartID;
             }
 
-
-            ///
-
             bSkip = false;
-
             try
             {
                 nTemp = Convert.ToInt64(strEndID);
@@ -5647,20 +5730,18 @@ this.checkBox_import_fastMode.Checked);
         {
             strError = "";
 
-            string strOutputStartNo = "";
-            string strOutputEndNo = "";
             int nRet = VerifyRange(channel,
                 strDbName,
-                this.textBox_startNo.Text,
-                this.textBox_endNo.Text,
-                out strOutputStartNo,
-                out strOutputEndNo,
+                this.StartNo,
+                this.EndNo,
+                out string strOutputStartNo,
+                out string strOutputEndNo,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            this.textBox_startNo.Text = strOutputStartNo;
-            this.textBox_endNo.Text = strOutputEndNo;
+            this.StartNo = strOutputStartNo;
+            this.EndNo = strOutputEndNo;
 
             return nRet;
         }
@@ -5947,40 +6028,44 @@ this.checkBox_import_fastMode.Checked);
                 this.textBox_endNo.Text = "9999999999";
                 m_nPreventNest--;
             }
-
         }
 
         void EnableControls(bool bEnabled)
         {
-            textBox_startNo.Enabled = bEnabled;
+            this.Invoke((Action)(() =>
+            {
 
-            textBox_endNo.Enabled = bEnabled;
+                textBox_startNo.Enabled = bEnabled;
 
-            checkBox_verifyNumber.Enabled = bEnabled;
+                textBox_endNo.Enabled = bEnabled;
 
-            checkBox_forceLoop.Enabled = bEnabled;
+                checkBox_verifyNumber.Enabled = bEnabled;
 
-            treeView_rangeRes.Enabled = bEnabled;
+                checkBox_forceLoop.Enabled = bEnabled;
 
-            radioButton_startEnd.Enabled = bEnabled;
+                treeView_rangeRes.Enabled = bEnabled;
 
-            radioButton_all.Enabled = bEnabled;
+                radioButton_startEnd.Enabled = bEnabled;
 
-            checkBox_export_delete.Enabled = bEnabled;
+                radioButton_all.Enabled = bEnabled;
 
-            ///
+                checkBox_export_delete.Enabled = bEnabled;
 
-            this.textBox_import_dbMap.Enabled = bEnabled;
+                ///
 
-            textBox_import_fileName.Enabled = bEnabled;
+                this.textBox_import_dbMap.Enabled = bEnabled;
 
-            textBox_import_range.Enabled = bEnabled;
+                textBox_import_fileName.Enabled = bEnabled;
 
-            this.button_import_dbMap.Enabled = bEnabled;
-            button_import_findFileName.Enabled = bEnabled;
+                textBox_import_range.Enabled = bEnabled;
 
-            this.checkBox_import_fastMode.Enabled = bEnabled;
-            this.checkBox_export_fastMode.Enabled = bEnabled;
+                this.button_import_dbMap.Enabled = bEnabled;
+                button_import_findFileName.Enabled = bEnabled;
+
+                this.checkBox_import_fastMode.Enabled = bEnabled;
+                this.checkBox_export_fastMode.Enabled = bEnabled;
+
+            }));
         }
 
         private void menuItem_serversCfg_Click(object sender, System.EventArgs e)
@@ -6165,7 +6250,7 @@ this.checkBox_import_fastMode.Checked);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                MessageBoxShow(ExceptionUtil.GetAutoText(ex));
             }
 
         }
@@ -6173,7 +6258,10 @@ this.checkBox_import_fastMode.Checked);
         // 重建检索点
         private void menuItem_rebuildKeys_Click(object sender, EventArgs e)
         {
-            DoRebuildKeys();
+            Task.Factory.StartNew(() =>
+            {
+                DoRebuildKeys();
+            });
         }
 
         // 重建检索点
@@ -6194,40 +6282,48 @@ this.checkBox_import_fastMode.Checked);
 
             m_nRecordCount = -1;
 
-            if (textBox_dbPath.Text == "")
+            if (this.DbPath == "")
             {
-                MessageBox.Show(this, "尚未选择要重建检索点的数据库 ...");
+                MessageBoxShow("尚未选择要重建检索点的数据库 ...");
                 return;
             }
 
-            DialogResult result = MessageBox.Show(this,
-                "确实要对下列数据库\r\n---\r\n" + this.textBox_dbPath.Text.Replace(";", "\r\n") + "\r\n---\r\n进行重建检索点的操作?",
-                "dp2batch",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
+            DialogResult result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+            {
+                return MessageBox.Show(this,
+                 "确实要对下列数据库\r\n---\r\n" + this.DbPath.Replace(";", "\r\n") + "\r\n---\r\n进行重建检索点的操作?",
+                 "dp2batch",
+                 MessageBoxButtons.YesNo,
+                 MessageBoxIcon.Question,
+                 MessageBoxDefaultButton.Button2);
+            }));
             if (result == DialogResult.No)
                 return;
 
-            RebuildKeysDialog option_dlg = new RebuildKeysDialog();
-            MainForm.SetControlFont(option_dlg, this.DefaultFont);
-            option_dlg.StartPosition = FormStartPosition.CenterScreen;
-            option_dlg.ShowDialog(this);
-            if (option_dlg.DialogResult == DialogResult.Cancel)
-                return;
-
-            if (option_dlg.WholeMode == true)
+            this.Invoke((Action)(() =>
             {
-                bClearKeysAtBegin = true;
-                bDeleteOldKeysPerRecord = false;
-            }
-            else
-            {
-                bClearKeysAtBegin = false;
-                bDeleteOldKeysPerRecord = true;
-            }
+                using (RebuildKeysDialog option_dlg = new RebuildKeysDialog())
+                {
+                    MainForm.SetControlFont(option_dlg, this.DefaultFont);
+                    option_dlg.StartPosition = FormStartPosition.CenterScreen;
+                    option_dlg.ShowDialog(this);
+                    if (option_dlg.DialogResult == DialogResult.Cancel)
+                        return;
 
-            string[] dbpaths = textBox_dbPath.Text.Split(new char[] { ';' });
+                    if (option_dlg.WholeMode == true)
+                    {
+                        bClearKeysAtBegin = true;
+                        bDeleteOldKeysPerRecord = false;
+                    }
+                    else
+                    {
+                        bClearKeysAtBegin = false;
+                        bDeleteOldKeysPerRecord = true;
+                    }
+                }
+            }));
+
+            string[] dbpaths = this.DbPath.Split(new char[] { ';' });
 
             // 如果为单库输出
             if (dbpaths.Length == 1)
@@ -6240,22 +6336,22 @@ this.checkBox_import_fastMode.Checked);
                 string strDbName = respath.Path;
 
                 // 校验起止号
-                if (checkBox_verifyNumber.Checked == true)
+                if (this.VerifyNumber == true)
                 {
                     nRet = VerifyRange(channel,
                         strDbName,
                         out strError);
                     if (nRet == -1)
-                        MessageBox.Show(this, strError);
+                        MessageBoxShow(strError);
                 }
                 else
                 {
-                    if (this.textBox_startNo.Text == "")
+                    if (this.StartNo == "")
                     {
                         strError = "尚未指定起始号";
                         goto ERROR1;
                     }
-                    if (this.textBox_endNo.Text == "")
+                    if (this.EndNo == "")
                     {
                         strError = "尚未指定结束号";
                         goto ERROR1;
@@ -6267,21 +6363,18 @@ this.checkBox_import_fastMode.Checked);
                 Debug.Assert(dbpaths.Length > 1, "");
 
                 // 多库输出。修改界面要素，表示针对每个库都是全库处理
-                this.radioButton_all.Checked = true;
-                this.textBox_startNo.Text = "1";
-                this.textBox_endNo.Text = "9999999999";
+                this.All = true;
+                this.StartNo = "1";
+                this.EndNo = "9999999999";
             }
-
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在重建检索点");
             stop.BeginLoop();
 
-
             EnableControls(false);
             try
             {
-
                 // TODO: 如果是多库输出，是否要对非“全部”的起止号范围进行警告? 因为后面是强迫按照全部来进行的
 
                 for (int f = 0; f < dbpaths.Length; f++)
@@ -6297,96 +6390,67 @@ this.checkBox_import_fastMode.Checked);
                     if (String.IsNullOrEmpty(strInfo) == false)
                         strInfo += "\r\n";
 
+                    // TODO: strInfo 是否会膨胀得很大?
                     strInfo += "" + strDbName;
 
                     // 实际处理的首尾号
                     string strRealStartNo = "";
                     string strRealEndNo = "";
-                    /*
-                    DialogResult result;
-                    if (checkBox_export_delete.Checked == true)
-                    {
-                        result = MessageBox.Show(this,
-                            "确实要删除" + respath.Path + "内指定范围的记录?\r\n\r\n---------\r\n(是)删除 (否)放弃批处理",
-                            "dp2batch",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result != DialogResult.Yes)
-                            continue;
-                    }*/
-
-                    // 
 
                     // 如果为多库重建
                     if (dbpaths.Length > 1)
                     {
                         // 如果为全选
-                        if (this.radioButton_all.Checked == true
+                        if (this.All == true
                             || f > 0)
                         {
                             // 恢复为最大范围
-                            this.textBox_startNo.Text = "1";
-                            this.textBox_endNo.Text = "9999999999";
+                            this.StartNo = "1";
+                            this.EndNo = "9999999999";
                         }
 
                         // 校验起止号
-                        if (checkBox_verifyNumber.Checked == true)
+                        if (this.VerifyNumber == true)
                         {
                             nRet = VerifyRange(channel,
                                 strDbName,
                                 out strError);
                             if (nRet == -1)
-                                MessageBox.Show(this, strError);
+                                MessageBoxShow(strError);
 
                             if (nRet == 0)
                             {
                                 // 库中无记录
-                                AutoCloseMessageBox.Show(this, "数据库 " + strDbName + " 中无记录。");
-                                strInfo += "(无记录)";
-
-                                /*
-                                if (bClearKeysAtBegin == true)
+                                this.Invoke((Action)(() =>
                                 {
-                                    // 结束Refresh数据库定义
-                                    lRet = channel.DoRefreshDB(
-                                        "end",
-                                        strDbName,
-                                        false,  // 此参数此时无用
-                                        out strError);
-                                    if (lRet == -1)
-                                        goto ERROR1;
-                                }
-                                 * */
-
+                                    AutoCloseMessageBox.Show(this, "数据库 " + strDbName + " 中无记录。");
+                                }));
+                                strInfo += "(无记录)";
                                 continue;
                             }
                         }
                         else
                         {
-                            if (this.textBox_startNo.Text == "")
+                            if (this.StartNo == "")
                             {
                                 strError = "尚未指定起始号";
                                 goto ERROR1;
                             }
-                            if (this.textBox_endNo.Text == "")
+                            if (this.EndNo == "")
                             {
                                 strError = "尚未指定结束号";
                                 goto ERROR1;
                             }
-
                         }
                     }
 
 
-                    Int64 nStart;
-                    Int64 nEnd;
                     Int64 nCur;
                     bool bAsc = GetDirection(
                         this.textBox_startNo.Text,
                         this.textBox_endNo.Text,
-                        out nStart,
-                        out nEnd);
+                        out long nStart,
+                        out long nEnd);
 
                     // 设置进度条范围
                     Int64 nMax = nEnd - nStart;
@@ -6394,15 +6458,6 @@ this.checkBox_import_fastMode.Checked);
                         nMax *= -1;
                     nMax++;
 
-                    /*
-                    ProgressRatio = nMax / 10000;
-                    if (ProgressRatio < 1.0)
-                        ProgressRatio = 1.0;
-
-                    progressBar_main.Minimum = 0;
-                    progressBar_main.Maximum = (int)(nMax / ProgressRatio);
-                    progressBar_main.Value = 0;
-                     * */
                     stop.SetProgressRange(0, nMax);
 
                     // Refresh数据库定义
@@ -6414,25 +6469,27 @@ this.checkBox_import_fastMode.Checked);
                     if (lRet == -1)
                         goto ERROR1;
 
-
                     bool bFirst = true;	// 是否为第一次取记录
 
-                    string strID = this.textBox_startNo.Text;
+                    string strID = this.StartNo;
 
                     m_nRecordCount = 0;
                     // 循环
                     for (; ; )
                     {
-                        Application.DoEvents();	// 出让界面控制权
+                        // Application.DoEvents();	// 出让界面控制权
 
                         if (stop.State != 0)
                         {
-                            result = MessageBox.Show(this,
+                            result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                            {
+                                return MessageBox.Show(this,
                                 "确实要中断当前批处理操作?",
                                 "dp2batch",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Question,
                                 MessageBoxDefaultButton.Button2);
+                            }));
                             if (result == DialogResult.Yes)
                             {
                                 strError = "用户中断";
@@ -6452,7 +6509,6 @@ this.checkBox_import_fastMode.Checked);
 
                         if (bDeleteOldKeysPerRecord == true)
                             strStyle += ",forcedeleteoldkeys";
-
 
                         if (bFirst == true)
                         {
@@ -6480,7 +6536,7 @@ this.checkBox_import_fastMode.Checked);
 
                         bool bNeedRetry = true;
 
-                    REDO_REBUILD:
+                        REDO_REBUILD:
                         // 获得资源
                         // return:
                         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
@@ -6498,14 +6554,20 @@ this.checkBox_import_fastMode.Checked);
                                     // 如果要强制循环
                                     if (checkBox_forceLoop.Checked == true)
                                     {
-                                        AutoCloseMessageBox.Show(this, "您为数据库 " + strDbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n按 确认 继续向后找。");
+                                        this.Invoke((Action)(() =>
+                                        {
+                                            AutoCloseMessageBox.Show(this, "您为数据库 " + strDbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n按 确认 继续向后找。");
+                                        }));
                                         bFirst = false;
                                         goto CONTINUE;
                                     }
                                     else
                                     {
                                         // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
-                                        AutoCloseMessageBox.Show(this, "您为数据库 " + strDbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                                        this.Invoke((Action)(() =>
+                                        {
+                                            AutoCloseMessageBox.Show(this, "您为数据库 " + strDbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                                        }));
                                         bFirst = false;
                                         goto CONTINUE;
                                     }
@@ -6531,7 +6593,7 @@ this.checkBox_import_fastMode.Checked);
                                     else
                                     {
                                         bNeedRetry = false; // 单库情况，也没有必要出现重试对话框
-                                        MessageBox.Show(this, strError);
+                                        MessageBoxShow(strError);
                                         break;
                                     }
                                 }
@@ -6550,12 +6612,15 @@ this.checkBox_import_fastMode.Checked);
                             // 允许重试
                             if (bNeedRetry == true)
                             {
-                                DialogResult redo_result = MessageBox.Show(this,
+                                DialogResult redo_result = (DialogResult)this.Invoke(new Func<DialogResult>(() =>
+                                {
+                                    return MessageBox.Show(this,
                                     "重建检索点 记录 '" + strPath + "' (style='" + strStyle + "')时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
                                     "dp2batch",
                                     MessageBoxButtons.RetryCancel,
                                     MessageBoxIcon.Question,
                                     MessageBoxDefaultButton.Button1);
+                                }));
                                 if (redo_result == DialogResult.Cancel)
                                     goto ERROR1;
                                 goto
@@ -6583,8 +6648,7 @@ this.checkBox_import_fastMode.Checked);
 
                         strRealEndNo = strID;
 
-                    CONTINUE:
-
+                        CONTINUE:
                         // 是否超过循环范围
                         try
                         {
@@ -6619,7 +6683,6 @@ this.checkBox_import_fastMode.Checked);
                             stop.SetProgressValue(nStart - nCur + 1);
                         }
 
-
                         // 对已经作过的进行判断
                         if (bAsc == true && nCur >= nEnd)
                             break;
@@ -6640,10 +6703,7 @@ this.checkBox_import_fastMode.Checked);
                     }
 
                     strInfo += " : " + m_nRecordCount.ToString() + "条 (ID " + strRealStartNo + "-" + strRealEndNo + ")";
-
                 }   // end of dbpaths loop
-
-
             }   // end of try
             finally
             {
@@ -6658,13 +6718,12 @@ this.checkBox_import_fastMode.Checked);
 
             // END1:
 
-            MessageBox.Show(this, strError);
+            MessageBoxShow(strError);
             return;
 
-        ERROR1:
-            MessageBox.Show(this, strError);
+            ERROR1:
+            MessageBoxShow(strError);
         }
-
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -6678,6 +6737,7 @@ this.checkBox_import_fastMode.Checked);
             }
         }
 
+        // TODO: 要改进为多线程的
         private void menuItem_rebuildKeysByDbnames_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6726,7 +6786,7 @@ this.checkBox_import_fastMode.Checked);
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
-            Application.DoEvents(); // 让光标形状显示出来
+            // Application.DoEvents(); // 让光标形状显示出来
 
             bool bRet = this.treeView_rangeRes.SelectDatabases(paths, out strError);
 
@@ -6740,7 +6800,7 @@ this.checkBox_import_fastMode.Checked);
 
             DoRebuildKeys();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

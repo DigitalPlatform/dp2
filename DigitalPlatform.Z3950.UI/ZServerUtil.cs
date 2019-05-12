@@ -97,7 +97,11 @@ namespace DigitalPlatform.Z3950.UI
                         || strDefaultEncodingName.ToLower() == "marc-8")
                     {
                         if (marc8Encoding == null)
-                            return new NormalResult { Value = -1, ErrorInfo = "尚未初始化this.EaccEncoding成员"};
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "marc8Encoding 不应为 null"
+                            };
                         targetinfo.DefaultRecordsEncoding = marc8Encoding;
                     }
                     else

@@ -1608,9 +1608,13 @@ Keys keyData)
 
                     {
                         string xmlFileName = Path.Combine(Program.MainForm.UserDir, "zserver.xml");
-                        var result = _zsearcher.LoadServer(xmlFileName);
+                        var result = _zsearcher.LoadServer(xmlFileName, Program.MainForm.Marc8Encoding);
                         if (result.Value == -1)
-                            this.ShowMessage(result.ErrorInfo, "red", true);
+                        {
+                            strError = result.ErrorInfo;
+                            goto ERROR1;
+                            // this.ShowMessage(result.ErrorInfo, "red", true);
+                        }
                     }
                     this.ShowMessage("等待 Z39.50 检索响应 ...");
 
@@ -1773,6 +1777,28 @@ Keys keyData)
             {
                 string strRecPath = $"{start + i + 1}@{strLibraryName}";
 
+                if (string.IsNullOrEmpty(record.m_strDiagSetID) == false)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        int index = insert_pos.ListView.Items.IndexOf(insert_pos);
+
+                        var item = Global.InsertNewLine(
+    this.listView_records,
+    strRecPath,
+    new string[] { $"错误代码: {record.m_nDiagCondition} 错误信息: {record.m_strAddInfo}" },
+    index);
+                        if (item != null)
+                        {
+                            item.ForeColor = Color.White;
+                            item.BackColor = Color.DarkRed;
+                        }
+                    }
+                    ));
+
+                    goto CONTINUE;
+                }
+
                 // 把byte[]类型的MARC记录转换为机内格式
                 // return:
                 //		-2	MARC格式错
@@ -1838,21 +1864,20 @@ Keys keyData)
                 string[] cols = new string[column_list.Count];
                 column_list.CopyTo(cols);
 
-                ListViewItem item = null;
                 this.Invoke((Action)(() =>
                 {
                     int index = insert_pos.ListView.Items.IndexOf(insert_pos);
 
+                    ListViewItem item = null;
                     item = Global.InsertNewLine(
 this.listView_records,
 strRecPath,
 cols,
 index);  // index + i
+                    if (item != null)
+                        item.BackColor = Color.LightGreen;
                 }
                 ));
-
-                if (item != null)
-                    item.BackColor = Color.LightGreen;
 
                 CONTINUE:
                 i++;
@@ -11439,7 +11464,7 @@ MessageBoxDefaultButton.Button1);
             return list.SelectedItems[0];
         }
 
-#region 停靠
+        #region 停靠
 
         List<Control> _freeControls = new List<Control>();
 
@@ -11508,7 +11533,7 @@ MessageBoxDefaultButton.Button1);
             Program.MainForm._dockedBiblioSearchForm = null;
         }
 
-#endregion
+        #endregion
 
         private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
         {

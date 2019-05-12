@@ -11,6 +11,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Z3950;
 using DigitalPlatform.Z3950.UI;
 using System.Threading;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -56,7 +57,8 @@ namespace dp2Circulation
         }
 
         // 从 XML 文件中装载服务器配置信息
-        public NormalResult LoadServer(string xmlFileName)
+        public NormalResult LoadServer(string xmlFileName,
+            Marc8Encoding marc8Encoding)
         {
             this.Clear();
 
@@ -76,15 +78,17 @@ namespace dp2Circulation
             foreach (XmlElement server in servers)
             {
                 var result = ZServerUtil.GetTarget(server,
-                    null,
+                    marc8Encoding,
                     out TargetInfo targetInfo);
                 if (result.Value == -1)
                     return result;
-                ZClientChannel channel = new ZClientChannel();
-                channel.ServerName = server.GetAttribute("name");
-                channel.ZClient = new ZClient();
-                channel.TargetInfo = targetInfo;
-                channel.Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true);
+                ZClientChannel channel = new ZClientChannel
+                {
+                    ServerName = server.GetAttribute("name"),
+                    ZClient = new ZClient(),
+                    TargetInfo = targetInfo,
+                    Enabled = ZServerListDialog.IsEnabled(server.GetAttribute("enabled"), true)
+                };
                 _channels.Add(channel);
             }
 

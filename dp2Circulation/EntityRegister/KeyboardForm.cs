@@ -769,7 +769,7 @@ namespace dp2Circulation
 
         string _lastISBN = "";
 
-        private void button_scan_Click(object sender, EventArgs e)
+        private async void button_scan_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -783,7 +783,7 @@ namespace dp2Circulation
                 this._lastISBN = this.textBox_input.Text;
                 // 显示“正在检索”
                 this.SetStep(Step.SearchingBiblio);
-                this.BaseForm.DoSearch(this.textBox_input.Text, "ISBN", false);
+                await this.BaseForm.DoSearch(this.textBox_input.Text, "ISBN", false);
                 this.SetStep(Step.SearchBiblioCompleted);
                 // 如果检索命中，要选择后，切换到下一页。选择方面，可以提示输入 1 2 3 4 等用以选择
                 // 如果检索没有命中，提示再次扫入相同的 ISBN，可以直接进入创建新记录流程
