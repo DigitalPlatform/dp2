@@ -158,7 +158,7 @@ namespace dp2Catalog
                 }
 
                 // 对ISBN检索词进行预处理
-                if ((strFrom == "ISBN" || strFrom == "ISSN")
+                if (strFrom == "ISBN"
                     && isbnconvertinfo != null)
                 {
                     /*
@@ -174,13 +174,44 @@ namespace dp2Catalog
                         return -1;
                     }
                      * */
-                    List<string> isbns = null;
                     // return:
                     //      -1  出错
                     //      0   没有必要转换
                     //      1   已经转换
                     nRet = isbnconvertinfo.ConvertISBN(strWord,
-                        out isbns,
+                        out List<string> isbns,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "在处理" + strFrom + "字符串 '" + strWord + "' 过程中出错: " + strError;
+                        return -1;
+                    }
+
+                    int j = 0;
+                    foreach (string isbn in isbns)
+                    {
+                        if (j > 0)
+                            strQueryString += " OR ";
+                        // string strIsbn = isbn.Replace("\"", "\\\"");    // 字符 " 替换为 \"
+                        string strIsbn = StringUtil.EscapeString(isbn, "\"/=");    // eacape 特殊字符
+                        strQueryString += "\""
+                            + strIsbn + "\"" + "/1="
+                            + strValue;
+                        j++;
+                    }
+                    continue;
+                }
+
+                // 对 ISSN 检索词进行预处理
+                if (strFrom == "ISSN"
+                    && isbnconvertinfo != null)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要转换
+                    //      1   已经转换
+                    nRet = isbnconvertinfo.ConvertISSN(strWord,
+                        out List<string> isbns,
                         out strError);
                     if (nRet == -1)
                     {
@@ -513,10 +544,11 @@ namespace dp2Catalog
             bool bWildMatch = StringUtil.IsInList("wild", this.ConvertStyle);
 
             // ISSN，强制转换为 8 数字形态 xxxx-xxxx
-            bool bForce8 = StringUtil.IsInList("force8", this.ConvertStyle);
+            // bool bForce8 = StringUtil.IsInList("force8", this.ConvertStyle);
 
             int nRet = 0;
 
+#if REMOVED
             if (bForce8)
             {
                 // return:
@@ -533,7 +565,7 @@ namespace dp2Catalog
                 isbns.Add(strTarget);
                 return nRet;
             }
-
+#endif
             if (bWildMatch == true)
             {
                 List<string> styles = new List<string>();
@@ -646,8 +678,52 @@ namespace dp2Catalog
                 return 1;
             }
 
+            if (isbns.Count == 0)
+                isbns.Add(strISBN);
+
             return 0;
         }
 
+        // return:
+        //      -1  出错
+        //      0   没有必要转换
+        //      1   已经转换
+        public int ConvertISSN(string strISSN,
+            out List<string> issns,
+            out string strError)
+        {
+            strError = "";
+            issns = new List<string>();
+
+            if (string.IsNullOrEmpty(this.ConvertStyle) == true)
+            {
+                issns.Add(strISSN);
+                return 0;
+            }
+
+            // ISSN，强制转换为 8 数字形态 xxxx-xxxx
+            bool bForce8 = StringUtil.IsInList("force8", this.ConvertStyle);
+
+            int nRet = 0;
+
+            if (bForce8)
+            {
+                // return:
+                //      -1:出错; 
+                //      0:未修改校验位;
+                //      1:修改了校验位
+                nRet = IsbnSplitter.IssnInsertHyphen(
+                    strISSN,
+                    "force8",
+                    out string strTarget,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                issns.Add(strTarget);
+                return nRet;
+            }
+
+            return 0;
+        }
     }
 }

@@ -29,9 +29,10 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.1.*")]
-[assembly: AssemblyFileVersion("3.1.0.0")]
+[assembly: AssemblyVersion("3.2.*")]
+[assembly: AssemblyFileVersion("3.2.0.0")]
 
 // 2.5 (2015/12/11) 调用 dp2library Login() API 的时候发送了 client 参数
 // 3.0 (2018/6/23) 改用 .NET Framework 4.6.1 编译
 // 3.1 (2018/8/25) Z39.50 服务器属性中增加了 “ISSN 自动规整为 8 位” 功能
+// 3.2 (2019/5/13) 改用 .NET Framework 4.7.2 编译

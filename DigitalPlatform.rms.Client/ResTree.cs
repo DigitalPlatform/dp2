@@ -1131,6 +1131,8 @@ namespace DigitalPlatform.rms.Client
                     goto ERROR1;
                 }
 
+                // 2019/5/13
+                return (int)lRet;
             }
             finally
             {
@@ -1152,7 +1154,6 @@ namespace DigitalPlatform.rms.Client
 
                 this.channel = null;
             }
-            return 0;
             ERROR1:
             return -1;
         }

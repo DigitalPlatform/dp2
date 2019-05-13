@@ -54,9 +54,12 @@ namespace dp2SSL
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
-            List<string> errors = InitialFingerprint();
+#if REMOVED
+            List<string> errors = TryInitialFingerprint();
             if (errors.Count > 0)
                 AddErrors(errors);
+#endif
+            InitialFingerPrint();
 
             EnableSendkey(false);
 
@@ -71,6 +74,26 @@ namespace dp2SSL
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                     OutputHistory(result.ErrorInfo, 0);
             });
+
+            // 用于重试初始化指纹环境的 Timer
+            // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
+            _timer = new System.Threading.Timer(
+    new System.Threading.TimerCallback(timerCallback),
+    null,
+    TimeSpan.FromSeconds(10),
+    TimeSpan.FromSeconds(60));
+        }
+
+        // 重新初始化指纹环境
+        public List<string> InitialFingerPrint()
+        {
+            EndFingerprint();
+            ClearErrors();
+            List<string> errors = TryInitialFingerprint();
+            if (errors.Count > 0)
+                AddErrors(errors);
+
+            return errors;
         }
 
         // TODO: 如何显示后台任务执行信息? 可以考虑只让管理者看到
@@ -347,7 +370,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             DateTime now = DateTime.Now;
             // _errors.AddRange(errors);
-            foreach(string error in errors)
+            foreach (string error in errors)
             {
                 _errors.Add($"{now.ToShortTimeString()} {error}");
             }
@@ -356,6 +379,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             {
                 errors.RemoveAt(0);
             }
+        }
+
+        public void ClearErrors()
+        {
+            _errors.Clear();
         }
 
         void EnableSendkey(bool enable)
@@ -396,44 +424,49 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        private static readonly Object _syncRoot_fingerprint = new Object(); // 2017/5/18
+
         // TODO: 如果没有初始化成功，要提供重试初始化的办法
-        public List<string> InitialFingerprint()
+        public List<string> TryInitialFingerprint()
         {
-            // 准备指纹通道
-            List<string> errors = new List<string>();
-            if (string.IsNullOrEmpty(App.FingerprintUrl) == false
-                && (_fingerprintChannel == null || _fingerprintChannel.Started == false))
+            lock (_syncRoot_fingerprint)
             {
+                // 准备指纹通道
+                List<string> errors = new List<string>();
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                    && (_fingerprintChannel == null || _fingerprintChannel.Started == false))
+                {
 #if NO
                 eventProxy = new EventProxy();
                 eventProxy.MessageArrived +=
                   new MessageArrivedEvent(eventProxy_MessageArrived);
 #endif
-                _fingerprintChannel = FingerPrint.StartFingerprintChannel(
-                    App.FingerprintUrl,
-                    out string strError);
-                if (_fingerprintChannel == null)
-                    errors.Add($"启动指纹通道时出错: {strError}");
-                // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
+                    _fingerprintChannel = FingerPrint.StartFingerprintChannel(
+                        App.FingerprintUrl,
+                        out string strError);
+                    if (_fingerprintChannel == null)
+                        errors.Add($"启动指纹通道时出错: {strError}");
+                    // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
 #if NO
                 _fingerprintChannel.Object.MessageArrived +=
   new MessageArrivedEvent(eventProxy.LocallyHandleMessageArrived);
 #endif
-                try
-                {
-                    _fingerprintChannel.Object.GetMessage("clear");
-                    _fingerprintChannel.Started = true;
+                    try
+                    {
+                        _fingerprintChannel.Object.GetMessage("clear");
+                        _fingerprintChannel.Started = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
+                            errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
+                        else
+                            errors.Add($"启动指纹通道时出错(2): {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                        errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
-                    else
-                        errors.Add($"启动指纹通道时出错(2): {ex.Message}");
-                }
-            }
 
-            return errors;
+                return errors;
+            }
         }
 
         void EndFingerprint()
@@ -442,6 +475,53 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             {
                 FingerPrint.EndFingerprintChannel(_fingerprintChannel);
                 _fingerprintChannel = null;
+            }
+        }
+
+        Timer _timer = null;
+
+        CancellationTokenSource _cancelRefresh = null;
+
+        void timerCallback(object o)
+        {
+            // 避免重叠启动
+            if (_cancelRefresh != null)
+                return;
+
+            Refresh();
+        }
+
+        int _inRefresh = 0;
+
+        void Refresh()
+        {
+            if (this._fingerprintChannel?.Started == true)
+                return;
+
+            // 防止重入
+            int v = Interlocked.Increment(ref this._inRefresh);
+            if (v > 1)
+            {
+                Interlocked.Decrement(ref this._inRefresh);
+                return;
+            }
+
+            _cancelRefresh = new CancellationTokenSource();
+            try
+            {
+                List<string> errors = TryInitialFingerprint();
+                if (errors.Count > 0)
+                    AddErrors(errors);
+            }
+            catch (Exception ex)
+            {
+                AddErrors(new List<string> { $"重试初始化指纹环境时出现异常: {ex.Message}" });
+                return;
+            }
+            finally
+            {
+                _cancelRefresh = null;
+                Interlocked.Decrement(ref this._inRefresh);
             }
         }
 

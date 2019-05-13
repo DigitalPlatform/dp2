@@ -12165,6 +12165,9 @@ handle.CancelTokenSource.Token).Result;
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;
+
+                            // TODO: 锁定前标示状态，便于前端探知数据库状态
+
                             table.LockForRead();    // 这里读锁定整个对象。在 Read() 函数那里就不需要锁定了
                             try
                             {

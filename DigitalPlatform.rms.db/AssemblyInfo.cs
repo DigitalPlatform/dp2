@@ -59,8 +59,8 @@ using System.Runtime.InteropServices;
 // 您可以指定所有这些值，也可以使用“修订号”和“内部版本号”的默认值，方法是按
 // 如下所示使用 '*':
 
-[assembly: AssemblyVersion("3.2.*")]
-[assembly: AssemblyFileVersion("3.2.0.0")]
+[assembly: AssemblyVersion("3.3.*")]
+[assembly: AssemblyFileVersion("3.3.0.0")]
 
 //      2.2 第一个具有版本号的版本。特点是增加了SearchEx() API，另外Record结构也有改动，增加了RecordBody成员
 //      2.3 records 表中会自动增加一个列 newdptimestamp
@@ -94,4 +94,5 @@ using System.Runtime.InteropServices;
 //      3.0 2018/6/23 改为用 .NET Framework 4.6.1 编译
 //      3.1 2018/9/20 GetRecords() API 中当 strStyle 为 @remove:resultset_name 用法时，resultset_name 部分可以用逗号间隔的多个全局结果集名。单个全局结果集名的第一个字符可以是 '#'，也可以不是
 //      3.2 2018/10/12 广泛应用 CancellationToken 提高 down 时候的敏捷度
+//      3.3 2019/5/13 RefreshDb() API 增加了 "start_endfastappend" 动作
 
