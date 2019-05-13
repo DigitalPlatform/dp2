@@ -137,6 +137,8 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            SetErrorState("error");
+
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
             {
                 MessageBox.Show(this, "fingerprintcenter 被木马软件干扰，无法启动");
@@ -298,9 +300,24 @@ bool bClickClose = false)
                     FingerPrint.StartCapture(_cancel.Token);
                     // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
                     // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
-                    if (result.ErrorCode == "RequestError")
+                    if (result.ErrorCode == "RequestError"
+                        || result.ErrorCode == "NotLogin")
+                    {
+                        // TODO: 要提醒用户，此时没有初始化成功，但后面会重试
+                        SetErrorState("retry");
                         StartTimer();
+                    }
+                    else
+                    {
+                        // TODO: 需要进入警告状态(表示软件后面不会自动重试)，让工作人员明白必须介入
+                        SetErrorState("error");
+                    }
+
                     return result;
+                }
+                else
+                {
+                    SetErrorState("normal");
                 }
                 if (result.Value == 0)
                     this.ShowMessage(result.ErrorInfo, "yellow", true);
@@ -313,6 +330,37 @@ bool bClickClose = false)
             StartTimer();
 
             return new NormalResult();
+        }
+
+        void SetWholeColor(Color backColor, Color foreColor)
+        {
+            this.BackColor = backColor;
+            this.ForeColor = foreColor;
+            foreach (TabPage page in this.tabControl_main.TabPages)
+            {
+                page.BackColor = backColor;
+                page.ForeColor = foreColor;
+            }
+            this.toolStrip1.BackColor = backColor;
+            this.toolStrip1.ForeColor = foreColor;
+
+            this.menuStrip1.BackColor = backColor;
+            this.menuStrip1.ForeColor = foreColor;
+
+            this.statusStrip1.BackColor = backColor;
+            this.statusStrip1.ForeColor = foreColor;
+        }
+
+        void SetErrorState(string state)
+        {
+            if (state == "error")   // 出现错误，后面不再会重试
+                SetWholeColor(Color.DarkRed, Color.White);
+            else if (state == "retry")   // 出现错误，但后面会自动重试
+                SetWholeColor(Color.DarkOrange, Color.Black);
+            else if (state == "normal")  // 没有错误
+                SetWholeColor(SystemColors.Window, SystemColors.WindowText);
+            else
+                throw new Exception($"无法识别的 state={state}");
         }
 
         void StartTimer()
@@ -1556,7 +1604,12 @@ token);
         {
             get
             {
-                string index = this.comboBox_deviceList.Text;
+
+                string index = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.comboBox_deviceList.Text;
+                }));
+
                 if (string.IsNullOrEmpty(index))
                     return 0;
                 if (Int32.TryParse(index, out int v) == false)
