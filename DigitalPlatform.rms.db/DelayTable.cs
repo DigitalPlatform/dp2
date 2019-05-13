@@ -150,6 +150,7 @@ namespace DigitalPlatform.rms
             DelayTable table = null;
             KeyCollection part_keys = new KeyCollection();
 
+            // TODO: 如果 keys 集合为空，那么 table 是否可能为 null?
             foreach (KeyItem item in keys)
             {
                 if (table == null)

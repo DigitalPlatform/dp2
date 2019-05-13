@@ -72,7 +72,7 @@ namespace dp2SSL
             List<string> errors = new List<string>();
 
             // 重试初始化指纹环境
-            errors.AddRange(App.CurrentApp.InitialFingerprint());
+            errors.AddRange(App.CurrentApp.TryInitialFingerprint());
 
             App.CurrentApp.ClearFingerprintMessage();
 #if NO

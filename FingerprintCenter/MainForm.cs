@@ -231,6 +231,10 @@ bool bClickClose = false)
         void BeginStart()
         {
             this.ClearMessage();
+            this.Invoke((Action)(() =>
+            {
+                toolStripStatusLabel1.Text = "";
+            }));
 
             if (_initialized == true)
                 return;
@@ -245,6 +249,7 @@ bool bClickClose = false)
                     string strError = "指纹功能启动失败: " + result.ErrorInfo;
                     Speak(strError, true);
                     this.ShowMessage(strError, "red", true);
+                    OutputHistory(strError, 2);
 
                     if (result.ErrorCode == "driver not install")
                     {
@@ -255,6 +260,7 @@ bool bClickClose = false)
                 {
                     _initialized = true;
                     Speak("指纹功能启动成功");
+                    OutputHistory("指纹功能启动成功", 0);
                 }
             });
         }
@@ -286,6 +292,7 @@ bool bClickClose = false)
 
             DisplayText("Init Cache ...");
 
+#if REMOVED
             {
                 // 初始化指纹缓存
                 // return:
@@ -322,6 +329,12 @@ bool bClickClose = false)
                 if (result.Value == 0)
                     this.ShowMessage(result.ErrorInfo, "yellow", true);
             }
+#endif
+            {
+                var result = TryInitFingerprintCache();
+                if (result.Value == -1)
+                    return result;
+            }
 
             // 开始捕捉指纹
             FingerPrint.StartCapture(_cancel.Token);
@@ -332,23 +345,66 @@ bool bClickClose = false)
             return new NormalResult();
         }
 
+        NormalResult TryInitFingerprintCache()
+        {
+            // 初始化指纹缓存
+            // return:
+            //      -1  出错
+            //      0   没有获得任何数据
+            //      >=1 获得了数据
+            var result = _initFingerprintCache();
+            if (result.Value == -1)
+            {
+
+                // 开始捕捉指纹
+                FingerPrint.StartCapture(_cancel.Token);
+                // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
+                // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
+                if (result.ErrorCode == "RequestError"
+                    || result.ErrorCode == "NotLogin")
+                {
+                    // TODO: 要提醒用户，此时没有初始化成功，但后面会重试
+                    SetErrorState("retry");
+                    StartTimer();
+                }
+                else
+                {
+                    // TODO: 需要进入警告状态(表示软件后面不会自动重试)，让工作人员明白必须介入
+                    SetErrorState("error");
+                }
+
+                return result;
+            }
+            else
+            {
+                SetErrorState("normal");
+            }
+            if (result.Value == 0)
+                this.ShowMessage(result.ErrorInfo, "yellow", true);
+
+            return new NormalResult();
+        }
+
         void SetWholeColor(Color backColor, Color foreColor)
         {
-            this.BackColor = backColor;
-            this.ForeColor = foreColor;
-            foreach (TabPage page in this.tabControl_main.TabPages)
+            this.Invoke((Action)(() =>
             {
-                page.BackColor = backColor;
-                page.ForeColor = foreColor;
-            }
-            this.toolStrip1.BackColor = backColor;
-            this.toolStrip1.ForeColor = foreColor;
+                this.BackColor = backColor;
+                this.ForeColor = foreColor;
+                foreach (TabPage page in this.tabControl_main.TabPages)
+                {
+                    page.BackColor = backColor;
+                    page.ForeColor = foreColor;
+                }
+                this.toolStrip1.BackColor = backColor;
+                this.toolStrip1.ForeColor = foreColor;
 
-            this.menuStrip1.BackColor = backColor;
-            this.menuStrip1.ForeColor = foreColor;
+                this.menuStrip1.BackColor = backColor;
+                this.menuStrip1.ForeColor = foreColor;
 
-            this.statusStrip1.BackColor = backColor;
-            this.statusStrip1.ForeColor = foreColor;
+                this.statusStrip1.BackColor = backColor;
+                this.statusStrip1.ForeColor = foreColor;
+            }));
         }
 
         void SetErrorState(string state)
@@ -731,7 +787,7 @@ bool bClickClose = false)
         //      -1  出错
         //      0   没有获得任何数据
         //      >=1 获得了数据
-        NormalResult InitFingerprintCache()
+        NormalResult _initFingerprintCache()
         {
             string strError = "";
             string strUrl = (string)this.Invoke((Func<string>)(() =>
@@ -754,6 +810,13 @@ bool bClickClose = false)
             try
             {
                 ReplicationPlan plan = BioUtil.GetReplicationPlan(channel);
+                if (plan.Value == -1)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = plan.ErrorInfo,
+                        ErrorCode = plan.ErrorCode
+                    };
                 this.Invoke((Action)(() =>
                 {
                     this.textBox_replicationStart.Text = plan.StartDate;
@@ -789,7 +852,7 @@ bool bClickClose = false)
                 //      -1  出错
                 //      0   没有获得任何数据
                 //      >=1 获得了数据
-                var result = InitFingerprintCache();
+                var result = _initFingerprintCache();
                 if (result.Value == -1)
                     ShowMessageBox(result.ErrorInfo);
             });
@@ -1283,6 +1346,8 @@ Keys keyData)
         {
             _channelPool.Clear();
             this.textBox_replicationStart.Text = "";
+            // 2019/5/14
+            _initialized = false;
         }
 
         private void MenuItem_lightWhite_Click(object sender, EventArgs e)
@@ -1432,6 +1497,22 @@ token);
         // 指立即从服务器获取最新日志，同步指纹变动信息
         private void MenuItem_refresh_Click(object sender, EventArgs e)
         {
+#if NO
+            string strStartDate = (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.textBox_replicationStart.Text;
+            }));
+
+            // 如果没有明确的日期，那就从头开始初始化指纹缓存
+            if (string.IsNullOrEmpty(strStartDate))
+            {
+                var result = TryInitFingerprintCache();
+                if (result.Value == -1)
+                    MessageBox.Show(this, result.ErrorInfo);
+            }
+            else
+                BeginReplication();
+#endif
             BeginReplication();
         }
 

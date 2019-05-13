@@ -1,8 +1,10 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -147,6 +149,14 @@ namespace dp2SSL
         {
             Window cfg_window = new ConfigWindow();
             cfg_window.ShowDialog();
+
+            // 重试初始化指纹环境
+            // TODO: 有时候会遇到报错。可能略微延时一下重试就又可以了
+            List<string> errors = App.CurrentApp.InitialFingerPrint();
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
+            }
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
