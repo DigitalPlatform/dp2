@@ -5522,23 +5522,6 @@ dlg.UiState);
                 return -1;
             }
 
-#if NO
-            // 询问文件名
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.Title = "请指定要输出的 Excel 文件名";
-            dlg.CreatePrompt = false;
-            dlg.OverwritePrompt = true;
-            // dlg.FileName = this.ExportExcelFilename;
-            // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
-            dlg.RestoreDirectory = true;
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return 0;
-#endif
-
             XLWorkbook doc = null;
 
             try
@@ -5551,6 +5534,8 @@ dlg.UiState);
                 strError = "ReaderSearchForm new XLWorkbook() {0BD1CB34-DF8A-4DDB-B884-8A9CF830D7C7} exception: " + ExceptionUtil.GetAutoText(ex);
                 return -1;
             }
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始导出读者详情</div>");
 
             IXLWorksheet sheet = null;
             sheet = doc.Worksheets.Add("表格");
@@ -5587,6 +5572,28 @@ dlg.UiState);
                     catch (Exception ex)
                     {
                         strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
+                        return -1;
+                    }
+
+                    try
+                    {
+                        // 过滤读者记录
+                        // parameters:
+                        //      filtering   过滤特征。空表示不过滤。amerce,borrowing,overdue
+                        // return:
+                        //      true 表示通过了过滤
+                        //      false   表示没有通过过滤
+                        // exception:
+                        //      可能会抛出 Exception 异常
+                        if (FilterPatron(dom, dlg.Filtering) == false)
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"读者记录 {strXml} 不符合过滤条件 '{dlg.Filtering}'，被跳过") + "</div>");
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = $"处理读者记录 {strXml} 时出现异常: {ex.Message}";
                         return -1;
                     }
 
@@ -5725,6 +5732,7 @@ dlg.UiState);
                     }
                 }
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束导出读者详情</div>");
             }
             return 1;
         }
@@ -6892,6 +6900,63 @@ dlg.UiState);
 
 #endif
 
+        // 过滤读者记录
+        // parameters:
+        //      filtering   过滤特征。空表示不过滤。amerce,borrowing,overdue
+        // return:
+        //      true 表示通过了过滤
+        //      false   表示没有通过过滤
+        // exception:
+        //      可能会抛出 Exception 异常
+        static bool FilterPatron(XmlDocument dom,
+            string filtering)
+        {
+            if (string.IsNullOrEmpty(filtering))
+                return true;
+
+            // 有未交费用
+            if (StringUtil.IsInList("amerce", filtering))
+            {
+                XmlNodeList overdues = dom.DocumentElement.SelectNodes("overdues/overdue");
+                if (overdues.Count > 0)
+                    return true;
+            }
+
+            // 有在借册
+            if (StringUtil.IsInList("borrowing", filtering))
+            {
+                XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                if (borrows.Count > 0)
+                    return true;
+            }
+
+            // 有过期未还的册
+            if (StringUtil.IsInList("overdue", filtering))
+            {
+                XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                foreach (XmlElement borrow in borrows)
+                {
+                    string borrowDate = borrow.GetAttribute("borrowDate");
+                    string period = borrow.GetAttribute("borrowPeriod");
+
+                    // 看现在是否已经超期
+                    // return:
+                    //      -1  检测过程出错(是否超期则未知)
+                    //      1   超期
+                    //      0   没有超期
+                    int nRet = Global.IsOverdue(borrowDate,
+                        period,
+                        out string strError);
+                    if (nRet == -1)
+                        throw new Exception($"在检查是否超期过程中发现读者记录错误: {strError}");
+                    if (nRet == 1)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         // return:
         //      -1  出错
         //      0   用户中断
@@ -6974,6 +7039,8 @@ dlg.UiState);
 
             try
             {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始导出读者详情</div>");
+
                 // return:
                 //      -1  出错。包括用户中断的情况
                 //      >=0 实际处理的读者记录数
@@ -6983,6 +7050,28 @@ dlg.UiState);
                     (strRecPath, dom, timestamp) =>
                     {
                         this.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        try
+                        {
+                            // 过滤读者记录
+                            // parameters:
+                            //      filtering   过滤特征。空表示不过滤。amerce,borrowing,overdue
+                            // return:
+                            //      true 表示通过了过滤
+                            //      false   表示没有通过过滤
+                            // exception:
+                            //      可能会抛出 Exception 异常
+                            if (FilterPatron(dom, dlg.Filtering) == false)
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode($"读者记录 {strRecPath} 不符合过滤条件 '{dlg.Filtering}'，被跳过") + "</div>");
+                                return true;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            string strErrorText = $"处理读者记录 {strRecPath} 时出现异常: {ex.Message}";
+                            throw new Exception(strErrorText, ex);
+                        }
 
                         string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
 
@@ -7138,6 +7227,7 @@ dlg.UiState);
                     }
                 }
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束导出读者详情</div>");
                 this.ClearMessage();
             }
 

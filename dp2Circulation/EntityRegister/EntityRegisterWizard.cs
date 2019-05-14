@@ -950,7 +950,6 @@ MessageBoxDefaultButton.Button1);
                     this.ClearMessage();
                 }
 
-
                 if (string.IsNullOrEmpty(strTotalError) == false)
                     this.ShowMessage(strError, "red", true);
                 else if (nHitCount == 0)
@@ -2506,7 +2505,7 @@ out strError);
             public string BiblioRecPath = "";   // 书目记录路径
         }
 
-#endregion
+        #endregion
 
         int SetBiblio(RegisterBiblioInfo info,
             bool bAutoSetFocus,
@@ -2594,9 +2593,79 @@ out strError);
             return 0;
         }
 
-        private void dpTable_browseLines_DoubleClick(object sender, EventArgs e)
+        private async void dpTable_browseLines_DoubleClick(object sender, EventArgs e)
         {
-            EditSelectedBrowseLine();
+            if (this.dpTable_browseLines.FocusedItem != null
+                && this.dpTable_browseLines.FocusedItem is DpRow
+                && ((DpRow)this.dpTable_browseLines.FocusedItem).Tag is ZClientChannel info)
+            {
+                await LoadNextBatch(info, this.dpTable_browseLines.FocusedItem as DpRow, false);
+            }
+            else
+                EditSelectedBrowseLine();
+        }
+
+        async Task LoadNextBatch(
+            ZClientChannel channel,
+            DpRow insert_pos, 
+            bool all)
+        {
+            _zsearcher.InSearching = true;
+            this.EnableControls(false);
+            stop.OnStop += OnZ3950LoadStop;
+            stop.Initial("正在装载 Z39.50 检索内容 ...");
+            stop.BeginLoop();
+            try
+            {
+                if (channel._fetched >= channel._resultCount)
+                {
+                    this.ShowMessage("已经全部载入", "yellow", true);
+                    return;
+                }
+
+                while (channel._fetched < channel._resultCount)
+                {
+                    if (_zsearcher.InSearching == false)
+                        break;
+
+                    stop.SetMessage($"正在装载 Z39.50 检索内容({channel._fetched}-) ...");
+
+                    var present_result = await Z3950Searcher.FetchRecords(channel,
+                        all ? 50 : 10);
+
+                    {
+                        if (present_result.Records != null)
+                            FillList(channel._fetched,
+                channel.ZClient.ForcedRecordsEncoding == null ? channel.TargetInfo.DefaultRecordsEncoding : channel.ZClient.ForcedRecordsEncoding,
+                channel.ServerName,
+                present_result.Records, insert_pos);
+                        UpdateCommandLine(insert_pos, channel, present_result);
+                    }
+
+                    if (present_result.Value == -1)
+                        break;
+                    else
+                        channel._fetched += present_result.Records.Count;
+
+                    if (all == false)
+                        break;
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= OnZ3950LoadStop;
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+                _zsearcher.InSearching = false;
+            }
+        }
+
+        private void OnZ3950LoadStop(object sender, StopEventArgs e)
+        {
+            _zsearcher.Stop();
         }
 
         // 选定一个浏览行
@@ -3022,7 +3091,7 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-#region 册记录相关
+        #region 册记录相关
 
         // 将一条书目记录下属的若干册记录装入列表
         // return:
@@ -3383,9 +3452,9 @@ int nCount)
                 this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
-#endregion
+        #endregion
 
-#region 保存书目记录
+        #region 保存书目记录
 
         // 保存书目记录和下属的册记录
         // return:
@@ -3913,9 +3982,9 @@ int nCount)
             return 0;
         }
 
-#endregion
+        #endregion
 
-#region 删除书目记录
+        #region 删除书目记录
 
         // return:
         //      -1  出错
@@ -4104,7 +4173,7 @@ int nCount)
             }
         }
 
-#endregion
+        #endregion
 
         private void flowLayoutPanel1_SizeChanged(object sender, EventArgs e)
         {
@@ -4724,7 +4793,7 @@ MessageBoxDefaultButton.Button2);
             this.DeleteBiblioRecord();
         }
 
-#region 键盘输入面板
+        #region 键盘输入面板
 
         KeyboardForm _keyboardForm = null;
 
@@ -4870,7 +4939,7 @@ MessageBoxDefaultButton.Button2);
             // this.easyMarcControl1.HideSelection = true;
         }
 
-#endregion
+        #endregion
 
         private void EntityRegisterWizard_Move(object sender, EventArgs e)
         {
