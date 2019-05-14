@@ -9,6 +9,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -79,7 +80,7 @@ namespace dp2Circulation
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -245,6 +246,12 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_chargingHistory, false));
 
                 controls.Add(this.textBox_chargingHistory_dateRange);
+
+                controls.Add(new ControlWrapper(this.checkBox_filter_notFilter, true));
+                controls.Add(new ControlWrapper(this.checkBox_filter_borrowing, false));
+                controls.Add(new ControlWrapper(this.checkBox_filter_overdue, false));
+                controls.Add(new ControlWrapper(this.checkBox_filter_amerce, false));
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -259,6 +266,12 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_chargingHistory, false));
 
                 controls.Add(this.textBox_chargingHistory_dateRange);
+
+                controls.Add(new ControlWrapper(this.checkBox_filter_notFilter, true));
+                controls.Add(new ControlWrapper(this.checkBox_filter_borrowing, false));
+                controls.Add(new ControlWrapper(this.checkBox_filter_overdue, false));
+                controls.Add(new ControlWrapper(this.checkBox_filter_amerce, false));
+
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -334,6 +347,62 @@ namespace dp2Circulation
             {
                 strError = "检测文件名的过程出错: " + ex.Message;
                 return -1;
+            }
+        }
+
+        private void checkBox_filter_notFilter_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_filter_notFilter.Checked)
+            {
+                this.checkBox_filter_overdue.Enabled = false;
+                this.checkBox_filter_amerce.Enabled = false;
+                this.checkBox_filter_borrowing.Enabled = false;
+            }
+            else
+            {
+                this.checkBox_filter_overdue.Enabled = true;
+                this.checkBox_filter_amerce.Enabled = true;
+                this.checkBox_filter_borrowing.Enabled = true;
+            }
+        }
+
+        public string Filtering
+        {
+            get
+            {
+                List<string> names = new List<string>();
+                if (this.checkBox_filter_notFilter.Checked)
+                    return "";
+                if (this.checkBox_filter_amerce.Checked)
+                    names.Add("amerce");
+                if (this.checkBox_filter_borrowing.Checked)
+                    names.Add("borrwing");
+                if (this.checkBox_filter_overdue.Checked)
+                    names.Add("overdue");
+                return StringUtil.MakePathList(names, ",");
+            }
+            set
+            {
+                this.checkBox_filter_amerce.Checked = false;
+                this.checkBox_filter_borrowing.Checked = false;
+                this.checkBox_filter_overdue.Checked = false;
+
+                if (string.IsNullOrEmpty(value))
+                {
+                    this.checkBox_filter_notFilter.Checked = true;
+                    return;
+                }
+
+                List<string> names = StringUtil.SplitList(value);
+                foreach (var name in names)
+                {
+                    if (name == "amerce")
+                        this.checkBox_filter_amerce.Checked = true;
+                    if (name == "borrowing")
+                        this.checkBox_filter_borrowing.Checked = true;
+                    if (name == "overdue")
+                        this.checkBox_filter_overdue.Checked = true;
+                }
             }
         }
     }

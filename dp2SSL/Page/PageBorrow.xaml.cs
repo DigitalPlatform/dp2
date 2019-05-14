@@ -335,7 +335,7 @@ namespace dp2SSL
                 // 获得所有协议类型的标签
                 ListTagsResult result = null;
 
-                if ((bool)_rfidChannel?.Started)
+                if (_rfidChannel != null && _rfidChannel.Started)
                     result = _rfidChannel?.Object?.ListTags("*",
                         null
                         // "getTagInfo"

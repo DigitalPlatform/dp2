@@ -37,6 +37,9 @@ namespace dp2Circulation
         // parameters:
         //      end 应还书时间。GMT 时间
         //      now 当前时间。GMT 时间
+        // return:
+        //      1   超期
+        //      0   没有超期
         public static int IsOver(string strUnit,
             DateTime end,
             DateTime now,
@@ -53,6 +56,10 @@ namespace dp2Circulation
         }
 
         // 看现在是否已经超期
+        // return:
+        //      -1  检测过程出错(是否超期则未知)
+        //      1   超期
+        //      0   没有超期
         public static int IsOverdue(string strBorrowDate,
             string strPeriod,
             out string strError)
@@ -69,13 +76,10 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            string strPeriodUnit = "";
-            long lPeriodValue = 0;
-
             nRet = DateTimeUtil.ParsePeriodUnit(strPeriod,
                 "day",
-                out lPeriodValue,
-                out strPeriodUnit,
+                out long lPeriodValue,
+                out string strPeriodUnit,
                 out strError);
             if (nRet == -1)
             {
