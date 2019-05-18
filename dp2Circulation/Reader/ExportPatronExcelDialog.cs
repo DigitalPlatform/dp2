@@ -376,7 +376,7 @@ namespace dp2Circulation
                 if (this.checkBox_filter_amerce.Checked)
                     names.Add("amerce");
                 if (this.checkBox_filter_borrowing.Checked)
-                    names.Add("borrwing");
+                    names.Add("borrowing");
                 if (this.checkBox_filter_overdue.Checked)
                     names.Add("overdue");
                 return StringUtil.MakePathList(names, ",");

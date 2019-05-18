@@ -363,15 +363,13 @@ bool bClickClose = false)
                 if (result.ErrorCode == "RequestError"
                     || result.ErrorCode == "NotLogin")
                 {
-                    // TODO: 要提醒用户，此时没有初始化成功，但后面会重试
-                    SetErrorState("retry");
                     StartTimer();
                 }
-                else
-                {
-                    // TODO: 需要进入警告状态(表示软件后面不会自动重试)，让工作人员明白必须介入
+
+                if (_timer == null)
                     SetErrorState("error");
-                }
+                else
+                    SetErrorState("retry");
 
                 return result;
             }
