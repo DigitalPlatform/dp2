@@ -36,8 +36,6 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
-
-
         // parameters:
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
         public ListTagsResult ListTags(string reader_name, string style)
@@ -62,11 +60,10 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name, reader.Name) == false)
                     continue;
 
-
                 InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name, "");
                 if (inventory_result.Value == -1)
                 {
-                    return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo };
+                    return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo, ErrorCode = inventory_result.ErrorCode };
                 }
 
                 foreach (InventoryInfo info in inventory_result.Results)

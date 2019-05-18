@@ -26,13 +26,17 @@ namespace DigitalPlatform.RFID.UI
             set
             {
                 _chip = value;
-                if (value != null)
+
+                if (propertyGrid1 != null)
                 {
-                    var viewModel = ViewModel.DressUp(value);
-                    propertyGrid1.SelectedObject = viewModel;
+                    if (value != null)
+                    {
+                        var viewModel = ViewModel.DressUp(value);
+                        propertyGrid1.SelectedObject = viewModel;
+                    }
+                    else
+                        propertyGrid1.SelectedObject = null;
                 }
-                else
-                    propertyGrid1.SelectedObject = null;
             }
         }
 
@@ -120,11 +124,12 @@ namespace DigitalPlatform.RFID.UI
         {
             get
             {
-                return this.label_titile.Text;
+                return this.label_titile?.Text;
             }
             set
             {
-                this.label_titile.Text = value;
+                if (this.label_titile != null)
+                    this.label_titile.Text = value;
             }
         }
 
@@ -136,11 +141,16 @@ namespace DigitalPlatform.RFID.UI
             }
             set
             {
-                this.label_titile.Visible = value;
-                if (value == false)
-                    this.propertyGrid1.Dock = DockStyle.Fill;
-                else
-                    this.propertyGrid1.Dock = DockStyle.None;
+                if (this.label_titile != null)
+                    this.label_titile.Visible = value;
+
+                if (this.propertyGrid1 != null)
+                {
+                    if (value == false)
+                        this.propertyGrid1.Dock = DockStyle.Fill;
+                    else
+                        this.propertyGrid1.Dock = DockStyle.None;
+                }
             }
         }
     }

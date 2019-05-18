@@ -9,10 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
+using log4net;
+
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using log4net;
 
 namespace RfidDrivers.First
 {
@@ -122,7 +123,7 @@ namespace RfidDrivers.First
             }
 
             // 去掉填充信息阶段报错的那些 reader
-            foreach(Reader reader in removed)
+            foreach (Reader reader in removed)
             {
                 readers.Remove(reader);
             }
@@ -212,13 +213,15 @@ namespace RfidDrivers.First
         }
 
         NormalResult GetReaderHandle(string reader_name,
-            out UIntPtr handle)
+            out UIntPtr handle,
+            out string protocols)
         {
+            protocols = "";
             handle = UIntPtr.Zero;
             // Lock();
             try
             {
-                handle = GetReaderHandle(reader_name);
+                handle = GetReaderHandle(reader_name, out protocols);
                 if (handle == UIntPtr.Zero)
                     return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
                 return new NormalResult();
@@ -273,8 +276,9 @@ namespace RfidDrivers.First
 
 
         // 根据 reader 名字找到 reader_handle
-        UIntPtr GetReaderHandle(string reader_name)
+        UIntPtr GetReaderHandle(string reader_name, out string protocols)
         {
+            protocols = "";
             foreach (Reader reader in _readers)
             {
                 if (reader.Name == reader_name)
@@ -285,6 +289,7 @@ namespace RfidDrivers.First
                         throw new Exception($"名为 {reader_name} 的读卡器尚未打开");
                     return reader.Result?.ReaderHandle;
 #endif
+                    protocols = reader.Protocols;
                     return reader.ReaderHandle;
                 }
             }
@@ -1500,10 +1505,12 @@ namespace RfidDrivers.First
 
         static bool GetDriverName(string product_id,
             out string driver_name,
-            out string product_name)
+            out string product_name,
+            out string protocols)
         {
             driver_name = "";
             product_name = "";
+            protocols = "";
 
             if (_product_dom == null)
             {
@@ -1513,14 +1520,32 @@ namespace RfidDrivers.First
 
             // return _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
 
-            XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
-            if (node == null)
-                return false;
-
-            // driver id
-            driver_name = node.Value;
+            {
+                XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
+                if (node == null)
+                    return false;
+                // driver id
+                driver_name = node.Value;
+            }
 
             product_name = _product_dom.DocumentElement.SelectSingleNode($"device[basic/id[text()='{product_id}']]/@product")?.Value;
+
+            {
+                XmlElement hf = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../../protocol/HF") as XmlElement;
+                if (hf != null)
+                {
+                    List<string> list = new List<string>();
+                    foreach (XmlAttribute attr in hf.Attributes)
+                    {
+                        if (attr.Value != "true")
+                            continue;
+                        list.Add(attr.Name);
+                    }
+
+                    protocols = StringUtil.MakePathList(list);
+                }
+            }
+
             return true;
 #if NO
             XmlNode node = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../driver/text()");
@@ -1567,12 +1592,14 @@ namespace RfidDrivers.First
 
                 bool bRet = GetDriverName(product_id,
                     out string driver_name,
-                    out string product_name);
+                    out string product_name,
+                    out string protocols);
                 if (bRet == false)
                     return new NormalResult { Value = -1, ErrorInfo = $"product_id {product_id} 没有找到 driver name" };
 
                 reader.DriverName = driver_name;
                 reader.ProductName = product_name;
+                reader.Protocols = protocols;
                 return new NormalResult();
             }
             finally
@@ -1605,7 +1632,7 @@ namespace RfidDrivers.First
             else if (comm_type == "COM")
             {
                 // TODO: BaudRate=38400;Frame=8E1;BusAddr=255 应该可以配置
-                return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate=38400;Frame=8E1;BusAddr=255";
+                return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate=38400;Frame=8E1;BusAddr=255";// Frame=8E1 或者 8N1 8O1
             }
             else
                 throw new ArgumentException($"未知的 comm_type [{comm_type}]");
@@ -1743,7 +1770,9 @@ namespace RfidDrivers.First
             Lock();
             try
             {
-                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                NormalResult result = GetReaderHandle(reader_name,
+                    out UIntPtr hreader,
+                    out string protocols);
                 if (result.Value == -1)
                     return new InventoryResult(result);
 
@@ -1754,6 +1783,7 @@ namespace RfidDrivers.First
                 UInt32 nTagCount = 0;
                 int ret = tag_inventory(
                     hreader,
+                    protocols,
                     ai_type,
                     1,
                     new Byte[] { 1 },
@@ -1973,21 +2003,28 @@ namespace RfidDrivers.First
             string reader_name,
             string pii)
         {
+#if NO
             List<object> handles = GetAllReaderHandle(reader_name);
             if (handles.Count == 0)
+                return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+#endif
+            List<Reader> readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
                 return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             Lock();
             try
             {
-                foreach (UIntPtr hreader in handles)
+                foreach (Reader reader in readers)
                 {
+                    // UIntPtr hreader = reader.ReaderHandle;
                     // 枚举所有标签
                     byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
 
                     UInt32 nTagCount = 0;
                     int ret = tag_inventory(
-                        hreader,
+                        reader.ReaderHandle,
+                        reader.Protocols,
                         ai_type,
                         1,
                         new Byte[] { 1 },
@@ -1998,7 +2035,7 @@ namespace RfidDrivers.First
                         {
                             Value = -1,
                             ErrorInfo = "tag_inventory error",
-                            ErrorCode = GetErrorCode(ret, hreader)
+                            ErrorCode = GetErrorCode(ret, reader.ReaderHandle)
                         };
 
                     Debug.Assert(nTagCount == results.Count);
@@ -2006,7 +2043,7 @@ namespace RfidDrivers.First
                     foreach (InventoryInfo info in results)
                     {
                         UIntPtr hTag = _connectTag(
-    hreader,
+    reader.ReaderHandle,
     info?.UID,
     info.TagType);
                         if (hTag == UIntPtr.Zero)
@@ -2023,7 +2060,7 @@ namespace RfidDrivers.First
                             dsfid = afi = icref = 0;
                             blkSize = blkNum = 0;
                             iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
-                                hreader,
+                                reader.ReaderHandle,
                                 hTag,
                                 uid,
                                 ref dsfid,
@@ -2036,11 +2073,11 @@ namespace RfidDrivers.First
                                 {
                                     Value = -1,
                                     ErrorInfo = "ISO15693_GetSystemInfo() error 1",
-                                    ErrorCode = GetErrorCode(iret, hreader)
+                                    ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                 };
 
                             ReadBlocksResult result0 = ReadBlocks(
-                                hreader,
+                                reader.ReaderHandle,
                         hTag,
                         0,
                         blkNum,
@@ -2063,7 +2100,7 @@ namespace RfidDrivers.First
                         }
                         finally
                         {
-                            _disconnectTag(hreader, ref hTag);
+                            _disconnectTag(reader.ReaderHandle, ref hTag);
                         }
                     }
                 }
@@ -2422,7 +2459,7 @@ namespace RfidDrivers.First
             Lock();
             try
             {
-                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader, out string protocols);
                 if (result.Value == -1)
                     return result;
 
@@ -2727,7 +2764,7 @@ namespace RfidDrivers.First
             Lock();
             try
             {
-                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader);
+                NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader, out string protocols);
                 if (result.Value == -1)
                     return new GetTagInfoResult(result);
 #if DEBUG
@@ -2902,6 +2939,7 @@ namespace RfidDrivers.First
         //      AntinnaSel  从 1 开始？
         public int tag_inventory(
             UIntPtr hreader,
+            string protocols,
             Byte AIType,
             Byte AntennaSelCount,
             Byte[] AntennaSel,
@@ -2922,8 +2960,8 @@ namespace RfidDrivers.First
                     0x00,   // AFI, 打算要匹配的 AFI byte 值
                     0);
 
-                RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
-
+                if (StringUtil.IsInList("ISO14443A", protocols))
+                    RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
             }
             nTagCount = 0;
             LABEL_TAG_INVENTORY:
@@ -2973,6 +3011,7 @@ namespace RfidDrivers.First
                     }
 
                     /* Parse Iso14443A tag report */
+                    if (StringUtil.IsInList("ISO14443A", protocols))
                     {
                         uid = new Byte[8];
 

@@ -720,7 +720,7 @@ namespace DigitalPlatform.Marc
                 {
                     this.m_fixedSizeFont = value;
                     this.m_captionFont = value;
-                    this.Font = value;
+                    base.Font = value;  // 2019/5/18 从 this.Font 改过来
                     return;
                 }
 
