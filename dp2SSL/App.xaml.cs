@@ -509,6 +509,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _cancelRefresh = new CancellationTokenSource();
             try
             {
+                ClearErrors();  // 2019/5/20
                 List<string> errors = TryInitialFingerprint();
                 if (errors.Count > 0)
                     AddErrors(errors);

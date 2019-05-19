@@ -133,8 +133,15 @@ namespace FingerprintCenter
 
         public static NormalResult _enableSendKey(bool enable)
         {
+            bool old_enable = false;
             if (Program.MainForm != null)
-                Program.MainForm.SendKeyEnabled = enable;
+            {
+                old_enable = Program.MainForm.SendKeyEnabled;
+                if (old_enable != enable)
+                    Program.MainForm.SendKeyEnabled = enable;
+                else
+                    return new NormalResult();  // 优化，如果值没有变化则不显示操作历史
+            }
 
             string message = "";
             if (enable)

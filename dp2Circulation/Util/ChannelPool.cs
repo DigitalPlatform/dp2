@@ -14,6 +14,9 @@ namespace dp2Circulation
     /// <typeparam name="T"></typeparam>
     public class ChannelPool<T>
     {
+        // 极限通道数
+        public int MAX_COUNT = 1000;    // 1000
+
         internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         List<T> _idleChannels = new List<T>();
@@ -33,6 +36,9 @@ namespace dp2Circulation
                     _usedChannels.Add(result);
                     return result;
                 }
+
+                if (_idleChannels.Count + _usedChannels.Count > MAX_COUNT)
+                    throw new Exception();
 
                 {
                     var new_channel = func_new();
@@ -60,11 +66,15 @@ namespace dp2Circulation
             }
         }
 
-        public void ClearIdle()
+        public void ClearIdle(delegate_deleteChannel func_delete)
         {
             _lock.EnterWriteLock();
             try
             {
+                foreach (T channel in _idleChannels)
+                {
+                    func_delete(channel);
+                }
                 _idleChannels.Clear();
             }
             finally
@@ -73,12 +83,23 @@ namespace dp2Circulation
             }
         }
 
-        public void Close()
+        public delegate void delegate_deleteChannel(T channel);
+
+        public void Close(delegate_deleteChannel func_delete)
         {
             _lock.EnterWriteLock();
             try
             {
+                foreach (T channel in _usedChannels)
+                {
+                    func_delete(channel);
+                }
                 _usedChannels.Clear();
+
+                foreach (T channel in _idleChannels)
+                {
+                    func_delete(channel);
+                }
                 _idleChannels.Clear();
             }
             finally

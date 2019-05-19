@@ -812,5 +812,95 @@ namespace DigitalPlatform.CirculationClient
         }
 
         #endregion
+
+        #region Form 实用函数
+
+        public delegate void delegate_action(object o);
+
+        public static void ProcessControl(Control control,
+            delegate_action action)
+        {
+            action(control);
+            ProcessChildren(control, action);
+        }
+
+        static void ProcessChildren(Control parent,
+            delegate_action action)
+        {
+            // 修改所有下级控件的字体，如果字体名不一样的话
+            foreach (Control sub in parent.Controls)
+            {
+                action(sub);
+
+                if (sub is ToolStrip)
+                {
+                    ProcessToolStrip((ToolStrip)sub, action);
+                }
+
+                if (sub is SplitContainer)
+                {
+                    ProcessSplitContainer(sub as SplitContainer, action);
+                }
+
+                // 递归
+                ProcessChildren(sub, action);
+            }
+        }
+
+        static void ProcessToolStrip(ToolStrip tool,
+delegate_action action)
+        {
+            List<ToolStripItem> items = new List<ToolStripItem>();
+            foreach (ToolStripItem item in tool.Items)
+            {
+                items.Add(item);
+            }
+
+            foreach (ToolStripItem item in items)
+            {
+                action(item);
+
+                if (item is ToolStripMenuItem)
+                {
+                    ProcessDropDownItemsFont(item as ToolStripMenuItem, action);
+                }
+            }
+        }
+
+        static void ProcessDropDownItemsFont(ToolStripMenuItem menu,
+            delegate_action action)
+        {
+            // 修改所有事项的字体，如果字体名不一样的话
+            foreach (ToolStripItem item in menu.DropDownItems)
+            {
+
+                action(item);
+
+                if (item is ToolStripMenuItem)
+                {
+                    ProcessDropDownItemsFont(item as ToolStripMenuItem, action);
+                }
+            }
+        }
+
+        static void ProcessSplitContainer(SplitContainer container,
+            delegate_action action)
+        {
+            action(container.Panel1);
+
+            foreach (Control control in container.Panel1.Controls)
+            {
+                ProcessChildren(control, action);
+            }
+
+            action(container.Panel2);
+
+            foreach (Control control in container.Panel2.Controls)
+            {
+                ProcessChildren(control, action);
+            }
+        }
+
+        #endregion
     }
 }

@@ -133,7 +133,10 @@ namespace dp2Circulation
             if (_timerRefresh != null)
                 _timerRefresh.Dispose();
 
-            _rfidChannels?.Close();
+            _rfidChannels?.Close((channel) =>
+            {
+                EndRfidChannel(channel);
+            });
             //ReleaseRfidChannel();
 
             Program.MainForm.AppInfo.SetBoolean("rfidtoolform",
@@ -821,7 +824,7 @@ namespace dp2Circulation
             return 0;
         }
 
-#region RFID Channel
+        #region RFID Channel
 
         ChannelPool<RfidChannel> _rfidChannels = new ChannelPool<RfidChannel>();
 
@@ -862,7 +865,7 @@ namespace dp2Circulation
                     return channel;
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return null;
@@ -950,7 +953,7 @@ namespace dp2Circulation
             }
         }
 
-#endregion
+        #endregion
 
         class ItemInfo
         {

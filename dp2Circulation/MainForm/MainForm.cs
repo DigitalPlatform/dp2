@@ -8614,6 +8614,7 @@ Keys keyData)
                 return;
             try
             {
+                // TODO: 先查询 SendKey 状态，有变化才发出请求
                 channel?.Object?.EnableSendKey(enable);
             }
             catch

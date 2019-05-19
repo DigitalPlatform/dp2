@@ -183,6 +183,14 @@ namespace RfidCenter
         {
             this.Invoke((Action)(() =>
             {
+                ClientInfo.ProcessControl(this,
+    (o) =>
+    {
+        dynamic d = o;
+        d.BackColor = backColor;
+        d.ForeColor = foreColor;
+    });
+#if NO
                 this.BackColor = backColor;
                 this.ForeColor = foreColor;
                 foreach (TabPage page in this.tabControl_main.TabPages)
@@ -198,6 +206,7 @@ namespace RfidCenter
 
                 this.statusStrip1.BackColor = backColor;
                 this.statusStrip1.ForeColor = foreColor;
+#endif
             }));
         }
 
@@ -237,7 +246,7 @@ namespace RfidCenter
             _errorStateInfo = info;
         }
 
-        #endregion
+#endregion
 
 
         void UpdateDeviceList(List<Reader> readers)
@@ -974,7 +983,7 @@ bool bClickClose = false)
             }
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1022,9 +1031,9 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         IpcClientChannel m_rfidChannel = new IpcClientChannel();
         IRfid m_rfidObj = null;
@@ -1067,7 +1076,7 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1075,7 +1084,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1228,7 +1237,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
