@@ -73,11 +73,22 @@ namespace DigitalPlatform.Interfaces
         // 设置参数
         bool SetParameter(string strName, object value);
 
-        string GetMessage(string style);
+        GetMessageResult GetMessage(string style);
 
         // event MessageHandler DisplayMessage;
 
         NormalResult EnableSendKey(bool enable);
+    }
+
+    [Serializable()]
+    public class GetMessageResult : NormalResult
+    {
+        public string Message { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()},Message={Message}";
+        }
     }
 
     [Serializable()]

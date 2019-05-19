@@ -95,10 +95,11 @@
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_restart = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -422,7 +423,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(401, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(375, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -450,7 +451,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(404, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(378, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -577,6 +578,7 @@
             // MenuItem_file
             // 
             this.MenuItem_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_restart,
             this.MenuItem_openSendKey,
             this.MenuItem_closeSendKey,
             this.toolStripSeparator3,
@@ -588,26 +590,26 @@
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openSendKey.Text = "打开 发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(166, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(169, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -755,18 +757,6 @@
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
-            // MenuItem_manual
-            // 
-            this.MenuItem_manual.Name = "MenuItem_manual";
-            this.MenuItem_manual.Size = new System.Drawing.Size(254, 30);
-            this.MenuItem_manual.Text = "使用帮助 ...";
-            // 
-            // MenuItem_about
-            // 
-            this.MenuItem_about.Name = "MenuItem_about";
-            this.MenuItem_about.Size = new System.Drawing.Size(254, 30);
-            this.MenuItem_about.Text = "关于本软件 ...";
-            // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
@@ -780,6 +770,25 @@
             this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(254, 30);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
+            // 
+            // MenuItem_manual
+            // 
+            this.MenuItem_manual.Name = "MenuItem_manual";
+            this.MenuItem_manual.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_manual.Text = "使用帮助 ...";
+            // 
+            // MenuItem_about
+            // 
+            this.MenuItem_about.Name = "MenuItem_about";
+            this.MenuItem_about.Size = new System.Drawing.Size(254, 30);
+            this.MenuItem_about.Text = "关于本软件 ...";
+            // 
+            // MenuItem_restart
+            // 
+            this.MenuItem_restart.Name = "MenuItem_restart";
+            this.MenuItem_restart.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_restart.Text = "重新启动";
+            this.MenuItem_restart.Click += new System.EventHandler(this.MenuItem_restart_Click);
             // 
             // MainForm
             // 
@@ -892,6 +901,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openUserFolder;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openDataFolder;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openProgramFolder;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_restart;
     }
 }
 

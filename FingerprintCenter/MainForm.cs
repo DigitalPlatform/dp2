@@ -137,7 +137,7 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            SetErrorState("error");
+            SetErrorState("retry", "正在启动");
 
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
             {
@@ -208,7 +208,7 @@ bool bClickClose = false)
                 });
             }
             else
-                BeginStart();
+                BeginStart(false);
 
             // DisplayText("1");
 
@@ -228,7 +228,7 @@ bool bClickClose = false)
         // 指纹功能是否初始化成功
         bool _initialized = false;
 
-        void BeginStart()
+        void BeginStart(bool auto_retry)
         {
             this.ClearMessage();
             this.Invoke((Action)(() =>
@@ -240,7 +240,10 @@ bool bClickClose = false)
                 return;
 
             this.ShowMessage("开始启动");
-            this.OutputHistory("重新创建指纹缓存");
+            if (auto_retry)
+                this.OutputHistory("(重试)重新创建指纹缓存");
+            else
+                this.OutputHistory("重新创建指纹缓存");
             Task.Run(() =>
             {
                 NormalResult result = StartFingerPrint();
@@ -254,6 +257,12 @@ bool bClickClose = false)
                     if (result.ErrorCode == "driver not install")
                     {
                         Task.Run(() => { InstallDriver("您的电脑上尚未安装'中控'指纹仪厂家驱动。"); });
+                    }
+                    else
+                    {
+                        // 重试
+                        if (auto_retry == true)
+                            Task.Run(() => { BeginStart(false); });
                     }
                 }
                 else
@@ -279,7 +288,10 @@ bool bClickClose = false)
             {
                 NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
                 if (result.Value == -1)
+                {
+                    SetErrorState("error", result.ErrorInfo);
                     return result;
+                }
             }
 
             UpdateDeviceList();
@@ -360,28 +372,34 @@ bool bClickClose = false)
                 FingerPrint.StartCapture(_cancel.Token);
                 // 如果是请求 dp2library 服务器出错，则依然要启动 timer，这样可以自动每隔一段时间重试初始化
                 // TODO: 界面上要出现醒目的警告(或者不停语音提示)，表示请求 dp2library 出错，从而没有任何读者指纹信息可供识别时候利用
-                if (result.ErrorCode == "RequestError"
-                    || result.ErrorCode == "NotLogin")
+                if (result.ErrorCode == "RequestError")
                 {
                     StartTimer();
                 }
+                else
+                    EndTimer();
+
+                // result.ErrorCode == "NotLogin"
+                // 密码不正确的情况不要自动重试。因为重试超过十次会让当前账户被加入黑名单十分钟
 
                 if (_timer == null)
-                    SetErrorState("error");
+                    SetErrorState("error", result.ErrorInfo);
                 else
-                    SetErrorState("retry");
+                    SetErrorState("retry", result.ErrorInfo);
 
                 return result;
             }
             else
             {
-                SetErrorState("normal");
+                SetErrorState("normal", "");
             }
             if (result.Value == 0)
                 this.ShowMessage(result.ErrorInfo, "yellow", true);
 
             return new NormalResult();
         }
+
+        #region 错误状态
 
         void SetWholeColor(Color backColor, Color foreColor)
         {
@@ -405,7 +423,28 @@ bool bClickClose = false)
             }));
         }
 
-        void SetErrorState(string state)
+        // 错误状态
+        string _errorState = "normal";    // error/retry/normal
+        // 错误状态描述
+        string _errorStateInfo = "";
+
+        public string ErrorState
+        {
+            get
+            {
+                return _errorState;
+            }
+        }
+
+        public string ErrorStateInfo
+        {
+            get
+            {
+                return _errorStateInfo;
+            }
+        }
+
+        void SetErrorState(string state, string info)
         {
             if (state == "error")   // 出现错误，后面不再会重试
                 SetWholeColor(Color.DarkRed, Color.White);
@@ -415,7 +454,12 @@ bool bClickClose = false)
                 SetWholeColor(SystemColors.Window, SystemColors.WindowText);
             else
                 throw new Exception($"无法识别的 state={state}");
+
+            _errorState = state;
+            _errorStateInfo = info;
         }
+
+        #endregion
 
         void StartTimer()
         {
@@ -425,6 +469,15 @@ bool bClickClose = false)
                     null,
                     TimeSpan.FromSeconds(30),
                     TimeSpan.FromMinutes(5));   // 5 分钟
+        }
+
+        void EndTimer()
+        {
+            if (_timer != null)
+            {
+                _timer.Dispose();
+                _timer = null;
+            }
         }
 
         private void FingerPrint_ImageReady(object sender, ImageReadyEventArgs e)
@@ -549,12 +602,7 @@ bool bClickClose = false)
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            // 2019/2/21
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            EndTimer();
 
             _cancel.Cancel();
 
@@ -713,7 +761,9 @@ bool bClickClose = false)
         SpeechSynthesizer m_speech = new SpeechSynthesizer();
         string m_strSpeakContent = "";
 
-        public void Speak(string strText, bool bError = false)
+        public void Speak(string strText,
+            bool bError = false,
+            bool cancel_before = true)
         {
             string color = "gray";
             if (bError)
@@ -740,7 +790,8 @@ bool bClickClose = false)
             {
                 try
                 {
-                    this.m_speech.SpeakAsyncCancelAll();
+                    if (cancel_before)
+                        this.m_speech.SpeakAsyncCancelAll();
                     this.m_speech.SpeakAsync(strText);
                 }
                 catch (System.Runtime.InteropServices.COMException)
@@ -795,7 +846,12 @@ bool bClickClose = false)
             if (string.IsNullOrEmpty(strUrl))
             {
                 strError = "尚未配置 dp2library 服务器 URL，无法获得读者指纹信息";
-                return new NormalResult { Value = -1, ErrorInfo = strError };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    ErrorCode = "emptyServerUrl"
+                };
             }
 
             // 先把正在运行的同步过程中断
@@ -1286,10 +1342,12 @@ Keys keyData)
 
         System.Threading.Timer _refreshTimer = null;
         private static readonly Object _syncRoot_refresh = new Object();
+        const int _delaySeconds = 3;
 
-        // 2 秒内多次到来的请求，会被合并为一次执行
+        // (_delaySeconds) 秒内多次到来的请求，会被合并为一次执行
         void BeginRefreshReaders()
         {
+            // Speak("重新初始化指纹设备", false, false);
             lock (_syncRoot_refresh)
             {
                 if (_refreshTimer == null)
@@ -1297,29 +1355,43 @@ Keys keyData)
                     _refreshTimer = new System.Threading.Timer(
             new System.Threading.TimerCallback(refreshTimerCallback),
             null,
-            TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
+            TimeSpan.FromSeconds(_delaySeconds), TimeSpan.FromSeconds(_delaySeconds));
                 }
             }
         }
 
+        int _inRefresh = 0;
+
         void refreshTimerCallback(object o)
         {
-            // 迫使重新启动
-            _initialized = false;
-            BeginStart();
-            lock (_syncRoot_refresh)
+            int v = Interlocked.Increment(ref this._inRefresh);
+            try
             {
-                if (_refreshTimer != null)
+                // 防止重入
+                if (v > 1)
+                    return;
+                lock (_syncRoot_refresh)
                 {
-                    _refreshTimer.Dispose();
-                    _refreshTimer = null;
+                    // 迫使重新启动
+                    _initialized = false;
+                    BeginStart(true);
+
+                    if (_refreshTimer != null)
+                    {
+                        _refreshTimer.Dispose();
+                        _refreshTimer = null;
+                    }
                 }
+            }
+            finally
+            {
+                Interlocked.Decrement(ref this._inRefresh);
             }
         }
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {
-            BeginStart();
+            BeginStart(false);
         }
 
         private void ToolStripMenuItem_reopen_Click(object sender, EventArgs e)
@@ -1335,7 +1407,7 @@ Keys keyData)
                 return;
 
             _initialized = false;
-            BeginStart();
+            BeginStart(false);
         }
 
         // 当面板上服务器 URL、用户名、密码发生变动以后，清除以前的 ChannelPool。迫使前端重新登录
@@ -1393,7 +1465,7 @@ Keys keyData)
             {
                 // 先检查首次初始化指纹缓存是否完成。没有完成(因为曾出错)的情况，要先尝试首次初始化指纹缓存
                 // TODO: 这里需要优化的是，应该是仅仅是 dp2library/dp2libraryxe 未响应的出错以后才需要重试 BeginStart()。其他情况如果频繁重试，可能并不合适
-                BeginStart();
+                BeginStart(false);
                 return;
             }
 

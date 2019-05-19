@@ -14,7 +14,9 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting;
 using System.Web;
 using System.IO;
+using System.Speech.Synthesis;
 
+using log4net;
 using RfidDrivers.First;
 
 using DigitalPlatform;
@@ -25,8 +27,6 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Speech.Synthesis;
-using log4net;
 
 namespace RfidCenter
 {
@@ -59,8 +59,21 @@ namespace RfidCenter
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
         }
 
+        private const int CP_NOCLOSE_BUTTON = 0x200;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams myCp = base.CreateParams;
+                myCp.ClassStyle = myCp.ClassStyle | CP_NOCLOSE_BUTTON;
+                return myCp;
+            }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
+            SetErrorState("retry", "正在启动");
+
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
             {
                 MessageBox.Show(this, "rfidcenter 被木马软件干扰，无法启动");
@@ -125,7 +138,21 @@ namespace RfidCenter
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                // 警告关闭
+                DialogResult result = MessageBox.Show(this,
+                    "确实要退出 dp2-RFID 中心?\r\n\r\n(本接口程序提供了 RFID 设备接口功能，一旦退出，这些功能都将无法运行。平时应保持运行状态，将窗口最小化即可)",
+                    "dp2-RFID 中心",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -150,6 +177,69 @@ namespace RfidCenter
             _driver.ReleaseDriver();
         }
 
+        #region 错误状态
+
+        void SetWholeColor(Color backColor, Color foreColor)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.BackColor = backColor;
+                this.ForeColor = foreColor;
+                foreach (TabPage page in this.tabControl_main.TabPages)
+                {
+                    page.BackColor = backColor;
+                    page.ForeColor = foreColor;
+                }
+                this.toolStrip1.BackColor = backColor;
+                this.toolStrip1.ForeColor = foreColor;
+
+                this.menuStrip1.BackColor = backColor;
+                this.menuStrip1.ForeColor = foreColor;
+
+                this.statusStrip1.BackColor = backColor;
+                this.statusStrip1.ForeColor = foreColor;
+            }));
+        }
+
+        // 错误状态
+        string _errorState = "normal";    // error/retry/normal
+        // 错误状态描述
+        string _errorStateInfo = "";
+
+        public string ErrorState
+        {
+            get
+            {
+                return _errorState;
+            }
+        }
+
+        public string ErrorStateInfo
+        {
+            get
+            {
+                return _errorStateInfo;
+            }
+        }
+
+        void SetErrorState(string state, string info)
+        {
+            if (state == "error")   // 出现错误，后面不再会重试
+                SetWholeColor(Color.DarkRed, Color.White);
+            else if (state == "retry")   // 出现错误，但后面会自动重试
+                SetWholeColor(Color.DarkOrange, Color.Black);
+            else if (state == "normal")  // 没有错误
+                SetWholeColor(SystemColors.Window, SystemColors.WindowText);
+            else
+                throw new Exception($"无法识别的 state={state}");
+
+            _errorState = state;
+            _errorStateInfo = info;
+        }
+
+        #endregion
+
+
         void UpdateDeviceList(List<Reader> readers)
         {
             if (readers == null)
@@ -169,16 +259,32 @@ namespace RfidCenter
         {
             try
             {
+                ClearMessage();
+
+                _driver.ReleaseDriver();
                 InitializeDriverResult result = _driver.InitializeDriver("");
                 // 列出所有可用设备名称
                 UpdateDeviceList(result.Readers);
 
                 if (result.Value == -1)
+                {
+                    SetErrorState("error", result.ErrorInfo);
                     this.ShowMessage(result.ErrorInfo, "red", true);
+                }
                 else
                 {
                     // 一开始就启动捕捉状态
+                    m_rfidObj?.BeginCapture(false);
                     m_rfidObj?.BeginCapture(true);
+
+                    // 获得当前读卡器数量
+                    if (result.Readers?.Count == 0)
+                    {
+                        SetErrorState("error", "当前尚未连接读卡器");
+                        this.ShowMessage("当前尚未连接读卡器", "red", true);
+                    }
+                    else
+                        SetErrorState("normal", "");
                 }
 
                 this.Invoke((Action)(() =>
@@ -188,6 +294,7 @@ namespace RfidCenter
             }
             catch (Exception ex)
             {
+                SetErrorState("error", ex.Message);
                 ShowMessageBox(ex.Message);
             }
         }
@@ -1014,7 +1121,6 @@ bool bClickClose = false)
         public static void WriteHtml(WebBrowser webBrowser,
 string strHtml)
         {
-
             HtmlDocument doc = webBrowser.Document;
 
             if (doc == null)
@@ -1153,8 +1259,10 @@ string strHtml)
             }
         }
 
+        int _refreshCount = 2;
         System.Threading.Timer _refreshTimer = null;
         private static readonly Object _syncRoot_refresh = new Object(); // 2017/5/18
+        const int _delaySeconds = 3;
 
 #if NO
         void BeginRefreshReaders()
@@ -1173,39 +1281,68 @@ string strHtml)
         }
 #endif
 
-        // 2 秒内多次到来的请求，会被合并为一次执行
+        // (_delaySeconds) 秒内多次到来的请求，会被合并为一次执行
         public void BeginRefreshReaders()
         {
+            // Speak("重新初始化 RFID 设备", false, false);
             lock (_syncRoot_refresh)
             {
                 if (_refreshTimer == null)
                 {
+                    _refreshCount = 2;
                     _refreshTimer = new System.Threading.Timer(
             new System.Threading.TimerCallback(refreshTimerCallback),
             null,
-            TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
+            TimeSpan.FromSeconds(_delaySeconds), TimeSpan.FromSeconds(_delaySeconds));
                 }
             }
         }
 
+        int _inRefresh = 0;
+
         void refreshTimerCallback(object o)
         {
-            // 迫使重新启动
+            int v = Interlocked.Increment(ref this._inRefresh);
+            try
             {
+                // 防止重入
+                if (v > 1)
+                    return;
+
+                // 迫使重新启动
+                lock (_syncRoot_refresh)
+                {
+#if NO
                 _driver.RefreshAllReaders();
                 m_rfidObj?.BeginCapture(false);
                 m_rfidObj?.BeginCapture(true);
                 UpdateDeviceList(_driver.Readers);
-            }
+#endif
+                    InitializeDriver();
+                    // 如果初始化没有成功，则要追加初始化
+                    _refreshCount--;
+                    if (this.ErrorState != "normal" && _refreshCount > 0)
+                        return;
 
-            lock (_syncRoot_refresh)
-            {
-                if (_refreshTimer != null)
-                {
-                    _refreshTimer.Dispose();
-                    _refreshTimer = null;
+                    // 取消 Timer
+                    if (_refreshTimer != null)
+                    {
+                        _refreshTimer.Dispose();
+                        _refreshTimer = null;
+                    }
                 }
             }
+            finally
+            {
+                Interlocked.Decrement(ref this._inRefresh);
+            }
+
+#if NO
+            lock (_syncRoot_refresh)
+            {
+
+            }
+#endif
         }
 
         private void ToolStripMenuItem_exit_Click(object sender, EventArgs e)
@@ -1328,7 +1465,9 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
 前端地址 xxx 经由 http://dp2003.com/dp2library 
 
          * */
-        public void Speak(string strText, bool bError = false)
+        public void Speak(string strText,
+            bool bError = false,
+            bool cancel_before = true)
         {
 #if NO
             string color = "gray";
@@ -1349,10 +1488,11 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 try
                 {
-                    this.m_speech.SpeakAsyncCancelAll();
+                    if (cancel_before)
+                        this.m_speech.SpeakAsyncCancelAll();
                     this.m_speech.SpeakAsync(strText);
                 }
-                catch(System.Runtime.InteropServices.COMException)
+                catch (System.Runtime.InteropServices.COMException)
                 {
                     // TODO: 如何报错?
                 }
@@ -1403,9 +1543,9 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             }
 
             var result = m_rfidObj.ChangePassword("*",
-                inventory_result.Results[0].UID, 
-                "eas/afi", 
-                old_password, 
+                inventory_result.Results[0].UID,
+                "eas/afi",
+                old_password,
                 new_password);
             MessageDlg.Show(this, $"result:{result.ToString()}", "result");
             return;
@@ -1447,6 +1587,14 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
             }
+        }
+
+        private void MenuItem_restart_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                InitializeDriver();
+            });
         }
     }
 }
