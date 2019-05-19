@@ -25,9 +25,9 @@ namespace ZkFingerprint
     public class FingerprintServer : MarshalByRefObject, IFingerprint, IDisposable
     {
         public event MessageArrivedEvent MessageArrived;
-        public string GetMessage(string style)
+        public GetMessageResult GetMessage(string style)
         {
-            return null;
+            return new GetMessageResult { Message = null };
         }
 
         TimeSpan m_interval = new TimeSpan(0, 0, 0, 1, 0);
@@ -46,7 +46,7 @@ namespace ZkFingerprint
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);  // true : initial state is signaled 
 
-        public int GetVersion(out string strVersion, 
+        public int GetVersion(out string strVersion,
             out string strCfgInfo,
             out string strError)
         {
@@ -281,7 +281,7 @@ Exception rethrown at [0]:
             m_lastFinish = DateTime.Now;
             return;
 
-        ERROR1:
+            ERROR1:
             SafeBeep(3);
             if (this.BeepOn == false)
                 Speak("抱歉，无法识别您的指纹");
@@ -783,7 +783,7 @@ Exception rethrown at [0]:
 
             strResult += v.ToString() + " 分";
 
-        END1:
+            END1:
             m_gameScores.Add(v);
             while (this.m_gameScores.Count > 100)
             {

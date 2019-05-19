@@ -184,22 +184,28 @@ namespace FingerprintCenter
         static List<string> _messages = new List<string>();
 
         // 取走一条消息
-        public string GetMessage(string style)
+        public GetMessageResult GetMessage(string style)
         {
             lock (_syncRoot_messages)
             {
                 // Program.MainForm.OutputHistory($"messages.Count={_messages.Count}");
-
+                if (Program.MainForm.ErrorState != "normal")
+                {
+                    return new GetMessageResult { Value = -1,
+                        ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
+                        ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                    };
+                }
                 if (_messages.Count == 0)
-                    return null;
+                    return new GetMessageResult { Message = null };
                 if (style == "clear")
                 {
                     _messages.Clear();
-                    return "";
+                    return new GetMessageResult { Message = "" };
                 }
                 string message = _messages[0];
                 _messages.RemoveAt(0);
-                return message;
+                return new GetMessageResult { Message = message };
             }
         }
 

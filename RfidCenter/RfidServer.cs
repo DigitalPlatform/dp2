@@ -41,6 +41,15 @@ namespace RfidCenter
         public ListTagsResult ListTags(string reader_name, string style)
         {
             InventoryResult result = new InventoryResult();
+
+            if (Program.MainForm.ErrorState != "normal")
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
+                    ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                };
+
             List<OneTag> tags = new List<OneTag>();
 
             // uid --> OneTag
@@ -165,6 +174,14 @@ namespace RfidCenter
         public GetTagInfoResult GetTagInfo(string reader_name,
             string uid)
         {
+            if (Program.MainForm.ErrorState != "normal")
+                return new GetTagInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
+                    ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                };
+
             List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
             foreach (Reader reader in Program.Rfid.Readers)
             {

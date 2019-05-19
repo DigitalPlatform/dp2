@@ -312,6 +312,16 @@ namespace dp2SSL
             return new GetTagInfoResult { TagInfo = info };
         }
 
+        // 清除图书列表
+        void ClearBookList()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                List<Entity> new_entities = null;
+                _entities.Refresh(new List<OneTag>(), ref new_entities);
+            }));
+        }
+
         int _inRefresh = 0;
 
         void Refresh()
@@ -336,10 +346,19 @@ namespace dp2SSL
                 ListTagsResult result = null;
 
                 if (_rfidChannel != null && _rfidChannel.Started)
+                {
                     result = _rfidChannel?.Object?.ListTags("*",
                         null
                         // "getTagInfo"
                         );
+                    // 2019/5/19
+                    if (result.Value == -1)
+                    {
+                        this.Error = $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}";
+                        ClearBookList();
+                        return;
+                    }
+                }
 
                 List<OneTag> books = new List<OneTag>();
                 List<OneTag> patrons = new List<OneTag>();
@@ -469,13 +488,25 @@ namespace dp2SSL
                 return;
             try
             {
-                var message = _fingerprintChannel.Object.GetMessage("");
-                if (message == null)
+                var result = _fingerprintChannel.Object.GetMessage("");
+                if (result.Value == -1)
+                {
+                    this._patron.Error = $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}";
+                    _patron.Clear();    // 清除面板上的读者信息
+                    return;
+                }
+                else
+                {
+                    // 清除以前残留的报错信息
+                    _patron.Error = null;
+                }
+
+                if (result.Message == null)
                     return;
 
                 _patron.Clear();
                 // _patron.UID = "#fingerprint";
-                _patron.PII = message;
+                _patron.PII = result.Message;
                 _patron.Source = "fingerprint";
                 // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
                 // “新一轮”意思是图书全部取走以后开始的下一轮

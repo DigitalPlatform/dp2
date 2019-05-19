@@ -476,8 +476,10 @@ namespace DigitalPlatform.CirculationClient
                 LogType.OperLog,
                 out string strError);
             if (lCount < 0)
-                return new ReplicationPlan { Value = -1, ErrorInfo = strError };
-
+            {
+                // errorCode: "RequestError" 服务器没有响应
+                return new ReplicationPlan { Value = -1, ErrorInfo = strError, ErrorCode = channel.ErrorCode.ToString() };
+            }
             return new ReplicationPlan { StartDate = strEndDate + ":" + lCount + "-" };
         }
 
