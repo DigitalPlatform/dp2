@@ -435,7 +435,10 @@ namespace dp2SSL
                     if (patrons.Count == 1)
                         _patron.Fill(patrons[0]);
                     else
+                    {
                         _patron.Clear();
+                        _patron.Error = null;   // 2017/5/20
+                    }
                 }
 
                 GetPatronFromFingerprint();
