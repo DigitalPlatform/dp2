@@ -204,6 +204,8 @@ namespace FingerprintCenter
 #endif
 
             return new NormalResult();
+
+
 #if NO
             bnInit.Enabled = false;
             bnFree.Enabled = true;

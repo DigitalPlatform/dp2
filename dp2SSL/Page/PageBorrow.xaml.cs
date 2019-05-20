@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.Remoting;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -410,7 +411,7 @@ namespace dp2SSL
 
                     if (_entities.Count == 0
                         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
-                        && _patron.Source == "fingerprint")
+                        && _patron.IsFingerprintSource)
                         _patron.Clear();
                 }
 
@@ -419,25 +420,30 @@ namespace dp2SSL
                     ClearTagTable(null);
 
                 if (patrons.Count == 1)
-                    _patron.Source = "";
+                    _patron.IsRfidSource = true;
 
-                if (_patron.Source == "fingerprint")
+                if (_patron.IsFingerprintSource)
                 {
-
+                    // 指纹仪来源
                 }
                 else
                 {
-                    if (patrons.Count > 1)
-                    {
-                        // 读卡器上放了多张读者卡
-                        _patron.Error = "读卡器上放了多张读者卡。请拿走多余的";
-                    }
+                    // RFID 来源
+
+
                     if (patrons.Count == 1)
                         _patron.Fill(patrons[0]);
                     else
                     {
                         _patron.Clear();
-                        _patron.Error = null;   // 2017/5/20
+                        SetPatronError("getreaderinfo", "");
+                        if (patrons.Count > 1)
+                        {
+                            // 读卡器上放了多张读者卡
+                            SetPatronError("rfid", "读卡器上放了多张读者卡。请拿走多余的");
+                        }
+                        else
+                            SetPatronError("rfid", "");   // 2017/5/20
                     }
                 }
 
@@ -494,14 +500,15 @@ namespace dp2SSL
                 var result = _fingerprintChannel.Object.GetMessage("");
                 if (result.Value == -1)
                 {
-                    this._patron.Error = $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}";
-                    _patron.Clear();    // 清除面板上的读者信息
+                    SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                    if (_patron.IsFingerprintSource)
+                        _patron.Clear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                     return;
                 }
                 else
                 {
                     // 清除以前残留的报错信息
-                    _patron.Error = null;
+                    SetPatronError("fingerprint", "");
                 }
 
                 if (result.Message == null)
@@ -510,13 +517,13 @@ namespace dp2SSL
                 _patron.Clear();
                 // _patron.UID = "#fingerprint";
                 _patron.PII = result.Message;
-                _patron.Source = "fingerprint";
+                _patron.IsFingerprintSource = true;
                 // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
                 // “新一轮”意思是图书全部取走以后开始的下一轮
             }
             catch (Exception ex)
             {
-                this._patron.Error = ex.Message;
+                SetPatronError("fingerprint", ex.Message);
             }
         }
 
@@ -556,11 +563,11 @@ namespace dp2SSL
     out string reader_xml);
             if (result.Value != 1)
             {
-                _patron.Error = result.ErrorInfo;
+                SetPatronError("getreaderinfo", $"读者 '{pii}': {result.ErrorInfo}");
                 return;
             }
 
-            _patron.Error = null;
+            SetPatronError("getreaderinfo", "");
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -767,7 +774,7 @@ out string strError);
             }
         }
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -830,7 +837,7 @@ out string strError);
         }
 
 
-#endregion
+        #endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -849,10 +856,12 @@ out string strError);
             }
         }
 
+#if NO
         void ClearPatronError()
         {
             _patron.Error = null;
         }
+#endif
 
         void Loan(string action)
         {
@@ -1259,5 +1268,49 @@ out string strError);
         {
             this.NavigationService.Navigate(new PageMenu());
         }
+
+        #region 分类报错机制
+
+        // 错误类别 --> 错误字符串
+        // 错误类别有：rfid fingerprint getreaderinfo
+        Hashtable _patronErrorTable = new Hashtable();
+
+        // 设置读者区域错误字符串
+        void SetPatronError(string type, string error)
+        {
+            _patronErrorTable[type] = error;
+
+            _patron.Error = GetPatronError();
+        }
+
+        // 合成读者区域错误字符串，用于刷新显示
+        string GetPatronError()
+        {
+            List<string> errors = new List<string>();
+            foreach (string type in _patronErrorTable.Keys)
+            {
+                string error = _patronErrorTable[type] as string;
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error);
+            }
+            if (errors.Count == 0)
+                return null;
+            if (errors.Count == 1)
+                return errors[0];
+            int i = 0;
+            StringBuilder text = new StringBuilder();
+            foreach (string error in errors)
+            {
+                if (text.Length > 0)
+                    text.Append("\r\n");
+                text.Append($"{i + 1}) {error}");
+                i++;
+            }
+            return text.ToString();
+            // return StringUtil.MakePathList(errors, "\r\n");
+        }
+
+
+        #endregion
     }
 }

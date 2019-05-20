@@ -246,7 +246,7 @@ namespace RfidCenter
             _errorStateInfo = info;
         }
 
-#endregion
+        #endregion
 
 
         void UpdateDeviceList(List<Reader> readers)
@@ -983,7 +983,7 @@ bool bClickClose = false)
             }
         }
 
-#region remoting server
+        #region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1031,9 +1031,9 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
-#region ipc channel
+        #region ipc channel
 
         IpcClientChannel m_rfidChannel = new IpcClientChannel();
         IRfid m_rfidObj = null;
@@ -1076,7 +1076,7 @@ bool bClickClose = false)
             }
         }
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1084,7 +1084,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-#region 浏览器控件
+        #region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1237,7 +1237,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-#endregion
+        #endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -1296,6 +1296,7 @@ string strHtml)
             // Speak("重新初始化 RFID 设备", false, false);
             lock (_syncRoot_refresh)
             {
+                _refreshCount++;    // 2017/5/20
                 if (_refreshTimer == null)
                 {
                     _refreshCount = 2;
@@ -1319,21 +1320,22 @@ string strHtml)
                     return;
 
                 // 迫使重新启动
-                lock (_syncRoot_refresh)
-                {
+
 #if NO
                 _driver.RefreshAllReaders();
                 m_rfidObj?.BeginCapture(false);
                 m_rfidObj?.BeginCapture(true);
                 UpdateDeviceList(_driver.Readers);
 #endif
-                    InitializeDriver();
-                    // 如果初始化没有成功，则要追加初始化
-                    _refreshCount--;
-                    if (this.ErrorState != "normal" && _refreshCount > 0)
-                        return;
+                InitializeDriver();
+                // 如果初始化没有成功，则要追加初始化
+                _refreshCount--;
+                if (this.ErrorState != "normal" && _refreshCount > 0)
+                    return;
 
-                    // 取消 Timer
+                // 取消 Timer
+                lock (_syncRoot_refresh)
+                {
                     if (_refreshTimer != null)
                     {
                         _refreshTimer.Dispose();
