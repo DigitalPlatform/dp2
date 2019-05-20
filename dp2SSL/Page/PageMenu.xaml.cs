@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -22,6 +24,7 @@ namespace dp2SSL
     /// </summary>
     public partial class PageMenu : Page
     {
+
         public PageMenu()
         {
             InitializeComponent();
@@ -39,10 +42,12 @@ namespace dp2SSL
             window.Top = 0;
             if (StringUtil.IsDevelopMode() == false)
             {
+                // 最大化
                 window.WindowStyle = WindowStyle.None;
-                window.ResizeMode = ResizeMode.NoResize;
-                window.Width = SystemParameters.VirtualScreenWidth;
-                window.Height = SystemParameters.VirtualScreenHeight;
+                window.ResizeMode = ResizeMode.CanResize;
+                window.WindowState = WindowState.Maximized;
+                //window.Width = SystemParameters.VirtualScreenWidth;
+                //window.Height = SystemParameters.VirtualScreenHeight;
             }
 
             this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
@@ -91,5 +96,37 @@ namespace dp2SSL
         {
             this.NavigationService.Navigate(new PageError());
         }
+
+#if REMOVED
+        #region 探测平板模式
+
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(int nIndex);
+        // System metric constant for Windows XP Tablet PC Edition
+        private const int SM_TABLETPC = 86;
+        private const int SM_CONVERTIBLESLATEMODE = 0x2003;
+        private const int SM_SYSTEMDOCKED = 0x2004;
+
+        // https://stackoverflow.com/questions/5795010/detecting-tablet-pc
+        protected bool IsRunningOnTablet()
+        {
+            int value = GetSystemMetrics(SM_TABLETPC);
+            return (value != 0);
+        }
+
+        private static Boolean QueryTabletMode()
+        {
+            int state = GetSystemMetrics(SM_CONVERTIBLESLATEMODE);
+            return (state == 0);    // && isTabletPC;
+        }
+
+        private static Boolean QueryDocked()
+        {
+            int state = GetSystemMetrics(SM_SYSTEMDOCKED);
+            return (state != 0);
+        }
+
+        #endregion
+#endif
     }
 }

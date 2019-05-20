@@ -132,6 +132,36 @@ namespace dp2SSL
         // 来源。默认从 RFID 读卡器。"fingerprint" 表示从指纹仪而来
         public string Source { get; set; }
 
+        public bool IsFingerprintSource
+        {
+            get
+            {
+                return Source == "fingerprint";
+            }
+            set
+            {
+                if (value == true)
+                    Source = "fingerprint";
+                else
+                    Source = "";
+            }
+        }
+
+        public bool IsRfidSource
+        {
+            get
+            {
+                return Source == "";
+            }
+            set
+            {
+                if (value == true)
+                    Source = "";
+                else
+                    Source = "fingerprint";
+            }
+        }
+
         public new string UID
         {
             get
