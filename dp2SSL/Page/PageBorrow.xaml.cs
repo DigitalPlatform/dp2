@@ -33,6 +33,9 @@ namespace dp2SSL
         EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
 
+        Task _checkTask = null;
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         public PageBorrow()
         {
             InitializeComponent();
@@ -48,7 +51,6 @@ namespace dp2SSL
             this.patronControl.DataContext = _patron;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
-
         }
 
         public FingerprintChannel _fingerprintChannel
@@ -69,13 +71,17 @@ namespace dp2SSL
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
 
-            // 准备指纹通道
-            List<string> errors = new List<string>();
+            {
+                // 准备指纹通道
+                List<string> errors = new List<string>();
 
-            // 重试初始化指纹环境
-            errors.AddRange(App.CurrentApp.TryInitialFingerprint());
+                // 重试初始化指纹环境
+                errors.AddRange(App.CurrentApp.TryInitialFingerprint());
 
-            App.CurrentApp.ClearFingerprintMessage();
+                App.CurrentApp.ClearFingerprintMessage();
+
+                SetGlobalError("fingerprint", StringUtil.MakePathList(errors, "; "));
+            }
 #if NO
             if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
             {
@@ -109,6 +115,89 @@ namespace dp2SSL
             }
 
 #endif
+
+            PrepareRfid();
+
+            {
+                List<string> style = new List<string>();
+                if (_rfidChannel?.Started == true)
+                    style.Add("rfid");
+                if (_fingerprintChannel?.Started == true)
+                    style.Add("fingerprint");
+                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+            }
+
+            // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
+            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
+                _timer = new System.Threading.Timer(
+        new System.Threading.TimerCallback(timerCallback),
+        null,
+        TimeSpan.FromSeconds(0),
+        TimeSpan.FromSeconds(1));
+
+            _checkTask = Task.Run(() =>
+            {
+                while (_cancel.IsCancellationRequested == false)
+                {
+                    Task.Delay(TimeSpan.FromSeconds(10), _cancel.Token).Wait(_cancel.Token);
+
+                    if (string.IsNullOrEmpty(App.RfidUrl) == false
+                    && _rfidChannel?.Started == false)
+                        PrepareRfid();
+
+                    // 验证通道是否有效
+                    VerifyRfid();
+
+                    // 注: App 里面会不断尝试连接指纹中心。这里只需要刷新错误显示即可
+                    if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                    && _fingerprintChannel?.Started == true)
+                        SetGlobalError("fingerprint", "");
+
+                    VerifyFingerprint();
+                }
+            });
+        }
+
+        // 验证通道是否有效
+        void VerifyFingerprint()
+        {
+            if (_fingerprintChannel != null)
+            {
+                try
+                {
+                    _fingerprintChannel.Object.Awake();
+                    SetGlobalError("fingerprint", "");
+                }
+                catch (Exception ex)
+                {
+                    _fingerprintChannel.Started = false;
+                    SetGlobalError("fingerprint", $"指纹中心连接出错: {ex.Message}");
+                }
+            }
+        }
+
+        // 验证通道是否有效
+        void VerifyRfid()
+        {
+            if (_rfidChannel != null)
+            {
+                try
+                {
+                    _rfidChannel.Object.ListReaders();
+                    SetGlobalError("rfid", "");
+                }
+                catch (Exception ex)
+                {
+                    _rfidChannel.Started = false;
+                    SetGlobalError("rfid", $"RFID 中心连接出错: {ex.Message}");
+                }
+            }
+        }
+
+        // 准备通道
+        void PrepareRfid()
+        {
+            List<string> errors = new List<string>();
 
             // 准备 RFID 通道
             if (string.IsNullOrEmpty(App.RfidUrl) == false)
@@ -144,24 +233,9 @@ namespace dp2SSL
             }
 
             if (errors.Count > 0)
-                this.GlobalError = StringUtil.MakePathList(errors, "; ");
-
-            {
-                List<string> style = new List<string>();
-                if (_rfidChannel?.Started == true)
-                    style.Add("rfid");
-                if (_fingerprintChannel?.Started == true)
-                    style.Add("fingerprint");
-                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
-            }
-
-            // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
-            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
-                _timer = new System.Threading.Timer(
-        new System.Threading.TimerCallback(timerCallback),
-        null,
-        TimeSpan.FromSeconds(0),
-        TimeSpan.FromSeconds(1));
+                SetGlobalError("rfid", StringUtil.MakePathList(errors, "; "));
+            else
+                SetGlobalError("rfid", "");
         }
 
 #if NO
@@ -173,6 +247,7 @@ namespace dp2SSL
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
+            _cancel.Cancel();
 #if NO
             if (_fingerprintChannel != null)
             {
@@ -295,6 +370,10 @@ namespace dp2SSL
         // 从缓存中获取标签信息
         GetTagInfoResult GetTagInfo(RfidChannel channel, string uid)
         {
+            // 2019/5/21
+            if (channel.Started == false)
+                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+
             TagInfo info = (TagInfo)_tagTable[uid];
             if (info == null)
             {
@@ -341,7 +420,7 @@ namespace dp2SSL
             _cancelRefresh = new CancellationTokenSource();
             try
             {
-                this.Error = null;
+                SetGlobalError("current", "");
 
                 // 获得所有协议类型的标签
                 ListTagsResult result = null;
@@ -355,7 +434,7 @@ namespace dp2SSL
                     // 2019/5/19
                     if (result.Value == -1)
                     {
-                        this.Error = $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}";
+                        SetGlobalError("current", $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}");
                         ClearBookList();
                         return;
                     }
@@ -376,7 +455,7 @@ namespace dp2SSL
                             var gettaginfo_result = GetTagInfo(_rfidChannel, tag.UID);
                             if (gettaginfo_result.Value == -1)
                             {
-                                this.Error = gettaginfo_result.ErrorInfo;
+                                SetGlobalError("current", gettaginfo_result.ErrorInfo);
                                 continue;
                             }
                             TagInfo info = gettaginfo_result.TagInfo;
@@ -456,7 +535,7 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                this.Error = $"后台刷新过程出现异常: {ex.Message}";
+                SetGlobalError("current", $"后台刷新过程出现异常: {ex.Message}");
                 return;
             }
             finally
@@ -494,7 +573,11 @@ namespace dp2SSL
         void GetPatronFromFingerprint()
         {
             if (_fingerprintChannel == null || _fingerprintChannel.Started == false)
+            {
+                // 清除以前残留的报错信息
+                SetPatronError("fingerprint", "");
                 return;
+            }
             try
             {
                 var result = _fingerprintChannel.Object.GetMessage("");
@@ -658,7 +741,7 @@ out string strError);
                 this.error.Text = ex.Message;
                 this.error.Visibility = Visibility.Visible;
 #endif
-                this.Error = ex.Message;
+                SetGlobalError("current", ex.Message);
             }
             finally
             {
@@ -1269,7 +1352,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-        #region 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1312,5 +1395,51 @@ out string strError);
 
 
         #endregion
+
+        #region global 分类报错机制
+
+        // 错误类别 --> 错误字符串
+        // 错误类别有：rfid fingerprint
+        Hashtable _globalErrorTable = new Hashtable();
+
+        // 设置全局区域错误字符串
+        void SetGlobalError(string type, string error)
+        {
+            if (string.IsNullOrEmpty(error) == false)
+                error = error.Replace("\r\n", ";").TrimEnd(new char[] { ';', ' ' });
+
+            _globalErrorTable[type] = error;
+
+            Error = GetGlobalError();
+        }
+
+        // 合成全局区域错误字符串，用于刷新显示
+        string GetGlobalError()
+        {
+            List<string> errors = new List<string>();
+            foreach (string type in _globalErrorTable.Keys)
+            {
+                string error = _globalErrorTable[type] as string;
+                if (string.IsNullOrEmpty(error) == false)
+                    errors.Add(error.Replace("\r\n", "\n").TrimEnd(new char[] { '\n', ' ' }));
+            }
+            if (errors.Count == 0)
+                return null;
+            if (errors.Count == 1)
+                return errors[0];
+            int i = 0;
+            StringBuilder text = new StringBuilder();
+            foreach (string error in errors)
+            {
+                if (text.Length > 0)
+                    text.Append("\n");
+                text.Append($"{i + 1}) {error}");
+                i++;
+            }
+            return text.ToString();
+        }
+
+        #endregion
+
     }
 }

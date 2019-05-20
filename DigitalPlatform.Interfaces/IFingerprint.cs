@@ -78,6 +78,8 @@ namespace DigitalPlatform.Interfaces
         // event MessageHandler DisplayMessage;
 
         NormalResult EnableSendKey(bool enable);
+
+        void Awake();
     }
 
     [Serializable()]

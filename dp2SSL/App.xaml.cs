@@ -61,8 +61,6 @@ namespace dp2SSL
 #endif
             InitialFingerPrint();
 
-            EnableSendkey(false);
-
             // 后台自动检查更新
             Task.Run(() =>
             {
@@ -92,6 +90,8 @@ namespace dp2SSL
             List<string> errors = TryInitialFingerprint();
             if (errors.Count > 0)
                 AddErrors(errors);
+
+            EnableSendkey(false);
 
             return errors;
         }
@@ -386,7 +386,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _errors.Clear();
         }
 
-        void EnableSendkey(bool enable)
+        public void EnableSendkey(bool enable)
         {
             try
             {

@@ -1345,16 +1345,51 @@ Keys keyData)
                 {
                     case UsbNotification.DbtDeviceremovecomplete:
                         //MessageBox.Show(this, "removed"); 
-                        BeginRefreshReaders();
+                        BeginRefreshReaders(new CancellationToken());
                         break;
                     case UsbNotification.DbtDevicearrival:
                         //MessageBox.Show(this, "added");
-                        BeginRefreshReaders();
+                        BeginRefreshReaders(new CancellationToken());
                         break;
                 }
             }
         }
 
+        int _refreshCount = 2;
+        const int _delaySeconds = 3;
+        Task _refreshTask = null;
+
+        void BeginRefreshReaders(CancellationToken token)
+        {
+            if (_refreshTask != null)
+            {
+                _refreshCount++;
+                return;
+            }
+
+            _refreshCount = 2;
+            _refreshTask = Task.Run(() =>
+            {
+                while (_refreshCount-- > 0)
+                {
+                    Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
+                    if (token.IsCancellationRequested)
+                        break;
+                    // 迫使重新启动
+                    _initialized = false;
+                    BeginStart().Wait(token);
+                    if (token.IsCancellationRequested)
+                        break;
+
+                    // 如果初始化没有成功，则要追加初始化
+                    if (this.ErrorState == "normal")
+                        break;
+                }
+                _refreshTask = null;
+            });
+        }
+
+#if REMOVED
         int _refreshCount = 2;
         System.Threading.Timer _refreshTimer = null;
         private static readonly Object _syncRoot_refresh = new Object();
@@ -1413,6 +1448,8 @@ Keys keyData)
                 Interlocked.Decrement(ref this._inRefresh);
             }
         }
+
+#endif
 
         private void ToolStripMenuItem_start_Click(object sender, EventArgs e)
         {

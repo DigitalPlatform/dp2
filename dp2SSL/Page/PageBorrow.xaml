@@ -21,9 +21,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="0"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+            <!--
             <RowDefinition Height="30"/>
-            <RowDefinition Height="30"/>
-
+            -->
         </Grid.RowDefinitions>
         <!--
         <Button Grid.Row="0" Grid.ColumnSpan="3">Top</Button>
@@ -47,15 +48,17 @@
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3"
             Name="error" Visibility="Collapsed">Error Text</TextBlock>
         -->
-        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Error}"
+        <TextBox Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Error}"
+                   Height="60" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
                                        FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                                        Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                                        TextWrapping="WrapWithOverflow"/>
+<!--
         <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding GlobalError}"
                                        FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                                        Visibility="{Binding Path=GlobalError, Converter={StaticResource StringToVis}}"
                                        TextWrapping="WrapWithOverflow"/>
-
+-->
         <Grid Grid.Row="1" Grid.Column="1" Background="Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />

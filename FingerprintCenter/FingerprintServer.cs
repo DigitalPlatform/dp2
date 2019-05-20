@@ -505,6 +505,11 @@ Exception rethrown at [0]:
 #endif
         }
 
+        public void Awake()
+        {
+
+        }
+
         public void Dispose()
         {
             Program.FingerPrint?.CancelRegisterString();
