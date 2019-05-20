@@ -515,6 +515,8 @@ new_password);
 
             if (Program.Rfid.Readers.Count == 0)
                 Program.MainForm.OutputHistory("当前没有可用的读卡器", 2);
+            else
+                Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}", 0);
 
             _cancelInventory = new CancellationTokenSource();
             bool bFirst = true;
@@ -597,7 +599,7 @@ new_password);
                 if (_lastErrorCount > 200 * minutes)  // 200 相当于一分钟连续报错的量
                 {
                     // 触发重启全部读卡器
-                    Program.MainForm?.BeginRefreshReaders();
+                    Program.MainForm?.BeginRefreshReaders(new CancellationToken());
                     Program.MainForm?.Speak("尝试重新初始化全部读卡器");
                     _lastErrorCount = 0;
                 }
