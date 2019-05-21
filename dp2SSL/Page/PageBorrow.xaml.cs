@@ -40,6 +40,15 @@ namespace dp2SSL
         {
             InitializeComponent();
 
+            _globalErrorTable = new ErrorTable((e) =>
+            {
+                this.Error = e;
+            });
+            _patronErrorTable = new ErrorTable((e) =>
+            {
+                _patron.Error = e;
+            });
+
             Loaded += PageBorrow_Loaded;
             Unloaded += PageBorrow_Unloaded;
 
@@ -165,8 +174,12 @@ namespace dp2SSL
             {
                 try
                 {
-                    _fingerprintChannel.Object.Awake();
-                    SetGlobalError("fingerprint", "");
+                    // 调用查看状态的功能
+                    var result = _fingerprintChannel.Object.GetState("");
+                    if (result.Value == -1)
+                        SetGlobalError("fingerprint", $"指纹中心: {result.ErrorInfo}");
+                    else
+                        SetGlobalError("fingerprint", "");
                 }
                 catch (Exception ex)
                 {
@@ -183,8 +196,17 @@ namespace dp2SSL
             {
                 try
                 {
-                    _rfidChannel.Object.ListReaders();
-                    SetGlobalError("rfid", "");
+                    // 调用查看状态的功能
+                    var result = _rfidChannel.Object.GetState("");
+                    if (result.Value == -1)
+                    {
+                        if (result.ErrorCode == "noReaders")
+                            SetGlobalError("rfid", $"RFID 中心: 没有任何连接的读卡器。请检查读卡器是否正确连接");
+                        else
+                            SetGlobalError("rfid", $"RFID 中心: {result.ErrorInfo}");
+                    }
+                    else
+                        SetGlobalError("rfid", "");
                 }
                 catch (Exception ex)
                 {
@@ -207,24 +229,29 @@ namespace dp2SSL
     out string strError);
                 if (_rfidChannel == null)
                     errors.Add($"启动 RFID 通道时出错: {strError}");
-
-                try
+                else
                 {
-                    var result = _rfidChannel.Object.ListReaders();
+                    try
+                    {
+                        // 检查状态
+                        var result = _rfidChannel.Object.GetState("");
 
-                    // TODO: 某处界面可以显示当前连接的读卡器名字
-                    // 看看是否有至少一个读卡器
-                    if (result.Readers.Length == 0)
-                        errors.Add("当前 RFID 中心没有任何连接的读卡器。请检查读卡器是否正确连接");
-                    else
-                        _rfidChannel.Started = true;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                        errors.Add($"启动 RFID 通道时出错: “RFID-中心”({App.RfidUrl})没有响应");
-                    else
-                        errors.Add($"启动 RFID 通道时出错: {ex.Message}");
+                        // TODO: 某处界面可以显示当前连接的读卡器名字
+                        if (result.Value == -1)
+                            errors.Add(result.ErrorInfo);   // "当前 RFID 中心没有任何连接的读卡器。请检查读卡器是否正确连接"
+                        else
+                            _rfidChannel.Started = true;
+
+                        // 关掉 SendKey
+                        _rfidChannel.Object.EnableSendKey(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
+                            errors.Add($"启动 RFID 通道时出错: “RFID-中心”({App.RfidUrl})没有响应");
+                        else
+                            errors.Add($"启动 RFID 通道时出错: {ex.Message}");
+                    }
                 }
             }
             else
@@ -270,10 +297,11 @@ namespace dp2SSL
 
         private void _patron_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "UID")
+            if (e.PropertyName == "UID"
+                || e.PropertyName == "Barcode")
             {
                 // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
-                if (string.IsNullOrEmpty(_patron.UID) == false
+                if ((string.IsNullOrEmpty(_patron.UID) == false || string.IsNullOrEmpty(_patron.Barcode) == false)
                     && this.patronControl.Visibility != Visibility.Visible)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
@@ -281,7 +309,7 @@ namespace dp2SSL
                         _visiblityChanged = true;
                     }));
                 // 如果读者卡又被拿走了，则要恢复 patronControl 的隐藏状态
-                else if (string.IsNullOrEmpty(_patron.UID) == true
+                else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
     && this.patronControl.Visibility == Visibility.Visible
     && _visiblityChanged)
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -1356,16 +1384,15 @@ out string strError);
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
-        Hashtable _patronErrorTable = new Hashtable();
+        ErrorTable _patronErrorTable = null;
 
         // 设置读者区域错误字符串
         void SetPatronError(string type, string error)
         {
-            _patronErrorTable[type] = error;
-
-            _patron.Error = GetPatronError();
+            _patronErrorTable.SetError(type, error);
         }
 
+#if NO
         // 合成读者区域错误字符串，用于刷新显示
         string GetPatronError()
         {
@@ -1392,7 +1419,7 @@ out string strError);
             return text.ToString();
             // return StringUtil.MakePathList(errors, "\r\n");
         }
-
+#endif
 
         #endregion
 
@@ -1400,19 +1427,19 @@ out string strError);
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
-        Hashtable _globalErrorTable = new Hashtable();
+        ErrorTable _globalErrorTable = null;
 
         // 设置全局区域错误字符串
         void SetGlobalError(string type, string error)
         {
-            if (string.IsNullOrEmpty(error) == false)
-                error = error.Replace("\r\n", ";").TrimEnd(new char[] { ';', ' ' });
+            _globalErrorTable.SetError(type, error);
 
-            _globalErrorTable[type] = error;
-
-            Error = GetGlobalError();
+            // 指纹方面的报错，还要兑现到 App 中
+            if (type == "fingerprint")
+                App.CurrentApp.SetError(type, error);
         }
 
+#if NO
         // 合成全局区域错误字符串，用于刷新显示
         string GetGlobalError()
         {
@@ -1438,6 +1465,7 @@ out string strError);
             }
             return text.ToString();
         }
+#endif
 
         #endregion
 

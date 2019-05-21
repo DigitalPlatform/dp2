@@ -14,6 +14,8 @@ namespace DigitalPlatform.RFID
         // 列出当前可用的 reader
         ListReadersResult ListReaders();
 
+        NormalResult GetState(string style);
+
         ListTagsResult ListTags(string reader_name, string style);
 
         GetTagInfoResult GetTagInfo(string reader_name, string uid);

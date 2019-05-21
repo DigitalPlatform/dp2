@@ -32,6 +32,7 @@ namespace dp2SSL
             this.ShowsNavigationUI = false;
 
             this.Loaded += PageMenu_Loaded;
+            this.DataContext = App.CurrentApp;
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
@@ -51,7 +52,7 @@ namespace dp2SSL
             }
 
             this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
-            if (App.CurrentApp.Errors.Count == 0)
+            if (string.IsNullOrEmpty(App.CurrentApp.Error))
             {
                 this.error.Visibility = Visibility.Collapsed;
             }

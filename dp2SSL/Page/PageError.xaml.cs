@@ -25,7 +25,7 @@ namespace dp2SSL
         {
             InitializeComponent();
 
-            this.error.Text = StringUtil.MakePathList(App.CurrentApp.Errors, "\r\n");
+            this.error.Text = App.CurrentApp.Error; // StringUtil.MakePathList(App.CurrentApp.Errors, "\r\n");
         }
 
         private void GoHome_Click(object sender, RoutedEventArgs e)

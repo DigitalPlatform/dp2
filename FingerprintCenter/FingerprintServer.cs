@@ -198,7 +198,9 @@ namespace FingerprintCenter
                 // Program.MainForm.OutputHistory($"messages.Count={_messages.Count}");
                 if (Program.MainForm.ErrorState != "normal")
                 {
-                    return new GetMessageResult { Value = -1,
+                    return new GetMessageResult
+                    {
+                        Value = -1,
                         ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
                         ErrorCode = $"state:{Program.MainForm.ErrorState}"
                     };
@@ -505,9 +507,21 @@ Exception rethrown at [0]:
 #endif
         }
 
-        public void Awake()
+        public NormalResult GetState(string style)
         {
-
+            if (Program.MainForm.ErrorState == "normal")
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorCode = Program.MainForm.ErrorState,
+                    ErrorInfo = Program.MainForm.ErrorStateInfo
+                };
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorCode = Program.MainForm.ErrorState,
+                ErrorInfo = Program.MainForm.ErrorStateInfo
+            };
         }
 
         public void Dispose()

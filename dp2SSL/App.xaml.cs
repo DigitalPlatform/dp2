@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Linq;
@@ -19,12 +20,41 @@ namespace dp2SSL
     /// <summary>
     /// App.xaml 的交互逻辑
     /// </summary>
-    public partial class App : Application
+    public partial class App : Application, INotifyPropertyChanged
     {
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
         Mutex myMutex;
+
+        ErrorTable _errorTable = null;
+
+        #region 属性
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        private string _error = null;   // "test error line asdljasdkf; ;jasldfjasdjkf aasdfasdf";
+
+        public string Error
+        {
+            get => _error;
+            set
+            {
+                if (_error != value)
+                {
+                    _error = value;
+                    OnPropertyChanged("Error");
+                }
+            }
+        }
+
+        #endregion
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -43,6 +73,11 @@ namespace dp2SSL
                 System.Windows.Application.Current.Shutdown();
                 return;
             }
+
+            _errorTable = new ErrorTable((s) =>
+            {
+                this.Error = s;
+            });
 
             WpfClientInfo.TypeOfProgram = typeof(App);
             if (StringUtil.IsDevelopMode() == false)
@@ -86,10 +121,10 @@ namespace dp2SSL
         public List<string> InitialFingerPrint()
         {
             EndFingerprint();
-            ClearErrors();
+            ClearErrors("fingerprint");
             List<string> errors = TryInitialFingerprint();
             if (errors.Count > 0)
-                AddErrors(errors);
+                AddErrors("fingerprint", errors);
 
             EnableSendkey(false);
 
@@ -356,6 +391,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         #endregion
 
+#if REMOVED
         List<string> _errors = new List<string>();
 
         public List<string> Errors
@@ -365,7 +401,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 return _errors;
             }
         }
+#endif
 
+#if REMOVED
         public void AddErrors(List<string> errors)
         {
             DateTime now = DateTime.Now;
@@ -380,10 +418,29 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 errors.RemoveAt(0);
             }
         }
+#endif
 
-        public void ClearErrors()
+        public void AddErrors(string type, List<string> errors)
         {
-            _errors.Clear();
+            DateTime now = DateTime.Now;
+            List<string> results = new List<string>();
+            foreach (string error in errors)
+            {
+                results.Add($"{now.ToShortTimeString()} {error}");
+            }
+
+            _errorTable.SetError(type, StringUtil.MakePathList(results, "; "));
+        }
+
+        public void SetError(string type, string error)
+        {
+            _errorTable.SetError(type, error);
+        }
+
+        public void ClearErrors(string type)
+        {
+            // _errors.Clear();
+            _errorTable.SetError(type, "");
         }
 
         public void EnableSendkey(bool enable)
@@ -509,14 +566,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _cancelRefresh = new CancellationTokenSource();
             try
             {
-                ClearErrors();  // 2019/5/20
+                ClearErrors("fingerprint");  // 2019/5/20
                 List<string> errors = TryInitialFingerprint();
                 if (errors.Count > 0)
-                    AddErrors(errors);
+                    AddErrors("fingerprint", errors);
             }
             catch (Exception ex)
             {
-                AddErrors(new List<string> { $"重试初始化指纹环境时出现异常: {ex.Message}" });
+                AddErrors("fingerprint", new List<string> { $"重试初始化指纹环境时出现异常: {ex.Message}" });
                 return;
             }
             finally
