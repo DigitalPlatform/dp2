@@ -9,7 +9,9 @@
       Background="Black"
       WindowTitle="主菜单" Title="主菜单"
       >
-
+    <Page.Resources>
+        <local:StringToVisibilityConverter x:Key="StringToVis" />
+    </Page.Resources>
     <UniformGrid Width="500" Height="500">
 
         <!--
@@ -36,10 +38,11 @@
                 Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
         <Button Name="config" Grid.Row="1" Grid.Column="1" Content="设置"  Click="Config_Click"
                 Background="CornflowerBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <TextBlock Grid.ColumnSpan="2" Name="message"
+        <TextBox Grid.ColumnSpan="2" Name="message"
                    Text="test" TextAlignment="Center" 
                    Background="CornflowerBlue" Foreground="White"/>
         <Button Name="error" Content="错误信息"  Click="Error_Click"
+                Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                 Background="DarkRed" Foreground="White" FontSize="40" BorderThickness="0"/>
     </UniformGrid>
 </Page>

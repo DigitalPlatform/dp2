@@ -30,6 +30,11 @@ namespace ZkFingerprint
             return new GetMessageResult { Message = null };
         }
 
+        public void Awake()
+        {
+
+        }
+
         TimeSpan m_interval = new TimeSpan(0, 0, 0, 1, 0);
         DateTime m_lastFinish = new DateTime(0);
 

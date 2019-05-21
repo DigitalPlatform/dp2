@@ -79,7 +79,7 @@ namespace DigitalPlatform.Interfaces
 
         NormalResult EnableSendKey(bool enable);
 
-        void Awake();
+        NormalResult GetState(string style);
     }
 
     [Serializable()]

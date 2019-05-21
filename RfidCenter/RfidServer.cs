@@ -23,6 +23,33 @@ namespace RfidCenter
             _cancelInventory?.Cancel();
         }
 
+        public NormalResult GetState(string style)
+        {
+            if (Program.MainForm.ErrorState == "normal")
+            {
+                var result = ListReaders();
+                if (result.Readers.Length == 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorCode = "noReaders",
+                        ErrorInfo = "没有任何连接的读卡器"
+                    };
+                return new NormalResult
+                {
+                    Value = 0,
+                    ErrorCode = Program.MainForm.ErrorState,
+                    ErrorInfo = Program.MainForm.ErrorStateInfo
+                };
+            }
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorCode = Program.MainForm.ErrorState,
+                ErrorInfo = Program.MainForm.ErrorStateInfo
+            };
+        }
+
         // 列出当前可用的 reader
         public ListReadersResult ListReaders()
         {
@@ -458,6 +485,11 @@ new_password);
 
         public NormalResult EnableSendKey(bool enable)
         {
+            // 如果和以前的值相同
+            bool old_value = _sendKeyEnabled.Value;
+            if (old_value == enable)
+                return new NormalResult();
+
             if (enable == true)
                 _sendKeyEnabled.FalseToTrue();
             else
