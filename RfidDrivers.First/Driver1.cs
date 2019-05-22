@@ -2220,6 +2220,19 @@ namespace RfidDrivers.First
                 else
                     return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'", ErrorCode = "notSupportKey" };
             }
+            else if (reader.ProductName == "R-PAN ISO15693")
+            {
+                if (key == "mode")
+                {
+                    if (value != "scan" && value != "host")
+                        return new NormalResult { Value = -1, ErrorInfo = $"key '{key}' 的 value 部分 '{value}' 不合法。应为 host scan 之一" };
+                    cfg_no = 6;
+                    index = 4;  // WM byte
+                    bit = -1;   // 表示不用 bit，而使用整个 byte
+                }
+                else
+                    return new NormalResult { Value = 0, ErrorInfo = $"读卡器型号 '{reader.ProductName}' 暂不支持 key '{key}'", ErrorCode = "notSupportKey" };
+            }
             else if (reader.ProductName == "M201")
             {
                 if (key == "autoCloseRF")

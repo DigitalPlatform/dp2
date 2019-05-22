@@ -554,7 +554,11 @@ new_password);
             if (Program.Rfid.Readers.Count == 0)
                 Program.MainForm.OutputHistory("当前没有可用的读卡器", 2);
             else
-                Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}", 0);
+            {
+                List<string> names = new List<string>();
+                Program.Rfid.Readers.ForEach((o) => names.Add(o.Name));
+                Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names,"\r\n")}", 0);
+            }
 
             _cancelInventory = new CancellationTokenSource();
             bool bFirst = true;

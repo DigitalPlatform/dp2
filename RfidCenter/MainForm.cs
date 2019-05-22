@@ -273,7 +273,7 @@ namespace RfidCenter
 
         private static readonly Object _syncRoot_start = new Object(); // 2019/5/20
 
-        void InitializeDriver()
+        void InitializeDriver(string message = null)
         {
             lock (_syncRoot_start)
             {
@@ -281,8 +281,11 @@ namespace RfidCenter
                 try
                 {
                     ClearMessage();
-                    this.SetErrorState("retry","正在初始化 RFID 设备");
-                    this.ShowMessage("正在初始化 RFID 设备");
+                    this.SetErrorState("retry", "正在初始化 RFID 设备");
+                    if (message != null)
+                        this.ShowMessage(message);
+                    else
+                        this.ShowMessage("正在初始化 RFID 设备");
 
                     _driver.ReleaseDriver();
                     InitializeDriverResult result = _driver.InitializeDriver("");
@@ -1516,6 +1519,12 @@ string strHtml)
                     goto ERROR1;
                 }
             }
+
+            // 2019/5/23
+            // 如果当前读卡器中有 'R-PAN ISO15693' 这个型号，那需要重新初始化一下设备。不然后面调用 SetConfig() 时其中的读会失败
+            var reader = _driver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
+            if (reader != null)
+                InitializeDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
 
             {
                 NormalResult result = _driver.SetConfig("*", "beep:-,mode:host,autoCloseRF:-");

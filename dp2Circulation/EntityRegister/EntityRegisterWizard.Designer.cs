@@ -52,6 +52,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EntityRegisterWizard));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_settings = new System.Windows.Forms.TabPage();
+            this.checkBox_settings_searchHongniba = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_searchAmazon = new System.Windows.Forms.CheckBox();
             this.checkBox_settings_addDefaultFields = new System.Windows.Forms.CheckBox();
             this.button_settings_bilbioDefault = new System.Windows.Forms.Button();
             this.button_settings_reCreateServersXml = new System.Windows.Forms.Button();
@@ -91,8 +93,6 @@
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.checkBox_settings_searchAmazon = new System.Windows.Forms.CheckBox();
-            this.checkBox_settings_searchHongniba = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -120,7 +120,7 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(510, 317);
+            this.tabControl_main.Size = new System.Drawing.Size(765, 482);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControl_main_DrawItem);
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
@@ -139,27 +139,52 @@
             this.tabPage_settings.Controls.Add(this.checkBox_settings_keyboardWizard);
             this.tabPage_settings.Controls.Add(this.groupBox1);
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
-            this.tabPage_settings.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_settings.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_settings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_settings.Name = "tabPage_settings";
-            this.tabPage_settings.Size = new System.Drawing.Size(502, 291);
+            this.tabPage_settings.Size = new System.Drawing.Size(757, 450);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
+            // 
+            // checkBox_settings_searchHongniba
+            // 
+            this.checkBox_settings_searchHongniba.AutoSize = true;
+            this.checkBox_settings_searchHongniba.Location = new System.Drawing.Point(14, 354);
+            this.checkBox_settings_searchHongniba.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_settings_searchHongniba.Name = "checkBox_settings_searchHongniba";
+            this.checkBox_settings_searchHongniba.Size = new System.Drawing.Size(205, 22);
+            this.checkBox_settings_searchHongniba.TabIndex = 11;
+            this.checkBox_settings_searchHongniba.Text = "检索红泥巴服务器(&H)";
+            this.checkBox_settings_searchHongniba.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_searchAmazon
+            // 
+            this.checkBox_settings_searchAmazon.AutoSize = true;
+            this.checkBox_settings_searchAmazon.Location = new System.Drawing.Point(14, 321);
+            this.checkBox_settings_searchAmazon.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.checkBox_settings_searchAmazon.Name = "checkBox_settings_searchAmazon";
+            this.checkBox_settings_searchAmazon.Size = new System.Drawing.Size(205, 22);
+            this.checkBox_settings_searchAmazon.TabIndex = 10;
+            this.checkBox_settings_searchAmazon.Text = "检索亚马逊服务器(&A)";
+            this.checkBox_settings_searchAmazon.UseVisualStyleBackColor = true;
             // 
             // checkBox_settings_addDefaultFields
             // 
             this.checkBox_settings_addDefaultFields.AutoSize = true;
-            this.checkBox_settings_addDefaultFields.Location = new System.Drawing.Point(9, 106);
+            this.checkBox_settings_addDefaultFields.Location = new System.Drawing.Point(14, 159);
+            this.checkBox_settings_addDefaultFields.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_addDefaultFields.Name = "checkBox_settings_addDefaultFields";
-            this.checkBox_settings_addDefaultFields.Size = new System.Drawing.Size(210, 16);
+            this.checkBox_settings_addDefaultFields.Size = new System.Drawing.Size(313, 22);
             this.checkBox_settings_addDefaultFields.TabIndex = 9;
             this.checkBox_settings_addDefaultFields.Text = "为下载的书目记录添加默认字段(&D)";
             this.checkBox_settings_addDefaultFields.UseVisualStyleBackColor = true;
             // 
             // button_settings_bilbioDefault
             // 
-            this.button_settings_bilbioDefault.Location = new System.Drawing.Point(9, 79);
+            this.button_settings_bilbioDefault.Location = new System.Drawing.Point(14, 118);
+            this.button_settings_bilbioDefault.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_settings_bilbioDefault.Name = "button_settings_bilbioDefault";
-            this.button_settings_bilbioDefault.Size = new System.Drawing.Size(241, 23);
+            this.button_settings_bilbioDefault.Size = new System.Drawing.Size(362, 34);
             this.button_settings_bilbioDefault.TabIndex = 8;
             this.button_settings_bilbioDefault.Text = "书目记录缺省值";
             this.button_settings_bilbioDefault.UseVisualStyleBackColor = true;
@@ -167,9 +192,10 @@
             // 
             // button_settings_reCreateServersXml
             // 
-            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(9, 150);
+            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(14, 225);
+            this.button_settings_reCreateServersXml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_settings_reCreateServersXml.Name = "button_settings_reCreateServersXml";
-            this.button_settings_reCreateServersXml.Size = new System.Drawing.Size(241, 23);
+            this.button_settings_reCreateServersXml.Size = new System.Drawing.Size(362, 34);
             this.button_settings_reCreateServersXml.TabIndex = 7;
             this.button_settings_reCreateServersXml.Text = "重新创建 servers.xml 配置文件";
             this.button_settings_reCreateServersXml.UseVisualStyleBackColor = true;
@@ -178,9 +204,10 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(281, 218);
+            this.label2.Location = new System.Drawing.Point(422, 327);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.Size = new System.Drawing.Size(116, 18);
             this.label2.TabIndex = 6;
             this.label2.Text = "颜色风格(&C):";
             // 
@@ -190,18 +217,20 @@
             this.comboBox_settings_colorStyle.Items.AddRange(new object[] {
             "dark",
             "light"});
-            this.comboBox_settings_colorStyle.Location = new System.Drawing.Point(376, 215);
+            this.comboBox_settings_colorStyle.Location = new System.Drawing.Point(564, 322);
+            this.comboBox_settings_colorStyle.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBox_settings_colorStyle.Name = "comboBox_settings_colorStyle";
-            this.comboBox_settings_colorStyle.Size = new System.Drawing.Size(135, 20);
+            this.comboBox_settings_colorStyle.Size = new System.Drawing.Size(200, 26);
             this.comboBox_settings_colorStyle.TabIndex = 5;
             this.comboBox_settings_colorStyle.SelectedIndexChanged += new System.EventHandler(this.comboBox_settings_colorStyle_SelectedIndexChanged);
             // 
             // checkBox_settings_keyboardWizard
             // 
             this.checkBox_settings_keyboardWizard.AutoSize = true;
-            this.checkBox_settings_keyboardWizard.Location = new System.Drawing.Point(9, 16);
+            this.checkBox_settings_keyboardWizard.Location = new System.Drawing.Point(14, 24);
+            this.checkBox_settings_keyboardWizard.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_keyboardWizard.Name = "checkBox_settings_keyboardWizard";
-            this.checkBox_settings_keyboardWizard.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_settings_keyboardWizard.Size = new System.Drawing.Size(169, 22);
             this.checkBox_settings_keyboardWizard.TabIndex = 4;
             this.checkBox_settings_keyboardWizard.Text = "打开向导面板(&K)";
             this.checkBox_settings_keyboardWizard.UseVisualStyleBackColor = true;
@@ -215,9 +244,11 @@
             this.groupBox1.Controls.Add(this.checkBox_settings_needLocation);
             this.groupBox1.Controls.Add(this.checkBox_settings_needItemBarcode);
             this.groupBox1.Controls.Add(this.checkBox_settings_needAccessNo);
-            this.groupBox1.Location = new System.Drawing.Point(281, 16);
+            this.groupBox1.Location = new System.Drawing.Point(422, 24);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(230, 184);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(345, 276);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "册记录格式检查";
@@ -225,9 +256,10 @@
             // checkBox_settings_needBatchNo
             // 
             this.checkBox_settings_needBatchNo.AutoSize = true;
-            this.checkBox_settings_needBatchNo.Location = new System.Drawing.Point(28, 141);
+            this.checkBox_settings_needBatchNo.Location = new System.Drawing.Point(42, 212);
+            this.checkBox_settings_needBatchNo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needBatchNo.Name = "checkBox_settings_needBatchNo";
-            this.checkBox_settings_needBatchNo.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needBatchNo.Size = new System.Drawing.Size(187, 22);
             this.checkBox_settings_needBatchNo.TabIndex = 5;
             this.checkBox_settings_needBatchNo.Text = "必须具备批次号(&B)";
             this.checkBox_settings_needBatchNo.UseVisualStyleBackColor = true;
@@ -235,9 +267,10 @@
             // checkBox_settings_needPrice
             // 
             this.checkBox_settings_needPrice.AutoSize = true;
-            this.checkBox_settings_needPrice.Location = new System.Drawing.Point(28, 97);
+            this.checkBox_settings_needPrice.Location = new System.Drawing.Point(42, 146);
+            this.checkBox_settings_needPrice.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needPrice.Name = "checkBox_settings_needPrice";
-            this.checkBox_settings_needPrice.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_settings_needPrice.Size = new System.Drawing.Size(169, 22);
             this.checkBox_settings_needPrice.TabIndex = 3;
             this.checkBox_settings_needPrice.Text = "必须具备价格(&P)";
             this.checkBox_settings_needPrice.UseVisualStyleBackColor = true;
@@ -245,9 +278,10 @@
             // checkBox_settings_needBookType
             // 
             this.checkBox_settings_needBookType.AutoSize = true;
-            this.checkBox_settings_needBookType.Location = new System.Drawing.Point(28, 31);
+            this.checkBox_settings_needBookType.Location = new System.Drawing.Point(42, 46);
+            this.checkBox_settings_needBookType.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needBookType.Name = "checkBox_settings_needBookType";
-            this.checkBox_settings_needBookType.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needBookType.Size = new System.Drawing.Size(187, 22);
             this.checkBox_settings_needBookType.TabIndex = 0;
             this.checkBox_settings_needBookType.Text = "必须具备册类型(&T)";
             this.checkBox_settings_needBookType.UseVisualStyleBackColor = true;
@@ -255,9 +289,10 @@
             // checkBox_settings_needLocation
             // 
             this.checkBox_settings_needLocation.AutoSize = true;
-            this.checkBox_settings_needLocation.Location = new System.Drawing.Point(28, 53);
+            this.checkBox_settings_needLocation.Location = new System.Drawing.Point(42, 80);
+            this.checkBox_settings_needLocation.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needLocation.Name = "checkBox_settings_needLocation";
-            this.checkBox_settings_needLocation.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needLocation.Size = new System.Drawing.Size(187, 22);
             this.checkBox_settings_needLocation.TabIndex = 1;
             this.checkBox_settings_needLocation.Text = "必须具备馆藏地(&L)";
             this.checkBox_settings_needLocation.UseVisualStyleBackColor = true;
@@ -265,9 +300,10 @@
             // checkBox_settings_needItemBarcode
             // 
             this.checkBox_settings_needItemBarcode.AutoSize = true;
-            this.checkBox_settings_needItemBarcode.Location = new System.Drawing.Point(28, 119);
+            this.checkBox_settings_needItemBarcode.Location = new System.Drawing.Point(42, 178);
+            this.checkBox_settings_needItemBarcode.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needItemBarcode.Name = "checkBox_settings_needItemBarcode";
-            this.checkBox_settings_needItemBarcode.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_settings_needItemBarcode.Size = new System.Drawing.Size(205, 22);
             this.checkBox_settings_needItemBarcode.TabIndex = 4;
             this.checkBox_settings_needItemBarcode.Text = "必须具备册条码号(&B)";
             this.checkBox_settings_needItemBarcode.UseVisualStyleBackColor = true;
@@ -275,18 +311,20 @@
             // checkBox_settings_needAccessNo
             // 
             this.checkBox_settings_needAccessNo.AutoSize = true;
-            this.checkBox_settings_needAccessNo.Location = new System.Drawing.Point(28, 75);
+            this.checkBox_settings_needAccessNo.Location = new System.Drawing.Point(42, 112);
+            this.checkBox_settings_needAccessNo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.checkBox_settings_needAccessNo.Name = "checkBox_settings_needAccessNo";
-            this.checkBox_settings_needAccessNo.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needAccessNo.Size = new System.Drawing.Size(187, 22);
             this.checkBox_settings_needAccessNo.TabIndex = 2;
             this.checkBox_settings_needAccessNo.Text = "必须具备索取号(&A)";
             this.checkBox_settings_needAccessNo.UseVisualStyleBackColor = true;
             // 
             // button_settings_entityDefault
             // 
-            this.button_settings_entityDefault.Location = new System.Drawing.Point(9, 47);
+            this.button_settings_entityDefault.Location = new System.Drawing.Point(14, 70);
+            this.button_settings_entityDefault.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_settings_entityDefault.Name = "button_settings_entityDefault";
-            this.button_settings_entityDefault.Size = new System.Drawing.Size(241, 23);
+            this.button_settings_entityDefault.Size = new System.Drawing.Size(362, 34);
             this.button_settings_entityDefault.TabIndex = 0;
             this.button_settings_entityDefault.Text = "册记录缺省值";
             this.button_settings_entityDefault.UseVisualStyleBackColor = true;
@@ -297,9 +335,10 @@
             this.tabPage_searchBiblio.BackColor = System.Drawing.Color.DimGray;
             this.tabPage_searchBiblio.Controls.Add(this.tableLayoutPanel_search);
             this.tabPage_searchBiblio.ForeColor = System.Drawing.Color.White;
-            this.tabPage_searchBiblio.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_searchBiblio.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_searchBiblio.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_searchBiblio.Name = "tabPage_searchBiblio";
-            this.tabPage_searchBiblio.Size = new System.Drawing.Size(465, 256);
+            this.tabPage_searchBiblio.Size = new System.Drawing.Size(757, 450);
             this.tabPage_searchBiblio.TabIndex = 0;
             this.tabPage_searchBiblio.Text = "检索书目";
             // 
@@ -316,7 +355,7 @@
             this.tableLayoutPanel_search.RowCount = 2;
             this.tableLayoutPanel_search.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_search.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_search.Size = new System.Drawing.Size(465, 256);
+            this.tableLayoutPanel_search.Size = new System.Drawing.Size(757, 450);
             this.tableLayoutPanel_search.TabIndex = 13;
             // 
             // panel_search
@@ -326,19 +365,20 @@
             this.panel_search.Controls.Add(this.comboBox_from);
             this.panel_search.Controls.Add(this.textBox_queryWord);
             this.panel_search.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_search.Location = new System.Drawing.Point(0, 3);
-            this.panel_search.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
+            this.panel_search.Location = new System.Drawing.Point(0, 4);
+            this.panel_search.Margin = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.panel_search.Name = "panel_search";
-            this.panel_search.Size = new System.Drawing.Size(465, 29);
+            this.panel_search.Size = new System.Drawing.Size(757, 39);
             this.panel_search.TabIndex = 12;
             // 
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_search.Image = ((System.Drawing.Image)(resources.GetObject("button_search.Image")));
-            this.button_search.Location = new System.Drawing.Point(390, 0);
+            this.button_search.Location = new System.Drawing.Point(644, 0);
+            this.button_search.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(75, 23);
+            this.button_search.Size = new System.Drawing.Size(112, 34);
             this.button_search.TabIndex = 11;
             this.button_search.Text = "检索(&S)";
             this.button_search.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -347,6 +387,7 @@
             // 
             // comboBox_from
             // 
+            this.comboBox_from.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_from.FormattingEnabled = true;
             this.comboBox_from.Items.AddRange(new object[] {
@@ -354,9 +395,10 @@
             "书名",
             "作者",
             "出版社"});
-            this.comboBox_from.Location = new System.Drawing.Point(3, 2);
+            this.comboBox_from.Location = new System.Drawing.Point(4, 3);
+            this.comboBox_from.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(121, 20);
+            this.comboBox_from.Size = new System.Drawing.Size(180, 26);
             this.comboBox_from.TabIndex = 9;
             // 
             // textBox_queryWord
@@ -364,9 +406,10 @@
             this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_queryWord.Font = new System.Drawing.Font("宋体", 12F);
-            this.textBox_queryWord.Location = new System.Drawing.Point(130, 0);
+            this.textBox_queryWord.Location = new System.Drawing.Point(195, 0);
+            this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(254, 26);
+            this.textBox_queryWord.Size = new System.Drawing.Size(438, 35);
             this.textBox_queryWord.TabIndex = 10;
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
             this.textBox_queryWord.Leave += new System.EventHandler(this.textBox_queryWord_Leave);
@@ -393,11 +436,12 @@
             this.dpTable_browseLines.HoverBackColor = System.Drawing.SystemColors.HotTrack;
             this.dpTable_browseLines.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable_browseLines.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.dpTable_browseLines.Location = new System.Drawing.Point(0, 32);
+            this.dpTable_browseLines.Location = new System.Drawing.Point(0, 43);
             this.dpTable_browseLines.Margin = new System.Windows.Forms.Padding(0);
+            this.dpTable_browseLines.MaxTextHeight = 67;
             this.dpTable_browseLines.Name = "dpTable_browseLines";
-            this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(12);
-            this.dpTable_browseLines.Size = new System.Drawing.Size(465, 224);
+            this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(18, 18, 18, 18);
+            this.dpTable_browseLines.Size = new System.Drawing.Size(757, 407);
             this.dpTable_browseLines.TabIndex = 8;
             this.dpTable_browseLines.Text = "dpTable1";
             this.dpTable_browseLines.PaintRegion += new DigitalPlatform.CommonControl.PaintRegionEventHandler(this.dpTable_browseLines_PaintRegion);
@@ -429,9 +473,10 @@
             this.tabPage_biblioAndItems.BackColor = System.Drawing.Color.DimGray;
             this.tabPage_biblioAndItems.Controls.Add(this.splitContainer_biblioAndItems);
             this.tabPage_biblioAndItems.ForeColor = System.Drawing.Color.White;
-            this.tabPage_biblioAndItems.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_biblioAndItems.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_biblioAndItems.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage_biblioAndItems.Name = "tabPage_biblioAndItems";
-            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(465, 256);
+            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(757, 434);
             this.tabPage_biblioAndItems.TabIndex = 1;
             this.tabPage_biblioAndItems.Text = "种和册";
             // 
@@ -450,9 +495,9 @@
             // splitContainer_biblioAndItems.Panel2
             // 
             this.splitContainer_biblioAndItems.Panel2.Controls.Add(this.flowLayoutPanel1);
-            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(465, 256);
-            this.splitContainer_biblioAndItems.SplitterDistance = 234;
-            this.splitContainer_biblioAndItems.SplitterWidth = 8;
+            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(757, 434);
+            this.splitContainer_biblioAndItems.SplitterDistance = 380;
+            this.splitContainer_biblioAndItems.SplitterWidth = 12;
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
             // 
@@ -468,7 +513,7 @@
             this.easyMarcControl1.MarcDefDom = null;
             this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(0);
             this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(234, 256);
+            this.easyMarcControl1.Size = new System.Drawing.Size(380, 434);
             this.easyMarcControl1.TabIndex = 0;
             this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
             this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
@@ -484,7 +529,7 @@
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(223, 256);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(365, 434);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.SizeChanged += new System.EventHandler(this.flowLayoutPanel1_SizeChanged);
             this.flowLayoutPanel1.Enter += new System.EventHandler(this.flowLayoutPanel1_Enter);
@@ -506,6 +551,7 @@
             this.toolStrip1.BackColor = System.Drawing.Color.Gray;
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_start,
             this.toolStripButton_next,
@@ -516,9 +562,10 @@
             this.toolStripSeparator2,
             this.toolStripButton_delete,
             this.toolStripLabel_biblioSource});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 317);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 482);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(510, 25);
+            this.toolStrip1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip1.Size = new System.Drawing.Size(765, 31);
             this.toolStrip1.TabIndex = 9;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -530,7 +577,7 @@
             this.toolStripButton_start.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_start.Name = "toolStripButton_start";
             this.toolStripButton_start.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.toolStripButton_start.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_start.Size = new System.Drawing.Size(86, 28);
             this.toolStripButton_start.Text = "重新开始";
             this.toolStripButton_start.Click += new System.EventHandler(this.toolStripButton_start_Click);
             // 
@@ -542,7 +589,7 @@
             this.toolStripButton_next.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_next.Image")));
             this.toolStripButton_next.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_next.Name = "toolStripButton_next";
-            this.toolStripButton_next.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButton_next.Size = new System.Drawing.Size(68, 28);
             this.toolStripButton_next.Text = "下一步";
             this.toolStripButton_next.Click += new System.EventHandler(this.toolStripButton_next_Click);
             // 
@@ -554,14 +601,14 @@
             this.toolStripButton_prev.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_prev.Image")));
             this.toolStripButton_prev.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_prev.Name = "toolStripButton_prev";
-            this.toolStripButton_prev.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButton_prev.Size = new System.Drawing.Size(68, 28);
             this.toolStripButton_prev.Text = "上一步";
             this.toolStripButton_prev.Click += new System.EventHandler(this.toolStripButton_prev_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_new
             // 
@@ -570,7 +617,7 @@
             this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_new.Name = "toolStripButton_new";
             this.toolStripButton_new.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.toolStripButton_new.Size = new System.Drawing.Size(52, 22);
+            this.toolStripButton_new.Size = new System.Drawing.Size(74, 28);
             this.toolStripButton_new.Text = "新建";
             this.toolStripButton_new.ToolTipText = "新建书目记录";
             this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
@@ -582,14 +629,14 @@
             this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_save.Name = "toolStripButton_save";
             this.toolStripButton_save.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
+            this.toolStripButton_save.Size = new System.Drawing.Size(74, 28);
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStripButton_delete
             // 
@@ -598,14 +645,14 @@
             this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_delete.Name = "toolStripButton_delete";
             this.toolStripButton_delete.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.toolStripButton_delete.Size = new System.Drawing.Size(52, 22);
+            this.toolStripButton_delete.Size = new System.Drawing.Size(74, 28);
             this.toolStripButton_delete.Text = "删除";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
             // 
             // toolStripLabel_biblioSource
             // 
             this.toolStripLabel_biblioSource.Name = "toolStripLabel_biblioSource";
-            this.toolStripLabel_biblioSource.Size = new System.Drawing.Size(0, 22);
+            this.toolStripLabel_biblioSource.Size = new System.Drawing.Size(0, 28);
             this.toolStripLabel_biblioSource.ToolTipText = "书目记录来源";
             // 
             // tableLayoutPanel_main
@@ -621,38 +668,19 @@
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(510, 342);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(765, 513);
             this.tableLayoutPanel_main.TabIndex = 10;
-            // 
-            // checkBox_settings_searchAmazon
-            // 
-            this.checkBox_settings_searchAmazon.AutoSize = true;
-            this.checkBox_settings_searchAmazon.Location = new System.Drawing.Point(9, 214);
-            this.checkBox_settings_searchAmazon.Name = "checkBox_settings_searchAmazon";
-            this.checkBox_settings_searchAmazon.Size = new System.Drawing.Size(138, 16);
-            this.checkBox_settings_searchAmazon.TabIndex = 10;
-            this.checkBox_settings_searchAmazon.Text = "检索亚马逊服务器(&A)";
-            this.checkBox_settings_searchAmazon.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_settings_searchHongniba
-            // 
-            this.checkBox_settings_searchHongniba.AutoSize = true;
-            this.checkBox_settings_searchHongniba.Location = new System.Drawing.Point(9, 236);
-            this.checkBox_settings_searchHongniba.Name = "checkBox_settings_searchHongniba";
-            this.checkBox_settings_searchHongniba.Size = new System.Drawing.Size(138, 16);
-            this.checkBox_settings_searchHongniba.TabIndex = 11;
-            this.checkBox_settings_searchHongniba.Text = "检索红泥巴服务器(&H)";
-            this.checkBox_settings_searchHongniba.UseVisualStyleBackColor = true;
             // 
             // EntityRegisterWizard
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(510, 342);
+            this.ClientSize = new System.Drawing.Size(765, 513);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.Color.White;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "EntityRegisterWizard";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
