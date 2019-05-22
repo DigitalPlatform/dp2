@@ -9619,6 +9619,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
+            int nCount = 0;
+
             LibraryChannel channel = this.GetChannel();
 
             TimeSpan old_timeout = channel.Timeout;
@@ -9638,6 +9640,10 @@ MessageBoxDefaultButton.Button1);
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
                     if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    // 2019/5/22
+                    if (IsCmdLine(item.Text))
                         continue;
 
                     items.Add(item);
@@ -9675,15 +9681,13 @@ MessageBoxDefaultButton.Button1);
                     if (string.IsNullOrEmpty(strXml) == true)
                         continue;   // 并发删除书目记录的时候会碰到
 
-                    string strMARC = "";
-                    string strMarcSyntax = "";
                     // 将XML格式转换为MARC格式
                     // 自动从数据记录中获得MARC语法
                     nRet = MarcUtil.Xml2Marc(strXml,
                         true,
                         null,
-                        out strMarcSyntax,
-                        out strMARC,
+                        out string strMarcSyntax,
+                        out string strMARC,
                         out strError);
                     if (nRet == -1)
                     {
@@ -9719,7 +9723,12 @@ MessageBoxDefaultButton.Button1);
                         strMARC = record.Text;
                     }
 
-                    if (dlg_905.Create905 || dlg_905.Create906)
+                    // 2019/5/22
+                    // 是否为本地系统路径
+                    bool isLocal = info.RecPath.IndexOf("@") == -1 && IsCmdLine(info.RecPath) == false;
+
+                    if ((dlg_905.Create905 || dlg_905.Create906)
+                        && isLocal)
                     {
                         MarcRecord record = new MarcRecord(strMARC);
 
@@ -9773,6 +9782,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     stop.SetProgressValue(++i);
+                    nCount++;
                 }
             }
             catch (Exception ex)
@@ -9797,12 +9807,11 @@ MessageBoxDefaultButton.Button1);
 
             // 
             if (bAppend == true)
-                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+                MainForm.StatusBarMessage = nCount.ToString()
                     + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
             else
-                MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+                MainForm.StatusBarMessage = nCount.ToString()
                     + "条记录成功保存到新文件 " + this.LastIso2709FileName;
-
             return;
             ERROR1:
             MessageBox.Show(this, strError);
