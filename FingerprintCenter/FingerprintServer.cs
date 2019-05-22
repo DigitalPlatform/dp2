@@ -524,6 +524,12 @@ Exception rethrown at [0]:
             };
         }
 
+        public NormalResult ActivateWindow()
+        {
+            Program.MainForm.ActivateWindow();
+            return new NormalResult();
+        }
+
         public void Dispose()
         {
             Program.FingerPrint?.CancelRegisterString();

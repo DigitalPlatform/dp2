@@ -50,6 +50,12 @@ namespace RfidCenter
             };
         }
 
+        public NormalResult ActivateWindow()
+        {
+            Program.MainForm.ActivateWindow();
+            return new NormalResult();
+        }
+
         // 列出当前可用的 reader
         public ListReadersResult ListReaders()
         {

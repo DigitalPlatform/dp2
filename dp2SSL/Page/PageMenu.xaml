@@ -38,8 +38,8 @@
                 Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
         <Button Name="config" Grid.Row="1" Grid.Column="1" Content="设置"  Click="Config_Click"
                 Background="CornflowerBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <TextBox Grid.ColumnSpan="2" Name="message"
-                   Text="test" TextAlignment="Center" 
+        <TextBlock Grid.ColumnSpan="2" Name="message"
+                   Text="message" TextAlignment="Center" MouseDown="Message_MouseDown"
                    Background="CornflowerBlue" Foreground="White"/>
         <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"

@@ -127,11 +127,21 @@ namespace dp2SSL
 
             PrepareRfid();
 
+#if NO
             {
                 List<string> style = new List<string>();
                 if (_rfidChannel?.Started == true)
                     style.Add("rfid");
                 if (_fingerprintChannel?.Started == true)
+                    style.Add("fingerprint");
+                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+            }
+#endif
+            {
+                List<string> style = new List<string>();
+                if (string.IsNullOrEmpty(App.RfidUrl) == false)
+                    style.Add("rfid");
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
                     style.Add("fingerprint");
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
@@ -463,7 +473,12 @@ namespace dp2SSL
                     if (result.Value == -1)
                     {
                         SetGlobalError("current", $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}");
-                        ClearBookList();
+                        {
+                            ClearBookList();
+                            FillBookFields();
+                        }
+                        // 连带清掉读者信息
+                        _patron.Clear();
                         return;
                     }
                 }
@@ -539,7 +554,10 @@ namespace dp2SSL
 
 
                     if (patrons.Count == 1)
+                    {
                         _patron.Fill(patrons[0]);
+                        SetPatronError("rfid_multi", "");   // 2019/5/22
+                    }
                     else
                     {
                         _patron.Clear();
@@ -547,10 +565,10 @@ namespace dp2SSL
                         if (patrons.Count > 1)
                         {
                             // 读卡器上放了多张读者卡
-                            SetPatronError("rfid", "读卡器上放了多张读者卡。请拿走多余的");
+                            SetPatronError("rfid_multi", "读卡器上放了多张读者卡。请拿走多余的");
                         }
                         else
-                            SetPatronError("rfid", "");   // 2017/5/20
+                            SetPatronError("rfid_multi", "");   // 2019/5/20
                     }
                 }
 
@@ -885,7 +903,7 @@ out string strError);
             }
         }
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -948,7 +966,7 @@ out string strError);
         }
 
 
-        #endregion
+#endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1380,7 +1398,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1421,9 +1439,9 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region global 分类报错机制
+#region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1467,7 +1485,7 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
     }
 }

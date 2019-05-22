@@ -1602,6 +1602,12 @@ namespace RfidDrivers.First
                 reader.Protocols = protocols;
                 return new NormalResult();
             }
+            catch(Exception ex)
+            {
+                Driver1Manager.Log?.Error($"FillReaderInfo() exception[{ExceptionUtil.GetExceptionText(ex)}]");
+                string error = $"FillReaderInfo() 出现异常: {ex.Message}";
+                return new NormalResult { Value = -1, ErrorInfo = error};
+            }
             finally
             {
                 CloseReader(result.ReaderHandle);

@@ -137,6 +137,13 @@ bool bClickClose = false)
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            {
+                notifyIcon1.Visible = true;
+                notifyIcon1.BalloonTipIcon = ToolTipIcon.Info;
+                notifyIcon1.BalloonTipText = "指纹中心已经启动";
+                notifyIcon1.ShowBalloonTip(1000);
+            }
+
             SetErrorState("retry", "正在启动");
 
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
@@ -985,6 +992,37 @@ MessageBoxDefaultButton.Button2);
 
         #region ipc channel
 
+        public static bool CallActivate(string strUrl)
+        {
+            IpcClientChannel channel = new IpcClientChannel();
+            IFingerprint obj = null;
+
+            ChannelServices.RegisterChannel(channel, false);
+            try
+            {
+                obj = (IFingerprint)Activator.GetObject(typeof(IFingerprint),
+                    strUrl);
+                if (obj == null)
+                {
+                    // strError = "could not locate Fingerprint Server";
+                    return false;
+                }
+                obj.ActivateWindow();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                if (obj != null)
+                {
+                    ChannelServices.UnregisterChannel(channel);
+                }
+            }
+        }
+
         IpcClientChannel m_fingerprintChannel = new IpcClientChannel();
         IFingerprint m_fingerprintObj = null;
 
@@ -1336,8 +1374,50 @@ Keys keyData)
         #endregion
 #endif
 
+        public void ActivateWindow()
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.Speak("恢复窗口显示");
+                this.ShowInTaskbar = true;
+                this.WindowState = FormWindowState.Normal;
+            }));
+        }
+
+        public const int WM_SHOW1 = API.WM_USER + 200;
+
         protected override void WndProc(ref Message m)
         {
+#if REMOVED
+            if (m.Msg == Program.WM_MY_MSG)
+            {
+                this.Speak("收到消息");
+
+                if ((m.WParam.ToInt32() == 0xCDCD) && (m.LParam.ToInt32() == 0xEFEF))
+                {
+                    if (WindowState == FormWindowState.Minimized)
+                    {
+                        WindowState = FormWindowState.Normal;
+                    }
+                    // Bring window to front.
+                    bool temp = TopMost;
+                    TopMost = true;
+                    TopMost = temp;
+                    // Set focus to the window.
+                    Activate();
+                }
+            }
+#endif
+
+#if NO
+            if (m.Msg == WM_SHOW1)
+            {
+                this.ShowInTaskbar = true;
+                WindowState = FormWindowState.Normal;
+                this.Speak("收到消息");
+                return;
+            }
+#endif
             base.WndProc(ref m);
             if (m.Msg == UsbNotification.WmDevicechange)
             {
@@ -1960,6 +2040,24 @@ token);
         {
             // m_fingerprintObj.EnableSendKey(true);
             FingerprintServer._enableSendKey(true);
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            this.ShowInTaskbar = true;
+            // notifyIcon1.Visible = false;
+            WindowState = FormWindowState.Normal;
+        }
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                this.ShowInTaskbar = false;
+                notifyIcon1.Visible = true;
+                notifyIcon1.BalloonTipText = "指纹中心已经隐藏";
+                notifyIcon1.ShowBalloonTip(1000);
+            }
         }
     }
 

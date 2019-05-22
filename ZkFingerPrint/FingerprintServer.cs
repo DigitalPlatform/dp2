@@ -30,9 +30,15 @@ namespace ZkFingerprint
             return new GetMessageResult { Message = null };
         }
 
-        public void Awake()
+        public NormalResult GetState(string style)
         {
+            return new NormalResult();
+        }
 
+        public NormalResult ActivateWindow()
+        {
+            // Program.MainForm.ActivateWindow();
+            return new NormalResult();
         }
 
         TimeSpan m_interval = new TimeSpan(0, 0, 0, 1, 0);

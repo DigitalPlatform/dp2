@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
@@ -73,6 +74,7 @@
             this.toolStripButton_autoInventory = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.MenuItem_file = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_restart = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openSendKey = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_closeSendKey = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
@@ -99,7 +101,7 @@
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_restart = new System.Windows.Forms.ToolStripMenuItem();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -423,7 +425,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(375, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(245, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -451,7 +453,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(378, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(248, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -477,7 +479,7 @@
             this.toolStripButton_cfg_setHongnibaServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_cfg_setHongnibaServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_cfg_setHongnibaServer.Name = "toolStripButton_cfg_setHongnibaServer";
-            this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 48);
+            this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 28);
             this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
             this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             // 
@@ -587,29 +589,36 @@
             this.MenuItem_file.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_file.Text = "文件";
             // 
+            // MenuItem_restart
+            // 
+            this.MenuItem_restart.Name = "MenuItem_restart";
+            this.MenuItem_restart.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_restart.Text = "重新启动";
+            this.MenuItem_restart.Click += new System.EventHandler(this.MenuItem_restart_Click);
+            // 
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(169, 30);
             this.MenuItem_openSendKey.Text = "打开 发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(169, 30);
             this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(166, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(169, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -783,12 +792,14 @@
             this.MenuItem_about.Size = new System.Drawing.Size(254, 30);
             this.MenuItem_about.Text = "关于本软件 ...";
             // 
-            // MenuItem_restart
+            // notifyIcon1
             // 
-            this.MenuItem_restart.Name = "MenuItem_restart";
-            this.MenuItem_restart.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_restart.Text = "重新启动";
-            this.MenuItem_restart.Click += new System.EventHandler(this.MenuItem_restart_Click);
+            this.notifyIcon1.BalloonTipText = "dp2-RFID中心";
+            this.notifyIcon1.BalloonTipTitle = "dp2-RFID中心";
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "dp2-RFID中心";
+            this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
             // MainForm
             // 
@@ -800,13 +811,14 @@
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.menuStrip1);
             this.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
-            this.ShowIcon = false;
             this.Text = "dp2-RFID中心";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_start.ResumeLayout(false);
             this.splitContainer_start.Panel1.ResumeLayout(false);
@@ -902,6 +914,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openDataFolder;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openProgramFolder;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restart;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 

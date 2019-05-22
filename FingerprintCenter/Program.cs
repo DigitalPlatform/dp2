@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +18,22 @@ namespace FingerprintCenter
 {
     static class Program
     {
+#if REMOVED
+        #region Dll Imports
+
+        // https://stackoverflow.com/questions/1777668/send-message-to-a-windows-process-not-its-main-window
+        // https://stackoverflow.com/questions/10191707/postmessage-to-hidden-form-doesnt-work-the-first-time
+        private const int HWND_BROADCAST = 0xFFFF;
+
+        public static readonly int WM_MY_MSG = RegisterWindowMessage("WM_MY_MSG");
+
+        [DllImport("user32")]
+        private static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
+
+        [DllImport("user32")]
+        private static extern int RegisterWindowMessage(string message);
+        #endregion Dll Imports
+#endif
         public static FingerPrint FingerPrint { get; set; }
 
         static ExecutionContext context = null;
@@ -70,6 +87,21 @@ namespace FingerprintCenter
                             {
                                 // API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
                                 API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
+                            }
+                            else
+                            {
+                                // 用 .net remoting 通讯
+                                MainForm.CallActivate("ipc://FingerprintChannel/FingerprintServer");
+
+#if NO
+                                // Yes...Bring existing instance to top and activate it.
+                                PostMessage(
+                                    (IntPtr)HWND_BROADCAST,
+                                    WM_MY_MSG,
+                                    new IntPtr(0xCDCD),
+                                    new IntPtr(0xEFEF));
+#endif
+                                // API.PostMessage(process.MainWindowHandle, MainForm.WM_SHOW1, 0, 0);
                             }
                         }
                     }

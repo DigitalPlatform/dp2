@@ -16,6 +16,8 @@ namespace DigitalPlatform.RFID
 
         NormalResult GetState(string style);
 
+        NormalResult ActivateWindow();
+
         ListTagsResult ListTags(string reader_name, string style);
 
         GetTagInfoResult GetTagInfo(string reader_name, string uid);
