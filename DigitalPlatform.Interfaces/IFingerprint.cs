@@ -80,6 +80,8 @@ namespace DigitalPlatform.Interfaces
         NormalResult EnableSendKey(bool enable);
 
         NormalResult GetState(string style);
+
+        NormalResult ActivateWindow();
     }
 
     [Serializable()]

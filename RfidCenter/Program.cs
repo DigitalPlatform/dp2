@@ -83,6 +83,11 @@ namespace RfidCenter
                                 // API.ShowWindow(process.MainWindowHandle, API.SW_SHOW);
                                 API.ShowWindow(process.MainWindowHandle, API.SW_RESTORE);
                             }
+                            else
+                            {
+                                // 用 .net remoting 通讯
+                                MainForm.CallActivate("ipc://RfidChannel/RfidServer");
+                            }
                         }
                     }
                 }

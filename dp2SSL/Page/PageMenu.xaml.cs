@@ -98,6 +98,11 @@ namespace dp2SSL
             this.NavigationService.Navigate(new PageError());
         }
 
+        private void Message_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Clipboard.SetDataObject(this.message.Text, true);
+        }
+
 #if REMOVED
         #region 探测平板模式
 
@@ -128,6 +133,7 @@ namespace dp2SSL
         }
 
         #endregion
+
 #endif
     }
 }
