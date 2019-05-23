@@ -211,6 +211,19 @@ namespace dp2Circulation
         }
          */
 
+        string GetFirstRecordPath()
+        {
+            foreach(ListViewItem item in this.listView_records.Items)
+            {
+                var path = item.Text;
+                if (BiblioSearchForm.IsCmdLine(path))
+                    continue;
+                return path;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// 装入第一条记录到详细窗
         /// </summary>
@@ -222,15 +235,24 @@ namespace dp2Circulation
 
             string strError = "";
 
-            string strPath = this.listView_records.Items[0].Text;
+            // 找到第一个记录行。注意可能有命令行，需要跳过
+            string strPath = GetFirstRecordPath();  // this.listView_records.Items[0].Text;
+            // 2019/5/23
+            if (string.IsNullOrEmpty(strPath))
+            {
+                strError = "当前浏览结果中没有任何记录行";
+                goto ERROR1;
+            }
             if (strPath.IndexOf("@") == -1)
             {
                 string[] paths = new string[1];
                 paths[0] = strPath;
 
-                OpenDetailEventArgs args = new OpenDetailEventArgs();
-                args.Paths = paths;
-                args.OpenNew = false;
+                OpenDetailEventArgs args = new OpenDetailEventArgs
+                {
+                    Paths = paths,
+                    OpenNew = false
+                };
 
 #if NO
                 this.listView_records.Enabled = false;
@@ -242,24 +264,20 @@ namespace dp2Circulation
             }
             else
             {
-                BiblioInfo info = m_biblioTable[strPath] as BiblioInfo;
-                if (info == null)
+                if (!(m_biblioTable[strPath] is BiblioInfo info))
                 {
                     strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
                     goto ERROR1;
                 }
 
-                OpenDetailEventArgs args = new OpenDetailEventArgs();
-                args.Paths = null;
-                args.BiblioInfos = new List<BiblioInfo>();
+                OpenDetailEventArgs args = new OpenDetailEventArgs
+                {
+                    Paths = null,
+                    BiblioInfos = new List<BiblioInfo>()
+                };
                 args.BiblioInfos.Add(info);
                 args.OpenNew = false;
 
-#if NO
-                this.listView_records.Enabled = false;
-                this.OpenDetail(this, args);
-                this.listView_records.Enabled = true;
-#endif
                 DoOpenDetail(args);
             }
 
@@ -304,8 +322,7 @@ namespace dp2Circulation
                     path_list.Add(strPath);
                 else
                 {
-                    BiblioInfo info = m_biblioTable[strPath] as BiblioInfo;
-                    if (info == null)
+                    if (!(m_biblioTable[strPath] is BiblioInfo info))
                     {
                         strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
                         goto ERROR1;
