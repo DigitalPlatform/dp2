@@ -2889,7 +2889,6 @@
     <Compile Include="Util\CallNumberForm.Designer.cs">
       <DependentUpon>CallNumberForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Util\ChannelPool.cs" />
     <Compile Include="Util\RfidToolForm.cs">
       <SubType>Form</SubType>
     </Compile>

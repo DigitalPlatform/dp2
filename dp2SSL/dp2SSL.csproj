@@ -139,6 +139,7 @@
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="ErrorTable.cs" />
     <Compile Include="FingerPrint.cs" />
+    <Compile Include="FingerprintManager.cs" />
     <Compile Include="LayoutAdorner.cs" />
     <Compile Include="Dialog\MessageWindow.xaml.cs">
       <DependentUpon>MessageWindow.xaml</DependentUpon>
@@ -156,6 +157,7 @@
     <Compile Include="Converter\StateToBorderConverter.cs" />
     <Compile Include="Converter\StringToVisibilityConverter.cs" />
     <Compile Include="RFID.cs" />
+    <Compile Include="RfidManager.cs" />
     <Compile Include="WpfClientInfo.cs" />
     <Page Include="ConfigWindow.xaml">
       <SubType>Designer</SubType>

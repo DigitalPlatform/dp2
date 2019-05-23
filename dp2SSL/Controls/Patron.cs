@@ -1,12 +1,14 @@
-﻿using DigitalPlatform.RFID;
-using DigitalPlatform.Xml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using DigitalPlatform.RFID;
+using DigitalPlatform.Xml;
 
 namespace dp2SSL
 {
@@ -21,6 +23,8 @@ namespace dp2SSL
             {
                 if (_pii != value)
                 {
+                    // Debug.WriteLine($"PII='{value}'");
+
                     _pii = value;
                     OnPropertyChanged("PII");
                 }
