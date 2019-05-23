@@ -150,6 +150,7 @@ namespace dp2SSL
             Window cfg_window = new ConfigWindow();
             cfg_window.ShowDialog();
 
+#if REMOVED
             // 重试初始化指纹环境
             // TODO: 有时候会遇到报错。可能略微延时一下重试就又可以了
             List<string> errors = App.CurrentApp.InitialFingerPrint();
@@ -157,6 +158,7 @@ namespace dp2SSL
             {
                 MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
+#endif
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

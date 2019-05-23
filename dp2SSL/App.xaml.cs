@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 
 using DigitalPlatform;
+using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
@@ -24,6 +25,8 @@ namespace dp2SSL
     {
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
 
         Mutex myMutex;
 
@@ -89,12 +92,7 @@ namespace dp2SSL
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
-#if REMOVED
-            List<string> errors = TryInitialFingerprint();
-            if (errors.Count > 0)
-                AddErrors(errors);
-#endif
-            InitialFingerPrint();
+            // InitialFingerPrint();
 
             // 后台自动检查更新
             Task.Run(() =>
@@ -108,6 +106,7 @@ namespace dp2SSL
                     OutputHistory(result.ErrorInfo, 0);
             });
 
+#if REMOVED
             // 用于重试初始化指纹环境的 Timer
             // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
             _timer = new System.Threading.Timer(
@@ -115,8 +114,25 @@ namespace dp2SSL
     null,
     TimeSpan.FromSeconds(10),
     TimeSpan.FromSeconds(60));
+#endif
+            FingerprintManager.SetError += FingerprintManager_SetError;
+            FingerprintManager.Start(_cancelRefresh.Token);
+
+            RfidManager.SetError += RfidManager_SetError;
+            RfidManager.Start(_cancelRefresh.Token);
         }
 
+        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("rfid", e.Error);
+        }
+
+        private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("fingerprint", e.Error);
+        }
+
+#if REMOVED
         // 重新初始化指纹环境
         public List<string> InitialFingerPrint()
         {
@@ -130,6 +146,7 @@ namespace dp2SSL
 
             return errors;
         }
+#endif
 
         // TODO: 如何显示后台任务执行信息? 可以考虑只让管理者看到
         public void OutputHistory(string strText, int nWarningLevel = 0)
@@ -139,7 +156,9 @@ namespace dp2SSL
 
         protected override void OnExit(ExitEventArgs e)
         {
-            EndFingerprint();
+            _cancelRefresh.Cancel();
+
+            // EndFingerprint();
 
             this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
@@ -265,7 +284,7 @@ namespace dp2SSL
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-        #region LibraryChannel
+#region LibraryChannel
 
         internal void Channel_BeforeLogin(object sender,
 DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
@@ -378,8 +397,8 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnActivated(EventArgs e)
         {
-            EnableSendkey(false);
-            // Speak("Activated");
+            FingerprintManager.EnableSendkey(false);
+            RfidManager.EnableSendkey(false);
             base.OnActivated(e);
         }
 
@@ -389,7 +408,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             base.OnDeactivated(e);
         }
 
-        #endregion
+#endregion
 
 #if REMOVED
         List<string> _errors = new List<string>();
@@ -443,6 +462,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _errorTable.SetError(type, "");
         }
 
+#if NO
         public void EnableSendkey(bool enable)
         {
             try
@@ -455,7 +475,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 // TODO: 如何显示出错信息？
             }
         }
+#endif
 
+#if NO
         public void ClearFingerprintMessage()
         {
             try
@@ -468,9 +490,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 // TODO: 如何显示出错信息？
             }
         }
+#endif
 
-        #region 指纹
+#region 指纹
 
+#if NO
         FingerprintChannel _fingerprintChannel = null;
 
         public FingerprintChannel FingerprintChannel
@@ -480,7 +504,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 return _fingerprintChannel;
             }
         }
+#endif
 
+#if REMOVED
         private static readonly Object _syncRoot_fingerprint = new Object(); // 2017/5/18
 
         // TODO: 如果没有初始化成功，要提供重试初始化的办法
@@ -535,9 +561,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+
         Timer _timer = null;
 
-        CancellationTokenSource _cancelRefresh = null;
 
         void timerCallback(object o)
         {
@@ -582,7 +608,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 Interlocked.Decrement(ref this._inRefresh);
             }
         }
+#endif
 
-        #endregion
+#endregion
+
     }
 }

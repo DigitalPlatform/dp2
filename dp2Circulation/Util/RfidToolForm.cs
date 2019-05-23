@@ -929,6 +929,7 @@ namespace dp2Circulation
             }
         }
 #endif
+
         void OpenRfidCapture(bool open)
         {
             try

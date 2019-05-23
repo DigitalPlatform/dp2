@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 
 using DigitalPlatform;
+using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
@@ -60,8 +61,11 @@ namespace dp2SSL
             this.patronControl.DataContext = _patron;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
+
+            // _patron.IsFingerprintSource = true;
         }
 
+#if REMOVED
         public FingerprintChannel _fingerprintChannel
         {
             get
@@ -69,17 +73,24 @@ namespace dp2SSL
                 return App.CurrentApp.FingerprintChannel;
             }
         }
+#endif
 
-        RfidChannel _rfidChannel = null;
-        // EventProxy eventProxy;
+        // RfidChannel _rfidChannel = null;
 
         private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
+            FingerprintManager.SetError += FingerprintManager_SetError;
+            FingerprintManager.Touched += FingerprintManager_Touched;
+
+            RfidManager.SetError += RfidManager_SetError;
+            RfidManager.ListTags += RfidManager_ListTags;
+
             // throw new Exception("test");
 
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
 
+#if REMOVED
             {
                 // 准备指纹通道
                 List<string> errors = new List<string>();
@@ -91,6 +102,8 @@ namespace dp2SSL
 
                 SetGlobalError("fingerprint", StringUtil.MakePathList(errors, "; "));
             }
+#endif
+
 #if NO
             if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
             {
@@ -125,7 +138,7 @@ namespace dp2SSL
 
 #endif
 
-            PrepareRfid();
+            // PrepareRfid();
 
 #if NO
             {
@@ -146,6 +159,7 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
+#if NO
             // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
             if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
                 _timer = new System.Threading.Timer(
@@ -153,7 +167,9 @@ namespace dp2SSL
         null,
         TimeSpan.FromSeconds(0),
         TimeSpan.FromSeconds(1));
+#endif
 
+#if NO
             _checkTask = Task.Run(() =>
             {
                 while (_cancel.IsCancellationRequested == false)
@@ -167,16 +183,51 @@ namespace dp2SSL
                     // 验证通道是否有效
                     VerifyRfid();
 
+#if REMOVED
                     // 注: App 里面会不断尝试连接指纹中心。这里只需要刷新错误显示即可
                     if (string.IsNullOrEmpty(App.FingerprintUrl) == false
                     && _fingerprintChannel?.Started == true)
                         SetGlobalError("fingerprint", "");
 
                     VerifyFingerprint();
+#endif
                 }
             });
+#endif
         }
 
+        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        {
+            Refresh(sender as RfidChannel, e.Result);
+        }
+
+        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetGlobalError("rfid", e.Error);
+        }
+
+        private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetGlobalError("fingerprint", e.Error);
+        }
+
+        // 从指纹阅读器获取消息(第一阶段)
+        private void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+        {
+            SetPatronInfo(e.Result);
+
+            FillPatronDetail();
+
+#if NO
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                _patron.IsFingerprintSource = true;
+                _patron.Barcode = "test1234";
+            }));
+#endif
+        }
+
+#if REMOVED
         // 验证通道是否有效
         void VerifyFingerprint()
         {
@@ -198,7 +249,9 @@ namespace dp2SSL
                 }
             }
         }
+#endif
 
+#if NO
         // 验证通道是否有效
         void VerifyRfid()
         {
@@ -275,6 +328,8 @@ namespace dp2SSL
                 SetGlobalError("rfid", "");
         }
 
+#endif
+
 #if NO
         void eventProxy_MessageArrived(string Message)
         {
@@ -293,14 +348,23 @@ namespace dp2SSL
             }
 #endif
 
+#if NO
             if (_rfidChannel != null)
             {
                 RFID.EndRfidChannel(_rfidChannel);
                 _rfidChannel = null;
             }
+#endif
 
             if (_timer != null)
                 _timer.Dispose();
+
+            RfidManager.SetError -= RfidManager_SetError;
+            RfidManager.ListTags -= RfidManager_ListTags;
+
+
+            FingerprintManager.Touched -= FingerprintManager_Touched;
+            FingerprintManager.SetError -= FingerprintManager_SetError;
         }
 
         bool _visiblityChanged = false;
@@ -345,8 +409,9 @@ namespace dp2SSL
             _layer.Remove(_adorner);
         }
 
-        CancellationTokenSource _cancelRefresh = null;
+        // CancellationTokenSource _cancelRefresh = null;
 
+#if NO
         void timerCallback(object o)
         {
             // 避免重叠启动
@@ -355,6 +420,7 @@ namespace dp2SSL
 
             Refresh();
         }
+#endif
 
         public string ActionButtons
         {
@@ -442,10 +508,9 @@ namespace dp2SSL
 
         int _inRefresh = 0;
 
-        void Refresh()
+        void Refresh(RfidChannel channel, ListTagsResult result)
         {
-            //if (_rfidChannel == null || _rfidChannel.Started == false)
-            //    return;
+            Debug.Assert(channel != null, "");
 
             // 防止重入
             int v = Interlocked.Increment(ref this._inRefresh);
@@ -455,32 +520,23 @@ namespace dp2SSL
                 return;
             }
 
-            _cancelRefresh = new CancellationTokenSource();
+            // _cancelRefresh = new CancellationTokenSource();
             try
             {
                 SetGlobalError("current", "");
 
                 // 获得所有协议类型的标签
-                ListTagsResult result = null;
 
-                if (_rfidChannel != null && _rfidChannel.Started)
+                if (result.Value == -1)
                 {
-                    result = _rfidChannel?.Object?.ListTags("*",
-                        null
-                        // "getTagInfo"
-                        );
-                    // 2019/5/19
-                    if (result.Value == -1)
+                    SetGlobalError("current", $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}");
                     {
-                        SetGlobalError("current", $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}");
-                        {
-                            ClearBookList();
-                            FillBookFields();
-                        }
-                        // 连带清掉读者信息
-                        _patron.Clear();
-                        return;
+                        ClearBookList();
+                        FillBookFields(channel);
                     }
+                    // 连带清掉读者信息
+                    _patron.Clear();
+                    return;
                 }
 
                 List<OneTag> books = new List<OneTag>();
@@ -495,7 +551,7 @@ namespace dp2SSL
                             patrons.Add(tag);
                         else if (tag.Protocol == InventoryInfo.ISO15693)
                         {
-                            var gettaginfo_result = GetTagInfo(_rfidChannel, tag.UID);
+                            var gettaginfo_result = GetTagInfo(channel, tag.UID);
                             if (gettaginfo_result.Value == -1)
                             {
                                 SetGlobalError("current", gettaginfo_result.ErrorInfo);
@@ -551,8 +607,6 @@ namespace dp2SSL
                 else
                 {
                     // RFID 来源
-
-
                     if (patrons.Count == 1)
                     {
                         _patron.Fill(patrons[0]);
@@ -572,10 +626,10 @@ namespace dp2SSL
                     }
                 }
 
-                GetPatronFromFingerprint();
+                //GetPatronFromFingerprint();
 
-                FillBookFields();
-                FillPatronDetail();
+                FillBookFields(channel);
+                // FillPatronDetail();
 
                 CheckEAS(new_entities);
             }
@@ -586,7 +640,7 @@ namespace dp2SSL
             }
             finally
             {
-                _cancelRefresh = null;
+                // _cancelRefresh = null;
                 Interlocked.Decrement(ref this._inRefresh);
             }
         }
@@ -615,6 +669,38 @@ namespace dp2SSL
             }
         }
 
+        // 从指纹阅读器获取消息(第一阶段)
+        void SetPatronInfo(GetMessageResult result)
+        {
+            //Application.Current.Dispatcher.Invoke(new Action(() =>
+            //{
+
+            if (result.Value == -1)
+            {
+                SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                if (_patron.IsFingerprintSource)
+                    _patron.Clear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                return;
+            }
+            else
+            {
+                // 清除以前残留的报错信息
+                SetPatronError("fingerprint", "");
+            }
+
+            if (result.Message == null)
+                return;
+
+            _patron.Clear();
+            _patron.IsFingerprintSource = true;
+            _patron.PII = result.Message;
+            // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
+            // “新一轮”意思是图书全部取走以后开始的下一轮
+            //}));
+        }
+
+
+#if REMOVED
         // 从指纹阅读器获取消息(第一阶段)
         void GetPatronFromFingerprint()
         {
@@ -655,13 +741,15 @@ namespace dp2SSL
                 SetPatronError("fingerprint", ex.Message);
             }
         }
-
+#endif
         // 填充读者信息的其他字段(第二阶段)
         void FillPatronDetail()
         {
+#if NO
             if (_cancelRefresh == null
     || _cancelRefresh.IsCancellationRequested)
                 return;
+#endif
 
             //if (string.IsNullOrEmpty(_patron.Error) == false)
             //    return;
@@ -705,7 +793,7 @@ namespace dp2SSL
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        void FillBookFields()
+        void FillBookFields(RfidChannel channel)
         {
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
@@ -717,8 +805,8 @@ out string strError);
             {
                 foreach (Entity entity in _entities)
                 {
-                    if (_cancelRefresh == null
-                        || _cancelRefresh.IsCancellationRequested)
+                    if (_cancel == null
+                        || _cancel.IsCancellationRequested)
                         return;
 
                     if (entity.FillFinished == true)
@@ -734,7 +822,7 @@ out string strError);
                         if (entity.TagInfo == null)
                         {
                             // var result = channel.Object.GetTagInfo("*", entity.UID);
-                            var result = GetTagInfo(_rfidChannel, entity.UID);
+                            var result = GetTagInfo(channel, entity.UID);
                             if (result.Value == -1)
                             {
                                 entity.SetError(result.ErrorInfo);
@@ -1253,26 +1341,14 @@ out string strError);
 
         NormalResult SetEAS(string uid, bool enable)
         {
-#if NO
-            RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
-out string strError);
-            if (channel == null)
-                throw new Exception(strError);
-#endif
             try
             {
                 this.ClearTagTable(uid);
-                return _rfidChannel.Object.SetEAS("*", $"uid:{uid}", enable);
+                return RfidManager.SetEAS($"uid:{uid}", enable);
             }
             catch (Exception ex)
             {
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
-            }
-            finally
-            {
-#if NO
-                RFID.EndRfidChannel(channel);
-#endif
             }
         }
 
@@ -1453,7 +1529,7 @@ out string strError);
             _globalErrorTable.SetError(type, error);
 
             // 指纹方面的报错，还要兑现到 App 中
-            if (type == "fingerprint")
+            if (type == "fingerprint" || type == "rfid")
                 App.CurrentApp.SetError(type, error);
         }
 
