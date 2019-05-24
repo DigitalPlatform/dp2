@@ -27,6 +27,7 @@ using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using Microsoft.Win32;
 
 namespace RfidCenter
 {
@@ -57,6 +58,24 @@ namespace RfidCenter
             }
 
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+        }
+
+        private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    Task.Run(() =>
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                        this.Speak("RFID 中心被唤醒");
+                        BeginRefreshReaders(new CancellationToken());
+                    });
+                    break;
+                case PowerModes.Suspend:
+                    break;
+            }
         }
 
         private const int CP_NOCLOSE_BUTTON = 0x200;

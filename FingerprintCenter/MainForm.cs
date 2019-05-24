@@ -26,6 +26,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CirculationClient;
 using static DigitalPlatform.CirculationClient.BioUtil;
+using Microsoft.Win32;
 
 namespace FingerprintCenter
 {
@@ -54,6 +55,24 @@ namespace FingerprintCenter
             }
 
             UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
+        }
+
+        private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            switch (e.Mode)
+            {
+                case PowerModes.Resume:
+                    Task.Run(() =>
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                        this.Speak("指纹中心被唤醒");
+                        BeginRefreshReaders(new CancellationToken());
+                    });
+                    break;
+                case PowerModes.Suspend:
+                    break;
+            }
         }
 
         private const int CP_NOCLOSE_BUTTON = 0x200;
