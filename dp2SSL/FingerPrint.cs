@@ -11,6 +11,7 @@ using DigitalPlatform.Interfaces;
 
 namespace dp2SSL
 {
+#if REMOVED
     public static class FingerPrint
     {
 
@@ -119,5 +120,8 @@ namespace dp2SSL
             MessageBox.Show(e.Text);
         }
     }
+#endif
+
+
 #endif
 }

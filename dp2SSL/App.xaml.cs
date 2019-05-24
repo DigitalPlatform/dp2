@@ -115,9 +115,13 @@ namespace dp2SSL
     TimeSpan.FromSeconds(10),
     TimeSpan.FromSeconds(60));
 #endif
+            FingerprintManager.Base.Name = "指纹中心";
+            FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Start(_cancelRefresh.Token);
 
+            RfidManager.Base.Name = "RFID 中心";
+            RfidManager.Url = App.RfidUrl;
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.Start(_cancelRefresh.Token);
         }
@@ -156,6 +160,10 @@ namespace dp2SSL
 
         protected override void OnExit(ExitEventArgs e)
         {
+            LibraryChannelManager.Log.Debug("Begin WpfClientInfo.Finish()");
+            WpfClientInfo.Finish();
+            LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
+
             _cancelRefresh.Cancel();
 
             // EndFingerprint();
@@ -164,7 +172,6 @@ namespace dp2SSL
             this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             this._channelPool.Close();
 
-            WpfClientInfo.Finish();
             base.OnExit(e);
         }
 
@@ -201,7 +208,7 @@ namespace dp2SSL
         {
             get
             {
-                return WpfClientInfo.Config.Get("global", "rfidUrl", "");
+                return WpfClientInfo.Config?.Get("global", "rfidUrl", "");
             }
         }
 
@@ -209,7 +216,7 @@ namespace dp2SSL
         {
             get
             {
-                return WpfClientInfo.Config.Get("global", "fingerprintUrl", "");
+                return WpfClientInfo.Config?.Get("global", "fingerprintUrl", "");
             }
         }
 

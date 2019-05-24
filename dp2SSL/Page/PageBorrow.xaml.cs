@@ -198,7 +198,7 @@ namespace dp2SSL
 
         private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
-            Refresh(sender as RfidChannel, e.Result);
+            Refresh(sender as BaseChannel<IRfid>, e.Result);
         }
 
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
@@ -362,7 +362,6 @@ namespace dp2SSL
             RfidManager.SetError -= RfidManager_SetError;
             RfidManager.ListTags -= RfidManager_ListTags;
 
-
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
         }
@@ -472,7 +471,7 @@ namespace dp2SSL
         }
 
         // 从缓存中获取标签信息
-        GetTagInfoResult GetTagInfo(RfidChannel channel, string uid)
+        GetTagInfoResult GetTagInfo(BaseChannel<IRfid> channel, string uid)
         {
             // 2019/5/21
             if (channel.Started == false)
@@ -508,7 +507,7 @@ namespace dp2SSL
 
         int _inRefresh = 0;
 
-        void Refresh(RfidChannel channel, ListTagsResult result)
+        void Refresh(BaseChannel<IRfid> channel, ListTagsResult result)
         {
             Debug.Assert(channel != null, "");
 
@@ -793,7 +792,7 @@ namespace dp2SSL
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        void FillBookFields(RfidChannel channel)
+        void FillBookFields(BaseChannel<IRfid> channel)
         {
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
