@@ -37,6 +37,7 @@
             </Button>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="1" Name="error" Text="test"/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Name="error"
+                   Text="test" TextWrapping="Wrap" Padding="8,8,8,8"/>
     </Grid>
 </Page>

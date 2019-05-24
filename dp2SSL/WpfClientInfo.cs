@@ -95,7 +95,7 @@ namespace dp2SSL
             log4net.Config.XmlConfigurator.Configure(repository);
 
             LibraryChannelManager.Log = LogManager.GetLogger("main", "channellib");
-            _log = LogManager.GetLogger("main", "fingerprintcenter");
+            _log = LogManager.GetLogger("main", ProductName);
 
             // 启动时在日志中记载当前 .exe 版本号
             // 此举也能尽早发现日志目录无法写入的问题，会抛出异常

@@ -12,6 +12,7 @@ using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {
+#if REMOVED
     public static class RFID
     {
         #region RFID 有关功能
@@ -115,4 +116,6 @@ namespace dp2SSL
         // 通道已经成功启动。意思是已经至少经过一个 API 调用并表现正常
         public bool Started { get; set; }
     }
+
+#endif
 }

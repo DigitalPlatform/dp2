@@ -150,6 +150,12 @@ namespace dp2SSL
             Window cfg_window = new ConfigWindow();
             cfg_window.ShowDialog();
 
+
+            // 迫使 URL 生效
+            RfidManager.Url = App.RfidUrl;
+            RfidManager.Clear();
+            FingerprintManager.Url = App.FingerprintUrl;
+            FingerprintManager.Clear();
 #if REMOVED
             // 重试初始化指纹环境
             // TODO: 有时候会遇到报错。可能略微延时一下重试就又可以了

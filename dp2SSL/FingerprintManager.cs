@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2SSL
 {
@@ -19,19 +20,84 @@ namespace dp2SSL
     {
         public static event TouchedEventHandler Touched = null;
 
-        public static event SetErrorEventHandler SetError = null;
+        //public static event SetErrorEventHandler SetError = null;
 
-        static ChannelPool<FingerprintChannel> _fingerprintChannels = new ChannelPool<FingerprintChannel>();
+        //static ChannelPool<FingerprintChannel> _fingerprintChannels = new ChannelPool<FingerprintChannel>();
 
-        // static CancellationTokenSource _cancel = new CancellationTokenSource();
+        public static ManagerBase<IFingerprint> Base = new ManagerBase<IFingerprint>();
 
-        // public delegate void delegate_setError(string error);
+        public static event SetErrorEventHandler SetError
+        {
+            add
+            {
+                Base.AddEvent(value);
+            }
+            remove
+            {
+                Base.RemoveEvent(value);
+            }
+        }
+
+        public static void Clear()
+        {
+            Base.Clear();
+        }
+
+        public static string Url
+        {
+            get
+            {
+                return Base.Url;
+            }
+            set
+            {
+                Base.Url = value;
+            }
+        }
 
         // 启动后台任务。
         // 后台任务负责监视 指纹中心 里面新到的 message
         public static void Start(
             CancellationToken token)
         {
+            Base.Start((channel) =>
+            {
+                var result = channel.Object.GetState("");
+                if (result.Value == -1)
+                    throw new Exception($"指纹中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                channel.Started = true;
+
+                channel.Object.EnableSendKey(false);
+            },
+
+            (channel) =>
+{
+    var result = channel.Object.GetMessage("");
+    if (result.Value == -1)
+        Base.TriggerSetError(result,
+            new SetErrorEventArgs { Error = result.ErrorInfo });
+    else
+        Base.TriggerSetError(result,
+            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+    if (result.Value != -1 && result.Message == null)
+    {
+        // 没有消息的时候不用惊扰事件订阅者
+    }
+    else
+    {
+        Touched(result, new TouchedEventArgs
+        {
+            Message = result.Message,
+            ErrorOccur = result.Value == -1,
+            Result = result
+        });
+    }
+
+},
+token);
+
+#if NO
             Task.Run(() =>
             {
                 while (token.IsCancellationRequested == false)
@@ -81,7 +147,7 @@ namespace dp2SSL
                         SetError(ex,
                             new SetErrorEventArgs
                             {
-                                Error = $"指纹中心出现异常: {ex.Message}"
+                                Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                             });
 
                         // 附加一个延时
@@ -89,42 +155,44 @@ namespace dp2SSL
                     }
                 }
             });
+#endif
         }
 
         public static NormalResult EnableSendkey(bool enable)
         {
             try
             {
-                FingerprintChannel channel = GetFingerprintChannel();
+                BaseChannel<IFingerprint> channel = Base.GetChannel();
                 try
                 {
                     var result = channel.Object.EnableSendKey(enable);
                     if (result.Value == -1)
-                        SetError(result,
+                        Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
                     else
-                        SetError(result,
+                        Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
                     return result;
                 }
                 finally
                 {
-                    ReturnFingerprintChannel(channel);
+                    Base.ReturnChannel(channel);
                 }
 
             }
             catch (Exception ex)
             {
-                SetError(ex,
+                Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"指纹中心出现异常: {ex.Message}"
+                        Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message};
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
 
+#if NO
         // Exception: 
         //      可能会抛出 Exception 异常
         public static FingerprintChannel GetFingerprintChannel()
@@ -179,6 +247,7 @@ namespace dp2SSL
             _fingerprintChannels.ReturnChannel(channel);
         }
 
+#endif
     }
 
     public delegate void TouchedEventHandler(object sender,
@@ -205,4 +274,5 @@ SetErrorEventArgs e);
     {
         public string Error { get; set; }
     }
+
 }

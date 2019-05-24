@@ -534,7 +534,7 @@ namespace FingerprintCenter
 
         public override void StartCapture(CancellationToken token)
         {
-            LibraryChannelManager.Log?.Info($"StartCapture()");
+            LibraryChannelManager.Log?.Debug($"StartCapture()");
 
             _captureData.mfpWidth = GetIntParameter(PARAMETER_PICTURE_WIDTH);
             _captureData.mfpHeight = GetIntParameter(PARAMETER_PICTURE_HEIGHT);
@@ -552,7 +552,7 @@ namespace FingerprintCenter
 
         void CaptureThreadMain()
         {
-            LibraryChannelManager.Log?.Info($"Begin CaptureThreadMain()");
+            LibraryChannelManager.Log?.Debug($"Begin CaptureThreadMain()");
             try
             {
                 while (!_captureData._cancelToken.IsCancellationRequested)
@@ -581,7 +581,7 @@ namespace FingerprintCenter
             }
             finally
             {
-                LibraryChannelManager.Log?.Info($"End CaptureThreadMain()");
+                LibraryChannelManager.Log?.Debug($"End CaptureThreadMain()");
             }
         }
 
