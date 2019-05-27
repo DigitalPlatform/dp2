@@ -1,4 +1,5 @@
-﻿using DigitalPlatform.Text;
+﻿using DigitalPlatform;
+using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -204,6 +205,42 @@ namespace dp2SSL
 
             this.HasLoggedin = true;
             InitialPage();
+        }
+
+        private void OpenProgramFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(Environment.CurrentDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void OpenUserFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(WpfClientInfo.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
+        }
+
+        private void OpenDataFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(WpfClientInfo.DataDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ExceptionUtil.GetAutoText(ex));
+            }
         }
     }
 }

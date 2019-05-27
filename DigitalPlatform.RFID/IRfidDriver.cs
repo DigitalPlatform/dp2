@@ -8,7 +8,7 @@ namespace DigitalPlatform.RFID
 {
     public interface IRfidDriver
     {
-        InitializeDriverResult InitializeDriver(string style);
+        InitializeDriverResult InitializeDriver(string style, List<HintInfo> hint_table);
 
         NormalResult ReleaseDriver();
 
@@ -287,7 +287,11 @@ uint new_password);
 
     public class InitializeDriverResult : NormalResult
     {
+        // [out]
         public List<Reader> Readers { get; set; }
+
+        // [out]
+        public List<HintInfo> HintTable { get; set; }
 
         public InitializeDriverResult(NormalResult result) : base (result)
         {
@@ -298,6 +302,13 @@ uint new_password);
         {
 
         }
+    }
+
+    // COM 口暗示信息事项
+    public class HintInfo
+    {
+        public string COM { get; set; }
+        public string BaudRate { get; set; }
     }
 
     // [Serializable()]
