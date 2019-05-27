@@ -57,7 +57,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <!-- 密码区域 -->
             <StackPanel Name="passwordArea" Orientation="Horizontal" Height="36">
@@ -71,7 +71,9 @@
                         FontSize="16"  Margin="4" Padding="4">登录</Button>
             </StackPanel>
             <!-- 按钮区域 -->
-            <StackPanel Name="buttonArea" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
+            <WrapPanel Name="buttonArea" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" 
+                        Orientation="Horizontal" HorizontalAlignment="Center"
+                        >
                 <Button Name="config"
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="260" Height="60" 
@@ -92,7 +94,37 @@
                         <TextBlock>退出 dp2SSL</TextBlock>
                     </Button.Content>
                 </Button>
-            </StackPanel>
+                <Button Name="openUserFolderButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="OpenUserFolderButton_Click">
+                    <Button.Content>
+                        <TextBlock>打开用户文件夹</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="openProgramFolderButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="OpenProgramFolderButton_Click">
+                    <Button.Content>
+                        <TextBlock>打开程序文件夹</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="openDataFolderButton"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="OpenDataFolderButton_Click">
+                    <Button.Content>
+                        <TextBlock>打开数据文件夹</TextBlock>
+                    </Button.Content>
+                </Button>
+            </WrapPanel>
         </Grid>
     </Grid>
 

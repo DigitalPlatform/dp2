@@ -30,6 +30,7 @@ namespace DigitalPlatform.Text
 			return Convert.ToBase64String(baText);
 		}
 	}
+
 	/// <summary>
 	/// 和加密有关的函数
 	/// </summary>

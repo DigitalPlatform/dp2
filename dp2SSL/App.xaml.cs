@@ -158,9 +158,22 @@ namespace dp2SSL
             // OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
         }
 
+        // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            LibraryChannelManager.Log.Debug("OnSessionEnding() called");
+            WpfClientInfo.Finish();
+            LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
+
+            _cancelRefresh.Cancel();
+
+            base.OnSessionEnding(e);
+        }
+
+        // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnExit(ExitEventArgs e)
         {
-            LibraryChannelManager.Log.Debug("Begin WpfClientInfo.Finish()");
+            LibraryChannelManager.Log.Debug("OnExit() called");
             WpfClientInfo.Finish();
             LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
 

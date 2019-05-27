@@ -28,6 +28,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace RfidCenter
 {
@@ -290,9 +291,27 @@ namespace RfidCenter
             }));
         }
 
+        List<HintInfo> GetHintTable()
+        {
+            string value = ClientInfo.Config.Get("readers", "hint_table");
+            if (string.IsNullOrEmpty(value))
+                return null;
+            return JsonConvert.DeserializeObject<List<HintInfo>>(value);
+        }
+
+        void SetHintTable(List<HintInfo> hint_table)
+        {
+            string value = JsonConvert.SerializeObject(hint_table);
+            ClientInfo.Config.Set("readers", "hint_table", value);
+        }
+
         private static readonly Object _syncRoot_start = new Object(); // 2019/5/20
 
-        void InitializeDriver(string message = null)
+        // parameters:
+        //      message 需要显示的提示文字。如果为 null，表示函数自动决定显示“正在初始化 RFID 设备”
+        //      set_hint_table  保存本次获得的暗示表
+        void InitializeDriver(string message = null,
+            bool set_hint_table = false)
         {
             lock (_syncRoot_start)
             {
@@ -307,7 +326,8 @@ namespace RfidCenter
                         this.ShowMessage("正在初始化 RFID 设备");
 
                     _driver.ReleaseDriver();
-                    InitializeDriverResult result = _driver.InitializeDriver("");
+                    var existing_hint_table = GetHintTable();
+                    InitializeDriverResult result = _driver.InitializeDriver("", set_hint_table ? null : existing_hint_table);
                     // 列出所有可用设备名称
                     UpdateDeviceList(result.Readers);
 
@@ -318,6 +338,10 @@ namespace RfidCenter
                     }
                     else
                     {
+                        // 记忆
+                        if (set_hint_table || existing_hint_table == null)
+                            SetHintTable(result.HintTable);
+
                         // 一开始就启动捕捉状态
                         m_rfidObj?.BeginCapture(false);
                         m_rfidObj?.BeginCapture(true);
@@ -1504,6 +1528,13 @@ string strHtml)
                 else
                     MessageBox.Show(this, "OK");
             }
+
+            // 2019/5/23
+            // 如果当前读卡器中有 'R-PAN ISO15693' 这个型号，那需要重新初始化一下设备。不然后面调用 SetConfig() 时其中的读会失败
+            var reader = _driver.Readers.Find((o) => o.Name == "R-PAN ISO15693");
+            if (reader != null)
+                InitializeDriver("正在关闭和重新打开读卡器。所需时间较长，请耐心等待 ...");
+
         }
 
         private void MenuItem_testSetConfig_Click(object sender, EventArgs e)
@@ -1753,6 +1784,15 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 notifyIcon1.BalloonTipText = "RFID 中心已经隐藏";
                 notifyIcon1.ShowBalloonTip(1000);
             }
+        }
+
+        private void MenuItem_detectReader_Click(object sender, EventArgs e)
+        {
+            Task.Run(() =>
+            {
+                InitializeDriver("正在探测读卡器 ...",
+                    true);
+            });
         }
     }
 }

@@ -583,6 +583,9 @@ new_password);
                         if (reader == null)
                             continue;
 
+                        if (string.IsNullOrEmpty(Program.Rfid.State) == false)
+                            break;
+
                         InventoryResult inventory_result = Program.Rfid.Inventory(
                             reader.Name, bFirst ? "" : "only_new");
                         // bFirst = false;

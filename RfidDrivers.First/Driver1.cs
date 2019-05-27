@@ -19,7 +19,10 @@ namespace RfidDrivers.First
 {
     public class Driver1 : IRfidDriver
     {
-        // public UIntPtr hreader;
+        // 状态。
+        //      "initializing" 表示正在进行初始化; "closed" 表示已经不能使用
+        public string State { get; set; }
+
         internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         void Lock()
@@ -41,27 +44,35 @@ namespace RfidDrivers.First
             }
         }
 
-        public InitializeDriverResult InitializeDriver(string style)
+        public InitializeDriverResult InitializeDriver(string style,
+            List<HintInfo> hint_table)
         {
+            this.State = "initializing";
             Lock();
             try
             {
                 GetDriversInfo();
 
-                NormalResult result = OpenAllReaders();
+                NormalResult result = OpenAllReaders(hint_table, out List<HintInfo> output_hint_table);
                 if (result.Value == -1)
                     return new InitializeDriverResult(result);
 
-                return new InitializeDriverResult { Readers = _readers };
+                return new InitializeDriverResult
+                {
+                    Readers = _readers,
+                    HintTable = output_hint_table
+                };
             }
             finally
             {
                 Unlock();
+                this.State = "";
             }
         }
 
         public NormalResult ReleaseDriver()
         {
+            this.State = "initializing";
             Lock();
             try
             {
@@ -70,38 +81,186 @@ namespace RfidDrivers.First
             finally
             {
                 Unlock();
+                this.State = "closed";
             }
         }
 
         // 打开所有读卡器
-        NormalResult OpenAllReaders()
+        NormalResult OpenAllReaders(List<HintInfo> hint_table,
+            out List<HintInfo> output_hint_table)
         {
-            // 枚举所有的 reader
-            List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
-            readers.AddRange(EnumComReader("M201"));
+            output_hint_table = null;
+            _readers = new List<Reader>();
 
-            List<Reader> removed = new List<Reader>();
+            Hashtable name_table = new Hashtable();
+            List<Reader> readers = OpenUsbReaders(name_table, out NormalResult error);
+            if (error != null)
+                return error;
+            readers.AddRange(OpenComReaders(name_table, hint_table, out output_hint_table));
+            _readers = readers;
+            return new NormalResult();
+        }
+
+        static List<string> adjust_seq(string[] rates,
+            List<HintInfo> hint_table,
+            string com_name)
+        {
+            if (hint_table == null)
+                return new List<string>(rates);
+
+            var hint_item = hint_table.Find((o) => { return o.COM == com_name; });
+            if (hint_item == null)
+                return new List<string>(rates);
+
+            if (hint_item.BaudRate == "!")  // 这个 COM 口不是读卡器，需要跳过
+                return new List<string>();
+
+            List<string> results = new List<string>();
+            results.Add(hint_item.BaudRate);
+            foreach (string rate in rates)
+            {
+                if (rate == hint_item.BaudRate)
+                    continue;
+                results.Add(rate);
+            }
+
+            return results;
+        }
+
+        // 打开所有 COM 口读卡器
+        // parameters:
+        //      hint_table  暗示信息表。如果为 null，表示不提供暗示信息
+        //                  注：暗示信息表可以加快 COM 口读卡器打开的速度
+        static List<Reader> OpenComReaders(Hashtable name_table,
+            List<HintInfo> hint_table,
+            out List<HintInfo> output_hint_table)
+        {
+            output_hint_table = new List<HintInfo>();
+            // 枚举所有的 COM 口 reader
+            List<Reader> readers = EnumComReader("M201");
+
+            List<Reader> results = new List<Reader>();
 
             // name --> count
-            Hashtable table = new Hashtable();
+            // Hashtable table = new Hashtable();
+
+            string[] rates = new string[] {
+                "38400",    // 最常见的放在最前面
+                "19200",
+                "9600",
+                "57600",
+                "115200",
+                "230400",
+            };
 
             // 打开所有的 reader
             foreach (Reader reader in readers)
             {
-                var fill_result = FillReaderInfo(reader);
+                List<string> rate_list = adjust_seq(rates,
+    hint_table,
+    reader.SerialNumber);
+                foreach (string baudRate in rate_list)
+                {
+                    var fill_result = FillReaderInfo(reader, baudRate);
+                    if (fill_result.Value == -1)
+                        continue;
+
+                    OpenReaderResult result = OpenReader(reader.DriverName,
+                        reader.Type,
+                        reader.SerialNumber,
+                        baudRate,
+                        null);
+                    if (result.Value == -1)
+                        continue;
+
+                    output_hint_table.Add(new HintInfo
+                    {
+                        COM = reader.SerialNumber,
+                        BaudRate = baudRate
+                    });
+
+                    reader.Result = result;
+                    reader.ReaderHandle = result.ReaderHandle;
+
+                    // 构造 Name
+                    // 重复的 ProductName 后面要加上序号
+                    {
+                        int count = 0;
+                        if (name_table.ContainsKey(reader.ProductName) == true)
+                            count = (int)name_table[reader.ProductName];
+
+                        if (count == 0)
+                            reader.Name = reader.ProductName;
+                        else
+                            reader.Name = $"{reader.ProductName}({count + 1})";
+
+                        Debug.Assert(string.IsNullOrEmpty(reader.Name) == false, "");
+
+                        name_table[reader.ProductName] = ++count;
+                    }
+
+                    results.Add(reader);
+                    break;  // 一个波特率只要成功了一个，就不再尝试其他波特率
+                }
+            }
+
+            // 找出不是读卡器的 COM 口
+            foreach(Reader reader in readers)
+            {
+                var com_name = reader.SerialNumber;
+                var found = results.Find((o) => { return o.SerialNumber == com_name; });
+                if (found == null)
+                {
+                    output_hint_table.Add(new HintInfo
+                    {
+                        COM = reader.SerialNumber,
+                        BaudRate = "!"  // 表示这个 COM 口不是读卡器
+                    });
+                }
+            }
+
+            //_readers = readers;
+            //return new NormalResult();
+            return results;
+        }
+
+        // 打开所有 USB 读卡器
+        static List<Reader> OpenUsbReaders(Hashtable name_table,
+            out NormalResult error)
+        {
+            error = null;
+
+            // 枚举所有的 USB  reader
+            List<Reader> readers = EnumUsbReader("M201"); // "RL8000"
+
+            List<Reader> removed = new List<Reader>();
+
+            // name --> count
+            // Hashtable table = new Hashtable();
+
+            // 打开所有的 reader
+            foreach (Reader reader in readers)
+            {
+                var fill_result = FillReaderInfo(reader, "");
                 if (fill_result.Value == -1)
                 {
+#if NO
                     if (reader.Type == "COM")
                     {
                         removed.Add(reader);
                         continue;
                     }
                     return fill_result;
+#endif
+                    // TODO: 是否报错?
+                    error = fill_result;
+                    return new List<Reader>();
                 }
 
                 OpenReaderResult result = OpenReader(reader.DriverName,
                     reader.Type,
                     reader.SerialNumber,
+                    "",
                     null);
                 reader.Result = result;
                 reader.ReaderHandle = result.ReaderHandle;
@@ -110,15 +269,15 @@ namespace RfidDrivers.First
                 // 重复的 ProductName 后面要加上序号
                 {
                     int count = 0;
-                    if (table.ContainsKey(reader.ProductName) == true)
-                        count = (int)table[reader.ProductName];
+                    if (name_table.ContainsKey(reader.ProductName) == true)
+                        count = (int)name_table[reader.ProductName];
 
                     if (count == 0)
                         reader.Name = reader.ProductName;
                     else
                         reader.Name = $"{reader.ProductName}({count + 1})";
 
-                    table[reader.ProductName] = ++count;
+                    name_table[reader.ProductName] = ++count;
                 }
             }
 
@@ -128,8 +287,9 @@ namespace RfidDrivers.First
                 readers.Remove(reader);
             }
 
-            _readers = readers;
-            return new NormalResult();
+            //_readers = readers;
+            //return new NormalResult();
+            return readers;
         }
 
         // 刷新读卡器打开状态
@@ -175,7 +335,7 @@ namespace RfidDrivers.First
 
                 GetDriversInfo();
 
-                NormalResult result = OpenAllReaders();
+                NormalResult result = OpenAllReaders(null, out List<HintInfo> output);
                 if (result.Value == -1)
                     return result;
                 return new NormalResult();
@@ -359,7 +519,7 @@ namespace RfidDrivers.First
         // 枚举所有 USB 读卡器
         // parameters:
         //      driver_name 例如 "M201" "RL8000"
-        private List<Reader> EnumUsbReader(string driver_name)
+        private static List<Reader> EnumUsbReader(string driver_name)
         {
             List<Reader> readers = new List<Reader>();
             //CReaderDriverInf driver = (CReaderDriverInf)readerDriverInfoList[comboBox6.SelectedIndex];
@@ -417,7 +577,7 @@ namespace RfidDrivers.First
         }
 
         // 枚举所有 COM 读卡器
-        private List<Reader> EnumComReader(string driver_name)
+        private static List<Reader> EnumComReader(string driver_name)
         {
             List<Reader> readers = new List<Reader>();
             //CReaderDriverInf driver = (CReaderDriverInf)readerDriverInfoList[comboBox6.SelectedIndex];
@@ -1559,12 +1719,15 @@ namespace RfidDrivers.First
         }
 
         // 填充驱动类型和设备型号
-        NormalResult FillReaderInfo(Reader reader)
+        // parameters:
+        //      baudRate    波特率。仅对 COM 口读卡器有效。空表示默认 38400
+        static NormalResult FillReaderInfo(Reader reader, string baudRate)
         {
             StringBuilder debugInfo = new StringBuilder();
             var result = OpenReader(reader.DriverName,  // "",
                 reader.Type,
                 reader.SerialNumber,
+                baudRate,
                 debugInfo);
             Driver1Manager.Log?.Debug($"FillReaderInfo() OpenReader() return [{result.ToString()}]");
 
@@ -1602,11 +1765,11 @@ namespace RfidDrivers.First
                 reader.Protocols = protocols;
                 return new NormalResult();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Driver1Manager.Log?.Error($"FillReaderInfo() exception[{ExceptionUtil.GetExceptionText(ex)}]");
                 string error = $"FillReaderInfo() 出现异常: {ex.Message}";
-                return new NormalResult { Value = -1, ErrorInfo = error};
+                return new NormalResult { Value = -1, ErrorInfo = error };
             }
             finally
             {
@@ -1616,9 +1779,10 @@ namespace RfidDrivers.First
 
         // parameters:
         //      comm_type   COM/USB/NET/BLUETOOTH 之一
-        string BuildConnectionString(string readerDriverName,
+        static string BuildConnectionString(string readerDriverName,
             string comm_type,
-            string serial_number)
+            string serial_number,
+            string baudRate)
         {
             if (string.IsNullOrEmpty(readerDriverName))
             {
@@ -1637,8 +1801,10 @@ namespace RfidDrivers.First
                 return $"RDType={readerDriverName};CommType={comm_type};AddrMode=1;SerNum={serial_number}";
             else if (comm_type == "COM")
             {
+                if (string.IsNullOrEmpty(baudRate))
+                    baudRate = "38400";
                 // TODO: BaudRate=38400;Frame=8E1;BusAddr=255 应该可以配置
-                return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate=38400;Frame=8E1;BusAddr=255";// Frame=8E1 或者 8N1 8O1
+                return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate={baudRate};Frame=8E1;BusAddr=255";// Frame=8E1 或者 8N1 8O1
             }
             else
                 throw new ArgumentException($"未知的 comm_type [{comm_type}]");
@@ -1692,15 +1858,17 @@ namespace RfidDrivers.First
 #endif
         }
 
-        OpenReaderResult OpenReader(string driver_name,
+        static OpenReaderResult OpenReader(string driver_name,
             string type,
             string serial_number,
+            string baudRate,
             StringBuilder debugInfo)
         {
             UIntPtr hreader = UIntPtr.Zero;
             string connection_string = BuildConnectionString(driver_name,
                 type,
-                serial_number);
+                serial_number,
+                baudRate);
             if (debugInfo != null)
                 debugInfo.Append($"driver_name=[{driver_name}],type=[{type}],serial_number=[{serial_number}],connect_string=[{connection_string}]");
 
@@ -1718,7 +1886,7 @@ namespace RfidDrivers.First
             return new OpenReaderResult { ReaderHandle = hreader };
         }
 
-        NormalResult CloseReader(object reader_handle)
+        static NormalResult CloseReader(object reader_handle)
         {
             //Lock();
             try
@@ -3313,4 +3481,6 @@ can use “RDR_GetReaderLastReturnError” to get reader error code .
     {
         public static ILog Log { get; set; }
     }
+
+
 }
