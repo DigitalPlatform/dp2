@@ -175,6 +175,7 @@ null);
             }
             catch (Exception ex)
             {
+                Base.Clear();
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
@@ -188,6 +189,10 @@ null);
         {
             try
             {
+                // 因为 EnableSendkey 是可有可无的请求，如果 Url 为空就算了
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
@@ -208,6 +213,7 @@ null);
             }
             catch (Exception ex)
             {
+                Base.Clear();
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {

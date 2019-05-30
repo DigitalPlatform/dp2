@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Collections;
 
 using log4net;
 
@@ -14,8 +16,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
-using System.Collections.Generic;
-using System.Collections;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -433,13 +433,16 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public static void RemoveShortcutFromStartupGroup(string strProductName)
+        // parameters:
+        //      force 是否强制删除？如果为 false 表示不强制删除。在不是强制删除的情况下，应当满足 ClickOnce 启动并且是安装更新后第一次启动运行本函数才有效
+        public static void RemoveShortcutFromStartupGroup(string strProductName,
+            bool force = false)
         {
-            if (ApplicationDeployment.IsNetworkDeployed &&
+            if (force
+                || (ApplicationDeployment.IsNetworkDeployed &&
     ApplicationDeployment.CurrentDeployment != null &&
-    ApplicationDeployment.CurrentDeployment.IsFirstRun)
+    ApplicationDeployment.CurrentDeployment.IsFirstRun))
             {
-
                 string strTargetPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
                 strTargetPath = Path.Combine(strTargetPath, strProductName) + ".appref-ms";
 

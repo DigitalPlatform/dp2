@@ -505,7 +505,7 @@ namespace FingerprintCenter
         class CaptureData
         {
             // StartCapture() 所使用的 token。记忆下来使用
-            public CancellationToken _cancelToken = new CancellationToken();
+            //  public CancellationToken _cancelToken = new CancellationToken();
             public byte[] CapTmp = new byte[2048];
             public int cbCapTmp = 2048;
             // public byte[] FPBuffer;
@@ -544,18 +544,21 @@ namespace FingerprintCenter
             _register_template_list.Clear();
             _exclude.Clear();
 
-            Thread captureThread = new Thread(new ThreadStart(CaptureThreadMain));
+            Thread captureThread = new Thread(new ParameterizedThreadStart(CaptureThreadMain));
             // captureThread.IsBackground = true;
-            captureThread.Start();
-            _captureData._cancelToken = token;
+            captureThread.Start(token);
+            // _captureData._cancelToken = token;
         }
 
-        void CaptureThreadMain()
+        void CaptureThreadMain(object obj)
         {
+            CancellationToken token = (CancellationToken)obj;
+
             LibraryChannelManager.Log?.Debug($"Begin CaptureThreadMain()");
             try
             {
-                while (!_captureData._cancelToken.IsCancellationRequested)
+                // while (!_captureData._cancelToken.IsCancellationRequested)
+                while (!token.IsCancellationRequested)
                 {
                     byte[] image_buffer = new byte[_captureData.mfpWidth * _captureData.mfpHeight];
 
@@ -572,7 +575,8 @@ namespace FingerprintCenter
                             template_buffer,
                             template_buffer_length);
                     }
-                    Thread.Sleep(200);
+                    Task.Delay(200, token).Wait(token);
+                    // Thread.Sleep(200);
                 }
             }
             catch (Exception ex)

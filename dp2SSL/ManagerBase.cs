@@ -88,10 +88,10 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(this.Url))
                         continue;
 
+                    bool error = false;
                     this.Lock.EnterReadLock();  // 锁定范围以外，可以对通道进行 Clear()
                     try
                     {
-                        // 列举标签
                         try
                         {
                             var channel = GetChannel();
@@ -106,6 +106,7 @@ namespace dp2SSL
                         }
                         catch (Exception ex)
                         {
+                            error = true;
                             SetError(ex,
                                 new SetErrorEventArgs
                                 {
@@ -117,7 +118,13 @@ namespace dp2SSL
                     {
                         this.Lock.ExitReadLock();
                     }
+
+                    // 出过错以后就要清理通道集合
+                    if (error)
+                        this.Clear();
                 }
+
+                App.CurrentApp.Speak("退出后台循环");
             });
         }
 
@@ -127,8 +134,9 @@ namespace dp2SSL
         //      可能会抛出 Exception 异常
         public BaseChannel<T> GetChannel()
         {
+            // TODO: 这里需要一个特殊的异常类型
             if (string.IsNullOrEmpty(this.Url))
-                throw new Exception($"尚未配置 {this.Name} URL");
+                throw new UrlEmptyException($"尚未配置 {this.Name} URL");
 
             return this.Channels.GetChannel(() =>
             {
@@ -237,4 +245,16 @@ namespace dp2SSL
         // 通道已经成功启动。意思是已经至少经过一个 API 调用并表现正常
         public bool Started { get; set; }
     }
+
+    // 验证异常
+    public class UrlEmptyException : Exception
+    {
+
+        public UrlEmptyException(string s)
+            : base(s)
+        {
+        }
+
+    }
+
 }

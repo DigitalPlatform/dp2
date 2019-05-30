@@ -304,7 +304,7 @@ namespace dp2SSL
             return Cryptography.Encrypt(strPlainText, EncryptKey);
         }
 
-#region LibraryChannel
+        #region LibraryChannel
 
         internal void Channel_BeforeLogin(object sender,
 DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
@@ -417,8 +417,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         protected override void OnActivated(EventArgs e)
         {
-            FingerprintManager.EnableSendkey(false);
-            RfidManager.EnableSendkey(false);
+            // 单独线程执行，避免阻塞 OnActivated() 返回
+            Task.Run(() =>
+            {
+                FingerprintManager.EnableSendkey(false);
+                RfidManager.EnableSendkey(false);
+            });
             base.OnActivated(e);
         }
 
@@ -428,7 +432,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             base.OnDeactivated(e);
         }
 
-#endregion
+        #endregion
 
 #if REMOVED
         List<string> _errors = new List<string>();
@@ -512,7 +516,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 #endif
 
-#region 指纹
+        #region 指纹
 
 #if NO
         FingerprintChannel _fingerprintChannel = null;
@@ -630,7 +634,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         }
 #endif
 
-#endregion
+        #endregion
 
     }
 }

@@ -522,6 +522,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         Compressed = 114,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundObjectFile = 115,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]

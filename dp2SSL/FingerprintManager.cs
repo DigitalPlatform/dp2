@@ -18,6 +18,8 @@ namespace dp2SSL
     /// </summary>
     public static class FingerprintManager
     {
+        static string _state = "ok";    // ok/error
+
         public static event TouchedEventHandler Touched = null;
 
         //public static event SetErrorEventHandler SetError = null;
@@ -60,6 +62,7 @@ namespace dp2SSL
         public static void Start(
             CancellationToken token)
         {
+            // App.CurrentApp.Speak("启动后台线程");
             Base.Start((channel) =>
             {
                 var result = channel.Object.GetState("");
@@ -71,30 +74,47 @@ namespace dp2SSL
             },
 
             (channel) =>
-{
-    var result = channel.Object.GetMessage("");
-    if (result.Value == -1)
-        Base.TriggerSetError(result,
-            new SetErrorEventArgs { Error = result.ErrorInfo });
-    else
-        Base.TriggerSetError(result,
-            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+            {
+                var result = channel.Object.GetMessage("");
+                if (result.Value == -1)
+                    Base.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = result.ErrorInfo });
+                else
+                    Base.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
 
-    if (result.Value != -1 && result.Message == null)
-    {
-        // 没有消息的时候不用惊扰事件订阅者
-    }
-    else
-    {
-        Touched(result, new TouchedEventArgs
-        {
-            Message = result.Message,
-            ErrorOccur = result.Value == -1,
-            Result = result
-        });
-    }
+                if (result.Value != -1 && result.Message == null)
+                {
+                    // 状态转向 ok，需要补充触发一次
+                    if (_state != "ok")
+                    {
+                        Touched(result, new TouchedEventArgs
+                        {
+                            Message = result.Message,
+                            ErrorOccur = result.Value == -1,
+                            Result = result
+                        });
+                    }
 
-},
+                    // 没有消息的时候不用惊扰事件订阅者
+                    _state = "ok";
+                }
+                else
+                {
+                    if (result.Value == -1)
+                        _state = "error";
+                    else
+                        _state = "ok";
+
+                    Touched(result, new TouchedEventArgs
+                    {
+                        Message = result.Message,
+                        ErrorOccur = result.Value == -1,
+                        Result = result
+                    });
+                }
+
+            },
 token);
 
 #if NO
@@ -162,6 +182,10 @@ token);
         {
             try
             {
+                // 因为 EnableSendkey 是可有可无的请求，如果 Url 为空就算了
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
                 BaseChannel<IFingerprint> channel = Base.GetChannel();
                 try
                 {

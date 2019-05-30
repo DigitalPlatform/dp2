@@ -149,6 +149,7 @@
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
+    <Reference Include="System.Management" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
@@ -176,7 +177,9 @@
     <Compile Include="StreamCache.cs" />
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TextEncodingDetect.cs" />
+    <Compile Include="UsbInfo.cs" />
     <Compile Include="UsbNotification.cs" />
+    <Compile Include="UsbNotifier.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

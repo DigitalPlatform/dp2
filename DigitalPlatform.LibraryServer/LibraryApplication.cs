@@ -15299,6 +15299,7 @@ strLibraryCode);    // 读者所在的馆代码
         RequestTimeOut = 112,
         TimestampMismatch = 113,
         Compressed = 114,   // 2017/10/7
+        NotFoundObjectFile = 115, // 2019/10/7
     }
 
     // API函数结果

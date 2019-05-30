@@ -8786,6 +8786,7 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
+                    byte[] timestamp = null;
                     // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
 
                     REDO:
@@ -8799,7 +8800,7 @@ MessageBoxDefaultButton.Button1);
                         strBiblioRecPath,
                         "xml",
                         data.Xml,
-                        null,   // timestamp
+                        timestamp,
                         "",
                         out strOutputPath,
                         out baNewTimestamp,
@@ -8861,6 +8862,7 @@ MessageBoxDefaultButton.Button1);
                         if (result == System.Windows.Forms.DialogResult.No)
                             goto CONTINUE;
 
+                        timestamp = baNewTimestamp;
                         goto REDO;
                     }
 

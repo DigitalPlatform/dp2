@@ -103,6 +103,9 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.ToolStripMenuItem_deleteShortcut = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -426,7 +429,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(167, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(141, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             // 
             // label1
@@ -454,7 +457,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(170, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(144, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -464,7 +467,7 @@
             this.toolStripButton_cfg_setXeServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_cfg_setXeServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_cfg_setXeServer.Name = "toolStripButton_cfg_setXeServer";
-            this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 48);
+            this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 28);
             this.toolStripButton_cfg_setXeServer.Text = "单机版服务器";
             this.toolStripButton_cfg_setXeServer.ToolTipText = "设为单机版服务器";
             // 
@@ -731,10 +734,13 @@
             this.MenuItem_loadFactoryDefault,
             this.MenuItem_resetReaderToDigitalPlatformState,
             this.MenuItem_detectReader,
+            this.toolStripSeparator5,
+            this.ToolStripMenuItem_deleteShortcut,
             this.toolStripSeparator2,
             this.MenuItem_openUserFolder,
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder,
+            this.toolStripSeparator6,
             this.MenuItem_manual,
             this.MenuItem_about});
             this.MenuItem_help.Name = "MenuItem_help";
@@ -809,6 +815,23 @@
             this.notifyIcon1.Text = "dp2-RFID中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
+            // ToolStripMenuItem_deleteShortcut
+            // 
+            this.ToolStripMenuItem_deleteShortcut.Name = "ToolStripMenuItem_deleteShortcut";
+            this.ToolStripMenuItem_deleteShortcut.Size = new System.Drawing.Size(308, 30);
+            this.ToolStripMenuItem_deleteShortcut.Text = "删除开机启动快捷方式";
+            this.ToolStripMenuItem_deleteShortcut.Click += new System.EventHandler(this.ToolStripMenuItem_deleteShortcut_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(305, 6);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(305, 6);
             // 
             // MainForm
             // 
@@ -925,6 +948,9 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restart;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_detectReader;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_deleteShortcut;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
     }
 }
 

@@ -29,6 +29,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using System.Management;
 
 namespace RfidCenter
 {
@@ -58,7 +59,18 @@ namespace RfidCenter
                 _floatingMessage.Show(this);
             }
 
-            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+            UsbInfo.StartWatch((add_count, remove_count) =>
+            {
+                // this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
+                string type = "disconnected";
+                if (add_count > 0)
+                    type = "connected";
+
+                BeginRefreshReaders(type, new CancellationToken());
+            },
+            new CancellationToken());
+
+            // UsbNotification.RegisterUsbDeviceNotification(this.Handle);
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
         }
 
@@ -71,7 +83,7 @@ namespace RfidCenter
                     {
                         Task.Delay(TimeSpan.FromSeconds(5)).Wait();
                         this.Speak("RFID 中心被唤醒");
-                        BeginRefreshReaders(new CancellationToken());
+                        BeginRefreshReaders("connected", new CancellationToken());
                     });
                     break;
                 case PowerModes.Suspend:
@@ -186,7 +198,8 @@ namespace RfidCenter
         {
             m_rfidObj?.BeginCapture(false);
 
-            UsbNotification.UnregisterUsbDeviceNotification();
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            // UsbNotification.UnregisterUsbDeviceNotification();
 
             _cancelInventory?.Cancel();
 
@@ -1356,12 +1369,15 @@ string strHtml)
                 this.Speak("恢复窗口显示");
                 this.ShowInTaskbar = true;
                 this.WindowState = FormWindowState.Normal;
+                // 把窗口翻到前面
+                //this.Activate();
+                API.SetForegroundWindow(this.Handle);
             }));
         }
 
         protected override void WndProc(ref Message m)
         {
-            base.WndProc(ref m);
+#if NO
             if (m.Msg == UsbNotification.WmDevicechange)
             {
                 switch ((int)m.WParam)
@@ -1376,24 +1392,33 @@ string strHtml)
                         break;
                 }
             }
+#endif
+            base.WndProc(ref m);
         }
 
-        int _refreshCount = 2;
+        int _refreshCount = 0;
         const int _delaySeconds = 5;
         Task _refreshTask = null;
 
-        public void BeginRefreshReaders(CancellationToken token)
+        public void BeginRefreshReaders(string action,
+            CancellationToken token)
         {
             if (_refreshTask != null)
             {
-                _refreshCount++;
+                if (action == "disconnected")
+                {
+                    if (_refreshCount < 1)
+                        _refreshCount++;
+                }
+                else
+                    _refreshCount++;
                 return;
             }
 
-            _refreshCount = 2;
+            // _refreshCount = 2;
             _refreshTask = Task.Run(() =>
             {
-                while (_refreshCount-- > 0)
+                while (_refreshCount-- >= 0)
                 {
                     Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
                     if (token.IsCancellationRequested)
@@ -1408,6 +1433,7 @@ string strHtml)
                         break;
                 }
                 _refreshTask = null;
+                _refreshCount = 0;
             });
         }
 
@@ -1793,6 +1819,11 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
                 InitializeDriver("正在探测读卡器 ...",
                     true);
             });
+        }
+
+        private void ToolStripMenuItem_deleteShortcut_Click(object sender, EventArgs e)
+        {
+            ClientInfo.RemoveShortcutFromStartupGroup("dp2-RFID中心", true);
         }
     }
 }

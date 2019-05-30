@@ -3224,8 +3224,6 @@ true);
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.91") < 0)
                     bLoadSubrecords = false;
 
-                string strXml = "";
-                string strSubRecords = "";
                 int nRet = this.LoadBiblioRecord(
                     channel,
                     strBiblioRecPath,
@@ -3233,8 +3231,8 @@ true);
                     false,
                     bLoadSubrecords,
                     out strOutputBiblioRecPath,
-                    out strXml,
-                    out strSubRecords,
+                    out string strXml,
+                    out string strSubRecords,
                     out strError);
                 if (nRet == -1)
                 {
@@ -3249,6 +3247,13 @@ true);
                     if (String.IsNullOrEmpty(strTotalError) == false)
                         strTotalError += "\r\n";
                     strTotalError += strErrorText;
+
+                    // 2019/5/28
+                    // 如果书目记录不存在，则沿用strBiblioRecPath的路径
+                    if (String.IsNullOrEmpty(strOutputBiblioRecPath) == true)
+                    {
+                        strOutputBiblioRecPath = strBiblioRecPath;
+                    }
                 }
                 else if (nRet == 0)
                 {

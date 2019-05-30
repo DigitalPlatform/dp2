@@ -54,7 +54,18 @@ namespace FingerprintCenter
                 _floatingMessage.Show(this);
             }
 
-            UsbNotification.RegisterUsbDeviceNotification(this.Handle);
+            UsbInfo.StartWatch((add_count, remove_count) =>
+            {
+                // this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
+                string type = "disconnected";
+                if (add_count > 0)
+                    type = "connected";
+
+                BeginRefreshReaders(type, new CancellationToken());
+            },
+            new CancellationToken());
+
+            // UsbNotification.RegisterUsbDeviceNotification(this.Handle);
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
         }
 
@@ -67,7 +78,7 @@ namespace FingerprintCenter
                     {
                         Task.Delay(TimeSpan.FromSeconds(5)).Wait();
                         this.Speak("指纹中心被唤醒");
-                        BeginRefreshReaders(new CancellationToken());
+                        BeginRefreshReaders("connected", new CancellationToken());
                     });
                     break;
                 case PowerModes.Suspend:
@@ -647,7 +658,8 @@ bool bClickClose = false)
 
             _cancel.Cancel();
 
-            UsbNotification.UnregisterUsbDeviceNotification();
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
+            // UsbNotification.UnregisterUsbDeviceNotification();
 
             {
                 if (this.checkBox_cfg_savePasswordLong.Checked == false)
@@ -1279,7 +1291,7 @@ string strHtml)
 
         public void OutputHistory(string strText, int nWarningLevel = 0)
         {
-            OutputText(DateTime.Now.ToShortTimeString() + " " + strText, nWarningLevel);
+            OutputText(DateTime.Now.ToLongTimeString() + " " + strText, nWarningLevel);
         }
 
         // parameters:
@@ -1400,6 +1412,9 @@ Keys keyData)
                 this.Speak("恢复窗口显示");
                 this.ShowInTaskbar = true;
                 this.WindowState = FormWindowState.Normal;
+                // 把窗口翻到前面
+                //this.Activate();
+                API.SetForegroundWindow(this.Handle);
             }));
         }
 
@@ -1437,7 +1452,8 @@ Keys keyData)
                 return;
             }
 #endif
-            base.WndProc(ref m);
+
+#if NO
             if (m.Msg == UsbNotification.WmDevicechange)
             {
                 switch ((int)m.WParam)
@@ -1452,39 +1468,67 @@ Keys keyData)
                         break;
                 }
             }
+#endif
+            base.WndProc(ref m);
         }
 
-        int _refreshCount = 2;
-        const int _delaySeconds = 3;
+        int _refreshCount = 0;
+        const int _delaySeconds = 5;
         Task _refreshTask = null;
 
-        void BeginRefreshReaders(CancellationToken token)
+        void BeginRefreshReaders(string action,
+            CancellationToken token)
         {
             if (_refreshTask != null)
             {
-                _refreshCount++;
+                if (action == "disconnected")
+                {
+                    if (_refreshCount < 1)
+                    {
+                        _refreshCount++;
+                        this.OutputHistory($"disconnected ++ _refreshCount={_refreshCount}", 0);
+                    }
+                    else
+                        this.OutputHistory($"disconnected passed _refreshCount={_refreshCount}", 0);
+                }
+                else
+                {
+                    _refreshCount++;
+                    this.OutputHistory($"{action} ++ _refreshCount={_refreshCount}", 0);
+                }
                 return;
             }
 
-            _refreshCount = 2;
+            // _refreshCount = 2;
+            this.OutputHistory($"new task _refreshCount={_refreshCount}", 0);
             _refreshTask = Task.Run(() =>
             {
-                while (_refreshCount-- > 0)
+                int delta = 1;  // 第一次额外增加的秒数
+                while (_refreshCount-- >= 0)
                 {
-                    Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
+                    this.OutputHistory($"delay begin", 0);
+                    Task.Delay(TimeSpan.FromSeconds(_delaySeconds + delta)).Wait(token);
+                    this.OutputHistory($"delay end", 0);
+
                     if (token.IsCancellationRequested)
                         break;
                     // 迫使重新启动
                     _initialized = false;
+                    this.OutputHistory($"initial begin", 0);
                     BeginStart().Wait(token);
+                    this.OutputHistory($"initial end", 0);
                     if (token.IsCancellationRequested)
                         break;
 
                     // 如果初始化没有成功，则要追加初始化
                     if (this.ErrorState == "normal")
                         break;
+
+                    delta = 0;
                 }
                 _refreshTask = null;
+                _refreshCount = 0;
+                this.OutputHistory($"task = null", 0);
             });
         }
 
@@ -2077,6 +2121,26 @@ token);
                 notifyIcon1.BalloonTipText = "指纹中心已经隐藏";
                 notifyIcon1.ShowBalloonTip(1000);
             }
+        }
+
+        private void ToolStripMenuItem_deleteShortcut_Click(object sender, EventArgs e)
+        {
+            ClientInfo.RemoveShortcutFromStartupGroup("dp2-指纹中心", true);
+        }
+
+        private void ToolStripMenuItem_showUsbInfo_Click(object sender, EventArgs e)
+        {
+            var infos = UsbInfo.GetUSBDevices();
+            MessageDlg.Show(this, UsbInfo.ToString(infos), "USB device info");
+        }
+
+        private void ToolStripMenuItem_startWatchUsbChange_Click(object sender, EventArgs e)
+        {
+            UsbInfo.StartWatch((add_count, remove_count) =>
+                {
+                    this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
+                },
+                new CancellationToken());
         }
     }
 
