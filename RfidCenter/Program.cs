@@ -5,15 +5,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Reflection;
+using System.IO;
+using System.Runtime.InteropServices;
 
 using RfidDrivers.First;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
-using System.Reflection;
-using System.IO;
-using System.Runtime.InteropServices;
+
 using DigitalPlatform.Core;
 
 namespace RfidCenter

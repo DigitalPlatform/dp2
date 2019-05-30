@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.Remoting;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -34,7 +32,7 @@ namespace dp2SSL
         EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
 
-        Task _checkTask = null;
+        // Task _checkTask = null;
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         public PageBorrow()
@@ -85,7 +83,9 @@ namespace dp2SSL
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
 
-            // throw new Exception("test");
+            // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
+            if (string.IsNullOrEmpty(RfidManager.Url))
+                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
 
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
@@ -204,6 +204,25 @@ namespace dp2SSL
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetGlobalError("rfid", e.Error);
+            if (e.Error == null)
+            {
+                // 恢复正常
+            }
+            else
+            {
+                // 进入错误状态
+                if (_rfidState != "error")
+                {
+                    ClearBooksAndPatron(null);
+                    /*
+                    ClearBookList();
+                    FillBookFields(channel);
+                    _patron.Clear();
+                    */
+                }
+
+                _rfidState = "error";
+            }
         }
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
@@ -505,7 +524,23 @@ namespace dp2SSL
             }));
         }
 
+        void ClearBooksAndPatron(BaseChannel<IRfid> channel)
+        {
+            try
+            {
+                ClearBookList();
+                FillBookFields(channel);
+            }
+            catch(Exception ex)
+            {
+                LibraryChannelManager.Log?.Error($"ClearBooksAndPatron() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");
+            }
+            _patron.Clear();
+        }
+
         int _inRefresh = 0;
+
+        string _rfidState = "ok";   // ok/error
 
         void Refresh(BaseChannel<IRfid> channel, ListTagsResult result)
         {
@@ -529,14 +564,22 @@ namespace dp2SSL
                 if (result.Value == -1)
                 {
                     SetGlobalError("current", $"RFID 中心错误:{result.ErrorInfo}, 错误码:{result.ErrorCode}");
+                    // RFID 正常状态和错误状态之间切换时才需要连带清掉读者信息
+                    if (_rfidState != "error")
                     {
+                        ClearBooksAndPatron(channel);
+                        /*
                         ClearBookList();
                         FillBookFields(channel);
+                        _patron.Clear();
+                        */
                     }
-                    // 连带清掉读者信息
-                    _patron.Clear();
+
+                    _rfidState = "error";
                     return;
                 }
+                else
+                    _rfidState = "ok";
 
                 List<OneTag> books = new List<OneTag>();
                 List<OneTag> patrons = new List<OneTag>();
@@ -610,6 +653,9 @@ namespace dp2SSL
                     {
                         _patron.Fill(patrons[0]);
                         SetPatronError("rfid_multi", "");   // 2019/5/22
+
+                        // 2019/5/29
+                        FillPatronDetail();
                     }
                     else
                     {
@@ -818,7 +864,7 @@ out string strError);
                     // 注：如果 PII 为空，文字重要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.PII))
                     {
-                        if (entity.TagInfo == null)
+                        if (entity.TagInfo == null && channel != null)
                         {
                             // var result = channel.Object.GetTagInfo("*", entity.UID);
                             var result = GetTagInfo(channel, entity.UID);
@@ -1343,7 +1389,7 @@ out string strError);
             try
             {
                 this.ClearTagTable(uid);
-                return RfidManager.SetEAS($"uid:{uid}", enable);
+                return RfidManager.SetEAS($"{uid}", enable);
             }
             catch (Exception ex)
             {

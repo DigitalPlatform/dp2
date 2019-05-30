@@ -214,6 +214,7 @@ namespace FingerprintCenter
                 }
                 string message = _messages[0];
                 _messages.RemoveAt(0);
+                // Program.MainForm?.Speak($"拿走 {message}");
                 return new GetMessageResult { Message = message };
             }
         }

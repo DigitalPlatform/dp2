@@ -48,9 +48,12 @@
             this.MenuItem_replication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_showUsbInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_deleteShortcut = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
@@ -93,6 +96,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.ToolStripMenuItem_startWatchUsbChange = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -205,7 +209,9 @@
             this.MenuItem_lightGreen,
             this.MenuItem_replication,
             this.MenuItem_testInitCache,
-            this.MenuItem_throwException});
+            this.MenuItem_throwException,
+            this.ToolStripMenuItem_showUsbInfo,
+            this.ToolStripMenuItem_startWatchUsbChange});
             this.MenuItem_testing.Name = "MenuItem_testing";
             this.MenuItem_testing.Size = new System.Drawing.Size(58, 28);
             this.MenuItem_testing.Text = "测试";
@@ -213,50 +219,59 @@
             // MenuItem_lightWhite
             // 
             this.MenuItem_lightWhite.Name = "MenuItem_lightWhite";
-            this.MenuItem_lightWhite.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_lightWhite.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_lightWhite.Text = "白灯";
             this.MenuItem_lightWhite.Click += new System.EventHandler(this.MenuItem_lightWhite_Click);
             // 
             // MenuItem_lightRed
             // 
             this.MenuItem_lightRed.Name = "MenuItem_lightRed";
-            this.MenuItem_lightRed.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_lightRed.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_lightRed.Text = "红灯";
             this.MenuItem_lightRed.Click += new System.EventHandler(this.MenuItem_lightRed_Click);
             // 
             // MenuItem_lightGreen
             // 
             this.MenuItem_lightGreen.Name = "MenuItem_lightGreen";
-            this.MenuItem_lightGreen.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_lightGreen.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_lightGreen.Text = "绿灯";
             this.MenuItem_lightGreen.Click += new System.EventHandler(this.MenuItem_lightGreen_Click);
             // 
             // MenuItem_replication
             // 
             this.MenuItem_replication.Name = "MenuItem_replication";
-            this.MenuItem_replication.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_replication.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_replication.Text = "Replication";
             this.MenuItem_replication.Click += new System.EventHandler(this.MenuItem_replication_Click);
             // 
             // MenuItem_testInitCache
             // 
             this.MenuItem_testInitCache.Name = "MenuItem_testInitCache";
-            this.MenuItem_testInitCache.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_testInitCache.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_testInitCache.Text = "test InitCache";
             this.MenuItem_testInitCache.Click += new System.EventHandler(this.MenuItem_testInitCache_Click);
             // 
             // MenuItem_throwException
             // 
             this.MenuItem_throwException.Name = "MenuItem_throwException";
-            this.MenuItem_throwException.Size = new System.Drawing.Size(231, 30);
+            this.MenuItem_throwException.Size = new System.Drawing.Size(297, 30);
             this.MenuItem_throwException.Text = "throw exception";
             this.MenuItem_throwException.Click += new System.EventHandler(this.MenuItem_throwException_Click);
+            // 
+            // ToolStripMenuItem_showUsbInfo
+            // 
+            this.ToolStripMenuItem_showUsbInfo.Name = "ToolStripMenuItem_showUsbInfo";
+            this.ToolStripMenuItem_showUsbInfo.Size = new System.Drawing.Size(297, 30);
+            this.ToolStripMenuItem_showUsbInfo.Text = "显示当前 USB 设备信息 ...";
+            this.ToolStripMenuItem_showUsbInfo.Click += new System.EventHandler(this.ToolStripMenuItem_showUsbInfo_Click);
             // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_resetSerialCode,
             this.MenuItem_setupDriver,
+            this.toolStripSeparator5,
+            this.ToolStripMenuItem_deleteShortcut,
             this.toolStripSeparator2,
             this.MenuItem_manual,
             this.MenuItem_about});
@@ -277,6 +292,18 @@
             this.MenuItem_setupDriver.Size = new System.Drawing.Size(353, 30);
             this.MenuItem_setupDriver.Text = "下载安装\'中控\'指纹仪厂家驱动 ...";
             this.MenuItem_setupDriver.Click += new System.EventHandler(this.MenuItem_setupDriver_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(350, 6);
+            // 
+            // ToolStripMenuItem_deleteShortcut
+            // 
+            this.ToolStripMenuItem_deleteShortcut.Name = "ToolStripMenuItem_deleteShortcut";
+            this.ToolStripMenuItem_deleteShortcut.Size = new System.Drawing.Size(353, 30);
+            this.ToolStripMenuItem_deleteShortcut.Text = "删除开机启动快捷方式";
+            this.ToolStripMenuItem_deleteShortcut.Click += new System.EventHandler(this.ToolStripMenuItem_deleteShortcut_Click);
             // 
             // toolStripSeparator2
             // 
@@ -658,7 +685,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(687, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(609, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -687,7 +714,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(690, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(612, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -727,6 +754,13 @@
             this.notifyIcon1.Text = "dp2-指纹中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
+            // 
+            // ToolStripMenuItem_startWatchUsbChange
+            // 
+            this.ToolStripMenuItem_startWatchUsbChange.Name = "ToolStripMenuItem_startWatchUsbChange";
+            this.ToolStripMenuItem_startWatchUsbChange.Size = new System.Drawing.Size(297, 30);
+            this.ToolStripMenuItem_startWatchUsbChange.Text = "监控 USB 变化";
+            this.ToolStripMenuItem_startWatchUsbChange.Click += new System.EventHandler(this.ToolStripMenuItem_startWatchUsbChange_Click);
             // 
             // MainForm
             // 
@@ -835,6 +869,10 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_closeSendKey;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openSendKey;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_deleteShortcut;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_showUsbInfo;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_startWatchUsbChange;
     }
 }
 

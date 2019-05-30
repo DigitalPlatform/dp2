@@ -345,6 +345,8 @@ bool enable)
                 };
 
             {
+                // TODO: 检查 uid 字符串内容是否合法。应为 hex 数字
+
                 // return result.Value
                 //      -1  出错
                 //      0   成功
@@ -644,7 +646,7 @@ new_password);
                 if (_lastErrorCount > 200 * minutes)  // 200 相当于一分钟连续报错的量
                 {
                     // 触发重启全部读卡器
-                    Program.MainForm?.BeginRefreshReaders(new CancellationToken());
+                    Program.MainForm?.BeginRefreshReaders("connected", new CancellationToken());
                     Program.MainForm?.Speak("尝试重新初始化全部读卡器");
                     _lastErrorCount = 0;
                 }

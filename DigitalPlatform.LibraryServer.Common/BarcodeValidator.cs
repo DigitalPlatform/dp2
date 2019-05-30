@@ -1,12 +1,14 @@
-﻿using DigitalPlatform.Text;
-using Jint;
-using Jint.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using Jint;
+using Jint.Native;
+
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer.Common
 {
@@ -43,7 +45,7 @@ namespace DigitalPlatform.LibraryServer.Common
             XmlElement validator = nodes[0] as XmlElement;
 
             XmlNodeList patron_or_entitys = validator.SelectNodes("patron | entity");
-            foreach(XmlElement patron_or_entity in patron_or_entitys)
+            foreach (XmlElement patron_or_entity in patron_or_entitys)
             {
                 var ret = ProcessEntry(patron_or_entity, barcode, out string script);
                 if (ret == true)
@@ -70,7 +72,12 @@ namespace DigitalPlatform.LibraryServer.Common
                 }
             }
 
-            return new ValidateResult { OK = false };
+            return new ValidateResult
+            {
+                OK = false,
+                ErrorInfo = $"号码 '{barcode}' 既不是合法的册条码号，也不是合法的证条码号",
+                ErrorCode = "notMatch"
+            };
         }
 
         static string Transform(string barcode,

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform.IO
 {
+    // USB 变化通知机制
+    // 注意本功能只能用于一直显示的窗口。窗口隐藏会让通知失效
     // https://stackoverflow.com/questions/16245706/check-for-device-change-add-remove-events#
     public static class UsbNotification
     {

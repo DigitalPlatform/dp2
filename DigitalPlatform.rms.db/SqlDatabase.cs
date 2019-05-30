@@ -7057,7 +7057,7 @@ handle.CancelTokenSource.Token).Result;
                             // return:
                             //		-1  出错
                             //		-4  记录不存在
-        //      -100    对象文件不存在
+                            //      -100    对象文件不存在
                             //		>=0 资源总长度
                             lRet = this.GetImage(connection,
                                 strRecordID,

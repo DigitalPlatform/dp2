@@ -563,7 +563,12 @@ namespace DigitalPlatform.LibraryServer
                             continue;
                         }
                         strError = "获得" + strDbTypeCaption + "记录 '" + strSearchRecPath + "' 时出错: " + strError;
-                        goto ERROR1;
+                        // 2019/5/28
+                        result.Value = -1;
+                        result.ErrorCode = ErrorCode.NotFoundObjectFile;
+                        result.ErrorInfo = strError;
+                        return result;
+                        // goto ERROR1;
                     }
 
                     // 2014/12/16
@@ -4972,7 +4977,8 @@ out strError);
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound
+                        || channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)    // 2019/5/28
                     {
                         if (strAction == "checkunique")
                             goto SKIP_MEMO_OLDRECORD;
