@@ -531,7 +531,7 @@ namespace dp2SSL
                 ClearBookList();
                 FillBookFields(channel);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LibraryChannelManager.Log?.Error($"ClearBooksAndPatron() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");
             }
@@ -1036,7 +1036,7 @@ out string strError);
             }
         }
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1099,7 +1099,7 @@ out string strError);
         }
 
 
-#endregion
+        #endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1519,7 +1519,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1560,9 +1560,9 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
-#region global 分类报错机制
+        #region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1606,7 +1606,7 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
     }
 }

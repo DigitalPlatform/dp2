@@ -294,6 +294,13 @@ out strError);
                 MessageBox.Show(this, strError);
             }
 
+            // 列出条码校验规则
+            nRet = this.ListBarcodeValidation(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
             nRet = this.ListDup(out strError);
             if (nRet == -1)
             {
@@ -6164,6 +6171,161 @@ out strError);
 
         #endregion
 
+        #region 条码校验
+
+        int ListBarcodeValidation(out string strError)
+        {
+            strError = "";
+
+            if (this.BarcodeValidationChanged == true)
+            {
+                // 警告尚未保存
+                DialogResult result = MessageBox.Show(this,
+                    "当前窗口内条码校验规则定义被修改后尚未保存。若此时刷新窗口内容，现有未保存信息将丢失。\r\n\r\n确实要刷新? ",
+                    "ManagerForm",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    return 0;
+                }
+            }
+
+            // 获得定义
+            int nRet = GetBarcodeValidationInfo(out string strScriptXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            string strXml = "";
+            if (string.IsNullOrEmpty(strScriptXml) == false)
+            {
+                strScriptXml = "<barcodeValidation>" + strScriptXml + "</barcodeValidation>";
+
+                nRet = DomUtil.GetIndentXml(strScriptXml,
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 为了显示元素中的脚本的回行
+                strXml = strXml.Replace("\r\n", "\n");
+                strXml = strXml.Replace("\n", "\r\n");
+            }
+
+            this.textBox_barcodeValidation.Text = strXml;
+            this.BarcodeValidationChanged = false;
+            return 1;
+        }
+
+        // 获得条码校验规则定义
+        int GetBarcodeValidationInfo(out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在获取条码校验规则定义 ...");
+            stop.BeginLoop();
+
+            this.Update();
+            Program.MainForm.Update();
+
+            try
+            {
+                long lRet = Channel.GetSystemParameter(
+                    stop,
+                    "circulation",
+                    "barcodeValidation",
+                    out strXml,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                return (int)lRet;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+
+            ERROR1:
+            return -1;
+        }
+
+        // 保存条码校验规则定义
+        // parameters:
+        //      strScriptXml   脚本定义XML。注意，没有根元素
+        int SetBarcodeValidationDef(string strXml,
+            out string strError)
+        {
+            strError = "";
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在保存条码校验规则定义 ...");
+            stop.BeginLoop();
+
+            this.Update();
+            Program.MainForm.Update();
+
+            try
+            {
+                long lRet = Channel.SetSystemParameter(
+                    stop,
+                    "circulation",
+                    "barcodeValidation",
+                    strXml,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+
+            ERROR1:
+            return -1;
+        }
+
+        bool m_bBarcodeValidationChanged = false;
+
+        /// <summary>
+        /// 条码校验规则定义是否被修改
+        /// </summary>
+        public bool BarcodeValidationChanged
+        {
+            get
+            {
+                return this.m_bBarcodeValidationChanged;
+            }
+            set
+            {
+                this.m_bBarcodeValidationChanged = value;
+                if (value == true)
+                    this.toolStripButton_barcodeValidation_save.Enabled = true;
+                else
+                    this.toolStripButton_barcodeValidation_save.Enabled = false;
+            }
+        }
+
+        #endregion
+
         #region 脚本
 
         int ListScript(out string strError)
@@ -9150,7 +9312,73 @@ out strError);
             }
         }
 
+        private void toolStripButton_barcodeValidation_refresh_Click(object sender, EventArgs e)
+        {
+            this.toolStripButton_barcodeValidation_refresh.Enabled = false;
+            try
+            {
+                int nRet = this.ListBarcodeValidation(out string strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_barcodeValidation_refresh.Enabled = true;
+            }
+        }
 
+        private void toolStripButton_barcodeValidation_save_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strScriptXml = this.textBox_barcodeValidation.Text;
+
+            if (String.IsNullOrEmpty(strScriptXml) == true)
+            {
+                strScriptXml = "";
+            }
+            else
+            {
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strScriptXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "XML字符串装入XMLDOM时发生错误: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                if (dom.DocumentElement == null)
+                {
+                    strScriptXml = "";
+                }
+                else
+                    strScriptXml = dom.DocumentElement.InnerXml;
+            }
+
+            int nRet = SetBarcodeValidationDef(strScriptXml,
+                out strError);
+            if (nRet == -1)
+            {
+                //this.textBox_script_comment.Text = strError;
+                //this.ScriptChanged = false;
+                goto ERROR1;
+            }
+
+            this.BarcodeValidationChanged = false;
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void textBox_barcodeValidation_TextChanged(object sender, EventArgs e)
+        {
+            this.BarcodeValidationChanged = true;
+        }
     }
 
     #endregion // 查重

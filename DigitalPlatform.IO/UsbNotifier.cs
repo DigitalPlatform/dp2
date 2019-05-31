@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform.IO
 {
+#if REMOVED
     // 不需要窗口的 USB 变化通知类
     // https://stackoverflow.com/questions/10022794/how-can-i-use-registerdevicenotification-without-a-window-handle
     public class UsbNotifier
@@ -65,4 +66,6 @@ namespace DigitalPlatform.IO
             }
         }
     }
+
+#endif
 }

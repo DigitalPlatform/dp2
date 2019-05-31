@@ -79,7 +79,7 @@ namespace dp2SSL
         }
 #endif
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -143,27 +143,52 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
 
 
         private void Config_Click(object sender, RoutedEventArgs e)
         {
-            Window cfg_window = new ConfigWindow();
-            cfg_window.ShowDialog();
-
+            //FingerprintManager.Base.State = "pause";
+            try
+            {
+                Window cfg_window = new ConfigWindow();
+                cfg_window.ShowDialog();
+            }
+            finally
+            {
+                //FingerprintManager.Base.State = "";
+            }
 
             // 迫使 URL 生效
             RfidManager.Url = App.RfidUrl;
             RfidManager.Clear();
             FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.Clear();
+
+            // 检查状态，及时报错
+            {
+                List<string> errors = new List<string>();
+                {
+                    var result = RfidManager.GetState("");
+                    if (result.Value == -1)
+                        errors.Add(result.ErrorInfo);
+                }
+
+                {
+                    var result = FingerprintManager.GetState("");
+                    if (result.Value == -1)
+                        errors.Add(result.ErrorInfo);
+                }
+
+                if (errors.Count > 0)
+                    MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
+            }
 #if REMOVED
             // 重试初始化指纹环境
             // TODO: 有时候会遇到报错。可能略微延时一下重试就又可以了
             List<string> errors = App.CurrentApp.InitialFingerPrint();
             if (errors.Count > 0)
             {
-                MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
 #endif
         }

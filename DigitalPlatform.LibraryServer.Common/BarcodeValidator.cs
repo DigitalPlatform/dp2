@@ -53,15 +53,27 @@ namespace DigitalPlatform.LibraryServer.Common
                     if (string.IsNullOrEmpty(script) == false)
                     {
                         // 进行条码变换
-                        var result = Transform(barcode,
-        location,
-        script);
-                        return new ValidateResult
+                        try
                         {
-                            OK = true,
-                            Type = patron_or_entity.Name,
-                            Transformed = result
-                        };
+                            var result = Transform(barcode,
+            location,
+            script);
+                            return new ValidateResult
+                            {
+                                OK = true,
+                                Type = patron_or_entity.Name,
+                                Transformed = result
+                            };
+                        }
+                        catch(Exception ex)
+                        {
+                            return new ValidateResult
+                            {
+                                OK = false,
+                                ErrorInfo = $"javascript 脚本 {script} 执行时出现异常: {ex.Message}",
+                                ErrorCode = "scriptError"
+                            };
+                        }
                     }
                     return new ValidateResult
                     {
@@ -88,12 +100,14 @@ namespace DigitalPlatform.LibraryServer.Common
             SetValue(engine, "barcode", barcode);
             SetValue(engine, "location", location);
 
-            engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+            string result = engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
     + script) // execute a statement
     ?.GetCompletionValue() // get the latest statement completion value
     ?.ToObject()?.ToString() // converts the value to .NET
     ;
-            string result = GetString(engine, "result", "yes");
+            string var_result = GetString(engine, "result", null);
+            if (var_result != null)
+                result = var_result;
             string message = GetString(engine, "message", "");
             if (string.IsNullOrEmpty(message) == false)
                 throw new Exception(message);
@@ -113,8 +127,8 @@ namespace DigitalPlatform.LibraryServer.Common
         {
             var result_obj = engine.GetValue(name);
             string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
-            if (value == null)
-                value = "";
+            //if (value == null)
+            //    value = "";
             return value;
         }
 
@@ -123,21 +137,22 @@ namespace DigitalPlatform.LibraryServer.Common
         //      true    barcode 在定义的范围内
         bool ProcessEntry(XmlElement container,
             string barcode,
-            out string script)
+            out string transform_script)
         {
-            script = "";
+            transform_script = "";
 
             XmlNodeList nodes = container.SelectNodes("*");
-            foreach (XmlElement validator in nodes)
+            foreach (XmlElement range in nodes)
             {
-                if (validator.Name == "range")
+                transform_script = range.GetAttribute("transform");
+                if (range.Name == "range")
                 {
-                    string value = validator.GetAttribute("value");
+                    string value = range.GetAttribute("value");
                     if (IsInRange(barcode, value))
                         return true;
                 }
 
-                if (validator.Name.ToLower() == "cmis")
+                if (range.Name.ToLower() == "cmis")
                 {
                     if (StringUtil.IsValidCMIS(barcode))
                         return true;
