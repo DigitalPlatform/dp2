@@ -814,13 +814,13 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
                     }
 
-                    // 2008/10/13 
-                    // <script>元素内容
+                    // 2008/10/13 2019/5/31
+                    // <script> 或 <barcodeValidation> 元素内容
                     // strValue中是下级片断定义，没有<script>元素作为根。
-                    if (strName == "script")
+                    if (strName == "script" || strName == "barcodeValidation")
                     {
                         // 分馆用户也能看到全部<script>定义
-                        XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
+                        XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
                         if (root == null)
                         {
                             nRet = 0;
@@ -834,10 +834,6 @@ namespace DigitalPlatform.LibraryServer
 
                     strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                     goto NOTFOUND;
-                    /*
-                    strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
-                    goto ERROR1;
-                     * */
                 }
 
                 // 根据前端在strName参数中提供的rightstable xml字符串，立即创建rightsTableHtml字符串

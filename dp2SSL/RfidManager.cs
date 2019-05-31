@@ -26,13 +26,27 @@ namespace dp2SSL
         {
             add
             {
-                Base.AddEvent(value);
+                Base.AddSetErrorEvent(value);
             }
             remove
             {
-                Base.RemoveEvent(value);
+                Base.RemoveSetErrorEvent(value);
             }
         }
+
+#if NO
+        public static event EventHandler Loop
+        {
+            add
+            {
+                Base.AddLoopEvent(value);
+            }
+            remove
+            {
+                Base.RemoveLoopEvent(value);
+            }
+        }
+#endif
 
         public static void Clear()
         {
@@ -65,7 +79,19 @@ namespace dp2SSL
 
                 channel.Object.EnableSendKey(false);
             },
-
+            () =>
+            {
+                if (string.IsNullOrEmpty(Base.Url))
+                {
+                    Base.TriggerSetError(null,
+                        new SetErrorEventArgs
+                        {
+                            Error = "RFID 中心 URL 尚未配置(因此无法从 RFID 读卡器读取信息)"
+                        });
+                    return true;
+                }
+                return false;
+            },
             (channel) =>
             {
                 var result = channel?.Object?.ListTags("*",
@@ -87,68 +113,6 @@ null);
             },
             token);
 
-#if NO
-            Task.Run(() =>
-            {
-                while (token.IsCancellationRequested == false)
-                {
-                    // TODO: 中间进行配置的时候，确保暂停在这个位置
-                    // 延时
-                    Task.Delay(TimeSpan.FromMilliseconds(1000), token);
-
-                    if (string.IsNullOrEmpty(App.RfidUrl))
-                        continue;
-
-                    Base.Lock.EnterReadLock();  // 锁定范围以外，可以对通道进行 Clear()
-                    try
-                    {
-                        // 列举标签
-                        try
-                        {
-                            var channel = GetRfidChannel();
-                            try
-                            {
-                                var result = channel?.Object?.ListTags("*",
-        null);
-                                if (result.Value == -1)
-                                    SetError(result,
-                                        new SetErrorEventArgs { Error = result.ErrorInfo });
-                                else
-                                    SetError(result,
-                                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                                if (ListTags != null)
-                                {
-                                    ListTags(channel, new ListTagsEventArgs
-                                    {
-                                        Result = result
-                                    });
-                                }
-                            }
-                            finally
-                            {
-                                ReturnRfidChannel(channel);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            SetError(ex,
-                                new SetErrorEventArgs
-                                {
-                                    Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
-                                });
-
-                            // 附加一个延时
-                            // Task.Delay(TimeSpan.FromMinutes(1), token);
-                        }
-                    }
-                    finally
-                    {
-                        Base.Lock.ExitReadLock();
-                    }
-                }
-            });
-#endif
         }
 
         public static NormalResult SetEAS(string uid, bool enable)
@@ -223,64 +187,43 @@ null);
             }
         }
 
-#if NO
-        // Exception: 
-        //      可能会抛出 Exception 异常
-        public static RfidChannel GetRfidChannel()
+        public static NormalResult GetState(string style)
         {
-            if (string.IsNullOrEmpty(App.RfidUrl))
-                throw new Exception("尚未配置 RFID 中心 URL");
-
-            return Base.Channels.GetChannel(() =>
-            {
-                LibraryChannelManager.Log.Debug($"beginof new RFID channel, App.RfidUrl={App.RfidUrl}");
-                var channel = ManagerBase.StartChannel(
-    App.RfidUrl,
-    out string strError);
-                if (channel == null)
-                    throw new Exception(strError);
-                try
-                {
-                    var result = channel.Object.GetState("");
-                    if (result.Value == -1)
-                        throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
-                    channel.Started = true;
-
-                    channel.Object.EnableSendKey(false);
-                }
-                catch (Exception ex)
-                {
-                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                        throw new Exception($"启动 RFID 通道时出错: “指纹中心”({App.RfidUrl})没有响应", ex);
-                    else
-                        throw new Exception($"启动 RFID 通道时出错(2): {ex.Message}", ex);
-                }
-                LibraryChannelManager.Log.Debug($"endof new RFID channel, App.RfidUrl={App.RfidUrl}");
-                return channel;
-            });
-        }
-
-        public static RfidChannel GetRfidChannel(out string strError)
-        {
-            strError = "";
-
             try
             {
-                return GetRfidChannel();
+                // 因为 GetState 是可有可无的请求，如果 Url 为空就算了
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetState(style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
             }
             catch (Exception ex)
             {
-                strError = ex.Message;
-                return null;
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
-
-        public static void ReturnRfidChannel(RfidChannel channel)
-        {
-            Base.Channels.ReturnChannel(channel);
-        }
-
-#endif
     }
 
     public delegate void ListTagsEventHandler(object sender,

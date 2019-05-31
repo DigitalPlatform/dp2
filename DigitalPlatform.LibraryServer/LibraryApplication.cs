@@ -3049,6 +3049,9 @@ namespace DigitalPlatform.LibraryServer
                             "serverReplication",
                             "authdbgroup",
                             "maps_856u",
+                            "globalResults",    // 2018/12/3
+                            "rfid", // 2019/1/11
+                            "barcodeValidation", // 2019/5/31
                         };
 
             foreach (string element_name in unique_containers)
@@ -3508,6 +3511,7 @@ namespace DigitalPlatform.LibraryServer
                             "maps_856u",    // 2018/10/24
                             "globalResults",    // 2018/12/3
                             "rfid", // 2019/1/11
+                            "barcodeValidation", // 2019/5/31
                         };
 
                         RestoreElements(writer, elements);

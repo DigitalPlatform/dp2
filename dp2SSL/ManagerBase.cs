@@ -15,20 +15,34 @@ using DigitalPlatform.LibraryClient;
 namespace dp2SSL
 {
     // 一些公共的成员
-    // T: FingerprintChannel; T1: IFingerprint
+    // T: IFingerprint 或 IRfid
     public class ManagerBase<T>
     {
         event SetErrorEventHandler SetError = null;
 
-        public void AddEvent(SetErrorEventHandler handler)
+        public void AddSetErrorEvent(SetErrorEventHandler handler)
         {
             SetError += handler;
         }
 
-        public void RemoveEvent(SetErrorEventHandler handler)
+        public void RemoveSetErrorEvent(SetErrorEventHandler handler)
         {
             SetError -= handler;
         }
+
+        event EventHandler Loop = null;
+
+        public void AddLoopEvent(EventHandler handler)
+        {
+            Loop += handler;
+        }
+
+        public void RemoveLoopEvent(EventHandler handler)
+        {
+            Loop -= handler;
+        }
+
+        // public string State = "";   // pause/空
 
         public ReaderWriterLockSlim Lock = new ReaderWriterLockSlim();
 
@@ -72,6 +86,7 @@ namespace dp2SSL
         // 启动后台任务。
         public void Start(
             delegate_action new_action,
+            delegate_skip skip_func,
             delegate_action loop_action,
             CancellationToken token)
         {
@@ -85,8 +100,27 @@ namespace dp2SSL
                     // 延时
                     Task.Delay(TimeSpan.FromMilliseconds(1000), token);
 
-                    if (string.IsNullOrEmpty(this.Url))
-                        continue;
+                    // Loop?.Invoke(this, new EventArgs());
+                    if (skip_func == null)
+                    {
+                        if (string.IsNullOrEmpty(this.Url))
+                        {
+                            SetError(null,
+                                new SetErrorEventArgs
+                                {
+                                    Error = null
+                                });
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (skip_func?.Invoke() == true)
+                            continue;
+                    }
+
+                    //if (this.State == "pause")
+                    //    continue;
 
                     bool error = false;
                     this.Lock.EnterReadLock();  // 锁定范围以外，可以对通道进行 Clear()
@@ -129,6 +163,7 @@ namespace dp2SSL
         }
 
         public delegate void delegate_action(BaseChannel<T> channel);
+        public delegate bool delegate_skip();
 
         // Exception: 
         //      可能会抛出 Exception 异常
@@ -155,7 +190,7 @@ namespace dp2SSL
                     channel.Started = true;
 
                     channel.Object.EnableSendKey(false);
-#endif 
+#endif
                     _new_action?.Invoke(channel);
                 }
                 catch (Exception ex)

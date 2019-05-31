@@ -110,6 +110,7 @@ namespace dp2Circulation
             this.columnHeader_location_libraryCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_location_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_location_canBorrow = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_location_canReturn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_location_itemBarcodeNullable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.textBox_location_comment = new System.Windows.Forms.TextBox();
             this.toolStrip_location = new System.Windows.Forms.ToolStrip();
@@ -155,6 +156,13 @@ namespace dp2Circulation
             this.toolStripButton_script_refresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_script_caretPos = new System.Windows.Forms.ToolStripLabel();
             this.textBox_script_comment = new DigitalPlatform.GUI.NoHasSelTextBox();
+            this.tabPage_barcodeValidation = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel_barcodeValidation = new System.Windows.Forms.TableLayoutPanel();
+            this.textBox_barcodeValidation = new DigitalPlatform.GUI.NoHasSelTextBox();
+            this.toolStrip_barcodeValidation = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_barcodeValidation_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_barcodeValidation_refresh = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tabPage_valueTable = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.textBox_valueTables = new DigitalPlatform.GUI.NoHasSelTextBox();
@@ -208,7 +216,6 @@ namespace dp2Circulation
             this.imageList_opacDatabaseType = new System.Windows.Forms.ImageList(this.components);
             this.imageList_zhongcihao = new System.Windows.Forms.ImageList(this.components);
             this.imageList_arrangement = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_location_canReturn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main.SuspendLayout();
             this.tabPage_databases.SuspendLayout();
             this.toolStrip_databases.SuspendLayout();
@@ -246,6 +253,9 @@ namespace dp2Circulation
             this.splitContainer_script.SuspendLayout();
             this.tableLayoutPanel_script.SuspendLayout();
             this.toolStrip_script.SuspendLayout();
+            this.tabPage_barcodeValidation.SuspendLayout();
+            this.tableLayoutPanel_barcodeValidation.SuspendLayout();
+            this.toolStrip_barcodeValidation.SuspendLayout();
             this.tabPage_valueTable.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.toolStrip_valueTables.SuspendLayout();
@@ -273,6 +283,7 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_zhongcihaoDatabases);
             this.tabControl_main.Controls.Add(this.tabPage_bookshelf);
             this.tabControl_main.Controls.Add(this.tabPage_script);
+            this.tabControl_main.Controls.Add(this.tabPage_barcodeValidation);
             this.tabControl_main.Controls.Add(this.tabPage_valueTable);
             this.tabControl_main.Controls.Add(this.tabPage_center);
             this.tabControl_main.Controls.Add(this.tabPage_newLoanPolicy);
@@ -291,7 +302,7 @@ namespace dp2Circulation
             this.tabPage_databases.Controls.Add(this.listView_databases);
             this.tabPage_databases.Location = new System.Drawing.Point(4, 28);
             this.tabPage_databases.Name = "tabPage_databases";
-            this.tabPage_databases.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_databases.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_databases.Size = new System.Drawing.Size(802, 397);
             this.tabPage_databases.TabIndex = 0;
             this.tabPage_databases.Text = "数据库";
@@ -531,7 +542,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_opac_up.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel_opac_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_opac_up.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_opac_up.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_opac_up.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_opac_up.Name = "tableLayoutPanel_opac_up";
             this.tableLayoutPanel_opac_up.RowCount = 3;
             this.tableLayoutPanel_opac_up.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -674,7 +685,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_opac_down.Controls.Add(this.treeView_opacBrowseFormats, 0, 1);
             this.tableLayoutPanel_opac_down.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_opac_down.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_opac_down.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_opac_down.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_opac_down.Name = "tableLayoutPanel_opac_down";
             this.tableLayoutPanel_opac_down.RowCount = 3;
             this.tableLayoutPanel_opac_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -869,7 +880,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_dup_up.Controls.Add(this.toolStrip_dup_project, 0, 1);
             this.tableLayoutPanel_dup_up.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_dup_up.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_dup_up.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_dup_up.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_dup_up.Name = "tableLayoutPanel_dup_up";
             this.tableLayoutPanel_dup_up.RowCount = 2;
             this.tableLayoutPanel_dup_up.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -963,7 +974,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_dup_down.Controls.Add(this.listView_dup_defaults, 0, 1);
             this.tableLayoutPanel_dup_down.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_dup_down.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_dup_down.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_dup_down.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_dup_down.Name = "tableLayoutPanel_dup_down";
             this.tableLayoutPanel_dup_down.RowCount = 3;
             this.tableLayoutPanel_dup_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1077,7 +1088,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_locations.Controls.Add(this.toolStrip_location, 0, 1);
             this.tableLayoutPanel_locations.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_locations.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_locations.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_locations.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_locations.Name = "tableLayoutPanel_locations";
             this.tableLayoutPanel_locations.RowCount = 3;
             this.tableLayoutPanel_locations.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1124,6 +1135,11 @@ namespace dp2Circulation
             // 
             this.columnHeader_location_canBorrow.Text = "允许外借";
             this.columnHeader_location_canBorrow.Width = 100;
+            // 
+            // columnHeader_location_canReturn
+            // 
+            this.columnHeader_location_canReturn.Text = "允许还回";
+            this.columnHeader_location_canReturn.Width = 100;
             // 
             // columnHeader_location_itemBarcodeNullable
             // 
@@ -1548,7 +1564,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_script.Controls.Add(this.toolStrip_script, 0, 1);
             this.tableLayoutPanel_script.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_script.Location = new System.Drawing.Point(0, 9);
-            this.tableLayoutPanel_script.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_script.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_script.Name = "tableLayoutPanel_script";
             this.tableLayoutPanel_script.RowCount = 2;
             this.tableLayoutPanel_script.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1634,11 +1650,98 @@ namespace dp2Circulation
             this.textBox_script_comment.TabIndex = 10;
             this.textBox_script_comment.DoubleClick += new System.EventHandler(this.textBox_script_comment_DoubleClick);
             // 
+            // tabPage_barcodeValidation
+            // 
+            this.tabPage_barcodeValidation.Controls.Add(this.tableLayoutPanel_barcodeValidation);
+            this.tabPage_barcodeValidation.Location = new System.Drawing.Point(4, 28);
+            this.tabPage_barcodeValidation.Name = "tabPage_barcodeValidation";
+            this.tabPage_barcodeValidation.Size = new System.Drawing.Size(802, 397);
+            this.tabPage_barcodeValidation.TabIndex = 13;
+            this.tabPage_barcodeValidation.Text = "条码校验";
+            this.tabPage_barcodeValidation.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel_barcodeValidation
+            // 
+            this.tableLayoutPanel_barcodeValidation.ColumnCount = 1;
+            this.tableLayoutPanel_barcodeValidation.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_barcodeValidation.Controls.Add(this.textBox_barcodeValidation, 0, 0);
+            this.tableLayoutPanel_barcodeValidation.Controls.Add(this.toolStrip_barcodeValidation, 0, 1);
+            this.tableLayoutPanel_barcodeValidation.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_barcodeValidation.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_barcodeValidation.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel_barcodeValidation.Name = "tableLayoutPanel_barcodeValidation";
+            this.tableLayoutPanel_barcodeValidation.RowCount = 2;
+            this.tableLayoutPanel_barcodeValidation.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_barcodeValidation.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_barcodeValidation.Size = new System.Drawing.Size(802, 397);
+            this.tableLayoutPanel_barcodeValidation.TabIndex = 12;
+            // 
+            // textBox_barcodeValidation
+            // 
+            this.textBox_barcodeValidation.AcceptsReturn = true;
+            this.textBox_barcodeValidation.AcceptsTab = true;
+            this.textBox_barcodeValidation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_barcodeValidation.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_barcodeValidation.HideSelection = false;
+            this.textBox_barcodeValidation.Location = new System.Drawing.Point(3, 3);
+            this.textBox_barcodeValidation.MaxLength = 0;
+            this.textBox_barcodeValidation.Multiline = true;
+            this.textBox_barcodeValidation.Name = "textBox_barcodeValidation";
+            this.textBox_barcodeValidation.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_barcodeValidation.Size = new System.Drawing.Size(796, 360);
+            this.textBox_barcodeValidation.TabIndex = 2;
+            this.textBox_barcodeValidation.TextChanged += new System.EventHandler(this.textBox_barcodeValidation_TextChanged);
+            // 
+            // toolStrip_barcodeValidation
+            // 
+            this.toolStrip_barcodeValidation.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.toolStrip_barcodeValidation.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_barcodeValidation.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.toolStrip_barcodeValidation.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_barcodeValidation_save,
+            this.toolStripButton_barcodeValidation_refresh,
+            this.toolStripLabel2});
+            this.toolStrip_barcodeValidation.Location = new System.Drawing.Point(0, 366);
+            this.toolStrip_barcodeValidation.Name = "toolStrip_barcodeValidation";
+            this.toolStrip_barcodeValidation.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.toolStrip_barcodeValidation.Size = new System.Drawing.Size(802, 31);
+            this.toolStrip_barcodeValidation.TabIndex = 11;
+            this.toolStrip_barcodeValidation.Text = "toolStrip1";
+            // 
+            // toolStripButton_barcodeValidation_save
+            // 
+            this.toolStripButton_barcodeValidation_save.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_barcodeValidation_save.Enabled = false;
+            this.toolStripButton_barcodeValidation_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_barcodeValidation_save.Image")));
+            this.toolStripButton_barcodeValidation_save.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_barcodeValidation_save.Name = "toolStripButton_barcodeValidation_save";
+            this.toolStripButton_barcodeValidation_save.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_barcodeValidation_save.Text = "保存";
+            this.toolStripButton_barcodeValidation_save.Click += new System.EventHandler(this.toolStripButton_barcodeValidation_save_Click);
+            // 
+            // toolStripButton_barcodeValidation_refresh
+            // 
+            this.toolStripButton_barcodeValidation_refresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_barcodeValidation_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_barcodeValidation_refresh.Image")));
+            this.toolStripButton_barcodeValidation_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_barcodeValidation_refresh.Name = "toolStripButton_barcodeValidation_refresh";
+            this.toolStripButton_barcodeValidation_refresh.Size = new System.Drawing.Size(50, 28);
+            this.toolStripButton_barcodeValidation_refresh.Text = "刷新";
+            this.toolStripButton_barcodeValidation_refresh.Click += new System.EventHandler(this.toolStripButton_barcodeValidation_refresh_Click);
+            // 
+            // toolStripLabel2
+            // 
+            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel2.Name = "toolStripLabel2";
+            this.toolStripLabel2.Size = new System.Drawing.Size(0, 28);
+            // 
             // tabPage_valueTable
             // 
             this.tabPage_valueTable.Controls.Add(this.tableLayoutPanel1);
             this.tabPage_valueTable.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_valueTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_valueTable.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_valueTable.Name = "tabPage_valueTable";
             this.tabPage_valueTable.Size = new System.Drawing.Size(802, 397);
             this.tabPage_valueTable.TabIndex = 8;
@@ -1653,7 +1756,7 @@ namespace dp2Circulation
             this.tableLayoutPanel1.Controls.Add(this.toolStrip_valueTables, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1727,9 +1830,9 @@ namespace dp2Circulation
             this.tabPage_center.Controls.Add(this.listView_center);
             this.tabPage_center.Controls.Add(this.toolStrip_center);
             this.tabPage_center.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_center.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_center.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_center.Name = "tabPage_center";
-            this.tabPage_center.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_center.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_center.Size = new System.Drawing.Size(802, 397);
             this.tabPage_center.TabIndex = 9;
             this.tabPage_center.Text = "中心服务器";
@@ -1859,7 +1962,7 @@ namespace dp2Circulation
             this.tabPage_newLoanPolicy.Controls.Add(this.tabControl_newLoanPolicy);
             this.tabPage_newLoanPolicy.Controls.Add(this.toolStrip_newLoanPolicy);
             this.tabPage_newLoanPolicy.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_newLoanPolicy.Name = "tabPage_newLoanPolicy";
             this.tabPage_newLoanPolicy.Size = new System.Drawing.Size(802, 397);
             this.tabPage_newLoanPolicy.TabIndex = 10;
@@ -1874,7 +1977,7 @@ namespace dp2Circulation
             this.tabControl_newLoanPolicy.Controls.Add(this.tabPage_newLoanPolicy_rightsTable);
             this.tabControl_newLoanPolicy.Controls.Add(this.tabPage_newLoanPolicy_xml);
             this.tabControl_newLoanPolicy.Location = new System.Drawing.Point(4, 4);
-            this.tabControl_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl_newLoanPolicy.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl_newLoanPolicy.Name = "tabControl_newLoanPolicy";
             this.tabControl_newLoanPolicy.SelectedIndex = 0;
             this.tabControl_newLoanPolicy.Size = new System.Drawing.Size(789, 344);
@@ -1885,9 +1988,9 @@ namespace dp2Circulation
             // 
             this.tabPage_newLoanPolicy_rightsTable.Controls.Add(this.elementHost1);
             this.tabPage_newLoanPolicy_rightsTable.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_newLoanPolicy_rightsTable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_rightsTable.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_newLoanPolicy_rightsTable.Name = "tabPage_newLoanPolicy_rightsTable";
-            this.tabPage_newLoanPolicy_rightsTable.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_rightsTable.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_newLoanPolicy_rightsTable.Size = new System.Drawing.Size(781, 312);
             this.tabPage_newLoanPolicy_rightsTable.TabIndex = 0;
             this.tabPage_newLoanPolicy_rightsTable.Text = "权限表";
@@ -1897,7 +2000,7 @@ namespace dp2Circulation
             // 
             this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.elementHost1.Location = new System.Drawing.Point(4, 4);
-            this.elementHost1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.elementHost1.Margin = new System.Windows.Forms.Padding(4);
             this.elementHost1.Name = "elementHost1";
             this.elementHost1.Size = new System.Drawing.Size(773, 304);
             this.elementHost1.TabIndex = 1;
@@ -1908,9 +2011,9 @@ namespace dp2Circulation
             // 
             this.tabPage_newLoanPolicy_xml.Controls.Add(this.textBox_newLoanPolicy_xml);
             this.tabPage_newLoanPolicy_xml.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_newLoanPolicy_xml.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_xml.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_newLoanPolicy_xml.Name = "tabPage_newLoanPolicy_xml";
-            this.tabPage_newLoanPolicy_xml.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_newLoanPolicy_xml.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage_newLoanPolicy_xml.Size = new System.Drawing.Size(781, 312);
             this.tabPage_newLoanPolicy_xml.TabIndex = 1;
             this.tabPage_newLoanPolicy_xml.Text = "XML";
@@ -1973,7 +2076,7 @@ namespace dp2Circulation
             this.tabPage_calendar.Controls.Add(this.listView_calendar);
             this.tabPage_calendar.Controls.Add(this.toolStrip_calendar);
             this.tabPage_calendar.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_calendar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_calendar.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_calendar.Name = "tabPage_calendar";
             this.tabPage_calendar.Size = new System.Drawing.Size(802, 397);
             this.tabPage_calendar.TabIndex = 11;
@@ -2145,7 +2248,7 @@ namespace dp2Circulation
             // 
             this.tabPage_kernel.Controls.Add(this.kernelResTree1);
             this.tabPage_kernel.Location = new System.Drawing.Point(4, 28);
-            this.tabPage_kernel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage_kernel.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_kernel.Name = "tabPage_kernel";
             this.tabPage_kernel.Size = new System.Drawing.Size(802, 397);
             this.tabPage_kernel.TabIndex = 12;
@@ -2159,7 +2262,7 @@ namespace dp2Circulation
             this.kernelResTree1.ImageIndex = 0;
             this.kernelResTree1.Lang = null;
             this.kernelResTree1.Location = new System.Drawing.Point(0, 0);
-            this.kernelResTree1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.kernelResTree1.Margin = new System.Windows.Forms.Padding(4);
             this.kernelResTree1.Name = "kernelResTree1";
             this.kernelResTree1.SelectedImageIndex = 0;
             this.kernelResTree1.Size = new System.Drawing.Size(802, 397);
@@ -2199,11 +2302,6 @@ namespace dp2Circulation
             this.imageList_arrangement.Images.SetKeyName(0, "group.ico");
             this.imageList_arrangement.Images.SetKeyName(1, "database.bmp");
             this.imageList_arrangement.Images.SetKeyName(2, "error_entity.bmp");
-            // 
-            // columnHeader_location_canReturn
-            // 
-            this.columnHeader_location_canReturn.Text = "允许还回";
-            this.columnHeader_location_canReturn.Width = 100;
             // 
             // ManagerForm
             // 
@@ -2277,6 +2375,11 @@ namespace dp2Circulation
             this.tableLayoutPanel_script.PerformLayout();
             this.toolStrip_script.ResumeLayout(false);
             this.toolStrip_script.PerformLayout();
+            this.tabPage_barcodeValidation.ResumeLayout(false);
+            this.tableLayoutPanel_barcodeValidation.ResumeLayout(false);
+            this.tableLayoutPanel_barcodeValidation.PerformLayout();
+            this.toolStrip_barcodeValidation.ResumeLayout(false);
+            this.toolStrip_barcodeValidation.PerformLayout();
             this.tabPage_valueTable.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -2481,5 +2584,12 @@ namespace dp2Circulation
         private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
         private System.Windows.Forms.ColumnHeader columnHeader_opac_alias;
         private System.Windows.Forms.ColumnHeader columnHeader_location_canReturn;
+        private System.Windows.Forms.TabPage tabPage_barcodeValidation;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_barcodeValidation;
+        private NoHasSelTextBox textBox_barcodeValidation;
+        private System.Windows.Forms.ToolStrip toolStrip_barcodeValidation;
+        private System.Windows.Forms.ToolStripButton toolStripButton_barcodeValidation_save;
+        private System.Windows.Forms.ToolStripButton toolStripButton_barcodeValidation_refresh;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
     }
 }

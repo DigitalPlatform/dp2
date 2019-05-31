@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace DigitalPlatform.IO
 {
+    // 查看 USB 设备，感知 USB 插拔变化的实用类
+    // https://stackoverflow.com/questions/3331043/get-list-of-connected-usb-devices
     public class UsbInfo
     {
-
         public delegate void delegate_changed(int add_count, int remove_count);
 
+        // 启动观察线程
         public static void StartWatch(delegate_changed callback,
             CancellationToken token)
         {
@@ -39,6 +41,7 @@ namespace DigitalPlatform.IO
             });
         }
 
+        // 比较两个集合的变化
         static void Compare(List<USBDeviceInfo> infos1,
             List<USBDeviceInfo> infos2,
             out int add_count,

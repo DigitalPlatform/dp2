@@ -3563,23 +3563,23 @@ namespace dp2Library
                     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 #endif
 
-                    // 构造检索书目库的 XML 检索式
-                    // return:
-                    //      -2  没有找到指定风格的检索途径
-                    //      -1  出错
-                    //      0   没有发现任何书目库定义
-                    //      1   成功
-                    int nRet = app.BuildSearchBiblioQuery(
-            strBiblioDbNames,
-            strQueryWord,
-            nPerMax,
-            strFromStyle,
-            strMatchStyle,
-            strLang,
-            strSearchStyle,
-            out List<string> dbTypes,
-            out strQueryXml,
-                    out strError);
+                // 构造检索书目库的 XML 检索式
+                // return:
+                //      -2  没有找到指定风格的检索途径
+                //      -1  出错
+                //      0   没有发现任何书目库定义
+                //      1   成功
+                int nRet = app.BuildSearchBiblioQuery(
+        strBiblioDbNames,
+        strQueryWord,
+        nPerMax,
+        strFromStyle,
+        strMatchStyle,
+        strLang,
+        strSearchStyle,
+        out List<string> dbTypes,
+        out strQueryXml,
+                out strError);
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
                 if (nRet == -2)
@@ -10575,54 +10575,71 @@ Stack:
                         goto END1;
                     }
 
-                    // 2008/10/13 
-                    // 设置<script>元素
+                    // 2008/10/13 2019/5/31
+                    // 设置 <script> 或 <barcodeValidation> 元素
                     // strValue中是下级片断定义，没有<script>元素作为根。
-                    if (strName == "script")
+                    if (strName == "script" || strName == "barcodeValidation")
                     {
                         // 分馆用户不能修改定义
                         if (sessioninfo.GlobalUser == false)
                         {
-                            strError = "分馆用户不允许修改<script>元素定义";
+                            strError = $"分馆用户不允许修改<{strName}>元素定义";
                             goto ERROR1;
                         }
 
-                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
-                        if (root == null)
+                        bool changed = false;
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode(strName);
+                        if (string.IsNullOrEmpty(strValue) == false)
                         {
-                            root = app.LibraryCfgDom.CreateElement("script");
-                            app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                            if (root == null)
+                            {
+                                root = app.LibraryCfgDom.CreateElement(strName);
+                                app.LibraryCfgDom.DocumentElement.AppendChild(root);
+                                changed = true;
+                            }
+                        }
+                        else
+                        {
+                            if (root != null)
+                            {
+                                root.ParentNode.RemoveChild(root);
+                                changed = true;
+                            }
                         }
 
                         try
                         {
                             root.InnerXml = ConvertCrLf(strValue);
+                            changed = true;
                         }
                         catch (Exception ex)
                         {
-                            strError = "设置<script>元素的InnerXml时发生错误: " + ex.Message;
+                            strError = $"设置 <{strName}> 元素的 InnerXml 时发生错误: " + ex.Message;
                             goto ERROR1;
                         }
 
-                        app.Changed = true;
+                        app.Changed = changed;
 
-                        // 注意检测编译错误
-                        // 初始化LibraryHostAssembly对象
-                        // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
-                        // return:
-                        //		-1	出错
-                        //		0	脚本代码没有找到
-                        //      1   成功
-                        nRet = app.InitialLibraryHostAssembly(out strError);
-                        if (nRet == -1)
+                        if (strName == "script" && changed)
                         {
-                            app.ActivateManagerThread(); // 促使尽快保存
-                            app.WriteErrorLog(strError);
-                            goto ERROR1;
+                            // 注意检测编译错误
+                            // 初始化LibraryHostAssembly对象
+                            // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                            // return:
+                            //		-1	出错
+                            //		0	脚本代码没有找到
+                            //      1   成功
+                            nRet = app.InitialLibraryHostAssembly(out strError);
+                            if (nRet == -1)
+                            {
+                                app.ActivateManagerThread(); // 促使尽快保存
+                                app.WriteErrorLog(strError);
+                                goto ERROR1;
+                            }
+
                         }
-
-                        app.ActivateManagerThread();
-
+                        if (changed)
+                            app.ActivateManagerThread();
                         goto END1;
                     }
 
