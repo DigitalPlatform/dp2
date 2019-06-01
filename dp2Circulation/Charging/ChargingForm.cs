@@ -1158,7 +1158,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1206,7 +1206,7 @@ namespace dp2Circulation
             }
 
             return 1;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -1328,7 +1328,14 @@ namespace dp2Circulation
 
             // 2017/1/4
             // 变换条码号
-            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
             {
                 string strText = this.textBox_readerBarcode.Text;
 
@@ -1491,7 +1498,7 @@ namespace dp2Circulation
                     this.textBox_readerBarcode.Text);
             }
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
             if (this.FuncState == FuncState.Return)
                 this.SwitchFocus(ITEM_BARCODE, "");
@@ -1736,7 +1743,7 @@ namespace dp2Circulation
 
                         return;
                     }
-                // break;
+                    // break;
             }
             base.DefWndProc(ref m);
         }
@@ -1984,7 +1991,14 @@ dlg.UiState);
 
             // 2017/1/4
             // 变换条码号
-            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
             {
                 string strText = this.textBox_itemBarcode.Text;
 
@@ -2128,7 +2142,7 @@ dlg.UiState);
                             || this.FuncState == dp2Circulation.FuncState.Renew)
                             bRenew = true;
 
-                    REDO:
+                        REDO:
                         string[] aDupPath = null;
                         string[] item_records = null;
                         string[] reader_records = null;
@@ -2398,7 +2412,7 @@ dlg.UiState);
                         string strConfirmItemRecPath = null;
                         string strOutputReaderBarcode = "";
 
-                    REDO:
+                        REDO:
                         string[] aDupPath = null;
                         string[] item_records = null;
                         string[] reader_records = null;
@@ -2650,7 +2664,7 @@ dlg.UiState);
             // 焦点回到册条码号输入域
             this.SwitchFocus(ITEM_BARCODE, strFastInputText);
             return 1;
-        ERROR1:
+            ERROR1:
             strFastInputText = ChargingInfoDlg.Show(
                 this.CharingInfoHost,
                 strError,
@@ -2845,7 +2859,7 @@ dlg.UiState);
             // 校验正确
             this.SwitchFocus(ITEM_BARCODE, null);
             return;
-        ERROR1:
+            ERROR1:
             // 校验发现/发生错误
             string strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
@@ -3271,7 +3285,7 @@ dlg.UiState);
             }
 
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 

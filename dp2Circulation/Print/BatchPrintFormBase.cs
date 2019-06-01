@@ -1294,7 +1294,14 @@ namespace dp2Circulation
 
                         // 2017/5/17
                         // 变换条码号
-                        if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+                        // return:
+                        //      -1  出错
+                        //      0   不需要进行变换
+                        //      1   需要进行变换
+                        nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
                         {
                             string strText = strLine;
 

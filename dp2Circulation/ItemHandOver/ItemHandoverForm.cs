@@ -1979,11 +1979,19 @@ this.splitContainer_inAndOutof,
 
             // 2017/5/17
             // 变换条码号
-            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+
+            int nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
             {
                 string strText = this.textBox_verify_itemBarcode.Text;
 
-                int nRet = Program.MainForm.TransformBarcode(
+                nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
                     ref strText,
                     out strError);
@@ -2028,7 +2036,7 @@ this.splitContainer_inAndOutof,
                     //      -2  册条码号已经在list中存在了
                     //      -1  出错
                     //      1   成功
-                    int nRet = LoadOneItem(
+                    nRet = LoadOneItem(
                         channel,
                         this.comboBox_load_type.Text,
                         true,
@@ -6820,14 +6828,26 @@ MessageBoxDefaultButton.Button2);
 
             // 2017/5/17
             // 变换条码号
-            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            int nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode,
+                out string strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                this._scanBarcodeForm.Activate();
+                return;
+            }
+            if (nRet == 1)
             {
                 string strText = e.Barcode;
 
-                int nRet = Program.MainForm.TransformBarcode(
+                nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
                     ref strText,
-                    out string strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, strError);
@@ -6837,7 +6857,6 @@ MessageBoxDefaultButton.Button2);
 
                 e.Barcode = strText;
             }
-
 
             // 把册条码号直接加入行中，然后等待专门的线程来装载刷新
             // 要查重
@@ -6991,7 +7010,7 @@ MessageBoxDefaultButton.Button2);
                         {
                             // 为每一行加入错误信息，避免线程重复报错
                             int i = 0;
-                            foreach(ListViewItem item in items)
+                            foreach (ListViewItem item in items)
                             {
                                 string barcode = barcodes[i];
                                 ListViewItem temp = item;

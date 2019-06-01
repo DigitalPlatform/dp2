@@ -202,7 +202,7 @@ string strText)
                                         strError = "在校验条码号 '" + e.Barcode + "' 时出错";
                                     //      0   不是合法的条码号
                                     else if (e.Result == 0)
-                                        strError = "'" + e.Barcode + "' 不是合法的条码号";
+                                        strError = $"'{e.Barcode}' (馆藏地属于 '{e.LibraryCode}')不是合法的条码号";
                                     //      1   是合法的读者证条码号
                                     else if (e.Result == 1)
                                         strError = "'" + e.Barcode + "' 是读者证条码号(而不是册条码号)";

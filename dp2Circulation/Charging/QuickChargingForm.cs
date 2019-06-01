@@ -1632,6 +1632,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 this._summaryList.BeginThread();
 #endif
             // m_webExternalHost_readerInfo.StopPrevious();
+            int nRet = 0;
+            string strError = "";
 
             if ((this.UseIsbnBorrow == true && IsISBN(ref strText) == true)
                 || strText.ToLower() == "?b")
@@ -1640,10 +1642,10 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 //      -1  error
                 //      0   放弃
                 //      1   成功
-                int nRet = SelectOneItem(func,
+                nRet = SelectOneItem(func,
                     strText.ToLower() == "?b" ? "" : strText,
                     out string strItemBarcode,
-                    out string strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     MessageBox.Show(this, "选择册记录的过程中出错: " + strError);
@@ -1663,14 +1665,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             // 变换条码号
-            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            // return:
+            //      -1  出错
+            //      0   不需要进行变换
+            //      1   需要进行变换
+            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, 
+                out strError);
+            if (nRet == -1)
+            {
+                // TODO: 语音提示
+                // TODO: 红色对话框
+                MessageBox.Show(this, strError);
+                this.textBox_input.SelectAll();
+                this.textBox_input.Focus();
+                return;
+            }
+            if (nRet == 1)
             {
 
                 // 2017/1/4
-                int nRet = Program.MainForm.TransformBarcode(
+                nRet = Program.MainForm.TransformBarcode(
                     Program.MainForm.FocusLibraryCode,
                     ref strText,
-                    out string strError);
+                    out strError);
                 if (nRet == -1)
                 {
                     // TODO: 语音提示
@@ -1714,10 +1731,10 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     //      0   不是合法的条码号
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
-                    int nRet = VerifyBarcode(
+                    nRet = VerifyBarcode(
                         Program.MainForm.FocusLibraryCode,  // this.Channel.LibraryCodeList,
                         strText,
-                        out string strError);
+                        out strError);
                     if (nRet == -2)
                     {
                         MessageBox.Show(this, "服务器没有配置条码号验证脚本，无法使用验证条码号功能。请在前端参数配置对话框的“快捷出纳”属性页中清除“校验输入的条码号”事项");
@@ -1738,7 +1755,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     {
                         // TODO: 语音提示
                         // TODO: 红色对话框
-                        MessageBox.Show(this, "'" + strText + "' 不是合法的条码号: " + strError);
+                        MessageBox.Show(this, $"'{strText}' (馆藏地属于 '{Program.MainForm.FocusLibraryCode}')不是合法的条码号: {strError}");
                         this.textBox_input.SelectAll();
                         this.textBox_input.Focus();
                         return;
