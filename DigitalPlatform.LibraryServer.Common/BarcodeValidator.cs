@@ -24,7 +24,37 @@ namespace DigitalPlatform.LibraryServer.Common
             _dom.LoadXml(definition);
         }
 
-        public ValidateResult Validate(string location, string barcode)
+        // 判断一个馆藏地是否需要进行条码变换
+        // exception:
+        //      可能会抛出异常
+        public bool NeedValidate(string location)
+        {
+            XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            if (nodes.Count == 0)
+                return false;
+            if (nodes.Count > 1)
+                throw new Exception($"馆藏地 '{location}' 定义验证规则太多 ({nodes.Count})");
+
+            XmlElement validator = nodes[0] as XmlElement;
+
+            // validator 元素下的 transform 元素
+            if (validator.SelectSingleNode("transform") is XmlElement transform)
+                return true;
+
+            XmlNodeList patron_or_entitys = validator.SelectNodes("patron | entity");
+            foreach (XmlElement patron_or_entity in patron_or_entitys)
+            {
+                XmlNodeList attrs = patron_or_entity.SelectNodes("*/@transform");
+                if (attrs.Count > 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public ValidateResult Validate(string location,
+            string barcode,
+            bool do_transform = true)
         {
             XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
             if (nodes.Count == 0)
@@ -42,54 +72,91 @@ namespace DigitalPlatform.LibraryServer.Common
                     ErrorCode = "locationDefMoreThanOne"
                 };
 
+            ValidateResult result = null;
+            string current_script = ""; // 每个 range 元素里面的 scirpt 脚本
+
             XmlElement validator = nodes[0] as XmlElement;
+
+            // validator 元素下的 transform 元素
+            XmlElement transform = validator.SelectSingleNode("transform") as XmlElement;
+            string transform_script = transform == null ? null : transform.InnerText.Trim();
 
             XmlNodeList patron_or_entitys = validator.SelectNodes("patron | entity");
             foreach (XmlElement patron_or_entity in patron_or_entitys)
             {
-                var ret = ProcessEntry(patron_or_entity, barcode, out string script);
+                var ret = ProcessEntry(patron_or_entity,
+                    barcode,
+                    out current_script);
                 if (ret == true)
                 {
-                    if (string.IsNullOrEmpty(script) == false)
-                    {
-                        // 进行条码变换
-                        try
-                        {
-                            var result = Transform(barcode,
-            location,
-            script);
-                            return new ValidateResult
-                            {
-                                OK = true,
-                                Type = patron_or_entity.Name,
-                                Transformed = result
-                            };
-                        }
-                        catch(Exception ex)
-                        {
-                            return new ValidateResult
-                            {
-                                OK = false,
-                                ErrorInfo = $"javascript 脚本 {script} 执行时出现异常: {ex.Message}",
-                                ErrorCode = "scriptError"
-                            };
-                        }
-                    }
-                    return new ValidateResult
+                    result = new ValidateResult
                     {
                         OK = true,
                         Type = patron_or_entity.Name,
-                        Transformed = barcode
                     };
+                    break;
                 }
             }
 
-            return new ValidateResult
+            if (result == null)
+                result = new ValidateResult
+                {
+                    OK = false,
+                    ErrorInfo = $"号码 '{barcode}' (馆藏地属于 '{location}')既不是合法的册条码号，也不是合法的证条码号",
+                    ErrorCode = "notMatch"
+                };
+
+            // 最后进行变换
             {
-                OK = false,
-                ErrorInfo = $"号码 '{barcode}' 既不是合法的册条码号，也不是合法的证条码号",
-                ErrorCode = "notMatch"
-            };
+                // 优先用局部的 script
+                if (string.IsNullOrEmpty(current_script) == false)
+                    transform_script = current_script;
+                if (do_transform &&
+                    string.IsNullOrEmpty(transform_script) == false)
+                {
+                    // 询问是否需要变换？(但本次并不做变换)
+                    if (barcode == "?transform")
+                    {
+                        return new ValidateResult
+                        {
+                            OK = true,
+                            TransformedBarcode = barcode,
+                            Transformed = true
+                        };
+                    }
+
+                    // 进行条码变换
+                    try
+                    {
+                        var transform_result = Transform(barcode,
+        location,
+        transform_script);
+                        result.TransformedBarcode = transform_result;
+                        result.Transformed = true;
+                        result.OK = true;
+                    }
+                    catch(TransformException ex)
+                    {
+                        return new ValidateResult
+                        {
+                            OK = false,
+                            ErrorInfo = $"对条码号 '{barcode}' (属于馆藏地 '{location}') 进行变换时出错: {ex.Message}",
+                            ErrorCode = "scriptError"
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        return new ValidateResult
+                        {
+                            OK = false,
+                            ErrorInfo = $"javascript 脚本 {transform_script} 执行时出现异常(条码号 '{barcode}' (属于馆藏地 '{location}')): {ex.Message}",
+                            ErrorCode = "scriptError"
+                        };
+                    }
+                }
+            }
+
+            return result;
         }
 
         static string Transform(string barcode,
@@ -110,7 +177,7 @@ namespace DigitalPlatform.LibraryServer.Common
                 result = var_result;
             string message = GetString(engine, "message", "");
             if (string.IsNullOrEmpty(message) == false)
-                throw new Exception(message);
+                throw new TransformException(message);
 
             return result;
         }
@@ -179,7 +246,6 @@ namespace DigitalPlatform.LibraryServer.Common
 
     public class ValidateResult
     {
-
         // [out]
         public string ErrorInfo { get; set; }
         // [out]
@@ -191,7 +257,21 @@ namespace DigitalPlatform.LibraryServer.Common
         public string Type { get; set; }
 
         // [out] 变换后的条码号字符串
-        public string Transformed { get; set; }
+        public string TransformedBarcode { get; set; }
+
+        // [out] 是否进行过变换(注意即便进行过变换，变换前后的条码号也可能完全相同)
+        public bool Transformed { get; set; }
+    }
+
+    // 变换时出错。用于脚本代码中用 message 环境变量主动返回出错信息
+    public class TransformException : Exception
+    {
+
+        public TransformException(string s)
+            : base(s)
+        {
+        }
+
     }
 
     /*
@@ -206,6 +286,9 @@ namespace DigitalPlatform.LibraryServer.Common
      *          <entity>
      *              <range>20000001-20999999</range>
      *          </entity>
+     *          <transform>
+     *              script code in here
+     *          </transform>
      *      </validator>
      * </collection>
      * */

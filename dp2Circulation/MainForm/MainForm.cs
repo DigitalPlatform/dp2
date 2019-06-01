@@ -42,6 +42,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using static dp2Circulation.MyForm;
 using DigitalPlatform.Core;
 using DigitalPlatform.Z3950;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2Circulation
 {
@@ -120,6 +121,12 @@ namespace dp2Circulation
         /// 服务器配置的前端交费信息接口参数
         /// </summary>
         public string ClientFineInterfaceName = "";
+
+        /// <summary>
+        /// 服务器配置的条码校验规则
+        /// library.xml 中 barcodeValication 元素
+        /// </summary>
+        public string BarcodeValidation = "";
 
         /// <summary>
         /// 从服务器端获取的 CallNumber 配置信息
@@ -4906,9 +4913,15 @@ Stack:
         }
 
         // 观察一个特定分馆是否需要变换条码号?
-        public bool NeedTranformBarcode(string strLibraryCode)
+        // return:
+        //      -1  出错
+        //      0   不需要进行变换
+        //      1   需要进行变换
+        public int NeedTranformBarcode(string strLibraryCode, 
+            out string strError)
         {
-            string strError = "";
+            strError = "";
+
             string strBarcode = "?transform";
             // 变换条码号
             // return:
@@ -4919,9 +4932,11 @@ Stack:
                 strLibraryCode,
                 ref strBarcode,
                 out strError);
+            if (nRet == -1)
+                return -1;
             if (nRet == 1)
-                return true;
-            return false;
+                return 1;
+            return 0;
         }
 
         // 变换条码号
@@ -4942,7 +4957,35 @@ Stack:
                 return 0;
             }
 
-            // 优先进行前端校验
+            // 2019/6/1
+            // 优先用服务器传递到前端的条码校验规则来校验
+            if (string.IsNullOrEmpty(this.BarcodeValidation) == false)
+            {
+                try
+                {
+                    var validator = new BarcodeValidator(this.BarcodeValidation);
+                    if (strBarcode == "?transform")
+                        return validator.NeedValidate(strLibraryCode) == true ? 1 : 0;
+
+                    var result = validator.Validate(strLibraryCode, strBarcode);
+                    if (result.OK == false)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+                    if (result.Transformed == false)
+                        return 0;
+                    strBarcode = result.TransformedBarcode;
+                    return 1;
+                }
+                catch (Exception ex)
+                {
+                    strError = "前端执行 BarcodeValidation 规则时抛出异常: " + ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+            }
+
+            // 然后尝试进行前端 client.cs 校验
             if (this.ClientHost != null)
             {
                 dynamic o = this.ClientHost;

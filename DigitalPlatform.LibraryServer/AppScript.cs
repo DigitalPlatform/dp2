@@ -505,7 +505,15 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     BarcodeValidator validator = new BarcodeValidator(barcodeValidation.OuterXml);
-                    var result = validator.Validate(strLibraryCodeList, strBarcode);
+                    var result = validator.Validate(strLibraryCodeList,
+                        strBarcode, 
+                        false);
+                    if (result.OK == false 
+                        && result.ErrorCode == "scriptError")
+                    {
+                        strError = $"执行条码校验时出错: {result.ErrorInfo}";
+                        return -1;
+                    }
                     strError = result.ErrorInfo;
                     if (result.Type == "patron")
                         nResultValue = 1;
@@ -515,7 +523,7 @@ namespace DigitalPlatform.LibraryServer
                         nResultValue = 0;
                     return 0;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "创建 BarcodeValidator() 出现异常: " + ex.Message;
                     return -1;
