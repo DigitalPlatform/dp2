@@ -4906,10 +4906,10 @@ MessageBoxDefaultButton.Button2);
 
         #region 人脸登记功能
 
-        async Task<GetFeatureStringResult> CancelReadFeatureString()
+        async Task<NormalResult> CancelReadFeatureString()
         {
             string strError = "";
-            GetFeatureStringResult result = new GetFeatureStringResult();
+            NormalResult result = new NormalResult();
 
             if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
             {
@@ -4928,16 +4928,16 @@ MessageBoxDefaultButton.Button2);
             {
                 try
                 {
-                    return await Task.Factory.StartNew<GetFeatureStringResult>(
+                    return await Task.Factory.StartNew<NormalResult>(
                         () =>
                         {
-                            GetFeatureStringResult temp_result = new GetFeatureStringResult();
+                            NormalResult temp_result = new NormalResult();
                             try
                             {
-                                temp_result.Value = channel.Object.CancelGetFeatureString();
-                                if (temp_result.Value == -1)
-                                    temp_result.ErrorInfo = "API cancel return error";
-                                return temp_result;
+                                return channel.Object.CancelGetFeatureString();
+                                //if (temp_result.Value == -1)
+                                //    temp_result.ErrorInfo = "API cancel return error";
+                                // return temp_result;
                             }
                             catch (RemotingException ex)
                             {
@@ -4974,7 +4974,8 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   放弃输入
         //      1   成功输入
-        async Task<GetFeatureStringResult> ReadFeatureString(string strExcludeBarcodes)
+        async Task<GetFeatureStringResult> ReadFeatureString(string strExcludeBarcodes,
+            string strStyle)
         {
             string strError = "";
             GetFeatureStringResult result = new GetFeatureStringResult();
@@ -4994,7 +4995,7 @@ MessageBoxDefaultButton.Button2);
             _inFaceCall++;
             try
             {
-                return await GetFeatureString(channel, strExcludeBarcodes);
+                return await GetFeatureString(channel, strExcludeBarcodes, strStyle);
             }
             catch (Exception ex)
             {
@@ -5012,6 +5013,7 @@ MessageBoxDefaultButton.Button2);
             return result;
         }
 
+#if NO
         class GetFeatureStringResult
         {
             public string Feature { get; set; }
@@ -5020,19 +5022,22 @@ MessageBoxDefaultButton.Button2);
             public int Value { get; set; }
             public string ErrorInfo { get; set; }
         }
+#endif
 
         Task<GetFeatureStringResult> GetFeatureString(FaceChannel channel,
-            string strExcludeBarcodes)
+            string strExcludeBarcodes,
+            string strStyle)
         {
             return Task.Factory.StartNew<GetFeatureStringResult>(
     () =>
     {
-        return CallGetFeatureString(channel, strExcludeBarcodes);
+        return CallGetFeatureString(channel, strExcludeBarcodes, strStyle);
     });
         }
 
         GetFeatureStringResult CallGetFeatureString(FaceChannel channel,
-    string strExcludeBarcodes)
+    string strExcludeBarcodes,
+    string strStyle)
         {
             GetFeatureStringResult result = new GetFeatureStringResult();
             try
@@ -5042,16 +5047,19 @@ MessageBoxDefaultButton.Button2);
                 //      -1  error
                 //      0   放弃输入
                 //      1   成功输入
-                int nRet = channel.Object.GetFeatureString(
+                return channel.Object.GetFeatureString(
                     strExcludeBarcodes,
+                    strStyle/*,
                     out string strFingerprint,
                     out string strVersion,
-                    out string strError);
+                    out string strError*/);
+#if NO
                 result.Feature = strFingerprint;
                 result.Version = strVersion;
                 result.ErrorInfo = strError;
                 result.Value = nRet;
                 return result;
+#endif
             }
             catch (Exception ex)
             {
@@ -5061,9 +5069,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
-        #region 指纹登记功能
+#region 指纹登记功能
 
         // 局部更新指纹信息高速缓存
         // return:
@@ -5362,7 +5370,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
@@ -6491,7 +6499,7 @@ MessageBoxDefaultButton.Button1);
             try
             {
                 REDO:
-                GetFeatureStringResult result = await ReadFeatureString(this.readerEditControl1.Barcode);
+                GetFeatureStringResult result = await ReadFeatureString(this.readerEditControl1.Barcode, "confirmPicture");
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
@@ -6510,7 +6518,7 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
-                this.readerEditControl1.FaceFeature = result.Feature;
+                this.readerEditControl1.FaceFeature = result.FeatureString;
                 this.readerEditControl1.FaceFeatureVersion = result.Version;
                 this.readerEditControl1.Changed = true;
             }

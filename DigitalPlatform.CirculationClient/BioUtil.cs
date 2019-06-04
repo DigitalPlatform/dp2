@@ -2,12 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+
 using DigitalPlatform.Core;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.IO;
@@ -23,8 +25,59 @@ namespace DigitalPlatform.CirculationClient
     /// 和生物识别有关的实用功能
     /// 主要是从读者记录中析出 fingerprint 和 face 信息
     /// </summary>
-    public class BioUtil : BioBase
+    public class BioUtil : BioBase, IDisposable
     {
+        public event GetImageEventHandler GetImage = null;
+
+        public virtual string DriverName
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        // 算法版本号
+        public virtual string AlgorithmVersion
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+        public void Lock()
+        {
+            _lock.EnterWriteLock();
+        }
+
+        public void Unlock()
+        {
+            _lock.ExitWriteLock();
+        }
+
+        public void LockForRead()
+        {
+            _lock.EnterReadLock();
+        }
+
+        public void UnlockForRead()
+        {
+            _lock.ExitReadLock();
+        }
+
+        // 设备列表
+        List<string> _dev_list = new List<string>();
+        public List<string> DeviceList
+        {
+            get
+            {
+                return new List<string>(_dev_list);
+            }
+        }
+
         public class ReplicationResult : NormalResult
         {
             public string LastDate { get; set; }
@@ -57,7 +110,13 @@ namespace DigitalPlatform.CirculationClient
             _cancelOfRegister.Cancel();
         }
 
-        public virtual TextResult GetRegisterString(string strExcludeBarcodes)
+        public void TriggerGetImage(GetImageEventArgs e)
+        {
+            this.GetImage(this, e);
+        }
+
+        public virtual TextResult GetRegisterString(Image image,
+            string strExcludeBarcodes)
         {
             return new TextResult { Value = -1, ErrorInfo = "尚未重载 GetRegisterString() 函数" };
         }
@@ -1072,6 +1131,41 @@ out string strFingerprint)
                 strFingerprint = parts[2];
         }
 
+        #region IDisposable Support
+        private bool disposedValue = false; // 要检测冗余调用
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: 释放托管状态(托管对象)。
+                }
+
+                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
+                // TODO: 将大型字段设置为 null。
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+        // ~BioUtil() {
+        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+        //   Dispose(false);
+        // }
+
+        // 添加此代码以正确实现可处置模式。
+        public void Dispose()
+        {
+            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+            Dispose(true);
+            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
 #if NO
         public delegate int Delegate_addItems(
 List<FingerprintItem> items,
@@ -1092,6 +1186,23 @@ out string strError);
         }
 
 #endif
+    }
+
+    /// <summary>
+    /// 获取图象事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void GetImageEventHandler(object sender,
+    GetImageEventArgs e);
+
+    /// <summary>
+    /// 获取图象事件的参数
+    /// </summary>
+    public class GetImageEventArgs : EventArgs
+    {
+        // [out] 返回图象
+        public Image Image { get; set; }
     }
 }
 

@@ -226,3 +226,7 @@ ModelManifest.xml
 !/RfidCenter/x64/Drivers/
 
 FaceCenter/
+
+FaceDrivers.ArcSoft/
+FaceDrivers.EyeCool/
+

@@ -79,7 +79,7 @@ namespace DigitalPlatform.LibraryServer.Common
 
             // validator 元素下的 transform 元素
             XmlElement transform = validator.SelectSingleNode("transform") as XmlElement;
-            string transform_script = transform == null ? null : transform.InnerText.Trim();
+            string transform_script = transform?.InnerText.Trim();
 
             XmlNodeList patron_or_entitys = validator.SelectNodes("patron | entity");
             foreach (XmlElement patron_or_entity in patron_or_entitys)

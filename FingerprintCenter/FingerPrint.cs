@@ -707,7 +707,9 @@ namespace FingerprintCenter
 
         // exception:
         //      可能会抛出异常。在 token 中断时
-        public override TextResult GetRegisterString(string strExcludeBarcodes)
+        public override TextResult GetRegisterString(
+            Image image,
+            string strExcludeBarcodes)
         {
             string save_mode = _mode;
             try
