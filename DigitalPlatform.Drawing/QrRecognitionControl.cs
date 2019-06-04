@@ -568,7 +568,8 @@ namespace DigitalPlatform.Drawing
                     _currentBitmapForDecoding = (Bitmap)eventArgs.Frame.Clone();
                 }
                 //if ((_sourceFrameCount % 2) == 1)
-                BeginInvoke(new Action<Bitmap>(ShowFrame), eventArgs.Frame.Clone());
+                if (this.IsHandleCreated)   // 2019/6/2
+                    BeginInvoke(new Action<Bitmap>(ShowFrame), eventArgs.Frame.Clone());
                 //_sourceFrameCount++;
                 /*
                     if (motionLevel < 0.5)

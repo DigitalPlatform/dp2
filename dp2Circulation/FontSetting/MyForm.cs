@@ -386,7 +386,7 @@ namespace dp2Circulation
             }
         }
 
-#region 新风格的 ChannelPool
+        #region 新风格的 ChannelPool
 
         // parameters:
         //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
@@ -492,9 +492,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             }
         }
 
-#endregion
+        #endregion
 
-#region 旧风格的 Channel
+        #region 旧风格的 Channel
 
         /// <summary>
         /// 通讯通道
@@ -538,7 +538,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         }
 #endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 开始一个循环
@@ -965,7 +965,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         }
 
 
-#region 配置文件相关
+        #region 配置文件相关
 
         // 包装版本
         // 获得配置文件
@@ -1215,9 +1215,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             return -1;
         }
 
-#endregion
+        #endregion
 
-#region 种次号尾号相关
+        #region 种次号尾号相关
 
         public int ReleaseProtectedTailNumber(
 dp2Circulation.CallNumberForm.MemoTailNumber number,
@@ -1284,9 +1284,9 @@ out string strError)
             }
         }
 
-#endregion
+        #endregion
 
-#region 创建书目记录的浏览格式
+        #region 创建书目记录的浏览格式
 
         public int BuildBrowseText(string strXml,
             out string strBrowseText,
@@ -1488,7 +1488,7 @@ out string strError)
             return -1;
         }
 
-#endregion
+        #endregion
 
         // TODO: 值变化后要出现延时关闭的 floatingMessage
         public bool SearchShareBiblio
@@ -1569,7 +1569,7 @@ out string strError)
         }
 #endif
 
-#region 防止控件泄露
+        #region 防止控件泄露
 
         // 不会被自动 Dispose 的 子 Control，放在这里托管，避免内存泄漏
         List<Control> _freeControls = new List<Control>();
@@ -1589,7 +1589,7 @@ out string strError)
             ControlExtention.DisposeFreeControls(_freeControls);
         }
 
-#endregion
+        #endregion
 
 
         public void ParseOneMacro(ParseOneMacroEventArgs e)
@@ -1750,7 +1750,7 @@ out string strError)
                 }));
         }
 
-#region RFID 有关功能
+        #region RFID 有关功能
 
         public class RfidChannel
         {
@@ -1833,9 +1833,9 @@ out string strError)
             }
         }
 
-#endregion
+        #endregion
 
-#region 人脸识别有关功能
+        #region 人脸识别有关功能
 
         public class FaceChannel
         {
@@ -1886,9 +1886,9 @@ out string strError)
             }
         }
 
-#endregion
+        #endregion
 
-#region 指纹有关功能
+        #region 指纹有关功能
 
         public class FingerprintChannel
         {
@@ -1977,9 +1977,9 @@ out string strError)
             return 0;
         }
 
-#endregion
+        #endregion
 
-#region 其他 API
+        #region 其他 API
 
         // 获得馆藏地列表
         public int GetLocationList(
@@ -2119,7 +2119,7 @@ out strError);
             }
         }
 
-#endregion
+        #endregion
 
 #if NO
         protected override bool ProcessDialogKey(

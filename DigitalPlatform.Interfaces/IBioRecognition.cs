@@ -22,8 +22,7 @@ namespace DigitalPlatform.Interfaces
         // 添加高速缓存事项
         // 如果items == null 或者 items.Count == 0，表示要清除当前的全部缓存内容
         // 如果一个item对象的FingerprintString为空，表示要删除这个缓存事项
-        int AddItems(List<BioFeatureItem> items,
-            out string strError);
+        NormalResult AddItems(List<BioFeatureItem> items);
 
         // 2.0 增加的函数
         // 获得一个指纹特征字符串
@@ -31,14 +30,12 @@ namespace DigitalPlatform.Interfaces
         //      -1  error
         //      0   放弃输入
         //      1   成功输入
-        int GetFeatureString(
+        GetFeatureStringResult GetFeatureString(
             string strExcludeBarcodes,
-            out string strFeatureString,
-            out string strVersion,
-            out string strError);
+            string strStyle);
 
         // 取消正在进行的 GetFingerprintString() 操作
-        int CancelGetFeatureString();
+        NormalResult CancelGetFeatureString();
 
         // 验证读者指纹. 1:1比对
         // parameters:
@@ -49,8 +46,7 @@ namespace DigitalPlatform.Interfaces
         //      -1  出错
         //      0   不匹配
         //      1   匹配
-        int VerifyFeature(BioFeatureItem item,
-            out string strError);
+        NormalResult VerifyFeature(BioFeatureItem item);
 
         // 设置参数
         // bool SetParameter(string strName, object value);
@@ -65,6 +61,12 @@ namespace DigitalPlatform.Interfaces
         public string FeatureString { get; set; }
         // 读者证条码号
         public string PatronID { get; set; }
+    }
 
+    [Serializable()]
+    public class GetFeatureStringResult : NormalResult
+    {
+        public string FeatureString { get; set; }
+        public string Version { get; set; }
     }
 }
