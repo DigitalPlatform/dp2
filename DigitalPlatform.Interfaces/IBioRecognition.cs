@@ -37,6 +37,8 @@ namespace DigitalPlatform.Interfaces
         // 取消正在进行的 GetFingerprintString() 操作
         NormalResult CancelGetFeatureString();
 
+        RecognitionFaceResult RecognitionFace(string strStyle);
+
         // 验证读者指纹. 1:1比对
         // parameters:
         //      item    读者信息。ReaderBarcode成员提供了读者证条码号，FingerprintString提供了指纹特征码
@@ -68,5 +70,14 @@ namespace DigitalPlatform.Interfaces
     {
         public string FeatureString { get; set; }
         public string Version { get; set; }
+    }
+
+    [Serializable()]
+    public class RecognitionFaceResult : NormalResult
+    {
+        // [out] 证条码号
+        public string Patron { get; set; }
+        // [out] 分数。0-100
+        public int Score { get; set; }
     }
 }

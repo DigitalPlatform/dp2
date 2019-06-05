@@ -78,6 +78,7 @@
             this.dpTable_tasks = new DigitalPlatform.CommonControl.DpTable();
             this.toolStrip_main = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel_currentPatron = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripButton_faceInput = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_openPatronSummaryWindow = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_enableHanzi = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_upperInput = new System.Windows.Forms.ToolStripButton();
@@ -107,6 +108,7 @@
             // 
             // contextMenuStrip_selectFunc
             // 
+            this.contextMenuStrip_selectFunc.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.contextMenuStrip_selectFunc.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_borrow,
             this.toolStripMenuItem_continueBorrow,
@@ -127,122 +129,122 @@
             this.toolStripSeparator5,
             this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(149, 320);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(189, 398);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_continueBorrow
             // 
             this.toolStripMenuItem_continueBorrow.Name = "toolStripMenuItem_continueBorrow";
-            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_continueBorrow.Text = "同一读者借";
             this.toolStripMenuItem_continueBorrow.Click += new System.EventHandler(this.toolStripMenuItem_continueBorrow_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(185, 6);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(185, 6);
             // 
             // toolStripMenuItem_renew
             // 
             this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_renew.Text = "续借";
             this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(185, 6);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
             // toolStripMenuItem_verifyLost
             // 
             this.toolStripMenuItem_verifyLost.Name = "toolStripMenuItem_verifyLost";
-            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_verifyLost.Text = "验证丢失";
             this.toolStripMenuItem_verifyLost.Click += new System.EventHandler(this.toolStripMenuItem_verifyLost_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(185, 6);
             // 
             // toolStripMenuItem_loadPatronInfo
             // 
             this.toolStripMenuItem_loadPatronInfo.Name = "toolStripMenuItem_loadPatronInfo";
-            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_loadPatronInfo.Text = "装载读者信息";
             this.toolStripMenuItem_loadPatronInfo.Click += new System.EventHandler(this.toolStripMenuItem_loadPatronInfo_Click);
             // 
             // toolStripMenuItem_inventoryBook
             // 
             this.toolStripMenuItem_inventoryBook.Name = "toolStripMenuItem_inventoryBook";
-            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_inventoryBook.Text = "盘点图书";
             this.toolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
             // 
             // toolStripMenuItem_boxing
             // 
             this.toolStripMenuItem_boxing.Name = "toolStripMenuItem_boxing";
-            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_boxing.Text = "配书";
             this.toolStripMenuItem_boxing.Click += new System.EventHandler(this.ToolStripMenuItem_boxing_Click);
             // 
             // toolStripMenuItem_move
             // 
             this.toolStripMenuItem_move.Name = "toolStripMenuItem_move";
-            this.toolStripMenuItem_move.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_move.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_move.Text = "调拨";
             this.toolStripMenuItem_move.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(185, 6);
             // 
             // toolStripMenuItem_read
             // 
             this.toolStripMenuItem_read.Name = "toolStripMenuItem_read";
-            this.toolStripMenuItem_read.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_read.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_read.Text = "读过";
             this.toolStripMenuItem_read.Click += new System.EventHandler(this.ToolStripMenuItem_read_Click);
             // 
@@ -289,6 +291,7 @@
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_main.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(4);
             this.splitContainer_main.Name = "splitContainer_main";
             // 
             // splitContainer_main.Panel1
@@ -298,18 +301,19 @@
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.tableLayoutPanel_right);
-            this.splitContainer_main.Size = new System.Drawing.Size(596, 337);
-            this.splitContainer_main.SplitterDistance = 324;
-            this.splitContainer_main.SplitterWidth = 8;
+            this.splitContainer_main.Size = new System.Drawing.Size(894, 506);
+            this.splitContainer_main.SplitterDistance = 486;
+            this.splitContainer_main.SplitterWidth = 12;
             this.splitContainer_main.TabIndex = 0;
             // 
             // webBrowser_reader
             // 
             this.webBrowser_reader.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_reader.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_reader.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_reader.Margin = new System.Windows.Forms.Padding(4);
+            this.webBrowser_reader.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_reader.Name = "webBrowser_reader";
-            this.webBrowser_reader.Size = new System.Drawing.Size(324, 337);
+            this.webBrowser_reader.Size = new System.Drawing.Size(486, 506);
             this.webBrowser_reader.TabIndex = 0;
             this.webBrowser_reader.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_reader_DocumentCompleted);
             // 
@@ -322,13 +326,14 @@
             this.tableLayoutPanel_right.Controls.Add(this.toolStrip_main, 0, 2);
             this.tableLayoutPanel_right.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_right.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_right.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel_right.Name = "tableLayoutPanel_right";
             this.tableLayoutPanel_right.RowCount = 4;
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel_right.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_right.Size = new System.Drawing.Size(264, 337);
+            this.tableLayoutPanel_right.Size = new System.Drawing.Size(396, 506);
             this.tableLayoutPanel_right.TabIndex = 0;
             // 
             // panel_input
@@ -341,9 +346,10 @@
             this.panel_input.Controls.Add(this.label_input_message);
             this.panel_input.Controls.Add(this.pictureBox_action);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_input.Location = new System.Drawing.Point(3, 232);
+            this.panel_input.Location = new System.Drawing.Point(4, 349);
+            this.panel_input.Margin = new System.Windows.Forms.Padding(4);
             this.panel_input.Name = "panel_input";
-            this.panel_input.Size = new System.Drawing.Size(258, 82);
+            this.panel_input.Size = new System.Drawing.Size(388, 123);
             this.panel_input.TabIndex = 1;
             // 
             // colorSummaryControl1
@@ -351,9 +357,10 @@
             this.colorSummaryControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.colorSummaryControl1.ColorList = "";
-            this.colorSummaryControl1.Location = new System.Drawing.Point(0, 69);
+            this.colorSummaryControl1.Location = new System.Drawing.Point(0, 104);
+            this.colorSummaryControl1.Margin = new System.Windows.Forms.Padding(6);
             this.colorSummaryControl1.Name = "colorSummaryControl1";
-            this.colorSummaryControl1.Size = new System.Drawing.Size(258, 10);
+            this.colorSummaryControl1.Size = new System.Drawing.Size(388, 15);
             this.colorSummaryControl1.TabIndex = 5;
             this.colorSummaryControl1.Click += new System.EventHandler(this.colorSummaryControl1_Click);
             // 
@@ -364,9 +371,10 @@
             this.textBox_input.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_input.Font = new System.Drawing.Font("宋体", 22F);
             this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_input.Location = new System.Drawing.Point(3, 25);
+            this.textBox_input.Location = new System.Drawing.Point(4, 38);
+            this.textBox_input.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_input.Name = "textBox_input";
-            this.textBox_input.Size = new System.Drawing.Size(178, 41);
+            this.textBox_input.Size = new System.Drawing.Size(267, 58);
             this.textBox_input.TabIndex = 1;
             this.textBox_input.Enter += new System.EventHandler(this.textBox_input_Enter);
             this.textBox_input.Leave += new System.EventHandler(this.textBox_input_Leave);
@@ -376,22 +384,24 @@
             this.label_barcode_type.ContextMenuStrip = this.contextMenuStrip_testFunction;
             this.label_barcode_type.ImageIndex = 0;
             this.label_barcode_type.ImageList = this.imageList_barcodeType;
-            this.label_barcode_type.Location = new System.Drawing.Point(-2, 6);
+            this.label_barcode_type.Location = new System.Drawing.Point(-3, 9);
+            this.label_barcode_type.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_barcode_type.Name = "label_barcode_type";
-            this.label_barcode_type.Size = new System.Drawing.Size(26, 20);
+            this.label_barcode_type.Size = new System.Drawing.Size(39, 30);
             this.label_barcode_type.TabIndex = 4;
             // 
             // contextMenuStrip_testFunction
             // 
+            this.contextMenuStrip_testFunction.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.contextMenuStrip_testFunction.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem_test_simulateReservationArrive});
             this.contextMenuStrip_testFunction.Name = "contextMenuStrip_testFunction";
-            this.contextMenuStrip_testFunction.Size = new System.Drawing.Size(149, 26);
+            this.contextMenuStrip_testFunction.Size = new System.Drawing.Size(189, 32);
             // 
             // toolStripMenuItem_test_simulateReservationArrive
             // 
             this.toolStripMenuItem_test_simulateReservationArrive.Name = "toolStripMenuItem_test_simulateReservationArrive";
-            this.toolStripMenuItem_test_simulateReservationArrive.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_test_simulateReservationArrive.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_test_simulateReservationArrive.Text = "模拟预约到书";
             this.toolStripMenuItem_test_simulateReservationArrive.Click += new System.EventHandler(this.toolStripMenuItem_test_simulateReservationArrive_Click);
             // 
@@ -400,9 +410,10 @@
             this.label_input_message.AutoSize = true;
             this.label_input_message.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.label_input_message.ImageIndex = 0;
-            this.label_input_message.Location = new System.Drawing.Point(25, 10);
+            this.label_input_message.Location = new System.Drawing.Point(38, 15);
+            this.label_input_message.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_input_message.Name = "label_input_message";
-            this.label_input_message.Size = new System.Drawing.Size(29, 12);
+            this.label_input_message.Size = new System.Drawing.Size(44, 18);
             this.label_input_message.TabIndex = 3;
             this.label_input_message.Text = "test";
             this.label_input_message.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -411,9 +422,10 @@
             // 
             this.pictureBox_action.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox_action.ContextMenuStrip = this.contextMenuStrip_selectFunc;
-            this.pictureBox_action.Location = new System.Drawing.Point(190, 0);
+            this.pictureBox_action.Location = new System.Drawing.Point(286, 0);
+            this.pictureBox_action.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox_action.Name = "pictureBox_action";
-            this.pictureBox_action.Size = new System.Drawing.Size(68, 67);
+            this.pictureBox_action.Size = new System.Drawing.Size(102, 100);
             this.pictureBox_action.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_action.TabIndex = 2;
             this.pictureBox_action.TabStop = false;
@@ -443,11 +455,12 @@
             this.dpTable_tasks.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable_tasks.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable_tasks.LineDistance = 10;
-            this.dpTable_tasks.Location = new System.Drawing.Point(3, 3);
+            this.dpTable_tasks.Location = new System.Drawing.Point(4, 4);
+            this.dpTable_tasks.Margin = new System.Windows.Forms.Padding(4);
             this.dpTable_tasks.MaxTextHeight = 200;
             this.dpTable_tasks.Name = "dpTable_tasks";
-            this.dpTable_tasks.Padding = new System.Windows.Forms.Padding(8);
-            this.dpTable_tasks.Size = new System.Drawing.Size(258, 223);
+            this.dpTable_tasks.Padding = new System.Windows.Forms.Padding(12);
+            this.dpTable_tasks.Size = new System.Drawing.Size(388, 337);
             this.dpTable_tasks.TabIndex = 1;
             this.dpTable_tasks.Text = "dpTable1";
             this.dpTable_tasks.ScrollBarTouched += new DigitalPlatform.CommonControl.ScrollBarTouchedEventHandler(this.dpTable_tasks_ScrollBarTouched);
@@ -458,8 +471,10 @@
             // toolStrip_main
             // 
             this.toolStrip_main.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip_main.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel_currentPatron,
+            this.toolStripButton_faceInput,
             this.toolStripButton_openPatronSummaryWindow,
             this.toolStripButton_enableHanzi,
             this.toolStripButton_upperInput,
@@ -467,18 +482,29 @@
             this.toolStripDropDownButton1,
             this.toolStripDropDownButton_selectLibraryCode,
             this.toolStripButton_selectTargetLocation});
-            this.toolStrip_main.Location = new System.Drawing.Point(0, 317);
+            this.toolStrip_main.Location = new System.Drawing.Point(0, 476);
             this.toolStrip_main.Name = "toolStrip_main";
+            this.toolStrip_main.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_main.Size = new System.Drawing.Size(264, 20);
+            this.toolStrip_main.Size = new System.Drawing.Size(396, 30);
             this.toolStrip_main.TabIndex = 2;
             this.toolStrip_main.Text = "toolStrip1";
             // 
             // toolStripLabel_currentPatron
             // 
             this.toolStripLabel_currentPatron.Name = "toolStripLabel_currentPatron";
-            this.toolStripLabel_currentPatron.Size = new System.Drawing.Size(0, 17);
+            this.toolStripLabel_currentPatron.Size = new System.Drawing.Size(0, 27);
             this.toolStripLabel_currentPatron.ToolTipText = "当前读者证条码号";
+            // 
+            // toolStripButton_faceInput
+            // 
+            this.toolStripButton_faceInput.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_faceInput.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_faceInput.Image")));
+            this.toolStripButton_faceInput.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_faceInput.Name = "toolStripButton_faceInput";
+            this.toolStripButton_faceInput.Size = new System.Drawing.Size(28, 27);
+            this.toolStripButton_faceInput.Text = "人脸识别";
+            this.toolStripButton_faceInput.Click += new System.EventHandler(this.toolStripButton_faceInput_Click);
             // 
             // toolStripButton_openPatronSummaryWindow
             // 
@@ -486,7 +512,7 @@
             this.toolStripButton_openPatronSummaryWindow.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_openPatronSummaryWindow.Image")));
             this.toolStripButton_openPatronSummaryWindow.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_openPatronSummaryWindow.Name = "toolStripButton_openPatronSummaryWindow";
-            this.toolStripButton_openPatronSummaryWindow.Size = new System.Drawing.Size(23, 17);
+            this.toolStripButton_openPatronSummaryWindow.Size = new System.Drawing.Size(28, 27);
             this.toolStripButton_openPatronSummaryWindow.Text = "打开读者摘要窗口";
             this.toolStripButton_openPatronSummaryWindow.Click += new System.EventHandler(this.toolStripButton_openPatronSummaryWindow_Click);
             // 
@@ -498,7 +524,7 @@
             this.toolStripButton_enableHanzi.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_enableHanzi.Image")));
             this.toolStripButton_enableHanzi.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_enableHanzi.Name = "toolStripButton_enableHanzi";
-            this.toolStripButton_enableHanzi.Size = new System.Drawing.Size(24, 17);
+            this.toolStripButton_enableHanzi.Size = new System.Drawing.Size(34, 27);
             this.toolStripButton_enableHanzi.Text = "英";
             this.toolStripButton_enableHanzi.ToolTipText = "是否允许输入汉字";
             this.toolStripButton_enableHanzi.CheckedChanged += new System.EventHandler(this.toolStripButton_enableHanzi_CheckedChanged);
@@ -510,7 +536,7 @@
             this.toolStripButton_upperInput.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripButton_upperInput.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_upperInput.Name = "toolStripButton_upperInput";
-            this.toolStripButton_upperInput.Size = new System.Drawing.Size(23, 17);
+            this.toolStripButton_upperInput.Size = new System.Drawing.Size(26, 27);
             this.toolStripButton_upperInput.Text = "a";
             this.toolStripButton_upperInput.ToolTipText = "是否将输入自动转为大写";
             this.toolStripButton_upperInput.CheckedChanged += new System.EventHandler(this.toolStripButton_upperInput_CheckedChanged);
@@ -521,7 +547,7 @@
             this.toolStripButton_selectItem.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectItem.Image")));
             this.toolStripButton_selectItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectItem.Name = "toolStripButton_selectItem";
-            this.toolStripButton_selectItem.Size = new System.Drawing.Size(48, 17);
+            this.toolStripButton_selectItem.Size = new System.Drawing.Size(68, 27);
             this.toolStripButton_selectItem.Text = "选择册";
             this.toolStripButton_selectItem.Click += new System.EventHandler(this.toolStripButton_selectItem_Click);
             // 
@@ -533,13 +559,13 @@
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(30, 17);
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(40, 27);
             this.toolStripDropDownButton1.Text = "...";
             // 
             // toolStripMenuItem_inventoryFromFile
             // 
             this.toolStripMenuItem_inventoryFromFile.Name = "toolStripMenuItem_inventoryFromFile";
-            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(173, 22);
+            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(235, 30);
             this.toolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
             this.toolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
             // 
@@ -549,7 +575,7 @@
             this.toolStripDropDownButton_selectLibraryCode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_selectLibraryCode.Image")));
             this.toolStripDropDownButton_selectLibraryCode.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_selectLibraryCode.Name = "toolStripDropDownButton_selectLibraryCode";
-            this.toolStripDropDownButton_selectLibraryCode.Size = new System.Drawing.Size(69, 17);
+            this.toolStripDropDownButton_selectLibraryCode.Size = new System.Drawing.Size(100, 27);
             this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆";
             this.toolStripDropDownButton_selectLibraryCode.ToolTipText = "选择当前操作所针对的分馆";
             this.toolStripDropDownButton_selectLibraryCode.Visible = false;
@@ -560,16 +586,17 @@
             this.toolStripButton_selectTargetLocation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectTargetLocation.Image")));
             this.toolStripButton_selectTargetLocation.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
-            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(84, 21);
+            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 28);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTargetLocation_Click);
             // 
             // QuickChargingForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(596, 337);
+            this.ClientSize = new System.Drawing.Size(894, 506);
             this.Controls.Add(this.splitContainer_main);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "QuickChargingForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -645,5 +672,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_move;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton toolStripButton_selectTargetLocation;
+        private System.Windows.Forms.ToolStripButton toolStripButton_faceInput;
     }
 }

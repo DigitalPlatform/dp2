@@ -878,10 +878,10 @@ dlg.UiState);
             {
                 // 这是册条码号(RFID 读卡器发来的)。但内容依然需要进行校验
                 Hashtable table = StringUtil.ParseParameters(strBarcode, ',', ':');
-                strBarcode = GetValue(table,"pii");
+                strBarcode = GetValue(table, "pii");
                 if (string.IsNullOrEmpty(strBarcode))
                 {
-                    strBarcode = GetValue(table,"uid");
+                    strBarcode = GetValue(table, "uid");
                     prefix = "uid:";
                 }
                 type_of_usage = GetValue(table, "tou");
@@ -1669,7 +1669,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             //      -1  出错
             //      0   不需要进行变换
             //      1   需要进行变换
-            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, 
+            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode,
                 out strError);
             if (nRet == -1)
             {
@@ -3841,6 +3841,29 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         {
 
         }
+
+        // 人脸识别
+        private async void toolStripButton_faceInput_Click(object sender, EventArgs e)
+        {
+            var result = await RecognitionFace("");
+            this.Invoke((Action)(() =>
+            {
+                if (result.Value == 1)
+                {
+                    this.textBox_input.Text = result.Patron;
+                    // 触发回车
+                    DoEnter();
+                }
+                else
+                {
+                    MessageBox.Show(this, result.ErrorInfo);
+                    this.textBox_input.SelectAll();
+                    this.textBox_input.Focus();
+                }
+            }));
+        }
+
+
     }
 
     /// <summary>
