@@ -118,12 +118,26 @@ namespace DigitalPlatform.CirculationClient
         public virtual TextResult GetRegisterString(Image image,
             string strExcludeBarcodes)
         {
-            return new TextResult { Value = -1, ErrorInfo = "尚未重载 GetRegisterString() 函数" };
+            return new TextResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未重载 GetRegisterString() 函数"
+            };
         }
 
         public virtual void StartCapture(CancellationToken token)
         {
 
+        }
+
+        public virtual RecognitionFaceResult RecongnitionFace(Image image,
+    CancellationToken token)
+        {
+            return new RecognitionFaceResult
+            {
+                Value = -1,
+                ErrorInfo = "尚未重载 RecongnitionFaceResult() 函数"
+            };
         }
 
         // 同步
@@ -321,7 +335,7 @@ namespace DigitalPlatform.CirculationClient
                     LastIndex = last_index
                 };
             }
-            catch(ChannelException ex)
+            catch (ChannelException ex)
             {
                 return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
             }
@@ -1187,6 +1201,7 @@ out string strError);
 
 #endif
     }
+
 
     /// <summary>
     /// 获取图象事件

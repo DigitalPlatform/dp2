@@ -22,6 +22,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
+using System.Threading.Tasks;
 
 // 2013/3/16 添加 XML 注释
 
@@ -1883,6 +1884,56 @@ out string strError)
             {
                 ChannelServices.UnregisterChannel(channel.Channel);
                 channel.Channel = null;
+            }
+        }
+
+        // return:
+        //      -1  error
+        //      0   放弃输入
+        //      1   成功输入
+        public async Task<RecognitionFaceResult> RecognitionFace(string strStyle)
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                return new RecognitionFaceResult
+                {
+                    Value = -1,
+                    ErrorInfo = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息"
+                };
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out string strError);
+            if (channel == null)
+                return new RecognitionFaceResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            _inFaceCall++;
+            try
+            {
+                return await Task.Factory.StartNew<RecognitionFaceResult>(
+() =>
+{
+    return channel.Object.RecognitionFace(strStyle);
+});
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 RecongitionFace() 操作失败: " + ex.Message;
+                return new RecognitionFaceResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
             }
         }
 
