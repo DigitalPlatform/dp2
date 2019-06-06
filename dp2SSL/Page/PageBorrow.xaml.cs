@@ -57,23 +57,59 @@ namespace dp2SSL
 
             this.booksControl.SetSource(_entities);
             this.patronControl.DataContext = _patron;
+            this.patronControl.InputFace += PatronControl_InputFace;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
             // _patron.IsFingerprintSource = true;
         }
 
-#if REMOVED
-        public FingerprintChannel _fingerprintChannel
+        private async void PatronControl_InputFace(object sender, EventArgs e)
         {
-            get
+            var result = await RecognitionFace("");
+            if (result.Value == -1)
             {
-                return App.CurrentApp.FingerprintChannel;
+                SetPatronError("face", result.ErrorInfo);
+                return;
+            }
+
+            SetPatronError("face", null);
+
+            GetMessageResult message = new GetMessageResult
+            {
+                Value = 1,
+                Message = result.Patron,
+            };
+            SetPatronInfo(message);
+            FillPatronDetail();
+        }
+
+        void EnableControls(bool enable)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.borrowButton.IsEnabled = enable;
+                this.returnButton.IsEnabled = enable;
+                this.goHome.IsEnabled = enable;
+                this.patronControl.inputFace.IsEnabled = enable;
+            }));
+        }
+
+        async Task<RecognitionFaceResult> RecognitionFace(string style)
+        {
+            EnableControls(false);
+            try
+            {
+                return await Task.Run<RecognitionFaceResult>(() =>
+                {
+                    return FaceManager.RecognitionFace("");
+                });
+            }
+            finally
+            {
+                EnableControls(true);
             }
         }
-#endif
-
-        // RfidChannel _rfidChannel = null;
 
         private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -90,110 +126,16 @@ namespace dp2SSL
             _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
             _adorner = new LayoutAdorner(this);
 
-#if REMOVED
-            {
-                // 准备指纹通道
-                List<string> errors = new List<string>();
-
-                // 重试初始化指纹环境
-                errors.AddRange(App.CurrentApp.TryInitialFingerprint());
-
-                App.CurrentApp.ClearFingerprintMessage();
-
-                SetGlobalError("fingerprint", StringUtil.MakePathList(errors, "; "));
-            }
-#endif
-
-#if NO
-            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-            {
-#if NO
-                eventProxy = new EventProxy();
-                eventProxy.MessageArrived +=
-                  new MessageArrivedEvent(eventProxy_MessageArrived);
-#endif
-                _fingerprintChannel = FingerPrint.StartFingerprintChannel(
-                    App.FingerprintUrl,
-                    out string strError);
-                if (_fingerprintChannel == null)
-                    errors.Add($"启动指纹通道时出错: {strError}");
-                // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
-#if NO
-                _fingerprintChannel.Object.MessageArrived +=
-  new MessageArrivedEvent(eventProxy.LocallyHandleMessageArrived);
-#endif
-                try
-                {
-                    _fingerprintChannel.Object.GetMessage("clear");
-                    _fingerprintChannel.Started = true;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                        errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
-                    else
-                        errors.Add($"启动指纹通道时出错(2): {ex.Message}");
-                }
-            }
-
-#endif
-
-            // PrepareRfid();
-
-#if NO
-            {
-                List<string> style = new List<string>();
-                if (_rfidChannel?.Started == true)
-                    style.Add("rfid");
-                if (_fingerprintChannel?.Started == true)
-                    style.Add("fingerprint");
-                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
-            }
-#endif
             {
                 List<string> style = new List<string>();
                 if (string.IsNullOrEmpty(App.RfidUrl) == false)
                     style.Add("rfid");
                 if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
                     style.Add("fingerprint");
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                    style.Add("face");
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
-
-#if NO
-            // https://stackoverflow.com/questions/13396582/wpf-user-control-throws-design-time-exception
-            if (!System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
-                _timer = new System.Threading.Timer(
-        new System.Threading.TimerCallback(timerCallback),
-        null,
-        TimeSpan.FromSeconds(0),
-        TimeSpan.FromSeconds(1));
-#endif
-
-#if NO
-            _checkTask = Task.Run(() =>
-            {
-                while (_cancel.IsCancellationRequested == false)
-                {
-                    Task.Delay(TimeSpan.FromSeconds(10), _cancel.Token).Wait(_cancel.Token);
-
-                    if (string.IsNullOrEmpty(App.RfidUrl) == false
-                    && _rfidChannel?.Started == false)
-                        PrepareRfid();
-
-                    // 验证通道是否有效
-                    VerifyRfid();
-
-#if REMOVED
-                    // 注: App 里面会不断尝试连接指纹中心。这里只需要刷新错误显示即可
-                    if (string.IsNullOrEmpty(App.FingerprintUrl) == false
-                    && _fingerprintChannel?.Started == true)
-                        SetGlobalError("fingerprint", "");
-
-                    VerifyFingerprint();
-#endif
-                }
-            });
-#endif
         }
 
         private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
@@ -1575,7 +1517,7 @@ out string strError);
 
             // 指纹方面的报错，还要兑现到 App 中
             if (type == "fingerprint" || type == "rfid")
-                App.CurrentApp.SetError(type, error);
+                App.CurrentApp?.SetError(type, error);
         }
 
 #if NO

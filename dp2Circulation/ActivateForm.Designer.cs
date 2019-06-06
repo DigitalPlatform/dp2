@@ -1,4 +1,4 @@
-namespace dp2Circulation
+Ôªønamespace dp2Circulation
 {
     partial class ActivateForm
     {
@@ -149,7 +149,7 @@ namespace dp2Circulation
             this.toolStripButton_old_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_old_save.Name = "toolStripButton_old_save";
             this.toolStripButton_old_save.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_old_save.Text = "±£¥Ê‘¥º«¬º";
+            this.toolStripButton_old_save.Text = "‰øùÂ≠òÊ∫êËÆ∞ÂΩï";
             this.toolStripButton_old_save.Click += new System.EventHandler(this.toolStripButton_old_save_Click);
             // 
             // tabControl_old
@@ -176,7 +176,7 @@ namespace dp2Circulation
             this.tabPage_oldBasic.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage_oldBasic.Size = new System.Drawing.Size(250, 187);
             this.tabPage_oldBasic.TabIndex = 0;
-            this.tabPage_oldBasic.Text = "ª˘±æ–≈œ¢";
+            this.tabPage_oldBasic.Text = "Âü∫Êú¨‰ø°ÊÅØ";
             this.tabPage_oldBasic.UseVisualStyleBackColor = true;
             // 
             // readerEditControl_old
@@ -193,8 +193,8 @@ namespace dp2Circulation
             this.readerEditControl_old.Dock = System.Windows.Forms.DockStyle.Fill;
             this.readerEditControl_old.Email = "";
             this.readerEditControl_old.ExpireDate = "Sun, 03 Dec 2006 00:00:00 +0800";
-            this.readerEditControl_old.Fingerprint = "";
-            this.readerEditControl_old.FingerprintVersion = "";
+            this.readerEditControl_old.FingerprintFeature = "";
+            this.readerEditControl_old.FingerprintFeatureVersion = "";
             this.readerEditControl_old.Foregift = "";
             this.readerEditControl_old.Gender = "";
             this.readerEditControl_old.HireExpireDate = "";
@@ -224,7 +224,7 @@ namespace dp2Circulation
             this.tabPage_oldBorrowInfo.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage_oldBorrowInfo.Size = new System.Drawing.Size(250, 187);
             this.tabPage_oldBorrowInfo.TabIndex = 1;
-            this.tabPage_oldBorrowInfo.Text = "ΩË‘ƒ–≈œ¢";
+            this.tabPage_oldBorrowInfo.Text = "ÂÄüÈòÖ‰ø°ÊÅØ";
             this.tabPage_oldBorrowInfo.UseVisualStyleBackColor = true;
             // 
             // webBrowser_oldReaderInfo
@@ -292,20 +292,20 @@ namespace dp2Circulation
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 12);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Ãı¬Î∫≈(&B):";
+            this.label3.Text = "Êù°Á†ÅÂè∑(&B):";
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.BackColor = System.Drawing.SystemColors.Control;
-            this.label1.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(-2, 2);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(259, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "‘¥÷§–≈œ¢";
+            this.label1.Text = "Ê∫êËØÅ‰ø°ÊÅØ";
             // 
             // panel_new
             // 
@@ -348,7 +348,7 @@ namespace dp2Circulation
             this.toolStripButton_new_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_new_save.Name = "toolStripButton_new_save";
             this.toolStripButton_new_save.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_new_save.Text = "±£¥Êƒø±Íº«¬º";
+            this.toolStripButton_new_save.Text = "‰øùÂ≠òÁõÆÊ†áËÆ∞ÂΩï";
             this.toolStripButton_new_save.Click += new System.EventHandler(this.toolStripButton_new_save_Click);
             // 
             // toolStripSeparator1
@@ -363,7 +363,7 @@ namespace dp2Circulation
             this.toolStripButton_new_copyFromOld.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_new_copyFromOld.Name = "toolStripButton_new_copyFromOld";
             this.toolStripButton_new_copyFromOld.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_new_copyFromOld.Text = "¥”‘¥º«¬º÷–∏¥÷∆»´≤ø◊÷∂Œ";
+            this.toolStripButton_new_copyFromOld.Text = "‰ªéÊ∫êËÆ∞ÂΩï‰∏≠Â§çÂà∂ÂÖ®ÈÉ®Â≠óÊÆµ";
             this.toolStripButton_new_copyFromOld.Click += new System.EventHandler(this.toolStripButton_new_copyFromOld_Click);
             // 
             // tabControl_new
@@ -390,7 +390,7 @@ namespace dp2Circulation
             this.tabPage_newBasic.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage_newBasic.Size = new System.Drawing.Size(254, 187);
             this.tabPage_newBasic.TabIndex = 0;
-            this.tabPage_newBasic.Text = "ª˘±æ–≈œ¢";
+            this.tabPage_newBasic.Text = "Âü∫Êú¨‰ø°ÊÅØ";
             this.tabPage_newBasic.UseVisualStyleBackColor = true;
             // 
             // readerEditControl_new
@@ -406,8 +406,8 @@ namespace dp2Circulation
             this.readerEditControl_new.Dock = System.Windows.Forms.DockStyle.Fill;
             this.readerEditControl_new.Email = "";
             this.readerEditControl_new.ExpireDate = "Sun, 03 Dec 2006 00:00:00 +0800";
-            this.readerEditControl_new.Fingerprint = "";
-            this.readerEditControl_new.FingerprintVersion = "";
+            this.readerEditControl_new.FingerprintFeature = "";
+            this.readerEditControl_new.FingerprintFeatureVersion = "";
             this.readerEditControl_new.Foregift = "";
             this.readerEditControl_new.Gender = "";
             this.readerEditControl_new.HireExpireDate = "";
@@ -437,7 +437,7 @@ namespace dp2Circulation
             this.tabPage_newBorrowInfo.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage_newBorrowInfo.Size = new System.Drawing.Size(254, 187);
             this.tabPage_newBorrowInfo.TabIndex = 1;
-            this.tabPage_newBorrowInfo.Text = "ΩË‘ƒ–≈œ¢";
+            this.tabPage_newBorrowInfo.Text = "ÂÄüÈòÖ‰ø°ÊÅØ";
             this.tabPage_newBorrowInfo.UseVisualStyleBackColor = true;
             // 
             // webBrowser_newReaderInfo
@@ -505,20 +505,20 @@ namespace dp2Circulation
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(65, 12);
             this.label4.TabIndex = 2;
-            this.label4.Text = "Ãı¬Î∫≈(&B):";
+            this.label4.Text = "Êù°Á†ÅÂè∑(&B):";
             // 
             // label2
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.BackColor = System.Drawing.SystemColors.Control;
-            this.label2.Font = new System.Drawing.Font("ÀŒÃÂ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.Font = new System.Drawing.Font("ÂÆã‰Ωì", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.Location = new System.Drawing.Point(-2, 2);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(264, 12);
             this.label2.TabIndex = 0;
-            this.label2.Text = "ƒø±Í÷§–≈œ¢";
+            this.label2.Text = "ÁõÆÊ†áËØÅ‰ø°ÊÅØ";
             // 
             // button_activate
             // 
@@ -528,7 +528,7 @@ namespace dp2Circulation
             this.button_activate.Name = "button_activate";
             this.button_activate.Size = new System.Drawing.Size(134, 22);
             this.button_activate.TabIndex = 1;
-            this.button_activate.Text = "◊™“∆≤¢º§ªÓƒø±Í÷§(&A)";
+            this.button_activate.Text = "ËΩ¨ÁßªÂπ∂ÊøÄÊ¥ªÁõÆÊ†áËØÅ(&A)";
             this.button_activate.UseVisualStyleBackColor = true;
             this.button_activate.Click += new System.EventHandler(this.button_activate_Click);
             // 
@@ -539,7 +539,7 @@ namespace dp2Circulation
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(281, 162);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "ª˘±æ–≈œ¢";
+            this.tabPage1.Text = "Âü∫Êú¨‰ø°ÊÅØ";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabPage2
@@ -549,7 +549,7 @@ namespace dp2Circulation
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(281, 162);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "ΩË‘ƒ–≈œ¢";
+            this.tabPage2.Text = "ÂÄüÈòÖ‰ø°ÊÅØ";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tabPage3
@@ -559,7 +559,7 @@ namespace dp2Circulation
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage3.Size = new System.Drawing.Size(281, 162);
             this.tabPage3.TabIndex = 0;
-            this.tabPage3.Text = "ª˘±æ–≈œ¢";
+            this.tabPage3.Text = "Âü∫Êú¨‰ø°ÊÅØ";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // tabPage4
@@ -569,7 +569,7 @@ namespace dp2Circulation
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage4.Size = new System.Drawing.Size(281, 162);
             this.tabPage4.TabIndex = 1;
-            this.tabPage4.Text = "ΩË‘ƒ–≈œ¢";
+            this.tabPage4.Text = "ÂÄüÈòÖ‰ø°ÊÅØ";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // button_devolve
@@ -580,7 +580,7 @@ namespace dp2Circulation
             this.button_devolve.Name = "button_devolve";
             this.button_devolve.Size = new System.Drawing.Size(73, 22);
             this.button_devolve.TabIndex = 2;
-            this.button_devolve.Text = "◊™“∆(&V)";
+            this.button_devolve.Text = "ËΩ¨Áßª(&V)";
             this.button_devolve.UseVisualStyleBackColor = true;
             this.button_devolve.Click += new System.EventHandler(this.button_devolve_Click);
             // 
@@ -596,7 +596,7 @@ namespace dp2Circulation
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "ActivateForm";
             this.ShowInTaskbar = false;
-            this.Text = "º§ªÓ¥∞";
+            this.Text = "ÊøÄÊ¥ªÁ™ó";
             this.Activated += new System.EventHandler(this.ActivateForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ActivateForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ActivateForm_FormClosed);

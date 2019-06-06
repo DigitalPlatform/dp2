@@ -115,5 +115,24 @@ Description = "指纹接口 URL 地址"
             }
         }
 
+        // 默认值 ipc://FaceChannel/FaceServer
+        [Display(
+Order = 6,
+Name = "人脸接口 URL",
+Description = "人脸接口 URL 地址"
+)]
+        [Category("人脸接口")]
+        public string FaceURL
+        {
+            get
+            {
+                return _config.Get("global", "faceUrl", "");
+            }
+            set
+            {
+                _config.Set("global", "faceUrl", value);
+            }
+        }
+
     }
 }

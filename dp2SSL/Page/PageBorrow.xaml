@@ -10,7 +10,9 @@
       WindowTitle="借书" Title="借书"
       x:Name="_this" >
     <Page.Resources>
+        
         <local:StringToVisibilityConverter x:Key="StringToVis" />
+        
     </Page.Resources>
     <Grid Background="Black" Name="mainGrid">
         <Grid.ColumnDefinitions>

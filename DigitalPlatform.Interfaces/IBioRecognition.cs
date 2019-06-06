@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,6 +53,12 @@ namespace DigitalPlatform.Interfaces
 
         // 设置参数
         // bool SetParameter(string strName, object value);
+
+        NormalResult EnableSendKey(bool enable);
+
+        NormalResult GetState(string style);
+
+        NormalResult ActivateWindow();
     }
 
     [Serializable()]
@@ -68,8 +75,13 @@ namespace DigitalPlatform.Interfaces
     [Serializable()]
     public class GetFeatureStringResult : NormalResult
     {
+        // [out] 返回特征字符串。通常是一个 base64 的字符串，包装了 byte [] 内容 
         public string FeatureString { get; set; }
+        // [out] 返回特征算法版本
         public string Version { get; set; }
+
+        // [out] 返回读者照片
+        public byte [] ImageData { get; set; }
     }
 
     [Serializable()]

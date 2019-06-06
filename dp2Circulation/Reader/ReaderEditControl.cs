@@ -120,7 +120,7 @@ namespace dp2Circulation
         /// 指纹特征字符串。
         /// base64编码方式
         /// </summary>
-        public string Fingerprint
+        public string FingerprintFeature
         {
             get
             {
@@ -156,7 +156,7 @@ namespace dp2Circulation
         /// <summary>
         /// 指纹特征字符串的版本号
         /// </summary>
-        public string FingerprintVersion
+        public string FingerprintFeatureVersion
         {
             get
             {

@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using System.Threading.Tasks;
 using System.Collections;
 using DigitalPlatform.Core;
+using DigitalPlatform.Interfaces;
 
 namespace dp2Circulation
 {
@@ -3842,10 +3843,28 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
         }
 
+        void EnableControlsForFace(bool enable)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.textBox_input.Enabled = enable;
+                this.toolStrip_main.Enabled = enable;
+            }));
+        }
+
         // 人脸识别
         private async void toolStripButton_faceInput_Click(object sender, EventArgs e)
         {
-            var result = await RecognitionFace("");
+            RecognitionFaceResult result = null;
+            EnableControlsForFace(false);
+            try
+            {
+                result = await RecognitionFace("");
+            }
+            finally
+            {
+                EnableControlsForFace(true);
+            }
             this.Invoke((Action)(() =>
             {
                 if (result.Value == 1)
@@ -3862,8 +3881,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 }
             }));
         }
-
-
     }
 
     /// <summary>

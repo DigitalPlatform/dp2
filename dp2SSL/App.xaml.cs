@@ -124,6 +124,16 @@ namespace dp2SSL
             RfidManager.Url = App.RfidUrl;
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.Start(_cancelRefresh.Token);
+
+            FaceManager.Base.Name = "人脸中心";
+            FaceManager.Url = App.FaceUrl;
+            FaceManager.SetError += FaceManager_SetError; ;
+            FaceManager.Start(_cancelRefresh.Token);
+        }
+
+        private void FaceManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("face", e.Error);
         }
 
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
@@ -135,22 +145,6 @@ namespace dp2SSL
         {
             SetError("fingerprint", e.Error);
         }
-
-#if REMOVED
-        // 重新初始化指纹环境
-        public List<string> InitialFingerPrint()
-        {
-            EndFingerprint();
-            ClearErrors("fingerprint");
-            List<string> errors = TryInitialFingerprint();
-            if (errors.Count > 0)
-                AddErrors("fingerprint", errors);
-
-            EnableSendkey(false);
-
-            return errors;
-        }
-#endif
 
         // TODO: 如何显示后台任务执行信息? 可以考虑只让管理者看到
         public void OutputHistory(string strText, int nWarningLevel = 0)
@@ -233,6 +227,14 @@ namespace dp2SSL
             }
         }
 
+        public static string FaceUrl
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global", "faceUrl", "");
+            }
+        }
+
         public static string dp2Password
         {
             get
@@ -240,21 +242,6 @@ namespace dp2SSL
                 return DecryptPasssword(WpfClientInfo.Config.Get("global", "dp2Password", ""));
             }
         }
-
-#if NO
-        // 用于锁屏的密码
-        public string LockingPassword
-        {
-            get
-            {
-                return DecryptPasssword(WpfClientInfo.Config.Get("global", "lockingPassword", ""));
-            }
-            set
-            {
-                WpfClientInfo.Config.Set("global", "lockingPassword", EncryptPassword(value));
-            }
-        }
-#endif
 
         public static void SetLockingPassword(string password)
         {
@@ -434,35 +421,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         #endregion
 
-#if REMOVED
-        List<string> _errors = new List<string>();
-
-        public List<string> Errors
-        {
-            get
-            {
-                return _errors;
-            }
-        }
-#endif
-
-#if REMOVED
-        public void AddErrors(List<string> errors)
-        {
-            DateTime now = DateTime.Now;
-            // _errors.AddRange(errors);
-            foreach (string error in errors)
-            {
-                _errors.Add($"{now.ToShortTimeString()} {error}");
-            }
-
-            while (_errors.Count > 1000)
-            {
-                errors.RemoveAt(0);
-            }
-        }
-#endif
-
         public void AddErrors(string type, List<string> errors)
         {
             DateTime now = DateTime.Now;
@@ -485,156 +443,5 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // _errors.Clear();
             _errorTable.SetError(type, "");
         }
-
-#if NO
-        public void EnableSendkey(bool enable)
-        {
-            try
-            {
-                if (_fingerprintChannel != null && _fingerprintChannel.Started)
-                    _fingerprintChannel?.Object?.EnableSendKey(enable);
-            }
-            catch
-            {
-                // TODO: 如何显示出错信息？
-            }
-        }
-#endif
-
-#if NO
-        public void ClearFingerprintMessage()
-        {
-            try
-            {
-                if (_fingerprintChannel != null && _fingerprintChannel.Started)
-                    _fingerprintChannel?.Object?.GetMessage("clear");
-            }
-            catch
-            {
-                // TODO: 如何显示出错信息？
-            }
-        }
-#endif
-
-        #region 指纹
-
-#if NO
-        FingerprintChannel _fingerprintChannel = null;
-
-        public FingerprintChannel FingerprintChannel
-        {
-            get
-            {
-                return _fingerprintChannel;
-            }
-        }
-#endif
-
-#if REMOVED
-        private static readonly Object _syncRoot_fingerprint = new Object(); // 2017/5/18
-
-        // TODO: 如果没有初始化成功，要提供重试初始化的办法
-        public List<string> TryInitialFingerprint()
-        {
-            lock (_syncRoot_fingerprint)
-            {
-                // 准备指纹通道
-                List<string> errors = new List<string>();
-                if (string.IsNullOrEmpty(App.FingerprintUrl) == false
-                    && (_fingerprintChannel == null || _fingerprintChannel.Started == false))
-                {
-#if NO
-                eventProxy = new EventProxy();
-                eventProxy.MessageArrived +=
-                  new MessageArrivedEvent(eventProxy_MessageArrived);
-#endif
-                    _fingerprintChannel = FingerPrint.StartFingerprintChannel(
-                        App.FingerprintUrl,
-                        out string strError);
-                    if (_fingerprintChannel == null)
-                        errors.Add($"启动指纹通道时出错: {strError}");
-                    // https://stackoverflow.com/questions/7608826/how-to-remote-events-in-net-remoting
-#if NO
-                _fingerprintChannel.Object.MessageArrived +=
-  new MessageArrivedEvent(eventProxy.LocallyHandleMessageArrived);
-#endif
-                    try
-                    {
-                        _fingerprintChannel.Object.GetMessage("clear");
-                        _fingerprintChannel.Started = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                            errors.Add($"启动指纹通道时出错: “指纹中心”({App.FingerprintUrl})没有响应");
-                        else
-                            errors.Add($"启动指纹通道时出错(2): {ex.Message}");
-                    }
-                }
-
-                return errors;
-            }
-        }
-
-        void EndFingerprint()
-        {
-            if (_fingerprintChannel != null)
-            {
-                FingerPrint.EndFingerprintChannel(_fingerprintChannel);
-                _fingerprintChannel = null;
-            }
-        }
-
-
-        Timer _timer = null;
-
-
-        void timerCallback(object o)
-        {
-            // 避免重叠启动
-            if (_cancelRefresh != null)
-                return;
-
-            Refresh();
-        }
-
-        int _inRefresh = 0;
-
-        void Refresh()
-        {
-            if (this._fingerprintChannel?.Started == true)
-                return;
-
-            // 防止重入
-            int v = Interlocked.Increment(ref this._inRefresh);
-            if (v > 1)
-            {
-                Interlocked.Decrement(ref this._inRefresh);
-                return;
-            }
-
-            _cancelRefresh = new CancellationTokenSource();
-            try
-            {
-                ClearErrors("fingerprint");  // 2019/5/20
-                List<string> errors = TryInitialFingerprint();
-                if (errors.Count > 0)
-                    AddErrors("fingerprint", errors);
-            }
-            catch (Exception ex)
-            {
-                AddErrors("fingerprint", new List<string> { $"重试初始化指纹环境时出现异常: {ex.Message}" });
-                return;
-            }
-            finally
-            {
-                _cancelRefresh = null;
-                Interlocked.Decrement(ref this._inRefresh);
-            }
-        }
-#endif
-
-        #endregion
-
     }
 }

@@ -1,6 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -9,13 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -164,6 +158,8 @@ namespace dp2SSL
             RfidManager.Clear();
             FingerprintManager.Url = App.FingerprintUrl;
             FingerprintManager.Clear();
+            FaceManager.Url = App.FaceUrl;
+            FaceManager.Clear();
 
             // 检查状态，及时报错
             {
@@ -180,17 +176,15 @@ namespace dp2SSL
                         errors.Add(result.ErrorInfo);
                 }
 
+                {
+                    var result = FaceManager.GetState("");
+                    if (result.Value == -1)
+                        errors.Add(result.ErrorInfo);
+                }
+
                 if (errors.Count > 0)
                     MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
-#if REMOVED
-            // 重试初始化指纹环境
-            // TODO: 有时候会遇到报错。可能略微延时一下重试就又可以了
-            List<string> errors = App.CurrentApp.InitialFingerPrint();
-            if (errors.Count > 0)
-            {
-            }
-#endif
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

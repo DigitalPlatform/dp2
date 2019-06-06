@@ -84,6 +84,10 @@ namespace dp2SSL
         public delegate_action _new_action = null;
 
         // 启动后台任务。
+        // patameters:
+        //      new_action  GetChannel() 遇到需要 new channel 时候调用的回调函数
+        //      skip_action 循环中设置的一个检查点，若回调函数返回 true 则 continue
+        //      loop_action 循环中每一轮需要用 channel 做的事情
         public void Start(
             delegate_action new_action,
             delegate_skip skip_func,
@@ -121,6 +125,9 @@ namespace dp2SSL
 
                     //if (this.State == "pause")
                     //    continue;
+
+                    if (loop_action == null)
+                        continue;
 
                     bool error = false;
                     this.Lock.EnterReadLock();  // 锁定范围以外，可以对通道进行 Clear()
