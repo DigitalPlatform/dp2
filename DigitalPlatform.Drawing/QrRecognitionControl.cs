@@ -281,6 +281,12 @@ namespace DigitalPlatform.Drawing
             this.pictureBox1.Visible = bDisplay;
         }
 
+        // 2019/6/6
+        public void DisplayCameraList(bool display)
+        {
+            this.panel_camera.Visible = display;
+        }
+
         /// <summary>
         /// 显示文字
         /// </summary>

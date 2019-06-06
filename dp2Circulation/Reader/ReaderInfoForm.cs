@@ -30,6 +30,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Drawing.Imaging;
 
 namespace dp2Circulation
 {
@@ -2129,7 +2130,7 @@ strSavedXml);
                     //      0   成功
                     nRet = UpdateFingerprintCache(
                          this.readerEditControl1.Barcode,
-                         this.readerEditControl1.Fingerprint,
+                         this.readerEditControl1.FingerprintFeature,
                          out strError);
                     if (nRet == -1)
                     {
@@ -3884,6 +3885,7 @@ MessageBoxDefaultButton.Button2);
             {
                 // 自动缩小图像
                 nRet = SetCardPhoto(image,
+                    "cardphoto",
                 out strShrinkComment,
                 out strError);
                 if (nRet == -1)
@@ -3945,6 +3947,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         // 自动缩小图像
                         nRet = SetCardPhoto(image,
+                    "cardphoto",
                         out strShrinkComment,
                         out strError);
                         if (nRet == -1)
@@ -4233,10 +4236,12 @@ MessageBoxDefaultButton.Button2);
         /// 设置当前记录的证件照片对象
         /// </summary>
         /// <param name="image">腿片对象</param>
+        /// <param name="object_type">对象的类型，cardphoto/face 之一</param>
         /// <param name="strShrinkComment">返回缩放注释</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int SetCardPhoto(Image image,
+            string object_type,
             out string strShrinkComment,
             out string strError)
         {
@@ -4244,11 +4249,13 @@ MessageBoxDefaultButton.Button2);
             strShrinkComment = "";
             int nRet = 0;
 
+            ImageFormat format = ImageFormat.Jpeg;
+
             // 自动缩小图像
             string strMaxWidth = Program.MainForm.AppInfo.GetString(
     "readerinfoform_optiondlg",
-    "cardphoto_maxwidth",
-    "120");
+    $"{object_type}_maxwidth",
+    object_type == "cardphoto" ? "120" : "640");
             int nMaxWidth = -1;
             Int32.TryParse(strMaxWidth,
                 out nMaxWidth);
@@ -4282,17 +4289,18 @@ MessageBoxDefaultButton.Button2);
                 "~temp_make_cardphoto_",
                 ".png");
 
-            image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+            image.Save(strTempFilePath,
+                format);
             image.Dispose();
             image = null;
 
-            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage("cardphoto");
+            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage(object_type); // "cardphoto"
             if (items.Count == 0)
             {
                 ListViewItem item = null;
                 nRet = this.binaryResControl1.AppendNewItem(
     strTempFilePath,
-    "cardphoto",
+    object_type,   // "cardphoto",
     "",
     out item,
     out strError);
@@ -4301,7 +4309,7 @@ MessageBoxDefaultButton.Button2);
             {
                 nRet = this.binaryResControl1.ChangeObjectFile(items[0],
      strTempFilePath,
-     "cardphoto",
+     object_type,  // "cardphoto",
              out strError);
             }
             if (nRet == -1)
@@ -4633,6 +4641,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         string strShrinkComment = "";
                         nRet = SetCardPhoto(image,
+                    "cardphoto",
         out strShrinkComment,
         out strError);
                         if (nRet == -1)
@@ -5029,12 +5038,24 @@ MessageBoxDefaultButton.Button2);
             string strStyle)
         {
             return Task.Factory.StartNew<GetFeatureStringResult>(
-    () =>
-    {
-        return CallGetFeatureString(channel, strExcludeBarcodes, strStyle);
-    });
+                () =>
+                {
+                    // 获得一个指纹特征字符串
+                    // return:
+                    //      -1  error
+                    //      0   放弃输入
+                    //      1   成功输入
+                    return channel.Object.GetFeatureString(
+                        strExcludeBarcodes,
+                        strStyle/*,
+                    out string strFingerprint,
+                    out string strVersion,
+                    out string strError*/);
+                    //return CallGetFeatureString(channel, strExcludeBarcodes, strStyle);
+                });
         }
 
+#if NO
         GetFeatureStringResult CallGetFeatureString(FaceChannel channel,
     string strExcludeBarcodes,
     string strStyle)
@@ -5068,10 +5089,10 @@ MessageBoxDefaultButton.Button2);
                 return result;
             }
         }
+#endif
+        #endregion
 
-#endregion
-
-#region 指纹登记功能
+        #region 指纹登记功能
 
         // 局部更新指纹信息高速缓存
         // return:
@@ -5370,7 +5391,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-#endregion
+        #endregion
 
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
@@ -5437,8 +5458,8 @@ MessageBoxDefaultButton.Button1);
                 strVersion = "test-version";
 #endif
 
-                this.readerEditControl1.Fingerprint = result.Fingerprint;   // strFingerprint;
-                this.readerEditControl1.FingerprintVersion = result.Version;    // strVersion;
+                this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
+                this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
                 this.readerEditControl1.Changed = true;
             }
             finally
@@ -5465,14 +5486,8 @@ MessageBoxDefaultButton.Button1);
 
         private void toolStripMenuItem_clearFingerprint_Click(object sender, EventArgs e)
         {
-            /*
-            if (string.IsNullOrEmpty(this.readerEditControl1.Fingerprint) == false
-                || string.IsNullOrEmpty(this.readerEditControl1.FingerprintVersion) == false)
-            {
-            }
-             * */
-            this.readerEditControl1.FingerprintVersion = "";
-            this.readerEditControl1.Fingerprint = "";
+            this.readerEditControl1.FingerprintFeatureVersion = "";
+            this.readerEditControl1.FingerprintFeature = "";
             this.readerEditControl1.Changed = true;
         }
 
@@ -6521,6 +6536,19 @@ MessageBoxDefaultButton.Button1);
                 this.readerEditControl1.FaceFeature = result.FeatureString;
                 this.readerEditControl1.FaceFeatureVersion = result.Version;
                 this.readerEditControl1.Changed = true;
+
+                // 设置人脸照片对象
+                using (Image image = FromBytes(result.ImageData))
+                using (Image image1 = new Bitmap(image))
+                {
+                    // 自动缩小图像
+                    int nRet = SetCardPhoto(image1,
+                        "face",
+                    out string strShrinkComment,
+                    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
             }
             finally
             {
@@ -6534,6 +6562,14 @@ MessageBoxDefaultButton.Button1);
             ERROR1:
             Program.MainForm.StatusBarMessage = strError;
             ShowMessageBox(strError);
+        }
+
+        static Image FromBytes(byte[] bytes)
+        {
+            using (MemoryStream stream = new MemoryStream(bytes))
+            {
+                return Image.FromStream(stream);
+            }
         }
 
         private void ToolStripMenuItem_pasteCardPhoto_Click(object sender, EventArgs e)
@@ -6555,6 +6591,7 @@ MessageBoxDefaultButton.Button1);
             {
                 // 自动缩小图像
                 nRet = SetCardPhoto(image,
+                    "cardphoto",
                 out strShrinkComment,
                 out strError);
                 if (nRet == -1)
@@ -6594,6 +6631,14 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
             this.readerEditControl1.CardNumber = dlg.Numbers;
+        }
+
+        // 清除人脸特征
+        private void toolStripMenuItem_clearFaceFeature_Click(object sender, EventArgs e)
+        {
+            this.readerEditControl1.FaceFeatureVersion = "";
+            this.readerEditControl1.FaceFeature = "";
+            this.readerEditControl1.Changed = true;
         }
     }
 }

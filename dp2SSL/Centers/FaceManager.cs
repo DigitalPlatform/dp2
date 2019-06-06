@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
-using DigitalPlatform.Core;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.RFID;
+using DigitalPlatform.Interfaces;
 
 namespace dp2SSL
 {
-    public static class RfidManager
+    /// <summary>
+    /// 人脸通道集中管理
+    /// </summary>
+    public static class FaceManager
     {
-        public static event ListTagsEventHandler ListTags = null;
+        static string _state = "ok";    // ok/error
 
-        // static ChannelPool<RfidChannel> _rfidChannels = new ChannelPool<RfidChannel>();
+        public static event TouchedEventHandler Touched = null;
 
-        public static ManagerBase<IRfid> Base = new ManagerBase<IRfid>();
+        public static ManagerBase<IBioRecognition> Base = new ManagerBase<IBioRecognition>();
 
         public static event SetErrorEventHandler SetError
         {
@@ -33,20 +32,6 @@ namespace dp2SSL
                 Base.RemoveSetErrorEvent(value);
             }
         }
-
-#if NO
-        public static event EventHandler Loop
-        {
-            add
-            {
-                Base.AddLoopEvent(value);
-            }
-            remove
-            {
-                Base.RemoveLoopEvent(value);
-            }
-        }
-#endif
 
         public static void Clear()
         {
@@ -66,87 +51,23 @@ namespace dp2SSL
         }
 
         // 启动后台任务。
-        // 后台任务负责监视 RFID 中心的标签
+        // 后台任务负责监视 人脸中心 里面新到的 message
         public static void Start(
             CancellationToken token)
         {
+            // App.CurrentApp.Speak("启动后台线程");
             Base.Start((channel) =>
             {
                 var result = channel.Object.GetState("");
                 if (result.Value == -1)
-                    throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                    throw new Exception($"人脸中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
             },
-            () =>
-            {
-                if (string.IsNullOrEmpty(Base.Url))
-                {
-                    Base.TriggerSetError(null,
-                        new SetErrorEventArgs
-                        {
-                            Error = "RFID 中心 URL 尚未配置(因此无法从 RFID 读卡器读取信息)"
-                        });
-                    return true;
-                }
-                return false;
-            },
-            (channel) =>
-            {
-                var result = channel?.Object?.ListTags("*",
-null);
-                if (result.Value == -1)
-                    Base.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = result.ErrorInfo });
-                else
-                    Base.TriggerSetError(result,
-                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                if (ListTags != null)
-                {
-                    ListTags(channel, new ListTagsEventArgs
-                    {
-                        Result = result
-                    });
-                }
-            },
+            null,
+            null,
             token);
-
-        }
-
-        public static NormalResult SetEAS(string uid, bool enable)
-        {
-            try
-            {
-                BaseChannel<IRfid> channel = Base.GetChannel();
-                try
-                {
-                    var result = channel.Object.SetEAS("*", $"uid:{uid}", enable);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                    return result;
-                }
-                finally
-                {
-                    Base.ReturnChannel(channel);
-                }
-            }
-            catch (Exception ex)
-            {
-                Base.Clear();
-                Base.TriggerSetError(ex,
-                    new SetErrorEventArgs
-                    {
-                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
-                    });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
-            }
         }
 
         public static NormalResult EnableSendkey(bool enable)
@@ -157,7 +78,7 @@ null);
                 if (string.IsNullOrEmpty(Base.Url))
                     return new NormalResult();
 
-                BaseChannel<IRfid> channel = Base.GetChannel();
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
                 try
                 {
                     var result = channel.Object.EnableSendKey(enable);
@@ -174,14 +95,14 @@ null);
                 {
                     Base.ReturnChannel(channel);
                 }
+
             }
             catch (Exception ex)
             {
-                Base.Clear();
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetExceptionText(ex)}"
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
@@ -195,7 +116,7 @@ null);
                 if (string.IsNullOrEmpty(Base.Url))
                     return new NormalResult();
 
-                BaseChannel<IRfid> channel = Base.GetChannel();
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
                 try
                 {
                     var result = channel.Object.GetState(style);
@@ -219,21 +140,48 @@ null);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
-    }
 
-    public delegate void ListTagsEventHandler(object sender,
-ListTagsEventArgs e);
+        public static RecognitionFaceResult RecognitionFace(string style)
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new RecognitionFaceResult();
 
-    /// <summary>
-    ///列出标签事件的参数
-    /// </summary>
-    public class ListTagsEventArgs : EventArgs
-    {
-        public ListTagsResult Result { get; set; }
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.RecognitionFace(style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new RecognitionFaceResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
     }
 }

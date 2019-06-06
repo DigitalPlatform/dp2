@@ -1,18 +1,12 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -22,6 +16,8 @@ namespace dp2SSL
     /// </summary>
     public partial class PatronControl : UserControl
     {
+        public event EventHandler InputFace = null;
+
         public PatronControl()
         {
             InitializeComponent();
@@ -34,12 +30,23 @@ namespace dp2SSL
                 return;
             bool fingerprint = StringUtil.IsInList("fingerprint", style);
             bool rfid = StringUtil.IsInList("rfid", style);
+            bool face = StringUtil.IsInList("face", style);
             if (fingerprint && rfid)
                 this.startMessage.Text = "请放读者卡，或扫指纹 ...";
             else if (fingerprint)
                 this.startMessage.Text = "请扫指纹 ...";
             else if (rfid)
                 this.startMessage.Text = "请放读者卡 ...";
+
+            if (face)
+                this.inputFace.Visibility = Visibility.Visible;
+            else
+                this.inputFace.Visibility = Visibility.Collapsed;
+        }
+
+        private void InputFace_Click(object sender, RoutedEventArgs e)
+        {
+            this.InputFace?.Invoke(sender, e);
         }
     }
 }

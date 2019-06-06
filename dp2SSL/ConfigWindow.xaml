@@ -18,7 +18,7 @@
                2) The property named "FirstName"
                3) The property named "Spouse"
                Replacing the default editor. -->
-                <xctk:EditorTemplateDefinition TargetProperties="RfidURL,FingerprintURL">
+                <xctk:EditorTemplateDefinition TargetProperties="RfidURL,FingerprintURL,FaceURL">
                     <xctk:EditorTemplateDefinition.EditingTemplate>
                         <DataTemplate>
                             <DockPanel HorizontalAlignment="Stretch">

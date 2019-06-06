@@ -7,12 +7,25 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <local:StringToVisibilityConverter x:Key="StringToVis" />
-        <local:InvertStringToVisibilityConverter x:Key="InvertStringToVis" />
-        <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
-        <local:BoolToVisibilityConverter
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Purple.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <local:StringToVisibilityConverter x:Key="StringToVis" />
+            <local:InvertStringToVisibilityConverter x:Key="InvertStringToVis" />
+            <BooleanToVisibilityConverter x:Key="VisibleIfTrueConverter" />
+            <local:BoolToVisibilityConverter
          x:Key="VisibleIfFalseConverter"
          TrueValue="Hidden" FalseValue="Visible" />
+            <Image x:Key="MyImage" Source="/dp2SSL;component/face_recognition_219.png"/>
+        </ResourceDictionary>
+
+
     </UserControl.Resources>
     <Border BorderThickness="2" BorderBrush="Black"
             Margin="20" CornerRadius="8" >
@@ -79,13 +92,21 @@
 
 
             </Grid>
-            <TextBlock Name="startMessage" Text="请放好读者卡 ..."
+            <StackPanel VerticalAlignment="Center"
+                        Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}">
+                <TextBlock Name="startMessage" Text="请放好读者卡 ..."
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"
-                       Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}"
+                       
                        TextWrapping="WrapWithOverflow"/>
-
+                <Button Name="inputFace" Visibility="Collapsed"
+                        Content="{StaticResource MyImage}"
+                        Style="{StaticResource MaterialDesignFloatingActionLightButton}"
+                        Margin="20,0,20,0" Padding="10,10,10,10" FontSize="20"
+                        Click="InputFace_Click">
+                </Button>
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl>

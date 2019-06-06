@@ -22,10 +22,6 @@ namespace dp2SSL
 
         public static event TouchedEventHandler Touched = null;
 
-        //public static event SetErrorEventHandler SetError = null;
-
-        //static ChannelPool<FingerprintChannel> _fingerprintChannels = new ChannelPool<FingerprintChannel>();
-
         public static ManagerBase<IFingerprint> Base = new ManagerBase<IFingerprint>();
 
         public static event SetErrorEventHandler SetError
@@ -193,7 +189,6 @@ token);
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
-
     }
 
     public delegate void TouchedEventHandler(object sender,
@@ -220,5 +215,4 @@ SetErrorEventArgs e);
     {
         public string Error { get; set; }
     }
-
 }

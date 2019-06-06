@@ -446,7 +446,7 @@ Exception rethrown at [0]:
             Program.MainForm?.DisplayCancelButton(true);
             try
             {
-                TextResult result = Program.FingerPrint.GetRegisterString(strExcludeBarcodes);
+                TextResult result = Program.FingerPrint.GetRegisterString(null, strExcludeBarcodes);
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
