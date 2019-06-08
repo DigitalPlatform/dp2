@@ -1137,6 +1137,12 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("重建人脸特征 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
+                subMenuItem.Click += new System.EventHandler(this.menu_rebuildFaceFeature_Click);
+                if (this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
                 // ---
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
@@ -1600,8 +1606,10 @@ MessageBoxDefaultButton.Button2);
                 ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
-                loader.DbTypeCaption = this.DbTypeCaption;
+                    this.m_biblioTable)
+                {
+                    DbTypeCaption = this.DbTypeCaption
+                };
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -2971,6 +2979,92 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 #endif
+        // 快速修改记录
+        async void menu_rebuildFaceFeature_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string version = "";
+
+            var result = await QuickChangeItemRecords(
+                (recpath, dom, time) =>
+                {
+                    // Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(recpath) + "</div>");
+
+                    // 检查是否具有人脸特征
+                    if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode("没有 face 元素") + "</div>");
+                        return false;
+                    }
+
+                    // TODO: 如果 version 一致，则跳过刷新
+                    if (string.IsNullOrEmpty(version))
+                    {
+                        GetFeatureStringResult version_result = ReadFeatureString(null, "", "getVersion").Result;
+                        if (version_result.Value == -1)
+                            throw new Exception(version_result.ErrorInfo);
+                        version = version_result.Version;
+                    }
+                    string current_version = face.GetAttribute("version");
+                    if (current_version == version)
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode($"face/@version 符合 '{version}'，跳过刷新") + "</div>");
+                        return false;
+                    }
+
+                    // 获得图象数据
+                    // 获得读者记录中 usage 为 'face' 的对象数据
+                    // return:
+                    //      -1  出错
+                    //      0   对象不存在
+                    //      1   成功下载。文件全路径为 strLocalFilePath。这是一个临时文件，注意用完后要删除
+                    int nRet0 = DownloadPhoto(
+                        recpath,
+                        dom,
+                        "face",
+                        out string strLocalFilePath,
+                        out string strError0);
+                    if (nRet0 == -1)
+                    {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                        throw new Exception(strError0);
+                    }
+                    if (nRet0 == 0)
+                    {
+                        // 没有对象记录
+                        face.ParentNode.RemoveChild(face);
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug yellow'>" + HttpUtility.HtmlEncode("没有对象记录。face 元素被清除") + "</div>");
+                        return true;
+                    }
+
+                    byte[] bytes = null;
+                    using (Stream stream = File.OpenRead(strLocalFilePath))
+                    {
+                        bytes = new byte[stream.Length];
+                        stream.Read(bytes, 0, bytes.Length);
+                    }
+
+                    GetFeatureStringResult feature_result = ReadFeatureString(bytes, "", "").Result;
+                    if (feature_result.Value == -1)
+                        throw new Exception(feature_result.ErrorInfo);
+                    // TODO: 注意对无法提取特征的情况，输出报错信息到操作历史，然后继续循环
+                    face.InnerText = feature_result.FeatureString;
+                    face.SetAttribute("version", feature_result.Version);
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("face 元素中人脸特征已经刷新") + "</div>");
+                    return true;
+                });
+            if (result.Value == -1)
+                goto ERROR1;
+
+            if (nRet != 0)
+                ShowMessageBox(result.ErrorInfo);
+            return;
+            ERROR1:
+            ShowMessageBox(result.ErrorInfo);
+        }
+
         // 快速修改记录
         void menu_quickChangeRecords_Click(object sender, EventArgs e)
         {
@@ -6221,12 +6315,13 @@ dlg.UiState);
         // 2017/5/8
         // 从读者记录 XML 中获得读者卡片头像的路径。例如 "读者/1/object/0"
         static string GetCardPhotoPath(XmlDocument readerdom,
+            string usage,
             string strRecPath)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='cardphoto']", nsmgr);
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes($"//dprms:file[@usage='{usage}']", nsmgr);
 
             if (nodes.Count == 0)
                 return null;
@@ -6237,6 +6332,53 @@ dlg.UiState);
 
             string strResPath = strRecPath + "/object/" + strID;
             return strResPath.Replace(":", "/");
+        }
+
+        // return:
+        //      -1  出错
+        //      0   对象不存在
+        //      1   成功下载。文件全路径为 strLocalFilePath。这是一个临时文件，注意用完后要删除
+        public int DownloadPhoto(
+            string strRecPath,
+            XmlDocument dom,
+            string usage,
+            out string strLocalFilePath,
+            out string strError)
+        {
+            strError = "";
+            strLocalFilePath = "";
+
+            // 下载读者照片
+            // strCardPhotoPath = "";
+
+            string strObjectPath = GetCardPhotoPath(dom, usage, strRecPath); // "cardphoto"
+            if (string.IsNullOrEmpty(strObjectPath) == true)
+                return 0;
+            bool ok = false;
+            strLocalFilePath = Path.Combine(Program.MainForm.UserTempDir, "~cp_" + Guid.NewGuid().ToString());
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                int nRet = GetCardPhotoFile(channel,
+stop,
+strObjectPath,
+strLocalFilePath,
+out strError);
+                if (nRet == -1)
+                {
+                    return -1;
+                    // 删除临时文件
+                }
+                // strCardPhotoPath = Path.GetFileName(strLocalFilePath);
+                ok = true;
+                return 1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+                if (ok == false)
+                    File.Delete(strLocalFilePath);
+            }
         }
 
         // 创建读者账簿
@@ -6324,9 +6466,27 @@ dlg.UiState);
 
                             // 下载读者照片
                             string strCardPhotoPath = "";
+
+                            // return:
+                            //      -1  出错
+                            //      0   对象不存在
+                            //      1   成功下载。文件全路径为 strLocalFilePath。这是一个临时文件，注意用完后要删除
+                            int nRet0 = DownloadPhoto(
+                                strRecPath,
+                                dom,
+                                "cardphoto",
+                                out string strLocalFilePath,
+                                out string strError0);
+                            if (nRet0 == -1)
+                                MessageBox.Show(this, strError0);
+                            else if (nRet == 1)
+                                strCardPhotoPath = Path.GetFileName(strLocalFilePath);
+
+
+#if NO
                             {
                                 string strError0 = "";
-                                string strObjectPath = GetCardPhotoPath(dom, strRecPath);
+                                string strObjectPath = GetCardPhotoPath(dom, "cardphoto", strRecPath);
                                 if (string.IsNullOrEmpty(strObjectPath) == false)
                                 {
                                     string strLocalFilePath = Path.Combine(Program.MainForm.UserTempDir, "~cp_" + Guid.NewGuid().ToString());
@@ -6351,7 +6511,7 @@ dlg.UiState);
                                     }
                                 }
                             }
-
+#endif
                             string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
 
                             if (dlg.GroupByDepartment == false)

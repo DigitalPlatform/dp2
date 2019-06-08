@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -1369,6 +1370,225 @@ namespace dp2Circulation
             }
         }
 
+        public delegate bool delegate_changeAction(string recpath,
+            XmlDocument dom,
+            DateTime now);
+
+        // 快速修改记录。回调函数版本
+        // return:
+        //      -1  出错
+        //      0   放弃
+        //      1   成功
+        internal async Task<NormalResult> QuickChangeItemRecords(
+            delegate_changeAction callback)
+        {
+            string strError = "";
+            // int nRet = 0;
+
+            if (this._listviewRecords.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要快速修改的" + this.DbTypeCaption + "记录事项";
+                goto ERROR1;
+            }
+
+            DateTime now = DateTime.Now;
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial($"快速修改{this.DbTypeCaption}记录 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+
+            EnableControls(false);
+            this._listviewRecords.Enabled = false;
+
+            int nProcessCount = 0;
+            int nChangedCount = 0;
+            try
+            {
+                stop.SetProgressRange(0, this._listviewRecords.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this._listviewRecords.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                int nChangeCount = this.GetItemsChangeCount(items);
+                if (nChangeCount > 0)
+                {
+                    bool bHideMessageBox = true;
+                    DialogResult result = MessageDialog.Show(this,
+                        "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    null,
+    ref bHideMessageBox,
+    new string[] { "重新修改", "继续修改", "放弃" });
+                    if (result == DialogResult.Cancel)
+                    {
+                        strError = "放弃";
+                        return new NormalResult();
+                    }
+                    if (result == DialogResult.No)
+                    {
+                        bOldSource = false;
+                    }
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
+                    stop,
+                    items,
+                    this.m_biblioTable)
+                {
+                    DbTypeCaption = this.DbTypeCaption
+                };
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                var result0 = await Task.Run<NormalResult>(() =>
+                {
+                    int i = 0;
+                    foreach (LoaderItem item in loader)
+                    {
+                        // Application.DoEvents(); // 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            return new NormalResult { Value = -1, ErrorInfo = strError };
+                        }
+
+                        stop.SetProgressValue(i);
+
+                        BiblioInfo info = item.BiblioInfo;
+
+                        Debug.Assert(info != null, "");
+
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            if (bOldSource == true)
+                            {
+                                dom.LoadXml(info.OldXml);
+                                // 放弃上一次的修改
+                                if (string.IsNullOrEmpty(info.NewXml) == false)
+                                {
+                                    info.NewXml = "";
+                                    this.m_nChangedCount--;
+                                }
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(info.NewXml) == false)
+                                    dom.LoadXml(info.NewXml);
+                                else
+                                    dom.LoadXml(info.OldXml);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "装载XML到DOM时发生错误: " + ex.Message;
+                            return new NormalResult { Value = -1, ErrorInfo = strError };
+                        }
+
+                        var changed = callback(info.RecPath, dom, now);
+#if NO
+                    // 修改一个订购记录 XmlDocument
+                    // return:
+                    //      -1  出错
+                    //      0   没有实质性修改
+                    //      1   发生了修改
+                    nRet = ModifyItemRecord(
+                        cfg_dom,
+                        actions,
+                        ref dom,
+                        now,
+                        out string strDebugInfo,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+#endif
+
+                        // Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
+
+                        nProcessCount++;
+
+                        if (changed// nRet == 1
+                            )
+                        {
+                            string strXml = dom.OuterXml;
+                            Debug.Assert(info != null, "");
+                            if (info != null)
+                            {
+                                if (string.IsNullOrEmpty(info.NewXml) == true)
+                                    this.m_nChangedCount++;
+                                info.NewXml = strXml;
+                            }
+
+                            this.Invoke((Action)(() =>
+                            {
+                                item.ListViewItem.BackColor = SystemColors.Info;
+                                item.ListViewItem.ForeColor = SystemColors.InfoText;
+                            }));
+                            nChangedCount++;
+                        }
+
+                        i++;
+                    }
+                    return new NormalResult();
+                });
+                if (result0.Value == -1)
+                    return result0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                EnableControls(true);
+                this._listviewRecords.Enabled = true;
+
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
+            }
+
+            DoViewComment(false);
+            strError = $"修改{this.DbTypeCaption}记录 {nChangedCount.ToString()} 条 (共处理 {nProcessCount.ToString()})\r\n\r\n(注意修改并未自动保存。请在观察确认后，使用保存命令将修改保存回{this.DbTypeCaption}库)";
+            return new NormalResult
+            {
+                Value = 1,
+                ErrorInfo = strError
+            };
+            ERROR1:
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = strError
+            };
+        }
+
+
         // 快速修改记录
         // return:
         //      -1  出错
@@ -1480,8 +1700,10 @@ dlg.UiState);
                 ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     stop,
                     items,
-                    this.m_biblioTable);
-                loader.DbTypeCaption = this.DbTypeCaption;
+                    this.m_biblioTable)
+                {
+                    DbTypeCaption = this.DbTypeCaption
+                };
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
