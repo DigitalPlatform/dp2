@@ -23,6 +23,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Interfaces;
+using System.Drawing.Imaging;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
@@ -30,7 +31,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Drawing.Imaging;
 
 namespace dp2Circulation
 {
@@ -4913,184 +4913,6 @@ MessageBoxDefaultButton.Button2);
             e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
-        #region 人脸登记功能
-
-        async Task<NormalResult> CancelReadFeatureString()
-        {
-            string strError = "";
-            NormalResult result = new NormalResult();
-
-            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
-            {
-                strError = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息";
-                goto ERROR1;
-            }
-
-            FaceChannel channel = StartFaceChannel(
-                Program.MainForm.FaceReaderUrl,
-                out strError);
-            if (channel == null)
-                goto ERROR1;
-
-            _inFaceCall++;
-            try
-            {
-                try
-                {
-                    return await Task.Factory.StartNew<NormalResult>(
-                        () =>
-                        {
-                            NormalResult temp_result = new NormalResult();
-                            try
-                            {
-                                return channel.Object.CancelGetFeatureString();
-                                //if (temp_result.Value == -1)
-                                //    temp_result.ErrorInfo = "API cancel return error";
-                                // return temp_result;
-                            }
-                            catch (RemotingException ex)
-                            {
-                                temp_result.ErrorInfo = ex.Message;
-                                temp_result.Value = 0;  // 让调主认为没有出错
-                                return temp_result;
-                            }
-                            catch (Exception ex)
-                            {
-                                temp_result.ErrorInfo = ex.Message;
-                                temp_result.Value = -1;
-                                return temp_result;
-                            }
-                        });
-                }
-                catch (Exception ex)
-                {
-                    strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetFeatureString() 操作失败: " + ex.Message;
-                    goto ERROR1;
-                }
-            }
-            finally
-            {
-                _inFaceCall--;
-                EndFaceChannel(channel);
-            }
-            ERROR1:
-            result.ErrorInfo = strError;
-            result.Value = -1;
-            return result;
-        }
-
-        // return:
-        //      -1  error
-        //      0   放弃输入
-        //      1   成功输入
-        async Task<GetFeatureStringResult> ReadFeatureString(string strExcludeBarcodes,
-            string strStyle)
-        {
-            string strError = "";
-            GetFeatureStringResult result = new GetFeatureStringResult();
-
-            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
-            {
-                strError = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息";
-                goto ERROR1;
-            }
-
-            FaceChannel channel = StartFaceChannel(
-                Program.MainForm.FaceReaderUrl,
-                out strError);
-            if (channel == null)
-                goto ERROR1;
-
-            _inFaceCall++;
-            try
-            {
-                return await GetFeatureString(channel, strExcludeBarcodes, strStyle);
-            }
-            catch (Exception ex)
-            {
-                strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetFeatureString() 操作失败: " + ex.Message;
-                goto ERROR1;
-            }
-            finally
-            {
-                _inFaceCall--;
-                EndFaceChannel(channel);
-            }
-            ERROR1:
-            result.ErrorInfo = strError;
-            result.Value = -1;
-            return result;
-        }
-
-#if NO
-        class GetFeatureStringResult
-        {
-            public string Feature { get; set; }
-            public string Version { get; set; }
-
-            public int Value { get; set; }
-            public string ErrorInfo { get; set; }
-        }
-#endif
-
-        Task<GetFeatureStringResult> GetFeatureString(FaceChannel channel,
-            string strExcludeBarcodes,
-            string strStyle)
-        {
-            return Task.Factory.StartNew<GetFeatureStringResult>(
-                () =>
-                {
-                    // 获得一个指纹特征字符串
-                    // return:
-                    //      -1  error
-                    //      0   放弃输入
-                    //      1   成功输入
-                    return channel.Object.GetFeatureString(
-                        strExcludeBarcodes,
-                        strStyle/*,
-                    out string strFingerprint,
-                    out string strVersion,
-                    out string strError*/);
-                    //return CallGetFeatureString(channel, strExcludeBarcodes, strStyle);
-                });
-        }
-
-#if NO
-        GetFeatureStringResult CallGetFeatureString(FaceChannel channel,
-    string strExcludeBarcodes,
-    string strStyle)
-        {
-            GetFeatureStringResult result = new GetFeatureStringResult();
-            try
-            {
-                // 获得一个指纹特征字符串
-                // return:
-                //      -1  error
-                //      0   放弃输入
-                //      1   成功输入
-                return channel.Object.GetFeatureString(
-                    strExcludeBarcodes,
-                    strStyle/*,
-                    out string strFingerprint,
-                    out string strVersion,
-                    out string strError*/);
-#if NO
-                result.Feature = strFingerprint;
-                result.Version = strVersion;
-                result.ErrorInfo = strError;
-                result.Value = nRet;
-                return result;
-#endif
-            }
-            catch (Exception ex)
-            {
-                result.ErrorInfo = "GetFeatureString() 异常: " + ex.Message;
-                result.Value = -1;
-                return result;
-            }
-        }
-#endif
-        #endregion
 
         #region 指纹登记功能
 
@@ -6514,7 +6336,10 @@ MessageBoxDefaultButton.Button1);
             try
             {
                 REDO:
-                GetFeatureStringResult result = await ReadFeatureString(this.readerEditControl1.Barcode, "confirmPicture");
+                GetFeatureStringResult result = await ReadFeatureString(
+                    null,
+                    this.readerEditControl1.Barcode,
+                    "confirmPicture,returnImage");
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
