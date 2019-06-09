@@ -174,7 +174,7 @@ bool bClickClose = false)
                 notifyIcon1.ShowBalloonTip(1000);
             }
 
-            SetErrorState("retry", "正在启动");
+            ClientInfo.SetErrorState("retry", "正在启动");
 
             if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
             {
@@ -330,7 +330,7 @@ bool bClickClose = false)
                     NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
                     if (result.Value == -1)
                     {
-                        SetErrorState("error", result.ErrorInfo);
+                        ClientInfo.SetErrorState("error", result.ErrorInfo);
                         return result;
                     }
                 }
@@ -425,93 +425,21 @@ bool bClickClose = false)
                 // 密码不正确的情况不要自动重试。因为重试超过十次会让当前账户被加入黑名单十分钟
 
                 if (_timer == null)
-                    SetErrorState("error", result.ErrorInfo);
+                    ClientInfo.SetErrorState("error", result.ErrorInfo);
                 else
-                    SetErrorState("retry", result.ErrorInfo);
+                    ClientInfo.SetErrorState("retry", result.ErrorInfo);
 
                 return result;
             }
             else
             {
-                SetErrorState("normal", "");
+                ClientInfo.SetErrorState("normal", "");
             }
             if (result.Value == 0)
                 this.ShowMessage(result.ErrorInfo, "yellow", true);
 
             return new NormalResult();
         }
-
-        #region 错误状态
-
-        void SetWholeColor(Color backColor, Color foreColor)
-        {
-            this.Invoke((Action)(() =>
-            {
-                ClientInfo.ProcessControl(this,
-                    (o) =>
-                    {
-                        dynamic d = o;
-                        d.BackColor = backColor;
-                        d.ForeColor = foreColor;
-                    });
-
-#if NO
-                this.BackColor = backColor;
-                this.ForeColor = foreColor;
-                foreach (TabPage page in this.tabControl_main.TabPages)
-                {
-                    page.BackColor = backColor;
-                    page.ForeColor = foreColor;
-                }
-                this.toolStrip1.BackColor = backColor;
-                this.toolStrip1.ForeColor = foreColor;
-
-                this.menuStrip1.BackColor = backColor;
-                this.menuStrip1.ForeColor = foreColor;
-
-                this.statusStrip1.BackColor = backColor;
-                this.statusStrip1.ForeColor = foreColor;
-#endif
-            }));
-        }
-
-        // 错误状态
-        string _errorState = "normal";    // error/retry/normal
-        // 错误状态描述
-        string _errorStateInfo = "";
-
-        public string ErrorState
-        {
-            get
-            {
-                return _errorState;
-            }
-        }
-
-        public string ErrorStateInfo
-        {
-            get
-            {
-                return _errorStateInfo;
-            }
-        }
-
-        void SetErrorState(string state, string info)
-        {
-            if (state == "error")   // 出现错误，后面不再会重试
-                SetWholeColor(Color.DarkRed, Color.White);
-            else if (state == "retry")   // 出现错误，但后面会自动重试
-                SetWholeColor(Color.DarkOrange, Color.Black);
-            else if (state == "normal")  // 没有错误
-                SetWholeColor(SystemColors.Window, SystemColors.WindowText);
-            else
-                throw new Exception($"无法识别的 state={state}");
-
-            _errorState = state;
-            _errorStateInfo = info;
-        }
-
-        #endregion
 
         void StartTimer()
         {
@@ -1148,6 +1076,8 @@ MessageBoxDefaultButton.Button2);
             else
             {
                 this.button_cancel.Visible = bVisible;
+                if (bVisible)
+                    this.tabControl_main.SelectedTab = this.tabPage_start;
             }
         }
 
@@ -1521,7 +1451,7 @@ Keys keyData)
                         break;
 
                     // 如果初始化没有成功，则要追加初始化
-                    if (this.ErrorState == "normal")
+                    if (ClientInfo.ErrorState == "normal")
                         break;
 
                     delta = 0;

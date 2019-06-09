@@ -219,6 +219,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.ArcSoft", "Face
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.EyeCool", "FaceDrivers.EyeCool\FaceDrivers.EyeCool.csproj", "{EEDDD036-EB38-4BE8-A302-A4A3F206FE5D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.Hanwang", "FaceDrivers.Hanwang\FaceDrivers.Hanwang.csproj", "{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1754,6 +1756,24 @@ Global
 		{EEDDD036-EB38-4BE8-A302-A4A3F206FE5D}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{EEDDD036-EB38-4BE8-A302-A4A3F206FE5D}.Test|x86.ActiveCfg = Release|Any CPU
 		{EEDDD036-EB38-4BE8-A302-A4A3F206FE5D}.Test|x86.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Debug|x86.Build.0 = Debug|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|x86.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Release|x86.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|Any CPU.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|x86.ActiveCfg = Release|Any CPU
+		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

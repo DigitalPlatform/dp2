@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Speech.Synthesis;
-using System.Threading;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
-using System.Runtime.Serialization.Formatters;
-using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Interfaces;
-
+using DigitalPlatform.CirculationClient;
 
 namespace FingerprintCenter
 {
@@ -196,13 +190,13 @@ namespace FingerprintCenter
             lock (_syncRoot_messages)
             {
                 // Program.MainForm.OutputHistory($"messages.Count={_messages.Count}");
-                if (Program.MainForm.ErrorState != "normal")
+                if (ClientInfo.ErrorState != "normal")
                 {
                     return new GetMessageResult
                     {
                         Value = -1,
-                        ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
-                        ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                        ErrorInfo = $"{ClientInfo.ErrorStateInfo}",
+                        ErrorCode = $"state:{ClientInfo.ErrorState}"
                     };
                 }
                 if (_messages.Count == 0)
@@ -510,18 +504,18 @@ Exception rethrown at [0]:
 
         public NormalResult GetState(string style)
         {
-            if (Program.MainForm.ErrorState == "normal")
+            if (ClientInfo.ErrorState == "normal")
                 return new NormalResult
                 {
                     Value = 0,
-                    ErrorCode = Program.MainForm.ErrorState,
-                    ErrorInfo = Program.MainForm.ErrorStateInfo
+                    ErrorCode = ClientInfo.ErrorState,
+                    ErrorInfo = ClientInfo.ErrorStateInfo
                 };
             return new NormalResult
             {
                 Value = -1,
-                ErrorCode = Program.MainForm.ErrorState,
-                ErrorInfo = Program.MainForm.ErrorStateInfo
+                ErrorCode = ClientInfo.ErrorState,
+                ErrorInfo = ClientInfo.ErrorStateInfo
             };
         }
 

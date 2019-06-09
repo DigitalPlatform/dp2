@@ -8594,6 +8594,21 @@ out strError);
             return strText.Replace("\r", "\r\n");
         }
 
+        // 检查 strName 是否包含在 strIncludeFilenames 列表中
+        static bool IsInclude(string strName, string strIncludeFilenames)
+        {
+            // 注意 browse_xxx 要前方一致匹配
+            if (StringUtil.IsInList("browse", strIncludeFilenames))
+            {
+                if (strName == "browse")
+                    return true;
+                if (strName.StartsWith("browse_"))
+                    return true;
+            }
+
+            return StringUtil.IsInList(strName, strIncludeFilenames);
+        }
+
         // 根据数据库模板的定义，刷新一个已经存在的数据库的定义
         // parameters:
         //      bRecoverModeKeys    是否采用 keys_recover 来刷新 keys 配置文件
@@ -8648,13 +8663,21 @@ out strError);
 
 
                     // 如果Include和exclude里面都有一个文件名，优先依exclude(排除)
+                    if (IsInclude(strName, strExcludeFilenames))
+                        continue;
+                    /*
                     if (StringUtil.IsInList(strName, strExcludeFilenames) == true)
                         continue;
+                        */
 
                     if (strIncludeFilenames != "*")
                     {
+                        if (IsInclude(strName, strIncludeFilenames) == false)
+                            continue;
+                        /*
                         if (StringUtil.IsInList(strName, strIncludeFilenames) == false)
                             continue;
+                            */
                     }
 
                     string strFullPath = fis[i].FullName;

@@ -112,7 +112,14 @@ namespace DigitalPlatform.CirculationClient
 
         public void TriggerGetImage(GetImageEventArgs e)
         {
-            this.GetImage(this, e);
+            this.GetImage?.Invoke(this, e);
+        }
+
+        public Image TryGetImage()
+        {
+            var e = new GetImageEventArgs();
+            this.TriggerGetImage(e);
+            return e.Image;
         }
 
         public virtual TextResult GetRegisterString(Image image,
