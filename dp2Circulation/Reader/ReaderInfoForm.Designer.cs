@@ -428,7 +428,7 @@
             this.toolStripSplitButton_registerFace.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_registerFace.Name = "toolStripSplitButton_registerFace";
             this.toolStripSplitButton_registerFace.Size = new System.Drawing.Size(45, 28);
-            this.toolStripSplitButton_registerFace.Text = "toolStripSplitButton1";
+            this.toolStripSplitButton_registerFace.Text = "登记人脸(用于人脸识别)";
             this.toolStripSplitButton_registerFace.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFace_ButtonClick);
             // 
             // ToolStripMenuItem_pasteCardPhoto

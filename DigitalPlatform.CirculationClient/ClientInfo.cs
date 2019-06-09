@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
+using System.Drawing;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -101,6 +102,16 @@ namespace DigitalPlatform.CirculationClient
             string strServerUrl = GetValidPathString(strUrl.Replace("/", "_"));
 
             return Path.Combine(UserDir, "fingerprintcache\\" + strServerUrl);
+        }
+
+        /// <summary>
+        /// 人脸本地缓存目录
+        /// </summary>
+        public static string FaceCacheDir(string strUrl)
+        {
+            string strServerUrl = GetValidPathString(strUrl.Replace("/", "_"));
+
+            return Path.Combine(UserDir, "facecache\\" + strServerUrl);
         }
 
         public static string Lang = "zh";
@@ -905,5 +916,78 @@ delegate_action action)
         }
 
         #endregion
+
+        #region 错误状态
+
+        static void SetWholeColor(Color backColor, Color foreColor)
+        {
+            MainForm?.Invoke((Action)(() =>
+            {
+                ClientInfo.ProcessControl(MainForm,
+                    (o) =>
+                    {
+                        dynamic d = o;
+                        d.BackColor = backColor;
+                        d.ForeColor = foreColor;
+                    });
+
+#if NO
+                this.BackColor = backColor;
+                this.ForeColor = foreColor;
+                foreach (TabPage page in this.tabControl_main.TabPages)
+                {
+                    page.BackColor = backColor;
+                    page.ForeColor = foreColor;
+                }
+                this.toolStrip1.BackColor = backColor;
+                this.toolStrip1.ForeColor = foreColor;
+
+                this.menuStrip1.BackColor = backColor;
+                this.menuStrip1.ForeColor = foreColor;
+
+                this.statusStrip1.BackColor = backColor;
+                this.statusStrip1.ForeColor = foreColor;
+#endif
+            }));
+        }
+
+        // 错误状态
+        static string _errorState = "normal";    // error/retry/normal
+        // 错误状态描述
+        static string _errorStateInfo = "";
+
+        public static string ErrorState
+        {
+            get
+            {
+                return _errorState;
+            }
+        }
+
+        public static string ErrorStateInfo
+        {
+            get
+            {
+                return _errorStateInfo;
+            }
+        }
+
+        public static void SetErrorState(string state, string info)
+        {
+            if (state == "error")   // 出现错误，后面不再会重试
+                SetWholeColor(Color.DarkRed, Color.White);
+            else if (state == "retry")   // 出现错误，但后面会自动重试
+                SetWholeColor(Color.DarkOrange, Color.Black);
+            else if (state == "normal")  // 没有错误
+                SetWholeColor(SystemColors.Window, SystemColors.WindowText);
+            else
+                throw new Exception($"无法识别的 state={state}");
+
+            _errorState = state;
+            _errorStateInfo = info;
+        }
+
+        #endregion
+
     }
 }

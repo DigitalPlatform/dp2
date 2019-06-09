@@ -3048,8 +3048,16 @@ MessageBoxDefaultButton.Button1);
 
                     GetFeatureStringResult feature_result = ReadFeatureString(bytes, "", "").Result;
                     if (feature_result.Value == -1)
+                    {
+                        if (feature_result.ErrorCode == "getFeatureFail")
+                        {
+                            // 无法提取特征的情况，输出报错信息到操作历史，然后继续循环
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode($"无法提取人脸特征 {feature_result.ErrorInfo}") + "</div>");
+                            return false;
+                        }
                         throw new Exception(feature_result.ErrorInfo);
-                    // TODO: 注意对无法提取特征的情况，输出报错信息到操作历史，然后继续循环
+                    }
+
                     face.InnerText = feature_result.FeatureString;
                     face.SetAttribute("version", feature_result.Version);
                     Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("face 元素中人脸特征已经刷新") + "</div>");

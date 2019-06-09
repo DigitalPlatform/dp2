@@ -94,5 +94,7 @@ namespace DigitalPlatform.Interfaces
         public string Patron { get; set; }
         // [out] 分数。0-100
         public int Score { get; set; }
+
+        public string DebugInfo { get; set; }
     }
 }
