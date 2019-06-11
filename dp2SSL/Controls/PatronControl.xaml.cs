@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using DigitalPlatform.Text;
 
 namespace dp2SSL
@@ -47,6 +49,20 @@ namespace dp2SSL
         private void InputFace_Click(object sender, RoutedEventArgs e)
         {
             this.InputFace?.Invoke(sender, e);
+        }
+
+        public void SetPhoto(Stream stream)
+        {
+            if (stream == null)
+            {
+                this.photo.Source = null;
+                return;
+            }
+            var imageSource = new BitmapImage();
+            imageSource.BeginInit();
+            imageSource.StreamSource = stream;
+            imageSource.EndInit();
+            this.photo.Source = imageSource;
         }
     }
 }

@@ -71,7 +71,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -107,8 +107,6 @@ namespace DigitalPlatform.LibraryServer
                 string strItemRecPath = DomUtil.GetAttr(node, "recPath");
 
                 byte[] timestamp = null;
-                byte[] output_timestamp = null;
-                string strOutputPath = "";
 
                 // 写读者记录
                 lRet = channel.DoSaveTextRes(strReaderRecPath,
@@ -116,8 +114,8 @@ namespace DigitalPlatform.LibraryServer
     false,
     "content,ignorechecktimestamp",
     timestamp,
-    out output_timestamp,
-    out strOutputPath,
+    out byte[] output_timestamp,
+    out string strOutputPath,
     out strError);
                 if (lRet == -1)
                 {
@@ -178,14 +176,13 @@ out strError);
                     goto ERROR1;
                 }
 
-                string strLibraryCode = "";
                 // 获得读者库的馆代码
                 // return:
                 //      -1  出错
                 //      0   成功
                 nRet = GetLibraryCode(
                         strOutputReaderRecPath,
-                        out strLibraryCode,
+                        out string strLibraryCode,
                         out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -647,7 +644,7 @@ out strError);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverBorrow() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -753,12 +750,10 @@ out strError);
 
             // 检查strBorrowPeriod是否合法
             {
-                long lPeriodValue = 0;
-                string strPeriodUnit = "";
                 nRet = LibraryApplication.ParsePeriodUnit(
                     strThisBorrowPeriod,
-                    out lPeriodValue,
-                    out strPeriodUnit,
+                    out long lPeriodValue,
+                    out string strPeriodUnit,
                     out strError);
                 if (nRet == -1)
                 {
@@ -772,32 +767,9 @@ out strError);
             return 1;
         }
 
-        // 从 XML 元素设置到 XML 属性
-        static void SetAttribute(XmlDocument domLog,
-            string strAttrName,
-            XmlElement nodeBorrow)
-        {
-            string strValue = DomUtil.GetElementText(domLog.DocumentElement,
-strAttrName);
-            if (string.IsNullOrEmpty(strValue) == false)
-                nodeBorrow.SetAttribute(strAttrName, strValue);
-        }
 
-        // 从 XML 元素设置到 XML 属性
-        static void SetAttribute(ref XmlDocument dom,
-            string strElementName,
-            XmlElement nodeBorrow,
-            string strAttrName,
-            bool bDeleteElement)
-        {
-            string strValue = DomUtil.GetElementText(dom.DocumentElement,
-strElementName);
-            if (string.IsNullOrEmpty(strValue) == false)
-                nodeBorrow.SetAttribute(strAttrName, strValue);
 
-            if (bDeleteElement == true)
-                DomUtil.DeleteElement(dom.DocumentElement, strElementName);
-        }
+
 
         // 去除读者记录侧的借阅信息链条
         // return:
@@ -911,6 +883,8 @@ strElementName);
 
             return 1;
         }
+
+        public delegate void delegate_writeLog(string text);
 
         // 借阅操作，修改读者和册记录
         // parameters:
@@ -1113,7 +1087,7 @@ strElementName);
             DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strBorrowPeriod);
 
             // returningDate
-            SetAttribute(domLog,
+            LibraryServerUtil.SetAttribute(domLog,
                 "returningDate",
                 nodeBorrow);
 
@@ -1127,7 +1101,7 @@ strElementName);
 #if NO
             DomUtil.SetAttr(nodeBorrow, "operator", strOperator);
 #endif
-            SetAttribute(domLog,
+            LibraryServerUtil.SetAttribute(domLog,
     "operator",
     nodeBorrow);
 
@@ -1136,12 +1110,12 @@ strElementName);
                 DomUtil.SetAttr(nodeBorrow, "recoverComment", strItemBarcodeParam);
 
             // type
-            SetAttribute(domLog,
+            LibraryServerUtil.SetAttribute(domLog,
                 "type",
                 nodeBorrow);
 
             // price
-            SetAttribute(domLog,
+            LibraryServerUtil.SetAttribute(domLog,
                 "price",
                 nodeBorrow);
 
@@ -1152,7 +1126,6 @@ strElementName);
             if (string.IsNullOrEmpty(strBorrower0) == false
                 && strBorrower0 != strReaderBarcode)
             {
-                string strRemovedInfo = "";
 
                 // 去除读者记录侧的借阅信息链条
                 // return:
@@ -1164,15 +1137,17 @@ strElementName);
                     channel,
                     strBorrower0,
                     strItemBarcodeParam,
-                    out strRemovedInfo,
+                    out string strRemovedInfo,
                     out strError);
                 if (nRet == -1)
                 {
                     this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行借书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件尝试自动修正(删除)此读者记录的半侧借阅信息链。不过，在去除读者记录册借阅链时发生错误: " + strError);
+                    // writeLog?.Invoke($"册条码号为 '{strItemBarcodeParam}' 的册记录，在进行借书操作(拟被读者 '{strReaderBarcode}' 借阅)以前，发现它被另一读者 '{strBorrower0}' 持有，软件尝试自动修正(删除)此读者记录的半侧借阅信息链。不过，在去除读者记录册借阅链时发生错误: {strError}");
                 }
                 else
                 {
                     this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行借书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '" + strRemovedInfo + "'");
+                    // writeLog?.Invoke($"册条码号为 '{strItemBarcodeParam}' 的册记录，在进行借书操作(拟被读者 '{strReaderBarcode}' 借阅)以前，发现它被另一读者 '{strBorrower0}' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '{strRemovedInfo}'");
                 }
             }
 
@@ -1258,7 +1233,7 @@ strElementName);
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -1754,7 +1729,7 @@ strElementName);
                                 // 需要把根据“所借册条码号”清除读者记录中借阅信息的动作提前进行? 这样遇到特殊情况范围时，至少读者记录中的信息是被清除了的，这是容错的需要
                                 string strError_1 = "";
                                 nRet = ReturnAllReader(
-                                    // Channels,
+                                        // Channels,
                                         channel,
                                         strItemBarcode,
                                         "",
@@ -1920,7 +1895,7 @@ strElementName);
                 if (bDupItemBarcode == false)
                 {
                     nRet = ReturnAllReader(
-                        // Channels,
+                            // Channels,
                             channel,
                             strItemBarcode,
                             strOutputReaderRecPath,
@@ -1959,7 +1934,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverReturn() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -2135,7 +2110,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             return -1;
         }
 
@@ -2398,7 +2373,7 @@ strElementName);
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "borrower", "");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
         "borrower",
         nodeHistoryBorrower,
         "barcode",
@@ -2411,7 +2386,7 @@ strElementName);
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "borrowDate", "");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
     "borrowDate",
     nodeHistoryBorrower,
     "borrowDate",
@@ -2424,7 +2399,7 @@ strElementName);
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "returningDate", "");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
     "returningDate",
     nodeHistoryBorrower,
     "returningDate",
@@ -2437,7 +2412,7 @@ strElementName);
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "borrowPeriod", "");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
                         "borrowPeriod",
                         nodeHistoryBorrower,
                         "borrowPeriod",
@@ -2451,7 +2426,7 @@ strElementName);
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "operator", "");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
     "operator",
     nodeHistoryBorrower,
     "borrowOperator",
@@ -2474,7 +2449,7 @@ strElementName);
                 DomUtil.DeleteElement(itemdom.DocumentElement,
                     "no");
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
     "no",
     nodeHistoryBorrower,
     "no",
@@ -2495,7 +2470,7 @@ strElementName);
                         "renewComment");
                 }
 #endif
-                    SetAttribute(ref itemdom,
+                    LibraryServerUtil.SetAttribute(ref itemdom,
     "renewComment",
     nodeHistoryBorrower,
     "renewComment",
@@ -2602,7 +2577,7 @@ strElementName);
 
             bool bReuse = false;    // 是否能够不顾 RecoverLevel 状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -2669,7 +2644,7 @@ strElementName);
                         // 删除册记录
                         int nRedoCount = 0;
 
-                    REDO_DELETE:
+                        REDO_DELETE:
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
                             out output_timestamp,
@@ -2709,7 +2684,7 @@ strElementName);
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 删除册记录
                     lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
@@ -3491,7 +3466,7 @@ strElementName);
                     byte[] timestamp = exist_timestamp;
                     byte[] output_timestamp = null;
 
-                REDO:
+                    REDO:
                     // 删除册记录
                     lRet = channel.DoDeleteRes(strOutputItemRecPath,
                         timestamp,
@@ -3523,7 +3498,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetEntity() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -3570,7 +3545,7 @@ strElementName);
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -3637,7 +3612,7 @@ strElementName);
                         // 删除订购记录
                         int nRedoCount = 0;
 
-                    REDO_DELETE:
+                        REDO_DELETE:
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
                             out output_timestamp,
@@ -3677,7 +3652,7 @@ strElementName);
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 删除订购记录
                     lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
@@ -3909,7 +3884,7 @@ strElementName);
 
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetOrder() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -3957,7 +3932,7 @@ strElementName);
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -4024,7 +3999,7 @@ strElementName);
                         // 删除期记录
                         int nRedoCount = 0;
 
-                    REDO_DELETE:
+                        REDO_DELETE:
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
                             out output_timestamp,
@@ -4064,7 +4039,7 @@ strElementName);
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 删除期记录
                     lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
@@ -4296,7 +4271,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetIssue() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -4343,7 +4318,7 @@ strElementName);
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -4410,7 +4385,7 @@ strElementName);
                         // 删除评注记录
                         int nRedoCount = 0;
 
-                    REDO_DELETE:
+                        REDO_DELETE:
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
                             out output_timestamp,
@@ -4450,7 +4425,7 @@ strElementName);
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 删除评注记录
                     lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
@@ -4681,7 +4656,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetComment() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -4750,7 +4725,7 @@ strElementName);
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -4856,7 +4831,7 @@ strElementName);
 
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverChangeReaderPassword() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -4994,7 +4969,7 @@ strElementName);
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
                     int nRedoCount = 0;
-                REDO:
+                    REDO:
                     // 删除读者记录
                     lRet = channel.DoDeleteRes(strRecPath,
                         timestamp,
@@ -5250,7 +5225,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetReaderInfo() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -5368,7 +5343,7 @@ strElementName);
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -5428,7 +5403,7 @@ strElementName);
 
                         int nRedoCount = 0;
                         string strError0 = "";
-                    REDO:
+                        REDO:
                         // 删除违约金记录
                         lRet = channel.DoDeleteRes(strRecPath,
                             timestamp,
@@ -5722,7 +5697,7 @@ strElementName);
                         // 删除违约金记录
                         int nRedoCount = 0;
                         byte[] timestamp = null;
-                    REDO:
+                        REDO:
                         // 删除违约金记录
                         lRet = channel.DoDeleteRes(strRecPath,
                             timestamp,
@@ -5816,7 +5791,7 @@ strElementName);
 
             return 0;
 
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverAmerce() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -5977,7 +5952,7 @@ strElementName);
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -6294,7 +6269,7 @@ strElementName);
             }
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverDevolveReaderInfo() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -6360,7 +6335,7 @@ strElementName);
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                 "action");
@@ -6528,13 +6503,13 @@ strElementName);
                     {
                         string[] element_names = new string[] {
                             "copyEntityRecords",
-                            "moveEntityRecords",  
-                            "copyOrderRecords", 
+                            "moveEntityRecords",
+                            "copyOrderRecords",
                             "moveOrderRecords",
-                            "copyIssueRecords", 
-                            "moveIssueRecords",   
-                            "copyCommentRecords", 
-                            "moveCommentRecords"     
+                            "copyIssueRecords",
+                            "moveIssueRecords",
+                            "copyCommentRecords",
+                            "moveCommentRecords"
                         };
 
                         for (int i = 0; i < element_names.Length; i++)
@@ -6561,7 +6536,7 @@ strElementName);
                         )
                     {
                         int nRedoCount = 0;
-                    REDO_DELETE:
+                        REDO_DELETE:
                         // 删除源书目记录
                         lRet = channel.DoDeleteRes(strOldRecPath,
                             timestamp,
@@ -6608,7 +6583,7 @@ strElementName);
                     if (strAction != "onlydeletesubrecord")
                     {
                         int nRedoCount = 0;
-                    REDO:
+                        REDO:
                         // 删除书目记录
                         lRet = channel.DoDeleteRes(strRecPath,
                             timestamp,
@@ -6632,7 +6607,7 @@ strElementName);
                         }
                     }
 
-                DO_DELETE_CHILD_ENTITYRECORDS:
+                    DO_DELETE_CHILD_ENTITYRECORDS:
                     if (strAction == "delete" || strAction == "onlydeletesubrecord")
                     {
                         XmlNodeList nodes = domLog.DocumentElement.SelectNodes("deletedEntityRecords/record");
@@ -6645,7 +6620,7 @@ strElementName);
                                 continue;
                              * */
                             int nRedoDeleteCount = 0;
-                        REDO_DELETE_ENTITY:
+                            REDO_DELETE_ENTITY:
                             // 删除实体记录
                             lRet = channel.DoDeleteRes(strEntityRecPath,
                                 timestamp,
@@ -6677,7 +6652,7 @@ strElementName);
                             if (String.IsNullOrEmpty(strOrderRecPath) == true)
                                 continue;
                             int nRedoDeleteCount = 0;
-                        REDO_DELETE_ORDER:
+                            REDO_DELETE_ORDER:
                             // 删除订购记录
                             lRet = channel.DoDeleteRes(strOrderRecPath,
                                 timestamp,
@@ -6709,7 +6684,7 @@ strElementName);
                             if (String.IsNullOrEmpty(strIssueRecPath) == true)
                                 continue;
                             int nRedoDeleteCount = 0;
-                        REDO_DELETE_ISSUE:
+                            REDO_DELETE_ISSUE:
                             // 删除期记录
                             lRet = channel.DoDeleteRes(strIssueRecPath,
                                 timestamp,
@@ -6780,7 +6755,7 @@ strElementName);
                         int nRedoCount = 0;
                         byte[] timestamp = null;
                         byte[] output_timestamp = null;
-                    REDO:
+                        REDO:
                         // 删除书目记录
                         lRet = channel.DoDeleteRes(strRecPath,
                             timestamp,
@@ -6804,7 +6779,7 @@ strElementName);
                         }
                     }
 
-                DO_DELETE_CHILD_ENTITYRECORDS:
+                    DO_DELETE_CHILD_ENTITYRECORDS:
 
                     if (strAction == "delete" || strAction == "onlydeletesubrecord")
                     {
@@ -6863,7 +6838,7 @@ strElementName);
                 }
             }
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSetBiblioInfo() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -7006,7 +6981,7 @@ API: Hire()
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -7169,7 +7144,7 @@ API: Hire()
 
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverHire() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -7218,7 +7193,7 @@ API: Foregift()
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -7380,7 +7355,7 @@ API: Foregift()
 
 
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverForegift() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -7428,7 +7403,7 @@ API: Settlement()
                 return -1;
             }
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
@@ -7489,7 +7464,7 @@ API: Settlement()
                     byte[] timestamp = null;
                     byte[] output_timestamp = null;
 
-                REDO_DELETE:
+                    REDO_DELETE:
                     lRet = channel.DoDeleteRes(strOldAmerceRecPath,
                         timestamp,
                         out output_timestamp,
@@ -7626,7 +7601,7 @@ API: Settlement()
 
             }
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverSettlement() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -7675,7 +7650,7 @@ API: Settlement()
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-        DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot
@@ -7834,7 +7809,7 @@ domLog.DocumentElement,
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot
@@ -7997,7 +7972,7 @@ DO_SNAPSHOT:
                     }
                 }
 
-            CONTINUE_REPAIR:
+                CONTINUE_REPAIR:
 
                 XmlDocument itemdom = null;
                 if (string.IsNullOrEmpty(strItemXml) == false)
@@ -8130,7 +8105,7 @@ DO_SNAPSHOT:
                 goto DO_SNAPSHOT;
             }
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverRepairBorrowInfo() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -8180,7 +8155,7 @@ out string strError)
 
             bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
-DO_SNAPSHOT:
+            DO_SNAPSHOT:
 
             // 快照恢复
             if (level == RecoverLevel.Snapshot
@@ -8308,7 +8283,7 @@ DO_SNAPSHOT:
                 goto DO_SNAPSHOT;
             }
             return 0;
-        ERROR1:
+            ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)
             {
                 WriteErrorLog($"RecoverManageDatabase() 用 LogicAndSnapShot 方式恢复遇到报错 {strError}，后面自动改用 SnapShot 方式尝试 ...");
@@ -8361,8 +8336,8 @@ DO_SNAPSHOT:
                     {
                         if (this.VerifyDatabaseDelete(
                             channel,
-                            strDbType, 
-                            dbname, 
+                            strDbType,
+                            dbname,
                             out strError) == -1)
                             return -1;
                     }
@@ -8387,11 +8362,11 @@ DO_SNAPSHOT:
                     {
                         if (this.VerifyDatabaseDelete(
                             channel,
-                            strDbType, 
-                            dbname, 
+                            strDbType,
+                            dbname,
                             out strError) == -1)
                             return -1;
-                    } 
+                    }
                     continue;
                 }
 
@@ -8431,7 +8406,7 @@ DO_SNAPSHOT:
                             dbname,
                             out strError) == -1)
                             return -1;
-                    } 
+                    }
                     continue;
                 }
 
@@ -8458,11 +8433,11 @@ DO_SNAPSHOT:
                     {
                         Debug.Assert(string.IsNullOrEmpty(strDbType) == false, "");
                         if (this.VerifyDatabaseDelete(channel,
-                            strDbType, 
+                            strDbType,
                             dbname,
                             out strError) == -1)
                             return -1;
-                    } 
+                    }
                     continue;
                 }
 

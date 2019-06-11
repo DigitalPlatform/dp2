@@ -47,7 +47,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -56,6 +56,10 @@
                     <RowDefinition Height="Auto"/>
 
                 </Grid.RowDefinitions>
+
+                <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
+                       MaxWidth="160" MinHeight="40"
+                          Margin="0" HorizontalAlignment="Left"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="1" 
                            Text="UID" 

@@ -4,6 +4,8 @@ using System.Xml;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.Xml;
+using System.Collections.Generic;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -320,6 +322,624 @@ namespace DigitalPlatform.LibraryServer
                 strLocation) == true)
                 return true;
             return false;
+        }
+
+        // parameters:
+        //      strItemBarcodeParam 册条码号。可以使用 @refID: 前缀
+        public static int ReturnChangeReaderAndItemRecord(
+            string strAction,
+            string strItemBarcodeParam,
+            string strReaderBarcode,
+            XmlDocument domLog,
+            string strRecoverComment,
+            ref XmlDocument readerdom,
+            ref XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+
+
+            if (strAction != "return" && strAction != "lost")
+            {
+                strError = "ReturnChangeReaderAndItemRecord() 只能处理 strAction 为 'return' 和 'lost' 的情况，不能处理 '" + strAction + "'";
+                return -1;
+            }
+
+            string strReturnOperator = DomUtil.GetElementText(domLog.DocumentElement,
+    "operator");
+
+            string strOperTime = DomUtil.GetElementText(domLog.DocumentElement,
+    "operTime");
+
+            // *** 修改读者记录
+            string strDeletedBorrowFrag = "";
+            XmlNode dup_reader_history = null;
+
+            // 既然日志记录中记载的是 @refID: 的形态，那读者记录中 borrows 里面势必记载的也是这个形态
+            XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode(
+                "borrows/borrow[@barcode='" + strItemBarcodeParam + "']");
+            if (nodeBorrow != null)
+            {
+                if (String.IsNullOrEmpty(strRecoverComment) == false)
+                {
+                    string strText = strRecoverComment;
+                    string strOldRecoverComment = DomUtil.GetAttr(nodeBorrow, "recoverComment");
+                    if (String.IsNullOrEmpty(strOldRecoverComment) == false)
+                        strText = "(借阅时原注: " + strOldRecoverComment + ") " + strRecoverComment;
+                    DomUtil.SetAttr(nodeBorrow, "recoverComment", strText);
+                }
+                strDeletedBorrowFrag = nodeBorrow.OuterXml;
+                nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
+
+                // 获得几个查重需要的参数
+                XmlDocument temp = new XmlDocument();
+                temp.LoadXml(strDeletedBorrowFrag);
+                string strItemBarcode = temp.DocumentElement.GetAttribute("barcode");
+                string strBorrowDate = temp.DocumentElement.GetAttribute("borrowDate");
+                string strBorrowPeriod = temp.DocumentElement.GetAttribute("borrowPeriod");
+
+                dup_reader_history = readerdom.DocumentElement.SelectSingleNode("borrowHistory/borrow[@barcode='" + strItemBarcode + "' and @borrowDate='" + strBorrowDate + "' and @borrowPeriod='" + strBorrowPeriod + "']");
+            }
+
+            // 加入到读者记录借阅历史字段中
+
+            if (string.IsNullOrEmpty(strDeletedBorrowFrag) == false
+                && dup_reader_history == null)
+            {
+                // 看看根下面是否有 borrowHistory 元素
+                XmlNode root = readerdom.DocumentElement.SelectSingleNode("borrowHistory");
+                if (root == null)
+                {
+                    root = readerdom.CreateElement("borrowHistory");
+                    readerdom.DocumentElement.AppendChild(root);
+                }
+
+                XmlDocumentFragment fragment = readerdom.CreateDocumentFragment();
+                fragment.InnerXml = strDeletedBorrowFrag;
+
+                // 插入到最前面
+                XmlNode temp = DomUtil.InsertFirstChild(root, fragment);
+                // 2007/6/19
+                if (temp != null)
+                {
+                    // returnDate 加入还书时间
+                    DomUtil.SetAttr(temp, "returnDate", strOperTime);
+
+                    // borrowOperator
+                    string strBorrowOperator = DomUtil.GetAttr(temp, "operator");
+                    // 把原来的operator属性值复制到borrowOperator属性中
+                    DomUtil.SetAttr(temp, "borrowOperator", strBorrowOperator);
+
+
+                    // operator 此时需要表示还书操作者了
+                    DomUtil.SetAttr(temp, "operator", strReturnOperator);
+
+                }
+                // 如果超过100个，则删除多余的
+                while (root.ChildNodes.Count > 100)
+                    root.RemoveChild(root.ChildNodes[root.ChildNodes.Count - 1]);
+
+                // 2007/6/19
+                // 增量借阅量属性值
+                string strBorrowCount = DomUtil.GetAttr(root, "count");
+                if (String.IsNullOrEmpty(strBorrowCount) == true)
+                    strBorrowCount = "1";
+                else
+                {
+                    long lCount = 1;
+                    try
+                    {
+                        lCount = Convert.ToInt64(strBorrowCount);
+                    }
+                    catch { }
+                    lCount++;
+                    strBorrowCount = lCount.ToString();
+                }
+                DomUtil.SetAttr(root, "count", strBorrowCount);
+            }
+
+            // 增添超期信息
+            string strOverdueString = DomUtil.GetElementText(domLog.DocumentElement,
+                "overdues");
+            if (String.IsNullOrEmpty(strOverdueString) == false)
+            {
+                XmlDocumentFragment fragment = readerdom.CreateDocumentFragment();
+                fragment.InnerXml = strOverdueString;
+
+                List<string> existing_ids = new List<string>();
+
+                // 看看根下面是否有overdues元素
+                XmlNode root = readerdom.DocumentElement.SelectSingleNode("overdues");
+                if (root == null)
+                {
+                    root = readerdom.CreateElement("overdues");
+                    readerdom.DocumentElement.AppendChild(root);
+                }
+                else
+                {
+                    // 记载以前已经存在的 id
+                    XmlNodeList nodes = root.SelectNodes("overdue");
+                    foreach (XmlElement node in nodes)
+                    {
+                        string strID = node.GetAttribute("id");
+                        if (string.IsNullOrEmpty(strID) == false)
+                            existing_ids.Add(strID);
+                    }
+                }
+
+                // root.AppendChild(fragment);
+                {
+                    // 一个一个加入，丢掉重复 id 属性值得 overdue 元素
+                    XmlNodeList nodes = fragment.SelectNodes("overdue");
+                    foreach (XmlElement node in nodes)
+                    {
+                        string strID = node.GetAttribute("id");
+                        if (existing_ids.IndexOf(strID) != -1)
+                            continue;
+                        root.AppendChild(node);
+                    }
+                }
+            }
+
+            if (itemdom != null)
+            {
+
+                // *** 检查册记录操作前在借的读者，是否指向另外一个读者。如果是这样，则需要事先消除相关的另一个读者记录的痕迹，也就是说相当于把相关的册给进行还书操作
+                string strBorrower0 = DomUtil.GetElementInnerText(itemdom.DocumentElement,
+        "borrower");
+                if (string.IsNullOrEmpty(strBorrower0) == false
+                    && strBorrower0 != strReaderBarcode)
+                {
+#if NO
+                string strRemovedInfo = "";
+
+                // 去除读者记录侧的借阅信息链条
+                // return:
+                //      -1  出错
+                //      0   没有必要修复
+                //      1   修复成功
+                nRet = RemoveReaderSideLink(
+                    // Channels,
+                    channel,
+                    strBorrower0,
+                    strItemBarcodeParam,
+                    out strRemovedInfo,
+                    out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行还书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件尝试自动修正(删除)此读者记录的半侧借阅信息链。不过，在去除读者记录册借阅链时发生错误: " + strError);
+                }
+                else
+                {
+                    this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行还书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '" + strRemovedInfo + "'");
+                }
+#endif
+                }
+
+
+                // *** 修改册记录
+                XmlElement nodeHistoryBorrower = null;
+
+                string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement, "borrower");
+
+                XmlNode dup_item_history = null;
+                // 看看相同借者、借阅日期、换回日期的 BorrowHistory/borrower 元素是否已经存在
+                {
+                    string strBorrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
+                    dup_item_history = itemdom.DocumentElement.SelectSingleNode("borrowHistory/borrower[@barcode='" + strBorrower + "' and @borrowDate='" + strBorrowDate + "' and @returnDate='" + strOperTime + "']");
+                }
+
+                if (dup_item_history != null)
+                {
+                    // 历史信息节点已经存在，就不必加入了
+
+                    // 清空相关元素
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+        "borrower");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "borrowDate");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "returningDate");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "borrowPeriod");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "operator");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "no");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+    "renewComment");
+                }
+                else
+                {
+                    // 加入历史信息节点
+
+                    // TODO: 也可从 domLog 中取得信息，创建 borrowHistory 下级事项。但要防范重复加入的情况
+                    // 这里判断册记录中 borrower 元素是否为空的做法，具有可以避免重复加入 borrowHistory 下级事项的优点
+                    if (string.IsNullOrEmpty(strBorrower) == false)
+                    {
+                        // 加入到借阅历史字段中
+                        {
+                            // 看看根下面是否有borrowHistory元素
+                            XmlNode root = itemdom.DocumentElement.SelectSingleNode("borrowHistory");
+                            if (root == null)
+                            {
+                                root = itemdom.CreateElement("borrowHistory");
+                                itemdom.DocumentElement.AppendChild(root);
+                            }
+
+                            nodeHistoryBorrower = itemdom.CreateElement("borrower");
+
+                            // 插入到最前面
+                            nodeHistoryBorrower = DomUtil.InsertFirstChild(root, nodeHistoryBorrower) as XmlElement;  // 2015/1/12 增加等号左边的部分
+
+                            // 如果超过100个，则删除多余的
+                            while (root.ChildNodes.Count > 100)
+                                root.RemoveChild(root.ChildNodes[root.ChildNodes.Count - 1]);
+                        }
+
+#if NO
+                DomUtil.SetAttr(nodeOldBorrower,
+                    "barcode",
+                    DomUtil.GetElementText(itemdom.DocumentElement, "borrower"));
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrower", "");
+#endif
+                        SetAttribute(ref itemdom,
+            "borrower",
+            nodeHistoryBorrower,
+            "barcode",
+            true);
+
+#if NO
+                DomUtil.SetAttr(nodeOldBorrower,
+                  "borrowDate",
+                  DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate"));
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrowDate", "");
+#endif
+                        SetAttribute(ref itemdom,
+        "borrowDate",
+        nodeHistoryBorrower,
+        "borrowDate",
+        true);
+
+#if NO
+                DomUtil.SetAttr(nodeOldBorrower,
+      "returningDate",
+      DomUtil.GetElementText(itemdom.DocumentElement, "returningDate"));
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "returningDate", "");
+#endif
+                        SetAttribute(ref itemdom,
+        "returningDate",
+        nodeHistoryBorrower,
+        "returningDate",
+        true);
+
+                        SetAttribute(ref itemdom,
+                            "borrowPeriod",
+                            nodeHistoryBorrower,
+                            "borrowPeriod",
+                            true);
+
+                        // borrowOperator
+                        SetAttribute(ref itemdom,
+        "operator",
+        nodeHistoryBorrower,
+        "borrowOperator",
+        true);
+
+                        // operator 本次还书的操作者
+                        DomUtil.SetAttr(nodeHistoryBorrower,
+                          "operator",
+                          strReturnOperator);
+
+                        DomUtil.SetAttr(nodeHistoryBorrower,
+              "returnDate",
+              strOperTime);
+
+                        // TODO: 0 需要省略
+                        SetAttribute(ref itemdom,
+        "no",
+        nodeHistoryBorrower,
+        "no",
+        true);
+
+                        // renewComment
+                        SetAttribute(ref itemdom,
+        "renewComment",
+        nodeHistoryBorrower,
+        "renewComment",
+        true);
+
+                        {
+                            string strText = strRecoverComment;
+                            string strOldRecoverComment = DomUtil.GetElementText(itemdom.DocumentElement, "recoverComment");
+                            if (String.IsNullOrEmpty(strOldRecoverComment) == false)
+                                strText = "(借阅时原注: " + strOldRecoverComment + ") " + strRecoverComment;
+
+                            if (String.IsNullOrEmpty(strText) == false)
+                            {
+                                DomUtil.SetAttr(nodeHistoryBorrower,
+                                    "recoverComment",
+                                    strText);
+                            }
+                        }
+                    }
+
+                    if (strAction == "lost")
+                    {
+                        // 修改册记录的<state>
+                        string strState = DomUtil.GetElementText(itemdom.DocumentElement,
+                            "state");
+                        if (nodeHistoryBorrower != null)
+                        {
+                            DomUtil.SetAttr(nodeHistoryBorrower,
+            "state",
+            strState);
+                        }
+
+                        if (String.IsNullOrEmpty(strState) == false)
+                            strState += ",";
+                        strState += "丢失";
+                        DomUtil.SetElementText(itemdom.DocumentElement,
+                            "state", strState);
+
+                        // 将日志记录中的<lostComment>内容追加写入册记录的<comment>中
+                        string strLostComment = DomUtil.GetElementText(domLog.DocumentElement,
+                            "lostComment");
+
+                        if (strLostComment != "")
+                        {
+                            string strComment = DomUtil.GetElementText(itemdom.DocumentElement,
+                                "comment");
+
+                            if (nodeHistoryBorrower != null)
+                            {
+                                DomUtil.SetAttr(nodeHistoryBorrower,
+                                    "comment",
+                                    strComment);
+                            }
+
+                            if (String.IsNullOrEmpty(strComment) == false)
+                                strComment += "\r\n";
+                            strComment += strLostComment;
+                            DomUtil.SetElementText(itemdom.DocumentElement,
+                                "comment", strComment);
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        // 从 XML 元素设置到 XML 属性
+        public static void SetAttribute(ref XmlDocument dom,
+            string strElementName,
+            XmlElement nodeBorrow,
+            string strAttrName,
+            bool bDeleteElement)
+        {
+            string strValue = DomUtil.GetElementText(dom.DocumentElement,
+strElementName);
+            if (string.IsNullOrEmpty(strValue) == false)
+                nodeBorrow.SetAttribute(strAttrName, strValue);
+
+            if (bDeleteElement == true)
+                DomUtil.DeleteElement(dom.DocumentElement, strElementName);
+        }
+
+        // 借阅操作，修改读者和册记录
+        // parameters:
+        //      strItemBarcodeParam 册条码号。可以使用 @refID: 前缀
+        //      strLibraryCode  读者记录所从属的读者库的馆代码
+        public static int BorrowChangeReaderAndItemRecord(
+            string strItemBarcodeParam,
+            string strReaderBarcode,
+            XmlDocument domLog,
+            string strRecoverComment,
+            // string strLibraryCode,
+            ref XmlDocument readerdom,
+            ref XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strOperator = DomUtil.GetElementText(domLog.DocumentElement,
+    "operator");
+
+            // *** 修改读者记录
+            string strNo = DomUtil.GetElementText(domLog.DocumentElement,
+                "no");
+
+            int nNo = 0;
+            if (string.IsNullOrEmpty(strNo) == false
+                && Int32.TryParse(strNo, out nNo) == false)
+            {
+                strError = "<no>元素值 '" + strNo + "' 应该为纯数字";
+                return -1;
+            }
+
+            XmlElement nodeBorrow = null;
+
+            // 既然日志记录中记载的是 @refID: 的形态，那读者记录中 borrows 里面势必记载的也是这个形态
+            nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcodeParam + "']") as XmlElement;
+
+            if (nodeBorrow != null)
+            {
+                // 为了提高容错能力，续借操作时不去追究以前是否借阅过
+            }
+            else
+            {
+                // 检查<borrows>元素是否存在
+                XmlNode root = readerdom.DocumentElement.SelectSingleNode("borrows");
+                if (root == null)
+                {
+                    root = readerdom.CreateElement("borrows");
+                    root = readerdom.DocumentElement.AppendChild(root);
+                }
+
+                // 加入借阅册信息
+                nodeBorrow = readerdom.CreateElement("borrow");
+                nodeBorrow = root.AppendChild(nodeBorrow) as XmlElement;
+            }
+
+            // 
+            // barcode
+            DomUtil.SetAttr(nodeBorrow, "barcode", strItemBarcodeParam);
+
+            string strRenewComment = "";
+
+            string strBorrowDate = DomUtil.GetElementText(domLog.DocumentElement,
+                "borrowDate");
+
+            if (nNo >= 1)
+            {
+                // 保存前一次借阅的信息
+                strRenewComment = DomUtil.GetAttr(nodeBorrow, "renewComment");
+
+                if (strRenewComment != "")
+                    strRenewComment += "; ";
+
+                strRenewComment += "no=" + Convert.ToString(nNo - 1) + ", ";
+                strRenewComment += "borrowDate=" + DomUtil.GetAttr(nodeBorrow, "borrowDate") + ", ";
+                strRenewComment += "borrowPeriod=" + DomUtil.GetAttr(nodeBorrow, "borrowPeriod") + ", ";
+                strRenewComment += "returnDate=" + strBorrowDate + ", ";
+                strRenewComment += "operator=" + DomUtil.GetAttr(nodeBorrow, "operator");
+            }
+
+            // borrowDate
+            DomUtil.SetAttr(nodeBorrow, "borrowDate",
+                strBorrowDate);
+
+            // no
+            DomUtil.SetAttr(nodeBorrow, "no", Convert.ToString(nNo));
+
+            // borrowPeriod
+            string strBorrowPeriod = DomUtil.GetElementText(domLog.DocumentElement,
+                "borrowPeriod");
+
+            if (String.IsNullOrEmpty(strBorrowPeriod) == true)
+            {
+                strBorrowPeriod = DomUtil.GetElementText(domLog.DocumentElement,
+"defaultBorrowPeriod");
+                if (String.IsNullOrEmpty(strBorrowPeriod) == true)
+                    strBorrowPeriod = "60day";// 简单化处理
+            }
+
+            DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strBorrowPeriod);
+
+            // returningDate
+            SetAttribute(domLog,
+                "returningDate",
+                nodeBorrow);
+
+            // renewComment
+            {
+                if (string.IsNullOrEmpty(strRenewComment) == false)
+                    DomUtil.SetAttr(nodeBorrow, "renewComment", strRenewComment);
+            }
+
+            // operator
+            SetAttribute(domLog,
+    "operator",
+    nodeBorrow);
+
+            // recoverComment
+            if (String.IsNullOrEmpty(strRecoverComment) == false)
+                DomUtil.SetAttr(nodeBorrow, "recoverComment", strItemBarcodeParam);
+
+            // type
+            SetAttribute(domLog,
+                "type",
+                nodeBorrow);
+
+            // price
+            SetAttribute(domLog,
+                "price",
+                nodeBorrow);
+
+            if (itemdom != null)
+            {
+                // *** 检查册记录以前是否存在在借的痕迹，如果存在的话，(如果指向当前读者倒是无妨了反正后面即将要覆盖) 需要事先消除相关的另一个读者记录的痕迹，也就是说相当于把相关的册给进行还书操作
+                string strBorrower0 = DomUtil.GetElementInnerText(itemdom.DocumentElement,
+                "borrower");
+                if (string.IsNullOrEmpty(strBorrower0) == false
+                    && strBorrower0 != strReaderBarcode)
+                {
+#if NO
+                // 去除读者记录侧的借阅信息链条
+                // return:
+                //      -1  出错
+                //      0   没有必要修复
+                //      1   修复成功
+                nRet = RemoveReaderSideLink(
+                    // Channels,
+                    channel,
+                    strBorrower0,
+                    strItemBarcodeParam,
+                    out string strRemovedInfo,
+                    out strError);
+                if (nRet == -1)
+                {
+                    //this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行借书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件尝试自动修正(删除)此读者记录的半侧借阅信息链。不过，在去除读者记录册借阅链时发生错误: " + strError);
+                    writeLog?.Invoke($"册条码号为 '{strItemBarcodeParam}' 的册记录，在进行借书操作(拟被读者 '{strReaderBarcode}' 借阅)以前，发现它被另一读者 '{strBorrower0}' 持有，软件尝试自动修正(删除)此读者记录的半侧借阅信息链。不过，在去除读者记录册借阅链时发生错误: {strError}");
+                }
+                else
+                {
+                    //this.WriteErrorLog("册条码号为 '" + strItemBarcodeParam + "' 的册记录，在进行借书操作(拟被读者 '" + strReaderBarcode + "' 借阅)以前，发现它被另一读者 '" + strBorrower0 + "' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '" + strRemovedInfo + "'");
+                    writeLog?.Invoke($"册条码号为 '{strItemBarcodeParam}' 的册记录，在进行借书操作(拟被读者 '{strReaderBarcode}' 借阅)以前，发现它被另一读者 '{strBorrower0}' 持有，软件已经自动修正(删除)了此读者记录的半侧借阅信息链。被移走的片断 XML 信息为 '{strRemovedInfo}'");
+                }
+#endif
+                }
+
+
+                // *** 修改册记录
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrower", strReaderBarcode);
+
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrowDate",
+                    strBorrowDate);
+
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "no",
+                    Convert.ToString(nNo));
+
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "borrowPeriod",
+                    strBorrowPeriod);
+
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "renewComment",
+                    strRenewComment);
+
+                DomUtil.SetElementText(itemdom.DocumentElement,
+        "operator",
+        strOperator);
+
+                // recoverComment
+                if (String.IsNullOrEmpty(strRecoverComment) == false)
+                {
+                    DomUtil.SetElementText(itemdom.DocumentElement,
+            "recoverComment",
+            strRecoverComment);
+                }
+            }
+            return 0;
+        }
+
+        // 从 XML 元素设置到 XML 属性
+        public static void SetAttribute(XmlDocument domLog,
+            string strAttrName,
+            XmlElement nodeBorrow)
+        {
+            string strValue = DomUtil.GetElementText(domLog.DocumentElement,
+strAttrName);
+            if (string.IsNullOrEmpty(strValue) == false)
+                nodeBorrow.SetAttribute(strAttrName, strValue);
         }
     }
 }
