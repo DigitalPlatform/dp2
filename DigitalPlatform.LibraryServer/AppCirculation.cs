@@ -2361,7 +2361,7 @@ start_time_1,
             // 顺便也把占空间的一些元素剪裁了
             // 注：只有当 borrows 元素被裁剪的时候，fingerprint 元素才会被裁剪。所以判断读者记录是否被裁剪的时候，只要判断 borrows 元素的 clipping 属性就可以了
             ClipElement(target.DocumentElement, "fingerprint");
-
+            ClipElement(target.DocumentElement, "face");
             return target.OuterXml;
         }
 

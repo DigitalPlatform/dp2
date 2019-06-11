@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -331,6 +332,14 @@ namespace dp2SSL
 
         private void _patron_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == "PhotoPath")
+            {
+                Task.Run(() =>
+                {
+                    LoadPhoto(_patron.PhotoPath);
+                });
+            }
+
             if (e.PropertyName == "UID"
                 || e.PropertyName == "Barcode")
             {
@@ -764,7 +773,8 @@ namespace dp2SSL
             //      0   读者记录没有找到
             //      1   成功
             NormalResult result = GetReaderInfo(pii,
-    out string reader_xml);
+                out string recpath,
+                out string reader_xml);
             if (result.Value != 1)
             {
                 SetPatronError("getreaderinfo", $"读者 '{pii}': {result.ErrorInfo}");
@@ -773,10 +783,67 @@ namespace dp2SSL
 
             SetPatronError("getreaderinfo", "");
 
+            string old_photopath = _patron.PhotoPath;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                _patron.SetPatronXml(reader_xml);
+                _patron.SetPatronXml(recpath, reader_xml);
             }));
+
+#if NO
+            // 装载图象
+            if (old_photopath != _patron.PhotoPath)
+            {
+                Task.Run(()=> {
+                    LoadPhoto(_patron.PhotoPath);
+                });
+            }
+#endif
+        }
+
+        void LoadPhoto(string photo_path)
+        {
+            if (string.IsNullOrEmpty(photo_path))
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.patronControl.SetPhoto(null);
+                }));
+                return;
+            }
+
+            Stream stream = new MemoryStream();
+            var channel = App.CurrentApp.GetChannel();
+            try
+            {
+                long lRet = channel.GetRes(
+                    null,
+                    photo_path,
+                    stream,
+                    "data,content", // strGetStyle,
+                    null,   // byte [] input_timestamp,
+                    out string strMetaData,
+                    out byte [] baOutputTimeStamp,
+                    out string strOutputPath,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    SetGlobalError("patron", $"获取读者照片时出错: {strError}");
+                    return;
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.patronControl.SetPhoto(stream);
+                }));
+                stream = null;
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+                if (stream != null)
+                    stream.Dispose();
+            }
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
@@ -949,9 +1016,11 @@ out string strError);
         //      0   读者记录没有找到
         //      1   成功
         NormalResult GetReaderInfo(string pii,
+            out string recpath,
             out string reader_xml)
         {
             reader_xml = "";
+            recpath = "";
             if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
                 return new NormalResult { Value = -1, ErrorInfo = "dp2library 服务器 URL 尚未配置，无法获得读者信息" };
             LibraryChannel channel = App.CurrentApp.GetChannel();
@@ -961,6 +1030,8 @@ out string strError);
                     pii,
                     "xml",
                     out string[] results,
+                    out recpath,
+                    out byte[] baTimestamp,
                     out string strError);
                 if (lRet == -1)
                     return new NormalResult { Value = -1, ErrorInfo = strError };
@@ -969,7 +1040,6 @@ out string strError);
 
                 if (results != null && results.Length > 0)
                     reader_xml = results[0];
-
                 return new NormalResult { Value = 1 };
             }
             finally
@@ -978,7 +1048,7 @@ out string strError);
             }
         }
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1041,7 +1111,7 @@ out string strError);
         }
 
 
-        #endregion
+#endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1461,7 +1531,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1502,9 +1572,9 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region global 分类报错机制
+#region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1548,7 +1618,7 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
     }
 }

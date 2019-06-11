@@ -29,6 +29,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2Circulation
 {
@@ -9116,10 +9117,52 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
+        // 检查记录路径，按照书目记录和读者记录分类列出类型。
+        // 类型决定了 OperLogLoader 的 filter
+        List<string> GetRecordTypes(List<string> recpath_list)
+        {
+            Hashtable types = new Hashtable();
+            foreach (string recpath in recpath_list)
+            {
+                if (string.IsNullOrEmpty(recpath))
+                    continue;
+                var dbname = Global.GetDbName(recpath);
+                if (Program.MainForm.IsBiblioDbName(dbname))
+                    types["biblio"] = true;
+                else if (Program.MainForm.IsReaderDbName(dbname))
+                    types["patron"] = true;
+            }
+
+            List<string> results = new List<string>();
+            foreach (string s in types.Keys)
+            {
+                results.Add(s);
+            }
+            return results;
+        }
+
+        static string GetFilter(List<string> types)
+        {
+            List<string> list = new List<string>();
+            foreach (string type in types)
+            {
+                if (type == "biblio")
+                    list.Add("setBiblioInfo");
+                else if (type == "patron")
+                    list.Add("setReaderInfo,borrow,return");
+            }
+
+            return StringUtil.MakePathList(list);
+        }
+
         class RecoverBiblioItem
         {
+            public string Type { get; set; }    // 类型。biblio/patron
+
             public string BiblioRecPath { get; set; }
             public string Xml { get; set; }
+
+            public bool IsClipped { get; set; }
         }
 
         int RecoverFromOperLogs(List<string> dates,
@@ -9127,6 +9170,23 @@ MessageBoxDefaultButton.Button1);
             out string strError)
         {
             strError = "";
+
+            // 加速用
+            Hashtable recpath_table = null;
+
+            if (recpath_list.Count > 0)
+            {
+                recpath_table = new Hashtable();
+                foreach (string recpath in recpath_list)
+                {
+                    recpath_table[recpath] = true;
+                }
+                if (recpath_table.Count == 0)
+                    recpath_table = null;
+            }
+
+            // TODO: 检查记录路径，按照书目记录和读者记录分类列出类型。类型决定了 OperLogLoader 的 filter
+            List<string> types = GetRecordTypes(recpath_list);
 
             this.listView_restoreList.Items.Clear();
             Application.DoEvents();
@@ -9157,7 +9217,7 @@ MessageBoxDefaultButton.Button1);
                 loader.Level = 0;   // 2;  // Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
-                loader.Filter = "setBiblioInfo";
+                loader.Filter = GetFilter(types);   // "setBiblioInfo";
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -9202,109 +9262,44 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
-                    if (strOperation != "setBiblioInfo")
-                        continue;
-                    string strAction = DomUtil.GetElementText(dom.DocumentElement,
-        "action");
-                    string strOperator = DomUtil.GetElementText(dom.DocumentElement,
-        "operator");
-                    string strOperTime = DomUtil.GetElementText(dom.DocumentElement,
-        "operTime");
-                    string strBiblioRecPath = "";
-                    string strXml = "";
-
-                    List<RecoverBiblioItem> records = new List<RecoverBiblioItem>();
-
-                    if (strAction.IndexOf("delete") != -1
-                        || strAction.IndexOf("copy") != -1
-                        || strAction.IndexOf("move") != -1)
+                    if (strOperation == "setBiblioInfo"
+                        || strOperation == "setReaderInfo")
                     {
-                        XmlNode node = dom.DocumentElement.SelectSingleNode("oldRecord/@recPath");
-                        if (node != null)
-                        {
-                            strBiblioRecPath = node.Value;
-                            strXml = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
+                        List<RecoverBiblioItem> records = GetRecords(
+                            recpath_table,
+                            dom,
+                            item,
+                            out string strHistory);
 
-                            RecoverBiblioItem record = new RecoverBiblioItem();
-                            record.BiblioRecPath = strBiblioRecPath;
-                            record.Xml = strXml;
-                            records.Add(record);
+                        if (records.Count > 0)
+                        {
+                            // string strHistory = "date=" + item.Date + ", index=" + item.Index + ", action=" + strAction + ", operTime=" + strOperTime + ", operator=" + strOperator;
+
+                            AddRecords(
+            records,
+            recpath_list,
+            item);
                         }
                     }
-
+                    else if (strOperation == "borrow"
+    || strOperation == "return")
                     {
-                        XmlNode node = dom.DocumentElement.SelectSingleNode("record/@recPath");
-                        if (node != null)
+                        List<RecoverBiblioItem> records = GetRecordsFromBorrowReturn(
+                            recpath_table,
+                            dom,
+                            item,
+                            out string strHistory);
+
+                        if (records.Count > 0)
                         {
-                            strBiblioRecPath = node.Value;
-                            strXml = DomUtil.GetElementText(dom.DocumentElement, "record");
-
-                            RecoverBiblioItem record = new RecoverBiblioItem();
-                            record.BiblioRecPath = strBiblioRecPath;
-                            record.Xml = strXml;
-                            records.Add(record);
+                            AddRecords(
+            records,
+            recpath_list,
+            item);
                         }
-                    }
-
-                    // 至少产生一个 record
-                    if (records.Count == 0 && string.IsNullOrEmpty(strBiblioRecPath) == false)
-                    {
-                        RecoverBiblioItem record = new RecoverBiblioItem();
-                        record.BiblioRecPath = strBiblioRecPath;
-                        record.Xml = "";
-                        records.Add(record);
-                    }
-
-                    if (records.Count > 0)
-                    {
-                        string strHistory = "date=" + item.Date + ", index=" + item.Index + ", action=" + strAction + ", operTime=" + strOperTime + ", operator=" + strOperator;
-
-                        AddRecords(
-        records,
-        recpath_list,
-        item);
-                    }
-
-#if NO
-                    if (recpath_list != null
-                        && recpath_list.Count > 0
-                        && recpath_list.IndexOf(strItemRecPath) == -1)
-                        continue;
-
-                    if (string.IsNullOrEmpty(strXml))
-                        continue;
-
-                    RecoverData data = (RecoverData)_recoverTable[strItemRecPath];
-                    if (data == null)
-                    {
-                        data = new RecoverData();
-                        data.BiblioRecPath = strItemRecPath;
-                        _recoverTable[strItemRecPath] = data;
-
-                        // 中途就要考虑填入 list
-                    }
-
-                    data.Xml = strXml;
-                    if (data.HistoryList == null)
-                        data.HistoryList = new List<string>();
-                    data.HistoryList.Add("date=" + item.Date + ", index=" + item.Index + ", action=" + strAction + ", operTime=" + strOperTime + ", operator=" + strOperator);
-
-                    if (data.ListViewItem == null)
-                    {
-                        ListViewItem new_item = new ListViewItem();
-                        ListViewUtil.ChangeItemText(new_item, COLUMN_RECOVER_NO, (_recoverTable.Count).ToString());
-                        ListViewUtil.ChangeItemText(new_item, COLUMN_RECOVER_RECPATH, data.BiblioRecPath);
-                        ListViewUtil.ChangeItemText(new_item, COLUMN_RECOVER_HISTORY, StringUtil.MakePathList(data.HistoryList, "; "));
-                        this.listView_restoreList.Items.Add(new_item);
-                        data.ListViewItem = new_item;
                     }
                     else
-                    {
-                        // 刷新显示
-                        ListViewUtil.ChangeItemText(data.ListViewItem, COLUMN_RECOVER_HISTORY, StringUtil.MakePathList(data.HistoryList, "; "));
-                    }
-
-#endif
+                        continue;
 
                     if ((count % 100) == 0
                 || DateTime.Now - _lastUpdateTime > TimeSpan.FromSeconds(5))
@@ -9340,6 +9335,227 @@ MessageBoxDefaultButton.Button1);
 
         }
 
+        // 获得累积的最终记录
+        string GetCurrentRecordXml(string recpath)
+        {
+            RecoverData data = (RecoverData)_recoverTable[recpath];
+            if (data == null)
+                return null;
+            return data.Xml;
+        }
+
+        // 从 borrow/return 日志记录中获得恢复信息
+        List<RecoverBiblioItem> GetRecordsFromBorrowReturn(
+            Hashtable recpath_table,
+            XmlDocument dom,
+            OperLogItem item,
+            out string strHistory)
+        {
+            strHistory = "";
+
+            string strAction = DomUtil.GetElementText(dom.DocumentElement,
+"action");
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement,
+"operator");
+            string strOperTime = DomUtil.GetElementText(dom.DocumentElement,
+"operTime");
+            string strBiblioRecPath = "";
+            string strXml = "";
+
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+"readerBarcode");
+            string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
+"itemBarcode");
+            // string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
+            // "libraryCode");
+
+            List<RecoverBiblioItem> records = new List<RecoverBiblioItem>();
+
+            {
+                XmlNode node = dom.DocumentElement.SelectSingleNode("readerRecord/@recPath");
+                if (node != null)
+                {
+                    strBiblioRecPath = node.Value;
+                    if (recpath_table != null
+                        && recpath_table.ContainsKey(strBiblioRecPath) == false)
+                        return new List<RecoverBiblioItem>();
+
+                    strXml = DomUtil.GetElementText(dom.DocumentElement, "readerRecord");
+
+                    XmlDocument patron_dom = new XmlDocument();
+                    try
+                    {
+                        patron_dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new List<RecoverBiblioItem>();
+                    }
+
+                    if (patron_dom == null || patron_dom.DocumentElement == null)
+                        return new List<RecoverBiblioItem>();
+
+                    var isClipped = IsClipped(patron_dom);
+                    if (isClipped)
+                    {
+                        string old_xml = GetCurrentRecordXml(strBiblioRecPath);
+                        XmlDocument existing_dom = new XmlDocument();
+                        existing_dom.LoadXml(string.IsNullOrEmpty(old_xml) ? strXml : old_xml);
+                        // TODO: 去掉 borrows/@clipping 属性
+                        RemoveClippedElement(existing_dom);
+                        // TODO: 始终把 patron_dom 中的可用字段叠加上去？
+
+                        XmlDocument item_dom = null;
+                        int nRet = 0;
+                        string strError = "";
+
+                        string strOperation = DomUtil.GetElementText(dom.DocumentElement,
+"operation");
+
+                        if (strOperation == "borrow")
+                            nRet = LibraryServerUtil.BorrowChangeReaderAndItemRecord(
+    strItemBarcode,
+    strReaderBarcode,
+    dom,
+    "", // strRecoverComment,
+        // strLibraryCode,
+    ref existing_dom,
+    ref item_dom,
+    out strError);
+                        else
+                            nRet = LibraryServerUtil.ReturnChangeReaderAndItemRecord(
+        strAction,
+        strItemBarcode,
+        strReaderBarcode,
+        dom,
+        "", // strRecoverComment,
+        ref existing_dom,
+        ref item_dom,
+        out strError);
+                        if (nRet == -1) // TODO: 如何报错?
+                            return new List<RecoverBiblioItem>();
+                        strXml = existing_dom.OuterXml;
+                    }
+
+                    RecoverBiblioItem record = new RecoverBiblioItem();
+                    record.BiblioRecPath = strBiblioRecPath;
+                    record.Xml = strXml;
+                    // 观察读者记录中是否有 clipping 标志
+                    record.IsClipped = IsClipped(patron_dom);
+                    records.Add(record);
+                }
+            }
+
+
+#if NO
+            // 至少产生一个 record
+            if (records.Count == 0
+                && string.IsNullOrEmpty(strBiblioRecPath) == false)
+            {
+                RecoverBiblioItem record = new RecoverBiblioItem();
+                record.BiblioRecPath = strBiblioRecPath;
+                record.Xml = "";
+                records.Add(record);
+            }
+#endif
+
+            strHistory = $"date={item.Date}, index={item.Index}, action={strAction}, operTime={strOperTime}, operator={strOperator}";
+            return records;
+        }
+
+        static void RemoveClippedElement(XmlDocument dom)
+        {
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("*/@clipping");
+            foreach(XmlAttribute attr in nodes)
+            {
+                attr.OwnerElement.ParentNode.RemoveChild(attr.OwnerElement);
+            }
+        }
+
+        // 检查读者记录的 borrows 元素是否被剪裁过
+        static bool IsClipped(XmlDocument dom)
+        {
+            if (dom == null || dom.DocumentElement == null)
+                return true;
+            XmlAttribute attr = dom.DocumentElement.SelectSingleNode("borrows/@clipping") as XmlAttribute;
+            return (attr != null);
+        }
+
+        // 从 setBiblioInfo/setReaderInfo 日志记录中获得恢复信息
+        List<RecoverBiblioItem> GetRecords(
+            Hashtable recpath_table,
+            XmlDocument dom,
+            OperLogItem item,
+            out string strHistory)
+        {
+            string strAction = DomUtil.GetElementText(dom.DocumentElement,
+"action");
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement,
+"operator");
+            string strOperTime = DomUtil.GetElementText(dom.DocumentElement,
+"operTime");
+            string strBiblioRecPath = "";
+            string strXml = "";
+
+            List<RecoverBiblioItem> records = new List<RecoverBiblioItem>();
+
+            if (strAction.IndexOf("delete") != -1
+                || strAction.IndexOf("copy") != -1
+                || strAction.IndexOf("move") != -1)
+            {
+                XmlNode node = dom.DocumentElement.SelectSingleNode("oldRecord/@recPath");
+                if (node != null)
+                {
+                    strBiblioRecPath = node.Value;
+                    if (recpath_table == null ||
+                        recpath_table.ContainsKey(strBiblioRecPath) == true)
+                    {
+                        strXml = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
+
+                        RecoverBiblioItem record = new RecoverBiblioItem();
+                        record.BiblioRecPath = strBiblioRecPath;
+                        record.Xml = strXml;
+                        records.Add(record);
+                    }
+                }
+            }
+
+            {
+                XmlNode node = dom.DocumentElement.SelectSingleNode("record/@recPath");
+                if (node != null)
+                {
+                    strBiblioRecPath = node.Value;
+                    if (recpath_table == null || 
+                        recpath_table.ContainsKey(strBiblioRecPath) == true)
+                    {
+                        strXml = DomUtil.GetElementText(dom.DocumentElement, "record");
+
+                        RecoverBiblioItem record = new RecoverBiblioItem();
+                        record.BiblioRecPath = strBiblioRecPath;
+                        record.Xml = strXml;
+                        records.Add(record);
+                    }
+                }
+            }
+
+            // 至少产生一个 record
+            if (records.Count == 0
+                && string.IsNullOrEmpty(strBiblioRecPath) == false)
+            {
+                if (recpath_table == null || 
+                    recpath_table.ContainsKey(strBiblioRecPath) == true)
+                {
+                    RecoverBiblioItem record = new RecoverBiblioItem();
+                    record.BiblioRecPath = strBiblioRecPath;
+                    record.Xml = "";
+                    records.Add(record);
+                }
+            }
+
+            strHistory = $"date={item.Date}, index={item.Index}, action={strAction}, operTime={strOperTime}, operator={strOperator}";
+            return records;
+        }
+
         // parameters:
         //      records 要处理的集合
         void AddRecords(
@@ -9368,7 +9584,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 if (string.IsNullOrEmpty(record.Xml) == false)
-                    data.Xml = record.Xml;
+                    data.Xml = record.Xml;  // TODO: clipping 时用合并算法
                 if (data.HistoryList == null)
                     data.HistoryList = new List<OperLogItem>();
                 data.HistoryList.Add(history_item);

@@ -221,6 +221,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.EyeCool", "Face
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.Hanwang", "FaceDrivers.Hanwang\FaceDrivers.Hanwang.csproj", "{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAccord", "TestAccord\TestAccord.csproj", "{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1774,6 +1776,24 @@ Global
 		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|x86.ActiveCfg = Release|Any CPU
 		{9AC9B039-9F8D-4E47-AD54-29A2D16D221A}.Test|x86.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Debug|x86.Build.0 = Debug|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|x86.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Release|x86.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|Any CPU.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|x86.ActiveCfg = Release|Any CPU
+		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

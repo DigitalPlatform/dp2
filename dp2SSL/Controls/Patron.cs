@@ -279,7 +279,25 @@ namespace dp2SSL
             }
         }
 
-        public void SetPatronXml(string xml)
+        string _photoPath;
+
+        public string PhotoPath
+        {
+            get
+            {
+                return _photoPath;
+            }
+            set
+            {
+                if (_photoPath != value)
+                {
+                    _photoPath = value;
+                    OnPropertyChanged("PhotoPath");
+                }
+            }
+        }
+
+        public void SetPatronXml(string recpath, string xml)
         {
             if (string.IsNullOrEmpty(xml))
             {
@@ -294,6 +312,31 @@ namespace dp2SSL
 
             this.PatronName = DomUtil.GetElementText(dom.DocumentElement, "name");
             this.Department = DomUtil.GetElementText(dom.DocumentElement, "department");
+
+            // 获得头像路径
+            this.PhotoPath = GetCardPhotoPath(dom, "face", recpath);
+            // 下载头像
+        }
+
+        // 从读者记录 XML 中获得读者卡片头像的路径。例如 "读者/1/object/0"
+        static string GetCardPhotoPath(XmlDocument readerdom,
+            string usage,
+            string strRecPath)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes($"//dprms:file[@usage='{usage}']", nsmgr);
+
+            if (nodes.Count == 0)
+                return null;
+
+            string strID = DomUtil.GetAttr(nodes[0], "id");
+            if (string.IsNullOrEmpty(strID) == true)
+                return null;
+
+            string strResPath = strRecPath + "/object/" + strID;
+            return strResPath.Replace(":", "/");
         }
 
         // 刷新信息
@@ -325,6 +368,7 @@ namespace dp2SSL
             this.Department = null;
             this.UID = null;
             this.PII = null;
+            this.PhotoPath = "";
 
             this.SetNotEmpty();
         }
