@@ -314,29 +314,36 @@ namespace dp2SSL
             this.Department = DomUtil.GetElementText(dom.DocumentElement, "department");
 
             // 获得头像路径
-            this.PhotoPath = GetCardPhotoPath(dom, "face", recpath);
-            // 下载头像
+            this.PhotoPath = GetCardPhotoPath(dom,
+                new List<string> { "face", "cardphoto" },
+                recpath);
         }
 
         // 从读者记录 XML 中获得读者卡片头像的路径。例如 "读者/1/object/0"
+        // parameters:
+        //      usage_list  用途列表。只要顺次匹配上其中任何一个就算命中
         static string GetCardPhotoPath(XmlDocument readerdom,
-            string usage,
+            List<string> usage_list,
             string strRecPath)
         {
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes($"//dprms:file[@usage='{usage}']", nsmgr);
+            foreach (string usage in usage_list)
+            {
+                XmlNodeList nodes = readerdom.DocumentElement.SelectNodes($"//dprms:file[@usage='{usage}']", nsmgr);
+                if (nodes.Count == 0)
+                    continue;
 
-            if (nodes.Count == 0)
-                return null;
+                string strID = DomUtil.GetAttr(nodes[0], "id");
+                if (string.IsNullOrEmpty(strID) == true)
+                    continue;
 
-            string strID = DomUtil.GetAttr(nodes[0], "id");
-            if (string.IsNullOrEmpty(strID) == true)
-                return null;
+                string strResPath = strRecPath + "/object/" + strID;
+                return strResPath.Replace(":", "/");
+            }
 
-            string strResPath = strRecPath + "/object/" + strID;
-            return strResPath.Replace(":", "/");
+            return null;
         }
 
         // 刷新信息
