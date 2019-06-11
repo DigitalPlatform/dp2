@@ -783,7 +783,7 @@ namespace dp2SSL
 
             SetPatronError("getreaderinfo", "");
 
-            string old_photopath = _patron.PhotoPath;
+            // string old_photopath = _patron.PhotoPath;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 _patron.SetPatronXml(recpath, reader_xml);
