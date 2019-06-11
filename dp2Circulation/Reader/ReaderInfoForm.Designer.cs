@@ -68,7 +68,9 @@
             this.ToolStripMenuItem_returnForegift = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_saveTo = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_save = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_saveChangeBarcode = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_saveForce = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_prev = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -331,7 +333,7 @@
             this.toolStripButton_createMoneyRecord,
             this.toolStripSeparator3,
             this.toolStripButton_saveTo,
-            this.toolStripButton_save,
+            this.toolStripSplitButton_save,
             this.toolStripButton_next,
             this.toolStripButton_prev,
             this.toolStripSeparator4,
@@ -511,15 +513,31 @@
             this.toolStripButton_saveTo.ToolTipText = "将记录保存为一条新的记录";
             this.toolStripButton_saveTo.Click += new System.EventHandler(this.toolStripButton_saveTo_Click);
             // 
-            // toolStripButton_save
+            // toolStripSplitButton_save
             // 
-            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
-            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_save.Name = "toolStripButton_save";
-            this.toolStripButton_save.Size = new System.Drawing.Size(74, 28);
-            this.toolStripButton_save.Text = "保存";
-            this.toolStripButton_save.ToolTipText = "将当前修改覆盖保存到数据库";
-            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
+            this.toolStripSplitButton_save.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_saveChangeBarcode,
+            this.ToolStripMenuItem_saveForce});
+            this.toolStripSplitButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_save.Image")));
+            this.toolStripSplitButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_save.Name = "toolStripSplitButton_save";
+            this.toolStripSplitButton_save.Size = new System.Drawing.Size(91, 28);
+            this.toolStripSplitButton_save.Text = "保存";
+            this.toolStripSplitButton_save.ButtonClick += new System.EventHandler(this.toolStripSplitButton_save_ButtonClick);
+            // 
+            // ToolStripMenuItem_saveChangeBarcode
+            // 
+            this.ToolStripMenuItem_saveChangeBarcode.Name = "ToolStripMenuItem_saveChangeBarcode";
+            this.ToolStripMenuItem_saveChangeBarcode.Size = new System.Drawing.Size(284, 30);
+            this.ToolStripMenuItem_saveChangeBarcode.Text = "保存(强制修改证条码号)";
+            this.ToolStripMenuItem_saveChangeBarcode.Click += new System.EventHandler(this.ToolStripMenuItem_saveChangeBarcode_Click);
+            // 
+            // ToolStripMenuItem_saveForce
+            // 
+            this.ToolStripMenuItem_saveForce.Name = "ToolStripMenuItem_saveForce";
+            this.ToolStripMenuItem_saveForce.Size = new System.Drawing.Size(284, 30);
+            this.ToolStripMenuItem_saveForce.Text = "保存(强制修改)";
+            this.ToolStripMenuItem_saveForce.Click += new System.EventHandler(this.ToolStripMenuItem_saveForce_Click);
             // 
             // toolStripButton_next
             // 
@@ -826,7 +844,6 @@
         private System.Windows.Forms.TabPage tabPage_xml;
         private System.Windows.Forms.WebBrowser webBrowser_xml;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton toolStripButton_save;
         private System.Windows.Forms.ToolStripButton toolStripButton_saveTo;
         private System.Windows.Forms.ToolStripButton toolStripButton_delete;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
@@ -880,5 +897,8 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_createRfidCard;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_bindCardNumber;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_clearFaceFeature;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_save;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveChangeBarcode;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveForce;
     }
 }

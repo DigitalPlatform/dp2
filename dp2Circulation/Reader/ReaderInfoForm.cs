@@ -51,9 +51,10 @@ namespace dp2Circulation
         const int WM_SAVETO = API.WM_USER + 205;
         const int WM_SAVE_RECORD = API.WM_USER + 206;
         const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 207;
-        const int WM_FOREGIFT = API.WM_USER + 208;
-        const int WM_RETURN_FOREGIFT = API.WM_USER + 209;
-        const int WM_SET_FOCUS = API.WM_USER + 210;
+        const int WM_SAVE_RECORD_FORCE = API.WM_USER + 208;
+        const int WM_FOREGIFT = API.WM_USER + 210;
+        const int WM_RETURN_FOREGIFT = API.WM_USER + 211;
+        const int WM_SET_FOCUS = API.WM_USER + 212;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
@@ -1074,7 +1075,8 @@ MessageBoxDefaultButton.Button2);
             this.toolStripButton_createMoneyRecord.Enabled = bEnable;
 
             this.toolStripButton_saveTo.Enabled = bEnable;
-            this.toolStripButton_save.Enabled = bEnable;
+            //this.toolStripButton_save.Enabled = bEnable;
+            this.toolStripSplitButton_save.Enabled = bEnable;
 
             this.toolStripButton_clearOutofReservationCount.Enabled = bEnable;
 
@@ -1720,6 +1722,7 @@ strNewDefault);
             this.toolStrip1.Enabled = bEnable;
         }
 
+#if REMOVED
         // 保存
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
@@ -1733,6 +1736,7 @@ strNewDefault);
             else
                 this.commander.AddMessage(WM_SAVE_RECORD);
         }
+#endif
 
 #if NO
         // 形式校验条码号
@@ -1808,7 +1812,7 @@ strNewDefault);
         /// <summary>
         /// 保存记录
         /// </summary>
-        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
+        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode/changereaderforce 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
         public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
@@ -1904,12 +1908,6 @@ strNewDefault);
                 if (nRet == -1)
                     goto ERROR1;
 
-                ErrorCodeValue kernel_errorcode;
-
-                byte[] baNewTimestamp = null;
-                string strExistingXml = "";
-                string strSavedXml = "";
-                string strSavedPath = "";
 
                 string strAction = this.m_strSetAction;
 
@@ -1921,6 +1919,14 @@ strNewDefault);
 
                 // 是否强制修改册条码号
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+                bool bChangeReaderForce = StringUtil.IsInList("changereaderforce", strStyle);
+
+                if (bChangeReaderBarcode && bChangeReaderForce)
+                {
+                    strError = "style 不应同时包含 changereaderbarcode 和 changerecordforce";
+                    goto ERROR1;
+                }
+
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
                     if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.51") < 0)
@@ -1929,6 +1935,11 @@ strNewDefault);
                         goto ERROR1;
                     }
                     strAction = "changereaderbarcode";
+                }
+
+                if (strAction == "change" && bChangeReaderForce)
+                {
+                    strAction = "forcechange";
                 }
 
                 // 调试
@@ -1942,12 +1953,11 @@ strNewDefault);
                     // 2007/11/5 changed
                     this.m_strSetAction != "new" ? this.readerEditControl1.OldRecord : null,
                     this.m_strSetAction != "new" ? this.readerEditControl1.Timestamp : null,
-
-                    out strExistingXml,
-                    out strSavedXml,
-                    out strSavedPath,
-                    out baNewTimestamp,
-                    out kernel_errorcode,
+                    out string strExistingXml,
+                    out string strSavedXml,
+                    out string strSavedPath,
+                    out byte[] baNewTimestamp,
+                    out ErrorCodeValue kernel_errorcode,
                     out strError);
                 if (lRet == -1)
                 {
@@ -3594,7 +3604,22 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
-
+                case WM_SAVE_RECORD_FORCE:
+                    EnableToolStrip(false);
+                    try
+                    {
+                        if (this.m_webExternalHost.CanCallNew(
+                            this.commander,
+                            m.Msg) == true)
+                        {
+                            this.SaveRecord("displaysuccess,changereaderforce");
+                        }
+                    }
+                    finally
+                    {
+                        EnableToolStrip(true);
+                    }
+                    return;
             }
             base.DefWndProc(ref m);
         }
@@ -6464,6 +6489,39 @@ MessageBoxDefaultButton.Button1);
             this.readerEditControl1.FaceFeatureVersion = "";
             this.readerEditControl1.FaceFeature = "";
             this.readerEditControl1.Changed = true;
+        }
+
+        // 一般保存
+        private void toolStripSplitButton_save_ButtonClick(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_SAVE_RECORD);
+        }
+
+        // 能修改册条码号的保存
+        private void ToolStripMenuItem_saveChangeBarcode_Click(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_SAVE_RECORD_BARCODE);  // 能在读者尚有外借信息的情况下强行修改证条码号
+        }
+
+        // 强制保存所有内容，包括 borrows 元素。一定要小心使用本功能
+        private void ToolStripMenuItem_saveForce_Click(object sender, EventArgs e)
+        {
+            EnableToolStrip(false);
+
+            this.m_webExternalHost.StopPrevious();
+            this.webBrowser_readerInfo.Stop();
+
+            this.commander.AddMessage(WM_SAVE_RECORD_FORCE);
         }
     }
 }

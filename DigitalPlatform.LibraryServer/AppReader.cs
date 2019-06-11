@@ -1318,16 +1318,14 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    byte[] output_timestamp = null;
-                    string strOutputPath = "";
 
                     lRet = channel.DoSaveTextRes(strRecPath,
                         strSavedXml,
                         false,   // include preamble?
                         "content",
                         baOldTimestamp,
-                        out output_timestamp,
-                        out strOutputPath,
+                        out byte[] output_timestamp,
+                        out string strOutputPath,
                         out strError);
                     if (lRet == -1)
                     {
@@ -2075,6 +2073,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
         REDOLOAD:
+            bool bObjectNotFound = false;
             // 先读出数据库中此位置的已有记录
             lRet = channel.GetRes(strRecPath,
                 out strExistXml,
@@ -2084,8 +2083,10 @@ strLibraryCode);    // 读者所在的馆代码
                 out strError);
             if (lRet == -1)
             {
-                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                if (channel.ErrorCode == ChannelErrorCode.NotFound
+                    || channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)    // 2019/6/12
                 {
+                    bObjectNotFound = channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile;
                     // 如果记录不存在, 则构造一条空的记录
                     bExist = false;
                     strExistXml = "<root />";
@@ -2261,13 +2262,12 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (bForce == false)
             {
-                string strNewXml = "";
                 nRet = MergeTwoReaderXml(
                     element_names,
                     strAction,
                     domExist,
                     domNewRec,
-                    out strNewXml,
+                    out string strNewXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2284,11 +2284,10 @@ strLibraryCode);    // 读者所在的馆代码
                 }
             }
 
-            string strLibraryCode = "";
             // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
             if (this.IsCurrentChangeableReaderPath(strRecPath,
                 strCurrentLibraryCode,
-                out strLibraryCode) == false)
+                out string strLibraryCode) == false)
             {
                 strError = "读者记录路径 '" + strRecPath + "' 的读者库不在当前用户管辖范围内";
                 goto ERROR1;
@@ -2335,9 +2334,9 @@ strLibraryCode);    // 读者所在的馆代码
                     strExistComment += "; ";
                 strExistComment += DateTime.Now.ToString() + " 证条码号从 '" + strOldBarcode + "' 修改为 '" + strNewBarcode + "'";
                 DomUtil.SetElementText(domNewRec.DocumentElement, "comment", strExistComment);
-
             }
 
+            REDO_SAVE:
             // 保存新记录
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(strRecPath,
@@ -2360,6 +2359,13 @@ strLibraryCode);    // 读者所在的馆代码
                     // 发现时间戳不匹配
                     // 重复进行提取已存在记录\比较的过程
                     nRedoCount++;
+
+                    if (bObjectNotFound)
+                    {
+                        exist_timestamp = output_timestamp;
+                        goto REDO_SAVE;
+                    }
+
                     goto REDOLOAD;
                 }
 
@@ -2442,7 +2448,6 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             return 0;
-
         ERROR1:
             errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.CommonError;
             return -1;
