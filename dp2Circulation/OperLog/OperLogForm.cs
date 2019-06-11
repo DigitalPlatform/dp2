@@ -8741,7 +8741,7 @@ MessageBoxDefaultButton.Button1);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("保存回书目库(&S) [" + this.listView_restoreList.SelectedItems.Count.ToString() + "]");
+            menuItem = new MenuItem("保存回数据库(&S) [" + this.listView_restoreList.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_recover_saveToDatabase_Click);
             if (this.listView_restoreList.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -8766,7 +8766,7 @@ MessageBoxDefaultButton.Button1);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存书目记录 ...");
+            stop.Initial("正在保存数据库记录 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -8787,15 +8787,18 @@ MessageBoxDefaultButton.Button1);
                         goto CONTINUE;
                     }
 
+                    long lRet = 0;
                     byte[] timestamp = null;
+                    string strOutputPath = "";
+                    byte[] baNewTimestamp = null;
+
                     // TODO: 是否先探测一下书目记录是否存在？已经存在最好给出特殊的提示和警告
 
                     REDO:
                     stop.SetMessage("正在保存书目记录 " + strBiblioRecPath);
 
-                    byte[] baNewTimestamp = null;
-                    string strOutputPath = "";
-                    long lRet = channel.SetBiblioInfo(
+                    if (data.DbType == "biblio")
+                        lRet = channel.SetBiblioInfo(
                         stop,
                         "change",
                         strBiblioRecPath,
@@ -8806,6 +8809,28 @@ MessageBoxDefaultButton.Button1);
                         out strOutputPath,
                         out baNewTimestamp,
                         out strError);
+                    else if (data.DbType == "patron")
+                    {
+                        // TODO: 应该允许在 forcechange 和 change 之间进行选择
+                        lRet = channel.SetReaderInfo(
+                            stop,
+                            "forcechange",
+                            strBiblioRecPath,
+                            data.Xml,
+                            "",
+                            timestamp,
+                            out string strExistingXml,
+                            out string strSavedXml,
+                            out strOutputPath,
+                            out baNewTimestamp,
+                            out ErrorCodeValue kernel_errorcode,
+                            out strError);
+                    }
+                    else
+                    {
+                        strError = $"未知的 data.DbType '{data.DbType}'";
+                        goto ERROR1;
+                    }
                     if (lRet == -1)
                     {
                         if (channel.ErrorCode == ErrorCode.TimestampMismatch)
@@ -9081,6 +9106,8 @@ MessageBoxDefaultButton.Button1);
 
             public string BiblioRecPath { get; set; }
 
+            public string DbType { get; set; }  // 数据库类型。biblio/patron 之一
+
             public string Xml { get; set; } // 最后恢复的数据库记录
 
             public ListViewItem ListViewItem { get; set; }
@@ -9126,11 +9153,9 @@ MessageBoxDefaultButton.Button1);
             {
                 if (string.IsNullOrEmpty(recpath))
                     continue;
-                var dbname = Global.GetDbName(recpath);
-                if (Program.MainForm.IsBiblioDbName(dbname))
-                    types["biblio"] = true;
-                else if (Program.MainForm.IsReaderDbName(dbname))
-                    types["patron"] = true;
+                var dbtype = GetDbType(recpath);
+                if (string.IsNullOrEmpty(dbtype) == false)
+                    types[dbtype] = true;
             }
 
             List<string> results = new List<string>();
@@ -9437,11 +9462,14 @@ MessageBoxDefaultButton.Button1);
                         strXml = existing_dom.OuterXml;
                     }
 
-                    RecoverBiblioItem record = new RecoverBiblioItem();
-                    record.BiblioRecPath = strBiblioRecPath;
-                    record.Xml = strXml;
-                    // 观察读者记录中是否有 clipping 标志
-                    record.IsClipped = IsClipped(patron_dom);
+                    RecoverBiblioItem record = new RecoverBiblioItem
+                    {
+                        Type = "patron",
+                        BiblioRecPath = strBiblioRecPath,
+                        Xml = strXml,
+                        // 观察读者记录中是否有 clipping 标志
+                        IsClipped = IsClipped(patron_dom)
+                    };
                     records.Add(record);
                 }
             }
@@ -9466,7 +9494,7 @@ MessageBoxDefaultButton.Button1);
         static void RemoveClippedElement(XmlDocument dom)
         {
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("*/@clipping");
-            foreach(XmlAttribute attr in nodes)
+            foreach (XmlAttribute attr in nodes)
             {
                 attr.OwnerElement.ParentNode.RemoveChild(attr.OwnerElement);
             }
@@ -9513,6 +9541,7 @@ MessageBoxDefaultButton.Button1);
                         strXml = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
 
                         RecoverBiblioItem record = new RecoverBiblioItem();
+                        record.Type = GetDbType(strBiblioRecPath);
                         record.BiblioRecPath = strBiblioRecPath;
                         record.Xml = strXml;
                         records.Add(record);
@@ -9525,12 +9554,13 @@ MessageBoxDefaultButton.Button1);
                 if (node != null)
                 {
                     strBiblioRecPath = node.Value;
-                    if (recpath_table == null || 
+                    if (recpath_table == null ||
                         recpath_table.ContainsKey(strBiblioRecPath) == true)
                     {
                         strXml = DomUtil.GetElementText(dom.DocumentElement, "record");
 
                         RecoverBiblioItem record = new RecoverBiblioItem();
+                        record.Type = GetDbType(strBiblioRecPath);
                         record.BiblioRecPath = strBiblioRecPath;
                         record.Xml = strXml;
                         records.Add(record);
@@ -9542,10 +9572,11 @@ MessageBoxDefaultButton.Button1);
             if (records.Count == 0
                 && string.IsNullOrEmpty(strBiblioRecPath) == false)
             {
-                if (recpath_table == null || 
+                if (recpath_table == null ||
                     recpath_table.ContainsKey(strBiblioRecPath) == true)
                 {
                     RecoverBiblioItem record = new RecoverBiblioItem();
+                    record.Type = GetDbType(strBiblioRecPath);
                     record.BiblioRecPath = strBiblioRecPath;
                     record.Xml = "";
                     records.Add(record);
@@ -9554,6 +9585,17 @@ MessageBoxDefaultButton.Button1);
 
             strHistory = $"date={item.Date}, index={item.Index}, action={strAction}, operTime={strOperTime}, operator={strOperator}";
             return records;
+        }
+
+        static string GetDbType(string recpath)
+        {
+            var dbname = Global.GetDbName(recpath);
+            if (Program.MainForm.IsBiblioDbName(dbname))
+                return "biblio";
+            else if (Program.MainForm.IsReaderDbName(dbname))
+                return "patron";
+
+            return null;
         }
 
         // parameters:
@@ -9578,6 +9620,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     data = new RecoverData();
                     data.BiblioRecPath = record.BiblioRecPath;
+                    data.DbType = record.Type;
                     _recoverTable[record.BiblioRecPath] = data;
 
                     // 中途就要考虑填入 list
