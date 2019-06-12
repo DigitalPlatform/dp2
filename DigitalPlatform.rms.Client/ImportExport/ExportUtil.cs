@@ -288,6 +288,9 @@ namespace DigitalPlatform.rms.Client
                         baTimestamp,
                         out strError);
                 }
+
+                // TODO: -1 如何处理？是否可以继续循环
+
                 if (nRet == -1)
                     return -1;
 
@@ -410,6 +413,7 @@ namespace DigitalPlatform.rms.Client
                     strXmlBody,
                     body_timestamp,
                     out strError);
+                    // TODO: -1 如何处理？是否可以继续循环
                     if (nRet == -1)
                         return -1;
 
@@ -509,9 +513,11 @@ namespace DigitalPlatform.rms.Client
 
                 outputfile.LockingWrite(length, 0, 8);	// 临时写点数据,占据记录总长度位置
 
-                ResPath respath = new ResPath();
-                respath.Url = channel.Url;
-                respath.Path = strPath;
+                ResPath respath = new ResPath
+                {
+                    Url = channel.Url,
+                    Path = strPath
+                };
 
                 // 加工元数据
                 StringUtil.ChangeMetaData(ref strMetaData,
@@ -529,11 +535,10 @@ namespace DigitalPlatform.rms.Client
                     strXmlBody);
 
                 // 其余
-                string[] ids = null;
 
                 // 得到Xml记录中所有<file>元素的id属性值
                 int nRet = GetFileIds(strXmlBody,
-                    out ids,
+                    out string[] ids,
                     out strError);
                 if (nRet == -1)
                 {

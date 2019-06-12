@@ -1569,7 +1569,7 @@ out strError);
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 if (this.AcceptButton != null)
                     goto END1;

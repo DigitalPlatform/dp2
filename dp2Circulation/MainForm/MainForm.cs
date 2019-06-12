@@ -4345,6 +4345,7 @@ Stack:
             {
                 // 回车
                 case Keys.Enter:
+                case Keys.LineFeed:
                     toolStripButton_loadBarcode_Click(sender, e);
                     break;
             }
@@ -7877,7 +7878,7 @@ Keys keyData)
             }
 #endif
 
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 if (this.tabControl_panelFixed.SelectedTab == this.tabPage_accept
                     && this._acceptForm != null)

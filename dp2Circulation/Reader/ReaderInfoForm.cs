@@ -1095,6 +1095,7 @@ MessageBoxDefaultButton.Button2);
             {
                 // 回车
                 case Keys.Enter:
+                case Keys.LineFeed:
                     // toolStripTextBox_barcode.Enabled = false;
                     // toolStripTextBox_barcode.SelectAll();   //
                     toolStripButton_load_Click(sender, new EventArgs());
@@ -1908,7 +1909,6 @@ strNewDefault);
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 string strAction = this.m_strSetAction;
 
                 // 如果特意选定过要保存的位置
@@ -2030,14 +2030,12 @@ strNewDefault);
                     if (nRet >= 1)
                     {
                         // 重新获得时间戳
-                        string[] results = null;
-                        string strOutputPath = "";
                         lRet = Channel.GetReaderInfo(
                             stop,
                             "@path:" + strSavedPath,
                             "", // "xml,html",
-                            out results,
-                            out strOutputPath,
+                            out string[] results,
+                            out string strOutputPath,
                             out baNewTimestamp,
                             out strError);
                         if (lRet == -1 || lRet == 0)
@@ -2068,8 +2066,6 @@ strSavedXml);
 
                     // 装载记录到HTML
                     {
-                        byte[] baTimestamp = null;
-                        string strOutputRecPath = "";
 
                         string strBarcode = this.readerEditControl1.Barcode;
 
@@ -2083,8 +2079,8 @@ strSavedXml);
                             strBarcode,
                             "html",
                             out results,
-                            out strOutputRecPath,
-                            out baTimestamp,
+                            out string strOutputRecPath,
+                            out byte[] baTimestamp,
                             out strError);
                         if (lRet == -1)
                         {
@@ -2130,6 +2126,9 @@ strSavedXml);
                     }
                 }
 
+                // TODO: 也要考虑想办法通知人脸中心获取最新变化信息
+
+                // TODO: 对比新旧记录，如果指纹信息变化了，或者册条码号变化了，才请求立即刷新指纹缓存
                 // 更新指纹高速缓存
                 if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
                     && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
@@ -3864,6 +3863,7 @@ MessageBoxDefaultButton.Button2);
             SaveReaderToTemplate();
         }
 
+        // (从剪贴板)粘贴证件照(1)
         private void toolStripButton_pasteCardPhoto_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6407,7 +6407,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // MessageBox.Show(this, strFingerprint);
-            Program.MainForm.StatusBarMessage = "指纹信息获取成功";
+            Program.MainForm.StatusBarMessage = "人脸信息获取成功";
             return;
             ERROR1:
             Program.MainForm.StatusBarMessage = strError;
@@ -6422,6 +6422,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // (从剪贴板)粘贴证件照
         private void ToolStripMenuItem_pasteCardPhoto_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6431,7 +6432,7 @@ MessageBoxDefaultButton.Button1);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
-                strError = "。无法创建证件照片";
+                strError = $"{strError}。无法创建证件照片";
                 goto ERROR1;
             }
             Image image = images[0];

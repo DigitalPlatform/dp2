@@ -327,6 +327,7 @@ bool bClickClose = false)
                 DisplayText("正在打开指纹设备 ...");
 
                 {
+                    FingerPrint.Free();
                     NormalResult result = FingerPrint.Init(CurrentDeviceIndex);
                     if (result.Value == -1)
                     {

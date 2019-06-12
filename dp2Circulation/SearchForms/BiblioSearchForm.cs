@@ -660,7 +660,7 @@ this.comboBox_location.Text);
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
-            if (keyData == Keys.Enter
+            if ((keyData == Keys.Enter || keyData == Keys.LineFeed)
                 && this.tabControl_query.SelectedTab == this.tabPage_logic)
             {
                 this.DoLogicSearch(false);

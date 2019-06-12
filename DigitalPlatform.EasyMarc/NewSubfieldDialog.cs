@@ -201,7 +201,7 @@ namespace DigitalPlatform.EasyMarc
             Keys keyData)
         {
             // 2006/11/14 changed
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 button_OK_Click(null, null);
                 return true;

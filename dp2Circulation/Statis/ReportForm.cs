@@ -9578,7 +9578,7 @@ out strError);
             Debug.WriteLine(pure_key.ToString());
 
             if (Control.ModifierKeys == Keys.Control
-                && pure_key == Keys.Enter)
+                && (pure_key == Keys.Enter || pure_key == Keys.LineFeed))
             {
                 if (Control.ModifierKeys == Keys.Control)
                 {

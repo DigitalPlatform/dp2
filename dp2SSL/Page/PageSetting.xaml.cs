@@ -180,6 +180,9 @@ namespace dp2SSL
                     var result = FaceManager.GetState("");
                     if (result.Value == -1)
                         errors.Add(result.ErrorInfo);
+
+                    // 检查 Server UID
+
                 }
 
                 if (errors.Count > 0)

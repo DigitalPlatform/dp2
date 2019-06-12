@@ -376,7 +376,7 @@ out strError);
 
                 DoPendingCommands(strBackupFileName);
                 return;
-            ERROR1:
+                ERROR1:
                 this.ErrorInfo = strError;
                 this.AppendResultText(strError + "\r\n");
                 this.SetProgressText(strError);
@@ -723,8 +723,13 @@ out strError);
         out strError);
                                     if (nRet == -1)
                                     {
+                                        // 2019/6/12
+                                        // 注：继续往前处理
+                                        this.AppendResultText($"输出记录 {record.Path} 时出错: {strError}。但批处理还是会继续\r\n");
+                                        /*
                                         WriteStateFile(strBackupFileName, "error");  // 表示文件创建过程出错
                                         return -1;
+                                        */
                                     }
 
                                     breakpoint.DbName = ResPath.GetDbName(record.Path);
@@ -1066,7 +1071,7 @@ out strError);
                 this.AppendResultText("结束准备数据库定义\r\n");
             }
 
-        ERROR1:
+            ERROR1:
             WriteStateFile(strOutputFileNameParam, "error");
             return -1;
         }

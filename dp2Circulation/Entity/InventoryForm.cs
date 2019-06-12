@@ -309,7 +309,8 @@ namespace dp2Circulation
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter 
+                || keyData == Keys.LineFeed)  // 2019/6/12
             {
                 // MessageBox.Show(this, "test");
                 if (this.tabControl_main.SelectedTab == this.tabPage_scan)

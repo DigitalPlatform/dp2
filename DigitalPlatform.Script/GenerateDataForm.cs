@@ -510,7 +510,7 @@ namespace DigitalPlatform.Script
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 this.ActionTable_DoubleClick(this, null);
                 return true;
@@ -534,7 +534,7 @@ Keys keyData)
             Debug.Assert(this.Actions != null, "");
 
             char key = (char)e.KeyValue;
-            if (key == (char)Keys.Enter)
+            if (key == (char)Keys.Enter || key == (char)Keys.LineFeed)
             {
                 this.ActionTable_DoubleClick(this, null);
                 return;

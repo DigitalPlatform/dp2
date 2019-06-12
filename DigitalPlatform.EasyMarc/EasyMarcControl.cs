@@ -3450,6 +3450,7 @@ namespace DigitalPlatform.EasyMarc
             {
                 case Keys.Down:
                 case Keys.Enter:
+                case Keys.LineFeed:
                     if (this.Container.SelectNextControl((sender as Control), true, true, true, false) == false)
                     {
                         // SendKeys.Send("{TAB}");

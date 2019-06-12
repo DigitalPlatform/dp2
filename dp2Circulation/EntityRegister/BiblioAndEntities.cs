@@ -630,7 +630,7 @@ MessageBoxDefaultButton.Button2);
                 return;
             }
             else if (e.Name == "AccessNo"
-                && e.e.KeyCode == Keys.Enter
+                && (e.e.KeyCode == Keys.Enter || e.e.KeyCode == Keys.LineFeed)
                 && (StringUtil.HasHead(edit.AccessNo, "@accessNo") == true || string.IsNullOrEmpty(edit.AccessNo) == true))
             {
                 if (this.GenerateData != null)

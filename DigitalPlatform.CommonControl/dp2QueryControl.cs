@@ -1015,6 +1015,7 @@ namespace DigitalPlatform.CommonControl
                     }
                     break;
                 case Keys.Enter:
+                case Keys.LineFeed:
                     if (this.Container.HasEnterPressEvent == true)
                     {
                         this.Container.OnEnterPress(this, e);

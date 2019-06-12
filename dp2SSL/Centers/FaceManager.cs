@@ -15,9 +15,9 @@ namespace dp2SSL
     /// </summary>
     public static class FaceManager
     {
-        static string _state = "ok";    // ok/error
+        // static string _state = "ok";    // ok/error
 
-        public static event TouchedEventHandler Touched = null;
+        // public static event TouchedEventHandler Touched = null;
 
         public static ManagerBase<IBioRecognition> Base = new ManagerBase<IBioRecognition>();
 
@@ -61,6 +61,7 @@ namespace dp2SSL
                 var result = channel.Object.GetState("");
                 if (result.Value == -1)
                     throw new Exception($"人脸中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
