@@ -750,6 +750,7 @@ namespace dp2Circulation
             switch (e.KeyCode)
             {
                 case Keys.Enter:
+                case Keys.LineFeed:
                 case Keys.Down:
                     if (this.SelectNextControl((sender as Control), true, true, true, false) == false)
                         SendKeys.Send("{TAB}");

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Windows.Forms;
 
 using DigitalPlatform;
@@ -14,11 +14,11 @@ namespace DigitalPlatform.Marc
         {
             base.OnGotFocus(e);    // ??
 
-            /* Òª±ä³ÉÒì²½µÄµ÷ÓÃ
+            /* è¦å˜æˆå¼‚æ­¥çš„è°ƒç”¨
 			fixedFieldCtrl.nCurLine = this.nIndex;
 			fixedFieldCtrl.ShowValueList(this.SelectionStart,
                 this.MaxLength,
-                this.Text); // »¹ĞèÒª¸ø³öµ±Ç°²åÈë·ûÎ»ÖÃ
+                this.Text); // è¿˜éœ€è¦ç»™å‡ºå½“å‰æ’å…¥ç¬¦ä½ç½®
              * */
             fixedFieldCtrl.BeginShowValueList(this.nIndex,
                 this.SelectionStart,
@@ -26,11 +26,11 @@ namespace DigitalPlatform.Marc
                 this.Text);
         }
 
-        // ½Ó¹ÜCtrl+¸÷ÖÖ¼ü
+        // æ¥ç®¡Ctrl+å„ç§é”®
         protected override bool ProcessDialogKey(
             Keys keyData)
         {
-            // Ctrl + A ×Ô¶¯Â¼Èë¹¦ÄÜ
+            // Ctrl + A è‡ªåŠ¨å½•å…¥åŠŸèƒ½
             if ((keyData & Keys.Control) == Keys.Control
                 && (keyData & (~Keys.Control)) == Keys.A)
             {
@@ -41,7 +41,7 @@ namespace DigitalPlatform.Marc
 
                 //
                 Cursor oldcursor = this.Cursor;
-                this.Cursor = Cursors.WaitCursor;   // ³öÏÖÉ³Â©
+                this.Cursor = Cursors.WaitCursor;   // å‡ºç°æ²™æ¼
 
                 int nOldSelectionStart = this.SelectionStart;
                 this.Enabled = false;
@@ -92,7 +92,7 @@ namespace DigitalPlatform.Marc
             return base.ProcessDialogKey(keyData);  // 2017/3/12
         }
 
-        // °´ÏÂ¼ü
+        // æŒ‰ä¸‹é”®
         protected override void OnKeyDown(KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -154,7 +154,7 @@ namespace DigitalPlatform.Marc
 
                     }
                     break;
-                case Keys.Right:    // ÓÒ·½Ïò¼ü
+                case Keys.Right:    // å³æ–¹å‘é”®
                     {
                         if (this.SelectionStart < this.MaxLength - 1)
                             break;
@@ -195,15 +195,15 @@ namespace DigitalPlatform.Marc
                     break;
                 case Keys.Delete:
                     {
-                        // ½ûÖ¹Delete¼üµÄ×÷ÓÃ 2008/5/27
+                        // ç¦æ­¢Deleteé”®çš„ä½œç”¨ 2008/5/27
                         Console.Beep();
                         e.Handled = true;
                     }
                     break;
                 case Keys.Back:
                     {
-                        /* ²»ÖªÕâÀïÎªÊ²Ã´²»¹ÜÓÃ
-                        // ½ûÖ¹Backspace¼üµÄ×÷ÓÃ 2008/7/4
+                        /* ä¸çŸ¥è¿™é‡Œä¸ºä»€ä¹ˆä¸ç®¡ç”¨
+                        // ç¦æ­¢Backspaceé”®çš„ä½œç”¨ 2008/7/4
                         Console.Beep();
                         e.Handled = true;
                         return;
@@ -229,7 +229,7 @@ namespace DigitalPlatform.Marc
                     if (target != null)
                     {
                         // 2011/3/20
-                        // Ë¢ĞÂÖµÁĞ±í
+                        // åˆ·æ–°å€¼åˆ—è¡¨
                         fixedFieldCtrl.ShowValueList(target.SelectionStart,
                             target.MaxLength,
                             target.Text);
@@ -242,16 +242,16 @@ namespace DigitalPlatform.Marc
         {
             base.OnKeyUp(e);
 
-            // Ë¢ĞÂÖµÁĞ±í
+            // åˆ·æ–°å€¼åˆ—è¡¨
             fixedFieldCtrl.ShowValueList(this.SelectionStart,
                 this.MaxLength,
                 this.Text);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -263,18 +263,19 @@ namespace DigitalPlatform.Marc
                         {
                             case (int)Keys.Tab:
                                 {
-                                    // ½ûÖ¹Tab¼üµÄ×÷ÓÃ 2008/7/28
+                                    // ç¦æ­¢Tabé”®çš„ä½œç”¨ 2008/7/28
                                     Console.Beep();
                                     return;
                                 }
                                 break;
                             case (int)Keys.Enter:
+                            case (int)Keys.LineFeed:
                                 {
                                 }
                                 break;
                             case (int)Keys.Back:
                                 {
-                                    // ½ûÖ¹Backspace¼üµÄ×÷ÓÃ 2008/7/4
+                                    // ç¦æ­¢Backspaceé”®çš„ä½œç”¨ 2008/7/4
                                     Console.Beep();
                                     return;
                                 }
@@ -290,7 +291,7 @@ namespace DigitalPlatform.Marc
                                     int nOldSelectionStart = this.SelectionStart;
                                     if (nOldSelectionStart < this.Text.Length)
                                     {
-                                        // ±ÜÃâ¶àÓàµÄTextChanged¶¯×÷
+                                        // é¿å…å¤šä½™çš„TextChangedåŠ¨ä½œ
                                         this.fixedFieldCtrl.m_nDisableTextChanged++;
                                         this.Text = this.Text.Remove(this.SelectionStart, 1);
                                         this.fixedFieldCtrl.m_nDisableTextChanged--;
@@ -331,7 +332,7 @@ namespace DigitalPlatform.Marc
                     return;
                 }
 
-                // Ë¢ĞÂÖµÁĞ±í
+                // åˆ·æ–°å€¼åˆ—è¡¨
                 fixedFieldCtrl.ShowValueList(this.SelectionStart,
                     this.MaxLength,
                     this.Text);

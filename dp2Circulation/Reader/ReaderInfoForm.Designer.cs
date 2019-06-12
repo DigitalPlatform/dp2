@@ -447,7 +447,7 @@
             this.toolStripButton_pasteCardPhoto.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_pasteCardPhoto.Name = "toolStripButton_pasteCardPhoto";
             this.toolStripButton_pasteCardPhoto.Size = new System.Drawing.Size(28, 28);
-            this.toolStripButton_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照";
+            this.toolStripButton_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照(1)";
             this.toolStripButton_pasteCardPhoto.Click += new System.EventHandler(this.toolStripButton_pasteCardPhoto_Click);
             // 
             // toolStripButton_registerFingerprint

@@ -332,7 +332,7 @@ namespace DigitalPlatform.Marc
 
             // Ctrl + M
             if (Control.ModifierKeys == Keys.Control
-                && pure_key == Keys.Enter)
+                && (pure_key == Keys.Enter || pure_key == Keys.LineFeed))
             {
                 // 禁止插入回车换行
                 return true;
@@ -1053,6 +1053,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.30.6506.29202, Culture=neutral,
                     }
                     break;
                 case (char)Keys.Enter:
+                case (char)Keys.LineFeed:
                     {
                         if (this.MarcEditor.EnterAsAutoGenerate == true)
                         {

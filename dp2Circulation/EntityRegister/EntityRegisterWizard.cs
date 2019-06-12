@@ -4670,7 +4670,8 @@ MessageBoxDefaultButton.Button1);
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter && this.dpTable_browseLines.Focused)
+            if ((keyData == Keys.Enter || keyData == Keys.LineFeed)
+                && this.dpTable_browseLines.Focused)
             {
             }
 
@@ -4684,7 +4685,7 @@ MessageBoxDefaultButton.Button1);
 
         private void dpTable_browseLines_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyValue == (int)Keys.Enter
+            if ((e.KeyValue == (int)Keys.Enter || e.KeyValue == (int)Keys.LineFeed)
                 && this.dpTable_browseLines.Focused)
             {
                 this.dpTable_browseLines_DoubleClick(this, e);

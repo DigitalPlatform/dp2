@@ -918,7 +918,8 @@ namespace dp2Circulation
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter
+                || keyData == Keys.LineFeed)
             {
                 if (this.textBox_queryWord.Focused == true)
                     button_search_Click(this, new EventArgs());
@@ -1095,7 +1096,8 @@ namespace dp2Circulation
 
         private void dpTable_items_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter)
+            if (e.KeyChar == (char)Keys.Enter
+                || e.KeyChar == (char)Keys.LineFeed)
             {
                 ProcessDialogKey(Keys.Enter);
                 e.Handled = true;

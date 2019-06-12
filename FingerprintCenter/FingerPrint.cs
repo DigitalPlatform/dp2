@@ -69,6 +69,14 @@ namespace FingerprintCenter
             }
         }
 
+        public override string BioTypeName
+        {
+            get
+            {
+                return "指纹";
+            }
+        }
+
         public FingerPrint()
         {
             BrowseStyle = "fingerprint";

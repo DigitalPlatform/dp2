@@ -4008,6 +4008,7 @@ MessageBoxDefaultButton.Button1);
             {
                 // 回车
                 case (char)Keys.Enter:
+                case (char)Keys.LineFeed:
                     toolStripButton_search_Click(sender, e);
                     break;
             }

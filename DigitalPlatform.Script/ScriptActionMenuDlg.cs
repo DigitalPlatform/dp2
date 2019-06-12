@@ -183,7 +183,7 @@ namespace DigitalPlatform.Script
             Debug.Assert(this.Actions != null, "");
 
             char key = (char)e.KeyValue;
-            if (key == (char)Keys.Enter)
+            if (key == (char)Keys.Enter || key == (char)Keys.LineFeed)
             {
                 button_OK_Click(null, null);
                 return;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +12,7 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.Marc
 {
     /// <summary>
-    /// ĞÂÔö×Ö¶ÎµÄ¶Ô»°¿ò
+    /// æ–°å¢å­—æ®µçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class NewFieldDlg : Form
     {
@@ -57,16 +57,16 @@ namespace DigitalPlatform.Marc
                 string strName = DomUtil.GetAttr(node, "name");
 
                 if (strName == "###")
-                    continue;   // Ìø¹ıÍ·±êÇø
+                    continue;   // è·³è¿‡å¤´æ ‡åŒº
 
                 string strLabel = "";
 
                 XmlNode nodeProperty = node.SelectSingleNode("Property");
                 if (nodeProperty != null)
                 {
-                    // ´ÓÒ»¸öÔªËØµÄÏÂ¼¶µÄ¶à¸ö<strElementName>ÔªËØÖĞ, ÌáÈ¡ÓïÑÔ·ûºÏµÄXmlNodeµÄInnerText
+                    // ä»ä¸€ä¸ªå…ƒç´ çš„ä¸‹çº§çš„å¤šä¸ª<strElementName>å…ƒç´ ä¸­, æå–è¯­è¨€ç¬¦åˆçš„XmlNodeçš„InnerText
                     // parameters:
-                    //      bReturnFirstNode    Èç¹ûÕÒ²»µ½Ïà¹ØÓïÑÔµÄ£¬ÊÇ·ñ·µ»ØµÚÒ»¸ö<strElementName>
+                    //      bReturnFirstNode    å¦‚æœæ‰¾ä¸åˆ°ç›¸å…³è¯­è¨€çš„ï¼Œæ˜¯å¦è¿”å›ç¬¬ä¸€ä¸ª<strElementName>
                     strLabel = DomUtil.GetXmlLangedNodeText(
                 this.Lang,
                 nodeProperty,
@@ -87,7 +87,7 @@ namespace DigitalPlatform.Marc
                         nodeLabel = node.SelectSingleNode("Property/Label[@xml:lang='" + this.Lang + "']", nsmgr);
                     }
                 }
-                catch // ·ÀÖ¹×Ö¶ÎÃûÖĞ²»ºÏ·¨×Ö·ûÓÃÓÚxpathÅ×³öÒì³£
+                catch // é˜²æ­¢å­—æ®µåä¸­ä¸åˆæ³•å­—ç¬¦ç”¨äºxpathæŠ›å‡ºå¼‚å¸¸
                 {
                     nodeLabel = null;
                 }
@@ -114,19 +114,19 @@ namespace DigitalPlatform.Marc
 
             if (string.IsNullOrEmpty(this.textBox_fieldName.Text))
             {
-                strError = "ÉĞÎ´ÊäÈë×Ö¶ÎÃû";
+                strError = "å°šæœªè¾“å…¥å­—æ®µå";
                 goto ERROR1;
             }
 
             if (this.textBox_fieldName.Text.Length != 3)
             {
-                strError = "×Ö¶ÎÃûÓ¦Îª3×Ö·û";
+                strError = "å­—æ®µååº”ä¸º3å­—ç¬¦";
                 goto ERROR1;
             }
 
             if (this.textBox_fieldName.Text == "###")
             {
-                strError = "²»ÔÊĞí´´½¨Ãû×ÖÎª '###' µÄ×Ö¶Î";
+                strError = "ä¸å…è®¸åˆ›å»ºåå­—ä¸º '###' çš„å­—æ®µ";
                 goto ERROR1;
             }
 
@@ -171,15 +171,15 @@ namespace DigitalPlatform.Marc
 
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
             Keys keyData)
         {
             // 2006/11/14 changed
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 button_OK_Click(null, null);
                 return true;
@@ -204,7 +204,7 @@ namespace DigitalPlatform.Marc
         private void listView_fieldNameList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (nNested > 0)
-                return; // ·ÀÖ¹Ã»ÓĞ±ØÒªµÄÖØÈë
+                return; // é˜²æ­¢æ²¡æœ‰å¿…è¦çš„é‡å…¥
 
             if (this.listView_fieldNameList.SelectedItems.Count == 0)
                 this.textBox_fieldName.Text = "";
@@ -225,7 +225,7 @@ namespace DigitalPlatform.Marc
 
         private void textBox_fieldName_KeyUp(object sender, KeyEventArgs e)
         {
-            // ×Ô¶¯½áÊø
+            // è‡ªåŠ¨ç»“æŸ
             if (this.AutoComplete == true)
             {
                 if (this.textBox_fieldName.SelectionStart >= 2
@@ -237,7 +237,7 @@ namespace DigitalPlatform.Marc
 
         }
 
-        // ÊÇ·ñÔÚ×Ö¶ÎÃûÊäÈëµ½×îºóÒ»¸ö×Ö·ûÊ±×Ô¶¯½áÊø¶Ô»°¿ò
+        // æ˜¯å¦åœ¨å­—æ®µåè¾“å…¥åˆ°æœ€åä¸€ä¸ªå­—ç¬¦æ—¶è‡ªåŠ¨ç»“æŸå¯¹è¯æ¡†
         public bool AutoComplete
         {
             get
@@ -250,11 +250,11 @@ namespace DigitalPlatform.Marc
             }
         }
 
-        // listviewÖĞµÄÑ¡¶¨ÊÂÏî£¬¸úËæÎÄ±¾±ä»¯
+        // listviewä¸­çš„é€‰å®šäº‹é¡¹ï¼Œè·Ÿéšæ–‡æœ¬å˜åŒ–
         private void textBox_fieldName_TextChanged(object sender, EventArgs e)
         {
             if (nNested > 0)
-                return; // ·ÀÖ¹ËÀÑ­»·
+                return; // é˜²æ­¢æ­»å¾ªç¯
 
             nNested++;
 

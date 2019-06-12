@@ -10,14 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-using DigitalPlatform.Core;
-using DigitalPlatform.Interfaces;
 using DigitalPlatform.IO;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
+using DigitalPlatform.ResultSet;
+using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.ResultSet;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -28,6 +27,14 @@ namespace DigitalPlatform.CirculationClient
     public class BioUtil : BioBase, IDisposable
     {
         public event GetImageEventHandler GetImage = null;
+
+        public virtual string BioTypeName
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public virtual string DriverName
         {
@@ -90,6 +97,14 @@ namespace DigitalPlatform.CirculationClient
         {
             strError = "尚未重载 AddItems() 函数";
             return -1;
+        }
+
+        public virtual int ItemCount
+        {
+            get
+            {
+                throw new Exception("尚未重载 ItemCount");
+            }
         }
 
         public virtual NormalResult Init(int dev_index)
@@ -598,7 +613,7 @@ namespace DigitalPlatform.CirculationClient
                 }
                 if (readerdbnames.Count == 0)
                 {
-                    strError = "因当前用户没有管辖任何读者库，初始化指纹缓存的操作无法完成";
+                    strError = $"因当前用户没有管辖任何读者库，初始化{this.BioTypeName}缓存的操作无法完成";
                     return new NormalResult { Value = -1, ErrorInfo = strError };
                 }
 
@@ -638,11 +653,11 @@ namespace DigitalPlatform.CirculationClient
 #endif
                 if (nCount == 0)
                 {
-                    strError = "当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，指纹缓存为空";
+                    strError = $"当前用户管辖的读者库 { StringUtil.MakePathList(readerdbnames) } 中没有任何具有{this.BioTypeName}信息的读者记录，{this.BioTypeName}缓存为空";
                     return new NormalResult();
                 }
 
-                this.ShowMessage("指纹缓存初始化成功");
+                this.ShowMessage($"{this.BioTypeName}缓存初始化成功");
                 return new NormalResult { Value = nCount };
             }
             catch (Exception ex)

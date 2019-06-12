@@ -5018,7 +5018,7 @@ namespace dp2Catalog
             Keys keyData)
         {
             // 回车
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 bool bClear = true; // 是否清除浏览窗中已有的内容
 

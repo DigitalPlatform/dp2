@@ -3356,7 +3356,7 @@ MessageBoxDefaultButton.Button1);
             Keys keyData)
         {
             // 回车
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 if (this.amazonSimpleQueryControl_simple.Focused == true)
                 {

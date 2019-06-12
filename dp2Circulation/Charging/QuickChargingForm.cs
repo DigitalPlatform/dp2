@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Script;
@@ -15,10 +17,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.LibraryClient.localhost;
-using System.Threading.Tasks;
-using System.Collections;
-using DigitalPlatform.Core;
 using DigitalPlatform.Interfaces;
 
 namespace dp2Circulation
@@ -461,7 +459,8 @@ namespace dp2Circulation
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter
+                || keyData == Keys.LineFeed)
             {
                 // MessageBox.Show(this, "test");
                 DoEnter();
@@ -3859,7 +3858,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             EnableControlsForFace(false);
             try
             {
-                result = await RecognitionFace("");
+                NormalResult getstate_result = await FaceGetState("getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = getstate_result.ErrorInfo
+                    };
+                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                    result = new RecognitionFaceResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸识别"
+                    };
+                else
+                    result = await RecognitionFace("");
             }
             finally
             {

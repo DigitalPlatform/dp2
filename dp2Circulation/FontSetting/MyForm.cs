@@ -1917,15 +1917,61 @@ out string strError)
             try
             {
                 return await Task.Factory.StartNew<RecognitionFaceResult>(
-() =>
-{
-    return channel.Object.RecognitionFace(strStyle);
-});
+                    () =>
+                    {
+                        return channel.Object.RecognitionFace(strStyle);
+                    });
             }
             catch (Exception ex)
             {
                 strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 RecongitionFace() 操作失败: " + ex.Message;
                 return new RecognitionFaceResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
+            }
+        }
+
+        public async Task<NormalResult> FaceGetState(string strStyle)
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "尚未配置 人脸识别接口URL 系统参数，无法读取人脸信息"
+                };
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out string strError);
+            if (channel == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            _inFaceCall++;
+            try
+            {
+                return await Task.Factory.StartNew<NormalResult>(
+                    () =>
+                    {
+                        return channel.Object.GetState(strStyle);
+                    });
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetState() 操作失败: " + ex.Message;
+                return new NormalResult
                 {
                     Value = -1,
                     ErrorInfo = strError

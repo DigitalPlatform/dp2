@@ -5043,7 +5043,7 @@ Keys keyData)
                 return true;
             }
 
-            if (keyData == Keys.Enter)
+            if (keyData == Keys.Enter || keyData == Keys.LineFeed)
             {
                 DoEnterKey();
                 return true;

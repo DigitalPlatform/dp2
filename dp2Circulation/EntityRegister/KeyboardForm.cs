@@ -1110,6 +1110,7 @@ namespace dp2Circulation
             switch (e.KeyCode)
             {
                 case Keys.Enter:
+                case Keys.LineFeed:
                     button_scan_Click(sender, e);
                     e.Handled = true;
                     e.SuppressKeyPress = true;
