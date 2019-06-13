@@ -1489,6 +1489,7 @@ namespace DigitalPlatform.OPAC.Web
                             strMarc,
                             strOutMarcSyntax,
                             targetEncoding,
+                            "",     // 2019/6/11
                             out baResult,
                             out strError);
                         if (nRet == -1)

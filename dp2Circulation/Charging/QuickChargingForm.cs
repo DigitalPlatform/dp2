@@ -1964,6 +1964,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 return "";
             Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
             string strTypeOfUsage = GetValue(table, "tou");
+
+            // 2019/6/13
+            // 注意：特殊处理!
+            if (strTypeOfUsage == "32")
+                strTypeOfUsage = "10";
+
             if (string.IsNullOrEmpty(strTypeOfUsage) == false && strTypeOfUsage[0] != '1')
                 return "";
             string strBarcode = GetValue(table, "pii");
@@ -3880,9 +3886,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             }
             this.Invoke((Action)(() =>
             {
+                // 2019/6/13
+                this.Activate();
+                API.SetForegroundWindow(this.Handle);
+
                 if (result.Value == 1)
                 {
                     this.textBox_input.Text = result.Patron;
+                    this.textBox_input.Focus();
                     // 触发回车
                     DoEnter();
                 }

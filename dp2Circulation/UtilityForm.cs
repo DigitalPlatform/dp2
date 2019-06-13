@@ -1165,6 +1165,8 @@ MessageBoxDefaultButton.Button2);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            bool unimarc_modify_100 = dlg.UnimarcModify100;
+
             Encoding targetEncoding = null;
 
             nRet = Global.GetEncoding(dlg.EncodingName,
@@ -1263,6 +1265,7 @@ MessageBoxDefaultButton.Button2);
                             strMARC,
                             dlg.MarcSyntax,
                             targetEncoding,
+                            unimarc_modify_100 ? "unimarc_100" : "",
                             out baTarget,
                             out strError);
                         if (nRet == -1)

@@ -3085,6 +3085,8 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            bool unimarc_modify_100 = dlg.UnimarcModify100;
+
             Encoding targetEncoding = null;
 
             if (dlg.EncodingName == "MARC-8")
@@ -3247,6 +3249,7 @@ MessageBoxDefaultButton.Button1);
                         strMARC,
                         strMarcSyntax,
                         targetEncoding,
+                        unimarc_modify_100 ? "unimarc_100" : "",
                         out baTarget,
                         out strError);
                     if (nRet == -1)
