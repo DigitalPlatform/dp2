@@ -52,27 +52,40 @@ namespace TestAccord
             CloseCurrentVideoSource();
         }
 
+        string _moniker = "";
+        Size _captureSize = new Size(0, 0);
+
         private void ToolStripMenuItem_openCamera_Click(object sender, EventArgs e)
         {
-            VideoCaptureDeviceForm form = new VideoCaptureDeviceForm();
+            // 必须先关闭当前正在使用的的 Video Source
+            // CloseCurrentVideoSource();
 
-            if (form.ShowDialog(this) == DialogResult.OK)
+            using (VideoCaptureDeviceForm form = new VideoCaptureDeviceForm())
             {
-                // create video source
-                VideoCaptureDevice videoSource = form.VideoDevice;
+                form.VideoDeviceMoniker = _moniker;
+                form.CaptureSize = _captureSize;
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    // create video source
+                    VideoCaptureDevice videoSource = form.VideoDevice;
+                    // videoSource.VideoResolution = videoSource.VideoCapabilities[1];
 
-                // open it
-                OpenVideoSource(videoSource);
+                    // open it
+                    OpenVideoSource(videoSource);
+                    _moniker = form.VideoDeviceMoniker;
+                    _captureSize = form.CaptureSize;
+                }
             }
         }
 
         // Open video source
         private void OpenVideoSource(IVideoSource source)
-
         {
+            //
+            var test = source.Source;
+
             // set busy cursor
             this.Cursor = Cursors.WaitCursor;
-
 
             // stop current video source
             CloseCurrentVideoSource();
@@ -95,6 +108,7 @@ namespace TestAccord
             if (videoSourcePlayer.VideoSource != null)
             {
                 videoSourcePlayer.SignalToStop();
+                videoSourcePlayer.WaitForStop();
                 videoSourcePlayer.VideoSource = null;
             }
         }

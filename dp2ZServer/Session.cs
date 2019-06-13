@@ -1489,6 +1489,7 @@ namedResultSets        (14)
                 strMarc,
                 strOutMarcSyntax,
                 this._marcRecordEncoding,
+                "", // 2019/6/13
                 out baMARC,
                 out strError);
             if (nRet == -1)

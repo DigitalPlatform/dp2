@@ -4226,19 +4226,38 @@ out strError);
 
         #region 处理MARC记录转换为ISO209任务的静态函数
 
+        // 兼容原来的版本
+        public static int ModifyOutputMARC111(
+    string strMARC,
+    string strMarcSyntax,
+    Encoding encoding,
+    out string strResult)
+        {
+            return ModifyOutputMARC(
+            strMARC,
+            strMarcSyntax,
+            encoding,
+            "unimarc_100",  // 默认的效果
+            out strResult);
+        }
+
         // 2017/4/7 改为用 MarcRecord 处理 100$a
         // 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
         // parameters:
         //		strMarcSyntax   "unimarc" "usmarc"
+        //      strStyle    修改方式。
+        //                  unimarc_100 自动覆盖修改 100 字段内和字符集编码方式有关的几个字符位
         public static int ModifyOutputMARC(
             string strMARC,
             string strMarcSyntax,
             Encoding encoding,
+            string strStyle,
             out string strResult)
         {
             strResult = strMARC;
 
-            if (String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
+            if (StringUtil.IsInList("unimarc_100", strStyle)
+                && String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
             {
                 /*
                 In UNIMARC the information about enconding sets are stored in field 100, 
@@ -4293,7 +4312,6 @@ out strError);
                     record.setFirstSubfield("100", "a", strValue, "  ");
                     strResult = record.Text;
                 }
-
             }
 
             // 修改头标区
@@ -4824,6 +4842,22 @@ out strError);
             return 0;
         }
 
+        // 兼容原来的版本
+        public static int CvtJineiToISO2709(
+    string strSourceMARC,
+    string strMarcSyntax,
+    Encoding targetEncoding,
+    out byte[] baResult,
+    out string strError)
+        {
+            return CvtJineiToISO2709(
+    strSourceMARC,
+    strMarcSyntax,
+    targetEncoding,
+    "unimarc_100",
+    out baResult,
+    out strError);
+        }
 
         // 将MARC机内格式转换为ISO2709格式
         // parameters:
@@ -4838,6 +4872,7 @@ out strError);
             string strSourceMARC,
             string strMarcSyntax,
             Encoding targetEncoding,
+            string strStyle,
             out byte[] baResult,
             out string strError)
         {
@@ -4868,11 +4903,11 @@ out strError);
                 strSourceMARC = strSourceMARC.Replace(RECEND, '*');
             }
 
-            string strMARC;
             ModifyOutputMARC(strSourceMARC,
                 strMarcSyntax,
                 targetEncoding,
-                out strMARC);
+                strStyle,
+                out string strMARC);
 
             // 先转换字符集
             byte[] baMARC = targetEncoding.GetBytes(strMARC);

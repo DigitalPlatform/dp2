@@ -5368,6 +5368,8 @@ namespace dp2Catalog
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            bool unimarc_modify_100 = dlg.UnimarcModify100;
+
             Encoding targetEncoding = null;
 
             if (dlg.EncodingName == "MARC-8"
@@ -5579,6 +5581,7 @@ MessageBoxDefaultButton.Button2);
                         strRecord,
                         strMarcSyntax,
                         targetEncoding,
+                        unimarc_modify_100 ? "unimarc_100" : "",
                         out baTarget,
                         out strError);
                     if (nRet == -1)

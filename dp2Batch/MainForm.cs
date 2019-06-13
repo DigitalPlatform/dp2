@@ -52,6 +52,7 @@ namespace dp2Batch
         bool OutputCrLf = false;	// ISO2709文件记录尾部是否加入回车换行符号
         bool AddG01 = false;    // ISO2709文件中的记录内是否加入-01字段？(不加时就要去除原有的，以免误会)
         bool Remove998 = false; // 输出 ISO2709 文件的时候是否删除 998 字段?
+        bool UnimarcModify100 = true;
 
         public CfgCache cfgCache = new CfgCache();
 
@@ -3777,6 +3778,7 @@ this.checkBox_import_fastMode.Checked);
                         marcdlg.CrLf = this.OutputCrLf;
                         marcdlg.AddG01 = this.AddG01;
                         marcdlg.RemoveField998 = this.Remove998;
+                        marcdlg.UnimarcModify100 = this.UnimarcModify100;
 
                         this.AppInfo.LinkFormState(marcdlg, "OpenMarcFileDlg_output_state");
                         marcdlg.ShowDialog(this);
@@ -3798,6 +3800,7 @@ this.checkBox_import_fastMode.Checked);
                         this.OutputCrLf = marcdlg.CrLf;
                         this.AddG01 = marcdlg.AddG01;
                         this.Remove998 = marcdlg.RemoveField998;
+                        this.UnimarcModify100 = marcdlg.UnimarcModify100;
                         encoding = marcdlg.Encoding;
 
                         return 1;
@@ -4808,6 +4811,7 @@ this.checkBox_import_fastMode.Checked);
                                     this.OutputCrLf,
                                     this.AddG01,
                                     this.Remove998,
+                                    this.UnimarcModify100,
                                     out strError);
                                 if (nRet == -1)
                                 {
@@ -5071,6 +5075,7 @@ this.checkBox_import_fastMode.Checked);
             bool bOutputCrLf,
             bool bAddG01,
             bool bRemove998,
+            bool bUnimarcModify100,
             out string strError)
         {
 
@@ -5125,6 +5130,7 @@ this.checkBox_import_fastMode.Checked);
                 strMarc,
                 this.CurMarcSyntax,
                 targetEncoding,
+                bUnimarcModify100 ? "unimarc_100" : "",
                 out byte[] baResult,
                 out strError);
 

@@ -1475,6 +1475,7 @@ namespace DigitalPlatform.LibraryServer
                 strMARC,
                 strMarcSyntax,
                 targetEncoding,
+                "", // 2019/6/13
                 out result,
                 out strError);
             if (nRet == -1)

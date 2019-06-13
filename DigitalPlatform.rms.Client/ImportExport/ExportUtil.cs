@@ -320,6 +320,7 @@ namespace DigitalPlatform.rms.Client
                     strMARC,
                     strOutMarcSyntax,
                     this.OutputEncoding,
+                    "unimarc_100",  // 2019/6/13
                     out byte[] baResult,
                     out strError);
                 if (nRet == -1)

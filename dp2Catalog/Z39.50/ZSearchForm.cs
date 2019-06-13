@@ -4556,6 +4556,7 @@ MessageBoxDefaultButton.Button1);
                 strMARC,
                 strMarcSyntax,
                 targetEncoding,
+                "", // 2019/6/13
                 out baTarget,
                 out strError);
             if (nRet == -1)

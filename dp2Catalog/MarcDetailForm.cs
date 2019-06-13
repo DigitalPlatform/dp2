@@ -2114,6 +2114,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
+            bool unimarc_modify_100 = dlg.UnimarcModify100;
+
             Encoding targetEncoding = null;
 
             if (dlg.EncodingName == "MARC-8"
@@ -2256,6 +2258,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         strMarc,
                         strMarcSyntax,
                         targetEncoding,
+                        unimarc_modify_100 ? "unimarc_100" : "",
                         out baTarget,
                         out strError);
                     if (nRet == -1)

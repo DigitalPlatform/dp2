@@ -282,6 +282,8 @@ namespace DigitalPlatform.Drawing
 
             // camDevices.SelectCamera(((Device)(cmbDevice.SelectedItem)).Index);
             camDevices.Current.NewFrame += Current_NewFrame;
+            // testing
+            // camDevices.Current.VideoResolution = camDevices.Current.VideoCapabilities[camDevices.Current.VideoCapabilities.Length - 1];
             camDevices.Current.Start();
             m_bInCatch = true;
 
@@ -340,8 +342,10 @@ namespace DigitalPlatform.Drawing
             if (camDevices.Current == null)
                 return;
 
-            // this.camDevices.Current.WaitForStop();
+            this.camDevices.Current.WaitForStop();
 
+            // 注：不是太明白当初为啥要用这一段代码 2019/6/13
+#if NO
             DateTime start = DateTime.Now;
             while (camDevices.Current.IsRunning)
             {
@@ -351,6 +355,7 @@ namespace DigitalPlatform.Drawing
                 if (DateTime.Now - start > new TimeSpan(0, 0, 2))
                     break;
             }
+#endif
         }
 
         public bool InCatch
