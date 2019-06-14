@@ -4968,7 +4968,7 @@ Stack:
                     if (strBarcode == "?transform")
                         return validator.NeedValidate(strLibraryCode) == true ? 1 : 0;
 
-                    var result = validator.Validate(strLibraryCode, strBarcode);
+                    var result = validator.Transform(strLibraryCode, strBarcode);
                     if (result.OK == false)
                     {
                         strError = result.ErrorInfo;

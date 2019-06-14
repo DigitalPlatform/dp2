@@ -585,12 +585,16 @@ username='@hnb'>
 
         private void ToolStripMenuItem_new_nlc_Click(object sender, EventArgs e)
         {
+            // http://olcc.nlc.cn/news/73.html
             string server_xml = @"<server 
-name='国图联编(UCS01)' 
+name='国图联编(UCS01U)' 
 addr='202.96.31.28' 
-port='9991'>
-    <database name='UCS01' />
+port='9991' 
+defaultEncoding='utf-8' 
+queryTermEncoding='utf-8'>
+    <database name='UCS01U' />
 </server>";
+
 
             CreateServer(server_xml);
 
