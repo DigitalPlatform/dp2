@@ -506,8 +506,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     BarcodeValidator validator = new BarcodeValidator(barcodeValidation.OuterXml);
                     var result = validator.Validate(strLibraryCodeList,
-                        strBarcode, 
-                        false);
+                        strBarcode);
                     if (result.OK == false 
                         && result.ErrorCode == "scriptError")
                     {

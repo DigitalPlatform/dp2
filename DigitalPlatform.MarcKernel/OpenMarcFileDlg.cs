@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
+using System.IO;
 
 using DigitalPlatform.Text;
-using System.IO;
 using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.Marc
 {
-	/// <summary>
-	/// 打开或者保存 ISO2709 文件的通用对话框
-	/// </summary>
+    /// <summary>
+    /// 打开或者保存 ISO2709 文件的通用对话框
+    /// </summary>
     public class OpenMarcFileDlg : System.Windows.Forms.Form
     {
         /// <summary>
@@ -139,7 +139,7 @@ namespace DigitalPlatform.Marc
             // 
             // textBox_filename
             // 
-            this.textBox_filename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_filename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_filename.Location = new System.Drawing.Point(0, 22);
             this.textBox_filename.Margin = new System.Windows.Forms.Padding(4);
@@ -285,8 +285,8 @@ namespace DigitalPlatform.Marc
             // 
             // webBrowser1
             // 
-            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.webBrowser1.Location = new System.Drawing.Point(423, 74);
             this.webBrowser1.Margin = new System.Windows.Forms.Padding(4);
@@ -320,8 +320,8 @@ namespace DigitalPlatform.Marc
             // 
             // panel_main
             // 
-            this.panel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.panel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_main.Controls.Add(this.checkBox_unimarc_modify_100);
             this.panel_main.Controls.Add(this.textBox_filename);
@@ -403,7 +403,7 @@ namespace DigitalPlatform.Marc
             {
                 Encoding encoding = this.Encoding;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "您输入的编码方式名称不合法: " + ex.Message;
                 goto ERROR1;
@@ -412,7 +412,7 @@ namespace DigitalPlatform.Marc
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -448,7 +448,8 @@ namespace DigitalPlatform.Marc
             HideMessageTip();
         }
 
-        /*public*/ delegate void Delegate_Initial();
+        /*public*/
+        delegate void Delegate_Initial();
 
         void _initial()
         {
@@ -458,6 +459,8 @@ namespace DigitalPlatform.Marc
                 HideMessageTip();
                 ShowMessageTip();
             }
+
+            this.checkBox_unimarc_modify_100.Visible = this.IsOutput;
         }
 
         private void button_findFileName_Click(object sender, System.EventArgs e)
@@ -785,9 +788,9 @@ namespace DigitalPlatform.Marc
 
             string strMARC = "";
             string strError = "";
-                    // return:
-        //      -1  出错
-        //      0   正常
+            // return:
+            //      -1  出错
+            //      0   正常
             int nRet = LoadFirstRecord(strFileName,
             encoding,
             out strMARC,
@@ -903,7 +906,7 @@ TABLE.marc SPAN.fieldend
                 ShowMessageTip();
             }
             return;
-        ERROR1:
+            ERROR1:
             ClearHtml();
         }
 
@@ -912,9 +915,10 @@ TABLE.marc SPAN.fieldend
             this.webBrowser1.DocumentText = "<html><body></body></html>";
         }
 
-        /*public*/ static void AppendHtml(WebBrowser webBrowser,
-            string strHtml,
-            bool bClear = false)
+        /*public*/
+        static void AppendHtml(WebBrowser webBrowser,
+ string strHtml,
+ bool bClear = false)
         {
 
             HtmlDocument doc = webBrowser.Document;
@@ -936,7 +940,8 @@ TABLE.marc SPAN.fieldend
         private MessageBalloon m_firstUseBalloon = null;
         bool m_bBalloonDisplayed = false;   // 是否已经显示过一次了
 
-        /*public*/ void ShowMessageTip()
+        /*public*/
+        void ShowMessageTip()
         {
             if (m_bBalloonDisplayed == true)
                 return;
@@ -968,10 +973,11 @@ TABLE.marc SPAN.fieldend
         // return:
         //      -1  出错
         //      0   正常
-        /*public*/ static int LoadFirstRecord(string strMarcFileName,
-            Encoding encoding,
-            out string strMARC,
-            out string strError)
+        /*public*/
+        static int LoadFirstRecord(string strMarcFileName,
+ Encoding encoding,
+ out string strMARC,
+ out string strError)
         {
             strError = "";
             strMARC = "";
