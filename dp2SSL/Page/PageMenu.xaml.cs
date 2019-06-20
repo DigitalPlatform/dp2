@@ -41,7 +41,8 @@ namespace dp2SSL
 
             window.Left = 0;
             window.Top = 0;
-            if (StringUtil.IsDevelopMode() == false)
+            if (// StringUtil.IsDevelopMode() == false &&
+                App.FullScreen == true)
             {
                 // 最大化
                 window.WindowStyle = WindowStyle.None;

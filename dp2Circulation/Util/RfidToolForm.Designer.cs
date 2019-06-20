@@ -35,10 +35,13 @@
             this.toolStripButton_autoRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_saveRfid = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_autoFixEas = new System.Windows.Forms.ToolStripButton();
             this.listView_tags = new System.Windows.Forms.ListView();
             this.columnHeader_pii = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_uid = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_readerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_tag = new System.Windows.Forms.TabPage();
@@ -49,7 +52,6 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.columnHeader_protocol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -70,7 +72,9 @@
             this.toolStripSeparator1,
             this.toolStripButton_autoRefresh,
             this.toolStripSeparator2,
-            this.toolStripButton_saveRfid});
+            this.toolStripButton_saveRfid,
+            this.toolStripSeparator3,
+            this.toolStripButton_autoFixEas});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(800, 31);
@@ -120,6 +124,22 @@
             this.toolStripButton_saveRfid.ToolTipText = "保存全部修改";
             this.toolStripButton_saveRfid.Click += new System.EventHandler(this.toolStripButton_saveRfid_Click);
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 31);
+            // 
+            // toolStripButton_autoFixEas
+            // 
+            this.toolStripButton_autoFixEas.CheckOnClick = true;
+            this.toolStripButton_autoFixEas.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_autoFixEas.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_autoFixEas.Image")));
+            this.toolStripButton_autoFixEas.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_autoFixEas.Name = "toolStripButton_autoFixEas";
+            this.toolStripButton_autoFixEas.Size = new System.Drawing.Size(165, 28);
+            this.toolStripButton_autoFixEas.Text = "自动纠正 EAS 错误";
+            this.toolStripButton_autoFixEas.CheckedChanged += new System.EventHandler(this.toolStripButton_autoFixEas_CheckedChanged);
+            // 
             // listView_tags
             // 
             this.listView_tags.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -153,6 +173,11 @@
             // 
             this.columnHeader_readerName.Text = "读卡器";
             this.columnHeader_readerName.Width = 200;
+            // 
+            // columnHeader_protocol
+            // 
+            this.columnHeader_protocol.Text = "协议";
+            this.columnHeader_protocol.Width = 200;
             // 
             // splitContainer1
             // 
@@ -273,11 +298,6 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(800, 419);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
-            // columnHeader_protocol
-            // 
-            this.columnHeader_protocol.Text = "协议";
-            this.columnHeader_protocol.Width = 200;
-            // 
             // RfidToolForm
             // 
             this.AcceptButton = this.button_OK;
@@ -333,5 +353,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ColumnHeader columnHeader_protocol;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton toolStripButton_autoFixEas;
     }
 }

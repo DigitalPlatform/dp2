@@ -161,6 +161,10 @@ namespace dp2SSL
             FaceManager.Url = App.FaceUrl;
             FaceManager.Clear();
 
+            // 2019/6/19
+            // 主动保存一次参数配置
+            WpfClientInfo.SaveConfig();
+
             // 检查状态，及时报错
             {
                 List<string> errors = new List<string>();

@@ -134,5 +134,23 @@ Description = "人脸接口 URL 地址"
             }
         }
 
+        // 默认值 true
+        [Display(
+Order = 7,
+Name = "启动时全屏",
+Description = "程序启动时候是否自动全屏"
+)]
+        [Category("启动")]
+        public bool FullScreen
+        {
+            get
+            {
+                return _config.GetInt("global", "fullScreen", 1) == 1 ? true : false;
+            }
+            set
+            {
+                _config.SetInt("global", "fullScreen", value == true ? 1 : 0);
+            }
+        }
     }
 }

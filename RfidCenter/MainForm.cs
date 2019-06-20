@@ -1,35 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Threading;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Remoting.Channels;
-using System.Runtime.Remoting;
-using System.Web;
 using System.IO;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Ipc;
 using System.Speech.Synthesis;
-
-using log4net;
-using RfidDrivers.First;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Web;
+using System.Windows.Forms;
 
 using DigitalPlatform;
-using DigitalPlatform.RFID;
-using DigitalPlatform.GUI;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.RFID.UI;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
+using DigitalPlatform.RFID;
+using DigitalPlatform.RFID.UI;
 using DigitalPlatform.Text;
+
+using log4net;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using System.Management;
+using RfidDrivers.First;
 
 namespace RfidCenter
 {
@@ -192,6 +188,18 @@ namespace RfidCenter
                     return;
                 }
             }
+
+            // TODO: 每隔一段时间自动保存一次配置
+            SaveSettings();
+        }
+
+        void SaveSettings()
+        {
+            if (this.checkBox_cfg_savePasswordLong.Checked == false)
+                this.textBox_cfg_password.Text = "";
+            ClientInfo.Config?.Set("global", "ui_state", this.UiState);
+            ClientInfo.Config?.Set("global", "replication_start", this.textBox_replicationStart.Text);
+            ClientInfo.Finish();
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -203,13 +211,7 @@ namespace RfidCenter
 
             _cancelInventory?.Cancel();
 
-            {
-                if (this.checkBox_cfg_savePasswordLong.Checked == false)
-                    this.textBox_cfg_password.Text = "";
-                ClientInfo.Config?.Set("global", "ui_state", this.UiState);
-                ClientInfo.Config?.Set("global", "replication_start", this.textBox_replicationStart.Text);
-                ClientInfo.Finish();
-            }
+            // 
 
             EndChannel();
             EndRemotingServer();

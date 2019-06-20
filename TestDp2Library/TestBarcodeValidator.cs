@@ -35,12 +35,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, "entity");
-                /*
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
-                */
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
             }
         }
 
@@ -65,12 +61,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "P000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, "patron");
-                /*
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
-                */
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("patron", result.Type);
             }
         }
 
@@ -96,12 +88,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "P0000001");
-                Assert.AreEqual(result.OK, false);
-                Assert.AreEqual(result.ErrorCode, "notMatch");
-                /*
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
-                */
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("notMatch", result.ErrorCode);
             }
         }
 
@@ -126,12 +114,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆1", "P0000001");
-                Assert.AreEqual(result.OK, false);
-                Assert.AreEqual(result.ErrorCode, "locationDefNotFound");
-                /*
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
-                */
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("locationDefNotFound", result.ErrorCode);
             }
         }
 
@@ -159,12 +143,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, "entity");
-                /*
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail");
-                Assert.AreEqual(result.Transformed, true);
-                */
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
             }
         }
 
@@ -192,10 +172,10 @@ namespace TestDp2Library
 
             {
                 var result = validator.Transform("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, null);
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail");
-                Assert.AreEqual(result.Transformed, true);
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+                Assert.AreEqual("0000001tail", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
             }
         }
 
@@ -220,12 +200,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, false);
-                Assert.AreEqual(result.Type, null);
-#if NO
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail");
-                Assert.AreEqual(result.Transformed, true);
-#endif
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
             }
         }
 
@@ -250,10 +226,10 @@ namespace TestDp2Library
 
             {
                 var result = validator.Transform("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, "entity");
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail");
-                Assert.AreEqual(result.Transformed, true);
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+                Assert.AreEqual("0000001tail", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
             }
         }
 
@@ -282,12 +258,8 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, false);
-                Assert.AreEqual(result.Type, null);
-#if NO
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail1");
-                Assert.AreEqual(result.Transformed, true);
-#endif
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
             }
         }
 
@@ -314,10 +286,10 @@ namespace TestDp2Library
 
             {
                 var result = validator.Transform("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.Type, "entity");
-                Assert.AreEqual(result.TransformedBarcode, "0000001tail1");
-                Assert.AreEqual(result.Transformed, true);
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+                Assert.AreEqual("0000001tail1", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
             }
         }
 
@@ -346,15 +318,10 @@ namespace TestDp2Library
 
             {
                 var result = validator.Validate("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, true);
-                // Assert.AreEqual(result.ErrorCode, "scriptError");
-                Assert.AreEqual(result.ErrorCode, null);
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual(null, result.ErrorCode);
 
-                Assert.AreEqual(result.Type, "entity");
-#if NO
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
-#endif
+                Assert.AreEqual("entity", result.Type);
             }
         }
 
@@ -381,12 +348,12 @@ namespace TestDp2Library
 
             {
                 var result = validator.Transform("海淀分馆", "0000001");
-                Assert.AreEqual(result.OK, false);
-                Assert.AreEqual(result.ErrorCode, "scriptError");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("scriptError", result.ErrorCode);
 
-                Assert.AreEqual(result.Type, null);
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
+                Assert.AreEqual(null, result.Type);
+                Assert.AreEqual(null, result.TransformedBarcode);
+                Assert.AreEqual(false, result.Transformed);
             }
         }
 
@@ -411,12 +378,167 @@ namespace TestDp2Library
 
             {
                 var result = validator.Transform("海淀分馆", "T0000001");
-                Assert.AreEqual(result.OK, true);
-                Assert.AreEqual(result.ErrorCode, "notMatch");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("notMatch", result.ErrorCode);
 
-                Assert.AreEqual(result.Type, null);
-                Assert.AreEqual(result.TransformedBarcode, null);
-                Assert.AreEqual(result.Transformed, false);
+                Assert.AreEqual(null, result.Type);
+                Assert.AreEqual(null, result.TransformedBarcode);
+                Assert.AreEqual(false, result.Transformed);
+            }
+        }
+
+        [TestMethod]
+        public void Test15_transform()
+        {
+            string xml = @"
+<barcodeValidation>
+    <validator location='第三中学'>
+        <patron>
+            <CMIS />
+            <range value='T000001-T999999' />
+            <range value='000001-999999' transform='result=&quot;T&quot;+barcode ;' />
+        </patron>
+        <entity>
+            <range value='SZ001-SZ999' />
+            <range value='Z001-Z999' transform='result= &quot;S&quot; + barcode ;' />
+        </entity>
+        <transform>
+	if (barcode.length == 4)
+	result = 'Z' + barcode;
+                 else if (barcode.length == 5)
+                  result = barcode;
+else
+	message = '待变换的输入条码号 \''+barcode+'\' 长度不对';
+        </transform>
+    </validator>
+</barcodeValidation>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Transform("第三中学", "000001");
+                Assert.AreEqual(true, result.OK);
+
+                Assert.AreEqual("patron", result.Type);
+                Assert.AreEqual("T000001", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
+            }
+        }
+
+        [TestMethod]
+        public void Test16_transform()
+        {
+            string xml = @"
+<barcodeValidation>
+    <validator location='第三中学'>
+        <patron>
+            <CMIS />
+            <range value='T000001-T999999' />
+            <range value='000001-999999' transform='result=&quot;T&quot;+barcode ;' />
+        </patron>
+        <entity>
+            <range value='SZ001-SZ999' />
+            <range value='Z001-Z999' transform='result= &quot;S&quot; + barcode ;' />
+        </entity>
+        <transform>
+	if (barcode.length == 4)
+	result = 'Z' + barcode;
+                 else if (barcode.length == 5)
+                  result = barcode;
+else
+	message = '待变换的输入条码号 \''+barcode+'\' 长度不对';
+        </transform>
+    </validator>
+</barcodeValidation>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Transform("第三中学", "T000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("scriptError", result.ErrorCode);
+
+                Assert.AreEqual(null, result.Type);
+                Assert.AreEqual(null, result.TransformedBarcode);
+                Assert.AreEqual(false, result.Transformed);
+            }
+        }
+
+        [TestMethod]
+        public void Test17_transform()
+        {
+            string xml = @"
+<barcodeValidation>
+    <validator location='第三中学'>
+        <patron>
+            <CMIS />
+            <range value='T000001-T999999' />
+            <range value='000001-999999' transform='result=&quot;T&quot;+barcode ;' />
+        </patron>
+        <entity>
+            <range value='SZ001-SZ999' />
+            <range value='Z001-Z999' transform='result= &quot;S&quot; + barcode ;' />
+        </entity>
+        <transform>
+	if (barcode.length == 4)
+	result = 'Z' + barcode;
+                 else if (barcode.length == 5)
+                  result = barcode;
+else
+	message = '待变换的输入条码号 \''+barcode+'\' 长度不对';
+        </transform>
+    </validator>
+</barcodeValidation>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Transform("第三中学", "A001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual(null, result.ErrorCode);
+
+                Assert.AreEqual(null, result.Type);
+                Assert.AreEqual("ZA001", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
+            }
+        }
+
+        [TestMethod]
+        public void Test18_transform()
+        {
+            string xml = @"
+<barcodeValidation>
+    <validator location='第三中学'>
+        <patron>
+            <CMIS />
+            <range value='T000001-T999999' />
+            <range value='000001-999999' transform='result=&quot;T&quot;+barcode ;' />
+        </patron>
+        <entity>
+            <range value='SZ001-SZ999' />
+            <range value='Z001-Z999' transform='result= &quot;S&quot; + barcode ;' />
+        </entity>
+        <transform>
+	        if (barcode.length == 4)
+	            result = 'Z' + barcode;
+            else if (barcode.length == 5)
+                result = barcode;
+            else
+	            message = '待变换的输入条码号 \''+barcode+'\' 长度不对';
+        </transform>
+    </validator>
+</barcodeValidation>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Transform("第三中学", "A0001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual(null, result.ErrorCode);
+
+                Assert.AreEqual(null, result.Type);
+                Assert.AreEqual("A0001", result.TransformedBarcode);
+                Assert.AreEqual(true, result.Transformed);
             }
         }
 
@@ -442,7 +564,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("海淀分馆");
-                Assert.AreEqual(result, false);
+                Assert.AreEqual(false, result);
             }
         }
 
@@ -467,7 +589,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("西城分馆");
-                Assert.AreEqual(result, false);
+                Assert.AreEqual(false, result );
             }
         }
 
@@ -496,7 +618,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("西城分馆");
-                Assert.AreEqual(result, false);
+                Assert.AreEqual(false, result);
             }
         }
 
@@ -525,7 +647,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("海淀分馆");
-                Assert.AreEqual(result, true);
+                Assert.AreEqual(true, result );
             }
         }
 
@@ -550,7 +672,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("海淀分馆");
-                Assert.AreEqual(result, true);
+                Assert.AreEqual(true, result );
             }
         }
 
@@ -578,7 +700,7 @@ namespace TestDp2Library
 
             {
                 var result = validator.NeedValidate("海淀分馆");
-                Assert.AreEqual(result, true);
+                Assert.AreEqual(true, result );
             }
         }
 
