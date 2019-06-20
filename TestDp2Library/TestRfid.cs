@@ -419,10 +419,10 @@ L output:01100");
                 0xbe, 0x99, 0x1a, 0x14,
             };
             var element = Element.Parse(data, 0, out int bytes);
-            Assert.AreEqual((int)element.OID, 1);
-            Assert.AreEqual(element.Text, "123456789012");
-            Assert.AreEqual(element.PrecursorOffset, true); // Precursor 后面会有 1 byte 的填充字符数
-            Assert.AreEqual(element.Paddings, 0);   // 填充 byte 没有使用
+            Assert.AreEqual(1, (int)element.OID);
+            Assert.AreEqual("123456789012", element.Text);
+            Assert.AreEqual(true, element.PrecursorOffset); // Precursor 后面会有 1 byte 的填充字符数
+            Assert.AreEqual(0, element.Paddings);   // 填充 byte 没有使用
         }
 
         [TestMethod]

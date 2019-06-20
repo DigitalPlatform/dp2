@@ -150,14 +150,12 @@ namespace dp2SSL
             _config = ConfigSetting.Open(filename, true);
         }
 
+        // 允许反复调用
         public static void SaveConfig()
         {
             // Save the configuration file.
-            if (_config != null)
-            {
+            if (_config != null && _config.Changed)
                 _config.Save();
-                _config = null;
-            }
         }
 
         #region Log

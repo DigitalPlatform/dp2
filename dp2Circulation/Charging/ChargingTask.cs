@@ -1053,7 +1053,7 @@ end_time);
                         using (RfidToolForm dlg = new RfidToolForm())
                         {
                             dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
-                            dlg.Mode = "auto_fix_eas";
+                            dlg.Mode = "auto_fix_eas_and_close";
                             dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
                             dlg.ProtocolFilter = InventoryInfo.ISO15693;
                             dlg.ShowDialog(this.Container);

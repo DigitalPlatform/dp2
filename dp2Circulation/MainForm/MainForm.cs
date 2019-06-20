@@ -4958,6 +4958,8 @@ Stack:
                 return 0;
             }
 
+            // TODO: 需要考虑 RFID 读卡器发来的字符串形态
+
             // 2019/6/1
             // 优先用服务器传递到前端的条码校验规则来校验
             if (string.IsNullOrEmpty(this.BarcodeValidation) == false)

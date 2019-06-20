@@ -18,6 +18,8 @@ using System.Diagnostics;
 
 using static FingerprintCenter.FingerPrint;
 
+using Microsoft.Win32;
+
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
@@ -26,7 +28,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CirculationClient;
 using static DigitalPlatform.CirculationClient.BioUtil;
-using Microsoft.Win32;
 
 namespace FingerprintCenter
 {
@@ -581,22 +582,27 @@ bool bClickClose = false)
             }));
         }
 
+        void SaveSettings()
+        {
+            if (this.checkBox_cfg_savePasswordLong.Checked == false)
+                this.textBox_cfg_password.Text = "";
+            ClientInfo.Config?.Set("global", "ui_state", this.UiState);
+            ClientInfo.Config?.Set("global", "replication_start", this.textBox_replicationStart.Text);
+            ClientInfo.Finish();
+        }
+
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             EndTimer();
 
-            _cancel.Cancel();
+            _cancel?.Cancel();
+
+            AbortReplication(false);
 
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             // UsbNotification.UnregisterUsbDeviceNotification();
 
-            {
-                if (this.checkBox_cfg_savePasswordLong.Checked == false)
-                    this.textBox_cfg_password.Text = "";
-                ClientInfo.Config.Set("global", "ui_state", this.UiState);
-                ClientInfo.Config.Set("global", "replication_start", this.textBox_replicationStart.Text);
-                ClientInfo.Finish();
-            }
+            ////
 
             EndChannel();
             FingerprintServer.EndRemotingServer();
@@ -1283,6 +1289,8 @@ string strHtml)
                     return;
                 }
             }
+
+            SaveSettings();
         }
 
         protected override bool ProcessDialogKey(
@@ -1695,6 +1703,9 @@ token);
             if (_cancelReplication != null
                 || _inInitialCache == true)
                 return;
+
+            // 2019/6/19
+            ClientInfo.SaveConfig();
 
             BeginReplication();
         }

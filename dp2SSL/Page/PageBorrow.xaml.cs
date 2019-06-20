@@ -11,11 +11,11 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
+using DigitalPlatform.RFID;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Text;
 
 namespace dp2SSL
 {

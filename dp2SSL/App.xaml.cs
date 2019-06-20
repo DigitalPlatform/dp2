@@ -235,6 +235,14 @@ namespace dp2SSL
             }
         }
 
+        public static bool FullScreen
+        {
+            get
+            {
+                return WpfClientInfo.Config?.GetInt("global", "fullScreen", 1) == 1 ? true : false;
+            }
+        }
+
         public static string dp2Password
         {
             get

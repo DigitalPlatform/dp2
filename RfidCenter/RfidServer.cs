@@ -593,7 +593,7 @@ new_password);
                         // bFirst = false;
                         if (inventory_result.Value == -1)
                         {
-                            _compactLog?.Add($"*** 读卡器 {0} 点选标签时出错: {1}",
+                            _compactLog?.Add("*** 读卡器 {0} 点选标签时出错: {1}",
                                 new object[] { reader.Name, inventory_result.ToString() }
                                 );
                             continue;

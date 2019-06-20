@@ -14083,6 +14083,64 @@ out strError);
                 {
                     foreach (MessageData data in messages)
                     {
+                        // 统计信息写入操作日志
+                        if (data.strRecipient == "!statis")
+                        {
+                            XmlDocument domOperLog = new XmlDocument();
+                            domOperLog.LoadXml("<root />");
+
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "operation",
+                                "statis");
+                            // 第一级元素
+                            if (data.strMime == "text/xml")
+                            {
+                                string[] reserve_list = new string[] {
+                                    "operation","operator","operTime"
+                                };
+                                XmlDocument dom = new XmlDocument();
+                                dom.LoadXml(data.strBody);
+                                XmlNodeList nodes = dom.DocumentElement.SelectNodes("*");
+                                foreach (XmlElement node in nodes)
+                                {
+                                    if (Array.IndexOf(reserve_list, node.Name) != -1)
+                                        continue;
+                                    // XmlElement new_node = domOperLog.CreateElement(node.Name);
+                                    XmlNode importNode = domOperLog.ImportNode(node, true);
+                                    domOperLog.DocumentElement.AppendChild(importNode);
+                                }
+                            }
+                            else
+                            {
+                                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "subject",
+    data.strSubject);
+                                DomUtil.SetElementText(domOperLog.DocumentElement,
+                                    "sender",
+                                    data.strSender);
+                                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "mime",
+    data.strMime);
+                                DomUtil.SetElementText(domOperLog.DocumentElement,
+                                    "content",
+                                    data.strBody);
+                            }
+
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+    sessioninfo.UserID);
+                            string strOperTime = app.Clock.GetClock();
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                                strOperTime);
+                            nRet = app.OperLog.WriteOperLog(domOperLog,
+                                sessioninfo.ClientAddress,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "统计信息写入操作日志时出错: " + strError;
+                                goto ERROR1;
+                            }
+                        }
+
                         // 异常报告还要写入操作日志
                         if (data.strRecipient == "crash")
                         {
@@ -14114,7 +14172,9 @@ out strError);
                             }
                         }
 
-                        nRet = app.MessageCenter.SendMessage(
+                        if (data.strRecipient == "crash")
+                        {
+                            nRet = app.MessageCenter.SendMessage(
                             sessioninfo.Channels,
                             data.strRecipient,
                             sessioninfo.UserID,
@@ -14123,8 +14183,9 @@ out strError);
                             data.strBody,
                             true,
                             out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
                     }
                 }
 

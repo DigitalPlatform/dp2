@@ -45,7 +45,7 @@ namespace dp2Circulation
             }
         }
 
-        string _mode = "";  // auto_fix_eas
+        string _mode = "";  // auto_fix_eas 或 auto_fix_eas_and_close
         public string Mode
         {
             get
@@ -117,6 +117,10 @@ namespace dp2Circulation
             if (this.toolStripButton_autoRefresh.Checked == false)
                 Task.Run(() => { UpdateChipList(true); });
 
+            this.toolStripButton_autoFixEas.Checked = Program.MainForm.AppInfo.GetBoolean("rfidtoolform",
+    "auto_fix_eas",
+    true);
+
             this.BeginInvoke(new Action(() =>
             {
                 this.listView_tags.Focus();
@@ -142,6 +146,10 @@ namespace dp2Circulation
             Program.MainForm.AppInfo.SetBoolean("rfidtoolform",
     "auto_refresh",
     this.toolStripButton_autoRefresh.Checked);
+
+            Program.MainForm.AppInfo.SetBoolean("rfidtoolform",
+"auto_fix_eas",
+this.toolStripButton_autoFixEas.Checked);
         }
 
         // private static readonly Object _syncRoot_update = new Object();
@@ -284,7 +292,7 @@ namespace dp2Circulation
                                 FillEntityInfo();
                                 //}));
 
-                                if (this._mode == "auto_fix_eas")
+                                if (this._mode.StartsWith("auto_fix_eas"))
                                 {
                                     this.Invoke((Action)(() =>
                                     {
@@ -377,6 +385,10 @@ namespace dp2Circulation
 
             public static IdInfo Parse(string text)
             {
+                // 2019/6/18
+                if (string.IsNullOrEmpty(text))
+                    return null;
+
                 IdInfo info = new IdInfo();
                 if (text.IndexOf(":") == -1)
                 {
@@ -662,6 +674,7 @@ namespace dp2Circulation
         }
 
         // 填充所有的册记录信息
+        // TODO: 返回值最好能体现实际是否发生过刷新
         void FillEntityInfo()
         {
             LibraryChannel channel = this.GetChannel();
@@ -730,24 +743,32 @@ namespace dp2Circulation
 #endif
             try
             {
+                // 注：如果 info == null，表示对每一个 List View Item 都尝试去修复一下
+                // TODO: 注意修复后刷新显示
                 IdInfo info = IdInfo.Parse(this.SelectedID);
-
+                List<string> uids = new List<string>();
                 foreach (ListViewItem item in this.listView_tags.Items)
                 {
                     string uid = ListViewUtil.GetItemText(item, COLUMN_UID);
 
                     ItemInfo item_info = (ItemInfo)item.Tag;
+
+                    if (item_info.EasChecked)
+                        continue;
+
                     var tag_info = item_info.OneTag.TagInfo;
                     if (tag_info == null)
-                        continue;
+                        goto CONTINUE;
                     LogicChip chip = LogicChip.From(tag_info.Bytes,
                         (int)tag_info.BlockSize);
                     string pii = chip.FindElement(ElementOID.PII)?.Text;
-                    if ((info.Prefix == "pii" && pii == info.Text)
+                    if (info == null
+                        || (info.Prefix == "pii" && pii == info.Text)
                         || (info.Prefix == "uid" && uid == info.Text))
                     {
                         // 获得册记录的外借状态。
                         // return:
+                        //      -2  册记录为空，无法判断状态
                         //      -1  出错
                         //      0   没有被外借
                         //      1   在外借状态
@@ -763,12 +784,28 @@ namespace dp2Circulation
                         // 检测 EAS 是否正确
                         NormalResult result = null;
                         // TODO: 这里发现不一致的时候，是否要出现明确提示，让操作者知晓？
+                        // TODO: 要迫使界面刷新，因为 EAS 值可能发生了变化
                         if (nRet == 1 && tag_info.EAS == true)
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, false, out strError);
                         else if (nRet == 0 && tag_info.EAS == false)
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, true, out strError);
                         else
-                            continue;
+                            goto CONTINUE;
+
+                        uids.Add(tag_info.UID);
+
+                        // if (tag.TagInfo == null)
+                        {
+                            // 启动单独的线程去填充 .TagInfo
+                            Task.Run(() => { GetTagInfo(item); }).ContinueWith((o) =>
+                            {
+                                this.Invoke((Action)(() =>
+                                {
+                                    // 如果当前右侧显示了标签内容，也需要刷新
+                                    listView_tags_SelectedIndexChanged(this, new EventArgs());
+                                }));
+                            });
+                        }
 
                         if (result.Value == -1)
                         {
@@ -778,22 +815,30 @@ namespace dp2Circulation
 
                         this.EasFixed = true;
                     }
+
+                    CONTINUE:
+                    item_info.EasChecked = true;    // 避免以后重复检查
                 }
+
+                if (uids.Count > 0)
+                    this.ShowMessage($"UID 为 {StringUtil.MakePathList(uids, ",")} 的标签 EAS 状态不正确，已经被自动纠正", "yellow", true);
             }
             finally
             {
                 // ReturnRfidChannel(channel);
             }
 
-            if (this._mode == "auto_fix_eas" && this.EasFixed)
+            if (this._mode == "auto_fix_eas_and_close" && this.EasFixed)
                 this.Close();
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            this.ShowMessage(strError, "red", true);
+            // MessageBox.Show(this, strError);
         }
 
         // 获得册记录的外借状态。
         // return:
+        //      -2  册记录为空，无法判断状态
         //      -1  出错
         //      0   没有被外借
         //      1   在外借状态
@@ -804,7 +849,7 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strItemXml))
             {
                 strError = "册记录 XML 为空，无法判断外借状态";
-                return -1;
+                return -2;
             }
 
             XmlDocument dom = new XmlDocument();
@@ -961,6 +1006,9 @@ namespace dp2Circulation
             public OneTag OneTag { get; set; }
             public string Xml { get; set; }
             public LogicChipItem LogicChipItem { get; set; }
+
+            // EAS 是否被检查过。检查过就不要重复检查了
+            public bool EasChecked { get; set; }
         }
 
         private void toolStripButton_autoRefresh_CheckStateChanged(object sender, EventArgs e)
@@ -1372,6 +1420,11 @@ namespace dp2Circulation
                 this.ShowMessage($"保存成功({count})", "green", true);
             else
                 this.ShowMessage("没有需要保存的事项", "yellow", true);
+        }
+
+        private void toolStripButton_autoFixEas_CheckedChanged(object sender, EventArgs e)
+        {
+            StringUtil.SetInList(ref this._mode, "auto_fix_eas", this.toolStripButton_autoFixEas.Checked);
         }
 
 #if NO

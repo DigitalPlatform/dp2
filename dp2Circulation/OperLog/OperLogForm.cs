@@ -483,6 +483,8 @@ namespace dp2Circulation
                 nRet = GetSetUserString(dom, out strHtml, out strError);
             else if (strOperation == "manageDatabase")
                 nRet = GetManageDatabaseString(dom, out strHtml, out strError);
+            else if (strOperation == "statis")
+                nRet = GetStatisString(dom, out strHtml, out strError);
             else
             {
                 strError = "未知的操作类型 '" + strOperation + "'";
@@ -1140,6 +1142,67 @@ namespace dp2Circulation
 
                 BuildHtmlEncodedLine("操作前的读者记录", strOldReaderRecPath, strOldReaderRecordHtml) +
                 BuildHtmlEncodedLine("操作后的读者记录", strReaderRecPath, strReaderRecordHtml) +
+
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
+        // Statis
+        int GetStatisString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out XmlNode node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+            string strLocation = DomUtil.GetElementText(dom.DocumentElement, "location");
+            string strTagProtocol = DomUtil.GetElementText(dom.DocumentElement,
+                "tagProtocol");
+            string strTagReaderName = DomUtil.GetElementText(dom.DocumentElement,
+                "tagReaderName");
+            string strTagAFI = DomUtil.GetElementText(dom.DocumentElement,
+    "tagAFI");
+            string strTagBlockSize = DomUtil.GetElementText(dom.DocumentElement,
+"tagBlockSize");
+            string strTagMaxBlockCount = DomUtil.GetElementText(dom.DocumentElement,
+"tagMaxBlockCount");
+            string strTagDSFID = DomUtil.GetElementText(dom.DocumentElement,
+"tagDSFID");
+            string strTagUID = DomUtil.GetElementText(dom.DocumentElement,
+"tagUID");
+            string strTagBytes = DomUtil.GetElementText(dom.DocumentElement,
+"tagBytes");
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 统计信息") +
+                BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+                BuildHtmlLine("册条码号", strBarcode) +
+                BuildHtmlLine("馆藏地", strLocation) +
+                BuildHtmlLine("标签协议", strTagProtocol) +
+                BuildHtmlLine("读卡器名", strTagReaderName) +
+                BuildHtmlLine("AFI", strTagAFI) +
+                BuildHtmlLine("块尺寸", strTagBlockSize) +
+                BuildHtmlLine("最大块数", strTagMaxBlockCount) +
+                BuildHtmlLine("DSFID", strTagDSFID) +
+                BuildHtmlLine("标签数据区", strTagBytes) +
 
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
@@ -2135,6 +2198,12 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                     return "初始化数据库";
                 if (strAction == "refreshDatabase")
                     return "刷新数据库定义";
+            }
+
+            if (strOperation == "statis")
+            {
+                if (strAction == "writeRfidTag")
+                    return "写入 RFID 标签";
             }
 
             return strAction;

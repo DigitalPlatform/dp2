@@ -132,6 +132,9 @@ namespace DigitalPlatform.LibraryServer.Common
             XmlElement transform = validator.SelectSingleNode("transform") as XmlElement;
             string transform_script = transform?.InnerText.Trim();
 
+            // 校验所匹配上的类型
+            string verify_type = null;
+
             XmlNodeList patron_or_entitys = validator.SelectNodes("patron | entity");
             foreach (XmlElement patron_or_entity in patron_or_entitys)
             {
@@ -145,6 +148,20 @@ namespace DigitalPlatform.LibraryServer.Common
                         OK = true,
                         Type = patron_or_entity.Name,
                     };
+                    verify_type = patron_or_entity.Name;
+                    break;
+                }
+
+                // 按照 verify 算法来再匹配一次。
+                // patron 元素里面，只要命中过一个 range 元素，哪怕是没有 transform 属性的 range 元素，
+                // 后面也就不再尝试匹配 entity 元素了
+                // entity 元素亦然。
+                ret = ProcessEntry(patron_or_entity,
+    barcode);
+                if (ret == true)
+                {
+                    verify_type = patron_or_entity.Name;
+                    // transform = null;   // 迫使后面也不使用 transform 元素
                     break;
                 }
             }
@@ -154,6 +171,7 @@ namespace DigitalPlatform.LibraryServer.Common
                 result = new TransformResult
                 {
                     OK = true,
+                    Type = verify_type,
                     TransformedBarcode = null,
                     Transformed = false,
                     ErrorInfo = $"号码 '{barcode}' (馆藏地属于 '{location}') 没有发生变换",
@@ -186,6 +204,7 @@ namespace DigitalPlatform.LibraryServer.Common
         transform_script);
                         if (result == null)
                             result = new TransformResult();
+                        result.Type = verify_type;
                         result.TransformedBarcode = transform_result;
                         result.Transformed = true;
                         result.OK = true;
@@ -424,6 +443,7 @@ namespace DigitalPlatform.LibraryServer.Common
                 }
             }
 
+            transform_script = "";
             return false;
         }
 

@@ -54,7 +54,7 @@ namespace FingerprintCenter
         // 注册过程完成
         AutoResetEvent _eventRegisterFinished = new AutoResetEvent(false);
 
-        public const int DefaultThreshold = 10;
+        public const int DefaultThreshold = 70; // 2019/6/19 修改为 70。此前是 10
 
         int _shreshold = DefaultThreshold;
         public int Shreshold

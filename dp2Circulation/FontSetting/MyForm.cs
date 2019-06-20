@@ -2446,6 +2446,48 @@ Keys keyData)
             // TODO: 最好跳转到一个帮助目录页面
             MessageBox.Show(this, "当前没有帮助链接");
         }
+
+        // 写入统计日志
+        public int WriteStatisLog(
+    string strSender,
+    string strSubject,
+    string strXml,
+    out string strError)
+        {
+            strError = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                var message = new MessageData
+                {
+                    strRecipient = "!statis",
+                    strSender = strSender,
+                    strSubject = strSubject,
+                    strMime = "text/xml",
+                    strBody = strXml
+                };
+                MessageData[] messages = new MessageData[]
+                {
+                    message
+                };
+
+                long lRet = channel.SetMessage(
+                    "send",
+                    "",
+                    messages,
+                    out MessageData[] output_messages,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
     }
 
     public class FilterHost
