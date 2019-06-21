@@ -9,6 +9,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -38,10 +39,12 @@ namespace DigitalPlatform.CirculationClient
             timestamp,
             bRetryOverwiteExisting,
             false,
+            null,
             out output_timestamp,
             out strError);
         }
 
+        // 
         public static int UploadObject(
     this LibraryChannel channel,
     Stop stop,
@@ -51,6 +54,7 @@ namespace DigitalPlatform.CirculationClient
     byte[] timestamp,
     bool bRetryOverwiteExisting,
     bool bProgressChange,
+    delegate_prompt prompt_func,
     out byte[] output_timestamp,
     out string strError)
         {
@@ -66,6 +70,7 @@ namespace DigitalPlatform.CirculationClient
             timestamp,
             bRetryOverwiteExisting,
             bProgressChange,
+            prompt_func,
             out output_timestamp,
             out strError);
         }
@@ -92,11 +97,45 @@ namespace DigitalPlatform.CirculationClient
             timestamp,
             bRetryOverwiteExisting,
             false,
+            null,
             out output_timestamp,
             out strError);
         }
 
+#if NO
+        // 兼容以前的版本
+        public static int UploadFile(
+    this LibraryChannel channel,
+    Stop stop,
+    string strClientFilePath,
+    string strServerFilePath,
+    string strMetadata,
+    string strStyle,
+    byte[] timestamp,
+    bool bRetryOverwiteExisting,
+    bool bProgressChange,
+    out byte[] output_timestamp,
+    out string strError)
+        {
+            return UploadFile(
+            channel,
+            stop,
+            strClientFilePath,
+            strServerFilePath,
+            strMetadata,
+            strStyle,
+            timestamp,
+            bRetryOverwiteExisting,
+            bProgressChange,
+            null,
+            out output_timestamp,
+            out strError);
+        }
+#endif
 
+        public delegate string delegate_prompt(LibraryChannel channel, string message);
+
+        // TODO: 如何实现通讯出错时候重试？
         // 上传文件到到 dp2lbrary 服务器
         // parameters:
         //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
@@ -114,6 +153,7 @@ namespace DigitalPlatform.CirculationClient
             byte[] timestamp,
             bool bRetryOverwiteExisting,
             bool bProgressChange,
+            delegate_prompt prompt_func,
             out byte[] output_timestamp,
             out string strError)
         {
@@ -191,9 +231,6 @@ out strError);
                 {
                     for (int j = 0; j < ranges.Length; j++)
                     {
-                        //if (Program.MainForm.InvokeRequired == false)
-                        //    Application.DoEvents();	// 出让界面控制权
-
                         if (stop != null && stop.State != 0)
                         {
                             strError = "用户中断";
@@ -226,7 +263,13 @@ out strError);
                         }
 
                         int nRedoCount = 0;
-                    REDO:
+                        long save_pos = stream.Position;
+                        REDO:
+                        // 2019/6/21
+                        // 如果是重做，文件指针要回到合适位置
+                        if (stream.Position != save_pos)
+                            StreamUtil.FastSeek(stream, save_pos);
+
                         long lRet = channel.SaveResObject(
         stop,
         strResPath,
@@ -239,6 +282,11 @@ out strError);
         strStyle,
         out output_timestamp,
         out strError);
+                        if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
+                            strError = $"{strError}。timestamp={ByteArray.GetHexTimeStampString(timestamp)},output_timestamp={ByteArray.GetHexTimeStampString(output_timestamp)}。parsed:{ParseTimestamp(timestamp)};{ParseTimestamp(output_timestamp)}";
+
+                        // Debug.WriteLine($"parsed:{ParseTimestamp(timestamp)};{ParseTimestamp(output_timestamp)}");
+
                         timestamp = output_timestamp;
 
                         strWarning = "";
@@ -254,10 +302,56 @@ out strError);
                                 nRedoCount++;
                                 goto REDO;
                             }
+
+                            if (prompt_func != null)
+                            {
+                                if (stop != null && stop.State != 0)
+                                {
+                                    strError = "用户中断";
+                                    return -1;
+                                }
+
+                                string action = prompt_func(channel, strError);
+                                if (action == "retry")
+                                    goto REDO;
+                                if (action == "cancel")
+                                    return -1;
+                            }
                             return -1;
                         }
                     }
                 }
+
+                if (StringUtil.IsInList("_checkMD5", strStyle))
+                {
+                    stop?.SetMessage($"正在校验本地文件 {strClientFilePath} 和刚上传的服务器文件 {strServerFilePath} ...");
+                    // result.Value:
+                    //      -1  出错
+                    //      0   不匹配
+                    //      1   匹配
+                    // exception:
+                    //      可能会抛出异常
+                    var result = CheckMD5(
+                        channel,
+                        stop,
+                        strServerFilePath,
+                        strClientFilePath);
+
+                    stop?.SetMessage("MD5 校验完成");
+
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+                    if (result.Value == 0)
+                    {
+                        strError = $"UploadFile() 出错：本地文件 {strClientFilePath} 和刚上传的服务器文件 {strServerFilePath} MD5 校验不一致。请重新上传";
+                        return -1;
+                    }
+                    Debug.Assert(result.Value == 1, "");
+                }
+
             }
             catch (Exception ex)
             {
@@ -270,6 +364,61 @@ out strError);
             }
 
             return 0;
+        }
+
+        // result.Value:
+        //      -1  出错
+        //      0   不匹配
+        //      1   匹配
+        // exception:
+        //      可能会抛出异常
+        public static NormalResult CheckMD5(
+            this LibraryChannel channel,
+            Stop stop,
+            string strServerFilePath,
+            string strLocalFilePath)
+        {
+            // 检查 MD5
+            // return:
+            //      -1  出错
+            //      0   文件没有找到
+            //      1   文件找到
+            int nRet = DynamicDownloader.GetServerFileMD5(
+                channel,
+                stop,   // this.Stop,
+                strServerFilePath,
+                out byte[] server_md5,
+                out string strError);
+            if (nRet != 1)
+            {
+                strError = "探测服务器端文件 '" + strServerFilePath + "' MD5 时出错: " + strError;
+                return new NormalResult(-1, strError);
+            }
+
+            using (FileStream stream = File.OpenRead(strLocalFilePath))
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                byte[] local_md5 = DynamicDownloader.GetFileMd5(stream);
+                if (ByteArray.Compare(server_md5, local_md5) != 0)
+                {
+                    strError = "服务器端文件 '" + strServerFilePath + "' 和本地文件 '" + strLocalFilePath + "' MD5 不匹配";
+                    return new NormalResult(0, strError);
+                }
+            }
+
+            return new NormalResult(1, null);
+        }
+
+        static string ParseTimestamp(byte[] timestamp)
+        {
+            if (timestamp == null)
+                return "";
+            if (timestamp.Length < 16)
+                return "(length<16)";
+            var ticks = BitConverter.ToInt64(timestamp, 0);
+            DateTime time = new DateTime(ticks).ToLocalTime();
+            var length = BitConverter.ToInt64(timestamp, 8);
+            return $"time={time.ToString()},length={length}";
         }
 
         // 获得资源。包装版本 -- 返回字符串版本、Cache版本。
@@ -383,7 +532,7 @@ out strError);
                 }
             }
 
-        GETDATA:
+            GETDATA:
 
             // 重新正式获取内容
             lRet = channel.GetRes(
@@ -517,7 +666,7 @@ out strError);
                 return 0;	// 以无错误姿态返回
             }
 
-        GETDATA:
+            GETDATA:
             // 重新正式获取内容
             lRet = channel.GetRes(
                 stop,

@@ -9991,13 +9991,14 @@ dlg.DateRange);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
+            // 可用的频率类型列表筛选范围。注意不是直接用这些频率，而是拿着列表去和每个具体报表的频率过滤，“只留下和列表匹配的部分”的意思
             List<string> freq_types = StringUtil.SplitList(dlg.Frequency);
             if (string.IsNullOrEmpty(dlg.Frequency) == true)
             {
                 // 2019/6/21
                 // 警告频率为空的实际效果
                 var result = MessageBox.Show(this,
-"您选择了创建频率为空，这相当于 year,month,day 效果(注意不是 free 效果)\r\n\r\n是否继续处理?",
+"您选择了创建频率为空，这相当于 year,month,day 筛选效果(注意不是 free)\r\n\r\n是否继续处理?",
 "ReportForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,

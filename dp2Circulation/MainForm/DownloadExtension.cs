@@ -1687,19 +1687,51 @@ MessageBoxDefaultButton.Button1);
                         dlg.TargetFilePath = strTargetPath;
                     }));
 
+                    bool _hide_dialog = false;
+                    int _hide_dialog_count = 0;
+
                     int nRet = channel.UploadObject(
                 stop,
                 localfilename,
                 strTargetPath,
-                (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.120") >= 0) ? "gzip" : "",
+                "_checkMD5," + ((StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.120") >= 0) ? "gzip" : ""),
                 null,   // timestamp,
                 true,
                 true,
+                (c, m) =>
+                {
+                    DialogResult result = DialogResult.Yes;
+                    if (_hide_dialog == false)
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            result = MessageDialog.Show(this,
+                        m + "\r\n\r\n(重试) 重试操作; (中断) 中断处理",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxDefaultButton.Button1,
+                        "此后不再出现本对话框",
+                        ref _hide_dialog,
+                        new string[] { "重试", "中断" },
+                        10);
+                        }));
+                        _hide_dialog_count = 0;
+                    }
+                    else
+                    {
+                        _hide_dialog_count++;
+                        if (_hide_dialog_count > 10)
+                            _hide_dialog = false;
+                    }
+
+                    if (result == DialogResult.Yes)
+                        return "retry";
+                    return "cancel";
+                },
                 out byte[] temp_timestamp,
                 out strError);
                     if (nRet == -1)
                     {
-                        strError = "上传 '" + localfilename + "' --> '" + strTargetPath + "' 时出错: " + strError;
+                        strError = $"上传 '{ localfilename}' --> '{ strTargetPath }' 时出错: {strError}";
                         dlg.SetText(strError);
                         goto ERROR1;
                     }
