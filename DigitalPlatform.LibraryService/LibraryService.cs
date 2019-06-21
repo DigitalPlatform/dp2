@@ -14139,6 +14139,14 @@ out strError);
                                 strError = "统计信息写入操作日志时出错: " + strError;
                                 goto ERROR1;
                             }
+
+                            /*
+                            // testing
+                            {
+                                strError = "统计信息写入操作日志时出错: 测试";
+                                goto ERROR1;
+                            }
+                            */
                         }
 
                         // 异常报告还要写入操作日志

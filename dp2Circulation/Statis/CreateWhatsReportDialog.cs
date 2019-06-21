@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CommonControl;
@@ -105,7 +106,7 @@ namespace dp2Circulation
         /// <summary>
         /// 创建频率
         /// </summary>
-        public string Freguency
+        public string Frequency
         {
             get
             {

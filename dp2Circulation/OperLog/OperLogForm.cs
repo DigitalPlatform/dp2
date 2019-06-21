@@ -9313,6 +9313,7 @@ MessageBoxDefaultButton.Button1);
                 loader.CacheDir = "";
                 loader.Filter = GetFilter(types);   // "setBiblioInfo";
 
+                _hide_dialog = false;
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -9718,6 +9719,47 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        bool _hide_dialog = false;
+        int _hide_dialog_count = 0;
+
+        private void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = DialogResult.Yes;
+                if (_hide_dialog == false)
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        result = MessageDialog.Show(this,
+                    e.MessageText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    "此后不再出现本对话框",
+                    ref _hide_dialog,
+                    new string[] { "重试", "跳过", "中断" },
+                    10);
+                    }));
+                    _hide_dialog_count = 0;
+                }
+                else
+                {
+                    _hide_dialog_count++;
+                    if (_hide_dialog_count > 10)
+                        _hide_dialog = false;
+                }
+
+                if (result == DialogResult.Yes)
+                    e.ResultAction = "yes";
+                else if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else
+                    e.ResultAction = "no";
+            }
+        }
+
+#if REMOVED
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
@@ -9737,6 +9779,7 @@ MessageBoxDefaultButton.Button1);
                     e.ResultAction = "no";
             }
         }
+#endif
 
         private void listView_restoreList_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -9912,11 +9955,10 @@ strHtml2 +
                 ListViewUtil.ChangeItemText(item, COLUMN_INDEX, history_item.Index.ToString());
                 this.listView_recover_history.Items.Add(item);
                 item.Tag = info;
-                string strError = "";
                 int nRet = FillListViewItem(item,
                     history_item.Xml,
                     0,  // lAttachmentTotalLength,
-                    out strError);
+                    out string strError);
                 if (nRet == -1)
                     ListViewUtil.ChangeItemText(item, 1, strError);
             }

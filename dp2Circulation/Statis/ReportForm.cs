@@ -9964,7 +9964,7 @@ MessageBoxDefaultButton.Button1);
     "");
             if (string.IsNullOrEmpty(dlg.DateRange) == true)
                 dlg.DateRange = strLastDate + "-" + strEndDate; // 从上次最后处理时间，到今天
-            dlg.Freguency = Program.MainForm.AppInfo.GetString(GetReportSection(),
+            dlg.Frequency = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_frequency",
     "year,month,day");
             // dlg.ReportsNames = report_names;
@@ -9983,7 +9983,7 @@ MessageBoxDefaultButton.Button1);
 StringUtil.MakePathList(dlg.SelectedReportsNames, "|||"));
             Program.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_frequency",
-dlg.Freguency);
+dlg.Frequency);
             Program.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_daterange",
 dlg.DateRange);
@@ -9991,9 +9991,23 @@ dlg.DateRange);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            List<string> freq_types = StringUtil.SplitList(dlg.Freguency);
-            if (string.IsNullOrEmpty(dlg.Freguency) == true)
+            List<string> freq_types = StringUtil.SplitList(dlg.Frequency);
+            if (string.IsNullOrEmpty(dlg.Frequency) == true)
             {
+                // 2019/6/21
+                // 警告频率为空的实际效果
+                var result = MessageBox.Show(this,
+"您选择了创建频率为空，这相当于 year,month,day 效果(注意不是 free 效果)\r\n\r\n是否继续处理?",
+"ReportForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    strError = "取消处理";
+                    goto ERROR1;
+                }
+
                 freq_types.Add("year");
                 freq_types.Add("month");
                 freq_types.Add("day");
@@ -10053,7 +10067,7 @@ dlg.DateRange);
                         foreach (string strTimeType in freq_types)
                         {
                             List<string> report_names = new List<string>();
-                            if (string.IsNullOrEmpty(dlg.Freguency) == true)
+                            if (string.IsNullOrEmpty(dlg.Frequency) == true)
                             {
                                 // 每个报表都有独特的频率，选出符合频率的报表
                                 foreach (string strReportName in dlg.SelectedReportsNames)
