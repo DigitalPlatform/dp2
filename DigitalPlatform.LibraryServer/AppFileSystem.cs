@@ -379,6 +379,14 @@ namespace DigitalPlatform.LibraryServer
 
                     Debug.Assert(range.lStart >= 0, "");
 
+                    // 2019/6/21
+                    // TODO: 测试阶段，暂时不允许隔空追加写
+                    if (range.lStart > target.FileStream.Length)
+                    {
+                        strError = "不允许隔空写入";
+                        return -1;
+                    }
+
                     // 移动目标流的指针到指定位置
                     target.FileStream.FastSeek(range.lStart);
 
@@ -391,7 +399,10 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                // 2019/6/21 增加
+                var filepath = target.FilePath;
                 _physicalFileCache.ReturnStream(target);
+                File.SetLastWriteTime(filepath, DateTime.Now);
             }
 
             {

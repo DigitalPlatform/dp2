@@ -67,7 +67,18 @@ namespace DigitalPlatform.CommonControl
                 this.AutoCloseSeconds--;
                 this.SetTitle();
                 if (this.AutoCloseSeconds <= 0)
-                    button_1_Click(sender, e);
+                {
+                    // button_1_Click(sender, e);
+
+                    // 2019/6/21
+                    // 找到第一个 visible 状态的按钮
+                    ButtonInfo info = GetFirstVisibleButton();
+                    if (info == null)
+                        this.DialogResult = DialogResult.Cancel;
+                    else
+                        this.DialogResult = info.DialogResult;
+                    this.Close();
+                }
             }
             finally
             {
@@ -203,7 +214,6 @@ namespace DigitalPlatform.CommonControl
                         if (StringUtil.IsInList("cancel", info.Style) == true)
                             this.CancelButton = this.button_1;
                     }
-
                 }
 
                 if (this.m_buttonInfos.Count > 1)
@@ -346,6 +356,16 @@ namespace DigitalPlatform.CommonControl
                 }
             }
 #endif
+        }
+
+        ButtonInfo GetFirstVisibleButton()
+        {
+            foreach (var info in this.m_buttonInfos)
+            {
+                if (info.Visible)
+                    return info;
+            }
+            return null;
         }
 
         private void button_1_Click(object sender, EventArgs e)
