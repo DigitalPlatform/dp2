@@ -673,6 +673,9 @@ out strError);
             public string ReaderName { get; set; }
             public TagInfo NewTagInfo { get; set; }
             public string Xml { get; set; }
+
+            // 写入出错次数
+            public int ErrorCount { get; set; }
         }
 
         object _lockStatis = new object();
@@ -695,8 +698,10 @@ out strError);
                         out string strError);
                     if (nRet == -1)
                     {
+                        log.ErrorCount++;
                         error_items.Add(log);
                         this.ShowMessage(strError, "red", true);
+                        // TODO: 输出到操作历史
                     }
                 }
 
