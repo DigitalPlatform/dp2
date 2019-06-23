@@ -71,7 +71,7 @@ namespace DigitalPlatform
         //      totalBytesToReceive 总共计划接收多少 bytes
         public void SetProgress(
             string strText,
-            long bytesReceived, 
+            long bytesReceived,
             long totalBytesToReceive)
         {
             if (this.IsDisposed)
@@ -81,30 +81,31 @@ namespace DigitalPlatform
             {
                 this.Invoke((Action)(() =>
                 {
-                    if (string.IsNullOrEmpty(strText))
+                    if (totalBytesToReceive > 0)
                     {
                         double ratio = (double)bytesReceived / (double)totalBytesToReceive;
-                    //this.progressBar1.Minimum = 0;
-                    //this.progressBar1.Maximum = 100;
-                    this.progressBar1.Value = Convert.ToInt32((double)100 * ratio);
+                        //this.progressBar1.Minimum = 0;
+                        //this.progressBar1.Maximum = 100;
+                        this.progressBar1.Value = Convert.ToInt32((double)100 * ratio);
 
                         if (ratio == 100)
                             this.progressBar1.Style = ProgressBarStyle.Marquee;
                         else
                             this.progressBar1.Style = ProgressBarStyle.Continuous;
 
-                    // this.label_message.Text = bytesReceived.ToString() + " / " + totalBytesToReceive.ToString() + " " + this.SourceFilePath;
-                    this.label_message.Text = GetLengthText(bytesReceived) + " / " + GetLengthText(totalBytesToReceive) + " " + this.SourceFilePath;
+                        // this.label_message.Text = bytesReceived.ToString() + " / " + totalBytesToReceive.ToString() + " " + this.SourceFilePath;
+                        this.label_message.Text = GetLengthText(bytesReceived) + " / " + GetLengthText(totalBytesToReceive) + " " + this.SourceFilePath;
                     }
-                    else
+
+                    if (strText != null)
                         this.label_message.Text = strText;
                 }));
             }
-            catch(ObjectDisposedException)
+            catch (ObjectDisposedException)
             {
 
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }

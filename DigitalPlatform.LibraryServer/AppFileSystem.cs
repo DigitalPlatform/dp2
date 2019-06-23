@@ -578,6 +578,8 @@ namespace DigitalPlatform.LibraryServer
 
         // 下载本地文件
         // TODO: 限制 nMaxLength 最大值
+        // parameters:
+        //      strStyle    "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等
         // return:
         //      -2      文件不存在
         //		-1      出错
@@ -596,13 +598,30 @@ namespace DigitalPlatform.LibraryServer
             outputTimestamp = null;
             strError = "";
 
+            bool isPartial = StringUtil.IsInList("uploadedPartial", strStyle);
+
             long lTotalLength = 0;
             strFilePath = strFilePath.Replace("/", "\\");
-            FileInfo file = new FileInfo(strFilePath);
-            if (file.Exists == false)
+
+            FileInfo file = null;
+            if (isPartial)
             {
-                strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
-                return -2;
+                string strNewFileName = GetNewFileName(strFilePath);
+                file = new FileInfo(strNewFileName);
+                if (file.Exists == false)
+                {
+                    strError = " dp2Library 服务器不存在属于 '" + strFilePath + "' 的已上载局部文件";
+                    return -2;
+                }
+            }
+            else
+            {
+                file = new FileInfo(strFilePath);
+                if (file.Exists == false)
+                {
+                    strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
+                    return -2;
+                }
             }
 
             // 1.取时间戳
@@ -657,7 +676,6 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 检查范围是否合法
-                long lOutputLength;
                 // return:
                 //		-1  出错
                 //		0   成功
@@ -665,7 +683,7 @@ namespace DigitalPlatform.LibraryServer
                     nLength,
                     lTotalLength,
                     nMaxLength,
-                    out lOutputLength,
+                    out long lOutputLength,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -722,6 +740,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // TODO: 测试一下获取 30G 尺寸的文件的 MD5 需要多少时间
             // 取 MD5
             if (StringUtil.IsInList("md5", strStyle) == true)
             {

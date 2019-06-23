@@ -129,7 +129,6 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             this.m_bInfoInitilized = true;
-
             return 0;
         }
 

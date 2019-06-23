@@ -79,10 +79,17 @@ namespace DigitalPlatform
                 control.Text = strText;
             else
             {
-                control.Invoke((Action)(() =>
+                try
                 {
-                    control.Text = strText;
-                }));
+                    control.Invoke((Action)(() =>
+                    {
+                        control.Text = strText;
+                    }));
+                }
+                catch(ObjectDisposedException)
+                {
+
+                }
             }
         }
     }

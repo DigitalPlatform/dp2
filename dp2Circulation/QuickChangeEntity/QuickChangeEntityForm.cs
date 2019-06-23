@@ -15,6 +15,8 @@ using DigitalPlatform.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DigitalPlatform.Xml;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -93,9 +95,44 @@ namespace dp2Circulation
 
             BeginSwitchFocus("load_barcode", true);
 
+            bool _hide_dialog = false;
+            int _hide_dialog_count = 0;
+
             Task.Run(() =>
             {
-                WriteStatisLogs(_cancel.Token);
+                WriteStatisLogs(_cancel.Token,
+                    (c, m, buttons, sec) =>
+                    {
+                        DialogResult result = DialogResult.Yes;
+                        if (_hide_dialog == false)
+                        {
+                            this.Invoke((Action)(() =>
+                            {
+                                result = MessageDialog.Show(this,
+                            m,
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxDefaultButton.Button1,
+                            "此后不再出现本对话框",
+                            ref _hide_dialog,
+                            buttons,
+                            sec);
+                            }));
+                            _hide_dialog_count = 0;
+                        }
+                        else
+                        {
+                            _hide_dialog_count++;
+                            if (_hide_dialog_count > 10)
+                                _hide_dialog = false;
+                        }
+
+                        if (result == DialogResult.Yes)
+                            return buttons[0];
+                        else if (result == DialogResult.No)
+                            return buttons[1];
+                        return buttons[2];
+                    }
+                    );
             });
         }
 
@@ -682,7 +719,9 @@ out strError);
 
         List<StatisLog> _statisLogs = new List<StatisLog>();
 
-        void WriteStatisLogs(CancellationToken token)
+        // 循环写入统计日志的过程
+        void WriteStatisLogs(CancellationToken token,
+            LibraryChannelExtension.delegate_prompt prompt)
         {
             while (token.IsCancellationRequested == false)
             {
@@ -692,12 +731,36 @@ out strError);
                 for (int i = 0; i < count; i++)
                 {
                     var log = _statisLogs[i];
+                    // parameters:
+                    //      prompt_action   [out] 重试/中断
+                    // return:
+                    //      -2  UID 已经存在
+                    //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
+                    //      其他  成功
                     int nRet = WriteStatisLog("sender",
                         "subject",
                         log.Xml,
+                        prompt,
+                        out string prompt_action,
                         out string strError);
+                    if (nRet == -2)
+                    {
+                        // 如果 UID 重复了，跳过这一条
+                        _statisLogs.RemoveAt(i);
+                        i--;
+                        continue;
+                    }
                     if (nRet == -1)
                     {
+
+                        if (prompt_action == "skip" || prompt_action == "取消")
+                        {
+                            // 跳过这一条
+                            _statisLogs.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+
                         log.ErrorCount++;
                         error_items.Add(log);
                         this.ShowMessage(strError, "red", true);

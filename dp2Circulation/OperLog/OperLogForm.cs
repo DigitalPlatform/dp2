@@ -8947,7 +8947,7 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         DialogResult result = MessageBox.Show(this,
-"保存书目记录 " + strBiblioRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+$"保存{data.DbType}记录 {strBiblioRecPath} 时出错: {strError}。\r\n\r\n请问是否重试保存操作? \r\n\r\n(Yes 重试保存；\r\nNo 放弃保存、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
 "OperLogForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
@@ -9494,7 +9494,36 @@ MessageBoxDefaultButton.Button1);
                     if (isClipped)
                     {
                         string old_xml = GetCurrentRecordXml(strBiblioRecPath);
+
+                        if (string.IsNullOrEmpty(old_xml))
+                        {
+                            REDO_INPUT:
+                            // TODO: 请求操作者提供一条起始记录。可以提供一种选项，让程序试探从当前读者库中获取这条记录
+                            string result = EditDialog.GetInput(this,
+    "请指定读者记录的起始内容状态",
+    "读者记录 XML",
+    strXml,
+    this.Font);
+                            if (result == null)
+                                throw new Exception("放弃恢复");
+                            // TODO: 检查输入的记录的正确性
+                            XmlDocument temp = new XmlDocument();
+                            try
+                            {
+                                temp.LoadXml(result);
+                            }
+                            catch(Exception ex)
+                            {
+                                MessageBox.Show(this, $"输入的记录 XML 格式不正确: {ex.Message}。请重新输入");
+                                goto REDO_INPUT;
+                            }
+
+                            old_xml = result;
+                        }
+
+
                         XmlDocument existing_dom = new XmlDocument();
+
                         existing_dom.LoadXml(string.IsNullOrEmpty(old_xml) ? strXml : old_xml);
                         // TODO: 去掉 borrows/@clipping 属性
                         RemoveClippedElement(existing_dom);

@@ -530,7 +530,7 @@ namespace DigitalPlatform.LibraryClient
             // return:
             //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
             //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
-            //		0	成功
+            //		>=0	成功
             long lRet = this.Channel.GetRes(
                 this.Stop,
                 strPath,
