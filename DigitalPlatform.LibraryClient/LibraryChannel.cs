@@ -6747,7 +6747,7 @@ out strError);
         //      需要 getres 权限
         // return:
         //      -1  出错
-        //      0   成功
+        //      >=0   成功(返回值一般表示资源的总尺寸(注意不是这次获取的部分的尺寸))
         public long GetRes(
             DigitalPlatform.Stop stop,
             string strResPath,
@@ -6834,7 +6834,7 @@ out strError);
         // return:
         //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
-        //		0	成功
+        //		>=0	成功(2019/6/23 注: 注意返回值可能是 byte [] 的长度，不是 strResult 内容的字符数)
         public long GetRes(
             DigitalPlatform.Stop stop,
             string strPath,
@@ -6857,6 +6857,7 @@ out strError);
             int nPerLength = -1;
 
             byte[] baTotal = null;
+            long lRet = 0;
 
             for (; ; )
             {
@@ -6866,7 +6867,7 @@ out strError);
                     // Application.DoEvents();	// 出让界面控制权
                 }
 
-                long lRet = this.GetRes(stop,
+                lRet = this.GetRes(stop,
                         strPath,
                         nStart,
                         nPerLength,
@@ -6899,13 +6900,12 @@ out strError);
             if (StringUtil.IsInList("data", strStyle) != true)
                 return 0;
 
-
             // 转换成字符串
             strResult = ByteArray.ToString(baTotal/*,
 				Encoding.UTF8*/
                                );	// 将来做自动识别编码方式
 
-            return 0;   // TODO: return lRet?
+            return lRet;    // 2019/6/23 以前为 return 0;
         }
 
 #if NNNNNNNNO

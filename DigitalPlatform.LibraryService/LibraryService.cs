@@ -9850,13 +9850,12 @@ Stack:
 
                     if (strAction == "cd")
                     {
-                        string strResult = "";
 
                         nRet = LibraryApplication.ChangeDirectory(
                             strRoot,
                             strCurrentDirectory,
                             strFileName,
-                            out strResult,  // 注意返回的是物理路径
+                            out string strResult,  // 注意返回的是物理路径
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -12028,6 +12027,8 @@ Stack:
 
                     // 下载本地文件
                     // TODO: 限制 nMaxLength 最大值
+                    // parameters:
+                    //      strStyle    "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等
                     // return:
                     //      -2      文件不存在
                     //		-1      出错

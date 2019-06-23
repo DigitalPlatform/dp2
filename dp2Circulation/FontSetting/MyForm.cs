@@ -2448,12 +2448,21 @@ Keys keyData)
         }
 
         // 写入统计日志
+        // parameters:
+        //      prompt_action   [out] 重试/取消
+        // return:
+        //      -2  UID 已经存在
+        //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
+        //      其他  成功
         public int WriteStatisLog(
     string strSender,
     string strSubject,
     string strXml,
+            LibraryChannelExtension.delegate_prompt prompt,
+            out string prompt_action,
     out string strError)
         {
+            prompt_action = "";
             strError = "";
 
             LibraryChannel channel = this.GetChannel();
@@ -2472,6 +2481,7 @@ Keys keyData)
                     message
                 };
 
+                REDO:
                 long lRet = channel.SetMessage(
                     "send",
                     "",
@@ -2479,7 +2489,25 @@ Keys keyData)
                     out MessageData[] output_messages,
                     out strError);
                 if (lRet == -1)
-                    return -1;
+                {
+                    // 不使用 prompt
+                    if (channel.ErrorCode == ErrorCode.AlreadyExist)
+                        return -2;
+                    if (prompt == null)
+                        return -1;
+                    // TODO: 遇到出错，提示人工介入处理
+                    if (prompt != null)
+                    {
+                        var result = prompt(channel,
+                            strError + "\r\n\r\n(重试) 重试写入; (取消) 取消写入",
+                            new string[] { "重试", "取消" },
+                            10);
+                        if (result == "重试")
+                            goto REDO;
+                        prompt_action = result;
+                        return -1;
+                    }
+                }
 
                 return (int)lRet;
             }

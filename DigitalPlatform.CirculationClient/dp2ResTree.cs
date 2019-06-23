@@ -1244,7 +1244,6 @@ namespace DigitalPlatform.CirculationClient
         out strError);
                 if (lRet == -1)
                     goto ERROR1;
-
             }
             finally
             {

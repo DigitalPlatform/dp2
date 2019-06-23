@@ -1636,6 +1636,10 @@ MessageBoxDefaultButton.Button1);
 
         public void BeginUploadFiles(UploadFilesEventArgs e)
         {
+            // 检查 dp2library 版本
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.14") < 0)
+                throw new Exception($"上传文件功能必须和 dp2library 3.14 或以上版本配套使用(然而当前连接的 dp2library 版本是 {Program.MainForm.ServerVersion})");
+
             LibraryChannel channel = null;
             TimeSpan old_timeout = new TimeSpan(0);
 
@@ -1660,8 +1664,9 @@ MessageBoxDefaultButton.Button1);
 
             stop.OnProgressChanged += new ProgressChangedEventHandler(delegate (object o1, ProgressChangedEventArgs e1)
             {
-                dlg.SetProgress("", // StringUtil.GetPercentText(e1.Value - e1.Start, e1.End - e1.Start),
-                    e1.Value - e1.Start, e1.End - e1.Start);
+                dlg.SetProgress(e1.Message, // StringUtil.GetPercentText(e1.Value - e1.Start, e1.End - e1.Start),
+                    e1.Value - e1.Start, 
+                    e1.End - e1.Start);
             });
             stop.BeginLoop();
 
@@ -1698,7 +1703,7 @@ MessageBoxDefaultButton.Button1);
                 null,   // timestamp,
                 true,
                 true,
-                (c, m) =>
+                (c, m, buttons, sec) =>
                 {
                     DialogResult result = DialogResult.Yes;
                     if (_hide_dialog == false)
@@ -1706,13 +1711,13 @@ MessageBoxDefaultButton.Button1);
                         this.Invoke((Action)(() =>
                         {
                             result = MessageDialog.Show(this,
-                        m + "\r\n\r\n(重试) 重试操作; (中断) 中断处理",
-                        MessageBoxButtons.YesNo,
+                        m,
+                        MessageBoxButtons.YesNoCancel,
                         MessageBoxDefaultButton.Button1,
                         "此后不再出现本对话框",
                         ref _hide_dialog,
-                        new string[] { "重试", "中断" },
-                        10);
+                        buttons,    // new string[] { "重试", "中断" },
+                        sec);
                         }));
                         _hide_dialog_count = 0;
                     }
@@ -1724,8 +1729,10 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     if (result == DialogResult.Yes)
-                        return "retry";
-                    return "cancel";
+                        return buttons[0];
+                    else if (result == DialogResult.No)
+                        return buttons[1];
+                    return buttons[2];
                 },
                 out byte[] temp_timestamp,
                 out strError);

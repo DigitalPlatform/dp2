@@ -487,6 +487,8 @@ namespace DigitalPlatform.CommonControl
             return dlg.DialogResult;
         }
 
+        // parameters:
+        //      nAutoCloseSeconds   延迟多少秒自动重试。0 表示不自动重试，会一直等待人在 GUI 上确认
         public static DialogResult Show(IWin32Window owner,
             string strText,
             MessageBoxButtons buttons,

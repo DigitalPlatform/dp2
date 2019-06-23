@@ -50,12 +50,24 @@ namespace DigitalPlatform
         public bool IsActive = false;
     }
 
+#if REMOVED
+    // 文字信息发生改变 事件
+    public delegate void MessageChangedEventHandler(object sender,
+    MessageChangedEventArgs e);
+
+    public class MessageChangedEventArgs : EventArgs
+    {
+        public string Message { get; set; }
+    }
+#endif
+
     // 进度条发生改变 事件
     public delegate void ProgressChangedEventHandler(object sender,
     ProgressChangedEventArgs e);
 
     public class ProgressChangedEventArgs : EventArgs
     {
+        public string Message { get; set; }
         public long Start { get; set; }
         public long End { get; set; }
         public long Value { get; set; }
@@ -80,6 +92,7 @@ namespace DigitalPlatform
         public event BeginLoopEventHandler OnBeginLoop = null;
         public event EndLoopEventHandler OnEndLoop = null;
         public event ProgressChangedEventHandler OnProgressChanged = null;
+        // public event MessageChangedEventHandler MessageChanged = null;
 
         volatile int nStop = -1;	// -1: 尚未使用 0:正在处理 1:希望停止 2:已经停止，EndLoop()已经调用
         StopManager m_manager = null;
@@ -266,6 +279,25 @@ namespace DigitalPlatform
         public void SetMessage(string strMessage)
         {
             m_strMessage = strMessage;
+
+#if REMOVED
+            // 2019/6/23
+            if (this.MessageChanged != null)
+            {
+                this.MessageChanged(this, new MessageChangedEventArgs { Message = strMessage });
+            }
+#endif
+
+            this.OnProgressChanged?.Invoke(
+    this,
+    new ProgressChangedEventArgs
+    {
+        Message = strMessage,
+        Start = -1,
+        End = -1,
+        Value = -1
+    }
+    );
 
             if (m_manager != null)
             {
