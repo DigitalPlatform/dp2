@@ -263,27 +263,37 @@ this.toolStripButton_autoFixEas.Checked);
                         {
                             Task.WaitAll(tasks.ToArray());
                             bool closed = false;
-                            this.Invoke((Action)(() =>
+
+                            try
                             {
+
+                                this.Invoke((Action)(() =>
+                                {
                                 // 首次填充，自动设好选定状态
                                 // if (is_empty)
                                 {
                                     // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
                                     var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
 
-                                    if (// string.IsNullOrEmpty(this.SelectedPII) == false
-                                        ret == true
-                                        && this.AutoCloseDialog)
-                                    {
-                                        if (this.DoOK(show_messageBox) == true)
+                                        if (// string.IsNullOrEmpty(this.SelectedPII) == false
+                                            ret == true
+                                            && this.AutoCloseDialog)
                                         {
-                                            this.DialogResult = DialogResult.OK;
-                                            this.Close();
-                                            closed = true;
+                                            if (this.DoOK(show_messageBox) == true)
+                                            {
+                                                this.DialogResult = DialogResult.OK;
+                                                this.Close();
+                                                closed = true;
+                                            }
                                         }
                                     }
-                                }
-                            }));
+                                }));
+
+                            }
+                            catch(ObjectDisposedException)
+                            {
+                                return;
+                            }
 
                             if (closed == false)
                             {
