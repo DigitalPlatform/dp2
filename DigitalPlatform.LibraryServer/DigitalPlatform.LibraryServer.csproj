@@ -212,6 +212,7 @@
     <Compile Include="Threads\RebuildKeys.cs" />
     <Compile Include="Threads\ServerReplication.cs" />
     <Compile Include="TraceDTLP.cs" />
+    <Compile Include="UidTable.cs" />
     <Compile Include="UnhandledExceptionModule.cs" />
     <Compile Include="VirtualDatabase.cs" />
     <Compile Include="ZhengyuanReplication.cs" />
