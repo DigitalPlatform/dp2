@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -548,7 +549,6 @@ false);
                     NewTagInfo = new_tag_info
                 };
                 AddWritingLog(log);
-
                 return 1;
             }
             finally
@@ -742,6 +742,7 @@ out strError);
                 for (int i = 0; i < count; i++)
                 {
                     var log = _statisLogs[i];
+                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>写册 '{HttpUtility.HtmlEncode(log.BookItem.Barcode)}' 的 RFID 标签，记入统计日志</div>");
                     // parameters:
                     //      prompt_action   [out] 重试/中断
                     // return:
@@ -759,9 +760,10 @@ out strError);
                         // 如果 UID 重复了，跳过这一条
                         _statisLogs.RemoveAt(i);
                         i--;
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
                         continue;
                     }
-                    if (nRet == -1)
+                    else if (nRet == -1)
                     {
 
                         if (prompt_action == "skip" || prompt_action == "取消")
@@ -769,6 +771,7 @@ out strError);
                             // 跳过这一条
                             _statisLogs.RemoveAt(i);
                             i--;
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>遇到错误 {HttpUtility.HtmlEncode(strError)} 后用户选择跳过</div>");
                             continue;
                         }
 
@@ -776,7 +779,11 @@ out strError);
                         error_items.Add(log);
                         this.ShowMessage(strError, "red", true);
                         // TODO: 输出到操作历史
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
                     }
+                    else
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>写入成功</div>");
+
                 }
 
                 lock (_lockStatis)
