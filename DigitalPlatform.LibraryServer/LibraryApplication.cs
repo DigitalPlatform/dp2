@@ -106,6 +106,10 @@ namespace DigitalPlatform.LibraryServer
         /// </summary>
         public bool CheckClientVersion = false;
 
+        // 负责存储统计日志的 UID 的 Hashtable。用途是防止重复写入 UID 相同的日志记录
+        // uid --> true
+        public UidTable StatisLogUidTable = new UidTable(); 
+
         /// <summary>
         /// 在登录阶段要给所有账户都添加的权限列表。用逗号分隔的字符串
         /// </summary>

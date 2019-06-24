@@ -14087,6 +14087,26 @@ out strError);
                         // 统计信息写入操作日志
                         if (data.strRecipient == "!statis")
                         {
+                            XmlDocument data_dom = new XmlDocument();
+                            data_dom.LoadXml(data.strBody);
+
+                            string uid = DomUtil.GetElementText(data_dom.DocumentElement,
+                                "uid");
+                            if (string.IsNullOrEmpty(uid))
+                            {
+                                strError = "data body 中必须具备 uid 元素";
+                                goto ERROR1;
+                            }
+
+                            if (app.StatisLogUidTable.Contains(uid))
+                            {
+                                strError = $"UID 为 {uid} 的统计日志已经写入过了，无法重复写入";
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AlreadyExist;
+                                return result;
+                            }
+
                             XmlDocument domOperLog = new XmlDocument();
                             domOperLog.LoadXml("<root />");
 
@@ -14099,9 +14119,7 @@ out strError);
                                 string[] reserve_list = new string[] {
                                     "operation","operator","operTime"
                                 };
-                                XmlDocument dom = new XmlDocument();
-                                dom.LoadXml(data.strBody);
-                                XmlNodeList nodes = dom.DocumentElement.SelectNodes("*");
+                                XmlNodeList nodes = data_dom.DocumentElement.SelectNodes("*");
                                 foreach (XmlElement node in nodes)
                                 {
                                     if (Array.IndexOf(reserve_list, node.Name) != -1)
@@ -14148,6 +14166,8 @@ out strError);
                                 goto ERROR1;
                             }
                             */
+
+                            app.StatisLogUidTable.Set(uid);
                         }
 
                         // 异常报告还要写入操作日志

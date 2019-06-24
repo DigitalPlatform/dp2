@@ -476,14 +476,23 @@ false);
             if (need == false)
                 return 0;
 
+
+
             string strError = "";
             this.ShowMessage("正在写入 RFID 标签");
             try
             {
+                // 检查 dp2library 版本。因为写入统计日志，对 dp2library 版本有一定要求
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.14") < 0)
+                {
+                    strError = $"写入 RFID 标签功能要求 dp2library 版本为 3.14 或以上。(当前连接的 dp2library 版本号为 {Program.MainForm.ServerVersion})";
+                    goto ERROR1;
+                }
+
                 int nRet = this.entityEditControl1.GetData(
-                    true,
-                    out string strXml,
-                    out strError);
+                true,
+                out string strXml,
+                out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -532,10 +541,12 @@ false);
                 // TODO: 遇到出错，出现对话框提醒重试装入和写入？
 
                 // 写入统计日志
-                StatisLog log = new StatisLog();
-                log.BookItem = item;
-                log.ReaderName = _tagExisting.ReaderName;
-                log.NewTagInfo = new_tag_info;
+                StatisLog log = new StatisLog
+                {
+                    BookItem = item,
+                    ReaderName = _tagExisting.ReaderName,
+                    NewTagInfo = new_tag_info
+                };
                 AddWritingLog(log);
 
                 return 1;
@@ -726,7 +737,7 @@ out strError);
             while (token.IsCancellationRequested == false)
             {
                 List<StatisLog> error_items = new List<StatisLog>();
-                // 循环过程不怕 _staticLogs 数组后面被追加新内容
+                // 循环过程不怕 _statisLogs 数组后面被追加新内容
                 int count = _statisLogs.Count;
                 for (int i = 0; i < count; i++)
                 {
@@ -787,10 +798,17 @@ out strError);
             dom.LoadXml("<root />");
             DomUtil.SetElementText(dom.DocumentElement,
                 "action", "writeRfidTag");
+
             DomUtil.SetElementText(dom.DocumentElement,
-                "barcode", log.BookItem.Barcode);
+    "uid", Guid.NewGuid().ToString());
+
             DomUtil.SetElementText(dom.DocumentElement,
-                "location", log.BookItem.Location);
+    "type", "item");
+
+            DomUtil.SetElementText(dom.DocumentElement,
+                "itemBarcode", log.BookItem.Barcode);
+            DomUtil.SetElementText(dom.DocumentElement,
+                "itemLocation", log.BookItem.Location);
 
             DomUtil.SetElementText(dom.DocumentElement,
 "tagProtocol", "ISO15693");

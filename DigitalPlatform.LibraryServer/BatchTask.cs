@@ -1031,6 +1031,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 注记 2015/9/8
             }
+            else if (strOperation == "statis")
+            {
+                // 统计 2019/6/24
+            }
             else if (strOperation == "manageDatabase")
             {
 #if NO

@@ -1171,8 +1171,14 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
-            string strLocation = DomUtil.GetElementText(dom.DocumentElement, "location");
+            string type = DomUtil.GetElementText(dom.DocumentElement,
+                "type");
+            string uid = DomUtil.GetElementText(dom.DocumentElement,
+    "uid");
+            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, 
+                "itemBarcode");
+            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
+                "itemLocation");
             string strTagProtocol = DomUtil.GetElementText(dom.DocumentElement,
                 "tagProtocol");
             string strTagReaderName = DomUtil.GetElementText(dom.DocumentElement,
@@ -1194,6 +1200,8 @@ namespace dp2Circulation
                 "<table class='operlog'>" +
                 BuildHtmlLine("操作类型", strOperation + " -- 统计信息") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+                BuildHtmlLine("UID", uid) +
+                BuildHtmlLine("类型", type) +
                 BuildHtmlLine("册条码号", strBarcode) +
                 BuildHtmlLine("馆藏地", strLocation) +
                 BuildHtmlLine("标签协议", strTagProtocol) +
