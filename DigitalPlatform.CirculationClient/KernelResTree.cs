@@ -389,6 +389,13 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("观察 MD5 [" + selected_file_nodes.Count + "] (&M)");
+            menuItem.Click += new System.EventHandler(this.menu_getmd5);
+            if (selected_file_nodes.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -833,6 +840,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             DownloadFilesEventArgs e1 = new DownloadFilesEventArgs();
+            e1.Action = "download";
             e1.FileNames = paths;
             this.DownloadFiles(this, e1);
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
@@ -928,6 +936,49 @@ namespace DigitalPlatform.CirculationClient
 #endif
             return;
         ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_getmd5(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (this.DownloadFiles == null)
+            {
+                strError = "尚未绑定 DownloadFiles 事件";
+                goto ERROR1;
+            }
+
+            List<TreeNode> nodes = this.GetCheckedFileNodes();
+
+            if (nodes.Count == 0)
+            {
+                strError = "尚未选择要查看 MD5 的配置文件节点";
+                goto ERROR1;
+            }
+
+            List<string> paths = new List<string>();
+            foreach (TreeNode node in nodes)
+            {
+                string strPath = GetNodePath(node);
+
+                string strExt = Path.GetExtension(strPath);
+                if (strExt == ".~state")
+                {
+                    strError = "不允许查看扩展名为 .~state 的状态文件 (" + strPath + ")";
+                    goto ERROR1;
+                }
+                paths.Add(strPath);
+            }
+
+            DownloadFilesEventArgs e1 = new DownloadFilesEventArgs();
+            e1.Action = "getmd5";
+            e1.FileNames = paths;
+            this.DownloadFiles(this, e1);
+            if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                goto ERROR1;
+            return;
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1493,6 +1544,9 @@ out strError);
     /// </summary>
     public class DownloadFilesEventArgs : EventArgs
     {
+        // 动作。有 download/getmd5 等
+        public string Action { get; set; }  // [in]
+
         public List<string> FileNames { get; set; }  // [in]
         public string ErrorInfo { get; set; }  // [out]
     }

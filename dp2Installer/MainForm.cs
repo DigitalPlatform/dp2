@@ -4210,7 +4210,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-#region 安装 dp2library 以后创建书目库的相关函数
+        #region 安装 dp2library 以后创建书目库的相关函数
 
         // 出现提示
         // return:
@@ -4653,7 +4653,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return dlg;
         }
 
-#endregion
+        #endregion
 
         // 卸载 dp2library
         private void MenuItem_dp2library_uninstall_Click(object sender, EventArgs e)
@@ -5611,7 +5611,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-#region Service Control 功能
+        #region Service Control 功能
 
 #if NO
         IpcClientChannel m_dp2libraryScChannel = new IpcClientChannel();
@@ -5657,11 +5657,53 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-#endregion
+        #endregion
 
         private void ToolStripMenuItem_uninstallDp2zserver_Click(object sender, EventArgs e)
         {
             MenuItem_dp2ZServer_uninstall_Click(sender, e);
+        }
+
+        private async void ToolStripMenuItem_getMD5ofFile_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要获取 MD5 的文件名(可以复选)";
+            dlg.Filter = "All files (*.*)|*.*";
+            dlg.Multiselect = true;
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string result = "";
+            this._floatingMessage.Text = "正在运算 MD5, 请等待 ...";
+            try
+            {
+                result = await Task<string>.Run(() =>
+                {
+                    int i = 0;
+                    StringBuilder text = new StringBuilder();
+                    foreach (var filename in dlg.FileNames)
+                    {
+                        this._floatingMessage.Text = $"正在运算 {i+1}) {filename} 的 MD5, 请等待 ...";
+                        using (FileStream stream = File.OpenRead(filename))
+                        {
+                            stream.Seek(0, SeekOrigin.Begin);
+                            var bytes = DynamicDownloader.GetFileMd5(stream);
+                            text.Append($"{i + 1}) {filename} \tLength: {stream.Length} \tMD5: {Convert.ToBase64String(bytes)}\r\n");
+                        }
+                        i++;
+                    }
+
+                    return text.ToString();
+                });
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            MessageDialog.Show(this, result);
         }
     }
 }

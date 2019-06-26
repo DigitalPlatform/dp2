@@ -648,7 +648,7 @@ namespace DigitalPlatform.LibraryClient
             string strOutputPath = "";
 
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(5);
+            channel.Timeout = TimeSpan.FromMinutes(25);
             try
             {
                 // return:
