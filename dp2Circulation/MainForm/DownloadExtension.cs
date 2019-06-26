@@ -110,6 +110,7 @@ namespace dp2Circulation
                     strServerFilePath,
                     out byte[] server_md5,
                     out strError);
+                // TODO: 遇到出错要可以 UI 交互重试
                 if (nRet != 1)
                 {
                     strError = "探测服务器端文件 '" + strServerFilePath + "' MD5 时出错: " + strError;

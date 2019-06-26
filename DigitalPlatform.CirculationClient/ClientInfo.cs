@@ -183,7 +183,6 @@ namespace DigitalPlatform.CirculationClient
                     }
                 }
             }
-
         }
 
         public static void Finish()

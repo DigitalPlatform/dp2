@@ -17,6 +17,8 @@ using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
 using System.Threading.Tasks;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -136,14 +138,76 @@ namespace dp2Circulation
             Program.MainForm.BeginUploadFiles(e);
         }
 
-        void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
+        void GetMd5(DownloadFilesEventArgs e)
+        {
+            string strError = "";
+
+            List<string> lines = new List<string>();
+
+            var channel = this.GetChannel();
+
+            // var old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 25, 0);
+            this.ShowMessage("正在获取 MD5 ...");
+            try
+            {
+                foreach (string filepath in e.FileNames)
+                {
+                    this.ShowMessage($"正在获取服务器文件 {filepath} 的 MD5 ...");
+
+                    // 检查 MD5
+                    // return:
+                    //      -1  出错
+                    //      0   文件没有找到
+                    //      1   文件找到
+                    int nRet = DynamicDownloader.GetServerFileMD5(
+                        channel,
+                        stop,   // this.Stop,
+                        filepath,
+                        out byte[] server_md5,
+                        out strError);
+                    if (nRet != 1)
+                    {
+                        strError = "探测服务器端文件 '" + filepath + "' MD5 时出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    lines.Add($"文件 {filepath} 的 MD5 为 {Convert.ToBase64String(server_md5)}");
+                }
+            }
+            finally
+            {
+                //channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+                this.ClearMessage();
+            }
+
+            this.Invoke((Action)(() =>
+            {
+                MessageDialog.Show(this, StringUtil.MakePathList(lines, "\r\n"));
+            }));
+            return;
+            ERROR1:
+            ShowMessageBox(strError);
+        }
+
+        void kernelResTree1_DownloadFiles(object sender,
+            DownloadFilesEventArgs e)
         {
             string strError = "";
             string strOutputFolder = "";
 
+            if (e.Action == "getmd5")
+            {
+                Task.Run(() =>
+                {
+                    GetMd5(e);
+                });
+                return;
+            }
+
             List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(e.FileNames);
 
-            bool bAppend = false;
             // 询问是否覆盖已有的目标下载文件。整体询问
             // return:
             //      -1  出错
@@ -151,7 +215,7 @@ namespace dp2Circulation
             //      1   同意启动下载
             int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
 ref strOutputFolder,
-out bAppend,
+out bool bAppend,
 out strError);
             if (nRet == -1)
             {

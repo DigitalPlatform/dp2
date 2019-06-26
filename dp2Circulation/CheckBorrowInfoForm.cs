@@ -1134,6 +1134,8 @@ out strError);
         }
 
         // 从读者侧出发，修复一个读者记录中，所有册记录的链条错误
+        // parameters:
+        //      strReaderXml    读者记录 XML。从中可以获知有哪些册条码号(相关的链)需要尝试进行修复
         // return:
         //      -1  错误。可能有部分册已经修复成功
         //      其他  共修复多少个册事项
@@ -1175,11 +1177,6 @@ out strError);
                 string strItemBarcode = borrow.GetAttribute("barcode");
                 string strConfirmItemRecPath = borrow.GetAttribute("recPath");
 
-                string[] aDupPath = null;
-
-                string strOutputReaderBarcode = "";
-                int nProcessedBorrowItems = 0;
-                int nTotalBorrowItems = 0;
                 long lRet = Channel.RepairBorrowInfo(
                     stop,
                     "repairreaderside",
@@ -1188,10 +1185,10 @@ out strError);
                     strConfirmItemRecPath,
                     0,
                     -1,
-                    out nProcessedBorrowItems,   // 2008/10/27 
-                    out nTotalBorrowItems,   // 2008/10/27 
-                    out strOutputReaderBarcode,
-                    out aDupPath,
+                    out int nProcessedBorrowItems,   // 2008/10/27 
+                    out int nTotalBorrowItems,   // 2008/10/27 
+                    out string strOutputReaderBarcode,
+                    out string[] aDupPath,
                     out strError);
                 if (lRet == -1)
                 {
