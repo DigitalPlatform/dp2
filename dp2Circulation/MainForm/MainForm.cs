@@ -311,6 +311,12 @@ namespace dp2Circulation
         /// </summary>
         public string LibraryName = "";
 
+        // 2019/6/27
+        /// <summary>
+        /// OPAC URL。例如 http://dp2003.com/opac/
+        /// </summary>
+        public string OpacServerUrl { get; set; }
+
         //
         internal ReaderWriterLock m_lockChannel = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒

@@ -16,6 +16,7 @@ using DigitalPlatform.RFID;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using dp2SSL.Dialog;
 
 namespace dp2SSL
 {
@@ -65,16 +66,45 @@ namespace dp2SSL
             // _patron.IsFingerprintSource = true;
         }
 
+        bool _stopVideo = false;
+
         private async void PatronControl_InputFace(object sender, EventArgs e)
         {
-            var result = await RecognitionFace("");
-            if (result.Value == -1)
-            {
-                SetPatronError("face", result.ErrorInfo);
-                return;
-            }
+            RecognitionFaceResult result = null;
 
-            SetPatronError("face", null);
+            VideoWindow video = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                video = new VideoWindow();
+                video.MessageText = "识别人脸 ...";
+                video.Owner = Application.Current.MainWindow;
+                video.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                video.Closed += Video_Closed;
+                video.Show();
+            }));
+            _stopVideo = false;
+            var task = Task.Run(() =>
+            {
+                PlayVideo(video);
+            });
+            try
+            {
+                result = await RecognitionFace("");
+                if (result.Value == -1)
+                {
+                    SetPatronError("face", result.ErrorInfo);
+                    return;
+                }
+
+                SetPatronError("face", null);
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    video.Close();
+                }));
+            }
 
             GetMessageResult message = new GetMessageResult
             {
@@ -83,6 +113,36 @@ namespace dp2SSL
             };
             SetPatronInfo(message);
             FillPatronDetail();
+        }
+
+        void PlayVideo(VideoWindow window)
+        {
+            while (_stopVideo == false)
+            {
+                var result = FaceManager.GetImage("");
+                if (result.ImageData == null)
+                    continue;
+                MemoryStream stream = new MemoryStream(result.ImageData);
+                try
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        window.SetPhoto(stream);
+                    }));
+                    stream = null;
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.Close();
+                }
+            }
+        }
+
+        private void Video_Closed(object sender, EventArgs e)
+        {
+            FaceManager.CancelRecognitionFace();
+            _stopVideo = true;
         }
 
         void EnableControls(bool enable)
@@ -822,7 +882,7 @@ namespace dp2SSL
                     "data,content", // strGetStyle,
                     null,   // byte [] input_timestamp,
                     out string strMetaData,
-                    out byte [] baOutputTimeStamp,
+                    out byte[] baOutputTimeStamp,
                     out string strOutputPath,
                     out string strError);
                 if (lRet == -1)
@@ -1048,7 +1108,7 @@ out string strError);
             }
         }
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1111,7 +1171,7 @@ out string strError);
         }
 
 
-#endregion
+        #endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1531,7 +1591,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1572,9 +1632,9 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
-#region global 分类报错机制
+        #region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1618,7 +1678,7 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
     }
 }

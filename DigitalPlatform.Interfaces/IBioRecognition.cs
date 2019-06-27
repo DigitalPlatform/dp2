@@ -43,6 +43,12 @@ namespace DigitalPlatform.Interfaces
 
         RecognitionFaceResult RecognitionFace(string strStyle);
 
+        // 2019/6/27
+        NormalResult CancelRecognitionFace();
+
+        // 2019/6/27
+        GetImageResult GetImage(string strStyle);
+
         // 验证读者指纹. 1:1比对
         // parameters:
         //      item    读者信息。ReaderBarcode成员提供了读者证条码号，FingerprintString提供了指纹特征码
@@ -96,5 +102,12 @@ namespace DigitalPlatform.Interfaces
         public int Score { get; set; }
 
         public string DebugInfo { get; set; }
+    }
+
+    [Serializable()]
+    public class GetImageResult : NormalResult
+    {
+        // [out] 返回图象
+        public byte[] ImageData { get; set; }
     }
 }

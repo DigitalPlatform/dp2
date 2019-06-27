@@ -3180,6 +3180,13 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("导出到 HTML 文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&H)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_saveToHtmlFile_Click);
+                if (this.listView_records.SelectedItems.Count == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+
                 subMenuItem = new MenuItem("导出书目转储(.bdf)文件 [" + this.listView_records.SelectedItems.Count.ToString() + " ] (&B)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToBiblioDumpFile_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
@@ -8940,6 +8947,216 @@ MessageBoxDefaultButton.Button1);
 
 #endif
 
+        // 输出 HTML 新书通报
+        void menu_saveToHtmlFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 HTML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "HTML 文件 (*.html)|*.html|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+
+            this.EnableControls(false);
+            LibraryChannel channel = this.GetChannel();
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出到 HTML 文件 ...");
+            stop.BeginLoop();
+
+            StreamWriter writer = null;
+            try
+            {
+                using (writer = new StreamWriter(dlg.FileName, false, Encoding.UTF8))
+                {
+                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                    List<ListViewItem> items = new List<ListViewItem>();
+                    foreach (ListViewItem item in this.listView_records.SelectedItems)
+                    {
+                        if (string.IsNullOrEmpty(item.Text) == true)
+                            continue;
+
+                        items.Add(item);
+                    }
+
+                    // writer 开头
+                    writer.Write("<html><head></head><body>\r\n");
+
+                    int i = 0;
+                    foreach (ListViewItem item in items)
+                    {
+                        Application.DoEvents(); // 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        string strRecPath = item.Text;
+
+                        if (string.IsNullOrEmpty(strRecPath) == true)
+                            continue;
+
+
+                        stop.SetMessage("正在获取书目记录 " + strRecPath);
+
+                        long lRet = Channel.GetBiblioInfos(
+                            stop,
+                            strRecPath,
+                            "",
+                            new string[] { "table:areas|coverimageurl" },   // formats
+                            out string[] results,
+                            out byte[] baTimestamp,
+                            out strError);
+                        if (lRet == 0)
+                            goto ERROR1;
+                        if (lRet == -1)
+                            goto ERROR1;
+
+                        if (results == null || results.Length == 0)
+                        {
+                            strError = "results error";
+                            goto ERROR1;
+                        }
+
+                        string strXml = results[0];
+
+                        if (string.IsNullOrEmpty(strXml) == false)
+                        {
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(strXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "XML 装入 DOM 时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
+
+                            if (dom.DocumentElement != null)
+                            {
+                                writer.Write("<hr />\r\n");
+
+                                writer.Write(BuildHtml(dom, strRecPath, Program.MainForm.OpacServerUrl));
+                                // 给根元素设置几个参数
+                                //DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                                //DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
+
+                                // dom.DocumentElement.WriteTo(writer);
+                            }
+                        }
+
+                        stop.SetProgressValue(++i);
+                    }
+
+                    // writer 收尾
+                    writer.Write("</body></html>\r\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + dlg.FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+            }
+            MainForm.StatusBarMessage = this.listView_records.SelectedItems.Count.ToString()
+            + "条记录成功保存到文件 " + dlg.FileName;
+
+            // 打开一个浏览器
+            System.Diagnostics.Process.Start(// "iexplore",
+    dlg.FileName);
+
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 构造一个 HTML 新书通报局部。
+        static string BuildHtml(XmlDocument table_dom,
+            string recpath,
+            string strOpacServerUrl)
+        {
+            if (string.IsNullOrEmpty(strOpacServerUrl) == false 
+                && strOpacServerUrl[strOpacServerUrl.Length - 1] != '/')
+                strOpacServerUrl += "/";
+
+            StringBuilder result = new StringBuilder();
+            result.Append("<table>\r\n");
+            XmlNodeList lines = table_dom.DocumentElement.SelectNodes("line");
+            foreach (XmlElement line in lines)
+            {
+                string type = line.GetAttribute("type");
+                if (// type == "coverimageurl" ||
+                    type == "titlepinyin")
+                    continue;
+                string name = line.GetAttribute("name");
+
+                string value = line.GetAttribute("value");
+                if (string.IsNullOrEmpty(value))
+                    continue;
+
+                if (type == "coverimageurl")
+                {
+                    string url = "";
+                    if (value.StartsWith("http:") || value.StartsWith("https:"))
+                        url = value;
+                    else if (string.IsNullOrEmpty(strOpacServerUrl) == false)
+                    {
+                        url = $"{strOpacServerUrl}getobject.aspx?uri={HttpUtility.UrlEncode(ScriptUtil.MakeObjectUrl(recpath, value))}";
+                    }
+                    else
+                        continue;
+                    result.AppendLine($"<tr><td style='width:100pt;'></td><td><img alt='封面图片' src='{url}'></img></td></tr>");
+                    continue;
+                }
+                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode(name)}</td><td>{HttpUtility.HtmlEncode(value)}</td></tr>");
+            }
+
+            if (string.IsNullOrEmpty(strOpacServerUrl) == false)
+            {
+                string url = $"{strOpacServerUrl}book.aspx?BiblioRecPath={HttpUtility.UrlEncode(recpath)}";
+                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td><a href='{url}'>{HttpUtility.HtmlEncode(recpath)}</a></td></tr>");
+            }
+            else
+                result.AppendLine($"<tr><td style='width:100pt;color:#aaaaaa;'>{HttpUtility.HtmlEncode("记录路径")}</td><td>{HttpUtility.HtmlEncode(recpath)}</td></tr>");
+
+            result.Append("</table>\r\n");
+            return result.ToString();
+        }
+
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -9056,7 +9273,7 @@ MessageBoxDefaultButton.Button1);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -9661,7 +9878,7 @@ MessageBoxDefaultButton.Button1);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -9834,8 +10051,8 @@ MessageBoxDefaultButton.Button1);
             strError = "";
 
             /*
-只创建单个 905 字段
-每册一个 905 字段
+    只创建单个 905 字段
+    每册一个 905 字段
              * * */
 
             try
@@ -10136,7 +10353,7 @@ MessageBoxDefaultButton.Button1);
 
             // 创建文件
             using (StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
-                bAppend,	// append
+                bAppend,    // append
                 System.Text.Encoding.UTF8))
             {
                 Cursor oldCursor = this.Cursor;
@@ -10463,7 +10680,7 @@ MessageBoxDefaultButton.Button1);
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    Application.DoEvents(); // 出让界面控制权
 
                     if (stop != null)
                     {
@@ -10655,10 +10872,10 @@ MessageBoxDefaultButton.Button1);
             string strQueryXml = "";
 
             int nRet = dp2QueryControl1.BuildQueryXml(
-this.MaxSearchResultCount,
-"zh",
-out strQueryXml,
-out strError);
+    this.MaxSearchResultCount,
+    "zh",
+    out strQueryXml,
+    out strError);
             if (nRet == -1)
             {
                 strError = "在创建XML检索式的过程中出错: " + strError;
@@ -11239,8 +11456,8 @@ out strError);
     info.RecPath,
     strOldMARC);
                 string strNewImageFragment = GetCoverImageHtmlFragment(
-info.RecPath,
-strNewMARC);
+    info.RecPath,
+    strNewMARC);
 
                 // 创建展示两个 MARC 记录差异的 HTML 字符串
                 // return:
@@ -11414,11 +11631,11 @@ strNewMARC);
     && Program.MainForm.MessageHub.ShareBiblio == false)
                 {
                     DialogResult result = MessageBox.Show(this,
-"使用共享书目检索功能须知：为检索网络中共享书目记录，您必须明确同意允许他人检索您所在图书馆的全部书目记录。\r\n\r\n请问您是否允许他人从现在起一直能访问您所在图书馆的书目记录？\r\n\r\n(是: 同意；否：不同意)\r\n\r\n(除了在这里设定相关参数，您还可以稍后用“参数配置”对话框的“消息”属性页来设定是否允许共享书目数据)",
-"BiblioSearchForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+    "使用共享书目检索功能须知：为检索网络中共享书目记录，您必须明确同意允许他人检索您所在图书馆的全部书目记录。\r\n\r\n请问您是否允许他人从现在起一直能访问您所在图书馆的书目记录？\r\n\r\n(是: 同意；否：不同意)\r\n\r\n(除了在这里设定相关参数，您还可以稍后用“参数配置”对话框的“消息”属性页来设定是否允许共享书目数据)",
+    "BiblioSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
                     if (result == System.Windows.Forms.DialogResult.No)
                     {
                         this.ShowMessage("已放弃使用共享网络", "");
@@ -11730,6 +11947,19 @@ MessageBoxDefaultButton.Button1);
             set;
         }
 
+        string _format = "xml";
+        public string Format
+        {
+            get
+            {
+                return _format;
+            }
+            set
+            {
+                _format = value;
+            }
+        }
+
         BiblioLoader m_loader = null;
 
         /// <summary>
@@ -11747,7 +11977,7 @@ MessageBoxDefaultButton.Button1);
             m_loader = new BiblioLoader();
             m_loader.Channel = channel;
             m_loader.Stop = stop;
-            m_loader.Format = "xml";
+            m_loader.Format = _format;  // "xml";
             m_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp; // 附加信息只取得 timestamp
             m_loader.Prompt += new MessagePromptEventHandler(m_loader_Prompt);
 

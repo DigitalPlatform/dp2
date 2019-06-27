@@ -3410,11 +3410,14 @@ Culture=neutral, PublicKeyToken=null
 
             try
             {
-                string strValue = "";
+                this.LibraryName = "";
+                this.ExpireDate = "";
+                this.OpacServerUrl = "";
+
                 long lRet = channel.GetSystemParameter(Stop,
                     "library",
                     "name",
-                    out strValue,
+                    out string strValue,
                     out strError);
                 if (lRet == -1)
                 {
@@ -3438,6 +3441,20 @@ Culture=neutral, PublicKeyToken=null
                 }
 
                 this.ExpireDate = strValue;
+
+                // OPAC URL
+                lRet = channel.GetSystemParameter(Stop,
+    "opac",
+    "serverDirectory",
+    out strValue,
+    out strError);
+                if (lRet == -1)
+                {
+                    strError = "针对服务器 " + channel.Url + " opac/serverDirectory 过程发生错误：" + strError;
+                    goto ERROR1;
+                }
+
+                this.OpacServerUrl = strValue;
             }
             finally
             {
