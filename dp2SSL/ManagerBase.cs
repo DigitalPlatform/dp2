@@ -102,7 +102,7 @@ namespace dp2SSL
                 {
                     // TODO: 中间进行配置的时候，确保暂停在这个位置
                     // 延时
-                    Task.Delay(TimeSpan.FromMilliseconds(1000), token);
+                    Task.Delay(TimeSpan.FromMilliseconds(1000), token).Wait();
 
                     // Loop?.Invoke(this, new EventArgs());
                     if (skip_func == null)

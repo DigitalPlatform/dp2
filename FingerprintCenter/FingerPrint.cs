@@ -124,7 +124,7 @@ namespace FingerprintCenter
 
         // 设备列表
         List<string> _dev_list = new List<string>();
-        public List<string> DeviceList
+        public new List<string> DeviceList
         {
             get
             {

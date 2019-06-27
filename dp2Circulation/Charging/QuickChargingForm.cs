@@ -3878,7 +3878,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                         ErrorInfo = $"人脸中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行人脸识别"
                     };
                 else
-                    result = await RecognitionFace("");
+                    result = await RecognitionFace("ui");
             }
             finally
             {

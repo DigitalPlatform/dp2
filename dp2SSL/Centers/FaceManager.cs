@@ -184,5 +184,79 @@ namespace dp2SSL
             }
         }
 
+        public static GetImageResult GetImage(string style)
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new RecognitionFaceResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetImage(style);
+                    // TODO: 是否可以考虑不显示错误信息
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetImageResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult CancelRecognitionFace()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.CancelRecognitionFace();
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
     }
 }
