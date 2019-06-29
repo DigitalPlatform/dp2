@@ -68,6 +68,9 @@ namespace DigitalPlatform.Interfaces
         NormalResult GetState(string style);
 
         NormalResult ActivateWindow();
+
+        // 事件通知
+        NormalResult Notify(string event_name);
     }
 
     [Serializable()]

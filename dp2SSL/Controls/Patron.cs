@@ -297,7 +297,24 @@ namespace dp2SSL
             }
         }
 
-        public void SetPatronXml(string recpath, string xml)
+        string _xml = "";
+        public string Xml
+        {
+            get
+            {
+                return _xml;
+            }
+            set
+            {
+                _xml = value;
+            }
+        }
+
+        public byte[] Timestamp { get; set; }
+
+        public string RecPath { get; set; }
+
+        public void SetPatronXml(string recpath, string xml, byte [] timestamp)
         {
             if (string.IsNullOrEmpty(xml))
             {
@@ -307,6 +324,10 @@ namespace dp2SSL
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(xml);
+
+            RecPath = recpath;
+            _xml = xml;
+            Timestamp = timestamp;
 
             this.Barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
 

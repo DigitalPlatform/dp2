@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -53,10 +55,34 @@ namespace dp2SSL
             }
 
             this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
+
+            if (string.IsNullOrEmpty(App.FaceUrl))
+                this.registerFace.Visibility = Visibility.Hidden;
+            /*
             if (string.IsNullOrEmpty(App.CurrentApp.Error))
             {
                 this.error.Visibility = Visibility.Collapsed;
             }
+            */
+
+            /*
+            ColorAnimation colorChangeAnimation1 = new ColorAnimation
+            {
+                From = ((SolidColorBrush)this.borrowButton.Background).Color,
+                To = Colors.Black,
+                Duration = TimeSpan.FromSeconds(2),
+                AutoReverse = true
+            };
+
+            PropertyPath colorTargetPath = new PropertyPath("(Button.Background).(SolidColorBrush.Color)");
+            Storyboard CellBackgroundChangeStory = new Storyboard();
+            Storyboard.SetTarget(colorChangeAnimation1, this.borrowButton);
+            Storyboard.SetTargetProperty(colorChangeAnimation1, colorTargetPath);
+            CellBackgroundChangeStory.Children.Add(colorChangeAnimation1);
+
+            CellBackgroundChangeStory.RepeatBehavior = RepeatBehavior.Forever;
+            CellBackgroundChangeStory.Begin();
+*/
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
@@ -102,6 +128,11 @@ namespace dp2SSL
         private void Message_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Clipboard.SetDataObject(this.message.Text, true);
+        }
+
+        private void RegisterFace_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageBorrow("registerFace"));
         }
 
 #if REMOVED

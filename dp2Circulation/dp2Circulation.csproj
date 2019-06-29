@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>64</ApplicationRevision>
+    <ApplicationRevision>66</ApplicationRevision>
     <ApplicationVersion>3.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -705,6 +705,7 @@
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
     <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
+    <Compile Include="OperLog\OperLogReport.cs" />
     <Compile Include="Order\BatchOrder\BatchOrderForm.cs">
       <SubType>Form</SubType>
     </Compile>

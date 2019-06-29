@@ -30,7 +30,7 @@ namespace dp2SSL.Dialog
             this.Close();
         }
 
-        public string MessageText
+        public string TitleText
         {
             get
             {
@@ -41,6 +41,67 @@ namespace dp2SSL.Dialog
                 title.Text = value;
             }
         }
+
+        public string MessageText
+        {
+            get
+            {
+                return text.Text;
+            }
+            set
+            {
+                text.Text = value;
+                if (string.IsNullOrEmpty(value))
+                {
+                    this.photo.Visibility = Visibility.Visible;
+                    this.text.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    this.photo.Visibility = Visibility.Collapsed;
+                    this.text.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        string _backColor = "black";
+        public string BackColor
+        {
+            get
+            {
+                return _backColor;
+            }
+            set
+            {
+                _backColor = value;
+                if (_backColor == "black")
+                {
+                    this.Background = Brushes.Black;
+                    this.Foreground = Brushes.White;
+                }
+                if (_backColor == "red")
+                {
+                    this.Background = Brushes.DarkRed;
+                    this.Foreground = Brushes.White;
+                }
+                if (_backColor == "yellow")
+                {
+                    this.Background = Brushes.DarkOrange;
+                    this.Foreground = Brushes.White;
+                }
+                if (_backColor == "green")
+                {
+                    this.Background = Brushes.DarkGreen;
+                    this.Foreground = Brushes.White;
+                }
+                if (_backColor == "gray")
+                {
+                    this.Background = Brushes.DarkGray;
+                    this.Foreground = Brushes.White;
+                }
+            }
+        }
+
 
         public void SetPhoto(Stream stream)
         {

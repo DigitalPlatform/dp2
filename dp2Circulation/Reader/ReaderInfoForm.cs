@@ -11,6 +11,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
 using System.Threading.Tasks;
+using System.Drawing.Imaging;
 
 using ZXing;
 using ZXing.QrCode;
@@ -23,7 +24,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Interfaces;
-using System.Drawing.Imaging;
 
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
@@ -6364,7 +6364,7 @@ MessageBoxDefaultButton.Button1);
                 GetFeatureStringResult result = await ReadFeatureString(
                     null,
                     this.readerEditControl1.Barcode,
-                    "confirmPicture,returnImage");
+                    "ui,confirmPicture,returnImage");
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
@@ -6408,6 +6408,7 @@ MessageBoxDefaultButton.Button1);
 
             // MessageBox.Show(this, strFingerprint);
             Program.MainForm.StatusBarMessage = "人脸信息获取成功";
+            // TODO: 记住保存记录时通知 facecenter DoReplication
             return;
             ERROR1:
             Program.MainForm.StatusBarMessage = strError;

@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:dp2SSL"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="800" d:DesignWidth="800"
       Background="Black"
       WindowTitle="主菜单" Title="主菜单"
       >
@@ -27,22 +27,28 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 -->
-        <Button Grid.Row="0" Grid.Column="0" 
+        <Button 
                 Name="borrowButton" Content="借书" Click="Button_Borrow_Click"
                 Background="DarkBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <Button Grid.Row="0" Grid.Column="1" 
+        <Button 
                 Name="returnButton" Content="还书" Click="ReturnButton_Click"
                 Background="BlueViolet" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <Button Grid.Row="1" Grid.Column="0" 
+        <Button  
                 Name="renewBotton" Content="续借" Click="RenewBotton_Click"
                 Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <Button Name="config" Grid.Row="1" Grid.Column="1" Content="设置"  Click="Config_Click"
-                Background="CornflowerBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <TextBlock Grid.ColumnSpan="2" Name="message"
+
+        <Button 
+                Name="registerFace" Content="注册人脸" Click="RegisterFace_Click"
+                Background="#FFA4AEB4" Foreground="White" FontSize="36" BorderThickness="0"/>
+
+        <Button 
+            Name="config" Content="设置"  Click="Config_Click"
+                Background="#FF254276" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <TextBlock Name="message"
                    Text="message" TextAlignment="Center" MouseDown="Message_MouseDown"
-                   Background="CornflowerBlue" Foreground="White"/>
+                   Background="#FF1450BB" Foreground="White"/>
         <Button Name="error" Content="错误信息"  Click="Error_Click"
-                Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
-                Background="DarkRed" Foreground="White" FontSize="40" BorderThickness="0"/>
+                Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"
+                Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>
     </UniformGrid>
 </Page>

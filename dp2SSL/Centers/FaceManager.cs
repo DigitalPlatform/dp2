@@ -258,5 +258,121 @@ namespace dp2SSL
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
+
+        public static GetFeatureStringResult GetFeatureString(byte[] imageData,
+            string strExcludeBarcodes,
+            string strStyle)
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new GetFeatureStringResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetFeatureString(imageData,
+                        strExcludeBarcodes,
+                        strStyle);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetFeatureStringResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult CancelGetFeatureString()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.CancelGetFeatureString();
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult Notify(string event_name)
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new NormalResult();
+
+                BaseChannel<IBioRecognition> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.Notify(event_name);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
     }
 }

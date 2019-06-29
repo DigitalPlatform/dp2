@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:dp2SSL.Dialog"
         mc:Ignorable="d"
         Title="VideoWindow" Height="500" Width="600"
-        Background="#FF06520F" Foreground="White"
+        Background="#FF6C6964" Foreground="White"
         WindowStyle="None"
         AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False"
@@ -24,6 +24,12 @@
                      FontSize="16" TextWrapping="Wrap"
                     Background="Transparent" Foreground="White" 
                      BorderThickness="0"/>
+            <TextBox Name="text" Grid.Row="1" 
+                     Visibility="Collapsed"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   FontSize="20" TextWrapping="Wrap"
+                 Background="Transparent" Foreground="White" 
+                 VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
             <Image Name="photo"  Grid.Row="1"  
                           Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"
                    />
