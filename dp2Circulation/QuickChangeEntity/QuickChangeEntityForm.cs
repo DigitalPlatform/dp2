@@ -4,20 +4,18 @@ using System.Xml;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
+using System.Web;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
-
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID.UI;
 using DigitalPlatform.RFID;
-using DigitalPlatform.Core;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonControl;
-using System.Web;
 
 namespace dp2Circulation
 {
@@ -154,19 +152,6 @@ namespace dp2Circulation
 
         private void QuickChangeEntityForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-
-            }
-#endif
-
             if (this.entityEditControl1.Changed == true)
             {
                 // 警告尚未保存
@@ -734,68 +719,78 @@ out strError);
         void WriteStatisLogs(CancellationToken token,
             LibraryChannelExtension.delegate_prompt prompt)
         {
-            while (token.IsCancellationRequested == false)
+            // TODO: 需要捕获异常，写入错误日志
+            try
             {
-                List<StatisLog> error_items = new List<StatisLog>();
-                // 循环过程不怕 _statisLogs 数组后面被追加新内容
-                int count = _statisLogs.Count;
-                for (int i = 0; i < count; i++)
+                while (token.IsCancellationRequested == false)
                 {
-                    var log = _statisLogs[i];
-                    Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>写册 '{HttpUtility.HtmlEncode(log.BookItem.Barcode)}' 的 RFID 标签，记入统计日志</div>");
-                    // parameters:
-                    //      prompt_action   [out] 重试/中断
-                    // return:
-                    //      -2  UID 已经存在
-                    //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
-                    //      其他  成功
-                    int nRet = WriteStatisLog("sender",
-                        "subject",
-                        log.Xml,
-                        prompt,
-                        out string prompt_action,
-                        out string strError);
-                    if (nRet == -2)
+                    List<StatisLog> error_items = new List<StatisLog>();
+                    // 循环过程不怕 _statisLogs 数组后面被追加新内容
+                    int count = _statisLogs.Count;
+                    for (int i = 0; i < count; i++)
                     {
-                        // 如果 UID 重复了，跳过这一条
-                        _statisLogs.RemoveAt(i);
-                        i--;
-                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
-                        continue;
-                    }
-                    else if (nRet == -1)
-                    {
-
-                        if (prompt_action == "skip" || prompt_action == "取消")
+                        var log = _statisLogs[i];
+                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug recpath'>写册 '{HttpUtility.HtmlEncode(log.BookItem.Barcode)}' 的 RFID 标签，记入统计日志</div>");
+                        // parameters:
+                        //      prompt_action   [out] 重试/中断
+                        // return:
+                        //      -2  UID 已经存在
+                        //      -1  出错。注意 prompt_action 中有返回值，表明已经提示和得到了用户反馈
+                        //      其他  成功
+                        int nRet = WriteStatisLog("sender",
+                            "subject",
+                            log.Xml,
+                            prompt,
+                            out string prompt_action,
+                            out string strError);
+                        if (nRet == -2)
                         {
-                            // 跳过这一条
+                            // 如果 UID 重复了，跳过这一条
                             _statisLogs.RemoveAt(i);
                             i--;
-                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>遇到错误 {HttpUtility.HtmlEncode(strError)} 后用户选择跳过</div>");
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
                             continue;
                         }
+                        else if (nRet == -1)
+                        {
+                            if (prompt_action == "skip" || prompt_action == "取消")
+                            {
+                                // 跳过这一条
+                                _statisLogs.RemoveAt(i);
+                                i--;
+                                Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>遇到错误 {HttpUtility.HtmlEncode(strError)} 后用户选择跳过</div>");
+                                continue;
+                            }
 
-                        log.ErrorCount++;
-                        error_items.Add(log);
-                        this.ShowMessage(strError, "red", true);
-                        // TODO: 输出到操作历史
-                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
+                            log.ErrorCount++;
+                            error_items.Add(log);
+                            this.ShowMessage(strError, "red", true);
+                            // TODO: 输出到操作历史
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug error'>{HttpUtility.HtmlEncode(strError)}</div>");
+                        }
+                        else
+                            Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>写入成功</div>");
                     }
+
+                    lock (_lockStatis)
+                    {
+                        _statisLogs.RemoveRange(0, count);
+                        _statisLogs.AddRange(error_items);  // 准备重做
+                    }
+
+                    if (error_items.Count > 0)
+                        Task.Delay(TimeSpan.FromMinutes(1), token).Wait();
                     else
-                        Program.MainForm.OperHistory.AppendHtml($"<div class='debug green'>写入成功</div>");
-
+                        Task.Delay(500, token).Wait();
                 }
-
-                lock (_lockStatis)
+            }
+            catch(Exception ex)
+            {
+                this.ShowMessage($"后台线程出现异常: {ex.Message}", "red", true);
+                this.Invoke((Action)(() =>
                 {
-                    _statisLogs.RemoveRange(0, count);
-                    _statisLogs.AddRange(error_items);  // 准备重做
-                }
-
-                if (error_items.Count > 0)
-                    Task.Delay(TimeSpan.FromMinutes(1), token).Wait();
-                else
-                    Task.Delay(500, token).Wait();
+                    this.Enabled = false;   // 禁用界面，迫使操作者关闭窗口重新打开
+                }));
             }
         }
 
@@ -816,6 +811,9 @@ out strError);
                 "itemBarcode", log.BookItem.Barcode);
             DomUtil.SetElementText(dom.DocumentElement,
                 "itemLocation", log.BookItem.Location);
+            // 2019/6/28
+            DomUtil.SetElementText(dom.DocumentElement,
+    "itemRefID", log.BookItem.RefID);
 
             DomUtil.SetElementText(dom.DocumentElement,
 "tagProtocol", "ISO15693");
@@ -945,6 +943,14 @@ out strError);
                 }
             }
 
+            // 2019/6/28
+            // 自动检查 refID 元素
+            if (string.IsNullOrEmpty(this.entityEditControl1.RefID))
+            {
+                this.entityEditControl1.RefID = Guid.NewGuid().ToString();
+                bChanged = true;
+            }
+
             if (bChanged == true)
                 return 1;
 
@@ -1017,12 +1023,10 @@ out strError);
                     goto ERROR1;
                 }
 
-                EntityInfo[] entities = null;
-                EntityInfo[] errorinfos = null;
 
                 // 构造需要提交的实体信息数组
                 int nRet = BuildSaveEntities(
-                    out entities,
+                    out EntityInfo[] entities,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1030,12 +1034,11 @@ out strError);
                 if (entities == null || entities.Length == 0)
                     return 0; // 没有必要保存
 
-
                 nRet = SaveEntityRecords(
                     bEnableControls,
                     this.BiblioRecPath,
                     entities,
-                    out errorinfos,
+                    out EntityInfo[] errorinfos,
                     out strError);
 
                 this.entityEditControl1.Changed = false;    // 2007/4/4

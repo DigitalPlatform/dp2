@@ -127,7 +127,7 @@ namespace dp2SSL
 
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = App.FaceUrl;
-            FaceManager.SetError += FaceManager_SetError; ;
+            FaceManager.SetError += FaceManager_SetError;
             FaceManager.Start(_cancelRefresh.Token);
         }
 

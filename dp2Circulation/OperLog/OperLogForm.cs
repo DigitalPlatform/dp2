@@ -30,6 +30,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer;
+using dp2Circulation.OperLog;
 
 namespace dp2Circulation
 {
@@ -1179,6 +1180,8 @@ namespace dp2Circulation
                 "itemBarcode");
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "itemLocation");
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement,
+                "itemRefID");
             string strTagProtocol = DomUtil.GetElementText(dom.DocumentElement,
                 "tagProtocol");
             string strTagReaderName = DomUtil.GetElementText(dom.DocumentElement,
@@ -1204,6 +1207,7 @@ namespace dp2Circulation
                 BuildHtmlLine("类型", type) +
                 BuildHtmlLine("册条码号", strBarcode) +
                 BuildHtmlLine("馆藏地", strLocation) +
+                BuildHtmlLine("册参考 ID", strRefID) +
                 BuildHtmlLine("标签协议", strTagProtocol) +
                 BuildHtmlLine("读卡器名", strTagReaderName) +
                 BuildHtmlLine("AFI", strTagAFI) +
@@ -5687,7 +5691,6 @@ FileShare.ReadWrite))
             menuItem.Click += new System.EventHandler(this.menu_find_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("筛选(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_filter_Click);
             if (this.listView_records.SelectedItems.Count == 0)
@@ -5725,6 +5728,11 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出 RFID 标签写入 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportRfidWriteExcel_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             // ---
             menuItem = new MenuItem("-");
@@ -6145,6 +6153,87 @@ MessageBoxDefaultButton.Button1);
 
                 writer.WriteEndElement();   // </collection>
                 writer.WriteEndDocument();
+            }
+            return;
+            ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 导出 写入 RFID 统计信息到 Excel 文件
+        void menu_exportRfidWriteExcel_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "OperLogForm new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            IXLWorksheet sheet = doc.Worksheets.Add("表格");
+            bool bLaunchExcel = true;
+            try
+            {
+                List<RfidWriteInfo> lines = new List<RfidWriteInfo>();
+                int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+                {
+                    if (dom.DocumentElement != null)
+                    {
+                        string operation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                        string action = DomUtil.GetElementText(dom.DocumentElement, "action");
+                        if (operation != "statis" || action != "writeRfidTag")
+                            return true;
+                        lines.Add(RfidWriteInfo.Build(date, index, dom));
+                    }
+
+                    return true;
+                },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                //
+                OperLogReport.BuildRfidWriteReport(lines, sheet);
+            }
+            finally
+            {
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
             }
             return;
             ERROR1:
@@ -7081,7 +7170,7 @@ Keys keyData)
         }
 
 
-        #region 改进后的批处理功能
+#region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -8310,7 +8399,7 @@ MessageBoxDefaultButton.Button1);
             ERROR1:
             return -1;
         }
-        #endregion
+#endregion
 
         public string UiState
         {

@@ -54,6 +54,7 @@ namespace dp2Circulation
             "crashReport\t崩溃报告",
             "memo\t注记",
             "manageDatabase\t管理数据库",
+            "statis\t统计",
             });
         }
 

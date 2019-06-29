@@ -138,6 +138,16 @@
                         </TextBlock>
                     </Button.Content>
                 </Button>
+                <Button Name="registerFace"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="160" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="RegisterFace_Click">
+                    <Button.Content>
+                        <TextBlock>注册人脸</TextBlock>
+                    </Button.Content>
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>

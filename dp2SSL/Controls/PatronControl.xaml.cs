@@ -46,6 +46,13 @@ namespace dp2SSL
                 this.inputFace.Visibility = Visibility.Collapsed;
         }
 
+#if NO
+        public void HideInputFaceButton()
+        {
+            this.inputFace.Visibility = Visibility.Collapsed;
+        }
+#endif
+
         private void InputFace_Click(object sender, RoutedEventArgs e)
         {
             this.InputFace?.Invoke(sender, e);

@@ -1032,8 +1032,6 @@ out strError);
 
                 // if (info.Simulate == false)
                 {
-                    string strError = "";
-                    byte[] temp_timestamp = null;
                     // 上传文件到到 dp2lbrary 服务器
                     // parameters:
                     //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
@@ -1049,8 +1047,8 @@ out strError);
                 info.Simulate ? "simulate" : "",
                 ByteArray.GetTimeStampByteArray(strTimestamp),
                 true,
-                out temp_timestamp,
-                out strError);
+                out byte[] temp_timestamp,
+                out string strError);
                     if (nRet == -1)
                         throw new Exception(strError);  // TODO: 空对象不存在怎么办?
                 }
