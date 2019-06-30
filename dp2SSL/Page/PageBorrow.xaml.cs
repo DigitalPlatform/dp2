@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Xml;
+using System.Windows.Media;
 
 using dp2SSL.Dialog;
 
@@ -22,7 +23,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Core;
-using System.Windows.Media;
 
 namespace dp2SSL
 {
@@ -118,7 +118,7 @@ namespace dp2SSL
                 Message = result.Patron,
             };
             SetPatronInfo(message);
-            FillPatronDetail();
+            await FillPatronDetail();
         }
 
         void DisplayVideo(VideoWindow window)
@@ -190,6 +190,10 @@ namespace dp2SSL
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
 
+            RfidManager.GetState("clearCache");
+            // 处理以前积累的 tags
+            // RfidManager.TriggerLastListTags();
+
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
             if (string.IsNullOrEmpty(RfidManager.Url))
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
@@ -210,12 +214,12 @@ namespace dp2SSL
             }
         }
 
-        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        private async void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
-            Refresh(sender as BaseChannel<IRfid>, e.Result);
+            await Refresh(sender as BaseChannel<IRfid>, e.Result);
         }
 
-        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        private async void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetGlobalError("rfid", e.Error);
             if (e.Error == null)
@@ -227,7 +231,7 @@ namespace dp2SSL
                 // 进入错误状态
                 if (_rfidState != "error")
                 {
-                    ClearBooksAndPatron(null);
+                    await ClearBooksAndPatron(null);
                     /*
                     ClearBookList();
                     FillBookFields(channel);
@@ -245,11 +249,11 @@ namespace dp2SSL
         }
 
         // 从指纹阅读器获取消息(第一阶段)
-        private void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+        private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
         {
             SetPatronInfo(e.Result);
 
-            FillPatronDetail();
+            await FillPatronDetail();
 
 #if NO
             Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -562,12 +566,12 @@ namespace dp2SSL
             }));
         }
 
-        void ClearBooksAndPatron(BaseChannel<IRfid> channel)
+        async Task ClearBooksAndPatron(BaseChannel<IRfid> channel)
         {
             try
             {
                 ClearBookList();
-                FillBookFields(channel);
+                await FillBookFields(channel, _entities);
             }
             catch (Exception ex)
             {
@@ -576,14 +580,17 @@ namespace dp2SSL
             _patron.Clear();
         }
 
+        ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        object _sync_refresh = new object();
         int _inRefresh = 0;
 
         string _rfidState = "ok";   // ok/error
 
-        void Refresh(BaseChannel<IRfid> channel, ListTagsResult result)
+        async Task Refresh(BaseChannel<IRfid> channel, ListTagsResult result)
         {
             Debug.Assert(channel != null, "");
 
+            /*
             // 防止重入
             int v = Interlocked.Increment(ref this._inRefresh);
             if (v > 1)
@@ -591,6 +598,7 @@ namespace dp2SSL
                 Interlocked.Decrement(ref this._inRefresh);
                 return;
             }
+            */
 
             // _cancelRefresh = new CancellationTokenSource();
             try
@@ -605,7 +613,7 @@ namespace dp2SSL
                     // RFID 正常状态和错误状态之间切换时才需要连带清掉读者信息
                     if (_rfidState != "error")
                     {
-                        ClearBooksAndPatron(channel);
+                        await ClearBooksAndPatron(channel);
                         /*
                         ClearBookList();
                         FillBookFields(channel);
@@ -693,7 +701,7 @@ namespace dp2SSL
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
-                        FillPatronDetail();
+                        var task = FillPatronDetail();
                     }
                     else
                     {
@@ -711,7 +719,7 @@ namespace dp2SSL
 
                 //GetPatronFromFingerprint();
 
-                FillBookFields(channel);
+                await FillBookFields(channel, _entities);
                 // FillPatronDetail();
 
                 CheckEAS(new_entities);
@@ -723,8 +731,7 @@ namespace dp2SSL
             }
             finally
             {
-                // _cancelRefresh = null;
-                Interlocked.Decrement(ref this._inRefresh);
+                // Interlocked.Decrement(ref this._inRefresh);
             }
         }
 
@@ -826,7 +833,7 @@ namespace dp2SSL
         }
 #endif
         // 填充读者信息的其他字段(第二阶段)
-        void FillPatronDetail(bool force = false)
+        async Task FillPatronDetail(bool force = false)
         {
 #if NO
             if (_cancelRefresh == null
@@ -861,10 +868,12 @@ namespace dp2SSL
             //      -1  出错
             //      0   读者记录没有找到
             //      1   成功
-            NormalResult result = GetReaderInfo(pii,
-                out string recpath,
-                out string reader_xml,
-                out byte[] timestamp);
+            GetReaderInfoResult result = await
+                Task<GetReaderInfoResult>.Run(() =>
+                {
+                    return GetReaderInfo(pii);
+                });
+
             if (result.Value != 1)
             {
                 SetPatronError("getreaderinfo", $"读者 '{pii}': {result.ErrorInfo}");
@@ -878,9 +887,19 @@ namespace dp2SSL
             // string old_photopath = _patron.PhotoPath;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                _patron.SetPatronXml(recpath, reader_xml, timestamp);
+                _patron.SetPatronXml(result.RecPath, result.ReaderXml, result.Timestamp);
+                this.patronControl.SetBorrowed(result.ReaderXml);
             }));
 
+            BaseChannel<IRfid> channel = RfidManager.GetChannel();
+            try
+            {
+                await FillBookFields(channel, this.patronControl.BorrowedEntities);
+            }
+            finally
+            {
+                RfidManager.ReturnChannel(channel);
+            }
 #if NO
             // 装载图象
             if (old_photopath != _patron.PhotoPath)
@@ -939,7 +958,8 @@ namespace dp2SSL
         }
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
-        void FillBookFields(BaseChannel<IRfid> channel)
+        async Task FillBookFields(BaseChannel<IRfid> channel,
+            EntityCollection entities)
         {
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
@@ -949,7 +969,7 @@ out string strError);
 #endif
             try
             {
-                foreach (Entity entity in _entities)
+                foreach (Entity entity in entities)
                 {
                     if (_cancel == null
                         || _cancel.IsCancellationRequested)
@@ -995,18 +1015,23 @@ out string strError);
                     if (string.IsNullOrEmpty(entity.Title)
                         && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
                     {
-                        var result = GetEntityData(entity.PII,
-                            out string title,
-                            out string item_xml,
-                            out string item_recpath);
+                        GetEntityDataResult result = await
+                            Task<GetEntityDataResult>.Run(() =>
+                            {
+                                return GetEntityData(entity.PII);
+                            });
+                        /*
+                        out string title,
+                        out string item_xml,
+                        out string item_recpath);
+                        */
                         if (result.Value == -1)
                         {
                             entity.SetError(result.ErrorInfo);
                             continue;
                         }
-                        entity.Title = GetCaption(title);
-                        // entity.ItemXml = item_xml;
-                        entity.SetData(item_recpath, item_xml);
+                        entity.Title = GetCaption(result.Title);
+                        entity.SetData(result.ItemRecPath, result.ItemXml);
                     }
 
                     entity.SetError(null);
@@ -1017,17 +1042,7 @@ out string strError);
             }
             catch (Exception ex)
             {
-#if NO
-                this.error.Text = ex.Message;
-                this.error.Visibility = Visibility.Visible;
-#endif
                 SetGlobalError("current", ex.Message);
-            }
-            finally
-            {
-#if NO
-                RFID.EndRfidChannel(channel);
-#endif
             }
         }
 
@@ -1039,48 +1054,43 @@ out string strError);
             return text;
         }
 
-        // 获得一个册的题名字符串
-        NormalResult GetEntityData(string pii,
-            out string title,
-            out string item_xml,
-            out string item_recpath)
+        class GetEntityDataResult : NormalResult
         {
+            public string Title { get; set; }
+            public string ItemXml { get; set; }
+            public string ItemRecPath { get; set; }
+        }
+
+        // 获得一个册的题名字符串
+        GetEntityDataResult GetEntityData(string pii)
+        {
+            /*
             title = "";
             item_xml = "";
             item_recpath = "";
+            */
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
-#if NO
-                GetItemInfo(
-    stop,
-    "item",
-    strBarcode,
-    "",
-    strResultType,
-    out strResult,
-    out strItemRecPath,
-    out item_timestamp,
-    strBiblioType,
-    out strBiblio,
-    out strBiblioRecPath,
-    out strError);
-#endif
                 long lRet = channel.GetItemInfo(null,
                     "item",
                     pii,
                     "",
                     "xml",
-                    out item_xml,
-                    out item_recpath,
+                    out string item_xml,
+                    out string item_recpath,
                     out byte[] item_timestamp,
                     "",
                     out string biblio_xml,
                     out string biblio_recpath,
                     out string strError);
                 if (lRet == -1)
-                    return new NormalResult { Value = -1, ErrorInfo = strError };
+                    return new GetEntityDataResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
 
                 lRet = channel.GetBiblioSummary(
     null,
@@ -1091,11 +1101,21 @@ out string strError);
     out string strSummary,
     out strError);
                 if (lRet == -1)
-                    return new NormalResult { Value = -1, ErrorInfo = strError };
+                    return new GetEntityDataResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
 
-                title = strSummary;
+                strSummary = strSummary.Replace(". -- ", "\r\n");   // .Replace("/", "\r\n");
 
-                return new NormalResult();
+                return new GetEntityDataResult
+                {
+                    Value = 0,
+                    ItemXml = item_xml,
+                    ItemRecPath = item_recpath,
+                    Title = strSummary
+                };
             }
             finally
             {
@@ -1157,20 +1177,30 @@ out string strError);
             });
         }
 
+        class GetReaderInfoResult : NormalResult
+        {
+            public string RecPath { get; set; }
+            public string ReaderXml { get; set; }
+            public byte[] Timestamp { get; set; }
+        }
+
         // return.Value:
         //      -1  出错
         //      0   读者记录没有找到
         //      1   成功
-        NormalResult GetReaderInfo(string pii,
-            out string recpath,
-            out string reader_xml,
-            out byte[] timestamp)
+        GetReaderInfoResult GetReaderInfo(string pii)
         {
+            /*
             reader_xml = "";
             recpath = "";
             timestamp = null;
+            */
             if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
-                return new NormalResult { Value = -1, ErrorInfo = "dp2library 服务器 URL 尚未配置，无法获得读者信息" };
+                return new GetReaderInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = "dp2library 服务器 URL 尚未配置，无法获得读者信息"
+                };
             LibraryChannel channel = App.CurrentApp.GetChannel();
             try
             {
@@ -1178,17 +1208,28 @@ out string strError);
                     pii,
                     "xml",
                     out string[] results,
-                    out recpath,
-                    out timestamp,
+                    out string recpath,
+                    out byte[] timestamp,
                     out string strError);
-                if (lRet == -1)
-                    return new NormalResult { Value = -1, ErrorInfo = strError };
-                if (lRet == 0)
-                    return new NormalResult { Value = 0, ErrorInfo = strError };
+                if (lRet == -1 || lRet == 0)
+                    return new GetReaderInfoResult
+                    {
+                        Value = (int)lRet,
+                        ErrorInfo = strError,
+                        RecPath = recpath,
+                        Timestamp = timestamp
+                    };
 
+                string reader_xml = "";
                 if (results != null && results.Length > 0)
                     reader_xml = results[0];
-                return new NormalResult { Value = 1 };
+                return new GetReaderInfoResult
+                {
+                    Value = 1,
+                    RecPath = recpath,
+                    Timestamp = timestamp,
+                    ReaderXml = reader_xml
+                };
             }
             finally
             {
@@ -1811,7 +1852,7 @@ out string strError);
                         DisplayVideo(videoRegister);
                     });
 
-                    result = await GetFeatureString("returnImage,countDown");
+                    result = await GetFeatureString("returnImage,countDown,format:jpeg");
                     if (result.Value == -1)
                     {
                         DisplayError(videoRegister, result.ErrorInfo);
@@ -1898,7 +1939,7 @@ out string strError);
                     }));
             }
 
-             // TODO: await 通讯过程
+            // TODO: await 通讯过程
             // 最后刷新一次读者信息区显示
             // 获得和保存 jpeg 格式的图象
             /*
@@ -1909,7 +1950,7 @@ out string strError);
             };
             SetPatronInfo(message);
             */
-            FillPatronDetail(true);
+            var temp_task = FillPatronDetail(true);
         }
 
         static void DisplayError(VideoWindow videoRegister,

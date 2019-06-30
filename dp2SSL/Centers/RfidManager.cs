@@ -16,6 +16,17 @@ namespace dp2SSL
 {
     public static class RfidManager
     {
+        static List<OneTag> _lastTags = null;
+
+        // 以前获取过的 Tag 列表。当第一次添加 ListTags 事件时，要考虑立即处理一次这些以前的 Tag 列表
+        public static List<OneTag> LastTags
+        {
+            get
+            {
+                return _lastTags;
+            }
+        }
+
         public static event ListTagsEventHandler ListTags = null;
 
         public static ManagerBase<IRfid> Base = new ManagerBase<IRfid>();
@@ -54,6 +65,8 @@ namespace dp2SSL
         public static void Start(
             CancellationToken token)
         {
+            Base.ShortWaitTime = TimeSpan.FromMilliseconds(10);
+            Base.LongWaitTime = TimeSpan.FromMilliseconds(2000);
             Base.Start((channel) =>
             {
                 var result = channel.Object.GetState("");
@@ -89,15 +102,65 @@ null);
 
                 if (ListTags != null)
                 {
+                    // 先记忆
+                    _lastTags = result.Results;
+
                     ListTags(channel, new ListTagsEventArgs
                     {
                         Result = result
                     });
                 }
+                else
+                    _lastTags = null;
             },
             token);
 
         }
+
+        public static BaseChannel<IRfid> GetChannel()
+        {
+            return Base.GetChannel();
+        }
+
+        public static void ReturnChannel(BaseChannel<IRfid> channel)
+        {
+            Base.ReturnChannel(channel);
+        }
+
+        public static void TriggerLastListTags()
+        {
+            if (ListTags == null)
+                return;
+
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    if (ListTags != null)
+                    {
+                        ListTags(channel, new ListTagsEventArgs
+                        {
+                            Result = new ListTagsResult { Results = _lastTags }
+                        });
+                    }
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+            }
+        }
+
 
         public static NormalResult SetEAS(string uid, bool enable)
         {

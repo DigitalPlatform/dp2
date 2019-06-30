@@ -5,14 +5,14 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:dp2SSL"
       mc:Ignorable="d" 
-      d:DesignHeight="800" d:DesignWidth="800"
       Background="Black"
+      d:DesignHeight="800" d:DesignWidth="800"
       WindowTitle="主菜单" Title="主菜单"
       >
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
-    <UniformGrid Width="500" Height="500">
+    <UniformGrid Width="500" Height="500" >
 
         <!--
         <Grid.ColumnDefinitions>

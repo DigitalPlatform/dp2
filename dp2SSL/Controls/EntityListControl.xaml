@@ -15,12 +15,128 @@
         <local:StringToBrushConverter x:Key="StringToBrush" />
         <local:InvertCountToVisibilityConverter x:Key="InvertCountToVis" />
 
+        <local:PersonDataTemplateSelector x:Key="personDataTemplateSelector" />
+        <DataTemplate x:Key="LargeTemplate">
+            <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
+                            Margin="6" CornerRadius="8">
+
+                <Border.Background>
+                    <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
+                        <GradientStop Color="Black" Offset="0"/>
+                        <GradientStop Color="#FF363636" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Width="240" MaxHeight="660" Margin="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="3" Height="30" Foreground="DarkGray"
+                            Icon="Spinner" Spin="true" SpinDuration="5" 
+                                         Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
+                                         VerticalAlignment="Center"/>
+                    <!--
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding State}" 
+                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
+                            -->
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
+                                       TextAlignment="Right" FontSize="8" Foreground="Gray"/>
+
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" Foreground="DarkGray"
+                            Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
+                                             HorizontalAlignment="Left"/>
+
+
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
+                                       FontSize="20" FontWeight="Bold" Foreground="LightGray"
+                                       MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
+                                       Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
+                                       Foreground="LightGray"
+                                       TextWrapping="Wrap"/>
+
+                    <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Error}"
+                                       FontSize="12" FontWeight="Bold" Foreground="White" Padding="10"
+                                       Background="{Binding Path=ErrorColor, Converter={StaticResource StringToBrush}}"
+                                       Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
+                                       TextWrapping="WrapWithOverflow"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="SmallTemplate">
+            <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
+                            Margin="1" CornerRadius="8">
+
+                <Border.Background>
+                    <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
+                        <GradientStop Color="Black" Offset="0"/>
+                        <GradientStop Color="#FF363636" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Width="180" MaxHeight="660" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="3" 
+                                     Height="30" Foreground="DarkGray"
+                            Icon="Spinner" Spin="true" SpinDuration="5" 
+                                         Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
+                                         VerticalAlignment="Center"/>
+                    <!--
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding State}" 
+                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
+                            -->
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
+                               Visibility="Collapsed"
+                               TextAlignment="Right" FontSize="8" Foreground="Gray"/>
+
+                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                                     Height="14" Foreground="DarkGray"
+                                    Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
+                                    HorizontalAlignment="Left"/>
+
+
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
+                                       FontSize="12" FontWeight="Bold" Foreground="LightGray"
+                                       MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
+                    <!-- 借阅信息 TODO: 背景颜色应该和是否超期相关。已经超期的要显示为黄色 -->
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
+                                       Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
+                                       Foreground="LightGray"
+                                       TextWrapping="Wrap"/>
+
+                    <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="{Binding Error}"
+                                       FontSize="12" FontWeight="Bold" Foreground="White" Padding="10"
+                                       Background="{Binding Path=ErrorColor, Converter={StaticResource StringToBrush}}"
+                                       Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
+                                       TextWrapping="WrapWithOverflow"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
         <Grid Background="Transparent">
             <Button Name="refresh" Click="Refresh_Click" Visibility="Collapsed">Refresh</Button>
 
             <ListView Name="listView" 
+                  ItemTemplateSelector="{StaticResource personDataTemplateSelector}"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   Background="Transparent"
@@ -32,6 +148,7 @@
                                />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+                <!--
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderThickness="2" BorderBrush="{Binding Path=State, Converter={StaticResource StateToBorder}}"
@@ -59,10 +176,7 @@
                             Icon="Spinner" Spin="true" SpinDuration="5" 
                                          Visibility="{Binding Path=Waiting, Converter={StaticResource BoolToVis}}"
                                          VerticalAlignment="Center"/>
-                                <!--
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding State}" 
-                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
-                            -->
+
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
                                        TextAlignment="Right" FontSize="8" Foreground="Gray"/>
 
@@ -74,7 +188,7 @@
                                 <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                                 <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
                                        FontSize="20" FontWeight="Bold" Foreground="LightGray"
-                                       MaxWidth="240" TextWrapping="Wrap"/>
+                                       MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
                                 <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
                                        Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
                                        Foreground="LightGray"
@@ -89,16 +203,17 @@
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+                -->
             </ListView>
             <TextBlock Name="error" Visibility="Collapsed">Error Text</TextBlock>
 
         </Grid>
         <!-- -->
-        <TextBlock Text="请放图书 ..."
+        <TextBlock Name="emptyComment" Text="请放图书 ..."
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"
-                                              Visibility="{Binding ElementName=listView, Path=Items.Count, Converter={StaticResource InvertCountToVis}}"
+                       Visibility="{Binding ElementName=listView, Path=Items.Count, Converter={StaticResource InvertCountToVis}}"
                    TextWrapping="WrapWithOverflow"/>
     </Grid>
 </UserControl>

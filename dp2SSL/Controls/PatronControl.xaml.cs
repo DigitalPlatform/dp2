@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml;
+
 using DigitalPlatform.Text;
 
 namespace dp2SSL
@@ -20,9 +23,14 @@ namespace dp2SSL
     {
         public event EventHandler InputFace = null;
 
+        EntityCollection _borrowedEntities = new EntityCollection { Style = "template:SmallTemplate"};
+
         public PatronControl()
         {
             InitializeComponent();
+
+            this.borrowedBooks.SetSource(_borrowedEntities);
+            this.borrowedBooks.emptyComment.Visibility = Visibility.Collapsed;
         }
 
         // 设置开始阶段的提示文字
@@ -58,6 +66,29 @@ namespace dp2SSL
             this.InputFace?.Invoke(sender, e);
         }
 
+        public EntityCollection BorrowedEntities
+        {
+            get
+            {
+                return _borrowedEntities;
+            }
+        }
+
+        public void SetBorrowed(string patron_xml)
+        {
+            _borrowedEntities.Clear();
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(patron_xml);
+
+            XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+            foreach(XmlElement borrow in borrows)
+            {
+                string barcode = borrow.GetAttribute("barcode");
+                _borrowedEntities.Add(new Entity { PII = barcode, Container = _borrowedEntities });
+            }
+        }
+
         public void SetPhoto(Stream stream)
         {
             if (stream == null)
@@ -71,5 +102,15 @@ namespace dp2SSL
             imageSource.EndInit();
             this.photo.Source = imageSource;
         }
+
+        /*
+        void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        */
     }
 }

@@ -15,6 +15,8 @@ namespace dp2SSL
 {
     public class EntityCollection : ObservableCollection<Entity>
     {
+        public string Style { get; set; }
+
         // 第一阶段：填充 UID 和 PII
         // parameters:
         //      new_entities    返回本次新增的部分 Entity。调用前如果为 null，则表示不希望返回信息
@@ -73,7 +75,8 @@ namespace dp2SSL
                 {
                     TagInfo = tag.TagInfo,
                     UID = tag.UID,
-                    PII = pii
+                    PII = pii,
+                    Container = this,
                 };
                 this.Add(entity);
                 changed = true;
@@ -88,6 +91,8 @@ namespace dp2SSL
 
     public class Entity : RfidItem
     {
+        public EntityCollection Container { get; set; }
+
         public TagInfo TagInfo { get; set; }
 
         private string _itemRecPath;

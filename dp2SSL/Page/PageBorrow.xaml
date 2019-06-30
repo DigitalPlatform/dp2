@@ -95,7 +95,7 @@
                 </GridSplitter.Template>
             </GridSplitter>
             <!-- 读者信息 -->
-            <Grid Grid.Column="2" MaxWidth="300">
+            <Grid Grid.Column="2" MaxWidth="700">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
