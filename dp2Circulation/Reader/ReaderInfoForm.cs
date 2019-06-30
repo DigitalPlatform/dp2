@@ -6387,6 +6387,7 @@ MessageBoxDefaultButton.Button1);
                 this.readerEditControl1.FaceFeatureVersion = result.Version;
                 this.readerEditControl1.Changed = true;
 
+                // TODO: 如果尺寸符合要求，则直接用返回的 jpeg 上载
                 // 设置人脸照片对象
                 using (Image image = FromBytes(result.ImageData))
                 using (Image image1 = new Bitmap(image))

@@ -25,6 +25,12 @@ namespace RfidCenter
 
         public NormalResult GetState(string style)
         {
+            if (style == "clearCache")
+            {
+                SetLastUids("");
+                return new NormalResult();
+            }
+
             if (Program.MainForm.ErrorState == "normal")
             {
                 var result = ListReaders();
@@ -69,9 +75,86 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
+        // 前一次 ListTags() 返回的 tag 数量
+        // static int _lastListCount = 0;
+        static string _lastUids = "";
+        static object _sync_lastuids = new object();
+
+        static string BuildUids(List<OneTag> tags)
+        {
+            if (tags == null || tags.Count == 0)
+                return "";
+
+            StringBuilder current = new StringBuilder();
+            foreach (OneTag tag in tags)
+            {
+                current.Append(tag.UID + ",");
+            }
+            return current.ToString();
+        }
+
+        static void SetLastUids(string value)
+        {
+            lock (_sync_lastuids)
+            {
+                _lastUids = value;
+            }
+        }
+
+        static bool CompareLastUids(string value)
+        {
+            lock (_sync_lastuids)
+            {
+                if (_lastUids != value)
+                    return true;
+                return false;
+            }
+        }
+
+        // 增加了无标签时延迟等待功能。敏捷响应
+        public ListTagsResult ListTags(string reader_name, string style)
+        {
+            TimeSpan length = TimeSpan.FromSeconds(2);
+            ListTagsResult result = null;
+            string current_uids = "";
+            DateTime start = DateTime.Now;
+            while (DateTime.Now - start < length
+                || result == null)
+            {
+                result = _listTags(reader_name, style);
+
+                if (result != null && result.Results != null)
+                    current_uids = BuildUids(result.Results);
+                else
+                    current_uids = "";
+
+                // 只要本次和上次 tag 数不同，立刻就返回
+                if (CompareLastUids(current_uids))
+                {
+                    SetLastUids(current_uids);
+                    return result;
+                }
+
+                if (result.Value == -1)
+                    return result;
+                /*
+                // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
+                if (result.Results != null
+                    && result.Results.Count > 0)
+                {
+                    SetLastUids(current_uids);
+                    return result;
+                }
+                */
+                Thread.Sleep(10);
+            }
+
+            SetLastUids(current_uids);
+            return result;
+        }
         // parameters:
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
-        public ListTagsResult ListTags(string reader_name, string style)
+        ListTagsResult _listTags(string reader_name, string style)
         {
             InventoryResult result = new InventoryResult();
 
@@ -559,7 +642,7 @@ new_password);
             {
                 List<string> names = new List<string>();
                 Program.Rfid.Readers.ForEach((o) => names.Add(o.Name));
-                Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names,"\r\n")}", 0);
+                Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names, "\r\n")}", 0);
             }
 
             _cancelInventory = new CancellationTokenSource();

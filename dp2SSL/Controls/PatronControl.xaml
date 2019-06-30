@@ -35,82 +35,90 @@
                 <GradientStop Color="#FF363636" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
-        <Grid>
-            <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
                   >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="8"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="20"/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
 
-                </Grid.RowDefinitions>
+                    </Grid.RowDefinitions>
 
-                <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
+                    <Image Name="photo"  Grid.Row="0" Grid.Column="3" 
                        MaxWidth="160" MinHeight="40"
                           Margin="0" HorizontalAlignment="Left"/>
 
-                <TextBlock Grid.Row="1" Grid.Column="1" 
+                    <TextBlock Grid.Row="1" Grid.Column="1" 
                            Text="UID" 
                            Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
-                <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
+                    <TextBox Name="uid"  Grid.Row="1" Grid.Column="3"
                          Text="{Binding UID}" 
                          IsReadOnly="True" BorderThickness="0"
                          Background="Transparent" Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"
                          />
 
-                <TextBlock Grid.Row="2" Grid.Column="1" 
+                    <TextBlock Grid.Row="2" Grid.Column="1" 
                            Text="证条码号" 
                            Foreground="Gray" Margin="6" FontSize="12"  TextAlignment="Right"/>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Barcode}"
+                    <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding Barcode}"
                        Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="12"/>
 
-                <TextBlock Grid.Row="3" Grid.Column="1" 
+                    <TextBlock Grid.Row="3" Grid.Column="1" 
                            Text="姓名" 
                            Foreground="Gray" Margin="6" FontSize="24"  TextAlignment="Right"/>
-                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronName}"
+                    <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding PatronName}"
                        Foreground="#eeeeee" TextWrapping="Wrap" Margin="6" FontSize="24" FontWeight="Bold"/>
 
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="单位" 
                            Foreground="Gray" Margin="6" FontSize="16" TextAlignment="Right"/>
-                <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding Department}"
+                    <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding Department}"
                        Foreground="#dddddd" TextWrapping="Wrap" Margin="6" FontSize="16"/>
 
-                <TextBlock Grid.Row="5" Grid.Column="1"
+                    <TextBlock Grid.Row="5" Grid.Column="1"
                        Grid.ColumnSpan="3" Text="{Binding Error}"
                        Padding="10"
                                        FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                                        Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
                                        TextWrapping="WrapWithOverflow"/>
-
-
-            </Grid>
-            <StackPanel VerticalAlignment="Center"
+                    <TextBlock Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3"
+                               Foreground="Gray" Margin="6" FontSize="12" TextAlignment="Left"
+                               >--- 在借册 ---</TextBlock>
+                    <local:EntityListControl x:Name="borrowedBooks"
+                        Grid.Row="7" Grid.Column="1"
+                        Grid.ColumnSpan="3"
+                     />
+                </Grid>
+                <StackPanel VerticalAlignment="Center"
                         Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfFalseConverter}}">
-                <TextBlock Name="startMessage" Text="请放好读者卡 ..."
+                    <TextBlock Name="startMessage" Text="请放好读者卡 ..."
                        Padding="10" VerticalAlignment="Center" HorizontalAlignment="Center"
                        TextAlignment="Center"
                        FontSize="30" FontWeight="Bold" Foreground="Gray" Background="Transparent"
                        
                        TextWrapping="WrapWithOverflow"/>
-                <Button Name="inputFace" Visibility="Collapsed"
+                    <Button Name="inputFace" Visibility="Collapsed"
                         Content="{StaticResource MyImage}"
                         Style="{StaticResource MaterialDesignFloatingActionLightButton}"
                         Margin="20,0,20,0" Padding="10,10,10,10" FontSize="20"
                         Click="InputFace_Click">
-                </Button>
-            </StackPanel>
-        </Grid>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Border>
 </UserControl>

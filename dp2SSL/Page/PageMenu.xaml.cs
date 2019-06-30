@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +21,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using DigitalPlatform.Text;
+using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -35,6 +39,29 @@ namespace dp2SSL
 
             this.Loaded += PageMenu_Loaded;
             this.DataContext = App.CurrentApp;
+
+            InitWallpaper();
+        }
+
+        void InitWallpaper()
+        {
+            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
+                "daily_wallpaper");
+            if (File.Exists(filename) == false)
+            {
+                filename = System.IO.Path.Combine(WpfClientInfo.UserDir, 
+                    "wallpapaer");
+                if (File.Exists(filename) == false)
+                    return;
+            }
+
+            BitmapImage bitmap = new BitmapImage(new Uri(filename));
+            /*
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+            bitmap.EndInit();
+            */
+            this.Background = new ImageBrush(bitmap);
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
@@ -83,6 +110,8 @@ namespace dp2SSL
             CellBackgroundChangeStory.RepeatBehavior = RepeatBehavior.Forever;
             CellBackgroundChangeStory.Begin();
 */
+
+            // var task = SetWallPaper();
         }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
@@ -135,8 +164,37 @@ namespace dp2SSL
             this.NavigationService.Navigate(new PageBorrow("registerFace"));
         }
 
+#if NO
+        // https://blog.csdn.net/m0_37682004/article/details/82314055
+        Task SetWallPaper()
+        {
+            return Task.Run(() =>
+            {
+                WebClient client = new WebClient();
+                byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
+                dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
+                string url = obj.images[0].url;
+                url = $"https://cn.bing.com{url}";
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(url, UriKind.Absolute);
+                    bitmap.EndInit();
+                    // backImage.ImageSource = bitmap;
+
+                    this.Background = new ImageBrush(bitmap);
+
+                    Thread.Sleep(1000);
+                    this.mask.Background = new SolidColorBrush(Colors.Transparent);
+                }));
+            });
+        }
+#endif
+
 #if REMOVED
-        #region 探测平板模式
+#region 探测平板模式
 
         [DllImport("user32.dll")]
         private static extern int GetSystemMetrics(int nIndex);
@@ -164,7 +222,7 @@ namespace dp2SSL
             return (state != 0);
         }
 
-        #endregion
+#endregion
 
 #endif
     }
