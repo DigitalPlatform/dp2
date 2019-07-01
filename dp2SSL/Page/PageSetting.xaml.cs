@@ -28,6 +28,19 @@ namespace dp2SSL
             this.DataContext = this;
 
             this.Loaded += PageSetting_Loaded;
+            this.Unloaded += PageSetting_Unloaded;
+        }
+
+        private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // 确保 page 关闭时对话框能自动关闭
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (var window in _dialogs)
+                {
+                    window.Close();
+                }
+            }));
         }
 
         private void PageSetting_Loaded(object sender, RoutedEventArgs e)
@@ -274,26 +287,83 @@ namespace dp2SSL
 
         private async void DownloadDailyWallpaper_Click(object sender, RoutedEventArgs e)
         {
-            string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
-            await DownloadBingWallPaper(filename);
+            this.downloadDailyWallpaper.IsEnabled = false;
+            try
+            {
+                string filename = Path.Combine(WpfClientInfo.UserDir, "daily_wallpaper");
+                await DownloadBingWallPaper(filename);
+            }
+            finally
+            {
+                this.downloadDailyWallpaper.IsEnabled = true;
+            }
         }
+
+        List<Window> _dialogs = new List<Window>();
 
         // https://blog.csdn.net/m0_37682004/article/details/82314055
         Task DownloadBingWallPaper(string filename)
         {
             return Task.Run(() =>
             {
-                WebClient client = new WebClient();
-                byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
-                dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
-                string url = obj.images[0].url;
-                url = $"https://cn.bing.com{url}";
-
-                client.DownloadFile(url, filename);
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                using (WebClient client = new WebClient())
                 {
-                    MessageBox.Show("下载完成");
-                }));
+
+                    ProgressWindow progress = null;
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress = new ProgressWindow();
+                        progress.MessageText = "正在下载 bing 壁纸，请稍候 ...";
+                        progress.Owner = Application.Current.MainWindow;
+                        progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        progress.Closed += (sender, e) =>
+                        {
+                            client.CancelAsync();
+                        };
+                        progress.Show();
+                    }));
+
+                    try
+                    {
+                        byte[] bytes = client.DownloadData("https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN");
+                        dynamic obj = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(bytes));
+                        string url = obj.images[0].url;
+                        url = $"https://cn.bing.com{url}";
+                        client.DownloadFile(url, filename);
+                        _dialogs.Add(progress);
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = "下载完成";
+                            progress.BackColor = "green";
+                            progress = null;
+                        }));
+                    }
+                    catch (Exception ex)
+                    {
+                        _dialogs.Add(progress);
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.MessageText = $"下载 bing 壁纸过程出现异常: {ExceptionUtil.GetExceptionText(ex)}";
+                            progress.BackColor = "red";
+                            progress = null;
+                        }));
+                    }
+                    finally
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            if (progress != null)
+                                progress.Close();
+                        }));
+                    }
+
+                    /*
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        MessageBox.Show(message);
+                    }));
+                    */
+                }
             });
         }
 

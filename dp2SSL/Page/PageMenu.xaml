@@ -33,20 +33,27 @@
         <Button 
                 Name="returnButton" Content="还书" Click="ReturnButton_Click"
                 Background="BlueViolet" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <TextBlock Name="message"
+                   Text="message" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="16"
+                   MouseDown="Message_MouseDown"
+                   Background="Transparent" Foreground="White"/>
         <Button  
                 Name="renewBotton" Content="续借" Click="RenewBotton_Click"
                 Background="CadetBlue" Foreground="White" FontSize="40" BorderThickness="0"/>
 
         <Button 
                 Name="registerFace" Content="注册人脸" Click="RegisterFace_Click"
-                Background="#FFA4AEB4" Foreground="White" FontSize="36" BorderThickness="0"/>
+                Background="#FFB1D21C" Foreground="Black" FontSize="36" BorderThickness="0"/>
 
         <Button 
             Name="config" Content="设置"  Click="Config_Click"
                 Background="#FF254276" Foreground="White" FontSize="40" BorderThickness="0"/>
-        <TextBlock Name="message"
-                   Text="message" TextAlignment="Center" MouseDown="Message_MouseDown"
-                   Background="#FF1450BB" Foreground="White"/>
+        <TextBlock Name="number"
+                   Text="{Binding Path=Number,Mode=OneWay}"
+                   TextAlignment="Center" FontSize="100"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Background="Transparent" Foreground="White"/>
         <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"
                 Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>

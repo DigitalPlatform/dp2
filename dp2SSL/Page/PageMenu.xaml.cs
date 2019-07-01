@@ -38,30 +38,10 @@ namespace dp2SSL
             this.ShowsNavigationUI = false;
 
             this.Loaded += PageMenu_Loaded;
+            this.Unloaded += PageMenu_Unloaded;
             this.DataContext = App.CurrentApp;
 
             InitWallpaper();
-        }
-
-        void InitWallpaper()
-        {
-            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
-                "daily_wallpaper");
-            if (File.Exists(filename) == false)
-            {
-                filename = System.IO.Path.Combine(WpfClientInfo.UserDir, 
-                    "wallpapaer");
-                if (File.Exists(filename) == false)
-                    return;
-            }
-
-            BitmapImage bitmap = new BitmapImage(new Uri(filename));
-            /*
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(filename, UriKind.Absolute);
-            bitmap.EndInit();
-            */
-            this.Background = new ImageBrush(bitmap);
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
@@ -112,7 +92,72 @@ namespace dp2SSL
 */
 
             // var task = SetWallPaper();
+
         }
+
+        private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
+        {
+            DeleteTempFiles();
+        }
+
+        #region Wallpaper & tempo files
+
+        List<string> _temp_filenames = new List<string>();
+
+        void InitWallpaper()
+        {
+            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
+                "daily_wallpaper");
+            if (File.Exists(filename) == false)
+            {
+                filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
+                    "wallpapaer");
+                if (File.Exists(filename) == false)
+                    return;
+            }
+
+            // 复制到一个临时文件
+            string temp_filename = System.IO.Path.Combine(WpfClientInfo.UserTempDir, "~" + Guid.NewGuid().ToString());
+            File.Copy(filename, temp_filename, true);
+            _temp_filenames.Add(temp_filename);
+
+            BitmapImage bitmap = new BitmapImage(new Uri(temp_filename));
+            /*
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+            bitmap.EndInit();
+            */
+            this.Background = new ImageBrush(bitmap);
+        }
+
+        void DeleteTempFiles()
+        {
+            foreach (string filename in _temp_filenames)
+            {
+                try
+                {
+                    File.Delete(filename);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        #endregion
+
+#if NO
+        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        {
+            string text = e.Result?.Results?.Count.ToString();
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                if (this.number.Text != text)
+                    this.number.Text = text;
+            }));
+        }
+#endif
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
