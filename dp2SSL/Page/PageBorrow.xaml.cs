@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define OLD_RFID
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -373,6 +374,24 @@ namespace dp2SSL
             MessageBox.Show(Message);
         }
 #endif
+        List<Window> _dialogs = new List<Window>();
+
+        void CloseDialogs()
+        {
+            // 确保 page 关闭时对话框能自动关闭
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (var window in _dialogs)
+                {
+                    window.Close();
+                }
+            }));
+        }
+
+        void MemoryDialog(Window dialog)
+        {
+            _dialogs.Add(dialog);
+        }
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -401,6 +420,9 @@ namespace dp2SSL
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
+
+            // 确保 page 关闭时对话框能自动关闭
+            CloseDialogs();
         }
 
         bool _visiblityChanged = false;
@@ -520,6 +542,8 @@ namespace dp2SSL
             }
         }
 
+#if OLD_RFID
+
         // uid --> TagInfo
         Hashtable _tagTable = new Hashtable();
 
@@ -555,6 +579,8 @@ namespace dp2SSL
 
             return new GetTagInfoResult { TagInfo = info };
         }
+
+#endif
 
         // 清除图书列表
         void ClearBookList()
@@ -679,6 +705,13 @@ namespace dp2SSL
                         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
                         && _patron.IsFingerprintSource)
                         _patron.Clear();
+
+                    // 2019/7/1
+                    // 当读卡器上的图书全部拿走时候，自动关闭残留的模式对话框
+                    if (_entities.Count == 0
+    && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
+    )
+                        CloseDialogs();
                 }
 
                 // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
@@ -891,6 +924,7 @@ namespace dp2SSL
                 this.patronControl.SetBorrowed(result.ReaderXml);
             }));
 
+            // 显示在借图书列表
             BaseChannel<IRfid> channel = RfidManager.GetChannel();
             try
             {
@@ -1353,12 +1387,15 @@ out string strError);
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"读卡器上的当前读者卡状态不正确。无法进行{action_name}操作";
 
+                DisplayError(ref progress, check_message);
+                /*
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    progress.MessageText = check_message;
+                    progress.MessageText = ;
                     progress.BackColor = "red";
                     progress = null;
                 }));
+                */
                 return;
             }
 
@@ -1367,12 +1404,17 @@ out string strError);
             {
                 if (string.IsNullOrEmpty(_patron.Barcode))
                 {
+                    DisplayError(ref progress, $"请先在读卡器上放好读者卡，再进行{action_name}");
+
+                    /*
+                    MemoryDialog(progress);
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         progress.MessageText = $"请先在读卡器上放好读者卡，再进行{action_name}";
                         progress.BackColor = "red";
                         progress = null;
                     }));
+                    */
                     return;
                 }
             }
@@ -1537,6 +1579,11 @@ out string strError);
                         message += $"，成功 {success_count} 笔";
                     if (skip_count > 0)
                         message += $" (另有 {skip_count} 笔被忽略)";
+
+                    DisplayError(ref progress, message);
+
+                    /*
+                    MemoryDialog(progress);
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         progress.MessageText = message;
@@ -1545,6 +1592,7 @@ out string strError);
                         progress.BackColor = "red";
                         progress = null;
                     }));
+                    */
                     return; // new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, "; ") };
                 }
                 else
@@ -1559,12 +1607,23 @@ out string strError);
                         backColor = "yellow";
                         message = $"全部 {skip_count} 笔{action_name}操作被忽略";
                     }
+
+                    DisplayError(ref progress, message, backColor);
+
+                    /*
+                    MemoryDialog(progress);
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         progress.MessageText = message;
                         progress.BackColor = backColor;
                         progress = null;
                     }));
+                    */
+
+                    // 重新装载读者信息和显示
+                    var task = FillPatronDetail(true);
+
+                    App.CurrentApp.Speak($"{action_name}完成");
                 }
 
                 return; // new NormalResult { Value = success_count };
@@ -1839,8 +1898,7 @@ out string strError);
                     if (string.IsNullOrEmpty(check_message))
                         check_message = $"读卡器上的当前读者卡状态不正确。无法进行注册人脸操作";
 
-                    DisplayError(videoRegister, check_message, "yellow");
-                    videoRegister = null;
+                    DisplayError(ref videoRegister, check_message, "yellow");
                     return;
                 }
 
@@ -1855,15 +1913,13 @@ out string strError);
                     result = await GetFeatureString("returnImage,countDown,format:jpeg");
                     if (result.Value == -1)
                     {
-                        DisplayError(videoRegister, result.ErrorInfo);
-                        videoRegister = null;
+                        DisplayError(ref videoRegister, result.ErrorInfo);
                         return;
                     }
 
                     if (result.Value == 0)
                     {
-                        DisplayError(videoRegister, result.ErrorInfo);
-                        videoRegister = null;
+                        DisplayError(ref videoRegister, result.ErrorInfo);
                         return;
                     }
 
@@ -1898,8 +1954,7 @@ out string strError);
                     _patron.Timestamp);
                 if (save_result.Value == -1)
                 {
-                    DisplayError(videoRegister, save_result.ErrorInfo);
-                    videoRegister = null;
+                    DisplayError(ref videoRegister, save_result.ErrorInfo);
                     return;
                 }
 
@@ -1920,8 +1975,8 @@ out string strError);
         result.ImageData);
                 if (upload_result.Value == -1)
                 {
-                    DisplayError(videoRegister, $"上传头像文件失败: {upload_result.ErrorInfo}");
-                    videoRegister = null;
+                    DisplayError(ref videoRegister,
+                        $"上传头像文件失败: {upload_result.ErrorInfo}");
                     return;
                 }
 
@@ -1950,20 +2005,39 @@ out string strError);
             };
             SetPatronInfo(message);
             */
+            // 刷新读者信息区显示
             var temp_task = FillPatronDetail(true);
         }
 
-        static void DisplayError(VideoWindow videoRegister,
+        void DisplayError(ref ProgressWindow progress,
+    string message,
+    string color = "red")
+        {
+            MemoryDialog(progress);
+            var temp = progress;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                temp.MessageText = message;
+                temp.BackColor = color;
+                temp = null;
+            }));
+            progress = null;
+        }
+
+        void DisplayError(ref VideoWindow videoRegister,
             string message,
             string color = "red")
         {
+            MemoryDialog(videoRegister);
+            var temp = videoRegister;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                videoRegister.MessageText = message;
-                videoRegister.BackColor = color;
-                videoRegister.okButton.Content = "返回";
-                videoRegister = null;
+                temp.MessageText = message;
+                temp.BackColor = color;
+                temp.okButton.Content = "返回";
+                temp = null;
             }));
+            videoRegister = null;
         }
 
         Task<NormalResult> UploadObject(

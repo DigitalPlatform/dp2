@@ -57,9 +57,24 @@ namespace dp2SSL
             }
         }
 
+        private string _number = null;
+
+        public string Number
+        {
+            get => _number;
+            set
+            {
+                if (_number != value)
+                {
+                    _number = value;
+                    OnPropertyChanged("Number");
+                }
+            }
+        }
+
         #endregion
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected async override void OnStartup(StartupEventArgs e)
         {
             bool aIsNewInstance = false;
             myMutex = new Mutex(true, "{75BAF3F0-FF7F-46BB-9ACD-8FE7429BF291}", out aIsNewInstance);
@@ -95,7 +110,7 @@ namespace dp2SSL
             // InitialFingerPrint();
 
             // 后台自动检查更新
-            Task.Run(() =>
+            var task = Task.Run(() =>
             {
                 NormalResult result = WpfClientInfo.InstallUpdateSync();
                 if (result.Value == -1)
@@ -125,10 +140,30 @@ namespace dp2SSL
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.Start(_cancelRefresh.Token);
 
+            RfidManager.ListTags += RfidManager_ListTags;
+
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = App.FaceUrl;
             FaceManager.SetError += FaceManager_SetError;
             FaceManager.Start(_cancelRefresh.Token);
+
+            // 自动删除以前残留在 UserDir 中的全部临时文件
+            // 用 await 是需要删除完以后再返回，这样才能让后面的 PageMenu 页面开始使用临时文件目录
+            await Task.Run(()=> {
+                DeleteLastTempFiles();
+            });
+        }
+
+        void DeleteLastTempFiles()
+        {
+            try
+            {
+                PathUtil.ClearDir(WpfClientInfo.UserTempDir);
+            }
+            catch (Exception ex)
+            {
+                this.AddErrors("global", new List<string> { $"清除上次遗留的临时文件时出现异常: {ex.Message}" });
+            }
         }
 
         private void FaceManager_SetError(object sender, SetErrorEventArgs e)
@@ -450,6 +485,11 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
             // _errors.Clear();
             _errorTable.SetError(type, "");
+        }
+
+        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        {
+            this.Number = e.Result?.Results?.Count.ToString();
         }
     }
 }
