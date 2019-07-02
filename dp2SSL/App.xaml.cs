@@ -14,7 +14,9 @@ using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using dp2SSL.Models;
 
 namespace dp2SSL
 {
@@ -149,7 +151,8 @@ namespace dp2SSL
 
             // 自动删除以前残留在 UserDir 中的全部临时文件
             // 用 await 是需要删除完以后再返回，这样才能让后面的 PageMenu 页面开始使用临时文件目录
-            await Task.Run(()=> {
+            await Task.Run(() =>
+            {
                 DeleteLastTempFiles();
             });
         }
@@ -487,9 +490,51 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             _errorTable.SetError(type, "");
         }
 
+        public event TagChangedEventHandler TagChanged = null;
+        public event SetErrorEventHandler TagSetError = null;
+
         private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
-            this.Number = e.Result?.Results?.Count.ToString();
+            // 标签总数显示
+            // this.Number = e.Result?.Results?.Count.ToString();
+
+            TagList.Refresh(sender as BaseChannel<IRfid>, e.Result.Results,
+                    (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
+                    {
+                        TagChanged?.Invoke(sender, new TagChangedEventArgs
+                        {
+                            AddBooks = add_books,
+                            UpdateBooks = update_books,
+                            RemoveBooks = remove_books,
+                            AddPatrons = add_patrons,
+                            UpdatePatrons = update_patrons,
+                            RemovePatrons = remove_patrons
+                        });
+                    },
+                    (type, text) =>
+                    {
+                        TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                    });
+
+            // 标签总数显示 图书+读者卡
+            this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
         }
+    }
+
+    public delegate void TagChangedEventHandler(object sender,
+TagChangedEventArgs e);
+
+    /// <summary>
+    /// 设置标签变化事件的参数
+    /// </summary>
+    public class TagChangedEventArgs : EventArgs
+    {
+        public List<TagAndData> AddBooks { get; set; }
+        public List<TagAndData> UpdateBooks { get; set; }
+        public List<TagAndData> RemoveBooks { get; set; }
+
+        public List<TagAndData> AddPatrons { get; set; }
+        public List<TagAndData> UpdatePatrons { get; set; }
+        public List<TagAndData> RemovePatrons { get; set; }
     }
 }

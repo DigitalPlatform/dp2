@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+
+using dp2SSL.Models;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
@@ -16,6 +19,118 @@ namespace dp2SSL
     public class EntityCollection : ObservableCollection<Entity>
     {
         public string Style { get; set; }
+
+        public void Remove(string uid)
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (uid == this[i].UID)
+                {
+                    this.RemoveAt(i);
+                    return;
+                }
+            }
+        }
+
+        Entity FindEntity(string uid)
+        {
+            foreach (Entity entity in this)
+            {
+                if (entity.UID == uid)
+                    return entity;
+            }
+            return null;
+        }
+
+        // 修改一个 entity 中和 EAS 有关的内存数据
+        public bool SetEasData(string uid, bool enable)
+        {
+            Entity entity = FindEntity(uid);
+            if (entity == null)
+                return false;
+            return entity.SetEasData(enable);
+        }
+
+        public Entity Add(TagAndData data, bool auto_update = true)
+        {
+            // 查重
+            Entity entity = FindEntity(data.OneTag.UID);
+            if (entity != null)
+            {
+                if (auto_update)
+                    Update(data);
+                return entity;
+            }
+
+            entity = new Entity
+            {
+                Container = this,
+                UID = data.OneTag.UID,
+                TagInfo = data.OneTag.TagInfo
+            };
+            this.Add(entity);
+
+            SetPII(entity);
+
+            entity.SetError(data.Error);
+            return entity;
+        }
+
+        // 更新一个事项内容
+        // return:
+        //      null 没有找到
+        //      其他    找到并更新了
+        public Entity Update(TagAndData data, bool auto_add = true)
+        {
+            Entity entity = FindEntity(data.OneTag.UID);
+            if (entity == null)
+            {
+                if (auto_add)
+                    return Add(data, false);
+                return null;
+            }
+            if (data.OneTag != null
+                && data.OneTag.TagInfo != null
+                    && entity.TagInfo == null)
+            {
+                entity.TagInfo = data.OneTag.TagInfo;
+            }
+            else if (data.OneTag != null
+                && data.OneTag?.TagInfo == null && entity.TagInfo != null)
+            {
+                entity.TagInfo = null;
+                entity.PII = null;
+                entity.FillFinished = false;
+            }
+
+            SetPII(entity);
+            // 如何触发下一步的获取和显示?
+
+            entity.SetError(data.Error);
+            return entity;
+        }
+
+        static void SetPII(Entity entity)
+        {
+            // 刷新 PII
+            if (string.IsNullOrEmpty(entity.PII)
+                && entity.TagInfo != null)
+            {
+                string pii = "";
+
+                LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
+    (int)entity.TagInfo.BlockSize,
+    "" // tag.TagInfo.LockStatus
+    );
+                pii = chip.FindElement(ElementOID.PII)?.Text;
+                entity.PII = pii;
+            }
+            else if (string.IsNullOrEmpty(entity.PII) == false
+                && entity.TagInfo == null)
+            {
+                entity.PII = null;  // 2019/7/2
+            }
+        }
 
         // 第一阶段：填充 UID 和 PII
         // parameters:
@@ -239,6 +354,15 @@ namespace dp2SSL
                 return "";
             // TODO: 还可以优化为 (今天) 之类的简略说法
             return DateTimeUtil.FromRfc1123DateTimeString(strTime).ToLocalTime().ToString("d");
+        }
+
+        // 修改内存中和 EAS 有关的状态
+        public bool SetEasData(bool enable)
+        {
+            if (this.TagInfo == null)
+                return false;
+            TagList.SetTagInfoEAS(this.TagInfo, enable);
+            return true;
         }
     }
 

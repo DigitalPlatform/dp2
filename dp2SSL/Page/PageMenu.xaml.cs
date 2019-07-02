@@ -61,7 +61,7 @@ namespace dp2SSL
                 //window.Height = SystemParameters.VirtualScreenHeight;
             }
 
-            this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
+            this.message.Text = $"dp2SSL 版本号(测试版):\r\n{WpfClientInfo.ClientVersion}";
 
             if (string.IsNullOrEmpty(App.FaceUrl))
                 this.registerFace.Visibility = Visibility.Hidden;
@@ -111,7 +111,7 @@ namespace dp2SSL
             if (File.Exists(filename) == false)
             {
                 filename = System.IO.Path.Combine(WpfClientInfo.UserDir,
-                    "wallpapaer");
+                    "wallpaper");
                 if (File.Exists(filename) == false)
                     return;
             }
@@ -121,13 +121,15 @@ namespace dp2SSL
             File.Copy(filename, temp_filename, true);
             _temp_filenames.Add(temp_filename);
 
-            BitmapImage bitmap = new BitmapImage(new Uri(temp_filename));
-            /*
+            BitmapImage bitmap = new BitmapImage();
             bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
             bitmap.UriSource = new Uri(filename, UriKind.Absolute);
             bitmap.EndInit();
-            */
-            this.Background = new ImageBrush(bitmap);
+
+            var brush = new ImageBrush(bitmap);
+            brush.Stretch = Stretch.UniformToFill;
+            this.Background = brush;
         }
 
         void DeleteTempFiles()

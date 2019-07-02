@@ -1,5 +1,4 @@
-﻿#define OLD_RFID
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,6 +13,7 @@ using System.Xml;
 using System.Windows.Media;
 
 using dp2SSL.Dialog;
+using dp2SSL.Models;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -82,10 +82,12 @@ namespace dp2SSL
             VideoWindow videoRecognition = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                videoRecognition = new VideoWindow();
-                videoRecognition.TitleText = "识别人脸 ...";
-                videoRecognition.Owner = Application.Current.MainWindow;
-                videoRecognition.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                videoRecognition = new VideoWindow
+                {
+                    TitleText = "识别人脸 ...",
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 videoRecognition.Closed += VideoRecognition_Closed;
                 videoRecognition.Show();
             }));
@@ -183,13 +185,17 @@ namespace dp2SSL
             }
         }
 
-        private void PageBorrow_Loaded(object sender, RoutedEventArgs e)
+        private async void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
+#if OLD_RFID
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
+#endif
+            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            App.CurrentApp.TagSetError += CurrentApp_TagSetError;
 
             RfidManager.GetState("clearCache");
             // 处理以前积累的 tags
@@ -213,8 +219,171 @@ namespace dp2SSL
                     style.Add("face");
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
+
+            await InitialEntities();
         }
 
+        private void CurrentApp_TagSetError(object sender, SetErrorEventArgs e)
+        {
+            this.SetGlobalError("rfid", e.Error);
+        }
+
+        private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
+        {
+            await ChangeEntities((BaseChannel<IRfid>)sender, e);
+        }
+
+        // 跟随事件动态更新列表
+        async Task ChangeEntities(BaseChannel<IRfid> channel,
+            TagChangedEventArgs e)
+        {
+            // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
+            RefreshPatrons();
+
+            bool changed = false;
+            List<Entity> update_entities = new List<Entity>();
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                if (e.AddBooks != null)
+                    foreach (var tag in e.AddBooks)
+                    {
+                        var entity = _entities.Add(tag);
+                        update_entities.Add(entity);
+                    }
+                if (e.RemoveBooks != null)
+                    foreach (var tag in e.RemoveBooks)
+                    {
+                        _entities.Remove(tag.OneTag.UID);
+                        changed = true;
+                    }
+                if (e.UpdateBooks != null)
+                    foreach (var tag in e.UpdateBooks)
+                    {
+                        var entity = _entities.Update(tag);
+                        if (entity != null)
+                            update_entities.Add(entity);
+                    }
+            }));
+
+            if (update_entities.Count > 0)
+            {
+                await FillBookFields(channel, update_entities);
+
+                // 自动检查 EAS 状态
+                CheckEAS(update_entities);
+            }
+            else if (changed)
+            {
+                // 修改 borrowable
+                booksControl.SetBorrowable();
+            }
+
+            if (update_entities.Count > 0)
+                changed = true;
+
+            {
+                if (_entities.Count == 0
+        && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
+        && _patron.IsFingerprintSource)
+                    _patron.Clear();
+
+                // 2019/7/1
+                // 当读卡器上的图书全部拿走时候，自动关闭残留的模式对话框
+                if (_entities.Count == 0
+    && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
+    )
+                    CloseDialogs();
+
+                // 当列表为空的时候，主动清空一次 tag 缓存。这样读者可以用拿走全部标签一次的方法来迫使清除缓存(比如中途利用内务修改过 RFID 标签的 EAS)
+                // TODO: 不过此举对反复拿放图书的响应速度有一定影响。后面也可以考虑继续改进(比如设立一个专门的清除缓存按钮，这里就不要清除缓存了)
+                if (_entities.Count == 0 && TagList.TagTableCount > 0)
+                    TagList.ClearTagTable(null);
+            }
+        }
+
+        // 首次初始化 Entity 列表
+        async Task<NormalResult> InitialEntities()
+        {
+            var books = TagList.Books;
+            if (books.Count > 0)
+            {
+                List<Entity> update_entities = new List<Entity>();
+
+                foreach (var tag in books)
+                {
+                    var entity = _entities.Add(tag);
+                    update_entities.Add(entity);
+                }
+
+                if (update_entities.Count > 0)
+                {
+                    try
+                    {
+                        BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                        try
+                        {
+                            await FillBookFields(channel, update_entities);
+                        }
+                        finally
+                        {
+                            RfidManager.ReturnChannel(channel);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        string error = $"填充图书信息时出现异常: {ex.Message}";
+                        SetGlobalError("rfid", error);
+                        return new NormalResult { Value = -1, ErrorInfo = error };
+                    }
+
+                    // 自动检查 EAS 状态
+                    CheckEAS(update_entities);
+                }
+            }
+
+            RefreshPatrons();
+            return new NormalResult();
+        }
+
+
+        void RefreshPatrons()
+        {
+            var patrons = TagList.Patrons;
+            if (patrons.Count == 1)
+                _patron.IsRfidSource = true;
+
+            if (_patron.IsFingerprintSource)
+            {
+                // 指纹仪来源
+            }
+            else
+            {
+                // RFID 来源
+                if (patrons.Count == 1)
+                {
+                    _patron.Fill(patrons[0].OneTag);
+                    SetPatronError("rfid_multi", "");   // 2019/5/22
+
+                    // 2019/5/29
+                    var task = FillPatronDetail();
+                }
+                else
+                {
+                    _patron.Clear();
+                    SetPatronError("getreaderinfo", "");
+                    if (patrons.Count > 1)
+                    {
+                        // 读卡器上放了多张读者卡
+                        SetPatronError("rfid_multi", $"读卡器上放了多张读者卡({patrons.Count})。请拿走多余的");
+                    }
+                    else
+                        SetPatronError("rfid_multi", "");   // 2019/5/20
+                }
+            }
+
+        }
+
+#if OLD_RFID
         private async void RfidManager_ListTags(object sender, ListTagsEventArgs e)
         {
             await Refresh(sender as BaseChannel<IRfid>, e.Result);
@@ -243,6 +412,7 @@ namespace dp2SSL
                 _rfidState = "error";
             }
         }
+#endif
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
         {
@@ -415,8 +585,12 @@ namespace dp2SSL
             if (_timer != null)
                 _timer.Dispose();
 
+#if OLD_RFID
             RfidManager.SetError -= RfidManager_SetError;
             RfidManager.ListTags -= RfidManager_ListTags;
+#endif
+            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            App.CurrentApp.TagSetError -= CurrentApp_TagSetError;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
@@ -476,17 +650,6 @@ namespace dp2SSL
         }
 
         // CancellationTokenSource _cancelRefresh = null;
-
-#if NO
-        void timerCallback(object o)
-        {
-            // 避免重叠启动
-            if (_cancelRefresh != null)
-                return;
-
-            Refresh();
-        }
-#endif
 
         public string ActionButtons
         {
@@ -597,7 +760,7 @@ namespace dp2SSL
             try
             {
                 ClearBookList();
-                await FillBookFields(channel, _entities);
+                await FillBookFields(channel, new List<Entity>());
             }
             catch (Exception ex)
             {
@@ -606,12 +769,13 @@ namespace dp2SSL
             _patron.Clear();
         }
 
-        ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
-        object _sync_refresh = new object();
+        //ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        //object _sync_refresh = new object();
         int _inRefresh = 0;
 
         string _rfidState = "ok";   // ok/error
 
+#if OLD_RFID
         async Task Refresh(BaseChannel<IRfid> channel, ListTagsResult result)
         {
             Debug.Assert(channel != null, "");
@@ -767,6 +931,7 @@ namespace dp2SSL
                 // Interlocked.Decrement(ref this._inRefresh);
             }
         }
+#endif
 
         // 检查芯片的 EAS 状态
         void CheckEAS(List<Entity> entities)
@@ -866,7 +1031,7 @@ namespace dp2SSL
         }
 #endif
         // 填充读者信息的其他字段(第二阶段)
-        async Task FillPatronDetail(bool force = false)
+        async Task<NormalResult> FillPatronDetail(bool force = false)
         {
 #if NO
             if (_cancelRefresh == null
@@ -887,14 +1052,14 @@ namespace dp2SSL
             // 已经填充过了
             if (_patron.PatronName != null
                 && force == false)
-                return;
+                return new NormalResult();
 
             string pii = _patron.PII;
             if (string.IsNullOrEmpty(pii))
                 pii = _patron.UID;
 
             if (string.IsNullOrEmpty(pii))
-                return;
+                return new NormalResult();
 
             // TODO: 改造为 await
             // return.Value:
@@ -909,8 +1074,9 @@ namespace dp2SSL
 
             if (result.Value != 1)
             {
-                SetPatronError("getreaderinfo", $"读者 '{pii}': {result.ErrorInfo}");
-                return;
+                string error = $"读者 '{pii}': {result.ErrorInfo}";
+                SetPatronError("getreaderinfo", error);
+                return new NormalResult { Value = -1, ErrorInfo = error };
             }
 
             SetPatronError("getreaderinfo", "");
@@ -925,14 +1091,31 @@ namespace dp2SSL
             }));
 
             // 显示在借图书列表
-            BaseChannel<IRfid> channel = RfidManager.GetChannel();
-            try
+            List<Entity> entities = new List<Entity>();
+            foreach (Entity entity in this.patronControl.BorrowedEntities)
             {
-                await FillBookFields(channel, this.patronControl.BorrowedEntities);
+                entities.Add(entity);
             }
-            finally
+            if (entities.Count > 0)
             {
-                RfidManager.ReturnChannel(channel);
+                try
+                {
+                    BaseChannel<IRfid> channel = RfidManager.GetChannel();
+                    try
+                    {
+                        await FillBookFields(channel, entities);
+                    }
+                    finally
+                    {
+                        RfidManager.ReturnChannel(channel);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    string error = $"填充读者信息时出现异常: {ex.Message}";
+                    SetGlobalError("rfid", error);
+                    return new NormalResult { Value = -1, ErrorInfo = error };
+                }
             }
 #if NO
             // 装载图象
@@ -943,6 +1126,7 @@ namespace dp2SSL
                 });
             }
 #endif
+            return new NormalResult();
         }
 
         void LoadPhoto(string photo_path)
@@ -993,7 +1177,7 @@ namespace dp2SSL
 
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         async Task FillBookFields(BaseChannel<IRfid> channel,
-            EntityCollection entities)
+            List<Entity> entities)
         {
 #if NO
             RfidChannel channel = RFID.StartRfidChannel(App.RfidUrl,
@@ -1005,9 +1189,11 @@ out string strError);
             {
                 foreach (Entity entity in entities)
                 {
+                    /*
                     if (_cancel == null
                         || _cancel.IsCancellationRequested)
                         return;
+                        */
 
                     if (entity.FillFinished == true)
                         continue;
@@ -1016,9 +1202,12 @@ out string strError);
                     //    continue;
 
                     // 获得 PII
-                    // 注：如果 PII 为空，文字重要填入 "(空)"
+                    // 注：如果 PII 为空，文字中要填入 "(空)"
                     if (string.IsNullOrEmpty(entity.PII))
                     {
+                        if (entity.TagInfo == null)
+                            continue;
+#if OLD_RFID
                         if (entity.TagInfo == null && channel != null)
                         {
                             // var result = channel.Object.GetTagInfo("*", entity.UID);
@@ -1033,6 +1222,7 @@ out string strError);
 
                             entity.TagInfo = result.TagInfo;
                         }
+#endif
 
                         Debug.Assert(entity.TagInfo != null);
 
@@ -1648,8 +1838,17 @@ out string strError);
         {
             try
             {
+#if OLD_RFID
                 this.ClearTagTable(uid);
-                return RfidManager.SetEAS($"{uid}", enable);
+#endif
+                // TagList.ClearTagTable(uid);
+                var result = RfidManager.SetEAS($"{uid}", enable);
+                if (result.Value != -1)
+                {
+                    TagList.SetEasData(uid, enable);
+                    _entities.SetEasData(uid, enable);
+                }
+                return result;
             }
             catch (Exception ex)
             {

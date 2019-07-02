@@ -1939,6 +1939,8 @@ namespace RfidDrivers.First
         // parameters:
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
+        // exception:
+        //      可能会抛出 System.AccessViolationException 异常
         public InventoryResult Inventory(string reader_name, string style)
         {
             Lock();
@@ -2173,6 +2175,8 @@ namespace RfidDrivers.First
         //      result.Value    -1 出错
         //      result.Value    0   没有找到指定的标签
         //      result.Value    1   找到了。result.UID 和 result.ReaderName 里面有返回值
+        // exception:
+        //      可能会抛出 System.AccessViolationException 异常
         public FindTagResult FindTagByPII(
             string reader_name,
             string pii)
@@ -3124,6 +3128,8 @@ namespace RfidDrivers.First
         // parameters:
         //      AIType  RFIDLIB.rfidlib_def.AI_TYPE_NEW / RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE
         //      AntinnaSel  从 1 开始？
+        // exception:
+        //      可能会抛出 System.AccessViolationException 异常
         public int tag_inventory(
             UIntPtr hreader,
             string protocols,
@@ -3152,6 +3158,7 @@ namespace RfidDrivers.First
             }
             nTagCount = 0;
             LABEL_TAG_INVENTORY:
+            // 可能会抛出 System.AccessViolationException 异常
             iret = RFIDLIB.rfidlib_reader.RDR_TagInventory(hreader, AIType, AntennaSelCount, AntennaSel, InvenParamSpecList);
             RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);
             if (iret == 0 || iret == -21)
