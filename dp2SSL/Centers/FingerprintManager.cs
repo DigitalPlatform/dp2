@@ -146,7 +146,9 @@ token);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        Error = RfidManager.IsNotResponse(ex)
+                        ? $"指纹中心({Base.Url})没有响应"
+                        : $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }

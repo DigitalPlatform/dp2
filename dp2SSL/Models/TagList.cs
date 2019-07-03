@@ -106,6 +106,8 @@ namespace dp2SSL.Models
         public delegate void delegate_setError(string type, string error);
 
         // TODO: 维持一个 UID --> typeOfUsage 的对照表，加快对图书和读者类型标签的分离判断过程
+        // UID --> typeOfUsage string
+        static Hashtable _typeTable = new Hashtable();
 
         public static void Refresh(BaseChannel<IRfid> channel,
             List<OneTag> list,
@@ -154,9 +156,20 @@ namespace dp2SSL.Models
                 }
                 else
                 {
-                    // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
-                    book = new TagAndData { OneTag = tag };
-                    new_books.Add(book);
+                    // 根据缓存的 typeOfUsage 来判断
+                    string typeOfUsage = (string)_typeTable[tag.UID];
+                    if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                    {
+                        patron = new TagAndData { OneTag = tag, Type = "patron" };
+                        new_patrons.Add(patron);
+                        found_books.Remove(patron);
+                    }
+                    else
+                    {
+                        // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
+                        book = new TagAndData { OneTag = tag };
+                        new_books.Add(book);
+                    }
                 }
             }
 
@@ -181,7 +194,8 @@ namespace dp2SSL.Models
             {
                 foreach (TagAndData book in new_books)
                 {
-                    _books.Add(book);
+                    if (_books.IndexOf(book) == -1)
+                        _books.Add(book);
                 }
                 // 兑现删除
                 foreach (TagAndData book in remove_books)
@@ -194,7 +208,8 @@ namespace dp2SSL.Models
             {
                 foreach (TagAndData patron in new_patrons)
                 {
-                    _patrons.Add(patron);
+                    if (_patrons.IndexOf(patron) == -1)
+                        _patrons.Add(patron);
                 }
                 foreach (TagAndData patron in remove_patrons)
                 {
@@ -212,6 +227,7 @@ namespace dp2SSL.Models
 
             List<TagAndData> news = new List<TagAndData>();
             news.AddRange(_books);
+            news.AddRange(new_patrons);
 
             new_books = new List<TagAndData>();
             remove_books = new List<TagAndData>();
@@ -229,6 +245,8 @@ namespace dp2SSL.Models
                     if (tag == null)
                         continue;
                     if (tag.TagInfo != null && data.Error == null)
+                        continue;
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
                         continue;
                     {
                         var gettaginfo_result = GetTagInfo(channel, tag.UID);
@@ -266,22 +284,34 @@ namespace dp2SSL.Models
     (int)info.BlockSize,
     "");
 
-                        // 分离 ISO15693 图书标签和读者卡标签
                         string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+
+                        // 分离 ISO15693 图书标签和读者卡标签
+                        if (string.IsNullOrEmpty(data.Type))
                         {
-                            // 需要调整到 _patrons 中
-                            data.Type = "patron";
-                            // 删除列表? 同时添加列表
-                            remove_books.Add(data);
-                            update_books.Remove(data);  // 容错
-                            new_patrons.Add(data);
-                        }
-                        else
-                        {
-                            data.Type = "book";
-                            update_books.Add(data);
-                            update_patrons.Remove(data);
+                            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                            {
+                                // 需要调整到 _patrons 中
+                                data.Type = "patron";
+                                // 删除列表? 同时添加列表
+                                remove_books.Add(data);
+                                update_books.Remove(data);  // 容错
+                                new_patrons.Add(data);
+                            }
+                            else
+                            {
+                                data.Type = "book";
+                                update_books.Add(data);
+                                update_patrons.Remove(data);
+                            }
+
+                            // 保存到缓存
+                            if (typeOfUsage != null)
+                            {
+                                if (_typeTable.Count > 1000)
+                                    _typeTable.Clear();
+                                _typeTable[data.OneTag.UID] = typeOfUsage;
+                            }
                         }
                     }
                 } // end of foreach

@@ -60,6 +60,11 @@ namespace dp2SSL
             }
         }
 
+        public static void TriggerSetError(object sender, SetErrorEventArgs e)
+        {
+            Base.TriggerSetError(sender, e);
+        }
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -105,6 +110,7 @@ null);
                     // 先记忆
                     _lastTags = result.Results;
 
+                    // 注意 result.Value == -1 时也会触发这个事件
                     ListTags(channel, new ListTagsEventArgs
                     {
                         Result = result
@@ -228,10 +234,31 @@ null);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetExceptionText(ex)}"
+                        Error = IsNotResponse(ex) ? $"RFID 中心({Base.Url})没有响应"
+                        : $"RFID 中心出现异常: {ExceptionUtil.GetExceptionText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
+        }
+
+        public static bool IsNotResponse(Exception ex)
+        {
+            if (ex == null)
+                return false;
+
+            if (_isNotResponse(ex))
+                return true;
+            if (ex.InnerException != null && _isNotResponse(ex.InnerException))
+                return true;
+            return false;
+        }
+
+        static bool _isNotResponse(Exception ex)
+        {
+            if (ex is NotResponseException)
+                return true;
+
+            return (ex is RemotingException && (uint)ex.HResult == 0x8013150b);
         }
 
         public static NormalResult GetState(string style)
@@ -274,7 +301,7 @@ null);
     }
 
     public delegate void ListTagsEventHandler(object sender,
-ListTagsEventArgs e);
+    ListTagsEventArgs e);
 
     /// <summary>
     ///列出标签事件的参数

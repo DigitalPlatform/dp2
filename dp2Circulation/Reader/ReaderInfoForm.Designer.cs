@@ -341,8 +341,8 @@
             this.toolStripSeparator5,
             this.toolStripButton_addFriends,
             this.toolStripButton_clearOutofReservationCount,
-            this.toolStripSeparator2,
-            this.toolStripDropDownButton_otherFunc});
+            this.toolStripDropDownButton_otherFunc,
+            this.toolStripSeparator2});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 490);
             this.toolStrip1.Name = "toolStrip1";
@@ -436,8 +436,8 @@
             // ToolStripMenuItem_pasteCardPhoto
             // 
             this.ToolStripMenuItem_pasteCardPhoto.Name = "ToolStripMenuItem_pasteCardPhoto";
-            this.ToolStripMenuItem_pasteCardPhoto.Size = new System.Drawing.Size(266, 30);
-            this.ToolStripMenuItem_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照";
+            this.ToolStripMenuItem_pasteCardPhoto.Size = new System.Drawing.Size(440, 30);
+            this.ToolStripMenuItem_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照(注：和人脸识别无关)";
             this.ToolStripMenuItem_pasteCardPhoto.Click += new System.EventHandler(this.ToolStripMenuItem_pasteCardPhoto_Click);
             // 
             // toolStripButton_pasteCardPhoto
@@ -448,6 +448,7 @@
             this.toolStripButton_pasteCardPhoto.Name = "toolStripButton_pasteCardPhoto";
             this.toolStripButton_pasteCardPhoto.Size = new System.Drawing.Size(28, 28);
             this.toolStripButton_pasteCardPhoto.Text = "(从剪贴板)粘贴证件照(1)";
+            this.toolStripButton_pasteCardPhoto.Visible = false;
             this.toolStripButton_pasteCardPhoto.Click += new System.EventHandler(this.toolStripButton_pasteCardPhoto_Click);
             // 
             // toolStripButton_registerFingerprint
@@ -708,7 +709,7 @@
             // 
             this.toolStripMenuItem_clearFaceFeature.Name = "toolStripMenuItem_clearFaceFeature";
             this.toolStripMenuItem_clearFaceFeature.Size = new System.Drawing.Size(360, 30);
-            this.toolStripMenuItem_clearFaceFeature.Text = "清除人脸特征";
+            this.toolStripMenuItem_clearFaceFeature.Text = "清除人脸特征和图片";
             this.toolStripMenuItem_clearFaceFeature.Click += new System.EventHandler(this.toolStripMenuItem_clearFaceFeature_Click);
             // 
             // toolStripMenuItem_clearFingerprint

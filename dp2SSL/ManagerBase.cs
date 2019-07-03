@@ -219,7 +219,7 @@ namespace dp2SSL
                 catch (Exception ex)
                 {
                     if (ex is RemotingException && (uint)ex.HResult == 0x8013150b)
-                        throw new Exception($"启动 {this.Name} 通道时出错: “{this.Name}”({this.Url})没有响应", ex);
+                        throw new NotResponseException($"启动 {this.Name} 通道时出错: “{this.Name}”({this.Url})没有响应", ex);
                     else
                         throw new Exception($"启动 {this.Name} 通道时出错(2): {ex.Message}", ex);
                 }
@@ -294,6 +294,8 @@ namespace dp2SSL
                 channel.Channel = null;
             }
         }
+
+
     }
 
     public class BaseChannel<T>
@@ -313,6 +315,20 @@ namespace dp2SSL
         {
         }
 
+    }
+
+    public class NotResponseException : Exception
+    {
+
+        public NotResponseException(string s)
+            : base(s)
+        {
+        }
+
+        public NotResponseException(string s, Exception inner)
+    : base(s, inner)
+        {
+        }
     }
 
 }

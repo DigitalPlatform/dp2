@@ -201,11 +201,10 @@ namespace DigitalPlatform.CirculationClient
 
             try
             {
-                List<string> dates = null;
                 int nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                     strEndDate,
                     true,  // 是否包含扩展名 ".log"
-                    out dates,
+                    out List<string> dates,
                     out string strWarning,
                     out string strError);
                 if (nRet == -1)
@@ -368,6 +367,7 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // TODO: 考虑有一种机制可以让 fingerprintcenter 或者 facecenter 的操作历史中能显示出变化情况，至少是缓存事项的数量变化
         // SetReaderInfo() API 恢复动作
         /*
 <root>
@@ -430,6 +430,8 @@ namespace DigitalPlatform.CirculationClient
                         strRecord = strOldRecord;
                 }
 
+                // TODO: change 动作也可能删除 face 元素
+
                 // 删除旧记录对应的指纹缓存
                 if (strAction == "move"
                     && string.IsNullOrEmpty(strOldRecord) == false)
@@ -468,9 +470,7 @@ namespace DigitalPlatform.CirculationClient
             return 0;
         }
 
-
-
-        // 写入新记录的指纹缓存
+        // 写入新记录的指纹缓存，或者删除指纹缓存
         int AddFingerPrint(string strRecord,
             out string strError)
         {

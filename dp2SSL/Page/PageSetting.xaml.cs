@@ -367,5 +367,16 @@ namespace dp2SSL
             });
         }
 
+        private void AddShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            WpfClientInfo.AddShortcutToStartupGroup("dp2SSL-自助借还");
+            MessageBox.Show("快捷方式添加成功");
+        }
+
+        private void RemoveShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            WpfClientInfo.RemoveShortcutFromStartupGroup("dp2SSL-自助借还", true);
+            MessageBox.Show("快捷方式删除成功");
+        }
     }
 }
