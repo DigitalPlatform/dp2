@@ -436,5 +436,53 @@ namespace dp2SSL
 
             return new NormalResult();
         }
+
+        public static void AddShortcutToStartupGroup(string strProductName)
+        {
+            if (ApplicationDeployment.IsNetworkDeployed &&
+                ApplicationDeployment.CurrentDeployment != null &&
+                ApplicationDeployment.CurrentDeployment.IsFirstRun)
+            {
+
+                string strTargetPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                strTargetPath = Path.Combine(strTargetPath, strProductName) + ".appref-ms";
+
+                string strSourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                strSourcePath = Path.Combine(strSourcePath, strProductName) + ".appref-ms";
+
+                try
+                {
+                    File.Copy(strSourcePath, strTargetPath, true);
+                }
+                catch (System.IO.FileNotFoundException)
+                {
+                    // source 文件有可能不存在
+                }
+            }
+        }
+
+        // parameters:
+        //      force 是否强制删除？如果为 false 表示不强制删除。在不是强制删除的情况下，应当满足 ClickOnce 启动并且是安装更新后第一次启动运行本函数才有效
+        public static void RemoveShortcutFromStartupGroup(string strProductName,
+            bool force = false)
+        {
+            if (force
+                || (ApplicationDeployment.IsNetworkDeployed &&
+    ApplicationDeployment.CurrentDeployment != null &&
+    ApplicationDeployment.CurrentDeployment.IsFirstRun))
+            {
+                string strTargetPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                strTargetPath = Path.Combine(strTargetPath, strProductName) + ".appref-ms";
+
+                try
+                {
+                    File.Delete(strTargetPath);
+                }
+                catch
+                {
+
+                }
+            }
+        }
     }
 }

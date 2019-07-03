@@ -208,7 +208,7 @@ namespace dp2SSL
 
         private void RegisterFace_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageBorrow("registerFace"));
+            this.NavigationService.Navigate(new PageBorrow("registerFace,deleteFace"));
         }
 
 #if NO

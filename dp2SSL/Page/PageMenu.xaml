@@ -49,11 +49,13 @@
         <Button 
             Name="config" Content="设置"  Click="Config_Click"
                 Background="#FF254276" Foreground="White" FontSize="40" BorderThickness="0"/>
+        <Grid Background="Black" Opacity="0.7">
         <TextBlock Name="number"
                    Text="{Binding Path=Number,Mode=OneWay}"
                    TextAlignment="Center" FontSize="100"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Background="Transparent" Foreground="White"/>
+        </Grid>
         <Button Name="error" Content="错误信息"  Click="Error_Click"
                 Visibility="{Binding Path=Error, Mode=OneWay, Converter={StaticResource StringToVis}}"
                 Background="DarkRed" Foreground="White" FontSize="36" BorderThickness="0"/>

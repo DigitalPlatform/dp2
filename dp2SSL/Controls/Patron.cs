@@ -371,6 +371,12 @@ namespace dp2SSL
         public void Fill(OneTag tag)
         {
             string pii = "";
+
+            if (tag.TagInfo == null && tag.Protocol == InventoryInfo.ISO15693)
+            {
+                throw new Exception("Fill() taginfo == null");
+            }
+
             if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
             {
                 LogicChip chip = LogicChip.From(tag.TagInfo.Bytes,
@@ -397,6 +403,8 @@ namespace dp2SSL
             this.UID = null;
             this.PII = null;
             this.PhotoPath = "";
+
+            this.RecPath = "";
 
             this.SetNotEmpty();
         }

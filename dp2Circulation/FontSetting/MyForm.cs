@@ -1988,6 +1988,67 @@ out string strError)
 
         #region 人脸登记功能(从 ReaderInfoForm 移动过来)
 
+        public Task<NormalResult> FaceNotifyTask(string event_name)
+        {
+            string strError = "";
+            if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == true)
+            {
+                strError = "尚未配置 人脸识别接口URL 系统参数，无法通知人脸中心";
+                goto ERROR1;
+            }
+
+            FaceChannel channel = StartFaceChannel(
+                Program.MainForm.FaceReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFaceCall++;
+            try
+            {
+                try
+                {
+                    return Task.Factory.StartNew<NormalResult>(
+                        () =>
+                        {
+                            NormalResult temp_result = new NormalResult();
+                            try
+                            {
+                                return channel.Object.Notify(event_name);
+                            }
+                            catch (RemotingException ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = 0;  // 让调主认为没有出错
+                                return temp_result;
+                            }
+                            catch (Exception ex)
+                            {
+                                temp_result.ErrorInfo = ex.Message;
+                                temp_result.Value = -1;
+                                return temp_result;
+                            }
+                        });
+                }
+                catch (Exception ex)
+                {
+                    strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 Notify() 操作失败: " + ex.Message;
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                _inFaceCall--;
+                EndFaceChannel(channel);
+            }
+            ERROR1:
+            return Task.FromResult(
+            new NormalResult {
+                Value = -1,
+                ErrorInfo = strError
+            });
+        }
+
         public async Task<NormalResult> CancelReadFeatureString()
         {
             string strError = "";
@@ -2037,7 +2098,7 @@ out string strError)
                 }
                 catch (Exception ex)
                 {
-                    strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 GetFeatureString() 操作失败: " + ex.Message;
+                    strError = "针对 " + Program.MainForm.FaceReaderUrl + " 的 CancelReadFeatureString() 操作失败: " + ex.Message;
                     goto ERROR1;
                 }
             }

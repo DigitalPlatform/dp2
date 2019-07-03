@@ -50,11 +50,11 @@
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3"
             Name="error" Visibility="Collapsed">Error Text</TextBlock>
         -->
-        <TextBox Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Error}"
+        <TextBox Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Path=Error, Mode=OneWay}"
                    Height="60" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
-                                       FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
-                                       Visibility="{Binding Path=Error, Converter={StaticResource StringToVis}}"
-                                       TextWrapping="WrapWithOverflow"/>
+                   FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
+                   Visibility="{Binding Path=Error, Mode=OneWay,Converter={StaticResource StringToVis}}"
+                   TextWrapping="WrapWithOverflow"/>
 <!--
         <TextBlock Grid.Row="3" Grid.ColumnSpan="3" Text="{Binding GlobalError}"
                                        FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
@@ -146,6 +146,16 @@
                      Click="RegisterFace_Click">
                     <Button.Content>
                         <TextBlock>注册人脸</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="deleteFace"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="160" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="DeleteFace_Click">
+                    <Button.Content>
+                        <TextBlock>删除人脸</TextBlock>
                     </Button.Content>
                 </Button>
             </StackPanel>

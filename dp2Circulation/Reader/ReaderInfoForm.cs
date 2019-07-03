@@ -2126,12 +2126,22 @@ strSavedXml);
                     }
                 }
 
-                // TODO: 也要考虑想办法通知人脸中心获取最新变化信息
+                List<string> warnings = new List<string>();
+
+                // 通知人脸中心获取最新变化信息
+                // TODO: 对比新旧记录，如果 face 元素变化了，或者册条码号变化了，才请求立即人脸缓存
+                if (string.IsNullOrEmpty(Program.MainForm.FaceReaderUrl) == false
+    && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
+                {
+                    var result = FaceNotifyTask("faceChanged").Result;
+                    if (result.Value == -1)
+                        warnings.Add(result.ErrorInfo);
+                }
 
                 // TODO: 对比新旧记录，如果指纹信息变化了，或者册条码号变化了，才请求立即刷新指纹缓存
                 // 更新指纹高速缓存
                 if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
-                    && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
+                && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
                 {
                     // return:
                     //      -2  remoting服务器连接失败。驱动程序尚未启动
@@ -2143,12 +2153,18 @@ strSavedXml);
                          out strError);
                     if (nRet == -1)
                     {
-                        strError = "虽然读者记录已经保存成功，但更新指纹缓存时发生了错误: " + strError;
-                        goto ERROR1;
+                        // strError = "虽然读者记录已经保存成功，但更新指纹缓存时发生了错误: " + strError;
+                        // goto ERROR1;
+                        warnings.Add(strError);
                     }
                     // -2 故意不报错。因为用户可能配置了URL，但是当前驱动程序并没有启动
                 }
 
+                if (warnings.Count > 0)
+                {
+                    string warning = $"虽然读者记录已经保存成功，但通知人脸中心和指纹中心刷新时发生了错误: {StringUtil.MakePathList(warnings, "; ")}";
+                    this.ShowMessage(warning, "yellow", true);
+                }
             }
             finally
             {
@@ -3863,6 +3879,7 @@ MessageBoxDefaultButton.Button2);
             SaveReaderToTemplate();
         }
 
+        // *** 此函数已经废止
         // (从剪贴板)粘贴证件照(1)
         private void toolStripButton_pasteCardPhoto_Click(object sender, EventArgs e)
         {
@@ -4664,10 +4681,9 @@ MessageBoxDefaultButton.Button1);
 
                     if (image != null)
                     {
-                        string strShrinkComment = "";
                         nRet = SetCardPhoto(image,
                     "cardphoto",
-        out strShrinkComment,
+        out string strShrinkComment,
         out strError);
                         if (nRet == -1)
                             return -1;
@@ -6395,8 +6411,8 @@ MessageBoxDefaultButton.Button1);
                     // 自动缩小图像
                     int nRet = SetCardPhoto(image1,
                         "face",
-                    out string strShrinkComment,
-                    out strError);
+                        out string strShrinkComment,
+                        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                 }
@@ -6424,7 +6440,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // (从剪贴板)粘贴证件照
+        // (从剪贴板)粘贴证件照(注意证件照是用途为 cardphoto 的对象，和人脸识别无关)
         private void ToolStripMenuItem_pasteCardPhoto_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6434,6 +6450,8 @@ MessageBoxDefaultButton.Button1);
             List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
             if (images == null)
             {
+                if (string.IsNullOrEmpty(strError) == true)
+                    strError = "当前剪贴板为空";
                 strError = $"{strError}。无法创建证件照片";
                 goto ERROR1;
             }
@@ -6486,12 +6504,21 @@ MessageBoxDefaultButton.Button1);
             this.readerEditControl1.CardNumber = dlg.Numbers;
         }
 
-        // 清除人脸特征
+        // 清除人脸特征和图片
         private void toolStripMenuItem_clearFaceFeature_Click(object sender, EventArgs e)
         {
             this.readerEditControl1.FaceFeatureVersion = "";
             this.readerEditControl1.FaceFeature = "";
             this.readerEditControl1.Changed = true;
+
+            // 标记删除 usage 为 "face" 的对象
+            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage("face");
+            if (items.Count > 0)
+                this.binaryResControl1.MaskDelete(items);
+
+            // TODO: 注意保存记录的时候通知 facecenter 及时同步刷新信息
+            // 可能需要建立一种标志，表示人脸相关信息修改过
+            MessageBox.Show(this, "人脸特征信息和图片已经清除。但读者记录尚未保存");
         }
 
         // 一般保存
