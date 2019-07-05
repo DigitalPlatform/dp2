@@ -152,5 +152,24 @@ Description = "程序启动时候是否自动全屏"
                 _config.SetInt("global", "fullScreen", value == true ? 1 : 0);
             }
         }
+
+        // 默认值 true
+        [Display(
+Order = 7,
+Name = "借还按钮自动触发",
+Description = "借书和还书操作是否自动触发操作按钮"
+)]
+        [Category("操作风格")]
+        public bool AutoTrigger
+        {
+            get
+            {
+                return _config.GetBoolean("operation", "auto_trigger", false);
+            }
+            set
+            {
+                _config.SetBoolean("operation", "auto_trigger", value);
+            }
+        }
     }
 }

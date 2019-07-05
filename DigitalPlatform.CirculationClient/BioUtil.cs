@@ -360,6 +360,11 @@ namespace DigitalPlatform.CirculationClient
             {
                 return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
             }
+            catch (InterruptException ex)
+            {
+                // 2019/7/4
+                return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
+            }
             catch (Exception ex)
             {
                 string strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);

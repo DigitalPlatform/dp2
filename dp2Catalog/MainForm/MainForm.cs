@@ -4949,7 +4949,15 @@ out string strError)
                     }
                 }
 
-                e.Parameters = "location=dp2Catalog,type=worker";
+                string type = "worker";
+                if (e.UserName.StartsWith("~"))
+                {
+                    e.UserName = e.UserName.Substring(1);
+                    type = "reader";
+                }
+
+
+                e.Parameters = $"location=dp2Catalog,type={type}";
 
                 /*
                 e.IsReader = false;
@@ -4992,7 +5000,17 @@ out string strError)
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
             e.SavePasswordShort = false;
-            e.Parameters = "location=dp2Catalog,type=worker";
+
+            {
+                string type = "worker";
+                if (e.UserName.StartsWith("~"))
+                {
+                    e.UserName = e.UserName.Substring(1);
+                    type = "reader";
+                }
+
+                e.Parameters = $"location=dp2Catalog,type={type}";
+            }
 
             // 2014/11/10
             e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");

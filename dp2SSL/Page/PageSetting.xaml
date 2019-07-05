@@ -154,6 +154,36 @@
                         <TextBlock>去掉开机自启动</TextBlock>
                     </Button.Content>
                 </Button>
+                <Button Name="restartRfidCenter"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="RestartRfidCenter_Click">
+                    <Button.Content>
+                        <TextBlock>重启 RFID 中心</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="restartFingerprintCenter"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="RestartFingerprintCenter_Click">
+                    <Button.Content>
+                        <TextBlock>重启指纹中心</TextBlock>
+                    </Button.Content>
+                </Button>
+                <Button Name="restartFaceCenter"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="260" Height="60" 
+                    FontSize="20" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                     Click="RestartFaceCenter_Click">
+                    <Button.Content>
+                        <TextBlock>重启人脸中心</TextBlock>
+                    </Button.Content>
+                </Button>
             </WrapPanel>
         </Grid>
     </Grid>

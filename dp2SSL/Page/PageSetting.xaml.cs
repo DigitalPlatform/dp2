@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -377,6 +378,21 @@ namespace dp2SSL
         {
             WpfClientInfo.RemoveShortcutFromStartupGroup("dp2SSL-自助借还", true);
             MessageBox.Show("快捷方式删除成功");
+        }
+
+        private void RestartRfidCenter_Click(object sender, RoutedEventArgs e)
+        {
+            RfidManager.GetState("restart");
+        }
+
+        private void RestartFingerprintCenter_Click(object sender, RoutedEventArgs e)
+        {
+            FingerprintManager.GetState("restart");
+        }
+
+        private void RestartFaceCenter_Click(object sender, RoutedEventArgs e)
+        {
+            FaceManager.GetState("restart");
         }
     }
 }

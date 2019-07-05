@@ -320,6 +320,11 @@ namespace RfidCenter
             ClientInfo.Config.Set("readers", "hint_table", value);
         }
 
+        public void Restart()
+        {
+            Program.MainForm?.BeginRefreshReaders("connected", new CancellationToken());
+        }
+
         private static readonly Object _syncRoot_start = new Object(); // 2019/5/20
 
         // parameters:

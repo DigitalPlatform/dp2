@@ -113,18 +113,20 @@ namespace dp2SSL
                 result = await RecognitionFace("");
                 if (result.Value == -1)
                 {
-                    SetPatronError("face", result.ErrorInfo);
+                    SetGlobalError("face", result.ErrorInfo);
+                    DisplayError(ref videoRecognition, result.ErrorInfo);
                     return;
                 }
 
-                SetPatronError("face", null);
+                SetGlobalError("face", null);
             }
             finally
             {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    videoRecognition.Close();
-                }));
+                if (videoRecognition != null)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        videoRecognition.Close();
+                    }));
             }
 
             GetMessageResult message = new GetMessageResult
@@ -285,6 +287,8 @@ namespace dp2SSL
             {
                 await FillBookFields(channel, update_entities);
 
+                Trigger(update_entities);
+
                 // 自动检查 EAS 状态
                 CheckEAS(update_entities);
             }
@@ -301,7 +305,7 @@ namespace dp2SSL
                 if (_entities.Count == 0
         && changed == true  // 限定为，当数量减少到 0 这一次，才进行清除
         && _patron.IsFingerprintSource)
-                    _patron.Clear();
+                    PatronClear();
 
                 // 2019/7/1
                 // 当读卡器上的图书全部拿走时候，自动关闭残留的模式对话框
@@ -339,6 +343,8 @@ namespace dp2SSL
                         try
                         {
                             await FillBookFields(channel, update_entities);
+
+                            Trigger(update_entities);
                         }
                         finally
                         {
@@ -359,6 +365,25 @@ namespace dp2SSL
 
             var task = RefreshPatrons();
             return new NormalResult();
+        }
+
+        void Trigger(List<Entity> update_entities)
+        {
+            return;
+            List<Entity> results = new List<Entity>();
+            foreach(var entity in update_entities)
+            {
+                // 检查 PII。TODO: 还要检查在架状态
+                if (string.IsNullOrEmpty(entity.PII) == false)
+                    results.Add(entity);
+            }
+            if (results.Count == 0)
+                return;
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                MessageBox.Show($"开始。数量 [{results.Count}]");
+            }));
         }
 
         ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
@@ -389,7 +414,7 @@ namespace dp2SSL
                     }
                     else
                     {
-                        _patron.Clear();
+                        PatronClear();
                         SetPatronError("getreaderinfo", "");
                         if (patrons.Count > 1)
                         {
@@ -423,7 +448,7 @@ namespace dp2SSL
                     /*
                     ClearBookList();
                     FillBookFields(channel);
-                    _patron.Clear();
+                    PatronClear();
                     */
                 }
 
@@ -798,7 +823,7 @@ namespace dp2SSL
             {
                 LibraryChannelManager.Log?.Error($"ClearBooksAndPatron() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");
             }
-            _patron.Clear();
+            PatronClear();
         }
 
         //ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
@@ -999,7 +1024,7 @@ namespace dp2SSL
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
-                    _patron.Clear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return;
             }
             else
@@ -1011,7 +1036,7 @@ namespace dp2SSL
             if (result.Message == null)
                 return;
 
-            _patron.Clear();
+            PatronClear();
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
             // TODO: 此种情况下，要禁止后续从读卡器获取，直到新一轮开始。
@@ -2152,10 +2177,12 @@ out string strError);
             VideoWindow videoRegister = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                videoRegister = new VideoWindow();
-                videoRegister.TitleText = $"{action_name} ...";
-                videoRegister.Owner = Application.Current.MainWindow;
-                videoRegister.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                videoRegister = new VideoWindow
+                {
+                    TitleText = $"{action_name} ...",
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
                 videoRegister.Closed += VideoRegister_Closed;
                 videoRegister.Show();
                 AddLayer();
@@ -2169,18 +2196,6 @@ out string strError);
 
                     DisplayError(ref videoRegister, check_message, "yellow");
                     return;
-                }
-
-                // TODO: 用 WPF 对话框
-                if (action == "deleteFace")
-                {
-                    MessageBoxResult dialog_result = MessageBox.Show(
-                        "确实要删除人脸信息?\r\n\r\n(人脸信息删除以后，您将无法使用人脸识别功能)",
-                        "dp2SSL",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-                    if (dialog_result == MessageBoxResult.No)
-                        return;
                 }
 
                 if (action == "registerFace")
@@ -2250,6 +2265,8 @@ out string strError);
 
                 if (action == "registerFace")
                 {
+                    // TODO: 对话框提示以前已经登记过人脸，是否要覆盖？
+
                     // 在读者 XML 记录中加入 face 元素
                     if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
                     {
@@ -2265,6 +2282,9 @@ out string strError);
                     // 删除 face 元素
                     if (!(dom.DocumentElement.SelectSingleNode("face") is XmlElement face))
                     {
+                        // 报错说本来就没有人脸信息，所以也没有必要删除
+                        DisplayError(ref videoRegister, "读者记录中原本不存在人脸信息 ...");
+                        return;
                     }
                     else
                     {
@@ -2292,6 +2312,19 @@ out string strError);
                     if (RemoveCardPhotoObject(dom, "face") == true)
                         changed = true;
                 }
+
+                // TODO: 用 WPF 对话框
+                if (action == "deleteFace")
+                {
+                    MessageBoxResult dialog_result = MessageBox.Show(
+                        "确实要删除人脸信息?\r\n\r\n(人脸信息删除以后，您将无法使用人脸识别功能)",
+                        "dp2SSL",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    if (dialog_result == MessageBoxResult.No)
+                        return;
+                }
+
 
                 if (changed == true)
                 {
@@ -2330,7 +2363,7 @@ out string strError);
                 // 上传完对象后通知 facecenter DoReplication 一次
                 var notify_result = FaceManager.Notify("faceChanged");
                 if (notify_result.Value == -1)
-                    SetPatronError("face", notify_result.ErrorInfo);
+                    SetGlobalError("face", notify_result.ErrorInfo);
 
                 string message = $"{action_name}成功";
                 if (action == "deleteFace")
@@ -2822,6 +2855,19 @@ string usage)
         private async void DeleteFace_Click(object sender, RoutedEventArgs e)
         {
             await RegisterFace("deleteFace");
+        }
+
+        void PatronClear()
+        {
+            _patron.Clear();
+
+            if (!Application.Current.Dispatcher.CheckAccess())
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.patronControl.BorrowedEntities.Clear();
+                }));
+            else
+                this.patronControl.BorrowedEntities.Clear();
         }
     }
 }

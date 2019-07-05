@@ -504,6 +504,12 @@ Exception rethrown at [0]:
 
         public NormalResult GetState(string style)
         {
+            if (style == "restart")
+            {
+                Program.MainForm.Restart();
+                return new NormalResult();
+            }
+
             if (ClientInfo.ErrorState == "normal")
                 return new NormalResult
                 {
