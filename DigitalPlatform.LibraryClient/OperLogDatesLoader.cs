@@ -103,6 +103,12 @@ namespace DigitalPlatform.LibraryClient
                     "",
                     out records,
                     out strError);
+                /*
+                // testring
+                lRet = -1;
+                strError = "测试文字";
+                */
+
                 if (lRet == -1)
                 {
                     if (this.Prompt != null)
@@ -128,7 +134,6 @@ namespace DigitalPlatform.LibraryClient
                     }
                     else
                         throw new ChannelException(this.Channel.ErrorCode, strError);
-
                 }
 
                 lHitCount = lRet;

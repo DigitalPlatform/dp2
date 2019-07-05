@@ -31,6 +31,12 @@ namespace RfidCenter
                 return new NormalResult();
             }
 
+            if (style == "restart")
+            {
+                Program.MainForm.Restart();
+                return new NormalResult();
+            }
+
             if (Program.MainForm.ErrorState == "normal")
             {
                 var result = ListReaders();

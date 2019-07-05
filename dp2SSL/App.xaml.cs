@@ -281,6 +281,14 @@ namespace dp2SSL
             }
         }
 
+        public static bool AutoTrigger
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("operation", "auto_trigger", false);
+            }
+        }
+
         public static string dp2Password
         {
             get

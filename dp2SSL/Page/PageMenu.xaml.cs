@@ -61,7 +61,7 @@ namespace dp2SSL
                 //window.Height = SystemParameters.VirtualScreenHeight;
             }
 
-            this.message.Text = $"dp2SSL 版本号(测试版):\r\n{WpfClientInfo.ClientVersion}";
+            this.message.Text = $"dp2SSL 版本号:\r\n{WpfClientInfo.ClientVersion}";
 
             if (string.IsNullOrEmpty(App.FaceUrl))
                 this.registerFace.Visibility = Visibility.Hidden;

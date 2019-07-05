@@ -535,8 +535,13 @@ bool bClickClose = false)
             }));
         }
 
+        PromptManager _prompt = new PromptManager(2);
+
         private void FingerPrint_Prompt(object sender, MessagePromptEventArgs e)
         {
+            _prompt.Prompt(this, e);
+
+#if NO
             // TODO: 自动延时以后重试
             this.Invoke((Action)(() =>
             {
@@ -580,6 +585,7 @@ bool bClickClose = false)
                         e.ResultAction = "no";
                 }
             }));
+#endif
         }
 
         void SaveSettings()
@@ -956,7 +962,7 @@ MessageBoxDefaultButton.Button2);
             _cancel.Cancel();
         }
 
-        #region ipc channel
+#region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1031,7 +1037,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        #endregion
+#endregion
 
         delegate void _ActivateWindow(bool bActive);
 
@@ -1094,7 +1100,7 @@ MessageBoxDefaultButton.Button2);
             FingerPrint.CancelRegisterString();
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1248,7 +1254,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         void DisplayText(string text,
             string textColor = "white",
@@ -1309,7 +1315,7 @@ Keys keyData)
         }
 
 #if NO
-        #region device changed
+#region device changed
 
         const int WM_DEVICECHANGE = 0x0219; //see msdn site
         const int DBT_DEVNODES_CHANGED = 0x0007;
@@ -1341,7 +1347,7 @@ Keys keyData)
             base.WndProc(ref m);
         }
 
-        #endregion
+#endregion
 #endif
 
         public void ActivateWindow()
@@ -1409,6 +1415,11 @@ Keys keyData)
             }
 #endif
             base.WndProc(ref m);
+        }
+
+        public void Restart()
+        {
+            BeginRefreshReaders("connected", new CancellationToken());
         }
 
         int _refreshCount = 0;

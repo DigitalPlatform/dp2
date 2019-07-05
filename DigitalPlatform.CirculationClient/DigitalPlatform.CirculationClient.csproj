@@ -229,6 +229,7 @@
     <Compile Include="LoanPolicy\LoanPolicyControl.xaml.cs">
       <DependentUpon>LoanPolicyControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PromptManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
