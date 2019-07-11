@@ -173,6 +173,32 @@ be 99 1a 14"
             Assert.AreEqual(block_map, "ww");
         }
 
+        // 测试大量数据写入新标签
+        [TestMethod]
+        public void Test_large_layout_1()
+        {
+            LogicChip chip = new LogicChip();
+            chip.NewElement(ElementOID.PII, "1234567890");
+            chip.NewElement(ElementOID.SetInformation, "1203");
+            chip.NewElement(ElementOID.ShelfLocation, "QA268.L55");
+            chip.NewElement(ElementOID.OwnerInstitution, "US-InU-Mu");
+            chip.NewElement(ElementOID.LocalDataA, "1234567890");
+            chip.NewElement(ElementOID.LocalDataB, "1234567890");
+            chip.NewElement(ElementOID.LocalDataC, "1234567890");
+            chip.NewElement(ElementOID.Title, "1234567890 1234567890 1234567890");
+            chip.NewElement(ElementOID.AOI, "1234567890");
+            chip.NewElement(ElementOID.SOI, "1234567890");
+            chip.NewElement(ElementOID.AIBI, "1234567890");
+
+            Debug.Write(chip.ToString());
+
+            var result = chip.GetBytes(4 * 28,
+                4,
+                GetBytesStyle.None,
+                out string block_map);
+        }
+
+
         // 测试复杂布局
         [TestMethod]
         public void Test_chip_complex_layout_1()

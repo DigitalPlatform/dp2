@@ -300,6 +300,7 @@ namespace FingerprintCenter
             out string strError)
         {
             return AddItems(new List<FingerprintItem> { new FingerprintItem { ReaderBarcode = strReaderBarcode } },
+                null,
                 out strError);
         }
 
@@ -311,6 +312,7 @@ namespace FingerprintCenter
         //      其他  失败。错误码
         public override int AddItems(
             List<FingerprintItem> items,
+            ProcessInfo info,
             out string strError)
         {
             strError = "";
@@ -750,8 +752,8 @@ namespace FingerprintCenter
                         new FingerprintItem {
                             ReaderBarcode = temp_id,
                             FingerprintString = zkfp2.BlobToBase64(buffer, length)
-                        }
-                        },
+                        }},
+                        null,
                         out string strError);
                     if (nRet == -1)
                         return new TextResult { Value = -1, ErrorInfo = "尝试加入高速缓存时失败" };

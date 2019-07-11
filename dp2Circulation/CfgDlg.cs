@@ -654,6 +654,16 @@ false);
                 "upper_input_barcode",
                 true);
 
+            // 附加的馆藏地列表
+            string value = ap.GetString(
+                "global",
+                "additionalLocations",
+                "");
+            if (string.IsNullOrEmpty(value) == false)
+                value = value.Replace(",", "\r\n");
+            this.textBox_global_additionalLocations.Text = value;
+
+
             // *** 标签打印
             // 从何处获取索取号
             this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
@@ -1269,6 +1279,15 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "labelprint",
                 "accessNo_source",
                 this.comboBox_labelPrint_accessNoSource.Text);
+
+            // 附加的馆藏地列表
+            string value = this.textBox_global_additionalLocations.Text;
+            if (string.IsNullOrEmpty(value) == false)
+                value = value.Replace("\r\n", ",");
+            ap.SetString(
+"global",
+"additionalLocations",
+value);
 
             // *** 消息
 

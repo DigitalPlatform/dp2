@@ -9,6 +9,7 @@ using Jint;
 using Jint.Native;
 
 using DigitalPlatform.Text;
+using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer.Common
 {
@@ -24,12 +25,63 @@ namespace DigitalPlatform.LibraryServer.Common
             _dom.LoadXml(definition);
         }
 
+        // 选择 根下 的 validator 元素，符合 location 的那些
+        // location 字符串的格式如下：location1,location2,location3
+        //      可能会包含 馆代码；具体的馆藏地字符串(例如 '西城分馆/阅览室')；或者模式匹配的馆藏地字符串(例如 '西城分馆/社科*')
+        List<XmlElement> GetValidators(string location)
+        {
+            var error = VerifyOne(location);
+            if (string.IsNullOrEmpty(error) == false)
+                throw new ArgumentException(error);
+            XmlNodeList nodes = _dom.DocumentElement.SelectNodes("validator");
+            if (nodes.Count == 0)
+                return new List<XmlElement>();
+            foreach(XmlElement validator in nodes)
+            {
+                string current = validator.GetAttribute("location");
+                if (Match(location, current))
+                    return new List<XmlElement>{ validator };
+            }
+            return new List<XmlElement>();
+        }
+
+        static string VerifyOne(string one)
+        {
+            if (one.IndexOfAny(new char[] { ',', '*', '?' }) != -1)
+                return $"字符串 '{one}' 中不应包含 ,*? 这些字符";
+            return null;
+        }
+
+        static bool Match(string one, string pattern)
+        {
+            if (one == pattern)
+                return true;
+            string[] list = pattern.Split(new char[] { ',' });
+            foreach(string p in list)
+            {
+                if (one == p)
+                    return true;
+
+                if (Regex.IsMatch(one, WildCardToRegular(p)))
+                    return true;
+            }
+            return false;
+        }
+
+        // https://stackoverflow.com/questions/30299671/matching-strings-with-wildcard
+        // If you want to implement both "*" and "?"
+        private static String WildCardToRegular(String value)
+        {
+            return "^" + Regex.Escape(value).Replace("\\?", ".").Replace("\\*", ".*") + "$";
+        }
+
         // 判断一个馆藏地是否需要进行条码变换
         // exception:
         //      可能会抛出异常
         public bool NeedValidate(string location)
         {
-            XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            // XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            var nodes = GetValidators(location);
             if (nodes.Count == 0)
                 return false;
             if (nodes.Count > 1)
@@ -55,7 +107,8 @@ namespace DigitalPlatform.LibraryServer.Common
         public ValidateResult Validate(string location,
     string barcode)
         {
-            XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            // XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            var nodes = GetValidators(location);
             if (nodes.Count == 0)
                 return new ValidateResult
                 {

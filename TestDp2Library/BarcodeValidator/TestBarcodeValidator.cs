@@ -10,6 +10,7 @@ using DigitalPlatform.LibraryServer.Common;
 
 namespace TestDp2Library
 {
+    // BarcodeValidator 的一般测试
     [TestClass]
     public class TestBarcodeValidator
     {

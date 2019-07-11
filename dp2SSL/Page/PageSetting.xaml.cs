@@ -209,6 +209,9 @@ namespace dp2SSL
                 if (errors.Count > 0)
                     MessageBox.Show(StringUtil.MakePathList(errors, "\r\n"));
             }
+
+            // 重新启动 Proccess 监控
+            App.CurrentApp.StartProcessManager();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

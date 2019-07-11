@@ -190,6 +190,7 @@ namespace DigitalPlatform.RFID
             {
                 if (data[start] == 0)
                 {
+                    break;
                     start++;
                     continue;  // 有时候用 0 填充了余下的部分 bytes
                 }
@@ -391,6 +392,7 @@ namespace DigitalPlatform.RFID
 
         #region Sort() 的下级函数
 
+        // TODO: 单元测试，增加检查正确性的测试函数
         // parameters:
         //      layout  自由元素的布局方式。负数表示 WillLock 类型的元素
         void SetElementsPos(
@@ -732,7 +734,18 @@ namespace DigitalPlatform.RFID
         {
             List<List<OneArea>> results = new List<List<OneArea>>();
             // 列出所有排列形态
-            List<int[]> all = PermutationAndCombination<int>.GetPermutation(elements.ToArray());
+            List<int[]> all = null;
+
+            try
+            {
+                all = PermutationAndCombination<int>.GetPermutation(elements.ToArray());
+            }
+            catch
+            {
+                int i = 0;
+                i++;
+            }
+
             // 逐个进行检验
             foreach (int[] possible in all)
             {

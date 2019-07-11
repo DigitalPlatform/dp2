@@ -1514,6 +1514,9 @@ Stack:
                 dlg.ParamChanged -= new ParamChangedEventHandler(CfgDlg_ParamChanged);
             }
 
+            // 刷新框架窗工具条上的馆藏地列表
+            this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+
             // 缺省字体发生了变化
             if (strOldDefaultFontString != this.DefaultFontString)
             {

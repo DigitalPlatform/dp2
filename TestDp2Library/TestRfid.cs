@@ -633,6 +633,17 @@ ac a2 a6 5f
 
         }
 
+        [TestMethod]
+        public void test_logicChip_11()
+        {
+            // 汪总提供
+            // 
+            string bytes = @"E102074535353536373200000201B8030C1B81E130103A1AC9AB4C48BF65011266010067010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000575F4F4B";
+            byte[] data = Element.FromHexString(bytes);
+            LogicChip chip = LogicChip.From(data, 4);
+            Debug.Write(chip.ToString());
+
+        }
 
         #endregion
 
