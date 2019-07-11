@@ -91,6 +91,57 @@ uint new_password);
         {
             return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)},Protocol={Protocol}";
         }
+
+        public string GetDescription()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append(this.ToString() + "\r\n");
+            if (this.TagInfo != null)
+                text.Append($"*** TagInfo:\r\n{TagInfo.ToString()}");
+
+            /*
+            if (this.OriginBytes != null)
+            {
+                text.Append($"\r\n初始字节内容:\r\n{GetBytesString(this.OriginBytes, this.BlockSize, this.OriginLockStatus)}\r\n");
+            }
+
+            {
+                LogicChip chip = LogicChip.From(this.OriginBytes, this.BlockSize, this.OriginLockStatus);
+                text.Append($"初始元素:(共 {chip.Elements.Count} 个)\r\n");
+                int i = 0;
+                foreach (Element element in chip.Elements)
+                {
+                    text.Append($"{++i}) {element.ToString()}\r\n");
+                }
+            }
+
+            try
+            {
+                // 注意 GetBytes() 调用后，元素排列顺序会发生变化
+                byte[] bytes = this.GetBytes(
+                    this.MaxBlockCount * this.BlockSize,
+                    this.BlockSize,
+                    GetBytesStyle.None,
+                    out string block_map);
+                text.Append($"\r\n当前字节内容:\r\n{GetBytesString(bytes, this.BlockSize, block_map)}\r\n");
+            }
+            catch (Exception ex)
+            {
+                text.Append($"\r\n当前字节内容:\r\n构造 Bytes 过程出现异常: {ex.Message}\r\n");
+            }
+
+            {
+                text.Append($"当前元素:(共 {this.Elements.Count} 个)\r\n");
+                int i = 0;
+                foreach (Element element in this.Elements)
+                {
+                    text.Append($"{++i}) {element.ToString()}\r\n");
+                }
+            }
+            */
+            return text.ToString();
+        }
+
     }
 
     [Serializable()]

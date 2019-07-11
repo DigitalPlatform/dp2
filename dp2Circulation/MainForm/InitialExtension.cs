@@ -5241,7 +5241,7 @@ out strError);
         string _focusLibraryCode = "";
 
         // 当前操作所针对的分馆 代码
-        // 注: 全局用户可以操作任何分管，和总馆，通过此成员，可以明确它当前正在操作哪个分馆，这样可以明确 VerifyBarcode() 的 strLibraryCodeList 参数值
+        // 注: 全局用户可以操作任何分馆，和总馆，通过此成员，可以明确它当前正在操作哪个分馆，这样可以明确 VerifyBarcode() 的 strLibraryCodeList 参数值
         public string FocusLibraryCode
         {
             get
@@ -5258,9 +5258,8 @@ out strError);
 
         void FillLibraryCodeListMenu()
         {
-            string strError = "";
-            List<string> all_library_codes = null;
-            int nRet = this.GetAllLibraryCodes(out all_library_codes, out strError);
+            int nRet = this.GetAllLibraryCodes(out List<string> all_library_codes, 
+                out string strError);
 
             List<string> library_codes = new List<string>();
             if (Global.IsGlobalUser(_currentLibraryCodeList) == true)
@@ -5279,6 +5278,20 @@ out strError);
                     strName = "[总馆]";
                 ToolStripItem item = new ToolStripMenuItem(strName);
                 item.Tag = library_code;
+                item.Click += item_Click;
+                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
+            }
+
+            // 添加附加的馆藏地
+            string value = this.AppInfo.GetString(
+    "global",
+    "additionalLocations",
+    "");
+            List<string> list = StringUtil.SplitList(value);
+            foreach(string s in list)
+            {
+                ToolStripItem item = new ToolStripMenuItem(s);
+                item.Tag = s;
                 item.Click += item_Click;
                 this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
             }

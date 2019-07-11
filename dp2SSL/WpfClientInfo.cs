@@ -8,13 +8,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Threading;
 
 using log4net;
 
+using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
-using DigitalPlatform;
 
 namespace dp2SSL
 {
@@ -484,5 +485,37 @@ namespace dp2SSL
                 }
             }
         }
+
+        public static bool HasModuleStarted(string mutex_name)
+        {
+            bool createdNew = true;
+            // mutex name need contains windows account name. or us programes file path, hashed
+            using (Mutex mutex = new Mutex(true,
+                mutex_name, // "dp2libraryXE V3", 
+                out createdNew))
+            {
+                if (createdNew)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        public static bool StartModule(
+            string shortcut_path)
+        {
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath(
+                    shortcut_path
+                    // "DigitalPlatform/dp2 V3/dp2Library XE V3"
+                    );
+
+            if (File.Exists(strShortcutFilePath) == false)
+                return false;
+
+            Process.Start(strShortcutFilePath);
+            return true;
+        }
+
     }
+
 }

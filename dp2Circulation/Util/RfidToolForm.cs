@@ -25,6 +25,8 @@ namespace dp2Circulation
 {
     public partial class RfidToolForm : MyForm
     {
+        // ErrorTable _errorTable = null;
+
         public event AskTagEventHandler AskTag = null;
 
         public bool LayoutVertical
@@ -90,6 +92,14 @@ namespace dp2Circulation
             InitializeComponent();
 
             this.chipEditor1.TitleVisible = false;
+
+            /*
+            this._errorTable = new ErrorTable((s) =>
+            {
+                // TODO: 如果这以前残余的是同样 type，才能清为空。否则要保留
+                this.ShowMessage(s, "red", true);
+            });
+            */
         }
 
         private void RfidToolForm_Load(object sender, EventArgs e)
@@ -151,6 +161,12 @@ namespace dp2Circulation
 "auto_fix_eas",
 this.toolStripButton_autoFixEas.Checked);
         }
+
+        /*
+        void SetError(string type, string error)
+        {
+            _errorTable.SetError(type, error);
+        }*/
 
         // private static readonly Object _syncRoot_update = new Object();
         int _inUpdate = 0;
@@ -269,11 +285,11 @@ this.toolStripButton_autoFixEas.Checked);
 
                                 this.Invoke((Action)(() =>
                                 {
-                                // 首次填充，自动设好选定状态
-                                // if (is_empty)
-                                {
-                                    // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
-                                    var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
+                                    // 首次填充，自动设好选定状态
+                                    // if (is_empty)
+                                    {
+                                        // TODO: 只有当列表发生了实质性刷新的时候，才有必要调用一次 SelectItem。也就是说，不要每秒都无条件调用一次
+                                        var ret = SelectItem(this.SelectedID != null ? this.SelectedID : this.SelectedPII);
 
                                         if (// string.IsNullOrEmpty(this.SelectedPII) == false
                                             ret == true
@@ -290,7 +306,7 @@ this.toolStripButton_autoFixEas.Checked);
                                 }));
 
                             }
-                            catch(ObjectDisposedException)
+                            catch (ObjectDisposedException)
                             {
                                 return;
                             }
@@ -342,7 +358,10 @@ this.toolStripButton_autoFixEas.Checked);
                 if (show_messageBox)
                     this.ShowMessageBox(strError);
                 else
+                {
                     this.ShowMessage(strError, "red", true);
+                    // this.SetError("updateChipList", strError);
+                }
                 return false;
             }
             finally
@@ -530,8 +549,17 @@ this.toolStripButton_autoFixEas.Checked);
 
                 string hex_string = Element.GetHexString(result.TagInfo.Bytes, "4");
 
-                item_info.LogicChipItem = LogicChipItem.FromTagInfo(result.TagInfo);
-                item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
+                string chip_parse_error = "";
+                try
+                {
+                    item_info.LogicChipItem = LogicChipItem.FromTagInfo(result.TagInfo);
+                    item_info.LogicChipItem.PropertyChanged += LogicChipItem_PropertyChanged;
+                }
+                catch (Exception ex)
+                {
+                    chip_parse_error = ex.Message;
+                }
+
                 this.Invoke((Action)(() =>
                 {
                     // 2019/2/27
@@ -546,13 +574,22 @@ this.toolStripButton_autoFixEas.Checked);
                             ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, new_readername);
                     }
 
-                    string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
-                    // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
-                    SetItemPIIColumn(item, pii, true);
-                    if (this.SelectedPII != null
-                        && pii == this.SelectedPII)
-                        item.Font = new Font(item.Font, FontStyle.Bold);
+                    if (item_info.LogicChipItem != null)    // 2019/7/6
+                    {
+                        string pii = item_info.LogicChipItem.PrimaryItemIdentifier;
+                        // ListViewUtil.ChangeItemText(item, COLUMN_PII, pii);
+                        SetItemPIIColumn(item, pii, true);
+                        if (this.SelectedPII != null
+                            && pii == this.SelectedPII)
+                            item.Font = new Font(item.Font, FontStyle.Bold);
+                    }
                 }));
+
+                if (string.IsNullOrEmpty(chip_parse_error) == false)
+                {
+                    strError = chip_parse_error;
+                    goto ERROR1;
+                }
                 return;
             }
             catch (Exception ex)
@@ -1220,7 +1257,40 @@ this.toolStripButton_autoFixEas.Checked);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("测试");
+            menuItem.Click += new System.EventHandler(this.menu_test_Click);
+            if (this.listView_tags.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             contextMenu.Show(this.listView_tags, new Point(e.X, e.Y));
+        }
+
+        void menu_test_Click(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in this.listView_tags.SelectedItems)
+            {
+                ItemInfo item_info = (ItemInfo)item.Tag;
+
+                // item_info.LogicChipItem = new LogicChipItem();
+                SetContent(item_info.LogicChipItem);
+                item_info.LogicChipItem.SetChanged(true);
+            }
+        }
+
+        static void SetContent(LogicChip chip)
+        {
+            chip.SetElement(ElementOID.PII, "1234567890");
+            chip.SetElement(ElementOID.SetInformation, "1203");
+            chip.SetElement(ElementOID.ShelfLocation, "QA268.L55");
+            chip.SetElement(ElementOID.OwnerInstitution, "US-InU-Mu");
+            chip.SetElement(ElementOID.LocalDataA, "1234567890");
+            chip.SetElement(ElementOID.LocalDataB, "1234567890");
+            chip.SetElement(ElementOID.LocalDataC, "1234567890");
+            chip.SetElement(ElementOID.Title, "1234567890 1234567890 1234567890");
+            chip.SetElement(ElementOID.AOI, "1234567890");
+            chip.SetElement(ElementOID.SOI, "1234567890");
+            chip.SetElement(ElementOID.AIBI, "1234567890");
         }
 
         // 针对选定的标签，创建描述文字并复制到 Windows 剪贴板
@@ -1233,7 +1303,10 @@ this.toolStripButton_autoFixEas.Checked);
                     text.Append("\r\n***\r\n");
                 ItemInfo item_info = (ItemInfo)item.Tag;
                 if (item_info.LogicChipItem == null)
+                {
                     text.Append("\r\n[LogicChipItem 为空]\r\n");
+                    text.Append(item_info.OneTag.GetDescription());
+                }
                 else
                     text.Append(item_info.LogicChipItem.GetDescription());
             }

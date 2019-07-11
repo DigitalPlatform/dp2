@@ -89,11 +89,15 @@ namespace DigitalPlatform.CirculationClient
         {
             public string LastDate { get; set; }
             public long LastIndex { get; set; }
+
+            // [out] 返回处理概述信息
+            public ProcessInfo ProcessInfo { get; set; }
         }
 
         public virtual int AddItems(
-    List<FingerprintItem> items,
-    out string strError)
+            List<FingerprintItem> items,
+            ProcessInfo info,
+            out string strError)
         {
             strError = "尚未重载 AddItems() 函数";
             return -1;
@@ -182,6 +186,7 @@ namespace DigitalPlatform.CirculationClient
             long last_index = -1;    // -1 表示尚未处理
 
             // bool bUserChanged = false;
+            ProcessInfo info = new ProcessInfo();
 
             // strStartDate 里面可能会包含 ":1-100" 这样的附加成分
             StringUtil.ParseTwoPart(strStartDate,
@@ -298,6 +303,7 @@ namespace DigitalPlatform.CirculationClient
                             {
                                 nRet = TraceSetReaderInfo(
                                     dom,
+                                    info,
                                     out strError);
                             }
                             else
@@ -353,22 +359,38 @@ namespace DigitalPlatform.CirculationClient
                 {
                     Value = last_index == -1 ? 0 : 1,
                     LastDate = strLastDate,
-                    LastIndex = last_index
+                    LastIndex = last_index,
+                    ProcessInfo = info
                 };
             }
             catch (ChannelException ex)
             {
-                return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
+                return new ReplicationResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ProcessInfo = info
+                };
             }
             catch (InterruptException ex)
             {
                 // 2019/7/4
-                return new ReplicationResult { Value = -1, ErrorInfo = ex.Message };
+                return new ReplicationResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ProcessInfo = info
+                };
             }
             catch (Exception ex)
             {
                 string strError = "ReportForm DoReplication() exception: " + ExceptionUtil.GetDebugText(ex);
-                return new ReplicationResult { Value = -1, ErrorInfo = strError };
+                return new ReplicationResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError,
+                    ProcessInfo = info
+                };
             }
         }
 
@@ -390,6 +412,7 @@ namespace DigitalPlatform.CirculationClient
          * */
         int TraceSetReaderInfo(
             XmlDocument domLog,
+            ProcessInfo info,
             out string strError)
         {
             strError = "";
@@ -441,11 +464,11 @@ namespace DigitalPlatform.CirculationClient
                 if (strAction == "move"
                     && string.IsNullOrEmpty(strOldRecord) == false)
                 {
-                    if (DeleteFingerPrint(strOldRecord, out strError) == -1)
+                    if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
                         return -1;
                 }
 
-                if (AddFingerPrint(strRecord, out strError) == -1)
+                if (AddFingerPrint(strRecord, info, out strError) == -1)
                     return -1;
             }
             else if (strAction == "delete")
@@ -462,7 +485,7 @@ namespace DigitalPlatform.CirculationClient
 
                 if (string.IsNullOrEmpty(strOldRecord) == false)
                 {
-                    if (DeleteFingerPrint(strOldRecord, out strError) == -1)
+                    if (DeleteFingerPrint(strOldRecord, info, out strError) == -1)
                         return -1;
                 }
             }
@@ -477,6 +500,7 @@ namespace DigitalPlatform.CirculationClient
 
         // 写入新记录的指纹缓存，或者删除指纹缓存
         int AddFingerPrint(string strRecord,
+            ProcessInfo info,
             out string strError)
         {
             strError = "";
@@ -501,6 +525,7 @@ namespace DigitalPlatform.CirculationClient
             //      其他  失败。错误码
             int nRet = AddItems(
                 new List<FingerprintItem> { item },
+                info,
                 out strError);
             if (nRet != 0)
                 return -1;
@@ -509,6 +534,7 @@ namespace DigitalPlatform.CirculationClient
         }
 
         int DeleteFingerPrint(string strOldRecord,
+            ProcessInfo info,
             out string strError)
         {
             strError = "";
@@ -528,11 +554,11 @@ namespace DigitalPlatform.CirculationClient
                 //      其他  失败。错误码
                 int nRet = AddItems(
                     new List<FingerprintItem> { item },
+                    info,
                     out strError);
                 if (nRet != 0)
                     return -1;
             }
-
             return 0;
         }
 
@@ -601,7 +627,7 @@ namespace DigitalPlatform.CirculationClient
                 // return:
                 //      -1  出错
                 //      >=0 实际发送给接口程序的事项数目
-                int nRet = CreateFingerprintCache(null,
+                int nRet = CreateFingerprintCache(null,null,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                     return new NormalResult { Value = nRet, ErrorInfo = strError };
@@ -680,6 +706,7 @@ namespace DigitalPlatform.CirculationClient
         //      -1  出错
         //      >=0 实际发送给接口程序的事项数目
         int CreateFingerprintCache(DpResultSet resultset,
+            ProcessInfo info,
             out string strError)
         {
             strError = "";
@@ -696,6 +723,7 @@ namespace DigitalPlatform.CirculationClient
                     //      0   成功
                     //      其他  失败。错误码
                     nRet = this.AddItems(
+                        null,
                         null,
                         out strError);
                     if (nRet != 0)
@@ -735,6 +763,7 @@ out string strFingerprint);
                         //      其他  失败。错误码
                         nRet = this.AddItems(
                             items,
+                            info,
                             out strError);
                         if (nRet != 0)
                             return -1;
@@ -751,6 +780,7 @@ out string strFingerprint);
                     //      其他  失败。错误码
                     nRet = this.AddItems(
                         items,
+                        info,
                         out strError);
                     if (nRet != 0)
                         return -1;
@@ -956,7 +986,7 @@ out strError);
                     //      -2  remoting服务器连接失败。驱动程序尚未启动
                     //      -1  出错
                     //      >=0 实际发送给接口程序的事项数目
-                    nRet = CreateFingerprintCache(resultset,
+                    nRet = CreateFingerprintCache(resultset,null,
     out strError);
                     if (nRet == -1 || nRet == -2)
                         return -1;
@@ -1096,7 +1126,7 @@ out strError);
                 //      -2  remoting服务器连接失败。驱动程序尚未启动
                 //      -1  出错
                 //      >=0 实际发送给接口程序的事项数目
-                nRet = CreateFingerprintCache(resultset,
+                nRet = CreateFingerprintCache(resultset,null,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                     return -1;
@@ -1245,6 +1275,16 @@ out string strError);
     {
         // [out] 返回图象
         public Image Image { get; set; }
+    }
+
+    public class ProcessInfo
+    {
+        // 新创建数量
+        public int NewCount { get; set; }
+        // 删除数量
+        public int DeleteCount { get; set; }
+        // 修改数量
+        public int ChangeCount { get; set; }
     }
 }
 

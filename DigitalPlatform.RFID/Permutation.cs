@@ -59,6 +59,8 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        public static int MAX_ITEMS = 10000;
+
         /// <summary>
         /// 递归算法求排列(私有成员)
         /// </summary>
@@ -66,7 +68,7 @@ namespace DigitalPlatform.RFID
         /// <param name="t">所求数组</param>
         /// <param name="startIndex">起始标号</param>
         /// <param name="endIndex">结束标号</param>
-        private static void GetPermutation(ref List<T[]> list, T[] t, int startIndex, int endIndex)
+        private static bool GetPermutation(ref List<T[]> list, T[] t, int startIndex, int endIndex)
         {
             if (startIndex == endIndex)
             {
@@ -76,6 +78,8 @@ namespace DigitalPlatform.RFID
                 }
                 T[] temp = new T[t.Length];
                 t.CopyTo(temp, 0);
+                if (list.Count >= MAX_ITEMS)
+                    return false;// 溢出。及时退出
                 list.Add(temp);
             }
             else
@@ -83,10 +87,14 @@ namespace DigitalPlatform.RFID
                 for (int i = startIndex; i <= endIndex; i++)
                 {
                     Swap(ref t[startIndex], ref t[i]);
-                    GetPermutation(ref list, t, startIndex + 1, endIndex);
+                    bool bRet = GetPermutation(ref list, t, startIndex + 1, endIndex);
+                    if (bRet == false)
+                        return false; // 溢出。及时退出
                     Swap(ref t[startIndex], ref t[i]);
                 }
             }
+
+            return true;
         }
 
         /// <summary>

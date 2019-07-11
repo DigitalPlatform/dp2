@@ -113,7 +113,8 @@ namespace dp2SSL
                 result = await RecognitionFace("");
                 if (result.Value == -1)
                 {
-                    SetGlobalError("face", result.ErrorInfo);
+                    if (result.ErrorCode != "cancelled")
+                        SetGlobalError("face", result.ErrorInfo);
                     DisplayError(ref videoRecognition, result.ErrorInfo);
                     return;
                 }
@@ -371,7 +372,7 @@ namespace dp2SSL
         {
             return;
             List<Entity> results = new List<Entity>();
-            foreach(var entity in update_entities)
+            foreach (var entity in update_entities)
             {
                 // 检查 PII。TODO: 还要检查在架状态
                 if (string.IsNullOrEmpty(entity.PII) == false)

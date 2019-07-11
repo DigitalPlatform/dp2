@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+
+using DigitalPlatform.Core;
 
 namespace dp2SSL
 {
@@ -153,7 +154,7 @@ Description = "程序启动时候是否自动全屏"
             }
         }
 
-        // 默认值 true
+        // 默认值 false
         [Display(
 Order = 7,
 Name = "借还按钮自动触发",
@@ -169,6 +170,25 @@ Description = "借书和还书操作是否自动触发操作按钮"
             set
             {
                 _config.SetBoolean("operation", "auto_trigger", value);
+            }
+        }
+
+        // 默认值 true
+        [Display(
+Order = 8,
+Name = "监控相关进程",
+Description = "自动监控和重启 人脸中心 RFID中心 指纹中心等模块"
+)]
+        [Category("维护")]
+        public bool ProcessMonitor
+        {
+            get
+            {
+                return _config.GetBoolean("global", "process_monitor", true);
+            }
+            set
+            {
+                _config.SetBoolean("global", "process_monitor", value);
             }
         }
     }

@@ -1077,7 +1077,7 @@ EventLogEntryType.Information);
             binding.ReaderQuotas = quotas;
             SetTimeout(binding);
             binding.ReliableSession.InactivityTimeout = new TimeSpan(0, 20, 0);
-            // binding.ReliableSession.Enabled = false;
+            // binding.ReliableSession.Enabled = true;
 
             return binding;
         }

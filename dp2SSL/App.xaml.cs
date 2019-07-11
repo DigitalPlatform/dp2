@@ -31,6 +31,9 @@ namespace dp2SSL
 
         CancellationTokenSource _cancelRefresh = new CancellationTokenSource();
 
+        CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
+
+
         Mutex myMutex;
 
         ErrorTable _errorTable = null;
@@ -155,6 +158,54 @@ namespace dp2SSL
             {
                 DeleteLastTempFiles();
             });
+
+            StartProcessManager();
+        }
+
+        public void StartProcessManager()
+        {
+            // 停止前一次的 monitor
+            if (_cancelProcessMonitor != null)
+            {
+                _cancelProcessMonitor.Cancel();
+                _cancelProcessMonitor.Dispose();
+
+                _cancelProcessMonitor = new CancellationTokenSource();
+            }
+
+            if (ProcessMonitor == true)
+            {
+                List<ProcessInfo> infos = new List<ProcessInfo>();
+                if (string.IsNullOrEmpty(App.FaceUrl) == false
+                    && ProcessManager.IsIpcUrl(App.FaceUrl))
+                    infos.Add(new ProcessInfo
+                    {
+                        Name = "人脸中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-人脸中心",
+                        MutexName = "{E343F372-13A0-482F-9784-9865B112C042}"
+                    });
+                if (string.IsNullOrEmpty(App.RfidUrl) == false
+                    && ProcessManager.IsIpcUrl(App.RfidUrl))
+                    infos.Add(new ProcessInfo
+                    {
+                        Name = "RFID中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-RFID中心",
+                        MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
+                    });
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false
+                    && ProcessManager.IsIpcUrl(App.FingerprintUrl))
+                    infos.Add(new ProcessInfo
+                    {
+                        Name = "指纹中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-指纹中心",
+                        MutexName = "{75FB942B-5E25-4228-9093-D220FFEDB33C}"
+                    });
+                ProcessManager.Start(infos, 
+                    (info, text) => {
+                        WpfClientInfo.Log?.Info($"{info.Name} {text}");
+                    },
+                    _cancelProcessMonitor.Token);
+            }
         }
 
         void DeleteLastTempFiles()
@@ -197,7 +248,8 @@ namespace dp2SSL
             WpfClientInfo.Finish();
             LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
 
-            _cancelRefresh.Cancel();
+            _cancelRefresh?.Cancel();
+            _cancelProcessMonitor?.Cancel();
 
             base.OnSessionEnding(e);
         }
@@ -210,6 +262,7 @@ namespace dp2SSL
             LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
 
             _cancelRefresh.Cancel();
+            _cancelProcessMonitor?.Cancel();
 
             // EndFingerprint();
 
@@ -286,6 +339,16 @@ namespace dp2SSL
             get
             {
                 return (bool)WpfClientInfo.Config?.GetBoolean("operation", "auto_trigger", false);
+            }
+        }
+
+        public static bool ProcessMonitor
+        {
+            get
+            {
+                return (bool)WpfClientInfo.Config?.GetBoolean("global",
+                    "process_monitor", 
+                    true);
             }
         }
 

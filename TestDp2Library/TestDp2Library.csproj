@@ -60,8 +60,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="BarcodeValidator\TestBarcodeMultiMatch.cs" />
     <Compile Include="TestAuthorNumber.cs" />
-    <Compile Include="TestBarcodeValidator.cs" />
+    <Compile Include="BarcodeValidator\TestBarcodeValidator.cs" />
     <Compile Include="TestBiblioTable.cs" />
     <Compile Include="TestDp2Library.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

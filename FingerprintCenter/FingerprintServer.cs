@@ -369,7 +369,8 @@ Exception rethrown at [0]:
             out string strError)
         {
             return Program.FingerPrint.AddItems(items,
-    out strError);
+                null,
+                out strError);
         }
 
         public int CancelGetFingerprintString()

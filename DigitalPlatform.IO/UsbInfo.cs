@@ -70,25 +70,57 @@ namespace DigitalPlatform.IO
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 rfidcenter 
+媒体类型 text 
+内容 发生未捕获的异常: 
+Type: System.Runtime.InteropServices.COMException
+Message: 消息筛选器取消了调用。 (异常来自 HRESULT:0x80010002 (RPC_E_CALL_CANCELED))
+Stack:
+在 System.Management.ThreadDispatch.Start()
+在 System.Management.ManagementScope.Initialize()
+在 System.Management.ManagementObjectSearcher.Initialize()
+在 System.Management.ManagementObjectSearcher.Get()
+在 DigitalPlatform.IO.UsbInfo.GetUSBDevices()
+在 DigitalPlatform.IO.UsbInfo.StartWatch(delegate_changed callback, CancellationToken token)
+在 RfidCenter.MainForm..ctor()
+在 RfidCenter.Program.Main()
+
+
+rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: 94DE80D1DF42 
+操作时间 2019/6/26 16:47:50 (Wed, 26 Jun 2019 16:47:50 +0800) 
+前端地址 xxxx 经由 http://dp2003.com/dp2library 
+         * */
         public static List<USBDeviceInfo> GetUSBDevices()
         {
             List<USBDeviceInfo> devices = new List<USBDeviceInfo>();
 
-            ManagementObjectCollection collection;
-            using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_USBHub"))
-                collection = searcher.Get();
-
-            foreach (var device in collection)
+            try
             {
-                devices.Add(new USBDeviceInfo(
-                (string)device.GetPropertyValue("DeviceID"),
-                (string)device.GetPropertyValue("PNPDeviceID"),
-                (string)device.GetPropertyValue("Description")
-                ));
+                using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_USBHub"))
+                {
+                    using (ManagementObjectCollection collection = searcher.Get())
+                    {
+                        foreach (var device in collection)
+                        {
+                            devices.Add(new USBDeviceInfo(
+                            (string)device.GetPropertyValue("DeviceID"),
+                            (string)device.GetPropertyValue("PNPDeviceID"),
+                            (string)device.GetPropertyValue("Description")
+                            ));
+                        }
+                    }
+                }
+                return devices;
             }
-
-            collection.Dispose();
-            return devices;
+            catch(Exception)
+            {
+                // TODO: 可考虑写入错误日志
+                return devices;
+            }
         }
 
         public static string ToString(List<USBDeviceInfo> infos)

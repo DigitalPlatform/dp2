@@ -31,6 +31,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryServer;
 using dp2Circulation.OperLog;
+using static dp2Circulation.OperLog.OperLogReport;
 
 namespace dp2Circulation
 {
@@ -374,12 +375,16 @@ namespace dp2Circulation
             return -1;
         }
 
+        bool _processing = false;
+
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
+            _processing = !bEnable;
+
             this.comboBox_quickSetFilenames.Enabled = bEnable;
 
             this.textBox_logFileName.Enabled = bEnable;
@@ -1176,7 +1181,7 @@ namespace dp2Circulation
                 "type");
             string uid = DomUtil.GetElementText(dom.DocumentElement,
     "uid");
-            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, 
+            string strBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "itemBarcode");
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "itemLocation");
@@ -5693,7 +5698,8 @@ FileShare.ReadWrite))
 
             menuItem = new MenuItem("筛选(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_filter_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5711,26 +5717,30 @@ FileShare.ReadWrite))
 
             menuItem = new MenuItem("导出到 XML 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportXml_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出附件(&A) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportAttachment_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
             menuItem = new MenuItem("导出 amerce 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportAmerceExcel_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("导出 RFID 标签写入 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportRfidWriteExcel_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -5741,13 +5751,15 @@ FileShare.ReadWrite))
 
             menuItem = new MenuItem("打印解释内容(&P) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_printHtml_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("补做 SetBiblioInfo-move (&M) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_redoSetBiblioInfoMove_Click);
-            if (this.listView_records.SelectedItems.Count == 0)
+            if (this.listView_records.SelectedItems.Count == 0
+                || this._processing == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -6190,7 +6202,9 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            IXLWorksheet sheet = doc.Worksheets.Add("表格");
+            IXLWorksheet sheet = doc.Worksheets.Add("基本");
+            IXLWorksheet sheet1 = doc.Worksheets.Add("统计");
+
             bool bLaunchExcel = true;
             try
             {
@@ -6213,7 +6227,13 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
 
                 //
-                OperLogReport.BuildRfidWriteReport(lines, sheet);
+                OperLogReport.BuildRfidWriteReport(lines, sheet, out List<KeyStatisLine> lines1);
+
+                // 输出日统计表。
+                OperLogReport.BuildRfidStatisSheet(
+        lines1,
+        sheet1,
+        out List<DateStatisLine> lines2);
             }
             finally
             {
@@ -6680,14 +6700,13 @@ MessageBoxDefaultButton.Button1);
                     string strLogFileName = ListViewUtil.GetItemText(item, COLUMN_FILENAME);
                     string strIndex = ListViewUtil.GetItemText(item, COLUMN_INDEX);
 
-                    string strXml = "";
                     // 从服务器获得
                     // return:
                     //      -1  出错
                     //      0   正常
                     //      1   用户中断
                     int nRet = GetXml(item,
-            out strXml,
+            out string strXml,
             out strError);
                     if (nRet == 1)
                         return -1;
@@ -7170,7 +7189,7 @@ Keys keyData)
         }
 
 
-#region 改进后的批处理功能
+        #region 改进后的批处理功能
 
         // parameters:
         //      bInCacheFile    lHint指示的是否为本地cache文件中的hint
@@ -8399,7 +8418,7 @@ MessageBoxDefaultButton.Button1);
             ERROR1:
             return -1;
         }
-#endregion
+        #endregion
 
         public string UiState
         {
@@ -9609,7 +9628,7 @@ MessageBoxDefaultButton.Button1);
                             {
                                 temp.LoadXml(result);
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 MessageBox.Show(this, $"输入的记录 XML 格式不正确: {ex.Message}。请重新输入");
                                 goto REDO_INPUT;

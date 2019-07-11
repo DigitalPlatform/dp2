@@ -571,6 +571,11 @@ namespace DigitalPlatform.RFID
 
             Element element = new Element(start);
 
+            /*
+            // testing
+            throw new Exception("Element.Parse test throw exception");
+            */
+
             if (data.Length - offset < 1)
                 throw new Exception($"data 长度不足，从 {offset} 开始应至少为 1 bytes");
 
@@ -598,7 +603,7 @@ namespace DigitalPlatform.RFID
 
             if (element._precursor.Offset == true)
             {
-                // 填充字节数
+                // 填充字节数 padding length byte
                 element._paddings = data[offset];
                 offset++;
             }
@@ -615,6 +620,11 @@ namespace DigitalPlatform.RFID
             bytes = offset - start + element._lengthOfData + element._paddings;
 
             element.OriginData = new byte[bytes];
+
+            // 2019/7/7
+            if (start + bytes > data.Length)
+                throw new Exception($"data 长度不足。从 {start} 开始不足 {bytes}(data 总长度 {data.Length})");
+            Debug.Assert(start + bytes <= data.Length, "");
             Array.Copy(data, start, element.OriginData, 0, bytes);
 
             element.Content = element._compactedData;
@@ -754,7 +764,9 @@ namespace DigitalPlatform.RFID
 
                 // 加工前没有 padding 的情况
                 // 1) 先插入一个 Padding length 位
-                result.Insert(1, (byte)(delta - 1));
+                result.Insert(1 
+                    + additional_oid_count,     // 如果 OID 值大于等于 15, 则 precursor 后面有一个 byte 表示相对 OID 值，padding length byte 还要在它之后。2019/7/7
+                    (byte)(delta - 1));
                 if (delta - 1 > 0)
                 {
                     for (int i = 0; i < delta - 1; i++)
@@ -763,7 +775,13 @@ namespace DigitalPlatform.RFID
                     }
                 }
                 // 2) Offset bit 设置为 1
-                result[0] |= 0x80;
+                // result[0] |= 0x80;
+                // 修改 precursor.Offset
+
+                // 2019/7/7
+                precursor.Offset = true;
+                result[0] = precursor.ToByte();
+                // Debug.Assert(result[0] == precursor.ToByte());
 
                 result.AddRange(more);
                 return result.ToArray();
@@ -863,7 +881,21 @@ namespace DigitalPlatform.RFID
             {
                 bin += "(" + GetContentParameterDesription(this.Content) + ")";
             }
-            return $"OID={((int)this.OID)}({this.OID}),text='{this.Text}',content={bin},compacted={compacted}, OriginData={GetHexString(this.OriginData)}";
+            return $"OID={((int)this.OID)}({this.OID}),text='{DisplayText(this.Text)}',content={bin},compacted={compacted}, OriginData={GetHexString(this.OriginData)}";
+        }
+
+        // 2019/7/6
+        static string DisplayText(string text)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (char ch in text)
+            {
+                if (ch == 0)
+                    result.Append("{zero}");    // 2019/7/6 表示这里有个原本无法显示的 0 char
+                else
+                    result.Append(ch);
+            }
+            return result.ToString();
         }
 
         // 获得 Content Parameter 的解释文字
