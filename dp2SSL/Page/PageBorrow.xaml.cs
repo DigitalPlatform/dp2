@@ -2116,7 +2116,7 @@ out string strError);
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
-        ErrorTable _globalErrorTable = null;
+        // ErrorTable _globalErrorTable = null;
 
         // 设置全局区域错误字符串
         void SetGlobalError(string type, string error)
@@ -2128,6 +2128,8 @@ out string strError);
             if (type == "fingerprint" || type == "rfid")
                 App.CurrentApp?.SetError(type, error);
                 */
+            // Debug.Assert(type != "face", "");
+
             App.CurrentApp.SetError(type, error);
         }
 

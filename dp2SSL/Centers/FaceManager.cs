@@ -149,7 +149,7 @@ namespace dp2SSL
             }
         }
 
-        public static RecognitionFaceResult RecognitionFace(string style)
+        public static RecognitionFaceResult RecognitionFace(string style, bool setGlobalError = false)
         {
             try
             {
@@ -160,13 +160,15 @@ namespace dp2SSL
                 try
                 {
                     var result = channel.Object.RecognitionFace(style);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
+                    if (setGlobalError)
+                    {
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    }
                     return result;
                 }
                 finally
@@ -177,11 +179,12 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                Base.TriggerSetError(ex,
-                    new SetErrorEventArgs
-                    {
-                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
-                    });
+                if (setGlobalError)
+                    Base.TriggerSetError(ex,
+                        new SetErrorEventArgs
+                        {
+                            Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        });
                 return new RecognitionFaceResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
@@ -263,7 +266,8 @@ namespace dp2SSL
 
         public static GetFeatureStringResult GetFeatureString(byte[] imageData,
             string strExcludeBarcodes,
-            string strStyle)
+            string strStyle,
+            bool setGlobalError = false)
         {
             try
             {
@@ -276,13 +280,15 @@ namespace dp2SSL
                     var result = channel.Object.GetFeatureString(imageData,
                         strExcludeBarcodes,
                         strStyle);
-                    if (result.Value == -1)
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
+                    if (setGlobalError)
+                    {
+                        if (result.Value == -1)
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                    }
                     return result;
                 }
                 finally
@@ -293,11 +299,12 @@ namespace dp2SSL
             }
             catch (Exception ex)
             {
-                Base.TriggerSetError(ex,
-                    new SetErrorEventArgs
-                    {
-                        Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
-                    });
+                if (setGlobalError)
+                    Base.TriggerSetError(ex,
+                        new SetErrorEventArgs
+                        {
+                            Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                        });
                 return new GetFeatureStringResult { Value = -1, ErrorInfo = ex.Message };
             }
         }

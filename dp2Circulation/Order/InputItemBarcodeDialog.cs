@@ -180,7 +180,11 @@ string strText)
                     {
                         VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
                         e.Barcode = this.textBox_itemBarcode.Text;
-                        e.LibraryCode = Global.GetLibraryCode(StringUtil.GetPureLocation(book_item.BookItem.Location)); // 2016/4/18
+                        if (string.IsNullOrEmpty(Program.MainForm.BarcodeValidation))
+                            e.LibraryCode = Global.GetLibraryCode(StringUtil.GetPureLocation(book_item.BookItem.Location)); // 2016/4/18
+                        else
+                            e.LibraryCode = StringUtil.GetPureLocation(book_item.BookItem.Location); // 2019/7/12
+
                         this.VerifyBarcode(this, e);
                         // return:
                         //      -2  服务器没有配置校验方法，无法校验

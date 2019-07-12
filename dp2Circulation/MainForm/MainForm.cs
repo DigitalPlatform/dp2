@@ -4927,7 +4927,7 @@ Stack:
         //      -1  出错
         //      0   不需要进行变换
         //      1   需要进行变换
-        public int NeedTranformBarcode(string strLibraryCode, 
+        public int NeedTransformBarcode(string strLibraryCode, 
             out string strError)
         {
             strError = "";

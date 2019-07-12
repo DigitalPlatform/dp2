@@ -18,6 +18,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace dp2SSL
 {
@@ -552,6 +553,13 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
         public void SetError(string type, string error)
         {
+            /*
+            if (type == "face" && error != null)
+            {
+                Debug.Assert(false, "");
+            }
+            */
+
             _errorTable.SetError(type, error);
         }
 
