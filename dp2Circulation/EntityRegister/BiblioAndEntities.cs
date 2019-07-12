@@ -1817,6 +1817,12 @@ MessageBoxDefaultButton.Button2);
                     if (string.IsNullOrEmpty(edit.Barcode) == true)
                         conditions.Add("尚未输入册条码号");
 
+                    string location = "";
+                    if (string.IsNullOrEmpty(Program.MainForm.BarcodeValidation))
+                        location = Global.GetLibraryCode(StringUtil.GetPureLocation(edit.LocationString));
+                    else
+                        location = StringUtil.GetPureLocation(edit.LocationString); // 2019/7/12
+                    
                     // 检查册价格字符串格式是否正确
                     // 形式校验条码号
                     // return:
@@ -1826,7 +1832,7 @@ MessageBoxDefaultButton.Button2);
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
                     nRet = this.DoVerifyBarcode(
-                        Global.GetLibraryCode(StringUtil.GetPureLocation(edit.LocationString)),
+                        location,
                         edit.Barcode,
                         out strError);
                     if (nRet == -1)

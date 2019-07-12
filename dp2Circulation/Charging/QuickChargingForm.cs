@@ -1669,7 +1669,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             //      -1  出错
             //      0   不需要进行变换
             //      1   需要进行变换
-            nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode,
+            nRet = Program.MainForm.NeedTransformBarcode(
+                Program.MainForm.FocusLibraryCode,
                 out strError);
             if (nRet == -1)
             {

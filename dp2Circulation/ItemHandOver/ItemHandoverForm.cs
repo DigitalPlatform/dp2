@@ -1984,7 +1984,9 @@ this.splitContainer_inAndOutof,
             //      0   不需要进行变换
             //      1   需要进行变换
 
-            int nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode, out strError);
+            int nRet = Program.MainForm.NeedTransformBarcode(
+                Program.MainForm.FocusLibraryCode, 
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
             if (nRet == 1)
@@ -6832,7 +6834,8 @@ MessageBoxDefaultButton.Button2);
             //      -1  出错
             //      0   不需要进行变换
             //      1   需要进行变换
-            int nRet = Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode,
+            int nRet = Program.MainForm.NeedTransformBarcode(
+                Program.MainForm.FocusLibraryCode,
                 out string strError);
             if (nRet == -1)
             {

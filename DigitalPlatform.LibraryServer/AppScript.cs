@@ -2264,7 +2264,10 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  调用出错
                 //      0   校验正确
                 //      1   校验发现错误
-                nRet = VerifyItemBarcode(strLibraryCode, strNewBarcode, out strError);
+                nRet = VerifyItemBarcode(
+                    App.BarcodeValidation ? strLocation : strLibraryCode,
+                    strNewBarcode,
+                    out strError);
                 if (nRet != 0 && nRet != -2)
                 {
                     // return nRet;

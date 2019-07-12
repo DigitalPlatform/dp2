@@ -88,6 +88,17 @@ namespace DigitalPlatform.LibraryServer
             return info.Name + "|" + info.LastWriteTime.ToString("u") + "|" + info.Length.ToString();
         }
 
+        // 2019/7/12
+        // library.xml 中是否定义了 barcodeValidation 元素
+        public bool BarcodeValidation
+        {
+            get
+            {
+                XmlNode root = this.LibraryCfgDom?.DocumentElement?.SelectSingleNode("barcodeValidation");
+                return root != null;
+            }
+        }
+
         // return:
         //      -1  出错
         //      0   没有找到指定的参数
@@ -345,6 +356,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strCategory == "system")
                 {
+
                     // 2019/1/11
                     // RFID 相关定义
                     if (strName == "rfid")

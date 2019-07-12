@@ -257,7 +257,7 @@ namespace dp2Circulation
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = this.EntityControl.DoVerifyBarcode(
-                    strLibraryCode,
+                    string.IsNullOrEmpty(Program.MainForm.BarcodeValidation) ? strLibraryCode : strLocation,    // 2019/7/12
                     strBarcode,
                     out strError);
                 if (nRet == -1)

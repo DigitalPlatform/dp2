@@ -125,11 +125,10 @@ namespace dp2Circulation
 
         void _biblio_VerifyBarcode(object sender, VerifyBarcodeEventArgs e)
         {
-            string strError = "";
             e.Result = this.VerifyBarcode(
                 e.LibraryCode, //this.Channel.LibraryCodeList,
                 e.Barcode,
-                out strError);
+                out string strError);
             e.ErrorInfo = strError;
         }
 
