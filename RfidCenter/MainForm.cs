@@ -168,6 +168,18 @@ namespace RfidCenter
                     OutputHistory(result.ErrorInfo, 0);
             });
 
+            if (ClientInfo.IsMinimizeMode())
+            {
+                Task.Run(() =>
+                {
+                    Task.Delay(2000).Wait();
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        this.WindowState = FormWindowState.Minimized;
+                    }));
+                });
+            }
+
             this.Speak("RFID 中心启动");
         }
 

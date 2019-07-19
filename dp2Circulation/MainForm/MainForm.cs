@@ -809,6 +809,11 @@ Stack:
 
             if (this.AppInfo != null)
             {
+                // 2019/7/12
+                AppInfo.SetString("global",
+                    "currentLocation", 
+                    GetCurrentLocation());
+
                 // 消除短期保存的密码
                 bool bSavePasswordLong =
         AppInfo.GetBoolean(

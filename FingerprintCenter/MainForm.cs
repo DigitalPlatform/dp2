@@ -263,6 +263,18 @@ bool bClickClose = false)
                 else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                     OutputHistory(result.ErrorInfo, 0);
             });
+
+            if (ClientInfo.IsMinimizeMode())
+            {
+                Task.Run(() =>
+                {
+                    Task.Delay(2000).Wait();
+                    this.BeginInvoke((Action)(() =>
+                    {
+                        this.WindowState = FormWindowState.Minimized;
+                    }));
+                });
+            }
         }
 
         // 指纹功能是否初始化成功

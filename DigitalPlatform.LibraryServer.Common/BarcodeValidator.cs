@@ -160,7 +160,8 @@ namespace DigitalPlatform.LibraryServer.Common
         public TransformResult Transform(string location,
     string barcode)
         {
-            XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            // XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
+            var nodes = GetValidators(location);
             if (nodes.Count == 0)
                 return new TransformResult
                 {

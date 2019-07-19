@@ -502,7 +502,8 @@ namespace dp2SSL
         }
 
         public static bool StartModule(
-            string shortcut_path)
+            string shortcut_path,
+            string arguments)
         {
             string strShortcutFilePath = PathUtil.GetShortcutFilePath(
                     shortcut_path
@@ -512,7 +513,8 @@ namespace dp2SSL
             if (File.Exists(strShortcutFilePath) == false)
                 return false;
 
-            Process.Start(strShortcutFilePath);
+            // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
+            Process.Start(strShortcutFilePath, arguments);
             return true;
         }
 

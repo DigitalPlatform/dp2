@@ -6861,6 +6861,8 @@ MessageBoxDefaultButton.Button2);
                 e.Barcode = strText;
             }
 
+            // TODO: 可否增加 VerifyBarcode() 过程？
+
             // 把册条码号直接加入行中，然后等待专门的线程来装载刷新
             // 要查重
             ListViewItem dup = ListViewUtil.FindItem(this.listView_in, e.Barcode, COLUMN_BARCODE);
