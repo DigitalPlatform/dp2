@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.14.*")]
-[assembly: AssemblyFileVersion("3.14.0.0")]
+[assembly: AssemblyVersion("3.15.*")]
+[assembly: AssemblyFileVersion("3.15.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -194,4 +194,5 @@ ItemCanReturn()
 //      3.12 (2019/6/1) library.xml 中增加 barcodeValidation 元素。和配套的机制
 //      3.13 (2019/6/9) RefreshDatabase 在 includeFiles 中包含 "browse" 的时候，会处理 browse_xxx 这样的配置文件模板文件。以前的版本不会处理 browse_xxx 这样的
 //              开始支持人脸识别功能
-//      3.14 （2019/6/23）GetRes() API 的 strStyle 参数支持使用 "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等。这个特性暂时只支持静态文件
+//      3.14 (2019/6/23）GetRes() API 的 strStyle 参数支持使用 "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等。这个特性暂时只支持静态文件
+//      3.15 (2019/7/12) 新的 barcodeValidation 机制，会用馆藏地(而不是馆代码)字符串来作为 libraryCode 参数进行条码校验和变换。配套的内务前端也可发来组名，条码校验规则里面用通配符一般可以适应这两种情况

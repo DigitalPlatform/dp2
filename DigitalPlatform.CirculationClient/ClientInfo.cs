@@ -170,11 +170,10 @@ namespace DigitalPlatform.CirculationClient
                     // 在用户目录中写入一个隐藏文件，表示序列号功能已经启用
                     // this.WriteSerialNumberStatusFile();
 
-                    string strError = "";
                     int nRet = VerifySerialCode($"{product_name}需要先设置序列号才能使用",
                         "",
                         "reinput",
-                        out strError);
+                        out string strError);
                     if (nRet == -1)
                     {
                         MessageBox.Show(MainForm, $"{product_name}需要先设置序列号才能使用");
@@ -1006,5 +1005,19 @@ delegate_action action)
 
         #endregion
 
+        public static bool IsMinimizeMode()
+        {
+            try
+            {
+                // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
+                var args = AppDomain.CurrentDomain?.SetupInformation?.ActivationArguments?.ActivationData[0];
+                // List<string> args = StringUtil.GetCommandLineArgs();
+                return args.IndexOf("minimize") != -1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

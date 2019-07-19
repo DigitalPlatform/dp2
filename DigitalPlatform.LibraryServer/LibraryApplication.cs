@@ -67,7 +67,7 @@ namespace DigitalPlatform.LibraryServer
 
         public DailyItemCountTable DailyItemCountTable = new DailyItemCountTable();
 
-        internal static DateTime _expire = new DateTime(2019, 7, 15); // 上一个版本是 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+        internal static DateTime _expire = new DateTime(2019, 10, 15); // 上一个版本是 2019/7/15 2019/5/15 2019/2/15 2018/11/15 2018/9/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
 
 #if NO
         int m_nRefCount = 0;

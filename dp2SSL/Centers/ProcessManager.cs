@@ -47,7 +47,7 @@ namespace dp2SSL
                         writeLog?.Invoke(info, "进程被重新启动");
 
                         // 启动
-                        WpfClientInfo.StartModule(info.ShortcutPath);
+                        WpfClientInfo.StartModule(info.ShortcutPath, "minimize");
                     }
                 }
             });

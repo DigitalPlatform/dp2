@@ -185,5 +185,99 @@ namespace TestDp2Library
             }
         }
 
+
+        [TestMethod]
+        public void Test04()
+        {
+            string xml = @"
+<barcodeValidation>
+    <validator location=''>
+        <patron>
+            <CMIS />
+            <range value='000001-009999' />
+            <range value='P000001-P999999' />
+        </patron>
+        <entity>
+            <range value='00000001-00999999' />
+            <range value='20000001-20999999' />
+            <range value='Z00001-Z99999' />
+        </entity>
+    </validator>
+    <validator location='北院*'>
+        <patron>
+            <CMIS />
+            <range value='N0000-N9999' />
+            <range value='DZ0000-DZ9999' />
+        </patron>
+        <entity>
+            <range value='BY200000000-BY999999999' />
+            <range value='200000000-999999999' transform='result= &quot;BY&quot; + barcode ;' />
+        </entity>
+    </validator>
+    <validator location='中院*'>
+        <patron>
+            <CMIS />
+            <range value='N0000-N9999' />
+            <range value='DZ0000-DZ9999' />
+        </patron>
+        <entity>
+            <range value='ZY200000000-ZY999999999' />
+            <range value='200000000-999999999' transform='result= &quot;ZY&quot; + barcode ;' />
+        </entity>
+    </validator>
+    <validator location='南院*'>
+        <patron>
+            <CMIS />
+            <range value='N0000-N9999' />
+            <range value='DZ0000-DZ9999' />
+        </patron>
+        <entity>
+            <range value='NY200000000-NY999999999' />
+            <range value='200000000-999999999' transform='result= &quot;NY&quot; + barcode ;' />
+        </entity>
+    </validator>
+</barcodeValidation>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Transform("北院", "N9999");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("patron", result.Type);
+                Assert.AreEqual(false, result.Transformed);
+                Assert.AreEqual(null, result.TransformedBarcode);
+            }
+
+            /*
+            // 直接匹配
+            {
+                var result = validator.Validate("北院书库1", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            // 这个应该匹配不上
+            {
+                var result = validator.Validate("南院书库", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual(null, result.Type);
+            }
+
+            // 前方一致匹配
+            {
+                var result = validator.Validate("北院其他库", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+
+            // 前方一致匹配
+            {
+                var result = validator.Validate("北院阅览室", "0000001");
+                Assert.AreEqual(true, result.OK);
+                Assert.AreEqual("entity", result.Type);
+            }
+            */
+        }
+
     }
 }
