@@ -1889,7 +1889,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2019, 7, 15); // 上一个版本是 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2020, 7, 15); // 上一个版本是 2019/7/15 2018/7/15 2018/5/15 2018/3/15 2017/1/15 2017/12/1 2017/9/1 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)
