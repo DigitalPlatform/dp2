@@ -3221,12 +3221,10 @@ out strError);
                 if (_verifyBarcodeFuncTable.ContainsKey(strLocation) == false)
                 {
 
-                    string strLibraryCode = "";
-                    string strRoom = "";
                     // 解析
                     Global.ParseCalendarName(strLocation,
-                out strLibraryCode,
-                out strRoom);
+                out string strLibraryCode,
+                out string strRoom);
 
                     REDO_VERIFYBARCODE:
                     // <para>-2  服务器没有配置校验方法，无法校验</para>
@@ -3237,7 +3235,7 @@ out strError);
                     nRet = Program.MainForm.VerifyBarcode(
     this.stop,
     channel,
-    strLibraryCode,
+    string.IsNullOrEmpty(Program.MainForm.BarcodeValidation) ? strLibraryCode : strLocation,
     strBarcode,
     null,
     out strError);
