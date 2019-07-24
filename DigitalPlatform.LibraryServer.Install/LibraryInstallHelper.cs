@@ -935,10 +935,9 @@ RestoreLibraryParam param
                             param.Stop.SetMessage("正在修改 library.xml 文件");
 
                         // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
-                        XmlDocument target_dom = null;
                         nRet = MergeLibraryXml(info.Dom,
                         new_library_dom,
-                        out target_dom,
+                        out XmlDocument target_dom,
                         out strError);
                         if (nRet == -1)
                         {
@@ -1142,6 +1141,21 @@ RestoreLibraryParam param
             old_dom,
             target_dom,
             "externalMessageInterface");
+
+            // 2019/7/24
+            // 检查两个保留 account 元素的 type 属性
+            {
+                XmlNodeList accounts = target_dom.DocumentElement.SelectNodes("accounts/account[@name='reader' or @name='public']");
+                foreach (XmlElement account in accounts)
+                {
+                    string type = account.GetAttribute("type");
+                    if (string.IsNullOrEmpty(type))
+                    {
+                        // 强制修改
+                        account.SetAttribute("type", "reader");
+                    }
+                }
+            }
 
             return 0;
         }

@@ -440,17 +440,21 @@ namespace DigitalPlatform.CirculationClient
                     strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "oldRecord",
                         out node);
+                    /*
                     if (node == null)
                     {
                         strError = "日志记录中缺<oldRecord>元素";
                         return -1;
-                    }
+                    }*/
 
-                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
-                    if (string.IsNullOrEmpty(strOldRecPath) == true)
+                    if (node != null)
                     {
-                        strError = "日志记录中<oldRecord>元素内缺recPath属性值";
-                        return -1;
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                        if (string.IsNullOrEmpty(strOldRecPath) == true)
+                        {
+                            strError = "日志记录中<oldRecord>元素内缺recPath属性值";
+                            return -1;
+                        }
                     }
 
                     // 如果移动过程中没有修改，则要用旧的记录内容写入目标
