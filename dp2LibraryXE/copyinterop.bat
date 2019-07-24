@@ -5,7 +5,7 @@ MD x64
 
 CD ..\packages\system.data.sqlite.core.*
 
-copy .\build\net40\x86\sqlite.interop.dll ..\..\dp2circulation\x86
-copy .\build\net40\x64\sqlite.interop.dll ..\..\dp2circulation\x64
+copy .\build\net40\x86\sqlite.interop.dll ..\..\dp2libraryxe\x86
+copy .\build\net40\x64\sqlite.interop.dll ..\..\dp2libraryxe\x64
 
-CD ..\..\dp2circulation
+CD ..\..\dp2libraryxe
