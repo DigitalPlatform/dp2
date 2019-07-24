@@ -225,6 +225,9 @@ ModelManifest.xml
 !/RfidCenter/x64/
 !/RfidCenter/x64/Drivers/
 
+dp2Circulation/x86/SQLite.Interop.dll
+dp2Circulation/x64/SQLite.Interop.dll
+
 FaceCenter/
 
 FaceDrivers.ArcSoft/

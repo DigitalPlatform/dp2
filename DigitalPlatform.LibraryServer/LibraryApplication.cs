@@ -3081,6 +3081,25 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2019/7/24
+            // 检查两个保留 account 元素的 type 属性
+            {
+                XmlNodeList accounts = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account[@name='reader' or @name='public']");
+                foreach(XmlElement account in accounts)
+                {
+                    string type = account.GetAttribute("type");
+                    if (string.IsNullOrEmpty(type))
+                    {
+                        // errors.Add($"name属性值为 '{account.GetAttribute("name")}' 的 account 元素，其 type 属性值('')错误，必须为 'reader'");
+
+                        // 强制修改
+                        account.SetAttribute("type", "reader");
+                        this.Changed = true;
+                    }
+                }
+            }
+
+            // 检查图书馆名
             string libraryName = DomUtil.GetElementText(this.LibraryCfgDom.DocumentElement, "libraryInfo/libraryName");
             if (string.IsNullOrEmpty(libraryName) == false && libraryName.IndexOfAny(new char[] { '/', '\\' }) != -1)
                 errors.Add($"libraryInfo/libraryName 元素中的图书馆名 '{libraryName}' 不合法");
@@ -3094,6 +3113,9 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2019/7/24
+            if (this.Changed == true)
+                this.Flush();
             return 0;
         }
 

@@ -1989,6 +1989,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(strRestoreMode == "full" || strRestoreMode == "blank", "");
             }
 
+            if (!(Control.ModifierKeys == Keys.Control))
             {
                 // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
                 // 只需要 library.xml 即可，不需要 dp2library 在运行中。
@@ -2085,6 +2086,27 @@ MessageBoxDefaultButton.Button2);
                         ));
                         return;
                     }
+
+                    // 刷新 LineInfo。因为 library.xml 文件变了
+                    {
+                        LineInfo info = (LineInfo)item.Tag;
+                        if (info != null)
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   file not found
+                            //      1   succeed
+                            int nRet = info.Build(strDataDir,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, strError);
+                                item.BackColor = Color.Red;
+                                item.ForeColor = Color.White;
+                            }
+                        }
+                    }
+
                     if (bRunningChanged)
                     {
                         // 重新启动实例
@@ -2560,7 +2582,7 @@ MessageBoxDefaultButton.Button2);
 
 #endif
 
-#endregion
+        #endregion
 
     }
 
@@ -2670,6 +2692,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // supervisor
+            // 算法是获得 type 属性为空的第一个 account 元素
             XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
             if (nodeSupervisor != null)
             {
@@ -2754,7 +2777,22 @@ MessageBoxDefaultButton.Button2);
                 nodeAccounts = dom.CreateElement("accounts");
                 dom.DocumentElement.AppendChild(nodeAccounts);
             }
-            XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
+
+            // TODO: supervisor 账户改名这里还需要重新思考一下
+
+            XmlElement nodeSupervisor = null;
+            // XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
+            if (this.SupervisorUserName != null)
+            {
+                // 查重
+                nodeSupervisor = nodeAccounts.SelectSingleNode($"account[@name='{this.SupervisorUserName}']") as XmlElement;
+                // 如果发现以前有这个 @name，则先删除这个 account 元素，以避免出现重复
+                if (nodeSupervisor != null)
+                    nodeSupervisor.ParentNode.RemoveChild(nodeSupervisor);
+            }
+
+            nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
+
             if (nodeSupervisor == null)
             {
                 nodeSupervisor = dom.CreateElement("account");
@@ -2763,6 +2801,7 @@ MessageBoxDefaultButton.Button2);
 
             if (this.SupervisorUserName != null)
                 nodeSupervisor.SetAttribute("name", this.SupervisorUserName);
+
             if (this.SupervisorPassword != null)
             {
                 double version = LibraryServerUtil.GetLibraryXmlVersion(dom);
@@ -2797,7 +2836,6 @@ MessageBoxDefaultButton.Button2);
             }
 
             dom.Save(strFilename);
-
             return 0;
         }
     }
