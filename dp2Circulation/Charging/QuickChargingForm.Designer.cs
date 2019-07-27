@@ -57,7 +57,7 @@
             this.toolStripMenuItem_loadPatronInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_inventoryBook = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_boxing = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem_move = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_transfer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_read = new System.Windows.Forms.ToolStripMenuItem();
             this.dpColumn_color = new DigitalPlatform.CommonControl.DpColumn();
@@ -125,7 +125,7 @@
             this.toolStripMenuItem_loadPatronInfo,
             this.toolStripMenuItem_inventoryBook,
             this.toolStripMenuItem_boxing,
-            this.toolStripMenuItem_move,
+            this.toolStripMenuItem_transfer,
             this.toolStripSeparator5,
             this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
@@ -231,10 +231,10 @@
             // 
             // toolStripMenuItem_move
             // 
-            this.toolStripMenuItem_move.Name = "toolStripMenuItem_move";
-            this.toolStripMenuItem_move.Size = new System.Drawing.Size(188, 28);
-            this.toolStripMenuItem_move.Text = "调拨";
-            this.toolStripMenuItem_move.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
+            this.toolStripMenuItem_transfer.Name = "toolStripMenuItem_move";
+            this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(188, 28);
+            this.toolStripMenuItem_transfer.Text = "调拨";
+            this.toolStripMenuItem_transfer.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
             // 
             // toolStripSeparator5
             // 
@@ -588,7 +588,7 @@
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
             this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 28);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
-            this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTargetLocation_Click);
+            this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
             // 
             // QuickChargingForm
             // 
@@ -669,7 +669,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_testFunction;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_test_simulateReservationArrive;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_boxing;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_move;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_transfer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton toolStripButton_selectTargetLocation;
         private System.Windows.Forms.ToolStripButton toolStripButton_faceInput;

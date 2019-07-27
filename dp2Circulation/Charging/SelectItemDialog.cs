@@ -44,7 +44,7 @@ namespace dp2Circulation
         /// 功能类型
         /// 根据它决定某些事项显示为灰色文字
         /// </summary>
-        public string FunctionType = "borrow";  // borrow/return/renew/inventory/read。在 read 状态时，除了显示册记录行，还要显示书目记录行
+        public string FunctionType = "borrow";  // borrow/return/renew/inventory/read/transfer。在 read 状态时，除了显示册记录行，还要显示书目记录行
 
         /// <summary>
         /// 验证还书时的读者证条码号
