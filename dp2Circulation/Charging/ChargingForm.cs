@@ -3453,7 +3453,7 @@ Keys keyData)
         /// <summary>
         /// 移交
         /// </summary>
-        Move = 13,  // 移交 2017/1/12
+        Transfer = 13,  // 移交 2017/1/12
     }
 
     /*public*/

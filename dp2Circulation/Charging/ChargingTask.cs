@@ -163,6 +163,10 @@ namespace dp2Circulation
             {
                 strText = GetOperText("盘点");
             }
+            else if (this.Action == "transfer")
+            {
+                strText = GetOperText("调拨");
+            }
             else if (this.Action == "read")
             {
                 strText = GetOperText("读过");
@@ -227,7 +231,16 @@ namespace dp2Circulation
             string strSummary = "";
             if (string.IsNullOrEmpty(this.ItemSummary) == false)
                 strSummary = "\r\n---\r\n" + this.ItemSummary;
-            if (string.IsNullOrEmpty(this.ReaderBarcode) == false
+
+            if (strOperName == "调拨")
+            {
+                string direction = StringUtil.GetParameterByPrefix(this.Parameters, "direction");
+                if (string.IsNullOrEmpty(direction))
+                    direction = this.Parameters.Replace("location:", "-->");
+
+                return $"{strOperName} {this.ItemBarcode} {direction} {strSummary}";
+            }
+            else if (string.IsNullOrEmpty(this.ReaderBarcode) == false
                 && strOperName != "盘点")
                 return this.ReaderBarcode + " " + this.ReaderName + " " + strOperName + " " + this.ItemBarcode + strSummary;
             else
@@ -366,7 +379,8 @@ namespace dp2Circulation
                             || task.Action == "verify_lost"
                             || task.Action == "inventory"
                             || task.Action == "read"
-                            || task.Action == "boxing")
+                            || task.Action == "boxing"
+                            || task.Action == "transfer")
                         {
                             Return(task);
                         }
@@ -1111,6 +1125,8 @@ end_time);
 
             if (task.Action == "inventory")
                 strOperText = task.ReaderBarcode + " 盘点 " + task.ItemBarcode;
+            else if (task.Action == "transfer")
+                strOperText = task.ReaderBarcode + " 移交 " + task.ItemBarcode;
             else if (task.Action == "read")
             {
                 if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.68") < 0)
@@ -1175,6 +1191,19 @@ end_time);
                 }
                 strAction = "inventory";
             }
+            else if (task.Action == "transfer")
+            {
+                // testing
+                strReaderBarcode = "test_bachno";
+
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "尚未设定批次号";
+                    task.ErrorInfo = strError;
+                    goto ERROR1;
+                }
+                strAction = "transfer";
+            }
             else if (task.Action == "read")
             {
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
@@ -1231,6 +1260,9 @@ end_time);
             if (string.IsNullOrEmpty(task.Parameters) == false)
                 strStyle += "," + task.Parameters;
 
+            // testing
+            // if (strAction == "transfer")
+            //    strStyle += ",location:新馆藏地";
 #if NO
             if (strAction == "inventory")
             {
@@ -1343,7 +1375,8 @@ end_time);
             }
 
             string strItemXml = "";
-            if ((Program.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
+            if ((Program.MainForm.ChargingNeedReturnItemXml == true
+                || strAction == "inventory" || strAction == "transfer")
                 && item_records != null)
             {
                 Debug.Assert(item_records != null, "");
@@ -1385,6 +1418,12 @@ end_time);
                     task.ErrorInfo += "册记录中的馆藏地 '" + strLocation + "' 不在当前盘点要求的范围 '" + StringUtil.MakePathList(Container.FilterLocations) + "'。请及时处理";
                 }
             }
+
+            // 修改 Parameters，增加用于显示的调拨方向
+            if (lRet != -1
+    && strAction == "transfer")
+                task.Parameters += ",direction:" + return_info.Location;
+
 
             if (lRet == -1)
                 goto ERROR1;

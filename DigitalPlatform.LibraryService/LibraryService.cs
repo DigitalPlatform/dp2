@@ -5465,7 +5465,7 @@ namespace dp2Library
 
         // 还书
         // paramters:
-        //      strAction   动作。有 return/lost/inventory/read
+        //      strAction   动作。有 return/lost/inventory/read/transfer
         //      strReaderBarcode   读者证条码号
         //      strItemBarcode  册条码号
         //      bForce  是否强制执行还书操作。用于某些配置参数和数据结构不正确的特殊情况

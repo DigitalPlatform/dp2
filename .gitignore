@@ -228,6 +228,9 @@ ModelManifest.xml
 !dp2Secure.dll
 !Ionic.Zip.dll
 
+!AliMessageInterface/aliyun-net-sdk-core.dll
+!AliMessageInterface/aliyun-net-sdk-sms.dll
+
 !dp2Circulation/Microsoft.mshtml.dll
 
 dp2Circulation/x86/SQLite.Interop.dll

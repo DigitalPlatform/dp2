@@ -56,20 +56,37 @@ namespace DigitalPlatform.LibraryServer
                 "biblio",   //  2016/12/8
                 "oldRefID", // 2016/12/19
                 "shelfNo", // 2017/6/15 架号。例如 10-1 表示第十个架的第一排
+                "currentLocation",  // 2019/7/27 新增
             };
+
+        static string[] transfer_entity_element_names = new string[] {
+                "location",
+                "shelfNo", // 架号。例如 10-1 表示第十个架的第一排
+                "accessNo",
+                "currentLocation",  // 2019/7/27 新增
+                "batchNo",
+                "operations",
+            };
+
 
         // <DoEntityOperChange()的下级函数>
         // 合并新旧记录
+        // parameters:
+        //      element_names   要害元素名列表。如果为 null，表示会用到 core_entity_element_names
         static int MergeTwoEntityXml(XmlDocument domExist,
             XmlDocument domNew,
+            string[] element_names,
             out string strMergedXml,
             out string strError)
         {
             strMergedXml = "";
             strError = "";
 
+            if (element_names == null)
+                element_names = core_entity_element_names;
+
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
-            foreach (string name in core_entity_element_names)
+            foreach (string name in element_names)
             {
                 /*
                 string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
@@ -124,9 +141,12 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有变化
         //      1   有变化
         static int IsRegisterInfoChanged(XmlDocument dom1,
-            XmlDocument dom2)
+            XmlDocument dom2,
+            string[] element_names)
         {
-            for (int i = 0; i < core_entity_element_names.Length; i++)
+            if (element_names == null)
+                element_names = core_entity_element_names;
+            for (int i = 0; i < element_names.Length; i++)
             {
                 /*
                 string strText1 = DomUtil.GetElementText(dom1.DocumentElement,
@@ -3435,7 +3455,7 @@ out strError);
                             }
                         }
                     }
-                    else if (info.Action == "change")
+                    else if (info.Action == "change" || info.Action == "transfer")
                     {
                         if (bSimulate == true)
                         {
@@ -3446,7 +3466,7 @@ out strError);
                         {
                             // 执行SetEntities API中的"change"操作
                             nRet = DoEntityOperChange(
-                                // bForce,
+                                info.Action,
                                 strStyle,
                                 sessioninfo,
                                 channel,
@@ -4378,7 +4398,8 @@ out strError);
                     //      0   没有变化
                     //      1   有变化
                     nRet = IsRegisterInfoChanged(domExist,
-                        domOldRec);
+                        domOldRec,
+                        null);
                     if (nRet == 1)
                     {
 
@@ -4530,11 +4551,14 @@ out strError);
         // 执行SetEntities API中的"change"操作
         // 1) 操作成功后, NewRecord中有实际保存的新记录，NewTimeStamp为新的时间戳
         // 2) 如果返回TimeStampMismatch错，则OldRecord中有库中发生变化后的“原记录”，OldTimeStamp是其时间戳
+        // parameters:
+        //      strAction   change 或 transfer
         // return:
         //      -1  出错
         //      0   成功
         int DoEntityOperChange(
             // bool bForce,
+            string strAction,
             string strStyle,
             SessionInfo sessioninfo,
             RmsChannel channel,
@@ -4739,17 +4763,18 @@ out strError);
                     goto ERROR1;
 
                 bool bHasCirculationInfo = false;   // 册记录里面是否有流通信息
-                // bool bDetectCiculationInfo = false; // 是否已经探测过册记录中的流通信息
-                string strDetailInfo = "";  // 关于册记录里面是否有流通信息的详细提示文字
+                                                    // bool bDetectCiculationInfo = false; // 是否已经探测过册记录中的流通信息
+
                 // 观察已经存在的记录是否有流通信息
                 bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
-                    out strDetailInfo);
+                    out string strDetailInfo);  // strDetailInfo 关于册记录里面是否有流通信息的详细提示文字
                 // bDetectCiculationInfo = true;
 
                 if (nRet == 1)  // 册条码号有改变
                 {
                     if (bHasCirculationInfo == true
-                        && bForce == false)
+                        && bForce == false
+                        && strAction != "transfer")
                     {
                         // TODO: 可否增加允许同时修改所关联的已借阅读者记录修改能力?
                         // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
@@ -4776,6 +4801,8 @@ out strError);
                         goto ERROR1;
                     if (nRet == 1)  // 有改变
                     {
+                        // 注: transfer 操作是否允许带着流通信息修改 location?
+
                         if (bForce == false)
                         {
                             // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
@@ -4802,7 +4829,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                if (nRet == 1)
+                if (nRet == 1 && strAction != "transfer")
                 {
                     if ((strOldState != "注销" && strOldState != "丢失")
                         && (strNewState == "注销" || strNewState == "丢失")
@@ -4916,7 +4943,8 @@ out strError);
                     //      0   没有变化
                     //      1   有变化
                     nRet = IsRegisterInfoChanged(domOld,
-                        domExist);
+                        domExist,
+                        strAction == "transfer" ? transfer_entity_element_names : null);
                 }
 
                 if (nRet == 1 || bForce == true) // 2008/5/29 changed
@@ -4957,6 +4985,7 @@ out strError);
 
                 nRet = MergeTwoEntityXml(domExist,
                     domNew,
+                    strAction == "transfer" ? transfer_entity_element_names : null,
                     out strNewXml,
                     out strError);
                 if (nRet == -1)
@@ -5037,13 +5066,12 @@ out strError);
             }
 
             // 保存新记录
-            byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(info.NewRecPath,
     strNewXml,
     false,   // include preamble?
     "content" + (bSimulate ? ",simulate" : ""),
     exist_timestamp,
-    out output_timestamp,
+    out byte[] output_timestamp,
     out strOutputPath,
     out strError);
             if (lRet == -1)
@@ -5076,7 +5104,8 @@ out strError);
         "libraryCode",
         strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
 
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "change");
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "action", strAction == "transfer" ? strAction : "change");
                     if (String.IsNullOrEmpty(strStyle) == false)
                         DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
@@ -5434,7 +5463,8 @@ out strError);
                 //      0   没有变化
                 //      1   有变化
                 nRet = IsRegisterInfoChanged(domOld,
-                    domSourceExist);
+                    domSourceExist,
+                    null);
                 if (nRet == 1)
                 {
                     error = new EntityInfo(info);
@@ -5500,10 +5530,10 @@ out strError);
             }
 
             // 合并新旧记录
-            string strNewXml = "";
             nRet = MergeTwoEntityXml(domSourceExist,
                 domNew,
-                out strNewXml,
+                null,
+                out string strNewXml,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
