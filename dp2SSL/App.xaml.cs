@@ -9,6 +9,7 @@ using System.Speech.Synthesis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Diagnostics;
 
 using dp2SSL.Models;
 
@@ -18,7 +19,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace dp2SSL
 {
@@ -161,6 +161,33 @@ namespace dp2SSL
             });
 
             StartProcessManager();
+
+            BeginCheckServerUID(_cancelRefresh.Token);
+        }
+
+        // 单独的线程，监控 server UID 关系
+        public void BeginCheckServerUID(CancellationToken token)
+        {
+            var task1 = Task.Run(() =>
+            {
+                try
+                {
+                    while (token.IsCancellationRequested == false)
+                    {
+                        var result = PageSetting.CheckServerUID();
+                        if (result.Value == -1)
+                            SetError("uid", result.ErrorInfo);
+                        else
+                            SetError("uid", null);
+
+                        Task.Delay(TimeSpan.FromMinutes(5)).Wait(token);
+                    }
+                }
+                catch(OperationCanceledException)
+                {
+                    return;
+                }
+            });
         }
 
         public void StartProcessManager()
@@ -201,8 +228,9 @@ namespace dp2SSL
                         ShortcutPath = "DigitalPlatform/dp2 V3/dp2-指纹中心",
                         MutexName = "{75FB942B-5E25-4228-9093-D220FFEDB33C}"
                     });
-                ProcessManager.Start(infos, 
-                    (info, text) => {
+                ProcessManager.Start(infos,
+                    (info, text) =>
+                    {
                         WpfClientInfo.Log?.Info($"{info.Name} {text}");
                     },
                     _cancelProcessMonitor.Token);
@@ -348,7 +376,7 @@ namespace dp2SSL
             get
             {
                 return (bool)WpfClientInfo.Config?.GetBoolean("global",
-                    "process_monitor", 
+                    "process_monitor",
                     true);
             }
         }

@@ -319,6 +319,35 @@ namespace dp2SSL
 
     public class NotResponseException : Exception
     {
+        public static string GetErrorCode(Exception ex)
+        {
+            if (ex == null)
+                return "";
+            string error_code = ex.GetType().ToString();
+            if (NotResponseException.IsNotResponse(ex))
+                error_code = "notResponse";
+            return error_code;
+        }
+
+        public static bool IsNotResponse(Exception ex)
+        {
+            if (ex == null)
+                return false;
+
+            if (_isNotResponse(ex))
+                return true;
+            if (ex.InnerException != null && _isNotResponse(ex.InnerException))
+                return true;
+            return false;
+        }
+
+        static bool _isNotResponse(Exception ex)
+        {
+            if (ex is NotResponseException)
+                return true;
+
+            return (ex is RemotingException && (uint)ex.HResult == 0x8013150b);
+        }
 
         public NotResponseException(string s)
             : base(s)

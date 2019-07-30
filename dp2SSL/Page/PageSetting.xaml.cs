@@ -201,9 +201,13 @@ namespace dp2SSL
                     var result = FaceManager.GetState("");
                     if (result.Value == -1)
                         errors.Add(result.ErrorInfo);
+                }
 
-                    // 检查 Server UID
-
+                {
+                    // 检查 Server UID 关系
+                    var check_result = CheckServerUID();
+                    if (check_result.Value == -1)
+                        errors.Add(check_result.ErrorInfo);
                 }
 
                 if (errors.Count > 0)
@@ -212,6 +216,107 @@ namespace dp2SSL
 
             // 重新启动 Proccess 监控
             App.CurrentApp.StartProcessManager();
+        }
+
+        public static NormalResult CheckServerUID()
+        {
+            // 如果没有配置 dp2library URL 则不检查
+            if (string.IsNullOrEmpty(App.dp2ServerUrl) == true)
+                return new NormalResult();
+
+            string dp2library_uid = "";
+
+            // 获得 dp2library 服务器的 UID
+            var channel = App.CurrentApp.GetChannel();
+            try
+            {
+                long lRet = channel.GetVersion(null,
+                    out string version,
+                    out dp2library_uid,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    // not response
+                    if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.RequestError)
+                        return new NormalResult();
+
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"校验 UID 失败。获得 dp2library 服务器 UID 失败: {strError}",
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+
+            List<string> errors = new List<string>();
+
+            // 如果没有配置 指纹中心 URL 则不检查
+            if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+            {
+                var version_result = FingerprintManager.GetVersion();
+                if (version_result.Value == -1)
+                {
+                    errors.Add(version_result.ErrorInfo);
+                    goto SKIP1;
+                }
+
+                if (StringUtil.CompareVersion(version_result.Version, "2.1") < 0)
+                {
+                    // 版本太低，无法进行 UID 检查
+                    goto SKIP1;
+                }
+                var result = FingerprintManager.GetState("getLibraryServerUID");
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode != "notResponse")
+                        errors.Add(result.ErrorInfo);
+                    goto SKIP1;
+                }
+
+                string fingerprint_uid = result.ErrorCode;
+                if (string.IsNullOrEmpty(fingerprint_uid))
+                    errors.Add("针对指纹中心请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
+                else
+                {
+                    if (fingerprint_uid != dp2library_uid)
+                        errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和指纹中心所连接的 dp2library UID ('{fingerprint_uid}') 不同。请检查配置参数并重新配置");
+                }
+            }
+
+            SKIP1:
+
+            // 如果没有配置 人脸中心 URL 则不检查
+            if (string.IsNullOrEmpty(App.FaceUrl) == false)
+            {
+                var result = FaceManager.GetState("getLibraryServerUID");
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode != "notResponse")
+                        errors.Add(result.ErrorInfo);
+                }
+                else
+                {
+                    string face_uid = result.ErrorCode;
+                    if (string.IsNullOrEmpty(face_uid))
+                        errors.Add("针对人脸中心请求 getLibraryServerUID 失败，返回的 UID 为空，无法检查核对 UID");
+                    else
+                    {
+                        if (face_uid != dp2library_uid)
+                            errors.Add($"dp2SSL 直连的 dp2library 服务器的 UID ('{dp2library_uid}') 和人脸中心所连接的 dp2library UID ('{face_uid}') 不同。请检查配置参数并重新配置");
+                    }
+                }
+            }
+
+            SKIP2:
+            if (errors.Count > 0)
+                return new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, ";\r\n") };
+
+            return new NormalResult();
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)

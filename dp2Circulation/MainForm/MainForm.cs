@@ -4982,11 +4982,14 @@ Stack:
                 {
                     var validator = new BarcodeValidator(this.BarcodeValidation);
                     if (strBarcode == "?transform")
-                        return validator.NeedValidate(strLibraryCode) == true ? 1 : 0;
+                        return validator.NeedTransform(strLibraryCode) == true ? 1 : 0;
 
                     var result = validator.Transform(strLibraryCode, strBarcode);
                     if (result.OK == false)
                     {
+                        // 2019/7/30
+                        if (result.ErrorCode == "suppressed")
+                            return 0;
                         strError = result.ErrorInfo;
                         return -1;
                     }
@@ -5095,6 +5098,8 @@ Stack:
                 strError = "这是读者证号二维码";
                 return 1;
             }
+
+            // TODO: 优先利用 BarcodeValidation 进行校验
 
             // 优先进行前端校验
             if (this.ClientHost != null)

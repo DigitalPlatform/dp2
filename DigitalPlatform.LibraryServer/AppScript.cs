@@ -507,11 +507,21 @@ namespace DigitalPlatform.LibraryServer
                     BarcodeValidator validator = new BarcodeValidator(barcodeValidation.OuterXml);
                     var result = validator.Validate(strLibraryCodeList,
                         strBarcode);
-                    if (result.OK == false 
+                    if (result.OK == false
                         && result.ErrorCode == "scriptError")
                     {
                         strError = $"执行条码校验时出错: {result.ErrorInfo}";
                         return -1;
+                    }
+                    // 2019/7/30
+                    if (result.OK == false
+    && result.ErrorCode == "suppressed")
+                    {
+                        if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                            strError = $"{result.ErrorInfo}";
+                        else
+                            strError = $"馆藏地 '{strLibraryCodeList}' 不打算提供条码校验规则";
+                        return -2;
                     }
                     strError = result.ErrorInfo;
                     if (result.Type == "patron")
@@ -1688,13 +1698,12 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            Assembly assembly = null;
             // return:
             //      -1  出错
             //      0   Assembly 为空
             //      1   找到 Assembly
             int nRet = GetAssembly("findBase",
-        out assembly,
+        out Assembly assembly,
         out strError);
             if (nRet == -1)
                 return -1;
@@ -2202,6 +2211,7 @@ namespace DigitalPlatform.LibraryServer
             // 检查馆藏地点字符串
             if (strAction == "new"
 || strAction == "change"
+|| strAction == "transfer"
 || strAction == "move")
             {
                 if (item == null)
@@ -2229,7 +2239,7 @@ namespace DigitalPlatform.LibraryServer
                     bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
                     if (bNullable == false)
                     {
-                        strError = "册条码号不能为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
+                        strError = "册条码号不允许为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
                         // return 1;
                         errors.Add(strError);
                     }

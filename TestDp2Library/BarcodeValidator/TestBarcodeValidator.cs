@@ -564,7 +564,7 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("海淀分馆");
+                var result = validator.NeedTransform("海淀分馆");
                 Assert.AreEqual(false, result);
             }
         }
@@ -589,7 +589,7 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("西城分馆");
+                var result = validator.NeedTransform("西城分馆");
                 Assert.AreEqual(false, result );
             }
         }
@@ -618,7 +618,7 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("西城分馆");
+                var result = validator.NeedTransform("西城分馆");
                 Assert.AreEqual(false, result);
             }
         }
@@ -647,7 +647,7 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("海淀分馆");
+                var result = validator.NeedTransform("海淀分馆");
                 Assert.AreEqual(true, result );
             }
         }
@@ -672,7 +672,7 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("海淀分馆");
+                var result = validator.NeedTransform("海淀分馆");
                 Assert.AreEqual(true, result );
             }
         }
@@ -700,8 +700,128 @@ else
             BarcodeValidator validator = new BarcodeValidator(xml);
 
             {
-                var result = validator.NeedValidate("海淀分馆");
+                var result = validator.NeedTransform("海淀分馆");
                 Assert.AreEqual(true, result );
+            }
+        }
+
+        // 虽然元素 tranform 在 validator 和 range 元素下都有，但被 validator/@suppress 压制住了
+        [TestMethod]
+        public void TestNeedValidation06()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆' suppress=''>
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999' transform='barcode+&quot;tail&quot;'></range>
+               </entity>
+               <transform>
+                    barcode+'tail'
+               </transform>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.NeedTransform("海淀分馆");
+                Assert.AreEqual(false, result);
+            }
+        }
+
+
+        // 压制校验
+        [TestMethod]
+        public void Test_suppress_1()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆' suppress='海淀分馆 不打算提供校验'>
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("海淀分馆", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("suppressed", result.ErrorCode);
+                Assert.AreEqual("海淀分馆 不打算提供校验", result.ErrorInfo);
+
+                Assert.AreEqual(null, result.Type);
+            }
+        }
+
+        // 压制校验
+        [TestMethod]
+        public void Test_suppress_2()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆'>
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+           </validator>
+           <validator location='西城分馆' suppress='西城分馆 不打算提供校验'>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("西城分馆", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("suppressed", result.ErrorCode);
+                Assert.AreEqual("西城分馆 不打算提供校验", result.ErrorInfo);
+
+                Assert.AreEqual(null, result.Type);
+            }
+        }
+
+        // 压制校验
+        [TestMethod]
+        public void Test_suppress_3()
+        {
+            string xml = @"
+        <collection>
+           <validator location='海淀分馆'>
+               <patron>
+                   <CMIS />
+                   <range value='P000001-P999999' />
+               </patron>
+               <entity>
+                   <range value='0000001-9999999'></range>
+               </entity>
+           </validator>
+           <validator location='西城分馆' suppress=''>
+           </validator>
+        </collection>";
+
+            BarcodeValidator validator = new BarcodeValidator(xml);
+
+            {
+                var result = validator.Validate("西城分馆", "0000001");
+                Assert.AreEqual(false, result.OK);
+                Assert.AreEqual("suppressed", result.ErrorCode);
+                Assert.AreEqual("馆藏地 '西城分馆' 不打算定义验证规则", result.ErrorInfo);
+
+                Assert.AreEqual(null, result.Type);
             }
         }
 
