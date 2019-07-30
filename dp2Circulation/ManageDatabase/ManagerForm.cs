@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -16,7 +17,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading.Tasks;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
 
@@ -5297,7 +5297,6 @@ out strError);
 
                 EnableControls(true);
             }
-
             ERROR1:
             return -1;
         }

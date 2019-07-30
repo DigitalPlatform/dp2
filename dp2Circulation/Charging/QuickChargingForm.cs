@@ -1908,6 +1908,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
             else if (func == dp2Circulation.FuncState.Transfer)
             {
+                // 检查 dp2library 版本
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "3.16") < 0)
+                {
+                    // TODO: 语音提示
+                    // TODO: 红色对话框
+                    MessageBox.Show(this, $"调拨功能要求 dp2library 版本为 3.16 以上(而现在是 {Program.MainForm.ServerVersion})");
+                    this.textBox_input.SelectAll();
+                    this.textBox_input.Focus();
+                    return;
+                }
                 task.ItemBarcode = GetContent(strText);
                 task.ItemBarcodeEasType = GetEasType(strText);
                 task.Action = "transfer";
@@ -2378,6 +2388,12 @@ false);
                 {
                     this.toolStripMenuItem_transfer.Checked = true;
                     WillLoadReaderInfo = false;
+                    Task.Run(()=> {
+                        this.Invoke((Action)(() =>
+                        {
+                            toolStripButton_selectTransferTargetLocation_Click(this, new EventArgs());
+                        }));
+                    });
                 }
                 // SetInputMessage();
             }
@@ -3855,6 +3871,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         {
             // 选择目标馆藏地的对话框
             // 须是当前操作者能管辖的分馆内的馆藏地
+            /*
             REDO:
             var result = InputDlg.GetInput(this, "title",
                 "目标馆藏地", "", this.Font);
@@ -3865,6 +3882,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 goto REDO;
 
             this._targetLocation = result; 
+            */
+            using (SelectLocationDialog dlg = new SelectLocationDialog())
+            {
+                dlg.Text = "请选择调拨目标馆藏地";
+                dlg.SelectedLocation = this._targetLocation;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == DialogResult.Cancel)
+                    return;
+
+                this._targetLocation = dlg.SelectedLocation;
+
+                this.textBox_input.SelectAll();
+                this.textBox_input.Focus();
+            }
         }
 
         void EnableControlsForFace(bool enable)

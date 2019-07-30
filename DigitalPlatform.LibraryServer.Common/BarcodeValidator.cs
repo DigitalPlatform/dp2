@@ -78,7 +78,7 @@ namespace DigitalPlatform.LibraryServer.Common
         // 判断一个馆藏地是否需要进行条码变换
         // exception:
         //      可能会抛出异常
-        public bool NeedValidate(string location)
+        public bool NeedTransform(string location)
         {
             // XmlNodeList nodes = _dom.DocumentElement.SelectNodes($"validator[@location='{location}']");
             var nodes = GetValidators(location);
@@ -88,6 +88,10 @@ namespace DigitalPlatform.LibraryServer.Common
                 throw new Exception($"馆藏地 '{location}' 定义验证规则太多 ({nodes.Count})");
 
             XmlElement validator = nodes[0] as XmlElement;
+
+            // 2019/7/30
+            if (validator.GetAttributeNode("suppress") != null)
+                return false;
 
             // validator 元素下的 transform 元素
             if (validator.SelectSingleNode("transform") is XmlElement transform)
@@ -124,9 +128,22 @@ namespace DigitalPlatform.LibraryServer.Common
                     ErrorCode = "locationDefMoreThanOne"
                 };
 
-            ValidateResult result = null;
+            // ValidateResult result = null;
 
             XmlElement validator = nodes[0] as XmlElement;
+
+            if (validator.GetAttributeNode("suppress") != null)
+            {
+                string comment = validator.GetAttribute("suppress");
+                if (string.IsNullOrEmpty(comment))
+                    comment = $"馆藏地 '{location}' 不打算定义验证规则";
+                return new ValidateResult
+                {
+                    OK = false,
+                    ErrorInfo = comment,
+                    ErrorCode = "suppressed"    // 不打算定义验证规则
+                };
+            }
 
 #if NO
             // validator 元素下的 transform 元素
@@ -181,6 +198,19 @@ namespace DigitalPlatform.LibraryServer.Common
             string current_script = ""; // 每个 range 元素里面的 scirpt 脚本
 
             XmlElement validator = nodes[0] as XmlElement;
+
+            if (validator.GetAttributeNode("suppress") != null)
+            {
+                string comment = validator.GetAttribute("suppress");
+                if (string.IsNullOrEmpty(comment))
+                    comment = $"馆藏地 '{location}' 不打算定义验证规则";
+                return new TransformResult
+                {
+                    OK = false,
+                    ErrorInfo = comment,
+                    ErrorCode = "suppressed"    // 不打算定义验证规则
+                };
+            }
 
             // validator 元素下的 transform 元素
             XmlElement transform = validator.SelectSingleNode("transform") as XmlElement;

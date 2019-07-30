@@ -1194,14 +1194,15 @@ end_time);
             else if (task.Action == "transfer")
             {
                 // testing
-                strReaderBarcode = "test_bachno";
-
+                // strReaderBarcode = "test_bachno";
+                /*
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
                     strError = "尚未设定批次号";
                     task.ErrorInfo = strError;
                     goto ERROR1;
                 }
+                */
                 strAction = "transfer";
             }
             else if (task.Action == "read")

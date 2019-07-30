@@ -7347,6 +7347,7 @@ start_time_1,
                     changed = true;
                 }
             }
+
             if (strNewCurrentLocation != null)
             {
                 string old_currentlocation = DomUtil.GetElementText(new_itemdom.DocumentElement,
@@ -7355,6 +7356,18 @@ start_time_1,
                 {
                     DomUtil.SetElementText(new_itemdom.DocumentElement,
                         "currentLocation", strNewCurrentLocation);
+                    changed = true;
+                }
+            }
+
+            if (strBatchNo != null)
+            {
+                string old_batchno = DomUtil.GetElementText(new_itemdom.DocumentElement,
+"batchNo");
+                if (old_batchno != strBatchNo)
+                {
+                    DomUtil.SetElementText(new_itemdom.DocumentElement,
+                        "batchNo", strBatchNo);
                     changed = true;
                 }
             }
@@ -7372,6 +7385,7 @@ start_time_1,
             info.OldTimestamp = null;
             info.NewRecPath = strItemRecPath;
             info.NewRecord = new_itemdom.OuterXml;
+            info.Style = "dont_lock";
 
             var result = this.SetEntities(sessioninfo,
                 "", // strBiblioRecPath,

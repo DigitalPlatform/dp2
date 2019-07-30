@@ -2543,7 +2543,7 @@ out strError);
         /* 日志记录格式
 <root>
   <operation>setEntity</operation> 操作类型
-  <action>new</action> 具体动作。有new change delete 3种
+  <action>new</action> 具体动作。有new change delete 3种。2019/7/30 增加 transfer，transfer 行为和 change 相似
   <style>...</style> 风格。有force nocheckdup noeventlog 3种
   <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
   <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
@@ -2593,6 +2593,7 @@ out strError);
 
                 if (strAction == "new"
                     || strAction == "change"
+                    || strAction == "transfer"
                     || strAction == "move")
                 {
                     XmlNode node = null;
@@ -2665,17 +2666,15 @@ out strError);
                             }
                             strError = "删除册记录 '" + strOldRecPath + "' 时发生错误: " + strError;
                             return -1;
-
                         }
                     }
 
                 }
                 else if (strAction == "delete")
                 {
-                    XmlNode node = null;
                     string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "oldRecord",
-                        out node);
+                        out XmlNode node);
                     if (node == null)
                     {
                         strError = "日志记录中缺<oldRecord>元素";
@@ -2714,7 +2713,6 @@ out strError);
                     return -1;
                 }
 
-
                 return 0;
             }
 
@@ -2740,12 +2738,12 @@ out strError);
                 // 和数据库中已有记录合并，然后保存
                 if (strAction == "new"
                     || strAction == "change"
+                    || strAction == "transfer"
                     || strAction == "move")
                 {
-                    XmlNode node = null;
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "record",
-                        out node);
+                        out XmlNode node);
                     if (node == null)
                     {
                         strError = "日志记录中缺<record>元素";
@@ -2771,7 +2769,6 @@ out strError);
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
                     }
 
-
                     // 读出数据库中原有的记录
                     string strExistXml = "";
                     string strMetaData = "";
@@ -2779,12 +2776,13 @@ out strError);
                     string strOutputPath = "";
 
                     if ((strAction == "change"
+                        || strAction == "transfer"
                         || strAction == "move")
                         && bForce == false) // 2008/10/6
                     {
                         string strSourceRecPath = "";
 
-                        if (strAction == "change")
+                        if (strAction == "change" || strAction == "transfer")
                             strSourceRecPath = strNewRecPath;
                         if (strAction == "move")
                             strSourceRecPath = strOldRecPath;
@@ -2851,7 +2849,7 @@ out strError);
                     {
                         nRet = MergeTwoEntityXml(domExist,
                             domNew,
-                            null,
+                            strAction == "transfer" ? transfer_entity_element_names : null,
                             out strNewXml,
                             out strError);
                         if (nRet == -1)
@@ -2880,7 +2878,6 @@ out strError);
 
                         exist_timestamp = output_timestamp; // 及时更新时间戳
                     }
-
 
                     lRet = channel.DoSaveTextRes(strNewRecPath,
                         strNewXml,
@@ -2950,12 +2947,13 @@ out strError);
                 }
 
                 // 和数据库中已有记录合并，然后保存
-                if (strAction == "change" || strAction == "new")
+                if (strAction == "change"
+                    || strAction == "transfer"
+                    || strAction == "new")
                 {
-                    XmlNode node = null;
                     string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "record",
-                        out node);
+                        out XmlNode node);
                     if (node == null)
                     {
                         strError = "日志记录中缺<record>元素";
@@ -2972,10 +2970,8 @@ out strError);
                     string strOldItemBarcode = "";
                     string strNewItemBarcode = "";
 
-
                     string strExistXml = "";
                     byte[] exist_timestamp = null;
-
 
                     // 日志记录中记载的旧记录体
                     strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -2983,7 +2979,7 @@ out strError);
                         out node);
                     if (node == null)
                     {
-                        if (strAction == "change")
+                        if (strAction == "change" || strAction == "transfer")
                         {
                             strError = "日志记录中缺<oldRecord>元素";
                             return -1;
@@ -3043,7 +3039,7 @@ out strError);
                             out strError);
                         if (nRet == 0 || nRet == -1)
                         {
-                            if (strAction == "change")
+                            if (strAction == "change" || strAction == "transfer")
                             {
                                 /*
                                 // 从库中没有找到，只好依日志记录中记载的旧记录
@@ -3128,10 +3124,9 @@ out strError);
                             // 重新装载
                             if (bNeedReload == true)
                             {
-                                string strMetaData = "";
                                 lRet = channel.GetRes(strOutputItemRecPath,
                                     out strExistXml,
-                                    out strMetaData,
+                                    out string strMetaData,
                                     out exist_timestamp,
                                     out strOutputItemRecPath,
                                     out strError);
@@ -3142,9 +3137,7 @@ out strError);
                                 }
 
                                 // 需要检查记录中的<barcode>元素值是否匹配册条码号
-
                             }
-
                         }
 
                         // 修正strOldRecPath
@@ -3164,16 +3157,13 @@ out strError);
                         return -1;
                     }
 
-                    if (strAction == "change")
+                    if (strAction == "change" || strAction == "transfer")
                     {
                         if (strNewItemBarcode != ""
                             && strNewItemBarcode != strOldItemBarcode)
                         {
                             // 新旧记录的条码号不一致，需要对新条码号进行查重
-                            List<string> aPath = null;
 
-                            string strTempXml = "";
-                            byte[] temp_timestamp = null;
                             // 获得册记录
                             // return:
                             //      -1  error
@@ -3184,10 +3174,10 @@ out strError);
                                 // Channels,
                                 channel,
                                 strNewItemBarcode,
-                                out strTempXml,
+                                out string strTempXml,
                                 100,
-                                out aPath,
-                                out temp_timestamp,
+                                out List<string> aPath,
+                                out byte[] temp_timestamp,
                                 out strError);
                             if (nRet > 0)
                             {
@@ -3298,15 +3288,12 @@ out strError);
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
-
-
                 }
                 else if (strAction == "delete")
                 {
-                    XmlNode node = null;
                     string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
                         "oldRecord",
-                        out node);
+                        out XmlNode node);
                     if (node == null)
                     {
                         strError = "日志记录中缺<oldRecord>元素";
@@ -3314,9 +3301,8 @@ out strError);
                     }
                     string strRecPath = DomUtil.GetAttr(node, "recPath");
 
-                    string strOldItemBarcode = "";
                     nRet = GetItemBarcode(strOldRecord,
-                        out strOldItemBarcode,
+                        out string strOldItemBarcode,
                         out strError);
                     if (String.IsNullOrEmpty(strOldItemBarcode) == true)
                     {
@@ -3325,8 +3311,6 @@ out strError);
                     }
 
                     string strOutputItemRecPath = "";
-                    string strExistXml = "";
-                    byte[] exist_timestamp = null;
 
                     // 从册条码号获得册记录
 
@@ -3340,10 +3324,10 @@ out strError);
                         // Channels,
                         channel,
                         strOldItemBarcode,
-                        out strExistXml,
+                        out string strExistXml,
                         100,
                         out List<string> aPath,
-                        out exist_timestamp,
+                        out byte[] exist_timestamp,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -3406,9 +3390,6 @@ out strError);
                                     return -1;
                                 }
                             }
-
-
-
                         }
 
                         ///
@@ -3416,10 +3397,9 @@ out strError);
                         // 重新装载
                         if (bNeedReload == true)
                         {
-                            string strMetaData = "";
                             lRet = channel.GetRes(strOutputItemRecPath,
                                 out strExistXml,
-                                out strMetaData,
+                                out string strMetaData,
                                 out exist_timestamp,
                                 out strOutputItemRecPath,
                                 out strError);
@@ -3430,9 +3410,7 @@ out strError);
                             }
 
                             // 需要检查记录中的<barcode>元素值是否匹配册条码号
-
                         }
-
                     }
 
                     // 把两个记录装入DOM
@@ -3451,10 +3429,8 @@ out strError);
                         return -1;
                     }
 
-                    string strDetail = "";
                     bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
-                        out strDetail);
-
+                        out string strDetail);
 
                     // 观察已经存在的记录是否有流通信息
                     if (bHasCirculationInfo == true
@@ -3489,7 +3465,6 @@ out strError);
                         }
                         strError = "删除册记录 '" + strRecPath + "' 时发生错误: " + strError;
                         return -1;
-
                     }
                 }
                 else

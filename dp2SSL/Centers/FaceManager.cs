@@ -103,7 +103,7 @@ namespace dp2SSL
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = RfidManager.IsNotResponse(ex)
+                        Error = NotResponseException.IsNotResponse(ex)
                         ? $"人脸中心({Base.Url})没有响应"
                         : $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
@@ -145,7 +145,12 @@ namespace dp2SSL
                     {
                         Error = $"人脸中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
             }
         }
 

@@ -146,7 +146,7 @@ token);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = RfidManager.IsNotResponse(ex)
+                        Error = NotResponseException.IsNotResponse(ex)
                         ? $"指纹中心({Base.Url})没有响应"
                         : $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
@@ -179,7 +179,6 @@ token);
                 {
                     Base.ReturnChannel(channel);
                 }
-
             }
             catch (Exception ex)
             {
@@ -188,9 +187,70 @@ token);
                     {
                         Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
             }
         }
+
+        public class GetVersionResult : NormalResult
+        {
+            public string Version { get; set; }
+            public string CfgInfo { get; set; }
+        }
+
+        public static GetVersionResult GetVersion()
+        {
+            try
+            {
+                //if (string.IsNullOrEmpty(Base.Url))
+                //    return new NormalResult();
+
+                BaseChannel<IFingerprint> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetVersion(out string version,
+                        out string cfg_info,
+                        out string strError);
+                    if (result == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = strError });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return new GetVersionResult
+                    {
+                        Version = version,
+                        CfgInfo = cfg_info,
+                        Value = result,
+                        ErrorInfo = strError
+                    };
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"指纹中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetVersionResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
+            }
+        }
+
     }
 
     public delegate void TouchedEventHandler(object sender,

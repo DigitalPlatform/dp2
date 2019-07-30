@@ -869,6 +869,37 @@ bool bClickClose = false)
             LibraryChannel channel = this.GetChannel();
             try
             {
+                // 2019/7/29
+                // 检查 dp2library 服务器版本
+                long lRet = channel.GetVersion(null,
+out string strVersion,
+out string strUID,
+out strError);
+                if (lRet == -1)
+                {
+                    strError = $"获得 dp2library 服务器版本时出错: {strError}";
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError,
+                        ErrorCode = channel.ErrorCode.ToString()
+                    };
+                }
+
+                this.ServerUID = strUID;
+
+                /*
+                if (StringUtil.CompareVersion(strVersion, "3.13") < 0)
+                {
+                    strError = $"指纹识别功能要求 dp2library 在版本 3.13 或以上 (但当前 dp2library 版本是 {strVersion})";
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = strError
+                    };
+                }
+                */
+
                 ReplicationPlan plan = BioUtil.GetReplicationPlan(channel);
                 if (plan.Value == -1)
                     return new NormalResult

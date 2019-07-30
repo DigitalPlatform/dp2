@@ -234,32 +234,14 @@ null);
                 Base.TriggerSetError(ex,
                     new SetErrorEventArgs
                     {
-                        Error = IsNotResponse(ex) ? $"RFID 中心({Base.Url})没有响应"
+                        Error = NotResponseException.IsNotResponse(ex) ? $"RFID 中心({Base.Url})没有响应"
                         : $"RFID 中心出现异常: {ExceptionUtil.GetExceptionText(ex)}"
                     });
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
 
-        public static bool IsNotResponse(Exception ex)
-        {
-            if (ex == null)
-                return false;
 
-            if (_isNotResponse(ex))
-                return true;
-            if (ex.InnerException != null && _isNotResponse(ex.InnerException))
-                return true;
-            return false;
-        }
-
-        static bool _isNotResponse(Exception ex)
-        {
-            if (ex is NotResponseException)
-                return true;
-
-            return (ex is RemotingException && (uint)ex.HResult == 0x8013150b);
-        }
 
         public static NormalResult GetState(string style)
         {
@@ -295,7 +277,10 @@ null);
                     {
                         Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+                return new NormalResult { Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
             }
         }
     }

@@ -2323,6 +2323,50 @@ out string strError)
             return 0;
         }
 
+        public async Task<NormalResult> FingerprintGetState(string strStyle)
+        {
+            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
+            {
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = "尚未配置 指纹接口URL 系统参数，无法获得指纹中心状态"
+                };
+            }
+
+            var channel = StartFingerprintChannel(
+                Program.MainForm.FingerprintReaderUrl,
+                out string strError);
+            if (channel == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            try
+            {
+                return await Task.Factory.StartNew<NormalResult>(
+                    () =>
+                    {
+                        return channel.Object.GetState(strStyle);
+                    });
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetState() 操作失败: " + ex.Message;
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                EndFingerprintChannel(channel);
+            }
+        }
+
         #endregion
 
         #region 其他 API

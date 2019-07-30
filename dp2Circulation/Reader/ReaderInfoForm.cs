@@ -5259,44 +5259,25 @@ MessageBoxDefaultButton.Button2);
         private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
             string strError = "";
-            //string strFingerprint = "";
-            //string strVersion = "";
 
-#if NO
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("等待扫描指纹 ...");
-            stop.BeginLoop();
-#endif
             this.ShowMessage("等待扫描指纹 ...");
             this.EnableControls(false);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
-                REDO:
-#if NO
-                // return:
-                //      -1  error
-                //      0   放弃输入
-                //      1   成功输入
-                int nRet = ReadFingerprintString(
-                    out strFingerprint,
-                    out strVersion,
-                    out strError);
-                if (nRet == -1)
+                NormalResult getstate_result = await FingerprintGetState("getLibraryServerUID");
+                if (getstate_result.Value == -1)
                 {
-                    DialogResult temp_result = MessageBox.Show(this,
-strError + "\r\n\r\n是否重试?",
-"ReaderInfoForm",
-MessageBoxButtons.RetryCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                    if (temp_result == DialogResult.Retry)
-                        goto REDO;
+                    strError = getstate_result.ErrorInfo;
+                    goto ERROR1;
+                }
+                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                {
+                    strError = $"指纹中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行指纹登记";
+                    goto ERROR1;
                 }
 
-                if (nRet == -1 || nRet == 0)
-                    goto ERROR1;
-#endif
+                REDO:
                 GetFingerprintStringResult result = await ReadFingerprintString(this.readerEditControl1.Barcode);
                 if (result.Value == -1)
                 {
@@ -5329,14 +5310,6 @@ MessageBoxDefaultButton.Button1);
             {
                 this.EnableControls(true);
                 this.ClearMessage();
-#if NO
-                if (stop != null)
-                {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                }
-#endif
             }
 
             // MessageBox.Show(this, strFingerprint);

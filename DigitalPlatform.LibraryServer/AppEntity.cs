@@ -2917,6 +2917,7 @@ out strError);
                     // delete则需要加锁
                     if (info.Action == "new"
                         || info.Action == "change"
+                        || info.Action == "transfer"
                         || info.Action == "delete"
                         || info.Action == "move")
                     {
@@ -2942,6 +2943,7 @@ out strError);
 
                         if (info.Action == "new"
                             || info.Action == "change"
+                            || (info.Action == "transfer" && StringUtil.IsInList("dont_lock", info.Style) == false)
                             || info.Action == "move")
                             strLockBarcode = strNewBarcode;
                         else if (info.Action == "delete")
@@ -2979,6 +2981,7 @@ out strError);
 #endif
                         if ((info.Action == "new"
                                 || info.Action == "change"
+                                || info.Action == "transfer"
                                 || info.Action == "move")       // delete操作不校验记录
                             && bNoCheckDup == false
                             // && bSimulate == false
