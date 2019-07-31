@@ -2350,7 +2350,10 @@ out strTargetLibraryCode);
                 FileInfo[] fis = di.GetFiles("????????.log");
 
                 if (fis.Length == 0)
+                {
+                    records = new OperLogInfo[0];   // 2019/7/31 补充。避免前端处理起来麻烦
                     return 0;   // 一个文件也没有
+                }
 
                 // 日期小者在前
                 Array.Sort(fis, new FileInfoCompare(true));
