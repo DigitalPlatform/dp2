@@ -74,7 +74,7 @@ namespace DigitalPlatform.LibraryClient
             {
                 // 丢弃文件扩展名部分
                 filter_dates = new List<string>();
-                foreach(string date in this.FilterDates)
+                foreach (string date in this.FilterDates)
                 {
                     filter_dates.Add(date.Substring(0, 8));
                 }
@@ -92,7 +92,7 @@ namespace DigitalPlatform.LibraryClient
                     throw new InterruptException(strError);
                 }
 
-            REDO:
+                REDO:
                 OperLogInfo[] records = null;
                 long lRet = this.Channel.GetOperLogs(this.Stop,
                     "",
@@ -138,21 +138,32 @@ namespace DigitalPlatform.LibraryClient
 
                 lHitCount = lRet;
 
-                foreach (OperLogInfo info in records)
+                if (records != null)
                 {
-                    string strDate = info.Xml.Substring(0, 8);
-                    if (filter_dates != null 
-                        && filter_dates.IndexOf(strDate) == -1)
-                        continue;
+                    foreach (OperLogInfo info in records)
+                    {
+                        // testing
+                        // info.Xml = null;
 
-                    OperLogDateItem item = new OperLogDateItem();
-                    item.Date = strDate;
-                    item.Length = info.AttachmentLength;
-                    yield return item;
+                        string strDate = info.Xml.Substring(0, 8);
+                        if (filter_dates != null
+                            && filter_dates.IndexOf(strDate) == -1)
+                            continue;
+
+                        OperLogDateItem item = new OperLogDateItem();
+                        item.Date = strDate;
+                        item.Length = info.AttachmentLength;
+                        yield return item;
+                    }
                 }
-                if (lStart + records.Length >= lHitCount)
+
+                int length = 0;
+                if (records != null)
+                    length = records.Length;
+
+                if (lStart + length >= lHitCount)
                     yield break;
-                lStart += records.Length;
+                lStart += length;
             }
         }
     }
