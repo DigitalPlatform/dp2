@@ -186,6 +186,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="IsbnSplitter.cs" />
+    <Compile Include="MarcTable.cs" />
     <Compile Include="Project.cs">
       <SubType>Code</SubType>
     </Compile>

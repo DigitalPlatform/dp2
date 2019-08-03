@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
-using DigitalPlatform.Marc;
+// using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using static DigitalPlatform.Script.ScriptUtil;
 
-namespace DigitalPlatform.LibraryServer
+namespace DigitalPlatform.Marc
 {
-#if REMOVED
     public static class MarcTable
     {
         static readonly string CRLF = "\n";
@@ -1813,6 +1812,4 @@ namespace DigitalPlatform.LibraryServer
 
     }
 
-
-#endif
 }

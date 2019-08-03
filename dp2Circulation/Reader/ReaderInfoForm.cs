@@ -2291,6 +2291,9 @@ strSavedXml);
             // DomUtil.DeleteElement(dom.DocumentElement, "personalLibrary");
             DomUtil.DeleteElement(dom.DocumentElement, "friends");
 
+            // 2019/8/1
+            DomUtil.DeleteElement(dom.DocumentElement, "face");
+
 #if NO
             // 清除<dprms:file>元素
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
