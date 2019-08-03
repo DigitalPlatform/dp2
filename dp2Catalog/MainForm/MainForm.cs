@@ -5165,6 +5165,11 @@ out string strError)
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
         }
+
+        private void MenuItem_openSruSearchForm_Click(object sender, EventArgs e)
+        {
+            OpenWindow<SruSearchForm>();
+        }
     }
 
     public class EnableState

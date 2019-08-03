@@ -1,0 +1,153 @@
+﻿
+
+http://bibsys-network.alma.exlibrisgroup.com/view/sru/47BIBSYS_NETWORK?version=1.2&operation=explain
+
+SRU 的 Explain 记录
+
+
+
+~~~
+http://lx2.loc.gov:210/lcdb?operation=explain
+
+<?xml version="1.0"?>
+<zs:explainResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:version>2.0</zs:version><zs:record><zs:recordSchema>http://explain.z3950.org/dtd/2.0/</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><explain xmlns="http://explain.z3950.org/dtd/2.0/">
+  <serverInfo protocol="SRU">
+    <host>lx2.loc.gov</host>
+    <port>210</port>
+    <database>lcdb</database>
+  </serverInfo>
+</explain></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record><zs:echoedExplainRequest><zs:version>2.0</zs:version><zs:recordXMLEscaping>xml</zs:recordXMLEscaping></zs:echoedExplainRequest></zs:explainResponse>
+
+
+~~~
+http://lx2.loc.gov:210/NLSBPH?
+
+<?xml version="1.0"?>
+<zs:explainResponse xmlns:zs="http://docs.oasis-open.org/ns/search-ws/sruResponse"><zs:version>2.0</zs:version><zs:record><zs:recordSchema>http://explain.z3950.org/dtd/2.0/</zs:recordSchema><zs:recordXMLEscaping>xml</zs:recordXMLEscaping><zs:recordData><explain xmlns="http://explain.z3950.org/dtd/2.0/">
+      <serverInfo>
+        <host>lx2.loc.gov</host>
+        <port>210</port>
+      </serverInfo>
+      <databaseInfo>
+        <title>NLSBPH -- National Library Service for the Blind and Physically Handicapped</title>
+        <description lang="en" primary="true">
+                SRU/Z39.50 Gateway to NLS/BPH Z39.50 server. Records in UTF-8 encoding.
+              </description>
+      </databaseInfo>
+      <indexInfo>
+        <set identifier="info:srw/cql-context-set/1/cql-v1.1" name="cql"/>
+        <set identifier="info:srw/cql-context-set/1/dc-v1.1" name="dc"/>
+        <set identifier="http://zing.z3950.org/cql/bath/2.0" name="bath"/>
+        <set identifier="http://zing.z3950.org/cql/local/1.1" name="local"/>
+        <index id="1016">
+          <title>Keyword Anywhere</title>
+          <map>
+            <name set="cql">anywhere</name>
+          </map>
+        </index>
+        <index id="4">
+          <title>Title</title>
+          <map>
+            <name set="dc">title</name>
+          </map>
+        </index>
+        <index id="1003">
+          <title>Creator</title>
+          <map>
+            <name set="dc">creator</name>
+          </map>
+          <map>
+            <name set="dc">author</name>
+          </map>
+        </index>
+        <index id="21">
+          <title>Subject</title>
+          <map>
+            <name set="dc">subject</name>
+          </map>
+        </index>
+        <index id="1002">
+          <title>Name</title>
+          <map>
+            <name set="bath">name</name>
+          </map>
+        </index>
+        <index id="1">
+          <title>Personal Name</title>
+          <map>
+            <name set="bath">personalName</name>
+          </map>
+        </index>
+        <index id="2">
+          <title>Corporate Name</title>
+          <map>
+            <name set="bath">corporateName</name>
+          </map>
+        </index>
+        <index id="3">
+          <title>Conference Name</title>
+          <map>
+            <name set="bath">conferenceName</name>
+          </map>
+        </index>
+        <index id="58">
+          <title>Geographic Name</title>
+          <map>
+            <name set="bath">geographicName</name>
+          </map>
+        </index>
+        <index id="7">
+          <title>ISBN</title>
+          <map>
+            <name set="bath">isbn</name>
+          </map>
+        </index>
+        <index id="8">
+          <title>ISSN</title>
+          <map>
+            <name set="bath">issn</name>
+          </map>
+        </index>
+        <index id="9">
+          <title>LC Control Number</title>
+          <map>
+            <name set="bath">lccn</name>
+          </map>
+        </index>
+        <index id="1007">
+          <title>Standard Identifier</title>
+          <map>
+            <name set="bath">standardIdentifier</name>
+          </map>
+        </index>
+        <index id="1031">
+          <title>Material Type</title>
+          <map>
+            <name set="dc">resourceType</name>
+          </map>
+        </index>
+        <index id="1108">
+          <title>Location</title>
+          <map>
+            <name set="local">location</name>
+          </map>
+        </index>
+        <index id="13">
+          <title>Dewey Classification</title>
+          <map>
+            <name set="bath">deweyClassification</name>
+          </map>
+        </index>
+      </indexInfo>
+      <schemaInfo>
+        <schema identifier="info:srw/schema/1/marcxml-v1.1" sort="false" name="marcxml">
+          <title>MARCXML</title>
+        </schema>
+        <schema identifier="info:srw/schema/1/dc-v1.1" sort="false" name="dc">
+          <title>Dublin Core</title>
+        </schema>
+        <schema identifier="info:srw/schema/1/mods-v.3.5" sort="false" name="mods">
+          <title>MODS v.3.5</title>
+        </schema>
+      </schemaInfo>
+    </explain></zs:recordData><zs:recordPosition>1</zs:recordPosition></zs:record><zs:echoedExplainRequest><zs:version>2.0</zs:version><zs:recordXMLEscaping>xml</zs:recordXMLEscaping></zs:echoedExplainRequest></zs:explainResponse>

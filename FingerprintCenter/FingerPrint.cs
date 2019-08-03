@@ -312,7 +312,7 @@ namespace FingerprintCenter
         //      其他  失败。错误码
         public override int AddItems(
             List<FingerprintItem> items,
-            ProcessInfo info,
+            ProcessInfo info_param,
             out string strError)
         {
             strError = "";

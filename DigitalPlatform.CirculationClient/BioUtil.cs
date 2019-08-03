@@ -641,9 +641,9 @@ namespace DigitalPlatform.CirculationClient
 
             if (info != null)
             {
-                info.ChangeCount = info1.ChangeCount + info2.ChangeCount;
-                info.DeleteCount = info1.DeleteCount + info2.DeleteCount;
-                info.NewCount = info1.NewCount + info2.NewCount;
+                info.ChangeCount += info1.ChangeCount + info2.ChangeCount;
+                info.DeleteCount += info1.DeleteCount + info2.DeleteCount;
+                info.NewCount += info1.NewCount + info2.NewCount;
             }
             return 1;
         }
@@ -1441,6 +1441,24 @@ out string strError);
         public int DeleteCount { get; set; }
         // 修改数量
         public int ChangeCount { get; set; }
+
+        /*
+        public static ProcessInfo operator+(ProcessInfo info1, ProcessInfo info2)
+        {
+            ProcessInfo result = new ProcessInfo();
+            result.NewCount = info1.NewCount + info2.NewCount;
+            result.DeleteCount = info1.DeleteCount + info2.DeleteCount;
+            result.ChangeCount = info1.ChangeCount + info2.ChangeCount;
+            return result;
+        }
+        */
+
+        public static void AddTo(ProcessInfo info1, ProcessInfo info2)
+        {
+            info2.NewCount += info1.NewCount;
+            info2.DeleteCount += info1.DeleteCount;
+            info2.ChangeCount += info1.ChangeCount;
+        }
     }
 }
 

@@ -794,8 +794,6 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            string strOldBarcode = "";
-            string strNewBarcode = "";
 
             // return:
             //      -1  出错
@@ -803,8 +801,8 @@ namespace DigitalPlatform.LibraryServer
             //      1   不相等
             nRet = CompareTwoBarcode(domOldRec,
                 domNewRec,
-                out strOldBarcode,
-                out strNewBarcode,
+                out string strOldBarcode,
+                out string strNewBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -837,8 +835,6 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bBarcodeChanged = true;
 
-            string strOldDisplayName = "";
-            string strNewDisplayName = "";
 
             // return:
             //      -1  出错
@@ -846,8 +842,8 @@ namespace DigitalPlatform.LibraryServer
             //      1   不相等
             nRet = CompareTwoDisplayName(domOldRec,
                 domNewRec,
-                out strOldDisplayName,
-                out strNewDisplayName,
+                out string strOldDisplayName,
+                out string strNewDisplayName,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

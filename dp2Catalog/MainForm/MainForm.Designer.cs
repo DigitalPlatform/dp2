@@ -127,6 +127,7 @@
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
+            this.MenuItem_openSruSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -161,6 +162,7 @@
             this.MenuItem_openDtlpSearchForm,
             this.MenuItem_openDp2SearchForm,
             this.MenuItem_openAmazonSearchForm,
+            this.MenuItem_openSruSearchForm,
             this.MenuItem_openOaiSearchForm,
             this.toolStripSeparator12,
             this.MenuItem_linkMarcFile,
@@ -220,6 +222,7 @@
             this.MenuItem_openOaiSearchForm.Name = "MenuItem_openOaiSearchForm";
             this.MenuItem_openOaiSearchForm.Size = new System.Drawing.Size(314, 30);
             this.MenuItem_openOaiSearchForm.Text = "OAI检索窗(O)";
+            this.MenuItem_openOaiSearchForm.Visible = false;
             this.MenuItem_openOaiSearchForm.Click += new System.EventHandler(this.MenuItem_openOaiSearchForm_Click);
             // 
             // toolStripSeparator12
@@ -529,52 +532,52 @@
             // MenuItem_cfg
             // 
             this.MenuItem_cfg.Name = "MenuItem_cfg";
-            this.MenuItem_cfg.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_cfg.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_cfg.Text = "参数配置(&P)...";
             this.MenuItem_cfg.Click += new System.EventHandler(this.MenuItem_cfg_Click);
             // 
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(241, 6);
             // 
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator19
             // 
             this.toolStripSeparator19.Name = "toolStripSeparator19";
-            this.toolStripSeparator19.Size = new System.Drawing.Size(249, 6);
+            this.toolStripSeparator19.Size = new System.Drawing.Size(241, 6);
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
-            this.MenuItem_copyright.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_copyright.Size = new System.Drawing.Size(244, 30);
             this.MenuItem_copyright.Text = "关于(&A)...";
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
             // 
@@ -1008,6 +1011,13 @@
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_openSruSearchForm
+            // 
+            this.MenuItem_openSruSearchForm.Name = "MenuItem_openSruSearchForm";
+            this.MenuItem_openSruSearchForm.Size = new System.Drawing.Size(314, 30);
+            this.MenuItem_openSruSearchForm.Text = "SRU 检索窗(S)";
+            this.MenuItem_openSruSearchForm.Click += new System.EventHandler(this.MenuItem_openSruSearchForm_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -1147,6 +1157,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
         public System.Windows.Forms.ToolStripButton toolStripButton_copyToFixed;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_editMarcoTable;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openSruSearchForm;
     }
 }
 

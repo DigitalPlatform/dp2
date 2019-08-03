@@ -25,6 +25,7 @@ using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.Core;
+using DigitalPlatform.Marc;
 
 namespace DigitalPlatform.LibraryServer
 {
