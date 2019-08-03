@@ -1,6 +1,6 @@
 ﻿# GcatLite (通用著者号码表取号前端)使用和代码分析
 
-这是一个 Windows Form 的通过汉语著者号表取号的小前端程序，它通过 Restful API 访问 dp2003.com 这台服务器上的著者号服务器
+这是一个 Windows Form 的通过汉语著者号表取号的小前端程序，它通过 Restful API 访问 dp2003.com 这台服务器上的 dp2library 服务器
 
 直接安装运行 GcatLite：http://dp2003.com/gcatlite/v3/publish.htm
 
@@ -13,7 +13,7 @@
 
 表示直接使用数字平台公司服务器(dp2003.com)上的本项服务。
 
-如果用户自己安装了数字平台公司的Gcat服务器软件，此 URL 则为安装了这个服务的机器的实际 URL。
+如果用户自己安装了 dp2library 服务器软件，此 URL 则为用户自己的 dp2library 服务器的实际 URL。(注：dp2library 服务器若要支持著者号取号功能，需要增配著者号码数据库等附加资源，详情可联系数字平台)
 
 2) 著者
 
