@@ -22,6 +22,7 @@ namespace DigitalPlatform.Interfaces
             out string[] records,
             out string strError);
 
+        // (dp2 系统目前暂未用到此函数)
         // 获得一条读者记录
         // parameters:
         //      strID   读者记录标识符号。用什么字段作为标识，Client和Server需要另行约定
@@ -37,9 +38,10 @@ namespace DigitalPlatform.Interfaces
 
         // 从卡中心扣款
         // parameters:
-        //      strRecord   读者XML记录。里面包含足够的表示字段即可
-        //      strPriceString  金额字符串。一般为类似“CNY12.00”这样的形式
-        //      strRest    扣款后的余额
+        //      strRecord   [in] 读者XML记录，或读者证条码号。
+        //                  如果是读者 XML 记录，第一字符是 '<'，函数内代码可以据此进行判断。读者 XML 记录里面包含足够的标识字段即可，不要求包含所有字段
+        //      strPriceString  [out] 金额字符串。一般为类似“CNY12.00”这样的形式
+        //      strRest    [out] 扣款后的余额
         // return:
         //      -2  密码不正确
         //      -1  出错(调用出错等特殊原因)

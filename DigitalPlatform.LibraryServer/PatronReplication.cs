@@ -243,11 +243,10 @@ namespace DigitalPlatform.LibraryServer
             bool bPerDayStart = false;  // 是否为每日一次启动模式
             string strMonitorName = "patronReplication";
             {
-                string strLastTime = "";
 
                 nRet = ReadLastTime(
                     strMonitorName,
-                    out strLastTime,
+                    out string strLastTime,
                     out strError);
                 if (nRet == -1)
                 {
@@ -257,7 +256,6 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
-                string strStartTimeDef = "";
                 //      bRet    是否到了每日启动时间
                 bool bRet = false;
                 string strOldLastTime = strLastTime;
@@ -270,7 +268,7 @@ namespace DigitalPlatform.LibraryServer
                     strMonitorName,
                     ref strLastTime,
                     out bRet,
-                    out strStartTimeDef,
+                    out string strStartTimeDef,
                     out strError);
                 if (nRet == -1 || nRet == -2)
                 {
@@ -343,7 +341,6 @@ namespace DigitalPlatform.LibraryServer
 
                 this.AppendResultText("检索读者库中现有的记录集合\r\n");
 
-                List<string> current_ids = null;
                 // 检索出读者库中全部ids
                 // 通过特定检索途径获得读者记录
                 // return:
@@ -353,7 +350,7 @@ namespace DigitalPlatform.LibraryServer
                     this.RmsChannels,
                     this.PatronDbName,
                     this.From,
-                    out current_ids,
+                    out List<string> current_ids,
                     out strError);
                 if (nRet == -1)
                 {
