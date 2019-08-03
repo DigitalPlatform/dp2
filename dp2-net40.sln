@@ -223,6 +223,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceDrivers.Hanwang", "Face
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAccord", "TestAccord\TestAccord.csproj", "{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleCardCenter", "SampleCardCenter\SampleCardCenter.csproj", "{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1794,6 +1796,24 @@ Global
 		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|x86.ActiveCfg = Release|Any CPU
 		{897E41FC-A09C-4AB7-AEB2-E0294F3409EE}.Test|x86.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Debug|x86.Build.0 = Debug|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Release|x86.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|Any CPU.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|x86.ActiveCfg = Release|Any CPU
+		{E2794CD9-8BEA-4955-9624-2A48BBFC05B7}.Test|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
