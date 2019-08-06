@@ -1937,11 +1937,12 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }
 
+        // 2019/8/4 返回类型从 XmlNode 修改为 XmlElement
         // 写入一个元素文本
         // 文本内容中可以包含回车换行符号，但其他控制字符在写入的时候会被过滤为星号
         // return:
         //      返回该元素的XmlNode
-        public static XmlNode SetElementText(XmlNode nodeRoot,
+        public static XmlElement SetElementText(XmlNode nodeRoot,
             string strXpath,
             string strText)
         {
@@ -1950,7 +1951,7 @@ namespace DigitalPlatform.Xml
                 throw (new Exception("nodeRoot参数不能为null"));
             }
 
-            XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
+            XmlElement nodeFound = nodeRoot.SelectSingleNode(strXpath) as XmlElement;
 
             /*
             // 2007/6/19
@@ -1964,7 +1965,7 @@ namespace DigitalPlatform.Xml
             if (nodeFound == null)
             {
                 string[] aNodeName = strXpath.Split(new Char[] { '/' });
-                nodeFound = CreateNode(nodeRoot, aNodeName);
+                nodeFound = CreateNode(nodeRoot, aNodeName) as XmlElement;
             }
 
             if (nodeFound == null)

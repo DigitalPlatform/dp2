@@ -40,6 +40,8 @@
             this.listView_browse = new System.Windows.Forms.ListView();
             this.columnHeader_index = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_title = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_author = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_publisher = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // label1
@@ -129,7 +131,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_browse.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_index,
-            this.columnHeader_title});
+            this.columnHeader_title,
+            this.columnHeader_author,
+            this.columnHeader_publisher});
             this.listView_browse.FullRowSelect = true;
             this.listView_browse.HideSelection = false;
             this.listView_browse.Location = new System.Drawing.Point(12, 164);
@@ -147,6 +151,16 @@
             // 
             this.columnHeader_title.Text = "题名";
             this.columnHeader_title.Width = 200;
+            // 
+            // columnHeader_author
+            // 
+            this.columnHeader_author.Text = "著者";
+            this.columnHeader_author.Width = 200;
+            // 
+            // columnHeader_publisher
+            // 
+            this.columnHeader_publisher.Text = "出版者";
+            this.columnHeader_publisher.Width = 200;
             // 
             // SruSearchForm
             // 
@@ -186,5 +200,7 @@
         private System.Windows.Forms.ListView listView_browse;
         private System.Windows.Forms.ColumnHeader columnHeader_index;
         private System.Windows.Forms.ColumnHeader columnHeader_title;
+        private System.Windows.Forms.ColumnHeader columnHeader_author;
+        private System.Windows.Forms.ColumnHeader columnHeader_publisher;
     }
 }

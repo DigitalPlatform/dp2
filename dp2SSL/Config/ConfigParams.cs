@@ -191,5 +191,25 @@ Description = "自动监控和重启 人脸中心 RFID中心 指纹中心等模�
                 _config.SetBoolean("global", "process_monitor", value);
             }
         }
+
+        // 默认值 空
+        [Display(
+Order = 9,
+Name = "馆藏地",
+Description = "智能书架内的图书的专属馆藏地"
+)]
+        [Category("智能书架")]
+        public string ShelfLocation
+        {
+            get
+            {
+                return _config.Get("shelf", "location", "");
+            }
+            set
+            {
+                _config.Set("shelf", "location", value);
+            }
+        }
+
     }
 }

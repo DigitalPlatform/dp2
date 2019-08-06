@@ -171,6 +171,9 @@
     </Compile>
     <Compile Include="Converter\StateToBorderConverter.cs" />
     <Compile Include="Converter\StringToVisibilityConverter.cs" />
+    <Compile Include="Page\PageShelf.xaml.cs">
+      <DependentUpon>PageShelf.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RFID.cs" />
     <Compile Include="Centers\RfidManager.cs" />
     <Compile Include="WpfClientInfo.cs" />
@@ -229,6 +232,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialog\ProgressWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Page\PageShelf.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -211,6 +211,11 @@ namespace dp2SSL
             this.NavigationService.Navigate(new PageBorrow("registerFace,deleteFace"));
         }
 
+        private void Shelf_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new PageShelf());
+        }
+
 #if NO
         // https://blog.csdn.net/m0_37682004/article/details/82314055
         Task SetWallPaper()
@@ -241,7 +246,7 @@ namespace dp2SSL
 #endif
 
 #if REMOVED
-#region 探测平板模式
+        #region 探测平板模式
 
         [DllImport("user32.dll")]
         private static extern int GetSystemMetrics(int nIndex);
@@ -269,7 +274,7 @@ namespace dp2SSL
             return (state != 0);
         }
 
-#endregion
+        #endregion
 
 #endif
     }

@@ -381,6 +381,16 @@ namespace dp2SSL
             }
         }
 
+        public static string ShelfLocation
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("shelf",
+                    "location",
+                    "");
+            }
+        }
+
         public static string dp2Password
         {
             get

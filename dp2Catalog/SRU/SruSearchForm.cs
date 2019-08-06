@@ -90,22 +90,57 @@ namespace dp2Catalog
                 if (nRet == -1)
                     throw new Exception(strError);
 
-                MarcTable.ScriptMarc21("",
-                    strMARC,
-                    "",
-                    null,
-                    out List<DigitalPlatform.Marc.NameValueLine> results,
-                    out strError);
+                List<DigitalPlatform.Marc.NameValueLine> results = null;
+
+                if (marcSyntax == "usmarc")
+                    nRet = MarcTable.ScriptMarc21("",
+                        strMARC,
+                        "",
+                        null,
+                        out results,
+                        out strError);
+                else if (marcSyntax == "unimarc")
+                    nRet = MarcTable.ScriptUnimarc("",
+                        strMARC,
+                        "",
+                        null,
+                        out results,
+                        out strError);
+                else
+                    throw new Exception($"未知的 MARC 格式 '{marcSyntax}'");
+
                 if (nRet == -1)
                     throw new Exception(strError);
 
                 ListViewItem item = new ListViewItem();
                 ListViewUtil.ChangeItemText(item, 0, pos);
 
+                FillColumns(item, results);
+
                 this.listView_browse.Items.Add(item);
             }
+        }
 
+        void FillColumns(ListViewItem item,
+            List<DigitalPlatform.Marc.NameValueLine> results)
+        {
+            string title = "";
+            string author = "";
+            string publisher = "";
 
+            foreach (var line in results)
+            {
+                if (line.Type == "title")
+                    title = line.Value;
+                if (line.Type == "author")
+                    author = line.Value;
+                if (line.Type == "publication_area")
+                    publisher = line.Value;
+            }
+
+            ListViewUtil.ChangeItemText(item, 1, title);
+            ListViewUtil.ChangeItemText(item, 2, author);
+            ListViewUtil.ChangeItemText(item, 3, publisher);
         }
 
         private void SruSearchForm_Load(object sender, EventArgs e)

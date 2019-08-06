@@ -36,7 +36,7 @@ namespace dp2SSL
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
 
-        Timer _timer = null;
+        // Timer _timer = null;
 
         EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
@@ -634,8 +634,10 @@ namespace dp2SSL
             }
 #endif
 
+            /*
             if (_timer != null)
                 _timer.Dispose();
+                */
 
             RfidManager.SetError -= RfidManager_SetError;
 #if OLD_RFID
@@ -1328,7 +1330,7 @@ out string strError);
             }
         }
 
-        static string GetCaption(string text)
+        public static string GetCaption(string text)
         {
             if (string.IsNullOrEmpty(text))
                 return "(空)";
@@ -1336,7 +1338,7 @@ out string strError);
             return text;
         }
 
-        class GetEntityDataResult : NormalResult
+        public class GetEntityDataResult : NormalResult
         {
             public string Title { get; set; }
             public string ItemXml { get; set; }
@@ -1344,7 +1346,7 @@ out string strError);
         }
 
         // 获得一个册的题名字符串
-        GetEntityDataResult GetEntityData(string pii)
+        public static GetEntityDataResult GetEntityData(string pii)
         {
             /*
             title = "";

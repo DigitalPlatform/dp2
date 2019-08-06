@@ -7,3 +7,6 @@ SampleCardCenter
 本程序是一个 .NET Remoting Server，dp2library 模块在需要进行读者信息同步的时候，会用 .NET Remoting 方式请求本程序。这时 dp2library 模块相当于本程序的 Client 角色，本程序是 Server 角色。
 
 此外，dp2circulation(内务)前端在需要对读者进行扣款的时候，也可能直接请求本程序。
+
+详细说明参见：
+https://github.com/DigitalPlatform/dp2/issues/537

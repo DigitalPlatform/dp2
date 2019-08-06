@@ -1583,6 +1583,7 @@ namespace DigitalPlatform.LibraryServer
                         ref itemdom,
                         bForce,
                         sessioninfo.UserID,
+                        sessioninfo.Account?.Location,
                         strOutputItemRecPath,
                         strOutputReaderRecPath,
                         ref domOperLog,
@@ -1743,10 +1744,9 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 记载读者记录
-                    bool bClipped = false;
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "readerRecord",
-                        ClipReaderXml(readerdom, out bClipped)
+                        ClipReaderXml(readerdom, out bool bClipped)
                         // readerdom.OuterXml
                         );
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
@@ -6220,8 +6220,14 @@ account == null ? null : new AccountRecord(account));
                     Debug.Assert(string.IsNullOrEmpty(strReaderBarcode) == false, "");
                     DomUtil.SetElementText(domOperLog.DocumentElement, "readerBarcode",
                         strReaderBarcode);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    XmlElement operator_node = DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                         sessioninfo.UserID);
+
+                    // 2019/8/4
+                    if (sessioninfo.Account != null
+                        && string.IsNullOrEmpty(sessioninfo.Account.Location) == false)
+                        operator_node?.SetAttribute("location", sessioninfo.Account?.Location);
+
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                         strOperTime);
 
@@ -7396,7 +7402,7 @@ start_time_1,
                 strError = result.ErrorInfo;
                 return -1;
             }
-            foreach(var entity in errorinfos)
+            foreach (var entity in errorinfos)
             {
                 if (entity.ErrorCode != ErrorCodeValue.NoError)
                 {
@@ -16050,6 +16056,7 @@ out string strError)
             ref XmlDocument itemdom,
             bool bForce,
             string strOperator,
+            string strAccountLocation,  // sessioninfo.Account.Location
             string strItemRecPath,
             string strReaderRecPath,
             ref XmlDocument domOperLog,
@@ -16676,8 +16683,12 @@ strBookPrice);    // 图书价格
                 DomUtil.SetElementText(domOperLog.DocumentElement, "lastReturningDate",
     strLastReturningDate);     // 上次应还日期
 
-            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+            XmlElement operator_node = DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                 strOperator);   // 操作者
+                                // 2019/8/4
+            if (string.IsNullOrEmpty(strAccountLocation) == false)
+                operator_node?.SetAttribute("location", strAccountLocation);
+
             DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                 strBorrowDate);   // 操作时间
 
