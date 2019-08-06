@@ -437,7 +437,6 @@ namespace DigitalPlatform.LibraryServer
                 List<string> targetLeft = new List<string>();
                 List<string> targetMiddle = null;
                 List<string> targetRight = null;
-                string strDebugInfo = "";
 
                 this.AppendResultText("逻辑运算ID\r\n");
 
@@ -462,7 +461,7 @@ namespace DigitalPlatform.LibraryServer
                     ref targetMiddle,
                     ref targetRight,
                     false,
-                    out strDebugInfo,
+                    out string strDebugInfo,
                     out strError);
                 if (nRet == -1)
                 {
@@ -649,7 +648,6 @@ namespace DigitalPlatform.LibraryServer
                             return -1;
                         }
 
-                        string[] records = null;
                         // 获得若干读者记录
                         // parameters:
                         //      strPosition 第一次调用前，需要将此参数的值清为空
@@ -659,7 +657,7 @@ namespace DigitalPlatform.LibraryServer
                         //      0   正常获得一批记录，但是尚未获得全部
                         //      1   正常获得最后一批记录
                         nRet = m_cardCenterObj.GetPatronRecords(ref strPosition,
-                            out records,
+                            out string[] records,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -970,8 +968,6 @@ idElementName="barcode"
                     int nRedoCount = 0;
                 REDO:
                     string strExistingXml = "";
-                    string strOutputPath = "";
-                    byte[] baTimestamp = null;
                     // 检索所有读者库，看这条记录是否已经存在
                     // 通过特定检索途径获得读者记录
                     // return:
@@ -986,8 +982,8 @@ idElementName="barcode"
                         strID,
                         this.From,
                         out strExistingXml,
-                        out strOutputPath,
-                        out baTimestamp,
+                        out string strOutputPath,
+                        out byte[] baTimestamp,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1006,18 +1002,14 @@ idElementName="barcode"
 
                     if (nRet == 0)
                     {
-                        string strNewXml = "";
                         // 没有命中。需要创建新的读者记录
                         nRet = BuildNewPatronXml(
         source_dom,
-        out strNewXml,
+        out string strNewXml,
         out strError);
                         if (nRet == -1)
                             return -1;
 
-                        string strSavedXml = "";
-                        string strSavedRecPath = "";
-                        byte[] baNewTimestamp = null;
                         DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                         LibraryServerResult result = this.App.SetReaderInfo(
@@ -1028,9 +1020,9 @@ strNewXml,
 null,
 null,
 out strExistingXml,
-out strSavedXml,
-out strSavedRecPath,
-out baNewTimestamp,
+out string strSavedXml,
+out string strSavedRecPath,
+out byte[] baNewTimestamp,
 out kernel_errorcode);
                         if (result.Value == -1)
                         {
@@ -1065,7 +1057,6 @@ out kernel_errorcode);
                             return -1;
                         }
 
-                        string strMergedXml = "";
                         // 检查记录有无修改
                         // return:
                         //      -1  出错
@@ -1074,16 +1065,13 @@ out kernel_errorcode);
                         nRet = MergePatronXml(
                             exist_dom,
                             source_dom,
-                            out strMergedXml,
+                            out string strMergedXml,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
                         if (nRet == 1)
                         {
-                            string strSavedXml = "";
-                            string strSavedRecPath = "";
-                            byte[] baNewTimestamp = null;
                             DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
 
                             LibraryServerResult result = this.App.SetReaderInfo(
@@ -1094,9 +1082,9 @@ out kernel_errorcode);
     strExistingXml,
     baTimestamp,
     out strExistingXml,
-    out strSavedXml,
-    out strSavedRecPath,
-    out baNewTimestamp,
+    out string strSavedXml,
+    out string strSavedRecPath,
+    out byte[] baNewTimestamp,
     out kernel_errorcode);
                             if (result.Value == -1)
                             {

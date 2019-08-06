@@ -32,7 +32,7 @@ namespace dp2SSL
             }
         }
 
-        Entity FindEntity(string uid)
+        Entity FindEntityByUID(string uid)
         {
             foreach (Entity entity in this)
             {
@@ -42,19 +42,59 @@ namespace dp2SSL
             return null;
         }
 
+        // 2019/8/6
+        Entity FindEntityByPII(string pii)
+        {
+            foreach (Entity entity in this)
+            {
+                if (entity.PII == pii)
+                    return entity;
+            }
+            return null;
+        }
+
         // 修改一个 entity 中和 EAS 有关的内存数据
         public bool SetEasData(string uid, bool enable)
         {
-            Entity entity = FindEntity(uid);
+            Entity entity = FindEntityByUID(uid);
             if (entity == null)
                 return false;
             return entity.SetEasData(enable);
         }
 
+        // 根据已知的 PII 在结合中添加一个 Entity 元素
+        public Entity Add(string pii, bool auto_update = true)
+        {
+            // 查重
+            Entity entity = FindEntityByPII(pii);
+            if (entity != null)
+            {
+                //if (auto_update)
+                //    Update(data);
+                return entity;
+            }
+
+            entity = new Entity
+            {
+                Container = this,
+                PII = pii,
+                UID = null,
+                TagInfo = null
+            };
+            this.Add(entity);
+
+            entity.FillFinished = false;
+
+            // SetPII(entity);
+
+            entity.SetError(null);
+            return entity;
+        }
+
         public Entity Add(TagAndData data, bool auto_update = true)
         {
             // 查重
-            Entity entity = FindEntity(data.OneTag.UID);
+            Entity entity = FindEntityByUID(data.OneTag.UID);
             if (entity != null)
             {
                 if (auto_update)
@@ -82,7 +122,7 @@ namespace dp2SSL
         //      其他    找到并更新了
         public Entity Update(TagAndData data, bool auto_add = true)
         {
-            Entity entity = FindEntity(data.OneTag.UID);
+            Entity entity = FindEntityByUID(data.OneTag.UID);
             if (entity == null)
             {
                 if (auto_add)
@@ -110,6 +150,7 @@ namespace dp2SSL
             return entity;
         }
 
+        // 根据 entity 中的 RFID 信息设置 PII
         static void SetPII(Entity entity)
         {
             // 刷新 PII

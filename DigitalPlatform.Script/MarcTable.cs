@@ -1266,7 +1266,7 @@ namespace DigitalPlatform.Marc
             fields = record.select("field[@name='700' or @name='710' or @name='711']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("Related names", BuildFields(fields)));
+                results.Add(new NameValueLine("Related names", BuildFields(fields), "author"));
             }
 
             // Related titles

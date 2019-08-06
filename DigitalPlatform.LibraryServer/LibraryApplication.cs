@@ -931,11 +931,10 @@ namespace DigitalPlatform.LibraryServer
                                 this.PatronReplicationFields = StringUtil.SplitList(strList);
                         }
 
-                        int v = 0;
                         nRet = DomUtil.GetIntegerParam(node,
                             "maxPatronHistoryItems",
                             10, // 100,
-                            out v,
+                            out int v,
                             out strError);
                         if (nRet == -1)
                             app.WriteErrorLog(strError);
