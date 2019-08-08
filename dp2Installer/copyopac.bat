@@ -24,6 +24,7 @@ del test.* /Q
 
 md bin
 cd bin
+del *.dll /Q
 xcopy ..\..\..\dp2opac\bin\*.dll /Y
 del nanchangsso.dll /Q
 del fyjssso.dll /Q
