@@ -2727,6 +2727,28 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 #endif
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("复制(&C)");
+            menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
+            if (this.listView_records.SelectedIndices.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("复制单列(&S)");
+            if (this.listView_records.SelectedIndices.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            for (int i = 0; i < this.listView_records.Columns.Count; i++)
+            {
+                MenuItem subMenuItem = new MenuItem("复制列 '" + this.listView_records.Columns[i].Text + "'");
+                subMenuItem.Tag = i;
+                subMenuItem.Click += new System.EventHandler(this.menu_copySingleColumnToClipboard_Click);
+                menuItem.MenuItems.Add(subMenuItem);
+            }
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
