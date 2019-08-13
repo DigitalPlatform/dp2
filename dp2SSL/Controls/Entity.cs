@@ -13,6 +13,7 @@ using dp2SSL.Models;
 using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -43,7 +44,7 @@ namespace dp2SSL
         }
 
         // 2019/8/6
-        Entity FindEntityByPII(string pii)
+        public Entity FindEntityByPII(string pii)
         {
             foreach (Entity entity in this)
             {
@@ -78,6 +79,7 @@ namespace dp2SSL
             {
                 Container = this,
                 PII = pii,
+                OnShelf = false,
                 UID = null,
                 TagInfo = null
             };
@@ -88,6 +90,56 @@ namespace dp2SSL
             // SetPII(entity);
 
             entity.SetError(null);
+            return entity;
+        }
+
+        public Entity OffShelf(TagAndData data)
+        {
+            if (data.OneTag.TagInfo == null)
+                return null;
+
+            string pii = GetPII(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(pii))
+                return null;
+
+            var entity = FindEntityByPII(pii);
+            if (entity == null)
+                return null;
+
+            entity.OnShelf = false;
+
+            // TODO: 如果本来就不是当前馆藏地的(被误放进来的)，要从列表中删除
+            if (entity.BelongToCurrentShelf == false)
+                this.Remove(entity);
+
+            return entity;
+        }
+
+        // 放到架上
+        public Entity OnShelf(TagAndData data)
+        {
+            if (data.OneTag.TagInfo == null)
+                return null;
+
+            string pii = GetPII(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(pii))
+                return null;
+
+            var entity = FindEntityByPII(pii);
+            if (entity != null)
+            {
+                // 馆藏地属于本书架的图书
+                entity.BelongToCurrentShelf = true;
+            }
+            else
+            {
+                // 这是馆藏地不属于本书架的图书
+                entity = Add(data, true);
+                entity.BelongToCurrentShelf = false;
+            }
+
+            entity.OnShelf = true;
+            entity.UID = data.OneTag.UID;
             return entity;
         }
 
@@ -148,6 +200,15 @@ namespace dp2SSL
 
             entity.SetError(data.Error);
             return entity;
+        }
+
+        public static string GetPII(TagInfo tagInfo)
+        {
+            LogicChip chip = LogicChip.From(tagInfo.Bytes,
+(int)tagInfo.BlockSize,
+"" // tagInfo.LockStatus
+);
+            return chip.FindElement(ElementOID.PII)?.Text;
         }
 
         // 根据 entity 中的 RFID 信息设置 PII
@@ -296,6 +357,22 @@ namespace dp2SSL
             }
         }
 
+        private string _location;
+
+        // 原始馆藏地
+        public string Location
+        {
+            get => _location;
+            set
+            {
+                if (_location != value)
+                {
+                    _location = value;
+                    OnPropertyChanged("Location");
+                }
+            }
+        }
+
         private string _borrowInfo;
 
         public string BorrowInfo
@@ -308,6 +385,56 @@ namespace dp2SSL
                     _borrowInfo = value;
                     OnPropertyChanged("BorrowInfo");
                 }
+            }
+        }
+
+        string _shelfState = null;
+
+        // 智能书架事项状态。各种值的组合: onshelf/currentshelf
+        public string ShelfState
+        {
+            get
+            {
+                return _shelfState;
+            }
+            set
+            {
+                if (_shelfState != value)
+                {
+                    _shelfState = value;
+                    OnPropertyChanged("ShelfState");
+                }
+            }
+        }
+
+
+        // 是否在智能书架架上
+        public bool OnShelf
+        {
+            get
+            {
+                return !StringUtil.IsInList("offshelf", this.ShelfState);
+            }
+            set
+            {
+                string s = this.ShelfState;
+                StringUtil.SetInList(ref s, "offshelf", !value);
+                this.ShelfState = s;
+            }
+        }
+
+        // (馆藏地)是否属于当前智能书架
+        public bool BelongToCurrentShelf
+        {
+            get
+            {
+                return StringUtil.IsInList("currentshelf", this.ShelfState);
+            }
+            set
+            {
+                string s = this.ShelfState;
+                StringUtil.SetInList(ref s, "currentshelf", value);
+                this.ShelfState = s;
             }
         }
 
@@ -376,6 +503,10 @@ namespace dp2SSL
                 this.State = "borrowed";
 
             // TODO: 设置借书日期、期限、应还日期等
+            string location = DomUtil.GetElementText(dom.DocumentElement, "location");
+            location = StringUtil.GetPureLocation(location);
+            this.Location = location;
+
             string borrowDate = DomUtil.GetElementText(dom.DocumentElement, "borrowDate");
             string returningDate = DomUtil.GetElementText(dom.DocumentElement, "returningDate");
             string period = DomUtil.GetElementText(dom.DocumentElement, "borrowPeriod");

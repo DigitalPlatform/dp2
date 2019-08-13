@@ -148,6 +148,10 @@
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="Converter\CountToVisibilityConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
+    <Compile Include="Converter\StringToOpacityConverter.cs" />
+    <Compile Include="Dialog\PatronWindow.xaml.cs">
+      <DependentUpon>PatronWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dialog\VideoWindow.xaml.cs">
       <DependentUpon>VideoWindow.xaml</DependentUpon>
     </Compile>
@@ -157,6 +161,7 @@
     <Compile Include="Dialog\MessageWindow.xaml.cs">
       <DependentUpon>MessageWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\TagList.cs" />
     <Compile Include="Page\PageError.xaml.cs">
@@ -186,6 +191,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\EntityListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dialog\PatronWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
