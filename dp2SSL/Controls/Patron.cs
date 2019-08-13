@@ -94,7 +94,7 @@ namespace dp2SSL
 
         string _state = null;
 
-        // 事项状态。borrowed/onshelf/空
+        // 事项状态。borrowed/onshelf/空，或者各种值的组合
         public string State
         {
             get

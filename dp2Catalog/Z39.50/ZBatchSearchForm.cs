@@ -1474,6 +1474,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
             RecordInfo record_info = (RecordInfo)row.Tag;
 
+            // TODO: 此处 index 可能会越界
             VirtualItem v_item = connection.VirtualItems[index];
 
             // TODO: 比较浏览信息是否改变?
@@ -1494,6 +1495,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 }
                 cell.Text = v_item.SubItems[j];
             }
+
             return 0;
         }
 
@@ -1535,6 +1537,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     }
                     continue;
                 }
+
                 nRet = PresentOneLine(
                     row,
                     index,
