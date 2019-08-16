@@ -5268,7 +5268,14 @@ MessageBoxDefaultButton.Button2);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
-                NormalResult getstate_result = await FingerprintGetState("getLibraryServerUID");
+                NormalResult getstate_result = await FingerprintGetState("");
+                if (getstate_result.Value == -1)
+                {
+                    strError = $"指纹中心当前状态不正确：{getstate_result.ErrorInfo}";
+                    goto ERROR1;
+                }
+
+                getstate_result = await FingerprintGetState("getLibraryServerUID");
                 if (getstate_result.Value == -1)
                 {
                     strError = getstate_result.ErrorInfo;

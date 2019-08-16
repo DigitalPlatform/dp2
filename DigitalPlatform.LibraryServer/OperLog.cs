@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define WRITE_LOG
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -858,6 +860,10 @@ namespace DigitalPlatform.LibraryServer
                         strXmlBody,
                         attachment);
 
+#if WRITE_LOG
+                    this.App.WriteDebugInfo($"WriteEventLog() fileLength={this.m_stream.Length}");
+#endif
+
                 }
                 catch (Exception ex)
                 {
@@ -1324,6 +1330,13 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {   // begin of lock try
                     lFileSize = stream.Length;
+
+#if WRITE_LOG
+                    FileInfo fi = new FileInfo(strFilePath);
+
+                    this.App.WriteDebugInfo($"lFileSize={lFileSize} fi.Length={fi.Length} (1)");
+#endif
+
                 }   // end of lock try
                 finally
                 {
@@ -2344,6 +2357,11 @@ out strTargetLibraryCode);
             strError = "";
             List<OperLogInfo> results = new List<OperLogInfo>();
 
+#if WRITE_LOG
+            this.App.WriteDebugInfo($"GetOperLogs() strFileName{strFileName} lIndex={lIndex} nCount={nCount} strStyle={strStyle} strFilter={strFilter}");
+#endif
+
+
             if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 DirectoryInfo di = new DirectoryInfo(this.m_strDirectory);
@@ -2389,6 +2407,9 @@ out strTargetLibraryCode);
             long lHintNext = -1;
             for (int i = 0; i < nCount || nCount == -1; i++)
             {
+#if WRITE_LOG
+                this.App.WriteDebugInfo($"Call {i} GetOperLog() strFileName{strFileName} lIndex={lIndex} strStyle={strStyle} strFilter={strFilter}");
+#endif
                 // return:
                 //      -1  error
                 //      0   file not found
@@ -2405,6 +2426,11 @@ out strTargetLibraryCode);
                     out strXml,
                     out lAttachmentLength,
                     out strError);
+
+#if WRITE_LOG
+                this.App.WriteDebugInfo($"Call GetOperLog() nRet={nRet} strXml={strXml}");
+#endif
+
                 if (nRet == -1)
                     return -1;
                 if (nRet == 0)
@@ -2418,9 +2444,18 @@ out strTargetLibraryCode);
 
                 nPackageLength += strXml.Length + 100;  // 边角尺寸
 
+#if WRITE_LOG
+                this.App.WriteDebugInfo($"nPackageLength={nPackageLength}");
+#endif
+
                 if (nPackageLength > 500 * 1024
                     && i > 0)
+                {
+#if WRITE_LOG
+                    this.App.WriteDebugInfo($"break");
+#endif
                     break;
+                }
 
                 OperLogInfo info = new OperLogInfo();
                 info.Index = lIndex;
@@ -2435,6 +2470,10 @@ out strTargetLibraryCode);
 
             records = new OperLogInfo[results.Count];
             results.CopyTo(records);
+
+#if WRITE_LOG
+            this.App.WriteDebugInfo($"records.Length={records.Length}");
+#endif
             return 1;
         }
 
@@ -2526,7 +2565,14 @@ out strTargetLibraryCode);
                 }
                 try
                 {   // begin of lock try
+
                     lFileSize = cache_item.Stream.Length;
+
+#if WRITE_LOG
+                    FileInfo fi = new FileInfo(strFilePath);
+
+                    this.App.WriteDebugInfo($"lFileSize={lFileSize} fi.Length={fi.Length} (2)");
+#endif
                 }   // end of lock try
                 finally
                 {

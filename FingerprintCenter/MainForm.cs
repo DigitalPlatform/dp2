@@ -1733,7 +1733,7 @@ token);
                 if (result.Value == 1)
                     this.Invoke((Action)(() =>
                     {
-                        this.textBox_replicationStart.Text = result.LastDate + ":" + result.LastIndex;
+                        this.textBox_replicationStart.Text = result.LastDate + ":" + result.LastIndex + "-";    // 注意 - 符号不能少。少了意思就会变成每次只获取一条日志记录了
                     }));
             }
             finally

@@ -1305,7 +1305,7 @@ namespace DigitalPlatform.LibraryServer
                         //      1   不符合要求
                         nRet = CheckReaderType(domTemp,
                             strLibraryCode,
-                            strReaderDbName,
+                            //strReaderDbName,
                             out strError);
                         if (nRet == -1 || nRet == 1)
                         {
@@ -1516,21 +1516,22 @@ strLibraryCode);    // 读者所在的馆代码
 
         #region SetReaderInfo() 下级函数
 
-        // 检查一个册记录的读者类型是否符合值列表要求
+        // 检查一个读者记录的读者类型是否符合值列表要求
         // parameters:
         // return:
         //      -1  检查过程出错
         //      0   符合要求
         //      1   不符合要求
-        int CheckReaderType(XmlDocument dom,
+        internal int CheckReaderType(XmlDocument dom,
             string strLibraryCode,
-            string strReaderDbName,
+            // string strReaderDbName,
             out string strError)
         {
             strError = "";
-            // int nRet = 0;
+            int nRet = 0;
 
             List<string> values = null;
+            /*
 
             // 试探 读者库名
 
@@ -1555,6 +1556,20 @@ strLibraryCode);    // 读者所在的馆代码
                 goto FOUND;
 
             return 0;   // 因为没有值列表，什么值都可以
+            */
+
+            // return:
+            //      -1  出错
+            //      0   library.xml 中尚未定义 rightsTable 元素
+            //      1   成功
+            nRet = GetReaderTypes(
+                strLibraryCode,
+                out values,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;   // 因为没有值列表，什么值都可以
 
             FOUND:
             string strReaderType = DomUtil.GetElementText(dom.DocumentElement,
@@ -1574,6 +1589,31 @@ strLibraryCode);    // 读者所在的馆代码
 
             GetPureValue(ref values);
             strError = "读者类型 '" + strReaderType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";
+            return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   library.xml 中尚未定义 rightsTable 元素
+        //      1   成功
+        public int GetReaderTypes(
+            string strLibraryCode,
+            out List<string> reader_types,
+            out string strError)
+        {
+            strError = "";
+            reader_types = new List<string>();
+
+            XmlElement root = this.LibraryCfgDom?.DocumentElement?.SelectSingleNode("rightsTable") as XmlElement;
+            if (root == null)
+            {
+                strError = "library.xml 中尚未定义 rightsTable 元素";
+                return 0;
+            }
+
+            reader_types = LoanParam.GetReaderTypes(
+root, strLibraryCode);
+
             return 1;
         }
 
@@ -2310,7 +2350,7 @@ strLibraryCode);    // 读者所在的馆代码
                 //      1   不符合要求
                 nRet = CheckReaderType(domNewRec,   // domTemp,
                     strLibraryCode,
-                    strReaderDbName,
+                    //strReaderDbName,
                     out strError);
                 if (nRet == -1 || nRet == 1)
                 {

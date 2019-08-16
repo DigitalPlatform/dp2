@@ -67,7 +67,7 @@ namespace dp2SSL
                 this.Lock.ExitWriteLock();
             }
 
-            LibraryChannelManager.Log.Debug($"{this.Name} channels Clear() completed. IdleCount={this.Channels.IdleCount}, UsedCount={this.Channels.UsedCount}");
+            LibraryChannelManager.Log?.Debug($"{this.Name} channels Clear() completed. IdleCount={this.Channels.IdleCount}, UsedCount={this.Channels.UsedCount}");
         }
 
         void _clear()
@@ -198,7 +198,7 @@ namespace dp2SSL
 
             return this.Channels.GetChannel(() =>
             {
-                LibraryChannelManager.Log.Debug($"beginof new {this.Name} channel, Url={this.Url}");
+                LibraryChannelManager.Log?.Debug($"beginof new {this.Name} channel, Url={this.Url}");
                 var channel = StartChannel(
     this.Url,
     out string strError);
@@ -223,7 +223,7 @@ namespace dp2SSL
                     else
                         throw new Exception($"启动 {this.Name} 通道时出错(2): {ex.Message}", ex);
                 }
-                LibraryChannelManager.Log.Debug($"endof new {this.Name} channel, Url={this.Url}");
+                LibraryChannelManager.Log?.Debug($"endof new {this.Name} channel, Url={this.Url}");
                 return channel;
             });
         }

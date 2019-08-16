@@ -189,18 +189,24 @@ namespace dp2SSL.Models
                     remove_patrons.Add(patron);
             }
 
+            bool array_changed = false;
+
             // 兑现添加
             lock (_sync_books)
             {
                 foreach (TagAndData book in new_books)
                 {
                     if (_books.IndexOf(book) == -1)
+                    {
                         _books.Add(book);
+                        array_changed = true;
+                    }
                 }
                 // 兑现删除
                 foreach (TagAndData book in remove_books)
                 {
                     _books.Remove(book);
+                    array_changed = true;
                 }
             }
 
@@ -209,17 +215,24 @@ namespace dp2SSL.Models
                 foreach (TagAndData patron in new_patrons)
                 {
                     if (_patrons.IndexOf(patron) == -1)
+                    {
                         _patrons.Add(patron);
+                        array_changed = true;
+                    }
                 }
                 foreach (TagAndData patron in remove_patrons)
                 {
                     _patrons.Remove(patron);
+                    array_changed = true;
                 }
             }
 
             // 通知一次变化
-            notifyChanged(new_books, null, remove_books,
-                new_patrons, null, remove_patrons);
+            if (array_changed
+                || new_books.Count > 0 || remove_books.Count > 0
+                || new_patrons.Count > 0 || remove_patrons.Count > 0)    // 2019/8/15 优化
+                notifyChanged(new_books, null, remove_books,
+                    new_patrons, null, remove_patrons);
 
             // 需要获得 Tag 详细信息的。注意还应当包含以前出错的 Tag
             //List<TagAndData> news = new_books;
@@ -234,6 +247,8 @@ namespace dp2SSL.Models
             new_patrons = new List<TagAndData>();
             remove_patrons = new List<TagAndData>();
 
+            // .TagInfo 是否发生过填充
+            bool taginfo_changed = false;
             {
                 List<TagAndData> update_books = new List<TagAndData>();
                 List<TagAndData> update_patrons = new List<TagAndData>();
@@ -277,7 +292,10 @@ namespace dp2SSL.Models
 
                         // 记下来。避免以后重复再次去获取了
                         if (tag.TagInfo == null)
+                        {
                             tag.TagInfo = info;
+                            taginfo_changed = true;
+                        }
 
                         // 观察 typeOfUsage 元素
                         var chip = LogicChip.From(info.Bytes,
@@ -316,6 +334,7 @@ namespace dp2SSL.Models
                     }
                 } // end of foreach
 
+                array_changed = false;
                 // 再次兑现添加和删除
                 // 兑现添加
                 lock (_sync_books)
@@ -323,11 +342,13 @@ namespace dp2SSL.Models
                     foreach (TagAndData book in new_books)
                     {
                         _books.Add(book);
+                        array_changed = true;
                     }
                     // 兑现删除
                     foreach (TagAndData book in remove_books)
                     {
                         _books.Remove(book);
+                        array_changed = true;
                     }
                 }
 
@@ -336,16 +357,26 @@ namespace dp2SSL.Models
                     foreach (TagAndData patron in new_patrons)
                     {
                         _patrons.Add(patron);
+                        array_changed = true;
                     }
                     foreach (TagAndData patron in remove_patrons)
                     {
                         _patrons.Remove(patron);
+                        array_changed = true;
                     }
                 }
 
                 // 再次通知变化
-                notifyChanged(new_books, update_books, remove_books,
-                    new_patrons, update_patrons, remove_patrons);
+                if (array_changed == true
+                    || taginfo_changed == true
+                    || new_books.Count > 0
+                    || update_books.Count > 0
+                    || remove_books.Count > 0
+                    || new_patrons.Count > 0
+                    || update_patrons.Count > 0
+                    || remove_patrons.Count > 0)    // 2019/8/15 优化
+                    notifyChanged(new_books, update_books, remove_books,
+                        new_patrons, update_patrons, remove_patrons);
             }
         }
 

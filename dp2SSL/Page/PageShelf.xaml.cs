@@ -63,6 +63,7 @@ namespace dp2SSL
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
+            App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
 
         }
 
@@ -81,6 +82,8 @@ namespace dp2SSL
 
             // TODO: 首次从累积的列表里面初始化
             update_entities.AddRange(InitialEntities());
+
+            var task = RefreshPatrons();
 
             return await Update(null, update_entities, token);
         }
@@ -252,7 +255,7 @@ namespace dp2SSL
             TagChangedEventArgs e)
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
-            // var task = RefreshPatrons();
+            var task = RefreshPatrons();
 
             bool changed = false;
             List<Entity> update_entities = new List<Entity>();
@@ -361,7 +364,9 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
-                        _patron.Fill(patrons[0].OneTag);
+                        if (_patron.Fill(patrons[0].OneTag) == false)
+                            return;
+
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
@@ -473,13 +478,16 @@ namespace dp2SSL
         {
             _patron.Clear();
 
-            if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
+            if (this.patronControl.BorrowedEntities.Count == 0)
+            {
+                if (!Application.Current.Dispatcher.CheckAccess())
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        this.patronControl.BorrowedEntities.Clear();
+                    }));
+                else
                     this.patronControl.BorrowedEntities.Clear();
-                }));
-            else
-                this.patronControl.BorrowedEntities.Clear();
+            }
         }
 
         #region patron 分类报错机制

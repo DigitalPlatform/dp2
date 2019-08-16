@@ -408,7 +408,9 @@ namespace dp2SSL
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
-                        _patron.Fill(patrons[0].OneTag);
+                        if (_patron.Fill(patrons[0].OneTag) == false)
+                            return;
+
                         SetPatronError("rfid_multi", "");   // 2019/5/22
 
                         // 2019/5/29
@@ -427,6 +429,10 @@ namespace dp2SSL
                             SetPatronError("rfid_multi", "");   // 2019/5/20
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                SetGlobalError("rfid", $"RefreshPatrons() 出现异常: {ex.Message}");
             }
             finally
             {
@@ -2686,13 +2692,16 @@ string usage)
         {
             _patron.Clear();
 
-            if (!Application.Current.Dispatcher.CheckAccess())
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
+            if (this.patronControl.BorrowedEntities.Count > 0)
+            {
+                if (!Application.Current.Dispatcher.CheckAccess())
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        this.patronControl.BorrowedEntities.Clear();
+                    }));
+                else
                     this.patronControl.BorrowedEntities.Clear();
-                }));
-            else
-                this.patronControl.BorrowedEntities.Clear();
+            }
         }
     }
 }
