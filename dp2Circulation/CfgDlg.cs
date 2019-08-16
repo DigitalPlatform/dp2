@@ -37,6 +37,9 @@ namespace dp2Circulation
         public CfgDlg()
         {
             InitializeComponent();
+
+            this.tabControl_main.TabPages.Remove(this.tabPage_charging);
+            this.tabPage_charging.Dispose();
         }
 
         public string UiState

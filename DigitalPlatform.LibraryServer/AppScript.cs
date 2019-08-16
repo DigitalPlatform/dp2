@@ -521,6 +521,7 @@ namespace DigitalPlatform.LibraryServer
                             strError = $"{result.ErrorInfo}";
                         else
                             strError = $"馆藏地 '{strLibraryCodeList}' 不打算提供条码校验规则";
+                        nResultValue = -2;  // 2019/8/14
                         return -2;
                     }
                     strError = result.ErrorInfo;
@@ -2063,8 +2064,29 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
+
+            /*
+            {
+                XmlNode root = this.App.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable");
+                if (root == null)
+                {
+                    //strError = "所提供的读者权限定义XML字符串中不存在<rightsTable>元素";
+                    //return -1;
+                }
+                else
+                {
+                    List<String> readertypes = LoanParam.GetReaderTypes(
+    root, strLibraryCode);
+                }
+
+            }
+            */
+
             return 0;
         }
+
+
 
         // 2016/4/3
         // 按照缺省行为，验证读者记录中的证条码号
@@ -2220,6 +2242,7 @@ namespace DigitalPlatform.LibraryServer
                     // return 1;
                     errors.Add(strError);
                 }
+
             }
 
             // 2014/1/10
@@ -2253,7 +2276,6 @@ namespace DigitalPlatform.LibraryServer
                         errors.Add(strError);
                     }
                 }
-
             }
 
             if (string.IsNullOrEmpty(strNewBarcode) == false)
@@ -2362,10 +2384,9 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
-            CurrencyItem item = null;
             // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
             int nRet = PriceUtil.ParseSinglePrice(strPrice,
-                out item,
+                out CurrencyItem item,
                 out strError);
             if (nRet == -1)
                 return 1;
@@ -2406,7 +2427,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -2 || nRet == -1 || nResultValue != 2)
                 {
-                    if (nRet == -2)
+                    if (nRet == -2 && nResultValue != -2)
                     {
                         strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
                         return -1;

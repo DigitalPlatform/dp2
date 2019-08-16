@@ -597,9 +597,13 @@ new_password);
                 message = "RFID 发送打开";
             else
                 message = "RFID 发送关闭";
-            Program.MainForm.OutputHistory(message, 0);
 
-            Program.MainForm?.Speak(message);
+
+            Task.Run(() =>
+            {
+                Program.MainForm?.OutputHistory(message, 0);
+                Program.MainForm?.Speak(message);
+            });
 
             return new NormalResult();
         }

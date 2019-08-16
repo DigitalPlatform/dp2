@@ -368,13 +368,14 @@ namespace dp2SSL
         }
 
         // 刷新信息
-        public void Fill(OneTag tag)
+        public bool Fill(OneTag tag)
         {
             string pii = "";
 
             if (tag.TagInfo == null && tag.Protocol == InventoryInfo.ISO15693)
             {
-                throw new Exception("Fill() taginfo == null");
+                // throw new Exception("Fill() taginfo == null");
+                return false;
             }
 
             if (tag.TagInfo != null && tag.Protocol == InventoryInfo.ISO15693)
@@ -387,12 +388,13 @@ namespace dp2SSL
             }
 
             if (this.UID == tag.UID && this.PII == pii)
-                return; // 优化
+                return true; // 优化
 
             this.Clear();
 
             this.UID = tag.UID;
             this.PII = pii;
+            return true;
         }
 
         public void Clear()

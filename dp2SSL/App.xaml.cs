@@ -273,9 +273,9 @@ namespace dp2SSL
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
         {
-            LibraryChannelManager.Log.Debug("OnSessionEnding() called");
+            LibraryChannelManager.Log?.Debug("OnSessionEnding() called");
             WpfClientInfo.Finish();
-            LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
+            LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
 
             _cancelRefresh?.Cancel();
             _cancelProcessMonitor?.Cancel();
@@ -286,9 +286,9 @@ namespace dp2SSL
         // 注：Windows 关机或者重启的时候，会触发 OnSessionEnding 事件，但不会触发 OnExit 事件
         protected override void OnExit(ExitEventArgs e)
         {
-            LibraryChannelManager.Log.Debug("OnExit() called");
+            LibraryChannelManager.Log?.Debug("OnExit() called");
             WpfClientInfo.Finish();
-            LibraryChannelManager.Log.Debug("End WpfClientInfo.Finish()");
+            LibraryChannelManager.Log?.Debug("End WpfClientInfo.Finish()");
 
             _cancelRefresh.Cancel();
             _cancelProcessMonitor?.Cancel();
