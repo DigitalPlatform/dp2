@@ -103,6 +103,53 @@ namespace dp2SSL
             this.photo.Source = imageSource;
         }
 
+        public void LoadPhoto(string photo_path)
+        {
+            if (string.IsNullOrEmpty(photo_path))
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.SetPhoto(null);
+                }));
+                return;
+            }
+
+            Stream stream = new MemoryStream();
+            var channel = App.CurrentApp.GetChannel();
+            try
+            {
+                long lRet = channel.GetRes(
+                    null,
+                    photo_path,
+                    stream,
+                    "data,content", // strGetStyle,
+                    null,   // byte [] input_timestamp,
+                    out string strMetaData,
+                    out byte[] baOutputTimeStamp,
+                    out string strOutputPath,
+                    out string strError);
+                if (lRet == -1)
+                {
+                    // SetGlobalError("patron", $"获取读者照片时出错: {strError}");
+                    // return;
+                    throw new Exception($"获取读者照片时出错: {strError}");
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    this.SetPhoto(stream);
+                }));
+                stream = null;
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+                if (stream != null)
+                    stream.Dispose();
+            }
+        }
+
         /*
         void OnPropertyChanged(string name)
         {

@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Driver1.cs" />
+    <Compile Include="miniLib_Lock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="rfidlib.cs" />
     <Compile Include="rfidlib_aip_iso14443A.cs" />

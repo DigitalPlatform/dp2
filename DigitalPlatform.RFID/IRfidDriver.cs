@@ -343,4 +343,17 @@ uint new_password);
             return false;
         }
     }
+
+    public class ShelfLock
+    {
+        public string Name { get; set; }
+        public string Type { get; set; }    // 类型 USB/COM
+        public string DriverName { get; set; }  // 驱动名称
+        public string ProductName { get; set; } // 产品型号
+        public string Protocols { get; set; }   // 支持的协议
+        public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
+        public string DriverPath { get; set; }
+        public UIntPtr LockHandle { get; set; }
+
+    }
 }

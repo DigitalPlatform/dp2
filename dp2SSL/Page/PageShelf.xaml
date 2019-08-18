@@ -7,7 +7,8 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PageShelf">
+      WindowTitle="书架" Title="书架"
+      x:Name="_this" >
     <Page.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVis" />
     </Page.Resources>
@@ -47,7 +48,8 @@
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3"
             Name="error" Visibility="Collapsed">Error Text</TextBlock>
         -->
-        <TextBox Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Path=Error, Mode=OneWay}"
+        <TextBox 
+            Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding Path=Error, Mode=OneWay}"
                    Height="60" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
                    FontSize="20" FontWeight="Bold" Foreground="White" Background="DarkRed"
                    Visibility="{Binding Path=Error, Mode=OneWay,Converter={StaticResource StringToVis}}"

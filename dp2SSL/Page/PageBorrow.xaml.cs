@@ -668,7 +668,14 @@ namespace dp2SSL
             {
                 Task.Run(() =>
                 {
-                    LoadPhoto(_patron.PhotoPath);
+                    try
+                    {
+                        this.patronControl.LoadPhoto(_patron.PhotoPath);
+                    }
+                    catch(Exception ex)
+                    {
+                        SetGlobalError("patron", ex.Message);
+                    }
                 });
             }
 
@@ -1196,6 +1203,7 @@ namespace dp2SSL
             return new NormalResult();
         }
 
+#if NO
         void LoadPhoto(string photo_path)
         {
             if (string.IsNullOrEmpty(photo_path))
@@ -1241,7 +1249,7 @@ namespace dp2SSL
                     stream.Dispose();
             }
         }
-
+#endif
         // 第二阶段：填充图书信息的 PII 和 Title 字段
         async Task FillBookFields(BaseChannel<IRfid> channel,
             List<Entity> entities)

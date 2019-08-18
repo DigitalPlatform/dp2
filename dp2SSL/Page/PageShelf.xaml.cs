@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -22,13 +23,15 @@ using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
+using DigitalPlatform.Interfaces;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
     /// <summary>
     /// PageShelf.xaml 的交互逻辑
     /// </summary>
-    public partial class PageShelf : Page
+    public partial class PageShelf : Page, INotifyPropertyChanged
     {
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
@@ -52,20 +55,147 @@ namespace dp2SSL
 
             this.booksControl.SetSource(_entities);
             this.patronControl.DataContext = _patron;
+
+            this._patron.PropertyChanged += _patron_PropertyChanged;
+
+            App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
+
+            // this.error.Text = "test";
+        }
+
+        private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Error")
+            {
+                OnPropertyChanged(e.PropertyName);
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        public string Error
+        {
+            get
+            {
+                return App.CurrentApp.Error;
+            }
         }
 
         private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
         {
+            FingerprintManager.SetError += FingerprintManager_SetError;
+            FingerprintManager.Touched += FingerprintManager_Touched;
+
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+
+            RfidManager.GetState("clearCache");
+            // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
+            if (string.IsNullOrEmpty(RfidManager.Url))
+                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
+
+            _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
+            _adorner = new LayoutAdorner(this);
+
+            {
+                List<string> style = new List<string>();
+                if (string.IsNullOrEmpty(App.RfidUrl) == false)
+                    style.Add("rfid");
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                    style.Add("fingerprint");
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                    style.Add("face");
+                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+            }
+
 
             await Fill(new CancellationToken());
         }
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
+            RfidManager.SetError -= RfidManager_SetError;
+
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
 
+            FingerprintManager.Touched -= FingerprintManager_Touched;
+            FingerprintManager.SetError -= FingerprintManager_SetError;
+
         }
+
+        // 从指纹阅读器获取消息(第一阶段)
+        private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
+        {
+            SetPatronInfo(e.Result);
+
+            await FillPatronDetail();
+
+#if NO
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                _patron.IsFingerprintSource = true;
+                _patron.Barcode = "test1234";
+            }));
+#endif
+        }
+
+        // 从指纹阅读器获取消息(第一阶段)
+        void SetPatronInfo(GetMessageResult result)
+        {
+
+            if (result.Value == -1)
+            {
+                SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
+                if (_patron.IsFingerprintSource)
+                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                return;
+            }
+            else
+            {
+                // 清除以前残留的报错信息
+                SetPatronError("fingerprint", "");
+            }
+
+            if (result.Message == null)
+                return;
+
+            PatronClear();
+            _patron.IsFingerprintSource = true;
+            _patron.PII = result.Message;
+        }
+
+
+        private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetGlobalError("fingerprint", e.Error);
+        }
+
+        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetGlobalError("rfid", e.Error);
+            /*
+            if (e.Error == null)
+            {
+                // 恢复正常
+            }
+            else
+            {
+                // 进入错误状态
+                if (_rfidState != "error")
+                {
+                    await ClearBooksAndPatron(null);
+                }
+
+                _rfidState = "error";
+            }
+            */
+        }
+
 
         // 首次填充图书列表
         async Task<NormalResult> Fill(CancellationToken token)
@@ -426,6 +556,9 @@ namespace dp2SSL
 
             SetPatronError("getreaderinfo", "");
 
+            if (string.IsNullOrEmpty(_patron.State) == true)
+                OpenDoor();
+
             if (force)
                 _patron.PhotoPath = "";
             // string old_photopath = _patron.PhotoPath;
@@ -503,6 +636,95 @@ namespace dp2SSL
         }
 
         #endregion
+
+        bool _visiblityChanged = false;
+
+        private void _patron_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "PhotoPath")
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        this.patronControl.LoadPhoto(_patron.PhotoPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        SetGlobalError("patron", ex.Message);
+                    }
+                });
+            }
+
+            if (e.PropertyName == "UID"
+                || e.PropertyName == "Barcode")
+            {
+                // 如果 patronControl 本来是隐藏状态，但读卡器上放上了读者卡，这时候要把 patronControl 恢复显示
+                if ((string.IsNullOrEmpty(_patron.UID) == false || string.IsNullOrEmpty(_patron.Barcode) == false)
+                    && this.patronControl.Visibility != Visibility.Visible)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        patronControl.Visibility = Visibility.Visible;
+                        _visiblityChanged = true;
+                    }));
+                // 如果读者卡又被拿走了，则要恢复 patronControl 的隐藏状态
+                else if (string.IsNullOrEmpty(_patron.UID) == true && string.IsNullOrEmpty(_patron.Barcode) == true
+    && this.patronControl.Visibility == Visibility.Visible
+    && _visiblityChanged)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        patronControl.Visibility = Visibility.Collapsed;
+                    }));
+            }
+        }
+
+        // 开门
+        NormalResult OpenDoor()
+        {
+            // 打开对话框，询问门号
+            ProgressWindow progress = null;
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "正在处理，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += Progress_Closed;
+                progress.Show();
+                AddLayer();
+            }));
+
+            try
+            {
+                progress = null;
+
+                return new NormalResult();
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    if (progress != null)
+                        progress.Close();
+                }));
+            }
+        }
+
+        private void Progress_Closed(object sender, EventArgs e)
+        {
+            RemoveLayer();
+        }
+
+        void AddLayer()
+        {
+            _layer.Add(_adorner);
+        }
+
+        void RemoveLayer()
+        {
+            _layer.Remove(_adorner);
+        }
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
