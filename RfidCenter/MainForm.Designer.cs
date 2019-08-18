@@ -41,28 +41,10 @@
             this.tabPage_operHistory = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
-            this.button_setDefaultThreshold = new System.Windows.Forms.Button();
-            this.textBox_cfg_shreshold = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
             this.comboBox_deviceList = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.textBox_replicationStart = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.checkBox_speak = new System.Windows.Forms.CheckBox();
             this.checkBox_beep = new System.Windows.Forms.CheckBox();
-            this.checkBox_cfg_savePasswordLong = new System.Windows.Forms.CheckBox();
-            this.textBox_cfg_location = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox_cfg_password = new System.Windows.Forms.TextBox();
-            this.textBox_cfg_userName = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox_cfg_dp2LibraryServerUrl = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.toolStrip_server = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton_cfg_setXeServer = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -96,16 +78,18 @@
             this.MenuItem_loadFactoryDefault = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetReaderToDigitalPlatformState = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_detectReader = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_deleteShortcut = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openProgramFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.ToolStripMenuItem_deleteShortcut = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.comboBox_lock = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -114,7 +98,6 @@
             this.splitContainer_start.SuspendLayout();
             this.tabPage_operHistory.SuspendLayout();
             this.tabPage_cfg.SuspendLayout();
-            this.toolStrip_server.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -175,6 +158,7 @@
             this.columnHeader_pii});
             this.listView_chips.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_chips.FullRowSelect = true;
+            this.listView_chips.HideSelection = false;
             this.listView_chips.Location = new System.Drawing.Point(0, 0);
             this.listView_chips.Name = "listView_chips";
             this.listView_chips.Size = new System.Drawing.Size(252, 306);
@@ -241,25 +225,12 @@
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
-            this.tabPage_cfg.Controls.Add(this.button_setDefaultThreshold);
-            this.tabPage_cfg.Controls.Add(this.textBox_cfg_shreshold);
-            this.tabPage_cfg.Controls.Add(this.label7);
+            this.tabPage_cfg.Controls.Add(this.comboBox_lock);
+            this.tabPage_cfg.Controls.Add(this.label8);
             this.tabPage_cfg.Controls.Add(this.comboBox_deviceList);
             this.tabPage_cfg.Controls.Add(this.label6);
-            this.tabPage_cfg.Controls.Add(this.textBox_replicationStart);
-            this.tabPage_cfg.Controls.Add(this.label5);
             this.tabPage_cfg.Controls.Add(this.checkBox_speak);
             this.tabPage_cfg.Controls.Add(this.checkBox_beep);
-            this.tabPage_cfg.Controls.Add(this.checkBox_cfg_savePasswordLong);
-            this.tabPage_cfg.Controls.Add(this.textBox_cfg_location);
-            this.tabPage_cfg.Controls.Add(this.label4);
-            this.tabPage_cfg.Controls.Add(this.textBox_cfg_password);
-            this.tabPage_cfg.Controls.Add(this.textBox_cfg_userName);
-            this.tabPage_cfg.Controls.Add(this.label3);
-            this.tabPage_cfg.Controls.Add(this.label2);
-            this.tabPage_cfg.Controls.Add(this.textBox_cfg_dp2LibraryServerUrl);
-            this.tabPage_cfg.Controls.Add(this.label1);
-            this.tabPage_cfg.Controls.Add(this.toolStrip_server);
             this.tabPage_cfg.Location = new System.Drawing.Point(4, 33);
             this.tabPage_cfg.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage_cfg.Name = "tabPage_cfg";
@@ -269,31 +240,6 @@
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
-            // button_setDefaultThreshold
-            // 
-            this.button_setDefaultThreshold.Location = new System.Drawing.Point(297, 433);
-            this.button_setDefaultThreshold.Name = "button_setDefaultThreshold";
-            this.button_setDefaultThreshold.Size = new System.Drawing.Size(177, 47);
-            this.button_setDefaultThreshold.TabIndex = 14;
-            this.button_setDefaultThreshold.Text = "恢复默认值";
-            this.button_setDefaultThreshold.UseVisualStyleBackColor = true;
-            // 
-            // textBox_cfg_shreshold
-            // 
-            this.textBox_cfg_shreshold.Location = new System.Drawing.Point(191, 441);
-            this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
-            this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
-            this.textBox_cfg_shreshold.TabIndex = 13;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(12, 444);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(144, 24);
-            this.label7.TabIndex = 12;
-            this.label7.Text = "指纹识别阈值(&T):";
-            // 
             // comboBox_deviceList
             // 
             this.comboBox_deviceList.FormattingEnabled = true;
@@ -301,6 +247,7 @@
             this.comboBox_deviceList.Name = "comboBox_deviceList";
             this.comboBox_deviceList.Size = new System.Drawing.Size(283, 32);
             this.comboBox_deviceList.TabIndex = 11;
+            this.comboBox_deviceList.Visible = false;
             // 
             // label6
             // 
@@ -310,32 +257,14 @@
             this.label6.Size = new System.Drawing.Size(121, 24);
             this.label6.TabIndex = 10;
             this.label6.Text = "当前读卡器(&I):";
-            // 
-            // textBox_replicationStart
-            // 
-            this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 544);
-            this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_replicationStart.Name = "textBox_replicationStart";
-            this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
-            this.textBox_replicationStart.TabIndex = 18;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(11, 547);
-            this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(146, 24);
-            this.label5.TabIndex = 17;
-            this.label5.Text = "日志同步起点(&R):";
+            this.label6.Visible = false;
             // 
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
             this.checkBox_speak.Checked = true;
             this.checkBox_speak.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_speak.Location = new System.Drawing.Point(135, 491);
+            this.checkBox_speak.Location = new System.Drawing.Point(135, 88);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
@@ -346,146 +275,13 @@
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(15, 491);
+            this.checkBox_beep.Location = new System.Drawing.Point(15, 88);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
             this.checkBox_beep.TabIndex = 15;
             this.checkBox_beep.Text = "蜂鸣(&B)";
             this.checkBox_beep.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_cfg_savePasswordLong
-            // 
-            this.checkBox_cfg_savePasswordLong.AutoSize = true;
-            this.checkBox_cfg_savePasswordLong.Location = new System.Drawing.Point(15, 317);
-            this.checkBox_cfg_savePasswordLong.Margin = new System.Windows.Forms.Padding(5);
-            this.checkBox_cfg_savePasswordLong.Name = "checkBox_cfg_savePasswordLong";
-            this.checkBox_cfg_savePasswordLong.Size = new System.Drawing.Size(129, 28);
-            this.checkBox_cfg_savePasswordLong.TabIndex = 9;
-            this.checkBox_cfg_savePasswordLong.Text = "保存密码(&L)";
-            // 
-            // textBox_cfg_location
-            // 
-            this.textBox_cfg_location.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_location.Location = new System.Drawing.Point(191, 272);
-            this.textBox_cfg_location.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_cfg_location.Name = "textBox_cfg_location";
-            this.textBox_cfg_location.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_location.TabIndex = 8;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 275);
-            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(130, 24);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "工作台号(&W)：";
-            // 
-            // textBox_cfg_password
-            // 
-            this.textBox_cfg_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_password.Location = new System.Drawing.Point(191, 224);
-            this.textBox_cfg_password.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_cfg_password.Name = "textBox_cfg_password";
-            this.textBox_cfg_password.PasswordChar = '*';
-            this.textBox_cfg_password.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_password.TabIndex = 6;
-            // 
-            // textBox_cfg_userName
-            // 
-            this.textBox_cfg_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_cfg_userName.Location = new System.Drawing.Point(191, 176);
-            this.textBox_cfg_userName.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_cfg_userName.Name = "textBox_cfg_userName";
-            this.textBox_cfg_userName.Size = new System.Drawing.Size(283, 31);
-            this.textBox_cfg_userName.TabIndex = 4;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 227);
-            this.label3.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(87, 24);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "密码(&P)：";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 179);
-            this.label2.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(107, 24);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "用户名(&U)：";
-            // 
-            // textBox_cfg_dp2LibraryServerUrl
-            // 
-            this.textBox_cfg_dp2LibraryServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
-            this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
-            this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(141, 31);
-            this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(11, 24);
-            this.label1.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(207, 24);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "dp2Library 服务器 URL:";
-            // 
-            // toolStrip_server
-            // 
-            this.toolStrip_server.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.toolStrip_server.AutoSize = false;
-            this.toolStrip_server.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStrip_server.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip_server.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.toolStrip_server.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_cfg_setXeServer,
-            this.toolStripSeparator1,
-            this.toolStripButton_cfg_setHongnibaServer});
-            this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
-            this.toolStrip_server.Name = "toolStrip_server";
-            this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(144, 51);
-            this.toolStrip_server.TabIndex = 2;
-            this.toolStrip_server.Text = "toolStrip1";
-            // 
-            // toolStripButton_cfg_setXeServer
-            // 
-            this.toolStripButton_cfg_setXeServer.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripButton_cfg_setXeServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_cfg_setXeServer.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_cfg_setXeServer.Name = "toolStripButton_cfg_setXeServer";
-            this.toolStripButton_cfg_setXeServer.Size = new System.Drawing.Size(122, 28);
-            this.toolStripButton_cfg_setXeServer.Text = "单机版服务器";
-            this.toolStripButton_cfg_setXeServer.ToolTipText = "设为单机版服务器";
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 51);
-            // 
-            // toolStripButton_cfg_setHongnibaServer
-            // 
-            this.toolStripButton_cfg_setHongnibaServer.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripButton_cfg_setHongnibaServer.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_cfg_setHongnibaServer.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_cfg_setHongnibaServer.Name = "toolStripButton_cfg_setHongnibaServer";
-            this.toolStripButton_cfg_setHongnibaServer.Size = new System.Drawing.Size(198, 28);
-            this.toolStripButton_cfg_setHongnibaServer.Text = "红泥巴.数字平台服务器";
-            this.toolStripButton_cfg_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             // 
             // statusStrip1
             // 
@@ -769,6 +565,18 @@
             this.MenuItem_detectReader.Text = "自动探测 COM 口读卡器 ...";
             this.MenuItem_detectReader.Click += new System.EventHandler(this.MenuItem_detectReader_Click);
             // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(305, 6);
+            // 
+            // ToolStripMenuItem_deleteShortcut
+            // 
+            this.ToolStripMenuItem_deleteShortcut.Name = "ToolStripMenuItem_deleteShortcut";
+            this.ToolStripMenuItem_deleteShortcut.Size = new System.Drawing.Size(308, 30);
+            this.ToolStripMenuItem_deleteShortcut.Text = "删除开机启动快捷方式";
+            this.ToolStripMenuItem_deleteShortcut.Click += new System.EventHandler(this.ToolStripMenuItem_deleteShortcut_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -795,6 +603,11 @@
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(305, 6);
+            // 
             // MenuItem_manual
             // 
             this.MenuItem_manual.Name = "MenuItem_manual";
@@ -816,22 +629,29 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // ToolStripMenuItem_deleteShortcut
+            // comboBox_lock
             // 
-            this.ToolStripMenuItem_deleteShortcut.Name = "ToolStripMenuItem_deleteShortcut";
-            this.ToolStripMenuItem_deleteShortcut.Size = new System.Drawing.Size(308, 30);
-            this.ToolStripMenuItem_deleteShortcut.Text = "删除开机启动快捷方式";
-            this.ToolStripMenuItem_deleteShortcut.Click += new System.EventHandler(this.ToolStripMenuItem_deleteShortcut_Click);
+            this.comboBox_lock.FormattingEnabled = true;
+            this.comboBox_lock.Items.AddRange(new object[] {
+            "COM1",
+            "COM2",
+            "COM3",
+            "COM4",
+            "<自动>",
+            "<不使用>"});
+            this.comboBox_lock.Location = new System.Drawing.Point(191, 39);
+            this.comboBox_lock.Name = "comboBox_lock";
+            this.comboBox_lock.Size = new System.Drawing.Size(283, 32);
+            this.comboBox_lock.TabIndex = 20;
             // 
-            // toolStripSeparator5
+            // label8
             // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(305, 6);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(305, 6);
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(11, 42);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(71, 24);
+            this.label8.TabIndex = 19;
+            this.label8.Text = "门锁(&L):";
             // 
             // MainForm
             // 
@@ -860,8 +680,6 @@
             this.tabPage_operHistory.ResumeLayout(false);
             this.tabPage_cfg.ResumeLayout(false);
             this.tabPage_cfg.PerformLayout();
-            this.toolStrip_server.ResumeLayout(false);
-            this.toolStrip_server.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -883,28 +701,10 @@
         private System.Windows.Forms.TabPage tabPage_operHistory;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.TabPage tabPage_cfg;
-        private System.Windows.Forms.Button button_setDefaultThreshold;
-        private System.Windows.Forms.TextBox textBox_cfg_shreshold;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox comboBox_deviceList;
         private System.Windows.Forms.Label label6;
-        public System.Windows.Forms.TextBox textBox_replicationStart;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox checkBox_speak;
         private System.Windows.Forms.CheckBox checkBox_beep;
-        public System.Windows.Forms.CheckBox checkBox_cfg_savePasswordLong;
-        public System.Windows.Forms.TextBox textBox_cfg_location;
-        private System.Windows.Forms.Label label4;
-        public System.Windows.Forms.TextBox textBox_cfg_password;
-        public System.Windows.Forms.TextBox textBox_cfg_userName;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox_cfg_dp2LibraryServerUrl;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ToolStrip toolStrip_server;
-        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setXeServer;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButton_cfg_setHongnibaServer;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
@@ -951,6 +751,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_deleteShortcut;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ComboBox comboBox_lock;
+        private System.Windows.Forms.Label label8;
     }
 }
 

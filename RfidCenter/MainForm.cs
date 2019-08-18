@@ -43,8 +43,10 @@ namespace RfidCenter
 
             InitializeComponent();
 
+            /*
             this.tabControl_main.TabPages.Remove(this.tabPage_cfg);
             this.tabPage_cfg.Dispose();
+            */
 
             {
                 _floatingMessage = new FloatingMessageForm(this);
@@ -128,6 +130,11 @@ namespace RfidCenter
             }
             ClearHtml();
 
+            //this.Invoke((Action)(() =>
+            //{
+            this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+            //}));
+
             // 显示版本号
             this.OutputHistory($"版本号: {ClientInfo.ClientVersion}");
 
@@ -207,10 +214,7 @@ namespace RfidCenter
 
         void SaveSettings()
         {
-            if (this.checkBox_cfg_savePasswordLong.Checked == false)
-                this.textBox_cfg_password.Text = "";
             ClientInfo.Config?.Set("global", "ui_state", this.UiState);
-            ClientInfo.Config?.Set("global", "replication_start", this.textBox_replicationStart.Text);
             ClientInfo.Finish();
         }
 
@@ -350,6 +354,7 @@ namespace RfidCenter
                 bool success = false;
                 try
                 {
+
                     ClearMessage();
                     this.SetErrorState("retry", "正在初始化 RFID 设备");
                     if (message != null)
@@ -359,7 +364,18 @@ namespace RfidCenter
 
                     _driver.ReleaseDriver();
                     var existing_hint_table = GetHintTable();
-                    InitializeDriverResult result = _driver.InitializeDriver("", set_hint_table ? null : existing_hint_table);
+
+                    // TODO: 要允许 COM1,COM2 这种形态的内容被输入 combobox 和保存
+                    string lock_param = GetLockParam().Replace(",", "|").ToUpper();
+                    if (string.IsNullOrEmpty(lock_param) == false
+                        && lock_param != "<不使用>")
+                    {
+                        if (lock_param == "<自动>")
+                            lock_param = "";
+                        lock_param = $"lock:{lock_param}";
+                    }
+
+                    InitializeDriverResult result = _driver.InitializeDriver(lock_param, set_hint_table ? null : existing_hint_table);
                     // 列出所有可用设备名称
                     UpdateDeviceList(result.Readers);
 
@@ -391,15 +407,12 @@ namespace RfidCenter
                         }
                     }
 
-                    this.Invoke((Action)(() =>
-                    {
-                        this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
-                    }));
                 }
                 catch (Exception ex)
                 {
                     SetErrorState("error", ex.Message);
-                    ShowMessageBox(ex.Message);
+                    OutputHistory($"初始化驱动出现异常: {ex.Message}", 2);
+                    ShowMessage(ex.Message, "red", true);
                 }
                 finally
                 {
@@ -436,6 +449,14 @@ namespace RfidCenter
         {
             //NormalResult result = _driver.CloseReader();
             //MessageBox.Show(this, result.ToString());
+        }
+
+        string GetLockParam()
+        {
+            return (string)this.Invoke((Func<string>)(() =>
+            {
+                return this.comboBox_lock.Text;
+            }));
         }
 
         string GetCurrentReaderName()
@@ -1053,15 +1074,10 @@ bool bClickClose = false)
                 List<object> controls = new List<object>
                 {
                     this.tabControl_main,
-                    this.textBox_cfg_dp2LibraryServerUrl,
-                    this.textBox_cfg_userName,
-                    this.textBox_cfg_password,
-                    this.textBox_cfg_location,
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
-                    new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
                     this.comboBox_deviceList,
-                    this.textBox_cfg_shreshold
+                    this.comboBox_lock
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1070,15 +1086,10 @@ bool bClickClose = false)
                 List<object> controls = new List<object>
                 {
                     this.tabControl_main,
-                    this.textBox_cfg_dp2LibraryServerUrl,
-                    this.textBox_cfg_userName,
-                    this.textBox_cfg_password,
-                    this.textBox_cfg_location,
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
-                    new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
                     this.comboBox_deviceList,
-                    this.textBox_cfg_shreshold
+                    this.comboBox_lock
                 };
                 GuiState.SetUiState(controls, value);
             }
