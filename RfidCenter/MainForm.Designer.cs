@@ -41,6 +41,8 @@
             this.tabPage_operHistory = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.comboBox_lock = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.comboBox_deviceList = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox_speak = new System.Windows.Forms.CheckBox();
@@ -88,8 +90,9 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.comboBox_lock = new System.Windows.Forms.ComboBox();
-            this.label8 = new System.Windows.Forms.Label();
+            this.MenuItem_openLock = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_getLockState = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -240,6 +243,30 @@
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // comboBox_lock
+            // 
+            this.comboBox_lock.FormattingEnabled = true;
+            this.comboBox_lock.Items.AddRange(new object[] {
+            "COM1",
+            "COM2",
+            "COM3",
+            "COM4",
+            "<自动>",
+            "<不使用>"});
+            this.comboBox_lock.Location = new System.Drawing.Point(191, 39);
+            this.comboBox_lock.Name = "comboBox_lock";
+            this.comboBox_lock.Size = new System.Drawing.Size(283, 32);
+            this.comboBox_lock.TabIndex = 20;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(11, 42);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(71, 24);
+            this.label8.TabIndex = 19;
+            this.label8.Text = "门锁(&L):";
+            // 
             // comboBox_deviceList
             // 
             this.comboBox_deviceList.FormattingEnabled = true;
@@ -383,6 +410,9 @@
             this.MenuItem_restart,
             this.MenuItem_openSendKey,
             this.MenuItem_closeSendKey,
+            this.toolStripSeparator1,
+            this.MenuItem_openLock,
+            this.MenuItem_getLockState,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
@@ -392,33 +422,33 @@
             // MenuItem_restart
             // 
             this.MenuItem_restart.Name = "MenuItem_restart";
-            this.MenuItem_restart.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_restart.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_restart.Text = "重新启动";
             this.MenuItem_restart.Click += new System.EventHandler(this.MenuItem_restart_Click);
             // 
             // MenuItem_openSendKey
             // 
             this.MenuItem_openSendKey.Name = "MenuItem_openSendKey";
-            this.MenuItem_openSendKey.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_openSendKey.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_openSendKey.Text = "打开 发送";
             this.MenuItem_openSendKey.Click += new System.EventHandler(this.MenuItem_openSendKey_Click);
             // 
             // MenuItem_closeSendKey
             // 
             this.MenuItem_closeSendKey.Name = "MenuItem_closeSendKey";
-            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(169, 30);
+            this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(166, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(249, 6);
             // 
             // ToolStripMenuItem_exit
             // 
             this.ToolStripMenuItem_exit.Name = "ToolStripMenuItem_exit";
-            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(169, 30);
+            this.ToolStripMenuItem_exit.Size = new System.Drawing.Size(252, 30);
             this.ToolStripMenuItem_exit.Text = "退出(&X)";
             this.ToolStripMenuItem_exit.Click += new System.EventHandler(this.ToolStripMenuItem_exit_Click);
             // 
@@ -629,29 +659,24 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // comboBox_lock
+            // MenuItem_openLock
             // 
-            this.comboBox_lock.FormattingEnabled = true;
-            this.comboBox_lock.Items.AddRange(new object[] {
-            "COM1",
-            "COM2",
-            "COM3",
-            "COM4",
-            "<自动>",
-            "<不使用>"});
-            this.comboBox_lock.Location = new System.Drawing.Point(191, 39);
-            this.comboBox_lock.Name = "comboBox_lock";
-            this.comboBox_lock.Size = new System.Drawing.Size(283, 32);
-            this.comboBox_lock.TabIndex = 20;
+            this.MenuItem_openLock.Name = "MenuItem_openLock";
+            this.MenuItem_openLock.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openLock.Text = "开锁";
+            this.MenuItem_openLock.Click += new System.EventHandler(this.MenuItem_openLock_Click);
             // 
-            // label8
+            // MenuItem_getLockState
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(11, 42);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(71, 24);
-            this.label8.TabIndex = 19;
-            this.label8.Text = "门锁(&L):";
+            this.MenuItem_getLockState.Name = "MenuItem_getLockState";
+            this.MenuItem_getLockState.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_getLockState.Text = "探测锁状态";
+            this.MenuItem_getLockState.Click += new System.EventHandler(this.MenuItem_getLockState_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
             // 
             // MainForm
             // 
@@ -753,6 +778,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ComboBox comboBox_lock;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openLock;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_getLockState;
     }
 }
 
