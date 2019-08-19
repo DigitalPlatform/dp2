@@ -1077,7 +1077,7 @@ bool bClickClose = false)
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
                     this.comboBox_deviceList,
-                    this.comboBox_lock
+                    new ComboBoxText(this.comboBox_lock)
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -1089,7 +1089,7 @@ bool bClickClose = false)
                     new ControlWrapper(this.checkBox_speak, true),
                     new ControlWrapper(this.checkBox_beep, true),
                     this.comboBox_deviceList,
-                    this.comboBox_lock
+                    new ComboBoxText(this.comboBox_lock)
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -1854,6 +1854,34 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         private void ToolStripMenuItem_deleteShortcut_Click(object sender, EventArgs e)
         {
             ClientInfo.RemoveShortcutFromStartupGroup("dp2-RFID中心", true);
+        }
+
+        private void MenuItem_openLock_Click(object sender, EventArgs e)
+        {
+            string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
+            if (string.IsNullOrEmpty(strIndex) == false)
+            {
+                var result = _driver.OpenShelfLock("*", Convert.ToInt32(strIndex));
+                MessageBox.Show(this, result.ToString());
+            }
+            else
+            {
+                MessageBox.Show(this, "放弃");
+            }
+        }
+
+        private void MenuItem_getLockState_Click(object sender, EventArgs e)
+        {
+            string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
+            if (string.IsNullOrEmpty(strIndex) == false)
+            {
+                var result = _driver.GetShelfLockState("*", Convert.ToInt32(strIndex));
+                MessageDlg.Show(this, result.ToString(), "锁状态");
+            }
+            else
+            {
+                MessageBox.Show(this, "放弃");
+            }
         }
     }
 }

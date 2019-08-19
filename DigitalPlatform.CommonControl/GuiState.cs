@@ -72,7 +72,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string strPassword = (string)table["password"];
                 string strSave = (string)table["save"];
@@ -95,7 +95,7 @@ namespace DigitalPlatform.CommonControl
             table["save"] = container.SaveOrNotCheckBox.Checked == true ? "true" : "false";
 
             return container.GetType().ToString() + ":"
-                + StringUtil.BuildParameterString(table);
+                + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         static void SetRadioButtonState(RadioButton radio, string strText)
@@ -253,7 +253,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string strStyle = (string)table["style"];
                 string strValue = (string)table["text"];
@@ -281,7 +281,7 @@ namespace DigitalPlatform.CommonControl
             table["text"] = combobox.Text;
 
             return combobox.GetType().ToString() + ":"
-                + StringUtil.BuildParameterString(table);
+                + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         static void SetComboBoxTextState(ComboBoxText container,
@@ -309,7 +309,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string strStyle = (string)table["style"];
                 string strValue = (string)table["text"];
@@ -339,7 +339,7 @@ namespace DigitalPlatform.CommonControl
             table["text"] = combobox.Text;
 
             return container.GetType().ToString() + ":"
-                + StringUtil.BuildParameterString(table);
+                + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         static void SetComboBoxState(ComboBox combobox,
@@ -364,7 +364,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string strStyle = (string)table["style"];
                 string strIndex = (string)table["index"];
@@ -407,7 +407,7 @@ namespace DigitalPlatform.CommonControl
             table["index"] = combobox.SelectedIndex.ToString();
 
             return combobox.GetType().ToString() + ":"
-                + StringUtil.BuildParameterString(table);
+                + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         // 恢复 ListView 的状态
@@ -470,7 +470,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string strRatio = (string)table["ratio"];
                 string strOrientation = (string)table["orientation"];
@@ -507,7 +507,7 @@ namespace DigitalPlatform.CommonControl
 
             if (string.IsNullOrEmpty(strState) == false)
             {
-                Hashtable table = StringUtil.ParseParameters(strState);
+                Hashtable table = StringUtil.ParseParameters(strState, ',', '=', "url");
 
                 string s_w = (string)table["w"];
                 string s_h = (string)table["h"];
@@ -539,7 +539,7 @@ namespace DigitalPlatform.CommonControl
             Hashtable table = new Hashtable();
             table["ratio"] = GuiUtil.GetSplitterState(splitContainer).ToString();
             table["orientation"] = splitContainer.Orientation == Orientation.Vertical ? "v" : "h";
-            return splitContainer.GetType().ToString() + ":" + StringUtil.BuildParameterString(table);
+            return splitContainer.GetType().ToString() + ":" + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         static string GetFormState(Form form)
@@ -562,7 +562,7 @@ namespace DigitalPlatform.CommonControl
             if (form.WindowState != FormWindowState.Normal)
                 table["s"] = Enum.GetName(typeof(FormWindowState),
                     form.WindowState);
-            return form.GetType().ToString() + ":" + StringUtil.BuildParameterString(table);
+            return form.GetType().ToString() + ":" + StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         static void SetToolStripButtonState(ToolStripButton button, string strText)

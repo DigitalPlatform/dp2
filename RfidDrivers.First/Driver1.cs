@@ -3496,7 +3496,7 @@ namespace RfidDrivers.First
 
         void CloseAllLocks()
         {
-            foreach(var shelfLock in this._shelfLocks)
+            foreach (var shelfLock in this._shelfLocks)
             {
                 DisconnectLock(shelfLock.LockHandle);
                 shelfLock.LockHandle = UIntPtr.Zero;
@@ -3604,6 +3604,103 @@ namespace RfidDrivers.First
         }
 
         #endregion
+
+        List<ShelfLock> GetLocksByName(string lock_name)
+        {
+            List<ShelfLock> results = new List<ShelfLock>();
+            foreach (ShelfLock current_lock in _shelfLocks)
+            {
+                if (current_lock.LockHandle == UIntPtr.Zero)
+                    continue;
+                if (Reader.MatchReaderName(lock_name, current_lock.Name))
+                    results.Add(current_lock);
+            }
+
+            return results;
+        }
+
+        // 探测锁状态
+        // parameters:
+        //      lockName    锁名字。如果为 * 表示所有的锁
+        //      index       锁编号。从 0 开始计数
+        public GetLockStateResult GetShelfLockState(string lockName,
+            int index)
+        {
+            List<ShelfLock> locks = GetLocksByName(lockName);
+            if (locks.Count == 0)
+                return new GetLockStateResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{lockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            foreach (var current_lock in locks)
+            {
+                Byte sta = 0x00;
+                int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
+                    1,
+                    (Byte)(index + 1),
+                    ref sta);
+                if (iret != 0)
+                    return new GetLockStateResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"getDoorStatus error (lock name='{current_lock.Name}' index={index})"
+                    };
+
+                states.Add(new LockState
+                {
+                    Name = current_lock.Name,
+                    State = (sta == 0x00 ? "open" : "close")
+                });
+            }
+
+            return new GetLockStateResult
+            {
+                Value = 0,
+                States = states
+            };
+        }
+
+        // 开门
+        public NormalResult OpenShelfLock(string lockName,
+            int index)
+        {
+            List<ShelfLock> locks = GetLocksByName(lockName);
+            if (locks.Count == 0)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"当前不存在名为 '{lockName}' 的门锁对象",
+                    ErrorCode = "lockNotFound"
+                };
+
+            List<LockState> states = new List<LockState>();
+
+            int count = 0;
+            foreach (var current_lock in locks)
+            {
+                int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
+                    1,
+                    (Byte)(index + 1));
+                if (iret != 0)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"openDoor error (lock name='{current_lock.Name}' index={index})"
+                    };
+                count++;
+            }
+
+            return new NormalResult
+            {
+                Value = count
+            };
+        }
+
     }
 
     public class CReaderDriverInf
