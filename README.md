@@ -48,8 +48,10 @@ https://dotnet.microsoft.com/download/visual-studio-sdks
 
 3) dp2 Solution 中引用了一个名为 dp-library 的submodule。需要用 Git 命令行执行：
 
+```
 git submodule init
 git submodule update
+```
 
 以确保获得最新的 dp-library 代码。
 
