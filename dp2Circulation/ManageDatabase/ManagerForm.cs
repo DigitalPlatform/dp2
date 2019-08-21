@@ -4254,7 +4254,7 @@ out strError);
                 return;
 
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml("<format />");
+            dom.LoadXml(dlg.FormatXml);
 
             /*
             string strDisplayText = dlg.FormatName;
@@ -4279,9 +4279,11 @@ out strError);
             }
              * */
 
+            /*
             // 2009/6/27
             if (String.IsNullOrEmpty(dlg.CaptionsXml) == false)
                 dom.DocumentElement.InnerXml = dlg.CaptionsXml;
+                */
 
             TreeNode new_treenode = new TreeNode(GetFormatDisplayString(dom.DocumentElement), 1, 1);
             new_treenode.Tag = dom.DocumentElement.OuterXml;
@@ -4387,7 +4389,8 @@ out strError);
 
                 dlg.Text = "请指定显示格式的属性";
                 // dlg.FormatName = DomUtil.GetAttr(dom.DocumentElement, "name");
-                dlg.CaptionsXml = dom.DocumentElement.InnerXml; // 2009/6/27
+                // dlg.CaptionsXml = dom.DocumentElement.InnerXml; // 2009/6/27
+                dlg.FormatXml = dom.DocumentElement.OuterXml;
                 dlg.FormatType = DomUtil.GetAttr(dom.DocumentElement, "type");
                 dlg.ScriptFile = DomUtil.GetAttr(dom.DocumentElement, "scriptfile");
                 dlg.FormatStyle = DomUtil.GetAttr(dom.DocumentElement, "style");
@@ -4420,9 +4423,13 @@ out strError);
                 }
                  * */
 
+                /*
                 // 2009/6/27
                 if (String.IsNullOrEmpty(dlg.CaptionsXml) == false)
                     dom.DocumentElement.InnerXml = dlg.CaptionsXml;
+                    */
+
+                dom.LoadXml(dlg.FormatXml);
 
                 // 2009/6/27
                 current_treenode.Text = GetFormatDisplayString(dom.DocumentElement);

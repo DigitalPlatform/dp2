@@ -388,9 +388,9 @@ namespace dp2Circulation
             }
             catch (FileLoadException ex)
             {
-                if (DetectVirus.Detect360() == true)
+                if (DetectVirus.DetectXXX() == true)
                 {
-                    MessageBox.Show("dp2Circulation (内务)受到 360 软件干扰而无法启动。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    MessageBox.Show($"dp2Circulation (内务)受到 {DetectVirus.ViruName} 软件干扰而无法启动。请关闭或者卸载 {DetectVirus.ViruName} 软件然后再重新启动 dp2Circulation (内务)");
                     throw ex;
                 }
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
@@ -400,6 +400,7 @@ namespace dp2Circulation
                 ReportError("dp2circulation 创建 QrRecognitionControl 过程出现异常", ExceptionUtil.GetDebugText(ex));
             }
         }
+
 
         /// <summary>
         /// 是否为安装后第一次运行
@@ -520,7 +521,7 @@ Stack:
                 // && ApplicationDeployment.IsNetworkDeployed
                 )
             {
-                if (DetectVirus.Detect360() == true)
+                if (DetectVirus.DetectXXX() == true)
                 {
                     Program.PromptAndExit(this, "dp2Circulation (内务)受到 360 软件干扰而无法启动 [文件" + strFontFilePath + "不存在]。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
                     return;
@@ -2953,7 +2954,7 @@ false);
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {
-                    if (DetectVirus.Detect360() == true || DetectVirus.DetectGuanjia() == true)
+                    if (DetectVirus.DetectXXX() == true || DetectVirus.DetectGuanjia() == true)
                     {
                         channel.Close();
                         Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");

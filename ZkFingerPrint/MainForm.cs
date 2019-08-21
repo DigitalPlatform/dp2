@@ -55,7 +55,7 @@ namespace ZkFingerprint
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
+            if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
                 MessageBox.Show(this, "zkprintcenter 被木马软件干扰，无法启动");
                 Application.Exit();
