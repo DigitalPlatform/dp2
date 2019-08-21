@@ -54,7 +54,7 @@ namespace dp2Circulation
             if (this.dom == null)
             {
                 this.dom = new XmlDocument();
-                this.dom.LoadXml("<root />");
+                this.dom.LoadXml("<format />");
             }
             this.dom.DocumentElement.InnerXml = this.captionEditControl_formatName.Xml;
 
@@ -64,11 +64,23 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            // 2019/8/21
+            DomUtil.SetAttr(this.dom.DocumentElement, "name", Nulltify(this.FormatName));
+            DomUtil.SetAttr(this.dom.DocumentElement, "type", Nulltify(this.FormatType));
+            DomUtil.SetAttr(this.dom.DocumentElement, "style", Nulltify(this.FormatStyle));
+
             this.DialogResult = DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        static string Nulltify(string value)
+        {
+            if (value == "")
+                return null;
+            return value;
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -107,7 +119,7 @@ namespace dp2Circulation
                 return DomUtil.GetCaptionExt("zh", this.dom.DocumentElement);
             }
         }
- 
+
 
         public string FormatType
         {
@@ -152,6 +164,30 @@ namespace dp2Circulation
 		    </format>
          * * */
 
+        public string FormatXml
+        {
+            get
+            {
+                if (this.dom == null)
+                    return "<format />";
+
+                return this.dom.DocumentElement.OuterXml;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    this.dom = new XmlDocument();
+                    this.dom.LoadXml("<format />");
+                    return;
+                }
+
+                this.dom = new XmlDocument();
+                this.dom.LoadXml(value);
+            }
+        }
+
+#if NO
         public string CaptionsXml
         {
             get
@@ -166,13 +202,13 @@ namespace dp2Circulation
                 if (this.dom == null)
                 {
                     this.dom = new XmlDocument();
-                    this.dom.LoadXml("<root />");
+                    this.dom.LoadXml("<format />");
                 }
 
                 this.dom.DocumentElement.InnerXml = value;
             }
         }
-
+#endif
         private void button_virtualDatabaseName_newBlankLine_Click(object sender, EventArgs e)
         {
             this.captionEditControl_formatName.NewElement();

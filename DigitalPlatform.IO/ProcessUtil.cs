@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define ENABLE_DETECT
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -87,6 +89,15 @@ namespace DigitalPlatform.IO
 
     public static class DetectVirus
     {
+
+        public static string ViruName =
+#if ENABLE_DETECT
+            "360"
+#else
+            "xxx"
+#endif
+            ;
+
         /*
 信息创建时间:*2015-9-15 15:48:56
 当前操作系统信息:*Microsoft Windows NT 5.1.2600 Service Pack 3
@@ -287,8 +298,9 @@ namespace DigitalPlatform.IO
 27) dp2Circulation.exe
 
  * */
-        public static bool Detect360()
+        public static bool DetectXXX()
         {
+#if ENABLE_DETECT
             ServiceController[] devices = ServiceController.GetDevices();
 
             // 先检测驱动
@@ -310,22 +322,14 @@ namespace DigitalPlatform.IO
             }
 
             return false;
+#else
+            return false;
+#endif
         }
 
         public static bool DetectGuanjia()
         {
-#if NO
-            ServiceController[] devices = ServiceController.GetDevices();
-
-            // 先检测驱动
-            foreach (ServiceController controller in devices)
-            {
-                if (controller.DisplayName.StartsWith("360netmon", StringComparison.OrdinalIgnoreCase)
-                    || controller.DisplayName.StartsWith("360SelfProtection", StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
-#endif
-
+#if ENABLE_DETECT
             // 再检测系统进程
             List<string> names = ProcessUtil.GetProcessNameList();
 
@@ -337,6 +341,9 @@ namespace DigitalPlatform.IO
             }
 
             return false;
+#else
+            return false;
+#endif
         }
     }
 

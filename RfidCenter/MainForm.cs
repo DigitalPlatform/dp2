@@ -111,7 +111,7 @@ namespace RfidCenter
 
             SetErrorState("retry", "正在启动");
 
-            if (DetectVirus.Detect360() || DetectVirus.DetectGuanjia())
+            if (DetectVirus.DetectXXX() || DetectVirus.DetectGuanjia())
             {
                 MessageBox.Show(this, "rfidcenter 被木马软件干扰，无法启动");
                 Application.Exit();
