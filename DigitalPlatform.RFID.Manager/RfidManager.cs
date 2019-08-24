@@ -8,11 +8,11 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DigitalPlatform;
+using DigitalPlatform.IO;
 using DigitalPlatform.RFID;
 
-namespace dp2SSL
+namespace DigitalPlatform.RFID
 {
-#if REMOVED
     public static class RfidManager
     {
         static List<OneTag> _lastTags = null;
@@ -166,6 +166,42 @@ null);
             }
         }
 
+        public static NormalResult SetEAS(string reader_name,
+            string tag_name,
+            bool enable)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.SetEAS(reader_name, tag_name, enable);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
 
         public static NormalResult SetEAS(string uid, bool enable)
         {
@@ -295,5 +331,4 @@ null);
         public ListTagsResult Result { get; set; }
     }
 
-#endif
 }

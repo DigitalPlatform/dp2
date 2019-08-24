@@ -124,6 +124,14 @@ namespace RfidDrivers.First
                 return error;
             readers.AddRange(OpenComReaders(name_table, hint_table, out output_hint_table));
             _readers = readers;
+
+            // 2019/8/24 添加
+            // 使用了暗示信息，但始终没有找到任何一个读卡器，这时候要尝试一次不使用暗示信息
+            if (readers.Count == 0 && hint_table != null)
+            {
+                _readers = OpenComReaders(name_table, null, out output_hint_table);
+            }
+
             return new NormalResult();
         }
 
@@ -155,6 +163,7 @@ namespace RfidDrivers.First
 
         // 打开所有 COM 口读卡器
         // parameters:
+        //      name_table  用于查重的名字表
         //      hint_table  暗示信息表。如果为 null，表示不提供暗示信息
         //                  注：暗示信息表可以加快 COM 口读卡器打开的速度
         static List<Reader> OpenComReaders(Hashtable name_table,
@@ -251,6 +260,8 @@ namespace RfidDrivers.First
         }
 
         // 打开所有 USB 读卡器
+        // parameters:
+        //      name_table  用于查重的名字表
         static List<Reader> OpenUsbReaders(Hashtable name_table,
             out NormalResult error)
         {

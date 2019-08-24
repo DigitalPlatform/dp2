@@ -655,6 +655,13 @@ new_password);
                 Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names, "\r\n")}", 0);
             }
 
+            if (Program.Rfid.ShelfLocks.Count > 0)
+            {
+                List<string> names = new List<string>();
+                Program.Rfid.ShelfLocks.ForEach((o) => names.Add(o.Name));
+                Program.MainForm.OutputHistory($"当前锁控数量 {Program.Rfid.ShelfLocks.Count}。包括: \r\n{StringUtil.MakePathList(names, "\r\n")}", 0);
+            }
+
             _cancelInventory = new CancellationTokenSource();
             bool bFirst = true;
             try

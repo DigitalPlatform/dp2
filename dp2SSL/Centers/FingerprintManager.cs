@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {
@@ -267,14 +269,5 @@ TouchedEventArgs e);
         public GetMessageResult Result { get; set; }
     }
 
-    public delegate void SetErrorEventHandler(object sender,
-SetErrorEventArgs e);
 
-    /// <summary>
-    /// 设置出错信息事件的参数
-    /// </summary>
-    public class SetErrorEventArgs : EventArgs
-    {
-        public string Error { get; set; }
-    }
 }

@@ -38,6 +38,7 @@
             this.ToolStripMenuItem_new_hongniba = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_new_nlc = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_wangzhong = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_new_calis = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -50,7 +51,7 @@
             this.toolStripButton_import = new System.Windows.Forms.ToolStripButton();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.ToolStripMenuItem_new_calis = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_new_nbinet = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -118,7 +119,8 @@
             this.ToolStripMenuItem_new_hongniba,
             this.ToolStripMenuItem_new_nlc,
             this.ToolStripMenuItem_wangzhong,
-            this.ToolStripMenuItem_new_calis});
+            this.ToolStripMenuItem_new_calis,
+            this.ToolStripMenuItem_new_nbinet});
             this.toolStripSplitButton_new1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_new1.Image")));
             this.toolStripSplitButton_new1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_new1.Name = "toolStripSplitButton_new1";
@@ -148,6 +150,13 @@
             this.ToolStripMenuItem_wangzhong.Size = new System.Drawing.Size(290, 30);
             this.ToolStripMenuItem_wangzhong.Text = "网众";
             this.ToolStripMenuItem_wangzhong.Click += new System.EventHandler(this.ToolStripMenuItem_wangzhong_Click);
+            // 
+            // ToolStripMenuItem_new_calis
+            // 
+            this.ToolStripMenuItem_new_calis.Name = "ToolStripMenuItem_new_calis";
+            this.ToolStripMenuItem_new_calis.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_new_calis.Text = "CALIS";
+            this.ToolStripMenuItem_new_calis.Click += new System.EventHandler(this.ToolStripMenuItem_new_calis_Click);
             // 
             // toolStripButton_modify
             // 
@@ -264,12 +273,12 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
-            // ToolStripMenuItem_new_calis
+            // ToolStripMenuItem_new_nbinet
             // 
-            this.ToolStripMenuItem_new_calis.Name = "ToolStripMenuItem_new_calis";
-            this.ToolStripMenuItem_new_calis.Size = new System.Drawing.Size(290, 30);
-            this.ToolStripMenuItem_new_calis.Text = "CALIS";
-            this.ToolStripMenuItem_new_calis.Click += new System.EventHandler(this.ToolStripMenuItem_new_calis_Click);
+            this.ToolStripMenuItem_new_nbinet.Name = "ToolStripMenuItem_new_nbinet";
+            this.ToolStripMenuItem_new_nbinet.Size = new System.Drawing.Size(290, 30);
+            this.ToolStripMenuItem_new_nbinet.Text = "NBINET";
+            this.ToolStripMenuItem_new_nbinet.Click += new System.EventHandler(this.ToolStripMenuItem_new_nbinet_Click);
             // 
             // ZServerListDialog
             // 
@@ -319,5 +328,6 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_nlc;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_wangzhong;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_calis;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_new_nbinet;
     }
 }
