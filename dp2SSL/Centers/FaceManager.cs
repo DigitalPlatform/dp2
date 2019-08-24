@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.IO;
+using DigitalPlatform.RFID;
 
 namespace dp2SSL
 {

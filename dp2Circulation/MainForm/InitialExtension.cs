@@ -33,6 +33,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
+using DigitalPlatform.RFID;
 
 namespace dp2Circulation
 {
@@ -1639,7 +1640,69 @@ MessageBoxDefaultButton.Button1);
 
             // this.PropertyTaskList.MainForm = this;
             this.PropertyTaskList.BeginThread();
+
+            if (string.IsNullOrEmpty(this.RfidCenterUrl) == false)
+            {
+
+
+                RfidManager.Base.Name = "RFID 中心";
+                RfidManager.Url = this.RfidCenterUrl;
+                // RfidManager.SetError += RfidManager_SetError;
+                RfidManager.ListTags += RfidManager_ListTags;
+                RfidManager.Start(new System.Threading.CancellationToken());
+            }
         }
+
+        private string _error = null;   // "test error line asdljasdkf; ;jasldfjasdjkf aasdfasdf";
+
+        public string Error
+        {
+            get => _error;
+            set
+            {
+                if (_error != value)
+                {
+                    _error = value;
+                    // OnPropertyChanged("Error");
+                }
+            }
+        }
+
+
+
+
+        public event TagChangedEventHandler TagChanged = null;
+        // public event SetErrorEventHandler TagSetError = null;
+
+        private void RfidManager_ListTags(object sender, ListTagsEventArgs e)
+        {
+            // 标签总数显示
+            if (e.Result.Results != null)
+            {
+                TagList.Refresh(sender as BaseChannel<IRfid>, e.Result.Results,
+                        (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
+                        {
+                            TagChanged?.Invoke(sender, new TagChangedEventArgs
+                            {
+                                AddBooks = add_books,
+                                UpdateBooks = update_books,
+                                RemoveBooks = remove_books,
+                                AddPatrons = add_patrons,
+                                UpdatePatrons = update_patrons,
+                                RemovePatrons = remove_patrons
+                            });
+                        },
+                        (type, text) =>
+                        {
+                            RfidManager.TriggerSetError(this, new SetErrorEventArgs { Error = text });
+                            // TagSetError?.Invoke(this, new SetErrorEventArgs { Error = text });
+                        });
+
+                // 标签总数显示 图书+读者卡
+                // this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            }
+        }
+
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)
@@ -5403,4 +5466,22 @@ out strError);
         }
 
     }
+
+    public delegate void TagChangedEventHandler(object sender,
+TagChangedEventArgs e);
+
+    /// <summary>
+    /// 设置标签变化事件的参数
+    /// </summary>
+    public class TagChangedEventArgs : EventArgs
+    {
+        public List<TagAndData> AddBooks { get; set; }
+        public List<TagAndData> UpdateBooks { get; set; }
+        public List<TagAndData> RemoveBooks { get; set; }
+
+        public List<TagAndData> AddPatrons { get; set; }
+        public List<TagAndData> UpdatePatrons { get; set; }
+        public List<TagAndData> RemovePatrons { get; set; }
+    }
+
 }

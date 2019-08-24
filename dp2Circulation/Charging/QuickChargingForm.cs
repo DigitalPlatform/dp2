@@ -18,6 +18,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Interfaces;
+using DigitalPlatform.RFID;
+using DigitalPlatform.Core;
 
 namespace dp2Circulation
 {
@@ -158,11 +160,189 @@ namespace dp2Circulation
                 SetReaderHtmlString("(空)");
             }
 
-            // this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+            _errorTable = new ErrorTable((s) =>
+            {
+                this.Invoke((Action)(() =>
+                {
+                    if (this.label_rfidMessage.Text != s)
+                    {
+                        if (string.IsNullOrEmpty(s))
+                        {
+                            this.label_rfidMessage.Text = _rfidNumber;
 
-            Task.Run(() => { InitialRfidChannel(); });
+                            this.label_rfidMessage.BackColor = Color.White;
+                            this.label_rfidMessage.ForeColor = Color.Black;
+                        }
+                        else
+                        {
+                            this.label_rfidMessage.Text = s;
+
+                            this.label_rfidMessage.BackColor = Color.DarkRed;
+                            this.label_rfidMessage.ForeColor = Color.White;
+                        }
+                    }
+                }));
+            });
+
+            RfidManager.SetError += RfidManager_SetError;
+            Program.MainForm.TagChanged += MainForm_TagChanged;
+            InitialSendKey();
+            RfidManager.GetState("clearCache");
+
+            // Task.Run(() => { InitialRfidChannel(); });
         }
 
+        // 新 Tag 到来
+        private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
+        {
+            {
+                if (e.AddPatrons != null)
+                    foreach (var tag in e.AddPatrons)
+                    {
+                        SendKey(tag);
+                    }
+                if (e.UpdatePatrons != null)
+                    foreach (var tag in e.UpdatePatrons)
+                    {
+                        SendKey(tag);
+                    }
+            }
+
+            {
+                if (e.AddBooks != null)
+                    foreach (var tag in e.AddBooks)
+                    {
+                        SendKey(tag);
+                    }
+                /*
+                if (e.RemoveBooks != null)
+                    foreach (var tag in e.RemoveBooks)
+                    {
+
+                    }
+                    */
+                if (e.UpdateBooks != null)
+                    foreach (var tag in e.UpdateBooks)
+                    {
+                        SendKey(tag);
+                    }
+            }
+
+            RefreshRfidTagNumber();
+        }
+
+        string _rfidNumber = "";
+
+        void RefreshRfidTagNumber()
+        {
+            _rfidNumber = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            this.Invoke((Action)(() =>
+            {
+                if (this.label_rfidMessage.BackColor == Color.White)
+                {
+                    // 标签总数显示 图书+读者卡
+                    this.label_rfidMessage.Text = _rfidNumber;
+                }
+            }));
+        }
+
+        // 把存量的 PII 发送出去
+        void InitialSendKey()
+        {
+            var books = TagList.Books;
+            if (books.Count > 0)
+            {
+                foreach (var tag in books)
+                {
+                    SendKey(tag);
+                }
+            }
+
+            var patrons = TagList.Patrons;
+            if (patrons.Count > 0)
+            {
+                foreach (var tag in patrons)
+                {
+                    SendKey(tag);
+                }
+            }
+
+            RefreshRfidTagNumber();
+        }
+
+
+        public static string GetPII(TagInfo tagInfo)
+        {
+            LogicChip chip = LogicChip.From(tagInfo.Bytes,
+(int)tagInfo.BlockSize,
+"" // tagInfo.LockStatus
+);
+            return chip.FindElement(ElementOID.PII)?.Text;
+        }
+
+        public static string GetTOU(TagInfo tagInfo)
+        {
+            LogicChip chip = LogicChip.From(tagInfo.Bytes,
+(int)tagInfo.BlockSize,
+"" // tagInfo.LockStatus
+);
+            return chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+        }
+
+        void SendKey(TagAndData data)
+        {
+            Debug.WriteLine("sendKey");
+
+            if (data.OneTag.TagInfo == null)
+            {
+                Debug.WriteLine("TagInfo == null");
+                return;
+            }
+
+            string pii = GetPII(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(pii))
+            {
+                Debug.WriteLine("pii == null");
+                return;
+            }
+
+            Debug.WriteLine($"pii={pii}");
+
+            string strTypeOfUsage = GetTOU(data.OneTag.TagInfo);
+            if (string.IsNullOrEmpty(strTypeOfUsage))
+                strTypeOfUsage = "10";
+            // 2019/6/13
+            // 注意：特殊处理!
+            else if (strTypeOfUsage == "32")
+                strTypeOfUsage = "10";
+
+            string text = $"pii:{pii},tou:{strTypeOfUsage}";
+
+            this.Invoke((Action)(() =>
+            {
+                this.textBox_input.Text = text;
+            }));
+            AsyncDoAction(this.FuncState, text);
+        }
+
+        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("rfid", e.Error);
+        }
+
+        public void SetError(string type, string error)
+        {
+            _errorTable.SetError(type, error);
+        }
+
+        public void ClearErrors(string type)
+        {
+            _errorTable.SetError(type, "");
+        }
+
+        ErrorTable _errorTable = null;
+
+        /*
         public RfidChannel _rfidChannel = null;
 
         void InitialRfidChannel()
@@ -209,6 +389,8 @@ namespace dp2Circulation
                 }
             }
         }
+
+            */
 
 #if NO
         string _focusLibraryCode = "";
@@ -308,13 +490,16 @@ namespace dp2Circulation
 
         private void QuickChargingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            OpenRfidCapture(false);
+            Program.MainForm.TagChanged -= MainForm_TagChanged;
+            RfidManager.SetError -= RfidManager_SetError;
+
+            //OpenRfidCapture(false);
+            //ReleaseRfidChannel();
 
 #if NO
             if (Program.MainForm != null)
                 Program.MainForm.Move -= new EventHandler(MainForm_Move);
 #endif
-            ReleaseRfidChannel();
 
             this.commander.Destroy();
 
@@ -448,7 +633,7 @@ namespace dp2Circulation
 
         public void DoEnter()
         {
-            AsyncDoAction(this.FuncState, 
+            AsyncDoAction(this.FuncState,
                 GetUpperCase(this.textBox_input.Text));
         }
 
@@ -1789,6 +1974,13 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             task.ID = strTaskID;
             if (func == FuncState.LoadPatronInfo)
             {
+                // 此处限定只能是读者证条码号
+                if (IsReaderType(strText) == -1)
+                {
+                    MessageBox.Show(this, "请先输入读者证条码号，然后再输入册条码号");
+                    this.textBox_input.SelectAll();
+                    return;
+                }
                 task.ReaderBarcode = GetContent(strText);   // strText
                 task.Action = "load_reader_info";
             }
@@ -1964,6 +2156,34 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 return value;
             value = (string)table[name.ToUpper()];
             return value;
+        }
+
+        // return:
+        //      1   是读者类型
+        //      0   不清楚
+        //      -1  不是读者类型
+        static int IsReaderType(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return -1;
+            if (strText.IndexOf(":") == -1)
+                return 0;
+            Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
+            string strTypeOfUsage = GetValue(table, "tou");
+
+            // 注意：特殊处理!
+            if (strTypeOfUsage == "32")
+                strTypeOfUsage = "10";
+
+            if (string.IsNullOrEmpty(strTypeOfUsage) == false && strTypeOfUsage[0] == '8')
+                return 1;
+            string strBarcode = GetValue(table, "pii");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return -1;
+            strBarcode = GetValue(table, "uid");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return -1;
+            return 0;
         }
 
         // 获得一个字符串的 RFID 前缀类型
@@ -2388,7 +2608,8 @@ false);
                 {
                     this.toolStripMenuItem_transfer.Checked = true;
                     WillLoadReaderInfo = false;
-                    Task.Run(()=> {
+                    Task.Run(() =>
+                    {
                         this.Invoke((Action)(() =>
                         {
                             toolStripButton_selectTransferTargetLocation_Click(this, new EventArgs());
@@ -3354,13 +3575,13 @@ MessageBoxDefaultButton.Button2);
 #endif
             // 扫入 3 种条码均可
             EnterOrLeavePQR(true, InputType.ALL);
-            OpenRfidCapture(true);
+            //OpenRfidCapture(true);
         }
 
         private void textBox_input_Leave(object sender, EventArgs e)
         {
             EnterOrLeavePQR(false);
-            OpenRfidCapture(false);
+            //OpenRfidCapture(false);
         }
 
         private void QuickChargingForm_Enter(object sender, EventArgs e)

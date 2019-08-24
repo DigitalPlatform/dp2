@@ -632,5 +632,16 @@ port='2100'>
 
             MessageBox.Show(this, "该服务器需要用户名和密码才能访问，请您稍后用“修改”按钮设置");
         }
+
+        private void ToolStripMenuItem_new_nbinet_Click(object sender, EventArgs e)
+        {
+            string server_xml = @"<root>
+  <server name='NBINET' addr='nbinet3.ncl.edu.tw' port='210' defaultEncoding='utf-8' queryTermEncoding='utf-8'>
+    <database name='innopac' />
+  </server>
+</root>";
+
+            CreateServer(server_xml);
+        }
     }
 }

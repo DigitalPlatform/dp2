@@ -830,8 +830,10 @@ namespace dp2Circulation
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);
 
+            
+
             if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false
-                && this.Container._rfidChannel == null)
+                && string.IsNullOrEmpty(RfidManager.Url))    // this.Container._rfidChannel == null
             {
                 task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
                 goto ERROR1;
@@ -1049,9 +1051,14 @@ end_time);
             strError = "";
             try
             {
+                /*
                 NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
         task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
         enable);
+        */
+                NormalResult result = RfidManager.SetEAS("*",
+task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+enable);
 
                 // testing
                 // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
@@ -1074,7 +1081,7 @@ end_time);
                             eas_fixed = dlg.EasFixed;
                             // 2019/1/23
                             // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
-                            this.Container.OpenRfidCapture(true);
+                            // this.Container.OpenRfidCapture(true);
                         }
                     }));
 
@@ -1278,7 +1285,7 @@ end_time);
             times.Add(DateTime.Now);
 
             if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false
-    && this.Container._rfidChannel == null)
+    && string.IsNullOrEmpty(RfidManager.Url)) // this.Container._rfidChannel == null
             {
                 task.ErrorInfo = "尚未连接 RFID 设备，无法进行 RFID 标签物品的流通操作";
                 goto ERROR1;

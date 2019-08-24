@@ -152,6 +152,7 @@
       <Name>System.Drawing</Name>
     </Reference>
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
@@ -252,6 +253,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="AtomicBoolean.cs" />
+    <Compile Include="BaseChannel.cs" />
     <Compile Include="ConfirmSupervisorDialog.cs">
       <SubType>Form</SubType>
     </Compile>

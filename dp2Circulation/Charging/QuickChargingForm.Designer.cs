@@ -87,6 +87,8 @@
             this.toolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_selectTargetLocation = new System.Windows.Forms.ToolStripButton();
+            this.tableLayoutPanel_left = new System.Windows.Forms.TableLayoutPanel();
+            this.label_rfidMessage = new System.Windows.Forms.Label();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -97,6 +99,7 @@
             this.contextMenuStrip_testFunction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).BeginInit();
             this.toolStrip_main.SuspendLayout();
+            this.tableLayoutPanel_left.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList_barcodeType
@@ -229,9 +232,9 @@
             this.toolStripMenuItem_boxing.Text = "配书";
             this.toolStripMenuItem_boxing.Click += new System.EventHandler(this.ToolStripMenuItem_boxing_Click);
             // 
-            // toolStripMenuItem_move
+            // toolStripMenuItem_transfer
             // 
-            this.toolStripMenuItem_transfer.Name = "toolStripMenuItem_move";
+            this.toolStripMenuItem_transfer.Name = "toolStripMenuItem_transfer";
             this.toolStripMenuItem_transfer.Size = new System.Drawing.Size(188, 28);
             this.toolStripMenuItem_transfer.Text = "调拨";
             this.toolStripMenuItem_transfer.Click += new System.EventHandler(this.ToolStripMenuItem_move_Click);
@@ -296,7 +299,7 @@
             // 
             // splitContainer_main.Panel1
             // 
-            this.splitContainer_main.Panel1.Controls.Add(this.webBrowser_reader);
+            this.splitContainer_main.Panel1.Controls.Add(this.tableLayoutPanel_left);
             // 
             // splitContainer_main.Panel2
             // 
@@ -309,11 +312,11 @@
             // webBrowser_reader
             // 
             this.webBrowser_reader.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_reader.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser_reader.Location = new System.Drawing.Point(4, 4);
             this.webBrowser_reader.Margin = new System.Windows.Forms.Padding(4);
             this.webBrowser_reader.MinimumSize = new System.Drawing.Size(30, 30);
             this.webBrowser_reader.Name = "webBrowser_reader";
-            this.webBrowser_reader.Size = new System.Drawing.Size(486, 506);
+            this.webBrowser_reader.Size = new System.Drawing.Size(478, 456);
             this.webBrowser_reader.TabIndex = 0;
             this.webBrowser_reader.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_reader_DocumentCompleted);
             // 
@@ -586,9 +589,35 @@
             this.toolStripButton_selectTargetLocation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectTargetLocation.Image")));
             this.toolStripButton_selectTargetLocation.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
-            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 28);
+            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 27);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
+            // 
+            // tableLayoutPanel_left
+            // 
+            this.tableLayoutPanel_left.ColumnCount = 1;
+            this.tableLayoutPanel_left.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_left.Controls.Add(this.webBrowser_reader, 0, 0);
+            this.tableLayoutPanel_left.Controls.Add(this.label_rfidMessage, 0, 1);
+            this.tableLayoutPanel_left.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_left.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_left.Name = "tableLayoutPanel_left";
+            this.tableLayoutPanel_left.RowCount = 2;
+            this.tableLayoutPanel_left.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_left.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_left.Size = new System.Drawing.Size(486, 506);
+            this.tableLayoutPanel_left.TabIndex = 1;
+            // 
+            // label_rfidMessage
+            // 
+            this.label_rfidMessage.AutoSize = true;
+            this.label_rfidMessage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_rfidMessage.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_rfidMessage.Location = new System.Drawing.Point(3, 464);
+            this.label_rfidMessage.Name = "label_rfidMessage";
+            this.label_rfidMessage.Size = new System.Drawing.Size(480, 42);
+            this.label_rfidMessage.TabIndex = 1;
+            this.label_rfidMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // QuickChargingForm
             // 
@@ -620,6 +649,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).EndInit();
             this.toolStrip_main.ResumeLayout(false);
             this.toolStrip_main.PerformLayout();
+            this.tableLayoutPanel_left.ResumeLayout(false);
+            this.tableLayoutPanel_left.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -673,5 +704,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripButton toolStripButton_selectTargetLocation;
         private System.Windows.Forms.ToolStripButton toolStripButton_faceInput;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_left;
+        private System.Windows.Forms.Label label_rfidMessage;
     }
 }

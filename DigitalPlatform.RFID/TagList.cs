@@ -2,24 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
 using System.Threading.Tasks;
 
-using DigitalPlatform.RFID;
-
-namespace dp2SSL.Models
+namespace DigitalPlatform.RFID
 {
-#if REMOVED
-    public class TagAndData
-    {
-        public string Type { get; set; }    // patron/book/(null) 其中 (null) 表示无法判断类型
-
-        public OneTag OneTag { get; set; }
-
-        public LogicChip LogicChip { get; set; }
-
-        public string Error { get; set; }   // 错误信息
-    }
 
     // 存储 Tag 的数据结构。可以动态表现当前读卡器上的所有标签
     public static class TagList
@@ -296,6 +284,20 @@ namespace dp2SSL.Models
                         {
                             tag.TagInfo = info;
                             taginfo_changed = true;
+
+                            // 2019/8/25
+                            if (data.Type == "patron")
+                            {
+                                if (update_patrons.IndexOf(data) == -1)
+                                    update_patrons.Add(data);
+                            }
+                            else
+                            {
+                                /*
+                                if (update_books.IndexOf(data) == -1)
+                                    update_books.Add(data);
+                                    */
+                            }
                         }
 
                         // 观察 typeOfUsage 元素
@@ -457,5 +459,15 @@ namespace dp2SSL.Models
         }
     }
 
-#endif
+    public class TagAndData
+    {
+        public string Type { get; set; }    // patron/book/(null) 其中 (null) 表示无法判断类型
+
+        public OneTag OneTag { get; set; }
+
+        public LogicChip LogicChip { get; set; }
+
+        public string Error { get; set; }   // 错误信息
+    }
+
 }

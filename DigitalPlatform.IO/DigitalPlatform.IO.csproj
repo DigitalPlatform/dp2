@@ -150,6 +150,7 @@
       <Name>System.Data</Name>
     </Reference>
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
@@ -172,6 +173,7 @@
     <Compile Include="ItemFileBase.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Managers\ManagerBase.cs" />
     <Compile Include="PathUtil.cs" />
     <Compile Include="ProcessUtil.cs" />
     <Compile Include="StreamCache.cs" />

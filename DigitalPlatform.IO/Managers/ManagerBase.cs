@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define LOG
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting;
@@ -10,12 +12,11 @@ using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.RFID;
+//using DigitalPlatform.LibraryClient;
+//using DigitalPlatform.RFID;
 
-namespace dp2SSL
+namespace DigitalPlatform.IO
 {
-#if REMOVED
     // 一些公共的成员
     // T: IFingerprint 或 IRfid
     public class ManagerBase<T>
@@ -69,7 +70,9 @@ namespace dp2SSL
                 this.Lock.ExitWriteLock();
             }
 
+#if LOG
             LibraryChannelManager.Log?.Debug($"{this.Name} channels Clear() completed. IdleCount={this.Channels.IdleCount}, UsedCount={this.Channels.UsedCount}");
+#endif
         }
 
         void _clear()
@@ -125,7 +128,7 @@ namespace dp2SSL
                     {
                         if (string.IsNullOrEmpty(this.Url))
                         {
-                            SetError(null,
+                            SetError?.Invoke(null,
                                 new SetErrorEventArgs
                                 {
                                     Error = null
@@ -166,7 +169,7 @@ namespace dp2SSL
                         {
                             error = true;
                             wait_time = this.LongWaitTime;
-                            SetError(ex,
+                            SetError?.Invoke(ex,
                                 new SetErrorEventArgs
                                 {
                                     Error = $"{this.Name} 出现异常: {ExceptionUtil.GetAutoText(ex)}"
@@ -183,7 +186,7 @@ namespace dp2SSL
                         this.Clear();
                 }
 
-                App.CurrentApp.Speak("退出后台循环");
+                // App.CurrentApp.Speak("退出后台循环");
             });
         }
 
@@ -200,7 +203,9 @@ namespace dp2SSL
 
             return this.Channels.GetChannel(() =>
             {
+#if LOG
                 LibraryChannelManager.Log?.Debug($"beginof new {this.Name} channel, Url={this.Url}");
+#endif
                 var channel = StartChannel(
     this.Url,
     out string strError);
@@ -225,7 +230,9 @@ namespace dp2SSL
                     else
                         throw new Exception($"启动 {this.Name} 通道时出错(2): {ex.Message}", ex);
                 }
+#if LOG
                 LibraryChannelManager.Log?.Debug($"endof new {this.Name} channel, Url={this.Url}");
+#endif
                 return channel;
             });
         }
@@ -364,6 +371,14 @@ namespace dp2SSL
         }
     }
 
+    public delegate void SetErrorEventHandler(object sender,
+SetErrorEventArgs e);
 
-#endif
+    /// <summary>
+    /// 设置出错信息事件的参数
+    /// </summary>
+    public class SetErrorEventArgs : EventArgs
+    {
+        public string Error { get; set; }
+    }
 }

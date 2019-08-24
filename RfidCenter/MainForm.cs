@@ -1862,7 +1862,7 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             if (string.IsNullOrEmpty(strIndex) == false)
             {
                 var result = _driver.OpenShelfLock("*", Convert.ToInt32(strIndex));
-                MessageBox.Show(this, result.ToString());
+                MessageDlg.Show(this, result.ToString(), "开锁");
             }
             else
             {

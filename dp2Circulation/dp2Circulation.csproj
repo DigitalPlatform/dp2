@@ -21,7 +21,7 @@
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <ManifestCertificateThumbprint>80AE8886E9220471869958BEFAF13962C3FA0319</ManifestCertificateThumbprint>
     <ManifestKeyFile>代码签名证书-2019.pfx</ManifestKeyFile>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -3217,6 +3217,10 @@
     <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
       <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
       <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID.Manager\DigitalPlatform.RFID.Manager.csproj">
+      <Project>{E45F79DF-041F-4DA8-9365-909F53BAEE72}</Project>
+      <Name>DigitalPlatform.RFID.Manager</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID.UI\DigitalPlatform.RFID.UI.csproj">
       <Project>{FE5B6586-85F4-4850-A66D-5607ECB08F9B}</Project>

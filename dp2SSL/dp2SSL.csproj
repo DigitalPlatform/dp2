@@ -298,6 +298,10 @@
       <Project>{3541EC0B-82F5-4829-AFC3-5EF48254175D}</Project>
       <Name>DigitalPlatform.LibraryClient</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.RFID.Manager\DigitalPlatform.RFID.Manager.csproj">
+      <Project>{e45f79df-041f-4da8-9365-909f53baee72}</Project>
+      <Name>DigitalPlatform.RFID.Manager</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID\DigitalPlatform.RFID.csproj">
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
       <Name>DigitalPlatform.RFID</Name>
