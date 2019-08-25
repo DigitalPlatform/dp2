@@ -166,6 +166,9 @@ namespace dp2Circulation
                 {
                     if (this.label_rfidMessage.Text != s)
                     {
+                        if (this.label_rfidMessage.Visible == false)
+                            this.label_rfidMessage.Visible = true;
+
                         if (string.IsNullOrEmpty(s))
                         {
                             this.label_rfidMessage.Text = _rfidNumber;
@@ -188,47 +191,74 @@ namespace dp2Circulation
             Program.MainForm.TagChanged += MainForm_TagChanged;
             InitialSendKey();
             RfidManager.GetState("clearCache");
-
+            if (string.IsNullOrEmpty(RfidManager.Url) == false)
+            {
+                this.label_rfidMessage.Visible = true;
+                /*
+                var result = RfidManager.GetState("");
+                if (result.Value == -1)
+                    this.ShowMessage($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})", "red", true);
+                    */
+                var result = RfidManager.EnableSendkey(false);
+            }
+            else
+            {
+                this.label_rfidMessage.Visible = false;
+            }
             // Task.Run(() => { InitialRfidChannel(); });
         }
 
         // 新 Tag 到来
         private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
         {
+            try
             {
-                if (e.AddPatrons != null)
-                    foreach (var tag in e.AddPatrons)
-                    {
-                        SendKey(tag);
-                    }
-                if (e.UpdatePatrons != null)
-                    foreach (var tag in e.UpdatePatrons)
-                    {
-                        SendKey(tag);
-                    }
-            }
+                DateTime now = DateTime.Now;
+                {
+                    if (e.AddPatrons != null)
+                        foreach (var tag in e.AddPatrons)
+                        {
+                            SendKey(tag, now);
+                        }
+                    if (e.UpdatePatrons != null)
+                        foreach (var tag in e.UpdatePatrons)
+                        {
+                            SendKey(tag, now);
+                        }
+                    if (e.RemovePatrons != null)
+                        foreach (var tag in e.RemovePatrons)
+                        {
+                            if (tag.OneTag != null)
+                                SetLastTime(tag.OneTag.UID, now);
+                        }
+                }
 
+                {
+                    if (e.AddBooks != null)
+                        foreach (var tag in e.AddBooks)
+                        {
+                            SendKey(tag, now);
+                        }
+                    if (e.RemoveBooks != null)
+                        foreach (var tag in e.RemoveBooks)
+                        {
+                            if (tag.OneTag != null)
+                                SetLastTime(tag.OneTag.UID, now);
+                        }
+                    if (e.UpdateBooks != null)
+                        foreach (var tag in e.UpdateBooks)
+                        {
+                            SendKey(tag, now);
+                        }
+                }
+
+                RefreshRfidTagNumber();
+            }
+            catch (Exception ex)
             {
-                if (e.AddBooks != null)
-                    foreach (var tag in e.AddBooks)
-                    {
-                        SendKey(tag);
-                    }
-                /*
-                if (e.RemoveBooks != null)
-                    foreach (var tag in e.RemoveBooks)
-                    {
-
-                    }
-                    */
-                if (e.UpdateBooks != null)
-                    foreach (var tag in e.UpdateBooks)
-                    {
-                        SendKey(tag);
-                    }
+                WriteErrorLog($"MainForm_TagChanged exception: {ExceptionUtil.GetDebugText(ex)}");
+                throw ex;
             }
-
-            RefreshRfidTagNumber();
         }
 
         string _rfidNumber = "";
@@ -238,6 +268,9 @@ namespace dp2Circulation
             _rfidNumber = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
             this.Invoke((Action)(() =>
             {
+                if (this.label_rfidMessage.Visible == false)
+                    this.label_rfidMessage.Visible = true;
+
                 if (this.label_rfidMessage.BackColor == Color.White)
                 {
                     // 标签总数显示 图书+读者卡
@@ -249,12 +282,14 @@ namespace dp2Circulation
         // 把存量的 PII 发送出去
         void InitialSendKey()
         {
+            DateTime now = DateTime.Now;
+
             var books = TagList.Books;
             if (books.Count > 0)
             {
                 foreach (var tag in books)
                 {
-                    SendKey(tag);
+                    SendKey(tag, now);
                 }
             }
 
@@ -263,7 +298,7 @@ namespace dp2Circulation
             {
                 foreach (var tag in patrons)
                 {
-                    SendKey(tag);
+                    SendKey(tag, now);
                 }
             }
 
@@ -289,24 +324,69 @@ namespace dp2Circulation
             return chip.FindElement(ElementOID.TypeOfUsage)?.Text;
         }
 
-        void SendKey(TagAndData data)
+        // UID --> 最近出现时间 的对照表
+        // 用于平滑标签拿放的事件。原理是，如果一个标签最后离开和后来一次到来之间的时间差太小，则放弃这一次到来事件
+        Hashtable _uidTable = new Hashtable();
+        private readonly Object _syncRoot_uidTable = new object();
+
+        static TimeSpan _minDelay = TimeSpan.FromMilliseconds(500);
+
+        DateTime GetLastTime(string uid)
         {
-            Debug.WriteLine("sendKey");
+            lock (_syncRoot_uidTable)
+            {
+                if (_uidTable.ContainsKey(uid) == false)
+                    return DateTime.MinValue;
+                DateTime time = (DateTime)_uidTable[uid];
+                return time;
+            }
+        }
+
+        void SetLastTime(string uid, DateTime now)
+        {
+            if (string.IsNullOrEmpty(uid))
+                return;
+
+            lock (_syncRoot_uidTable)
+            {
+                if (_uidTable.Count > 1000)
+                    _uidTable.Clear();  // TODO: 可以优化为每隔一段时间自动清除太旧的事项
+                _uidTable[uid] = now;
+            }
+        }
+
+        public bool PauseRfid = true;
+
+        void SendKey(TagAndData data, DateTime now)
+        {
+            if (this.PauseRfid)
+                return;
+
+            //Debug.WriteLine("sendKey");
 
             if (data.OneTag.TagInfo == null)
             {
-                Debug.WriteLine("TagInfo == null");
+                //Debug.WriteLine("TagInfo == null");
                 return;
             }
 
             string pii = GetPII(data.OneTag.TagInfo);
             if (string.IsNullOrEmpty(pii))
             {
-                Debug.WriteLine("pii == null");
+                //Debug.WriteLine("pii == null");
                 return;
             }
 
             Debug.WriteLine($"pii={pii}");
+
+            DateTime last_time = GetLastTime(data.OneTag.UID);
+            if (now - last_time < _minDelay)
+            {
+                Debug.WriteLine("smooth");
+                return;
+            }
+
+            SetLastTime(data.OneTag.UID, now);
 
             string strTypeOfUsage = GetTOU(data.OneTag.TagInfo);
             if (string.IsNullOrEmpty(strTypeOfUsage))
@@ -315,6 +395,11 @@ namespace dp2Circulation
             // 注意：特殊处理!
             else if (strTypeOfUsage == "32")
                 strTypeOfUsage = "10";
+
+            if (strTypeOfUsage[0] == '8')
+                TaskList.Sound(0);
+            else
+                TaskList.Sound(1);
 
             string text = $"pii:{pii},tou:{strTypeOfUsage}";
 
@@ -3558,11 +3643,15 @@ MessageBoxDefaultButton.Button2);
         {
             this.textBox_input.Focus();
             //OpenRfidCapture(true);
+            //Debug.WriteLine("activated");
+            this.PauseRfid = false;
         }
 
         private void QuickChargingForm_Deactivate(object sender, EventArgs e)
         {
             //OpenRfidCapture(false);
+            //Debug.WriteLine("deactivate");
+            this.PauseRfid = true;
         }
 
         private void textBox_input_Enter(object sender, EventArgs e)

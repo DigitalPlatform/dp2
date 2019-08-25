@@ -194,6 +194,8 @@
             this.checkBox_operLog_displayItemBorrowHistory = new System.Windows.Forms.CheckBox();
             this.checkBox_operLog_displayReaderBorrowHistory = new System.Windows.Forms.CheckBox();
             this.tabPage_global = new System.Windows.Forms.TabPage();
+            this.textBox_global_additionalLocations = new System.Windows.Forms.TextBox();
+            this.label35 = new System.Windows.Forms.Label();
             this.checkBox_global_upperInputBarcode = new System.Windows.Forms.CheckBox();
             this.checkBox_global_saveOriginCoverImage = new System.Windows.Forms.CheckBox();
             this.label26 = new System.Windows.Forms.Label();
@@ -229,8 +231,6 @@
             this.button_z3950_servers = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.label35 = new System.Windows.Forms.Label();
-            this.textBox_global_additionalLocations = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -1992,6 +1992,7 @@
             this.textBox_cardReader_rfidCenterUrl.Name = "textBox_cardReader_rfidCenterUrl";
             this.textBox_cardReader_rfidCenterUrl.Size = new System.Drawing.Size(655, 28);
             this.textBox_cardReader_rfidCenterUrl.TabIndex = 0;
+            this.textBox_cardReader_rfidCenterUrl.TextChanged += new System.EventHandler(this.textBox_cardReader_rfidCenterUrl_TextChanged);
             // 
             // groupBox8
             // 
@@ -2189,6 +2190,25 @@
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
             // 
+            // textBox_global_additionalLocations
+            // 
+            this.textBox_global_additionalLocations.AcceptsReturn = true;
+            this.textBox_global_additionalLocations.Location = new System.Drawing.Point(7, 265);
+            this.textBox_global_additionalLocations.Multiline = true;
+            this.textBox_global_additionalLocations.Name = "textBox_global_additionalLocations";
+            this.textBox_global_additionalLocations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_global_additionalLocations.Size = new System.Drawing.Size(428, 98);
+            this.textBox_global_additionalLocations.TabIndex = 20;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(4, 243);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(224, 18);
+            this.label35.TabIndex = 19;
+            this.label35.Text = "附加的馆藏地：[每行一个]";
+            // 
             // checkBox_global_upperInputBarcode
             // 
             this.checkBox_global_upperInputBarcode.AutoSize = true;
@@ -2268,7 +2288,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox10.Size = new System.Drawing.Size(328, 126);
+            this.groupBox10.Size = new System.Drawing.Size(302, 126);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2276,7 +2296,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(162, 70);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(136, 70);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2292,7 +2312,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(308, 28);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(282, 28);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2358,7 +2378,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox7.Size = new System.Drawing.Size(328, 126);
+            this.groupBox7.Size = new System.Drawing.Size(302, 126);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2366,7 +2386,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(162, 70);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(136, 70);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2382,7 +2402,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(308, 28);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(282, 28);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2587,25 +2607,6 @@
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // label35
-            // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(4, 243);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(224, 18);
-            this.label35.TabIndex = 19;
-            this.label35.Text = "附加的馆藏地：[每行一个]";
-            // 
-            // textBox_global_additionalLocations
-            // 
-            this.textBox_global_additionalLocations.AcceptsReturn = true;
-            this.textBox_global_additionalLocations.Location = new System.Drawing.Point(7, 265);
-            this.textBox_global_additionalLocations.Multiline = true;
-            this.textBox_global_additionalLocations.Name = "textBox_global_additionalLocations";
-            this.textBox_global_additionalLocations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_global_additionalLocations.Size = new System.Drawing.Size(428, 98);
-            this.textBox_global_additionalLocations.TabIndex = 20;
             // 
             // CfgDlg
             // 
