@@ -34,6 +34,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Core;
 using DigitalPlatform.RFID;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -1641,18 +1642,35 @@ MessageBoxDefaultButton.Button1);
             // this.PropertyTaskList.MainForm = this;
             this.PropertyTaskList.BeginThread();
 
+            StartOrStopRfidManager();
+        }
+
+        #region RFID
+
+        CancellationTokenSource _cancelRfidManager = new CancellationTokenSource();
+
+        public void StartOrStopRfidManager()
+        {
             if (string.IsNullOrEmpty(this.RfidCenterUrl) == false)
             {
+                _cancelRfidManager?.Cancel();
 
-
+                _cancelRfidManager = new CancellationTokenSource();
                 RfidManager.Base.Name = "RFID 中心";
                 RfidManager.Url = this.RfidCenterUrl;
                 // RfidManager.SetError += RfidManager_SetError;
                 RfidManager.ListTags += RfidManager_ListTags;
-                RfidManager.Start(new System.Threading.CancellationToken());
+                RfidManager.Start(_cancelRfidManager.Token);
+            }
+            else
+            {
+                _cancelRfidManager?.Cancel();
+                RfidManager.Url = "";
+                RfidManager.ListTags -= RfidManager_ListTags;
             }
         }
 
+        /*
         private string _error = null;   // "test error line asdljasdkf; ;jasldfjasdjkf aasdfasdf";
 
         public string Error
@@ -1668,7 +1686,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-
+            */
 
 
         public event TagChangedEventHandler TagChanged = null;
@@ -1703,6 +1721,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        #endregion
 
         // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
         int MoveDp2circulationXml(out string strError)

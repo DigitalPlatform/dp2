@@ -119,7 +119,6 @@ null);
                     _lastTags = null;
             },
             token);
-
         }
 
         public static BaseChannel<IRfid> GetChannel()
@@ -165,6 +164,78 @@ null);
                     });
             }
         }
+
+        public static GetTagInfoResult GetTagInfo(string reader_name, 
+            string uid)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetTagInfo(reader_name, uid);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new GetTagInfoResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        public static NormalResult WriteTagInfo(string reader_name,
+            TagInfo oldTagInfo,
+            TagInfo newTagInfo)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.WriteTagInfo(reader_name, oldTagInfo, newTagInfo);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
 
         public static NormalResult SetEAS(string reader_name,
             string tag_name,
@@ -275,8 +346,6 @@ null);
                 return new NormalResult { Value = -1, ErrorInfo = ex.Message };
             }
         }
-
-
 
         public static NormalResult GetState(string style)
         {

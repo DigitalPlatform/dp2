@@ -12,6 +12,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -830,7 +831,7 @@ namespace dp2Circulation
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);
 
-            
+
 
             if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false
                 && string.IsNullOrEmpty(RfidManager.Url))    // this.Container._rfidChannel == null
@@ -1046,6 +1047,33 @@ end_time);
 
         }
 
+        static void Sound(CancellationToken token)
+        {
+            while (token.IsCancellationRequested == false)
+            {
+                System.Console.Beep(440, 10);
+            }
+        }
+
+        static int[] tones = new int[] { 523, 659, 783 };
+        /*
+         *  C4: 261 330 392
+            C5: 523 659 783
+         * */
+        public static void Sound(int tone)
+        {
+            Task.Run(() =>
+            {
+                if (tone == -1)
+                {
+                    for (int i = 0; i < 2; i++)
+                        System.Console.Beep(1147, 1000);
+                }
+                else
+                    System.Console.Beep(tones[tone], 500);
+            });
+        }
+
         bool SetEAS(ChargingTask task, bool enable, out string strError)
         {
             strError = "";
@@ -1056,32 +1084,47 @@ end_time);
         task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
         enable);
         */
+
                 NormalResult result = RfidManager.SetEAS("*",
-task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
-enable);
+    task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+    enable);
+                TagList.ClearTagTable("");
 
                 // testing
                 // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
 
                 if (result.Value != 1)
                 {
+                    Sound(-1);
+
                     strError = "修改 RFID 标签 EAS 标志位时出错: " + result.ErrorInfo;
 
                     bool eas_fixed = false;
                     string text = strError;
                     this.Container.Invoke((Action)(() =>
                     {
-                        using (RfidToolForm dlg = new RfidToolForm())
+                        var oldPause = this.Container.PauseRfid;
+                        this.Container.PauseRfid = true;
+                        try
                         {
-                            dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
-                            dlg.Mode = "auto_fix_eas_and_close";
-                            dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
-                            dlg.ProtocolFilter = InventoryInfo.ISO15693;
-                            dlg.ShowDialog(this.Container);
-                            eas_fixed = dlg.EasFixed;
-                            // 2019/1/23
-                            // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
-                            // this.Container.OpenRfidCapture(true);
+                            // TODO: 对话框打开之后，QuickCharingForm 要暂停接收标签信息
+                            using (RfidToolForm dlg = new RfidToolForm())
+                            {
+                                RfidManager.GetState("clearCache");
+                                dlg.MessageText = text + "\r\n请利用本窗口修正 EAS";
+                                dlg.Mode = "auto_fix_eas_and_close";
+                                dlg.SelectedID = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                                dlg.ProtocolFilter = InventoryInfo.ISO15693;
+                                dlg.ShowDialog(this.Container);
+                                eas_fixed = dlg.EasFixed;
+                                // 2019/1/23
+                                // TODO: 似乎也可以让 RfidToolForm 来负责恢复它打开前的 sendkey 状态
+                                // this.Container.OpenRfidCapture(true);
+                            }
+                        }
+                        finally
+                        {
+                            this.Container.PauseRfid = oldPause;
                         }
                     }));
 
@@ -1090,6 +1133,8 @@ enable);
 
                     return false;
                 }
+
+                Sound(2);
                 return true;
             }
             catch (Exception ex)

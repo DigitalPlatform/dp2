@@ -43,6 +43,7 @@ using static dp2Circulation.MyForm;
 using DigitalPlatform.Core;
 using DigitalPlatform.Z3950;
 using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.RFID;
 
 namespace dp2Circulation
 {
@@ -812,7 +813,7 @@ Stack:
             {
                 // 2019/7/12
                 AppInfo.SetString("global",
-                    "currentLocation", 
+                    "currentLocation",
                     GetCurrentLocation());
 
                 // 消除短期保存的密码
@@ -1593,6 +1594,18 @@ Stack:
                     chargingform.ClearItemAndBiblioControl();
                     chargingform.ChangeLayout((bool)e.Value);
                 }
+            }
+
+            if (e.Section == "cardreader"
+                && e.Entry == "rfidCenterUrl")
+            {
+                Task.Run(() =>
+                {
+                    // 迫使 URL 生效
+                    //RfidManager.Url = this.RfidCenterUrl;
+                    //RfidManager.Clear();
+                    StartOrStopRfidManager();
+                });
             }
         }
 
@@ -3911,7 +3924,7 @@ Stack:
             return -1;
         }
 
-#region EnsureXXXForm ...
+        #region EnsureXXXForm ...
 
         /// <summary>
         /// 获得最顶层的 UtilityForm 窗口，如果没有，则新创建一个
@@ -4199,7 +4212,7 @@ Stack:
             return EnsureChildForm<BiblioStatisForm>();
         }
 
-#endregion
+        #endregion
 
         private void toolButton_borrow_Click(object sender, EventArgs e)
         {
@@ -4933,7 +4946,7 @@ Stack:
         //      -1  出错
         //      0   不需要进行变换
         //      1   需要进行变换
-        public int NeedTransformBarcode(string strLibraryCode, 
+        public int NeedTransformBarcode(string strLibraryCode,
             out string strError)
         {
             strError = "";
@@ -7917,7 +7930,7 @@ Keys keyData)
             OpenWindow<MessageForm>();
         }
 
-#region 序列号机制
+        #region 序列号机制
 
         bool _testMode = false;
 
@@ -8236,7 +8249,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
         {
@@ -8343,7 +8356,7 @@ Keys keyData)
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
 
-#region servers.xml
+        #region servers.xml
 
         // HnbUrl.HnbUrl
 
@@ -8666,7 +8679,7 @@ Keys keyData)
             return this._currentUserRights;
         }
 
-#endregion // servers.xml
+        #endregion // servers.xml
 
         void EnableFingerprintSendKey(bool enable)
         {
@@ -8731,7 +8744,7 @@ Keys keyData)
 #endif
         }
 
-#region 消息过滤
+        #region 消息过滤
 
 #if NO
         public event MessageFilterEventHandler MessageFilter = null;
@@ -8761,7 +8774,7 @@ Keys keyData)
 
 #endif
 
-#endregion
+        #endregion
 
         /// <summary>
         /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名

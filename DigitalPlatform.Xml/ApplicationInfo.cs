@@ -365,6 +365,8 @@ Convert.ToString(nValue));
                 throw (new Exception("SetString() error ..."));
             }
 
+            string oldValue = DomUtil.GetAttr(node, strName);
+
             DomUtil.SetAttr(node,
                 strName,
                 strValue);
@@ -376,7 +378,8 @@ Convert.ToString(nValue));
                 {
                     Path = strPathParam,
                     Name = strName,
-                    Value = strValue
+                    Value = strValue,
+                    OldValue = oldValue
                 };
                 handler(this, e);
             }
@@ -804,5 +807,6 @@ AppInfoChangedEventArgs e);
         public string Path { get; set; }
         public string Name { get; set; }
         public string Value { get; set; }
+        public string OldValue { get; set; }    // 2019/8/25
     }
 }
