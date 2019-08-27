@@ -20,6 +20,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
+using dp2Circulation.Charging;
 
 namespace dp2Circulation
 {
@@ -205,6 +206,9 @@ namespace dp2Circulation
             {
                 this.label_rfidMessage.Visible = false;
             }
+            InitialEasForm();
+            ShowEasForm(false);
+
             // Task.Run(() => { InitialRfidChannel(); });
         }
 
@@ -370,6 +374,17 @@ namespace dp2Circulation
                 return;
             }
 
+            if (data.OneTag.Protocol == InventoryInfo.ISO14443A)
+            {
+                string text = $"uid:{data.OneTag.UID},tou:80";
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_input.Text = text;
+                }));
+                AsyncDoAction(this.FuncState, text);
+                return;
+            }
+
             string pii = GetPII(data.OneTag.TagInfo);
             if (string.IsNullOrEmpty(pii))
             {
@@ -401,13 +416,51 @@ namespace dp2Circulation
             else
                 TaskList.Sound(1);
 
-            string text = $"pii:{pii},tou:{strTypeOfUsage}";
-
-            this.Invoke((Action)(() =>
+            if (strTypeOfUsage[0] == '1' && _easForm.ErrorCount > 0)
             {
-                this.textBox_input.Text = text;
-            }));
-            AsyncDoAction(this.FuncState, text);
+                // 尝试自动修正 EAS
+                // result.Value
+                //      -1  出错
+                //      0   ListsView 中没有找到事项
+                //      1   发生了修改
+                var eas_result = _easForm.TryCorrectEas(data.OneTag.UID, pii);
+                if (eas_result.Value == -1)
+                {
+                    // TODO SetError()
+                    // this.ShowMessage($"尝试自动修正 EAS 时出错 '{eas_result.ErrorInfo}'", "red", true);
+                    return;
+                }
+
+                if (eas_result.Value == 1)
+                {
+                    // 如果所有错误均被消除，则 EasForm 要隐藏
+                    if (_easForm.ErrorCount == 0)
+                    {
+                        _easForm.ClearMessage();
+                        this.Invoke((Action)(() =>
+                        {
+                            ShowEasForm(false);
+                        }));
+                    }
+
+                    if (this.StateSpeak != "[不朗读]")
+                        Program.MainForm.Speak("自动修正 EAS 成功");
+                    // 本次标签触发了自动修正动作，并操作成功，后面就不再继续进行借书或者还书操作了
+                    return;
+                }
+
+                // TODO: 如果 errorCount > 0，则搜索 tasklist，如果 PII 找到匹配则放弃继续操作
+            }
+
+            {
+                string text = $"pii:{pii},tou:{strTypeOfUsage}";
+
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_input.Text = text;
+                }));
+                AsyncDoAction(this.FuncState, text);
+            }
         }
 
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
@@ -415,17 +468,26 @@ namespace dp2Circulation
             SetError("rfid", e.Error);
         }
 
-        public void SetError(string type, string error)
+        internal NormalResult SetEAS(
+            ChargingTask task,
+            string reader_name,
+            string tag_name,
+            bool enable)
         {
-            _errorTable.SetError(type, error);
+            var result = _easForm.SetEAS(task, reader_name, tag_name, enable);
+            if (result.Value != 1)
+            {
+                _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，请给读卡器一点时间", "yellow", true);
+                this.Invoke((Action)(() =>
+                {
+                    // 显示 EasForm
+                    ShowEasForm(true);
+                }));
+            }
+            return result;
         }
 
-        public void ClearErrors(string type)
-        {
-            _errorTable.SetError(type, "");
-        }
 
-        ErrorTable _errorTable = null;
 
         /*
         public RfidChannel _rfidChannel = null;
@@ -613,6 +675,8 @@ namespace dp2Circulation
             if (_patronSummaryForm != null)
                 _patronSummaryForm.Close();
 
+            DestroyEasForm();
+
             // this.Channel.Idle -= new IdleEventHandler(Channel_Idle);
 
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
@@ -708,7 +772,6 @@ namespace dp2Circulation
             this.panel_input.BackColor = this.BackColor;
             this.panel_input.ForeColor = this.ForeColor;
             this.pictureBox_action.BackColor = this.BackColor;
-
         }
 
         void commander_IsBusy(object sender, IsBusyEventArgs e)
@@ -4265,6 +4328,75 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                     this.textBox_input.Focus();
                 }
             }));
+        }
+
+        EasForm _easForm = null;
+
+        private void ToolStripMenuItem_openEasForm_Click(object sender, EventArgs e)
+        {
+            InitialEasForm();
+            ShowEasForm(true);
+        }
+
+        void InitialEasForm()
+        {
+            if (_easForm == null)
+            {
+                _easForm = new EasForm();
+                _easForm.Font = this.Font;
+                _easForm.FormClosed += (sender, e) =>
+                {
+                    _easForm.Dispose();
+                    _easForm = null;
+                };
+                _easForm.EasChanged += (sender, e) =>
+                {
+                    ChargingTask task = e.Param as ChargingTask;
+                    if (task != null)
+                    {
+                        task.Color = "green";
+                        {
+                            DpRow line = FindTaskLine(task);
+                            if (line != null)
+                                line.BackColor = this.TaskBackColor;
+                        }
+                        task.State = "finish";
+                        task.ErrorInfo = "";
+                        // task.ErrorInfo = "\r\nEAS 修正成功";
+                        this.DisplayTask("refresh_and_visible", task);
+                        this.SetColorList();
+                    }
+                };
+
+                _easForm.Show(this);
+            }
+        }
+
+        void ShowEasForm(bool show)
+        {
+            /*
+            if (show)
+            {
+                if (_easForm.IsHandleCreated)
+                    _easForm.Visible = true;
+                else
+                    _easForm.Show(this);
+            }
+            else
+                _easForm.Visible = false;
+                */
+
+            _easForm.Visible = show;
+        }
+
+        void DestroyEasForm()
+        {
+            if (_easForm != null)
+            {
+                _easForm.Close();
+                //_easForm.Dispose();
+                //_easForm = null;
+            }
         }
     }
 

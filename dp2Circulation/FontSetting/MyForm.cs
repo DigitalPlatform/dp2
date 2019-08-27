@@ -24,6 +24,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using System.Threading.Tasks;
 using System.Runtime.Remoting;
+using DigitalPlatform.Core;
 
 // 2013/3/16 添加 XML 注释
 
@@ -2621,6 +2622,18 @@ Keys keyData)
                 this.ReturnChannel(channel);
             }
         }
+
+        public void SetError(string type, string error)
+        {
+            _errorTable.SetError(type, error);
+        }
+
+        public void ClearErrors(string type)
+        {
+            _errorTable.SetError(type, "");
+        }
+
+        internal ErrorTable _errorTable = null;
     }
 
     public class FilterHost

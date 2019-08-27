@@ -52,7 +52,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>84</ApplicationRevision>
+    <ApplicationRevision>86</ApplicationRevision>
     <ApplicationVersion>3.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -333,6 +333,12 @@
     </Compile>
     <Compile Include="Charging\ColorSummaryControl.Designer.cs">
       <DependentUpon>ColorSummaryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\EasForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\EasForm.Designer.cs">
+      <DependentUpon>EasForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Charging\ExternalChannel.cs" />
     <Compile Include="Charging\IChargingForm.cs" />
@@ -1737,6 +1743,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\ColorSummaryControl.resx">
       <DependentUpon>ColorSummaryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\EasForm.resx">
+      <DependentUpon>EasForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\InventoryFromFileDialog.resx">
       <DependentUpon>InventoryFromFileDialog.cs</DependentUpon>

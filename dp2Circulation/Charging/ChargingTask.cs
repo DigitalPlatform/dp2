@@ -901,7 +901,8 @@ namespace dp2Circulation
                     if (SetEAS(task, false, out strError) == false)
                     {
                         // TODO: 要 undo 刚才进行的操作
-                        lRet = -1;
+                        // lRet = -1;
+                        lRet = 1;   // 相当于黄色状态 // 红色状态，但填充 ItemSummary
                         if (string.IsNullOrEmpty(task.ErrorInfo) == false)
                             task.ErrorInfo += "; ";
                         task.ErrorInfo += strError;
@@ -988,7 +989,13 @@ end_time);
             task.ErrorInfo = "asdf a asdf asdf as df asdf as f a df asdf a sdf a sdf asd f asdf a sdf as df";
             */
 
-            if (lRet == 1)
+            if (lRet == 2)
+            {
+                // 2019/8/28
+                // 红色状态
+                task.Color = "red";
+            }
+            else if (lRet == 1)
             {
                 // 黄色状态
                 task.Color = "yellow";
@@ -1079,6 +1086,39 @@ end_time);
             strError = "";
             try
             {
+                NormalResult result = this.Container.SetEAS(
+                    task,
+                    "*",
+                    task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+                    enable);
+
+                // testing
+                // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
+
+                if (result.Value != 1)
+                {
+                    Sound(-1);
+
+                    strError = "修改 RFID 标签 EAS 标志位时出错: " + result.ErrorInfo;
+                    return false;
+                }
+
+                Sound(2);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = "修改 RFID 标签 EAS 标志位时出现异常: " + ex.Message;
+                return false;
+            }
+        }
+
+#if NO
+        bool SetEAS(ChargingTask task, bool enable, out string strError)
+        {
+            strError = "";
+            try
+            {
                 /*
                 NormalResult result = this.Container._rfidChannel.Object.SetEAS("*",
         task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
@@ -1143,6 +1183,8 @@ end_time);
                 return false;
             }
         }
+
+#endif
 
         // parameters:
         //      times   时间值数组。依次是 总开始时间, API 开始时间, API 结束时间, 总结束时间
@@ -1396,7 +1438,8 @@ end_time);
                     if (SetEAS(task, true, out strError) == false)
                     {
                         // TODO: 要 undo 刚才进行的操作
-                        lRet = -1;
+                        // lRet = -1;
+                        lRet = 1;
                         if (string.IsNullOrEmpty(task.ErrorInfo) == false)
                             task.ErrorInfo += "; ";
                         task.ErrorInfo += strError;
@@ -1525,7 +1568,13 @@ end_time);
                 start_time,
                 end_time);
 
-            if (lRet == 1)
+            if (lRet == 2)
+            {
+                // 2019/8/28
+                // 红色状态
+                task.Color = "red";
+            }
+            else if (lRet == 1)
             {
                 // 黄色状态
                 task.Color = "yellow";

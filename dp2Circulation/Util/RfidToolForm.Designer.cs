@@ -52,6 +52,7 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label_message = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -152,7 +153,7 @@
             this.listView_tags.HideSelection = false;
             this.listView_tags.Location = new System.Drawing.Point(0, 0);
             this.listView_tags.Name = "listView_tags";
-            this.listView_tags.Size = new System.Drawing.Size(362, 369);
+            this.listView_tags.Size = new System.Drawing.Size(362, 333);
             this.listView_tags.TabIndex = 1;
             this.listView_tags.UseCompatibleStateImageBehavior = false;
             this.listView_tags.View = System.Windows.Forms.View.Details;
@@ -192,7 +193,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(794, 369);
+            this.splitContainer1.Size = new System.Drawing.Size(794, 333);
             this.splitContainer1.SplitterDistance = 362;
             this.splitContainer1.SplitterWidth = 8;
             this.splitContainer1.TabIndex = 2;
@@ -205,7 +206,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(424, 369);
+            this.tabControl1.Size = new System.Drawing.Size(424, 333);
             this.tabControl1.TabIndex = 1;
             // 
             // tabPage_tag
@@ -214,7 +215,7 @@
             this.tabPage_tag.Location = new System.Drawing.Point(4, 28);
             this.tabPage_tag.Name = "tabPage_tag";
             this.tabPage_tag.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_tag.Size = new System.Drawing.Size(416, 337);
+            this.tabPage_tag.Size = new System.Drawing.Size(416, 301);
             this.tabPage_tag.TabIndex = 0;
             this.tabPage_tag.Text = "RFID 标签";
             this.tabPage_tag.UseVisualStyleBackColor = true;
@@ -225,7 +226,7 @@
             this.chipEditor1.Location = new System.Drawing.Point(3, 3);
             this.chipEditor1.LogicChipItem = null;
             this.chipEditor1.Name = "chipEditor1";
-            this.chipEditor1.Size = new System.Drawing.Size(410, 331);
+            this.chipEditor1.Size = new System.Drawing.Size(410, 295);
             this.chipEditor1.TabIndex = 0;
             this.chipEditor1.TitleVisible = true;
             // 
@@ -235,7 +236,7 @@
             this.tabPage_record.Location = new System.Drawing.Point(4, 28);
             this.tabPage_record.Name = "tabPage_record";
             this.tabPage_record.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_record.Size = new System.Drawing.Size(416, 337);
+            this.tabPage_record.Size = new System.Drawing.Size(416, 313);
             this.tabPage_record.TabIndex = 1;
             this.tabPage_record.Text = "数据记录";
             this.tabPage_record.UseVisualStyleBackColor = true;
@@ -245,7 +246,7 @@
             this.propertyGrid_record.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid_record.Location = new System.Drawing.Point(3, 3);
             this.propertyGrid_record.Name = "propertyGrid_record";
-            this.propertyGrid_record.Size = new System.Drawing.Size(410, 331);
+            this.propertyGrid_record.Size = new System.Drawing.Size(410, 307);
             this.propertyGrid_record.TabIndex = 1;
             // 
             // panel_okCancel
@@ -253,7 +254,7 @@
             this.panel_okCancel.Controls.Add(this.button_Cancel);
             this.panel_okCancel.Controls.Add(this.button_OK);
             this.panel_okCancel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel_okCancel.Location = new System.Drawing.Point(3, 378);
+            this.panel_okCancel.Location = new System.Drawing.Point(3, 342);
             this.panel_okCancel.Name = "panel_okCancel";
             this.panel_okCancel.Size = new System.Drawing.Size(794, 38);
             this.panel_okCancel.TabIndex = 3;
@@ -289,14 +290,29 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.panel_okCancel, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.splitContainer1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label_message, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.Size = new System.Drawing.Size(800, 419);
             this.tableLayoutPanel1.TabIndex = 4;
+            // 
+            // label_message
+            // 
+            this.label_message.AutoSize = true;
+            this.label_message.BackColor = System.Drawing.Color.DarkRed;
+            this.label_message.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label_message.Font = new System.Drawing.Font("宋体", 18F);
+            this.label_message.ForeColor = System.Drawing.Color.White;
+            this.label_message.Location = new System.Drawing.Point(3, 383);
+            this.label_message.Name = "label_message";
+            this.label_message.Size = new System.Drawing.Size(794, 36);
+            this.label_message.TabIndex = 4;
+            this.label_message.Visible = false;
             // 
             // RfidToolForm
             // 
@@ -325,6 +341,7 @@
             this.tabPage_record.ResumeLayout(false);
             this.panel_okCancel.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -355,5 +372,6 @@
         private System.Windows.Forms.ColumnHeader columnHeader_protocol;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton toolStripButton_autoFixEas;
+        private System.Windows.Forms.Label label_message;
     }
 }
