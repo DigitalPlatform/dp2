@@ -15,6 +15,7 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.Core;
 using DigitalPlatform.GUI;
+using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.RFID.UI;
@@ -47,7 +48,7 @@ namespace dp2Circulation
             }
         }
 
-        string _mode = "";  // auto_fix_eas 或 auto_fix_eas_and_close
+        string _mode = "";  // auto_fix_eas 或 auto_fix_eas_and_close 或它们的组合
         public string Mode
         {
             get
@@ -131,10 +132,31 @@ namespace dp2Circulation
     "auto_fix_eas",
     true);
 
+            _errorTable = new ErrorTable((s) =>
+            {
+                this.Invoke((Action)(() =>
+                {
+                    if (this.label_message.Text != s)
+                    {
+                        this.label_message.Text = s;
+
+                        this.label_message.Visible = !string.IsNullOrEmpty(s);
+                    }
+                }));
+            });
+
+            RfidManager.SetError += RfidManager_SetError;
+            Program.MainForm.TagChanged += MainForm_TagChanged;
+
             this.BeginInvoke(new Action(() =>
             {
                 this.listView_tags.Focus();
             }));
+        }
+
+        private void RfidManager_SetError(object sender, SetErrorEventArgs e)
+        {
+            SetError("rfid", e.Error);
         }
 
         private void RfidToolForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -144,6 +166,9 @@ namespace dp2Circulation
 
         private void RfidToolForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Program.MainForm.TagChanged -= MainForm_TagChanged;
+            RfidManager.SetError -= RfidManager_SetError;
+
             if (_timerRefresh != null)
                 _timerRefresh.Dispose();
 
@@ -162,6 +187,19 @@ namespace dp2Circulation
 "auto_fix_eas",
 this.toolStripButton_autoFixEas.Checked);
         }
+
+        // 新 Tag 到来、变化、消失
+        private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
+        {
+            bool auto_refresh = (bool)this.Invoke((Func<bool>)(() =>
+            {
+                return this.toolStripButton_autoRefresh.Checked;
+            }));
+
+            if (auto_refresh)
+                UpdateChipList(false);
+        }
+
 
         /*
         void SetError(string type, string error)
@@ -885,6 +923,8 @@ this.toolStripButton_autoFixEas.Checked);
                     if (string.IsNullOrEmpty(pii))
                         continue;
 
+                    // TODO: 还要通过 typeOfUsage 判断是否读者证卡，如果是，要用 GetReaderInfo() 获得读者记录
+
                     long lRet = channel.GetItemInfo(null,
                         pii,
                         "xml",
@@ -1026,7 +1066,8 @@ this.toolStripButton_autoFixEas.Checked);
             {
             }
 
-            if (this._mode == "auto_fix_eas_and_close" && this.EasFixed)
+            if (StringUtil.IsInList("auto_fix_eas_and_close", this._mode)
+                && this.EasFixed)
                 this.Close();
             return;
             ERROR1:
@@ -1039,7 +1080,7 @@ this.toolStripButton_autoFixEas.Checked);
         //      -1  出错
         //      0   没有被外借
         //      1   在外借状态
-        static int GetCirculationState(string strItemXml, out string strError)
+        public static int GetCirculationState(string strItemXml, out string strError)
         {
             strError = "";
 
