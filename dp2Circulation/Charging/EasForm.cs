@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -29,6 +30,24 @@ namespace dp2Circulation.Charging
             this.SuppressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
         }
 
+        protected override bool ShowWithoutActivation
+        {
+            get { return true; }
+        }
+
+        /*
+        private const int WS_EX_TOPMOST = 0x00000008;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams createParams = base.CreateParams;
+                createParams.ExStyle |= WS_EX_TOPMOST;
+                return createParams;
+            }
+        }
+        */
+
         // 设置 EAS 状态。如果失败，会在 ListView 里面自动添加一行，以备后面用户在读卡器上放标签时候自动修正
         internal NormalResult SetEAS(
             object task,
@@ -36,6 +55,7 @@ namespace dp2Circulation.Charging
             string tag_name,
             bool enable)
         {
+
             // 解析 tag_name 里面的 UID 或者 PII
             string uid = "";
             string pii = "";
@@ -52,10 +72,26 @@ namespace dp2Circulation.Charging
                     ErrorCode = "unknownPrefix"
                 };
 
-            NormalResult result = RfidManager.SetEAS(reader_name,
-tag_name,
-enable);
-            TagList.ClearTagTable("");
+            // 尝试改变 tag_name 形态，优化后面请求 EAS 写入的速度
+            {
+                tag_name = ConvertTagNameString(tag_name);
+                if (string.IsNullOrEmpty(uid))
+                {
+                    Parse(tag_name, out string temp_uid, out string temp_pii);
+                    uid = temp_uid;
+                }
+            }
+
+            NormalResult result = null;
+            for (int i = 0; i < 2; i++)
+            {
+                result = RfidManager.SetEAS(reader_name,
+    tag_name,
+    enable);
+                if (result.Value == 1)
+                    break;
+            }
+            TagList.ClearTagTable(uid);
 
             if (result.Value != 1)
             {
@@ -290,6 +326,70 @@ enable);
         private void EasForm_Load(object sender, EventArgs e)
         {
             _floatingMessage.AutoHide = false;
+        }
+
+        // 解析 tag_name 里面的 UID 或者 PII
+        public static void Parse(string tag_name, out string uid, out string pii)
+        {
+            uid = "";
+            pii = "";
+            List<string> parts = StringUtil.ParseTwoPart(tag_name, ":");
+            if (parts[0] == "pii")
+                pii = parts[1];
+            else if (parts[0] == "uid" || string.IsNullOrEmpty(parts[0]))
+                uid = parts[1];
+        }
+
+
+        #region PII-->UID 对照表
+
+        // PII --> UID 对照表
+        Hashtable _piiTable = new Hashtable();
+
+        // 保存对照关系
+        public void SetUID(string pii, string uid)
+        {
+            lock (_piiTable.SyncRoot)
+            {
+                if (_piiTable.Count > 100)
+                    _piiTable.Clear();
+
+                _piiTable[pii] = uid;
+            }
+        }
+
+        // 根据 PII 获得对应的 UID
+        string GetUID(string pii)
+        {
+            lock (_piiTable.SyncRoot)
+            {
+                if (_piiTable.ContainsKey(pii) == false)
+                    return null;
+                return (string)_piiTable[pii];
+            }
+        }
+
+        // 把 tag_name 字符串尽可能转换为 uid: 形态
+        string ConvertTagNameString(string tag_name)
+        {
+            EasForm.Parse(tag_name, out string uid, out string pii);
+            if (string.IsNullOrEmpty(uid) == false)
+                return tag_name;
+            if (string.IsNullOrEmpty(pii))
+                return tag_name;
+
+            var cache_uid = GetUID(pii);
+            if (string.IsNullOrEmpty(cache_uid))
+                return tag_name;
+
+            return $"uid:{cache_uid}";
+        }
+
+        #endregion
+
+        private void EasForm_Activated(object sender, EventArgs e)
+        {
+            RfidManager.Pause = false;
         }
     }
 

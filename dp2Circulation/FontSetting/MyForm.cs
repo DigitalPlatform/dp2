@@ -1755,6 +1755,8 @@ out string strError)
 
         #region RFID 有关功能
 
+#if REMOVED
+
         public class RfidChannel
         {
             public IpcClientChannel Channel { get; set; }
@@ -1804,6 +1806,9 @@ out string strError)
             }
         }
 
+#endif
+
+#if REMOVED
         // return:
         //      -2  remoting服务器连接失败。驱动程序尚未启动
         //      -1  出错
@@ -1835,6 +1840,8 @@ out string strError)
                 return new NormalResult { Value = -1, ErrorInfo = strError };
             }
         }
+
+#endif
 
         #endregion
 

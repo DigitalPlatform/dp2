@@ -20,6 +20,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
+
 using dp2Circulation.Charging;
 
 namespace dp2Circulation
@@ -257,12 +258,23 @@ namespace dp2Circulation
                 }
 
                 RefreshRfidTagNumber();
+                CheckMultiPatronCard();
             }
             catch (Exception ex)
             {
                 WriteErrorLog($"MainForm_TagChanged exception: {ExceptionUtil.GetDebugText(ex)}");
                 throw ex;
             }
+        }
+
+        // 检查当前是否有多张读者卡持续放在读卡器上
+        void CheckMultiPatronCard()
+        {
+            var count = TagList.Patrons.Count;
+            if (count > 1)
+                SetError("multi", $"请拿走多余的读者卡(当前一共放了 {count} 张)");
+            else
+                SetError("multi", null);
         }
 
         string _rfidNumber = "";
@@ -307,6 +319,7 @@ namespace dp2Circulation
             }
 
             RefreshRfidTagNumber();
+            CheckMultiPatronCard();
         }
 
 
@@ -331,13 +344,13 @@ namespace dp2Circulation
         // UID --> 最近出现时间 的对照表
         // 用于平滑标签拿放的事件。原理是，如果一个标签最后离开和后来一次到来之间的时间差太小，则放弃这一次到来事件
         Hashtable _uidTable = new Hashtable();
-        private readonly Object _syncRoot_uidTable = new object();
+        // private readonly Object _syncRoot_uidTable = new object();
 
         static TimeSpan _minDelay = TimeSpan.FromMilliseconds(500);
 
         DateTime GetLastTime(string uid)
         {
-            lock (_syncRoot_uidTable)
+            lock (_uidTable.SyncRoot)
             {
                 if (_uidTable.ContainsKey(uid) == false)
                     return DateTime.MinValue;
@@ -351,7 +364,7 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(uid))
                 return;
 
-            lock (_syncRoot_uidTable)
+            lock (_uidTable.SyncRoot)
             {
                 if (_uidTable.Count > 1000)
                     _uidTable.Clear();  // TODO: 可以优化为每隔一段时间自动清除太旧的事项
@@ -366,16 +379,24 @@ namespace dp2Circulation
             if (this.PauseRfid)
                 return;
 
-            //Debug.WriteLine("sendKey");
-
-            if (data.OneTag.TagInfo == null)
-            {
-                //Debug.WriteLine("TagInfo == null");
-                return;
-            }
+            SetError("sendKey", null);
 
             if (data.OneTag.Protocol == InventoryInfo.ISO14443A)
             {
+                // 检查时间差额
+                {
+                    DateTime last_time = GetLastTime(data.OneTag.UID);
+                    if (now - last_time < _minDelay)
+                    {
+                        Debug.WriteLine("smooth ISO14443A");
+                        return;
+                    }
+                }
+
+                SetLastTime(data.OneTag.UID, DateTime.Now);
+
+                TaskList.Sound(0);
+
                 string text = $"uid:{data.OneTag.UID},tou:80";
                 this.Invoke((Action)(() =>
                 {
@@ -385,20 +406,35 @@ namespace dp2Circulation
                 return;
             }
 
-            string pii = GetPII(data.OneTag.TagInfo);
-            if (string.IsNullOrEmpty(pii))
+            if (data.OneTag.TagInfo == null)
             {
-                //Debug.WriteLine("pii == null");
+                //Debug.WriteLine("TagInfo == null");
                 return;
             }
 
+            string pii = GetPII(data.OneTag.TagInfo);
+
+            if (string.IsNullOrEmpty(pii))
+            {
+                // TODO: 改进显示方式
+                SetError("sendKey", $"此标签(UID={data.OneTag.UID})无法解析出 PII 元素");
+                return;
+            }
+
+            // 缓存起来
+            if (_easForm != null)
+                _easForm.SetUID(pii, data.OneTag.UID);
+
             Debug.WriteLine($"pii={pii}");
 
-            DateTime last_time = GetLastTime(data.OneTag.UID);
-            if (now - last_time < _minDelay)
+            // 检查时间差额
             {
-                Debug.WriteLine("smooth");
-                return;
+                DateTime last_time = GetLastTime(data.OneTag.UID);
+                if (now - last_time < _minDelay)
+                {
+                    Debug.WriteLine("smooth ISO15693");
+                    return;
+                }
             }
 
             SetLastTime(data.OneTag.UID, now);
@@ -450,6 +486,11 @@ namespace dp2Circulation
                 }
 
                 // TODO: 如果 errorCount > 0，则搜索 tasklist，如果 PII 找到匹配则放弃继续操作
+                {
+                    var task = this._taskList.FindTaskByItemBarcode(pii);
+                    if (task != null)
+                        return;
+                }
             }
 
             {
@@ -477,7 +518,7 @@ namespace dp2Circulation
             var result = _easForm.SetEAS(task, reader_name, tag_name, enable);
             if (result.Value != 1)
             {
-                _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，请给读卡器一点时间", "yellow", true);
+                _easForm.ShowMessage($"请把图书放回读卡器以修正 EAS\r\n拿放动作不要太快，给读卡器一点时间", "yellow", true);
                 this.Invoke((Action)(() =>
                 {
                     // 显示 EasForm
@@ -486,8 +527,6 @@ namespace dp2Circulation
             }
             return result;
         }
-
-
 
         /*
         public RfidChannel _rfidChannel = null;
@@ -4387,6 +4426,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 */
 
             _easForm.Visible = show;
+            // Program.MainForm.Activate();
         }
 
         void DestroyEasForm()

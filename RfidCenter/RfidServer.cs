@@ -120,43 +120,75 @@ namespace RfidCenter
         // 增加了无标签时延迟等待功能。敏捷响应
         public ListTagsResult ListTags(string reader_name, string style)
         {
-            TimeSpan length = TimeSpan.FromSeconds(2);
-            ListTagsResult result = null;
-            string current_uids = "";
-            DateTime start = DateTime.Now;
-            while (DateTime.Now - start < length
-                || result == null)
+            if (Program.Rfid.Pause)
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = "RFID 功能处于暂停状态",
+                    ErrorCode = "paused"
+                };
+
+            Program.Rfid.IncApiCount();
+            try
             {
-                result = _listTags(reader_name, style);
+                if (Program.Rfid.Pause)
+                    return new ListTagsResult
+                    {
+                        Value = -1,
+                        ErrorInfo = "RFID 功能处于暂停状态",
+                        ErrorCode = "paused"
+                    };
 
-                if (result != null && result.Results != null)
-                    current_uids = BuildUids(result.Results);
-                else
-                    current_uids = "";
-
-                // 只要本次和上次 tag 数不同，立刻就返回
-                if (CompareLastUids(current_uids))
+                TimeSpan length = TimeSpan.FromSeconds(2);
+                ListTagsResult result = null;
+                string current_uids = "";
+                DateTime start = DateTime.Now;
+                while (DateTime.Now - start < length
+                    || result == null)
                 {
-                    SetLastUids(current_uids);
-                    return result;
+                    result = _listTags(reader_name, style);
+
+                    if (result != null && result.Results != null)
+                        current_uids = BuildUids(result.Results);
+                    else
+                        current_uids = "";
+
+                    // 只要本次和上次 tag 数不同，立刻就返回
+                    if (CompareLastUids(current_uids))
+                    {
+                        SetLastUids(current_uids);
+                        return result;
+                    }
+
+                    if (result.Value == -1)
+                        return result;
+                    /*
+                    // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
+                    if (result.Results != null
+                        && result.Results.Count > 0)
+                    {
+                        SetLastUids(current_uids);
+                        return result;
+                    }
+                    */
+                    Thread.Sleep(10);
                 }
 
-                if (result.Value == -1)
-                    return result;
-                /*
-                // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
-                if (result.Results != null
-                    && result.Results.Count > 0)
-                {
-                    SetLastUids(current_uids);
-                    return result;
-                }
-                */
-                Thread.Sleep(10);
+                SetLastUids(current_uids);
+                return result;
             }
-
-            SetLastUids(current_uids);
-            return result;
+            catch (Exception ex)
+            {
+                return new ListTagsResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"ListTags() 出现异常:{ex.Message}"
+                };
+            }
+            finally
+            {
+                Program.Rfid.DecApiCount();
+            }
         }
         // parameters:
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
@@ -412,6 +444,7 @@ bool enable)
             {
                 FindTagResult result = Program.Rfid.FindTagByPII(
                     reader_name,
+                    InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
                     parts[1]);
                 if (result.Value != 1)
                     return new NormalResult
@@ -685,12 +718,25 @@ new_password);
                         if (reader == null)
                             continue;
 
+                        if (Program.Rfid.Pause)
+                            continue;
+
                         if (string.IsNullOrEmpty(Program.Rfid.State) == false)
                             break;
 
-                        InventoryResult inventory_result = Program.Rfid.Inventory(
-                            reader.Name, bFirst ? "" : "only_new");
-                        // bFirst = false;
+                        InventoryResult inventory_result = null;
+                        //Program.Rfid.IncApiCount();
+                        try
+                        {
+                            inventory_result = Program.Rfid.Inventory(
+      reader.Name, bFirst ? "" : "only_new");
+                            // bFirst = false;
+                        }
+                        finally
+                        {
+                            //Program.Rfid.DecApiCount();
+                        }
+
                         if (inventory_result.Value == -1)
                         {
                             _compactLog?.Add("*** 读卡器 {0} 点选标签时出错: {1}",
@@ -710,6 +756,7 @@ new_password);
                             //uid_table[info.UID] = reader.Name;
                             AddToTagList(reader.Name, info.UID, info.DsfID, info.Protocol);
                         }
+
                     }
                 }
             }

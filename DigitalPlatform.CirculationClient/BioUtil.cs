@@ -180,6 +180,7 @@ namespace DigitalPlatform.CirculationClient
             string strStartDate,
             string strEndDate,
             LogType logType,
+            string serverVersion,
             CancellationToken token)
         {
             string strLastDate = "";
@@ -228,7 +229,6 @@ namespace DigitalPlatform.CirculationClient
 
                 channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
-
                 // using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
                 {
                     ProgressEstimate estimate = new ProgressEstimate();
@@ -244,7 +244,8 @@ namespace DigitalPlatform.CirculationClient
                         AutoCache = false,
                         CacheDir = "",
                         LogType = logType,
-                        Filter = "setReaderInfo"
+                        Filter = "setReaderInfo",
+                        ServerVersion = serverVersion
                     };
 
                     loader.Prompt += Loader_Prompt;

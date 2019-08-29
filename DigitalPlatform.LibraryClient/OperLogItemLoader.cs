@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -34,6 +35,13 @@ namespace DigitalPlatform.LibraryClient
             {
                 _logType = value;
             }
+        }
+
+        // dp2library 服务器版本号。决定了是否使用获取时等待功能
+        public string ServerVersion
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -733,7 +741,12 @@ FileShare.ReadWrite);
                                 // 2017/10/9
                                 if (this.ReplicationLevel == true)
                                     strStyle += ",supervisor";  // 注：当前账户中还应该包含 replicatoin 权限才能真正获得日志记录中的密码字段
-                            REDO:
+
+                                if (string.IsNullOrEmpty(this.ServerVersion) == false
+                                    && StringUtil.CompareVersion(this.ServerVersion, "3.17") >= 0)
+                                    strStyle += ",wait";
+
+                                REDO:
                                 // 获得日志
                                 // return:
                                 //      -1  error

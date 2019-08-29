@@ -19,15 +19,62 @@ namespace RfidDrivers.First
 {
     public class Driver1 : IRfidDriver
     {
+        string _state = "closed";
+
         // 状态。
         //      "initializing" 表示正在进行初始化; "closed" 表示已经不能使用
-        public string State { get; set; }
+        public string State
+        {
+            get
+            {
+                return _state;
+            }
+            set
+            {
+                _state = value;
+            }
+        }
+
+        public bool Pause
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.State) == false)
+                    return true;
+                return false;
+            }
+        }
+
+        // 当前正在进行的 API 调用数
+        long _apiCount = 0;
+
+        public void IncApiCount()
+        {
+            Interlocked.Increment(ref _apiCount);
+        }
+
+        public void DecApiCount()
+        {
+            Interlocked.Decrement(ref _apiCount);
+        }
+
+        void WaitApiSilence()
+        {
+            while (true)
+            {
+                var v = Interlocked.Read(ref _apiCount);
+                if (v <= 0)
+                    return;
+                Thread.Sleep(10);
+            }
+        }
 
         internal ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         void Lock()
         {
             _lock.EnterWriteLock();
+            // _lock.TryEnterWriteLock(1000);  // 2019/8/29
         }
 
         void Unlock()
@@ -60,9 +107,14 @@ namespace RfidDrivers.First
             List<HintInfo> hint_table)
         {
             this.State = "initializing";
+
+            // 等待所有 API 调用安静下来
+            WaitApiSilence();
             Lock();
             try
             {
+
+
                 GetDriversInfo();
 
                 NormalResult result = OpenAllReaders(hint_table, out List<HintInfo> output_hint_table);
@@ -97,9 +149,12 @@ namespace RfidDrivers.First
         public NormalResult ReleaseDriver()
         {
             this.State = "initializing";
+            // 等待所有 API 调用安静下来
+            WaitApiSilence();
             Lock();
             try
             {
+
                 CloseAllLocks();
 
                 return CloseAllReaders();
@@ -2206,6 +2261,7 @@ namespace RfidDrivers.First
             }
         }
 
+        // TODO: 中间某个读卡器出错，还要继续往后用其他读卡器探索读取？
         // TODO: 根据 PII 寻找标签。如果找到两个或者以上，并且它们 UID 不同，会报错
         // 注：PII 相同，UID 也相同，属于正常情况，这是因为多个读卡器都读到了同一个标签的缘故
         // return:
@@ -2216,6 +2272,7 @@ namespace RfidDrivers.First
         //      可能会抛出 System.AccessViolationException 异常
         public FindTagResult FindTagByPII(
             string reader_name,
+            string protocols,   // 2019/8/28
             string pii)
         {
 #if NO
@@ -2230,8 +2287,13 @@ namespace RfidDrivers.First
             Lock();
             try
             {
+                FindTagResult temp_result = null;
+
                 foreach (Reader reader in readers)
                 {
+                    if (StringUtil.IsInList(reader.Protocols, protocols) == false)
+                        continue;
+
                     // UIntPtr hreader = reader.ReaderHandle;
                     // 枚举所有标签
                     byte ai_type = RFIDLIB.rfidlib_def.AI_TYPE_NEW;
@@ -2239,19 +2301,22 @@ namespace RfidDrivers.First
                     UInt32 nTagCount = 0;
                     int ret = tag_inventory(
                         reader.ReaderHandle,
-                        reader.Protocols,
+                        protocols,  // reader.Protocols,
                         ai_type,
                         1,
                         new Byte[] { 1 },
                         ref nTagCount,
                         out List<InventoryInfo> results);
                     if (ret != 0)
-                        return new FindTagResult
+                    {
+                        temp_result = new FindTagResult
                         {
                             Value = -1,
                             ErrorInfo = "tag_inventory error",
                             ErrorCode = GetErrorCode(ret, reader.ReaderHandle)
                         };
+                        continue;
+                    }
 
                     Debug.Assert(nTagCount == results.Count);
 
@@ -2262,7 +2327,14 @@ namespace RfidDrivers.First
     info?.UID,
     info.TagType);
                         if (hTag == UIntPtr.Zero)
-                            return new FindTagResult { Value = -1, ErrorInfo = "connectTag Error" };
+                        {
+                            temp_result = new FindTagResult
+                            {
+                                Value = -1,
+                                ErrorInfo = "connectTag Error"
+                            };
+                            continue;
+                        }
                         try
                         {
                             int iret;
@@ -2284,12 +2356,15 @@ namespace RfidDrivers.First
                                 ref blkNum,
                                 ref icref);
                             if (iret != 0)
-                                return new FindTagResult
+                            {
+                                temp_result = new FindTagResult
                                 {
                                     Value = -1,
                                     ErrorInfo = "ISO15693_GetSystemInfo() error 1",
                                     ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                                 };
+                                continue;
+                            }
 
                             ReadBlocksResult result0 = ReadBlocks(
                                 reader.ReaderHandle,
@@ -2299,7 +2374,15 @@ namespace RfidDrivers.First
                         blkSize,
                         true);
                             if (result0.Value == -1)
-                                return new FindTagResult { Value = -1, ErrorInfo = result0.ErrorInfo, ErrorCode = result0.ErrorCode };
+                            {
+                                temp_result = new FindTagResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = result0.ErrorInfo,
+                                    ErrorCode = result0.ErrorCode
+                                };
+                                continue;
+                            }
 
                             // 解析出 PII
                             LogicChip chip = LogicChip.From(result0.Bytes,
@@ -2309,7 +2392,7 @@ namespace RfidDrivers.First
                                 return new FindTagResult
                                 {
                                     Value = 1,
-                                    ReaderName = reader_name,
+                                    ReaderName = reader.Name,   // 2019/8/28
                                     UID = info.UID
                                 };
                         }
@@ -2319,6 +2402,10 @@ namespace RfidDrivers.First
                         }
                     }
                 }
+
+                // 如果中间曾出现过报错
+                if (temp_result != null)
+                    return temp_result;
 
                 return new FindTagResult
                 {

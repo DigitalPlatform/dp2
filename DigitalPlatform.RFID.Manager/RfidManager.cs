@@ -64,6 +64,20 @@ namespace DigitalPlatform.RFID
             Base.TriggerSetError(sender, e);
         }
 
+        static bool _pause = false;
+
+        public static bool Pause
+        {
+            get
+            {
+                return _pause;
+            }
+            set
+            {
+                _pause = value;
+            }
+        }
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -82,6 +96,16 @@ namespace DigitalPlatform.RFID
             },
             () =>
             {
+                if (_pause == true)
+                {
+                    Base.TriggerSetError(null,
+new SetErrorEventArgs
+{
+Error = "RFID 功能已暂停"
+});
+                    return true;
+                }
+
                 if (string.IsNullOrEmpty(Base.Url))
                 {
                     Base.TriggerSetError(null,
@@ -91,6 +115,7 @@ namespace DigitalPlatform.RFID
                         });
                     return true;
                 }
+
                 return false;
             },
             (channel) =>
@@ -165,7 +190,7 @@ null);
             }
         }
 
-        public static GetTagInfoResult GetTagInfo(string reader_name, 
+        public static GetTagInfoResult GetTagInfo(string reader_name,
             string uid)
         {
             try
@@ -381,7 +406,9 @@ null);
                     {
                         Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
                     });
-                return new NormalResult { Value = -1,
+                return new NormalResult
+                {
+                    Value = -1,
                     ErrorInfo = ex.Message,
                     ErrorCode = NotResponseException.GetErrorCode(ex)
                 };

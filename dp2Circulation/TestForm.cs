@@ -1151,7 +1151,7 @@ ref bHideMessageBox);
             spreadsheetDocument.Close();
         }
 
-#region text excel
+        #region text excel
 
         public static bool UpdateValue(
             WorkbookPart wbPart,
@@ -1332,7 +1332,7 @@ ref bHideMessageBox);
             }
             return result;
         }
-#endregion
+        #endregion
 
         private void button_encoding_detectEncoding_Click(object sender, EventArgs e)
         {
@@ -1958,6 +1958,28 @@ this,
         {
             // 启动若干线程，每个线程都在运行进度显示
 
+        }
+
+        UdpNotifier _udpNotifer = null;
+
+        private void button_sendUdpNotify_Click(object sender, EventArgs e)
+        {
+            if (_udpNotifer == null)
+            {
+                _udpNotifer = new UdpNotifier();
+                _udpNotifer.StartListening((m) =>
+                {
+                    MessageBox.Show(this, $"received '{m}'");
+                });
+            }
+
+
+            string message = InputDlg.GetInput(this, "发送通知", "通知文字", "fingerprint,face");
+            if (message == null)
+                return;
+            UdpNotifier notifier = new UdpNotifier();
+            notifier.Notify(message);
+            MessageBox.Show(this, "发送成功");
         }
     }
 }

@@ -8726,10 +8726,16 @@ Keys keyData)
                 }
             }
 #endif
+
+            // 激活 RfidManager
+            RfidManager.Pause = false;
         }
 
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
+            // 休眠 RfidManager
+            RfidManager.Pause = true;
+
             // this.Speak("deactivated");
 
 #if NO

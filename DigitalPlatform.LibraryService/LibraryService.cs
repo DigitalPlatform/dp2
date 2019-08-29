@@ -23,6 +23,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Threading.Tasks;
 
 namespace dp2Library
 {
@@ -8439,6 +8440,9 @@ namespace dp2Library
                         return result;
                     }
 
+                    DateTime start_time = DateTime.Now;
+
+                    REDO:
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -8454,6 +8458,14 @@ namespace dp2Library
                         strFilter,
                         out records,
                         out strError);
+                    if ((nRet == 2 || nRet == 1) && (records == null || records.Length == 0)
+                        && StringUtil.IsInList("wait", strStyle) == true
+                        && DateTime.Now - start_time < TimeSpan.FromSeconds(30))
+                    {
+                        // 敏捷中断
+                        Task.Delay(1000, app.AppDownToken).Wait();
+                        goto REDO;
+                    }
                 }
                 if (nRet == -1)
                     goto ERROR1;
