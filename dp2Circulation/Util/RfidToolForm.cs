@@ -245,7 +245,14 @@ this.toolStripButton_autoFixEas.Checked);
                         goto ERROR1;
                     }
 #else
-                    var tags = TagList.Books;
+                    List<TagAndData> tags = new List<TagAndData>();
+                    foreach(var book in TagList.Books)
+                    {
+                        if (book.OneTag.TagInfo == null)
+                            continue;
+                        tags.Add(book);
+                    }
+
                     tags.AddRange(TagList.Patrons);
 #endif
 
@@ -453,9 +460,11 @@ this.toolStripButton_autoFixEas.Checked);
                 //item.BackColor = SystemColors.Window;
                 //item.ForeColor = SystemColors.WindowText;
 
-                item.BackColor = item.ListView.BackColor;
-                item.ForeColor = item.ListView.ForeColor;
-
+                if (item.ListView != null)
+                {
+                    item.BackColor = item.ListView.BackColor;
+                    item.ForeColor = item.ListView.ForeColor;
+                }
                 return;
             }
 
@@ -859,7 +868,7 @@ this.toolStripButton_autoFixEas.Checked);
                     OneTag tag = item_info.OneTag;
                     // var tag_info = tag.TagInfo;
 
-                    this.SelectedTag = tag;
+                    this.SelectedTag = tag.Clone(); // 最好是深度拷贝
                     this.button_OK.Enabled = true;
 
                     this.chipEditor1.LogicChipItem = item_info.LogicChipItem;
@@ -1258,7 +1267,7 @@ this.toolStripButton_autoFixEas.Checked);
                 Debug.Assert(this.listView_tags.SelectedItems.Count > 0);
                 ListViewItem selected_item = this.listView_tags.SelectedItems[0];
                 GetTagInfo(selected_item);
-                strError = "您选择的行尚未获得 TagInfo。请稍候重试";
+                strError = "您选择的行尚未获得 TagInfo。请稍后重试";
                 goto ERROR1;
             }
 

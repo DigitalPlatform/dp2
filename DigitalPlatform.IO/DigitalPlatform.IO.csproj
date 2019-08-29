@@ -179,6 +179,7 @@
     <Compile Include="StreamCache.cs" />
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TextEncodingDetect.cs" />
+    <Compile Include="UdpNotifier.cs" />
     <Compile Include="UsbInfo.cs" />
     <Compile Include="UsbNotification.cs" />
     <Compile Include="UsbNotifier.cs" />

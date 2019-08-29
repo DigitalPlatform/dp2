@@ -87,6 +87,19 @@ uint new_password);
             this.LastActive = DateTime.Now;
         }
 
+        // 2019/8/29
+        public OneTag Clone()
+        {
+            OneTag result = new OneTag();
+            result.Protocol = this.Protocol;
+            result.ReaderName = this.ReaderName;
+            result.UID = this.UID;
+            result.LastActive = this.LastActive;
+            result.DSFID = this.DSFID;
+            result.TagInfo = this.TagInfo;
+            return result;
+        }
+
         public override string ToString()
         {
             return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)},Protocol={Protocol}";

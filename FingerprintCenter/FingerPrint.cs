@@ -574,6 +574,7 @@ namespace FingerprintCenter
 
                     byte[] template_buffer = new byte[2048];
                     int template_buffer_length = 2048;
+                    // 这一句可能抛出内存损坏异常
                     int ret = zkfp2.AcquireFingerprint(_devHandle,
                         image_buffer,
                         template_buffer,

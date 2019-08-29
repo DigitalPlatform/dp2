@@ -467,11 +467,19 @@ bool bClickClose = false)
         void StartTimer()
         {
             if (_timer == null)
+            {
+                TimeSpan period = TimeSpan.FromMinutes(5);  // 5 分钟
+
+                if (string.IsNullOrEmpty(this.ServerVersion) == false
+                    && StringUtil.CompareVersion(this.ServerVersion, "3.17") >= 0)
+                    period = TimeSpan.FromSeconds(30);
+
                 _timer = new System.Threading.Timer(
-                    new System.Threading.TimerCallback(timerCallback),
-                    null,
-                    TimeSpan.FromSeconds(30),
-                    TimeSpan.FromMinutes(5));   // 5 分钟
+                new System.Threading.TimerCallback(timerCallback),
+                null,
+                TimeSpan.FromSeconds(30),
+                period);
+            }
         }
 
         void EndTimer()
@@ -707,6 +715,7 @@ bool bClickClose = false)
         string _currentUserName = "";
 
         public string ServerUID = "";
+        public string ServerVersion = "";
 
         internal void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
@@ -895,6 +904,7 @@ out strError);
                     };
                 }
 
+                this.ServerVersion = strVersion;
                 this.ServerUID = strUID;
 
                 /*
@@ -1348,6 +1358,8 @@ string strHtml)
                 }
             }
 
+            // AbortAllChannel();
+
             SaveSettings();
         }
 
@@ -1726,6 +1738,7 @@ channel,
 strStartDate,
 strEndDate,
 LogType.OperLog,
+this.ServerVersion,
 token);
                 if (result.Value == -1)
                 {

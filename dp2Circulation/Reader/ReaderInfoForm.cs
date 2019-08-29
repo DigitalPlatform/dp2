@@ -5281,7 +5281,8 @@ MessageBoxDefaultButton.Button2);
                     strError = getstate_result.ErrorInfo;
                     goto ERROR1;
                 }
-                else if (getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                else if (getstate_result.ErrorCode != null &&
+                    getstate_result.ErrorCode != Program.MainForm.ServerUID)
                 {
                     strError = $"指纹中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行指纹登记";
                     goto ERROR1;

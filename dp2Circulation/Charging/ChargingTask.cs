@@ -1673,6 +1673,29 @@ end_time);
             }
         }
 
+
+        public ChargingTask FindTaskByItemBarcode(string itemBarcode)
+        {
+            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)   // m_nLockTimeout
+                throw new LockException("锁定尝试中超时");
+            try
+            {
+                foreach (ChargingTask task in _tasks)
+                {
+                    // if (task.Action) ?
+
+                    if (itemBarcode == task.ItemBarcode)
+                        return task;
+                }
+
+                return null;
+            }
+            finally
+            {
+                this.m_lock.ExitReadLock();
+            }
+        }
+
 #if NO
         public bool Stopped
         {

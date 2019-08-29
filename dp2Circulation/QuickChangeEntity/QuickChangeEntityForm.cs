@@ -660,6 +660,7 @@ false);
             new_tag_info = null;
             strError = "";
 
+#if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,
 out strError);
@@ -668,15 +669,24 @@ out strError);
                 strError = "StartRfidChannel() error";
                 return -1;
             }
+#endif
             try
             {
                 new_tag_info = LogicChipItem.ToTagInfo(
                     _tagExisting.TagInfo,
                     _right);
+#if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo,
                     new_tag_info);
+#else
+                NormalResult result = RfidManager.WriteTagInfo(
+    _tagExisting.ReaderName,
+    _tagExisting.TagInfo,
+    new_tag_info);
+                TagList.ClearTagTable(_tagExisting.UID);
+#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -692,7 +702,9 @@ out strError);
             }
             finally
             {
+#if OLD_CODE
                 EndRfidChannel(channel);
+#endif
             }
         }
 
@@ -784,7 +796,7 @@ out strError);
                         Task.Delay(500, token).Wait();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.ShowMessage($"后台线程出现异常: {ex.Message}", "red", true);
                 this.Invoke((Action)(() =>

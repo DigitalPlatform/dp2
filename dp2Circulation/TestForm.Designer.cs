@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle2 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_createDirectory = new System.Windows.Forms.Button();
@@ -201,6 +201,7 @@
             this.tabPage_amazonSearch = new System.Windows.Forms.TabPage();
             this.button_amazonSearch_openDialog = new System.Windows.Forms.Button();
             this.tabPage_test = new System.Windows.Forms.TabPage();
+            this.button_testStop = new System.Windows.Forms.Button();
             this.button_testListProcess = new System.Windows.Forms.Button();
             this.button_testRelationDialog = new System.Windows.Forms.Button();
             this.button_openWindowsUpdateDialog = new System.Windows.Forms.Button();
@@ -228,7 +229,7 @@
             this.label36 = new System.Windows.Forms.Label();
             this.textBox_login_userName = new System.Windows.Forms.TextBox();
             this.label35 = new System.Windows.Forms.Label();
-            this.button_testStop = new System.Windows.Forms.Button();
+            this.button_sendUdpNotify = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -900,6 +901,7 @@
             this.checkedComboBox1.Location = new System.Drawing.Point(24, 21);
             this.checkedComboBox1.Margin = new System.Windows.Forms.Padding(0);
             this.checkedComboBox1.Name = "checkedComboBox1";
+            this.checkedComboBox1.ReadOnly = false;
             this.checkedComboBox1.Size = new System.Drawing.Size(397, 25);
             this.checkedComboBox1.TabIndex = 0;
             // 
@@ -1963,7 +1965,7 @@
             this.patronCardControl1.Location = new System.Drawing.Point(6, 68);
             this.patronCardControl1.Margin = new System.Windows.Forms.Padding(4);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle1;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle2;
             this.patronCardControl1.Size = new System.Drawing.Size(234, 178);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -2230,6 +2232,7 @@
             // 
             // tabPage_test
             // 
+            this.tabPage_test.Controls.Add(this.button_sendUdpNotify);
             this.tabPage_test.Controls.Add(this.button_testStop);
             this.tabPage_test.Controls.Add(this.button_testListProcess);
             this.tabPage_test.Controls.Add(this.button_testRelationDialog);
@@ -2243,6 +2246,16 @@
             this.tabPage_test.TabIndex = 28;
             this.tabPage_test.Text = "杂项";
             this.tabPage_test.UseVisualStyleBackColor = true;
+            // 
+            // button_testStop
+            // 
+            this.button_testStop.Location = new System.Drawing.Point(6, 304);
+            this.button_testStop.Name = "button_testStop";
+            this.button_testStop.Size = new System.Drawing.Size(330, 29);
+            this.button_testStop.TabIndex = 5;
+            this.button_testStop.Text = "测试 Stop 类 ...";
+            this.button_testStop.UseVisualStyleBackColor = true;
+            this.button_testStop.Click += new System.EventHandler(this.button_testStop_Click);
             // 
             // button_testListProcess
             // 
@@ -2539,15 +2552,15 @@
             this.label35.TabIndex = 0;
             this.label35.Text = "user name";
             // 
-            // button_testStop
+            // button_sendUdpNotify
             // 
-            this.button_testStop.Location = new System.Drawing.Point(6, 304);
-            this.button_testStop.Name = "button_testStop";
-            this.button_testStop.Size = new System.Drawing.Size(330, 29);
-            this.button_testStop.TabIndex = 5;
-            this.button_testStop.Text = "测试 Stop 类 ...";
-            this.button_testStop.UseVisualStyleBackColor = true;
-            this.button_testStop.Click += new System.EventHandler(this.button_testStop_Click);
+            this.button_sendUdpNotify.Location = new System.Drawing.Point(6, 358);
+            this.button_sendUdpNotify.Name = "button_sendUdpNotify";
+            this.button_sendUdpNotify.Size = new System.Drawing.Size(330, 28);
+            this.button_sendUdpNotify.TabIndex = 6;
+            this.button_sendUdpNotify.Text = "发送 UdpNotifier 通知 ...";
+            this.button_sendUdpNotify.UseVisualStyleBackColor = true;
+            this.button_sendUdpNotify.Click += new System.EventHandler(this.button_sendUdpNotify_Click);
             // 
             // TestForm
             // 
@@ -2820,5 +2833,6 @@
         private System.Windows.Forms.Button button_testListProcess;
         private System.Windows.Forms.Button button_createDirectory;
         private System.Windows.Forms.Button button_testStop;
+        private System.Windows.Forms.Button button_sendUdpNotify;
     }
 }

@@ -374,6 +374,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+#if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,
 out strError);
@@ -382,15 +383,24 @@ out strError);
                 strError = "StartRfidChannel() error";
                 return -1;
             }
+#endif
             try
             {
                 TagInfo new_tag_info = LogicChipItem.ToTagInfo(
                     _tagExisting.TagInfo,
                     this.chipEditor_editing.LogicChipItem);
+#if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo,
                     new_tag_info);
+#else
+                NormalResult result = RfidManager.WriteTagInfo(
+    _tagExisting.ReaderName,
+    _tagExisting.TagInfo,
+    new_tag_info);
+                TagList.ClearTagTable(_tagExisting.UID);
+#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -406,7 +416,9 @@ out strError);
             }
             finally
             {
+#if OLD_CODE
                 EndRfidChannel(channel);
+#endif
             }
         }
 
@@ -419,6 +431,7 @@ out strError);
             strError = "";
             tag_info = null;
 
+#if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,
 out strError);
@@ -427,11 +440,18 @@ out strError);
                 strError = "StartRfidChannel() error";
                 return -1;
             }
+#endif
             try
             {
+#if OLD_CODE
                 var result = channel.Object.GetTagInfo(
                     reader_name,
                     uid);
+#else
+                var result = RfidManager.GetTagInfo(
+    reader_name,
+    uid);
+#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -448,7 +468,9 @@ out strError);
             }
             finally
             {
+#if OLD_CODE
                 EndRfidChannel(channel);
+#endif
             }
         }
     }

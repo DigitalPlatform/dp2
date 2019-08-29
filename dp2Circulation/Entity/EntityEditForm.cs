@@ -928,6 +928,12 @@ namespace dp2Circulation
 
             // 刷新左侧显示
             {
+                Debug.Assert(_tagExisting != null, "");
+
+                Debug.WriteLine("222 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
+
+                Debug.Assert(_tagExisting.TagInfo != null, "");
+
                 // 用保存后的确定了的 UID 重新装载
                 int nRet = LoadChipByUID(
                     _tagExisting.ReaderName,
@@ -940,7 +946,11 @@ namespace dp2Circulation
                     strError = "保存 RFID 标签内容已经成功。但刷新左侧显示时候出错: " + strError;
                     goto ERROR1;
                 }
+
+                Debug.Assert(tag_info != null, "");
+
                 _tagExisting.TagInfo = tag_info;
+                Debug.WriteLine("set taginfo");
                 var chip = LogicChipItem.FromTagInfo(tag_info);
                 this.chipEditor_existing.LogicChipItem = chip;
 
@@ -1090,6 +1100,10 @@ namespace dp2Circulation
 
                     var tag_info = dialog.SelectedTag.TagInfo;
                     _tagExisting = dialog.SelectedTag;
+                    Debug.WriteLine("set _tagExisting");
+
+                    Debug.Assert(_tagExisting != null, "");
+                    Debug.Assert(_tagExisting.TagInfo != null, "");
 
                     var chip = LogicChipItem.FromTagInfo(tag_info);
                     this.chipEditor_existing.LogicChipItem = chip;
@@ -1168,6 +1182,7 @@ namespace dp2Circulation
         {
             strError = "";
 
+#if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,
 out strError);
@@ -1176,6 +1191,9 @@ out strError);
                 strError = "StartRfidChannel() error";
                 return -1;
             }
+#endif
+
+
             try
             {
 #if NO
@@ -1187,13 +1205,32 @@ out strError);
                     out string block_map);
                 new_tag_info.LockStatus = block_map;
 #endif
+                Debug.Assert(_tagExisting != null, "");
+                Debug.WriteLine("333 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
+
+                Debug.Assert(_tagExisting.TagInfo != null, "");
+
                 TagInfo new_tag_info = LogicChipItem.ToTagInfo(
                     _tagExisting.TagInfo,
                     this.chipEditor_editing.LogicChipItem);
+#if OLD_CODE
                 NormalResult result = channel.Object.WriteTagInfo(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo,
                     new_tag_info);
+#else
+                Debug.Assert(_tagExisting != null, "");
+
+                Debug.WriteLine("111 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
+
+                Debug.Assert(_tagExisting.TagInfo != null, "");
+
+                NormalResult result = RfidManager.WriteTagInfo(
+    _tagExisting.ReaderName,
+    _tagExisting.TagInfo,
+    new_tag_info);
+                TagList.ClearTagTable(_tagExisting.UID);
+#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
@@ -1209,7 +1246,9 @@ out strError);
             }
             finally
             {
+#if OLD_CODE
                 EndRfidChannel(channel);
+#endif
             }
         }
 
@@ -1222,6 +1261,7 @@ out strError);
             strError = "";
             tag_info = null;
 
+#if OLD_CODE
             RfidChannel channel = StartRfidChannel(
 Program.MainForm.RfidCenterUrl,
 out strError);
@@ -1230,17 +1270,25 @@ out strError);
                 strError = "StartRfidChannel() error";
                 return -1;
             }
+#endif
             try
             {
+#if OLD_CODE
                 var result = channel.Object.GetTagInfo(
                     reader_name,
                     uid);
+#else
+                var result = RfidManager.GetTagInfo(
+                    reader_name,
+                    uid);
+#endif
                 if (result.Value == -1)
                 {
                     strError = result.ErrorInfo;
                     return -1;
                 }
 
+                Debug.Assert(result.TagInfo != null, "");
                 tag_info = result.TagInfo;
                 return 0;
             }
@@ -1251,7 +1299,9 @@ out strError);
             }
             finally
             {
+#if OLD_CODE
                 EndRfidChannel(channel);
+#endif
             }
         }
 

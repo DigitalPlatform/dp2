@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.16.*")]
-[assembly: AssemblyFileVersion("3.16.0.0")]
+[assembly: AssemblyVersion("3.17.*")]
+[assembly: AssemblyFileVersion("3.17.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -197,3 +197,4 @@ ItemCanReturn()
 //      3.14 (2019/6/23）GetRes() API 的 strStyle 参数支持使用 "uploadedPartial" 表示操作都是针对已上载临时部分的。比如希望获得这个局部的长度，时间戳，等等。这个特性暂时只支持静态文件
 //      3.15 (2019/7/12) 新的 barcodeValidation 机制，会用馆藏地(而不是馆代码)字符串来作为 libraryCode 参数进行条码校验和变换。配套的内务前端也可发来组名，条码校验规则里面用通配符一般可以适应这两种情况
 //      3.16 (2019/7/30) SetEntities() API 新增 transfer 子功能，用于典藏移交操作
+//      3.17 (2019/8/29) GetOperLogs() strStyle 参数可包含 "wait"，表示最多等待 30 秒直到有返回结果

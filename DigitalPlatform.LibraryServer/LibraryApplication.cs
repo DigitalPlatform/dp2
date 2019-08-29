@@ -109,7 +109,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 负责存储统计日志的 UID 的 Hashtable。用途是防止重复写入 UID 相同的日志记录
         // uid --> true
-        public UidTable StatisLogUidTable = new UidTable(); 
+        public UidTable StatisLogUidTable = new UidTable();
 
         /// <summary>
         /// 在登录阶段要给所有账户都添加的权限列表。用逗号分隔的字符串
@@ -3085,7 +3085,7 @@ namespace DigitalPlatform.LibraryServer
             // 检查两个保留 account 元素的 type 属性
             {
                 XmlNodeList accounts = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account[@name='reader' or @name='public']");
-                foreach(XmlElement account in accounts)
+                foreach (XmlElement account in accounts)
                 {
                     string type = account.GetAttribute("type");
                     if (string.IsNullOrEmpty(type))
@@ -3916,6 +3916,14 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 #endif
+
+        public CancellationToken AppDownToken
+        {
+            get
+            {
+                return _app_down.Token;
+            }
+        }
 
         internal CancellationTokenSource _app_down = new CancellationTokenSource();
 

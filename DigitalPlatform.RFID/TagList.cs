@@ -465,7 +465,7 @@ namespace DigitalPlatform.RFID
 
         public OneTag OneTag { get; set; }
 
-        public LogicChip LogicChip { get; set; }
+        // public LogicChip LogicChip { get; set; }
 
         public string Error { get; set; }   // 错误信息
     }

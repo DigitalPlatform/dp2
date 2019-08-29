@@ -79,9 +79,16 @@ namespace RfidCenter
                 case PowerModes.Resume:
                     Task.Run(() =>
                     {
-                        Task.Delay(TimeSpan.FromSeconds(5)).Wait();
-                        this.Speak("RFID 中心被唤醒");
-                        BeginRefreshReaders("connected", new CancellationToken());
+                        try
+                        {
+                            Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                            this.Speak("RFID 中心被唤醒");
+                            BeginRefreshReaders("connected", new CancellationToken());
+                        }
+                        catch
+                        {
+
+                        }
                     });
                     break;
                 case PowerModes.Suspend:
@@ -225,7 +232,7 @@ namespace RfidCenter
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             // UsbNotification.UnregisterUsbDeviceNotification();
 
-            _cancelInventory?.Cancel();
+            // _cancelInventory?.Cancel();
 
             // 
 
@@ -585,9 +592,10 @@ c0 9e ba a0
 
         private void toolStripButton_autoInventory_CheckStateChanged(object sender, EventArgs e)
         {
-            StartInventory(toolStripButton_autoInventory.Checked);
+            // StartInventory(toolStripButton_autoInventory.Checked);
         }
 
+#if NO
         // 启动或者停止自动盘点
         void StartInventory(bool start)
         {
@@ -649,6 +657,7 @@ c0 9e ba a0
 
             }
         }
+#endif
 
         ListViewItem FindItem(string uid)
         {
@@ -662,6 +671,7 @@ c0 9e ba a0
             return null;
         }
 
+#if NO
         void FillIventoryInfo(List<InventoryInfo> infos)
         {
             foreach (InventoryInfo info in infos)
@@ -678,6 +688,8 @@ c0 9e ba a0
                 }
             }
         }
+
+#endif
 
         static void SetItemColor(ListViewItem item, string state)
         {
@@ -1095,7 +1107,7 @@ bool bClickClose = false)
             }
         }
 
-        #region remoting server
+#region remoting server
 
 #if HTTP_CHANNEL
         HttpChannel m_serverChannel = null;
@@ -1143,9 +1155,9 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
-        #region ipc channel
+#region ipc channel
 
         public static bool CallActivate(string strUrl)
         {
@@ -1219,7 +1231,7 @@ bool bClickClose = false)
             }
         }
 
-        #endregion
+#endregion
 
         private void ToolStripMenuItem_testRfidChannel_Click(object sender, EventArgs e)
         {
@@ -1227,7 +1239,7 @@ bool bClickClose = false)
             MessageBox.Show(this, result.ToString());
         }
 
-        #region 浏览器控件
+#region 浏览器控件
 
         public void ClearHtml()
         {
@@ -1380,7 +1392,7 @@ string strHtml)
             AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
-        #endregion
+#endregion
 
         private void MenuItem_openSendKey_Click(object sender, EventArgs e)
         {
@@ -1448,22 +1460,29 @@ string strHtml)
             // _refreshCount = 2;
             _refreshTask = Task.Run(() =>
             {
-                while (_refreshCount-- >= 0)
+                try
                 {
-                    Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
-                    if (token.IsCancellationRequested)
-                        break;
-                    // 迫使重新启动
-                    InitializeDriver();
-                    if (token.IsCancellationRequested)
-                        break;
+                    while (_refreshCount-- >= 0)
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(_delaySeconds)).Wait(token);
+                        if (token.IsCancellationRequested)
+                            break;
+                        // 迫使重新启动
+                        InitializeDriver();
+                        if (token.IsCancellationRequested)
+                            break;
 
-                    // 如果初始化没有成功，则要追加初始化
-                    if (this.ErrorState == "normal")
-                        break;
+                        // 如果初始化没有成功，则要追加初始化
+                        if (this.ErrorState == "normal")
+                            break;
+                    }
+                    _refreshTask = null;
+                    _refreshCount = 0;
                 }
-                _refreshTask = null;
-                _refreshCount = 0;
+                catch
+                {
+                    
+                }
             });
         }
 

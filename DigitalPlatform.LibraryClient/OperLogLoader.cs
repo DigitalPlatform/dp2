@@ -128,6 +128,13 @@ namespace DigitalPlatform.LibraryClient
             set;
         }
 
+        // dp2library 服务器版本号。决定了是否使用获取时等待功能
+        public string ServerVersion
+        {
+            get;
+            set;
+        }
+
         LogType _logType = LogType.OperLog;
         /// <summary>
         /// 要获取的日志的类型。注意，只能用一种类型
@@ -724,6 +731,7 @@ namespace DigitalPlatform.LibraryClient
                     loader.lSize = lTotalSize;
                     loader.Filter = this.Filter;
                     loader.LogType = this.LogType;
+                    loader.ServerVersion = this.ServerVersion;
 
                     if (this.Prompt != null)
                         loader.Prompt += new MessagePromptEventHandler(loader_Prompt);

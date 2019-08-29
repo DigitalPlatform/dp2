@@ -251,6 +251,8 @@ Program.MainForm.UserDir,
             {
                 int nCount = 0;
 
+                DialogResult retry_result = DialogResult.Yes;
+
                 for (int i = 0; ; i++)
                 {
                     Application.DoEvents(); // 出让界面控制权
@@ -367,22 +369,25 @@ Program.MainForm.UserDir,
 #endif
 
                         // string strText = strError;
-                        DialogResult result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                        if (dont_display_dialog == false)
                         {
+                            retry_result = (DialogResult)this.Invoke((Func<DialogResult>)(() =>
+                            {
                             // return AutoCloseMessageBox.Show(this, strText + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
                             return MessageDlg.Show(this,
-strError + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
-"ImportMarcForm",
-MessageBoxButtons.YesNoCancel,
-MessageBoxDefaultButton.Button1,
-ref dont_display_dialog,
-new string[] { "重试", "跳过", "中断" },
-"后面不再出现此对话框，按本次选择自动处理");
-                        }));
+    strError + ", 是否重试？\r\n---\r\n\r\n[重试]重试; [跳过]跳过本条继续后面批处理; [中断]中断批处理",
+    "ImportMarcForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    ref dont_display_dialog,
+    new string[] { "重试", "跳过", "中断" },
+    "后面不再出现此对话框，按本次选择自动处理");
+                            }));
+                        }
 
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                        if (retry_result == System.Windows.Forms.DialogResult.Cancel)
                             goto ERROR1;
-                        if (result == DialogResult.Yes)
+                        if (retry_result == DialogResult.Yes)
                             goto REDO;
 
                         // 在操作历史中显示出错信息

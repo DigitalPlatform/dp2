@@ -295,6 +295,17 @@ namespace DigitalPlatform.RFID
         }
 
         // 根据名字得到 OID 类型
+        // TODO: 用不抛出异常的方式
+        public static bool TryGetOidByName(string name, out ElementOID oid)
+        {
+            // oid = ElementOID.PII;
+            // 把 name 变为 OID
+            if (Enum.TryParse<ElementOID>(name, out oid) == false)
+                return false;
+            return true;
+        }
+
+        // 根据名字得到 OID 类型
         public static ElementOID GetOidByName(string name)
         {
             // 把 name 变为 OID
@@ -303,6 +314,7 @@ namespace DigitalPlatform.RFID
             return oid;
         }
 
+#if NO
         public static bool TryGetOidByName(string name, out ElementOID oid)
         {
             try
@@ -316,6 +328,7 @@ namespace DigitalPlatform.RFID
                 return false;
             }
         }
+#endif
 
         // 验证输入的元素文本是否合法
         // return:
@@ -764,7 +777,7 @@ namespace DigitalPlatform.RFID
 
                 // 加工前没有 padding 的情况
                 // 1) 先插入一个 Padding length 位
-                result.Insert(1 
+                result.Insert(1
                     + additional_oid_count,     // 如果 OID 值大于等于 15, 则 precursor 后面有一个 byte 表示相对 OID 值，padding length byte 还要在它之后。2019/7/7
                     (byte)(delta - 1));
                 if (delta - 1 > 0)
