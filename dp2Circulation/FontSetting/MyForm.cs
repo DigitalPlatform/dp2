@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Xml;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting.Channels;
+using System.Threading.Tasks;
+using System.Runtime.Remoting;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -22,8 +24,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Interfaces;
 using DigitalPlatform.RFID;
-using System.Threading.Tasks;
-using System.Runtime.Remoting;
 using DigitalPlatform.Core;
 
 // 2013/3/16 添加 XML 注释
@@ -335,6 +335,23 @@ namespace dp2Circulation
         {
             if (this._floatingMessage != null)
                 this._floatingMessage.OnResizeOrMove();
+        }
+
+        public void ShowMessageAutoClear(string strMessage,
+string strColor = "",
+int delay = 2000,
+bool bClickClose = false)
+        {
+            Task.Run(() =>
+            {
+                ShowMessage(strMessage,
+    strColor,
+    bClickClose);
+                System.Threading.Thread.Sleep(delay);
+                // 中间一直没有变化才去消除它
+                if (_floatingMessage.Text == strMessage)
+                    ClearMessage();
+            });
         }
 
         public void ShowMessage(string strMessage,
@@ -2051,7 +2068,8 @@ out string strError)
             }
             ERROR1:
             return Task.FromResult(
-            new NormalResult {
+            new NormalResult
+            {
                 Value = -1,
                 ErrorInfo = strError
             });

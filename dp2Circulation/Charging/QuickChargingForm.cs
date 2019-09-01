@@ -192,7 +192,7 @@ namespace dp2Circulation
             RfidManager.SetError += RfidManager_SetError;
             Program.MainForm.TagChanged += MainForm_TagChanged;
             InitialSendKey();
-            RfidManager.GetState("clearCache");
+            RfidManager.ClearCache();
             if (string.IsNullOrEmpty(RfidManager.Url) == false)
             {
                 this.label_rfidMessage.Visible = true;
@@ -452,7 +452,9 @@ namespace dp2Circulation
             else
                 TaskList.Sound(1);
 
-            if (strTypeOfUsage[0] == '1' && _easForm.ErrorCount > 0)
+            if (strTypeOfUsage[0] == '1'
+                // && _easForm.ErrorCount > 0
+                )
             {
                 // 尝试自动修正 EAS
                 // result.Value
@@ -464,11 +466,14 @@ namespace dp2Circulation
                 {
                     // TODO SetError()
                     // this.ShowMessage($"尝试自动修正 EAS 时出错 '{eas_result.ErrorInfo}'", "red", true);
+                    TaskList.Sound(-1);
                     return;
                 }
 
                 if (eas_result.Value == 1)
                 {
+                    TaskList.Sound(2);
+
                     // 如果所有错误均被消除，则 EasForm 要隐藏
                     if (_easForm.ErrorCount == 0)
                     {
@@ -481,6 +486,7 @@ namespace dp2Circulation
 
                     if (this.StateSpeak != "[不朗读]")
                         Program.MainForm.Speak("自动修正 EAS 成功");
+                    this.ShowMessageAutoClear("自动修正 EAS 成功", "green", 2000, true);
                     // 本次标签触发了自动修正动作，并操作成功，后面就不再继续进行借书或者还书操作了
                     return;
                 }
@@ -488,8 +494,21 @@ namespace dp2Circulation
                 // TODO: 如果 errorCount > 0，则搜索 tasklist，如果 PII 找到匹配则放弃继续操作
                 {
                     var task = this._taskList.FindTaskByItemBarcode(pii);
-                    if (task != null)
+                    if (task != null
+                        && (task.Color != "red"))
+                    {
+                        // TODO: 发出尖锐声音提示操作者注意被吞掉的号码
+                        TaskList.Sound(-1);
+
+                        // 延时 ShowMessage
+                        this.ShowMessageAutoClear($"任务 {pii} 被忽略(和当前任务列表重复)",
+                            "yellow",
+                            5000,
+                            true);
+                        // 让 task 闪烁几次，让操作者容易看到
+                        FlashTask(task, 5);
                         return;
+                    }
                 }
             }
 
@@ -504,9 +523,55 @@ namespace dp2Circulation
             }
         }
 
+        public DigitalPlatform.Core.RecordLockCollection _tasklocks = new DigitalPlatform.Core.RecordLockCollection();
+
+        // TODO: 针对同一个 task 对象的线程同一时间只能允许一个运行
+        void FlashTask(ChargingTask task, int count)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var hashcode = task.GetHashCode().ToString();
+                    _tasklocks.LockForWrite(hashcode);
+                    try
+                    {
+                        string save_color = task.Color;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Thread.Sleep(500);
+                            task.Color = "";
+                            this.DisplayTask("refresh", task);
+                            Thread.Sleep(500);
+                            task.Color = save_color;
+                            this.DisplayTask("refresh", task);
+                        }
+                    }
+                    finally
+                    {
+                        _tasklocks.UnlockForWrite(hashcode);
+                    }
+                }
+                catch
+                {
+
+                }
+            });
+        }
+
         private void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetError("rfid", e.Error);
+        }
+
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        internal NormalResult GetEAS(string reader_name,
+            string tag_name)
+        {
+            return _easForm.GetEAS(reader_name, tag_name);
         }
 
         internal NormalResult SetEAS(
@@ -4433,10 +4498,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         {
             if (_easForm != null)
             {
+                _easForm.CloseFloatingMessage();
                 _easForm.Close();
                 //_easForm.Dispose();
                 //_easForm = null;
             }
+        }
+
+        private void ToolStripMenuItem_rfid_restartRfidCenter_Click(object sender, EventArgs e)
+        {
+            var result = RfidManager.GetState("restart");
+            if (result.Value == -1)
+                this.ShowMessage($"重启 RFID 中心时出错: {result.ErrorInfo}", "red", true);
+            else
+                this.ShowMessageAutoClear("RFID 中心已经重启", "green", 5000, true);
         }
     }
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define SERIAL
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
@@ -6,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+// RS232 设备可参考：
+// https://stackoverflow.com/questions/3293889/how-to-auto-detect-arduino-com-port
 namespace DigitalPlatform.IO
 {
     // 查看 USB 设备，感知 USB 插拔变化的实用类
@@ -21,22 +25,39 @@ namespace DigitalPlatform.IO
             List<USBDeviceInfo> Infos = new List<USBDeviceInfo>();
 
             Infos = GetUSBDevices();
+#if SERIAL
+            Infos.AddRange(GetSerialDevices());
+#endif
 
             Task.Run(() =>
             {
-                while (token.IsCancellationRequested == false)
+                try
                 {
-                    Task.Delay(TimeSpan.FromSeconds(2)).Wait(token);
-                    var result = GetUSBDevices();
+                    while (token.IsCancellationRequested == false)
+                    {
+                        Task.Delay(TimeSpan.FromSeconds(2)).Wait(token);
+                        if (token.IsCancellationRequested)
+                            break;
+                        var result = GetUSBDevices();
+                        if (token.IsCancellationRequested)
+                            break;
 
-                    // 和 Infos 比较
-                    Compare(Infos,
-    result,
-    out int add_count,
-    out int remove_count);
-                    Infos = result;
-                    if (add_count != 0 || remove_count != 0)
-                        callback?.Invoke(add_count, remove_count);
+#if SERIAL
+                        result.AddRange(GetSerialDevices());
+#endif
+                        // 和 Infos 比较
+                        Compare(Infos,
+        result,
+        out int add_count,
+        out int remove_count);
+                        Infos = result;
+                        if (add_count != 0 || remove_count != 0)
+                            callback?.Invoke(add_count, remove_count);
+                    }
+                }
+                catch
+                {
+
                 }
             });
         }
@@ -97,7 +118,7 @@ rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKe
         public static List<USBDeviceInfo> GetUSBDevices()
         {
             List<USBDeviceInfo> devices = new List<USBDeviceInfo>();
-
+            // return devices; // testing
             try
             {
                 using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_USBHub"))
@@ -117,6 +138,35 @@ rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKe
                 return devices;
             }
             catch(Exception)
+            {
+                // TODO: 可考虑写入错误日志
+                return devices;
+            }
+        }
+
+        public static List<USBDeviceInfo> GetSerialDevices()
+        {
+            List<USBDeviceInfo> devices = new List<USBDeviceInfo>();
+
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_SerialPort"))
+                {
+                    using (ManagementObjectCollection collection = searcher.Get())
+                    {
+                        foreach (var device in collection)
+                        {
+                            devices.Add(new USBDeviceInfo(
+                            (string)device.GetPropertyValue("DeviceID"),
+                            (string)device.GetPropertyValue("PNPDeviceID"),
+                            (string)device.GetPropertyValue("Description")
+                            ));
+                        }
+                    }
+                }
+                return devices;
+            }
+            catch (Exception)
             {
                 // TODO: 可考虑写入错误日志
                 return devices;
@@ -153,6 +203,18 @@ rfidcenter 版本: RfidCenter, Version=1.2.7110.20005, Culture=neutral, PublicKe
         public override string ToString()
         {
             return $"DeviceID={this.DeviceID}, PnpDeviceID={this.PnpDeviceID}, Discription={this.Description}";
+        }
+
+        public static string ToString(List<USBDeviceInfo> infos)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach(var info in infos)
+            {
+                text.Append($"{i+1}) {info.ToString()}\r\n");
+                i++;
+            }
+            return text.ToString();
         }
     }
 }

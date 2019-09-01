@@ -1077,20 +1077,44 @@ end_time);
                         System.Console.Beep(1147, 1000);
                 }
                 else
-                    System.Console.Beep(tones[tone], 500);
+                    System.Console.Beep(tones[tone], tone == 1 ? 200 : 500);
             });
         }
 
-        bool SetEAS(ChargingTask task, bool enable, out string strError)
+        bool PreSetEAS(ChargingTask task,
+    bool enable,
+    out bool old_state,
+    out string strError)
         {
             strError = "";
+            old_state = false;
             try
             {
-                NormalResult result = this.Container.SetEAS(
-                    task,
-                    "*",
-                    task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+                NormalResult result = null;
+                string tag_name = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                // 前置情况下，要小心检查原来标签的 EAS，如果没有必要修改就不要修改
+
+                {
+                    var get_result = this.Container.GetEAS("*", tag_name);
+                    if (get_result.Value == -1)
+                    {
+                        Sound(-1);
+
+                        strError = $"获得 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
+                        return false;
+                    }
+
+                    old_state = (get_result.Value == 1);
+                }
+
+                // 如果修改前已经是这个值就不修改了
+                if (old_state == enable)
+                    return true;
+
+                result = RfidManager.SetEAS("*",
+                    tag_name,
                     enable);
+                TagList.ClearTagTable("");
 
                 // testing
                 // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
@@ -1099,7 +1123,7 @@ end_time);
                 {
                     Sound(-1);
 
-                    strError = "修改 RFID 标签 EAS 标志位时出错: " + result.ErrorInfo;
+                    strError = $"前置修改 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
                     return false;
                 }
 
@@ -1108,7 +1132,61 @@ end_time);
             }
             catch (Exception ex)
             {
-                strError = "修改 RFID 标签 EAS 标志位时出现异常: " + ex.Message;
+                strError = $"前置修改 RFID 标签 EAS 标志位时出现异常: {ex.Message}";
+                return false;
+            }
+        }
+
+
+        bool SetEAS(ChargingTask task,
+            bool enable,
+            // bool preprocess,
+            out string strError)
+        {
+            string prefix = "";
+            strError = "";
+            try
+            {
+                NormalResult result = null;
+                /*
+                if (preprocess == true)
+                {
+                    prefix = "前置";
+
+                    // 前置情况下，要小心检查原来标签的 EAS，如果没有必要修改就不要修改
+
+                    result = RfidManager.SetEAS("*",
+                    task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+                    enable);
+                    TagList.ClearTagTable("");
+                }
+                else
+                */
+                {
+                    result = this.Container.SetEAS(
+                        task,
+                        "*",
+                        task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+                        enable);
+                }
+
+                // testing
+                // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
+
+                if (result.Value != 1)
+                {
+                    Sound(-1);
+
+                    strError = $"{prefix}修改 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
+                    return false;
+                }
+
+                Sound(2);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = $"{prefix}修改 RFID 标签 EAS 标志位时出现异常: {ex.Message}";
                 return false;
             }
         }
@@ -1378,6 +1456,23 @@ end_time);
                 goto ERROR1;
             }
 
+            // 还书操作在调用 Return() API 之前预先修改一次 EAS 为 On
+            bool eas_changed = false;
+            {
+                // 修改 EAS
+                if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
+                {
+                    if (PreSetEAS(task, true, out bool old_eas, out strError) == false)
+                    {
+                        task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
+                        goto ERROR1;
+                    }
+
+                    if (old_eas == false)
+                        eas_changed = true;
+                }
+            }
+
             long lRet = 0;
 
             LibraryChannel channel = this.GetChannel();
@@ -1430,19 +1525,28 @@ end_time);
             if (lRet != 0)
                 task.ErrorInfo = strError;
 
-            if (lRet != -1)
+
+            if (eas_changed == true && lRet == -1)
             {
-                // 修改 EAS
-                if (string.IsNullOrEmpty(task.ItemBarcodeEasType) == false)
+                if (channel.ErrorCode == ErrorCode.NotBorrowed)
                 {
-                    if (SetEAS(task, true, out strError) == false)
+                    Debug.Assert(eas_changed == true, "");
+                    // 此时正好顺便修正了以前此册的 EAS 问题，所以也不需要回滚了
+                    // TODO: 是否需要提示一下操作者？
+                    if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                        task.ErrorInfo += "; ";
+                    task.ErrorInfo += $"(前置 EAS 修改顺便把以前遗留的 Off 状态修正为 On)";
+                }
+                else
+                {
+                    // Undo 早先的 EAS 修改
+                    if (SetEAS(task, false, out strError) == false)
                     {
-                        // TODO: 要 undo 刚才进行的操作
                         // lRet = -1;
                         lRet = 1;
                         if (string.IsNullOrEmpty(task.ErrorInfo) == false)
                             task.ErrorInfo += "; ";
-                        task.ErrorInfo += strError;
+                        task.ErrorInfo += $"回滚 EAS 阶段: {strError}";
                     }
                 }
             }

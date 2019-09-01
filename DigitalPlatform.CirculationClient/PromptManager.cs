@@ -53,7 +53,7 @@ namespace DigitalPlatform.CirculationClient
                     MessageBoxDefaultButton.Button1,
                     "此后不再出现本对话框",
                     ref _hide_dialog,
-                    new string[] { "重试", "跳过", "中断" },
+                    e.ButtonCaptions !=null ? e.ButtonCaptions : new string[] { "重试", "跳过", "中断" },
                     10);
                     }));
                     _hide_dialog_count = 0;
@@ -97,7 +97,7 @@ namespace DigitalPlatform.CirculationClient
                     MessageBoxDefaultButton.Button1,
                     "此后不再出现本对话框",
                     ref _hide_dialog,
-                    new string[] { "跳过", "中断" },
+                    e.ButtonCaptions != null ? e.ButtonCaptions : new string[] { "跳过", "中断" },
                     10);
                     }));
                     _hide_dialog_count = 0;

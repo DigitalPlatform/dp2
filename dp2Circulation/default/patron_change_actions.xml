@@ -66,4 +66,7 @@
   <action element="fingerprint" type="">
     <caption lang="zh">指纹</caption>
   </action>
+  <action element="face" type="">
+    <caption lang="zh">人脸</caption>
+  </action>
 </root>

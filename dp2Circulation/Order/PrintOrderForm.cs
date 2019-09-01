@@ -5500,14 +5500,15 @@ long value,
                 goto END1;
 
             ListViewItem item = items[nIndex];
+            string strMARC = "";
+            string strOutMarcSyntax = "";
 
             this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
 
-            if (this.MarcFilter != null)
+            if (this.MarcFilter != null
+                || option.HasEvalue() == true)
             {
                 string strError = "";
-                string strMARC = "";
-                string strOutMarcSyntax = "";
 
                 // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
 
@@ -5527,16 +5528,19 @@ long value,
                     }
 
                     // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
-                        out strError);
-                    if (nRet == -1)
+                    if (this.MarcFilter != null)
                     {
-                        strHtmlLineContent = strError;
-                        goto END1;
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strHtmlLineContent = strError;
+                            goto END1;
+                        }
                     }
                 }
             }
@@ -5544,11 +5548,30 @@ long value,
             int col_index = 0;
             foreach (Column column in option.Columns)
             {
-                string strContent = GetMergedColumnContent(item,
+                string strContent = "";
+
+                if (string.IsNullOrEmpty(column.Evalue) == false)
+                {
+                    /*
+                    Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                    engine.EnableExposedClrTypes = true;
+                    engine.SetGlobalValue("syntax", strOutMarcSyntax);
+                    engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
+                    strContent = engine.Evaluate(column.Evalue).ToString();
+                    */
+                    strContent = PrintAcceptForm.RunScript(strOutMarcSyntax,
+    new DigitalPlatform.Marc.MarcRecord(strMARC),
+    column.Evalue);
+
+                }
+                else
+                {
+                    strContent = GetMergedColumnContent(item,
                     column.Name);
 
-                if (strContent == "!!!#")
-                    strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                    if (strContent == "!!!#")
+                        strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                }
 
                 // 截断字符串
                 if (column.MaxChars != -1)
@@ -9895,14 +9918,15 @@ MessageBoxDefaultButton.Button2);
                 goto END1;
 
             ListViewItem item = items[nIndex];
+            string strMARC = "";
+            string strOutMarcSyntax = "";
 
             this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
 
-            if (this.MarcFilter != null)
+            if (this.MarcFilter != null
+                || option.HasEvalue() == true)
             {
                 string strError = "";
-                string strMARC = "";
-                string strOutMarcSyntax = "";
 
                 // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
 
@@ -9922,16 +9946,19 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
-                        out strError);
-                    if (nRet == -1)
+                    if (this.MarcFilter != null)
                     {
-                        strLineContent = strError;
-                        goto END1;
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strLineContent = strError;
+                            goto END1;
+                        }
                     }
                 }
             }
@@ -9940,50 +9967,28 @@ MessageBoxDefaultButton.Button2);
             {
                 Column column = option.Columns[i];
 
-                /*
-                int nIndex = nPage * option.LinesPerPage + nLine;
-
-                if (nIndex >= items.Count)
-                    break;
-
-                ListViewItem item = items[nIndex];
-                 * */
-
-                string strContent = GetOriginColumnContent(item,
+                string strContent = "";
+                if (string.IsNullOrEmpty(column.Evalue) == false)
+                {
+                    /*
+                    Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                    engine.EnableExposedClrTypes = true;
+                    engine.SetGlobalValue("syntax", strOutMarcSyntax);
+                    engine.SetGlobalValue("biblio", new MarcRecord(strMARC));
+                    strContent = engine.Evaluate(column.Evalue).ToString();
+                    */
+                    strContent = PrintAcceptForm.RunScript(strOutMarcSyntax,
+new DigitalPlatform.Marc.MarcRecord(strMARC),
+column.Evalue);
+                }
+                else
+                {
+                    strContent = GetOriginColumnContent(item,
                     column.Name);
 
-                if (strContent == "!!!#")
-                    strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
-
-                /*
-                if (strContent == "!!!biblioPrice")
-                {
-                    // 看看自己是不是处在切换边沿
-                    string strCurLineBiblioRecPath = GetColumnContent(item, "biblioRecpath");
-
-                    string strNextLineBiblioRecPath = "";
-
-                    if (nIndex < items.Count - 1)
-                    {
-                        ListViewItem next_item = items[nIndex + 1];
-                        strNextLineBiblioRecPath = GetColumnContent(next_item, "biblioRecpath");
-                    }
-
-                    if (strCurLineBiblioRecPath != strNextLineBiblioRecPath)
-                    {
-                        // 处在切换边沿
-
-                        // 汇总前面的册价格
-                        strContent = ComputeBiblioPrice(items, nIndex).ToString();
-                        bBiblioSumLine = true;
-                    }
-                    else
-                    {
-                        // 其他普通行
-                        strContent = "&nbsp;";
-                    }
+                    if (strContent == "!!!#")
+                        strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
                 }
-                 * */
 
                 // 截断字符串
                 if (column.MaxChars != -1)

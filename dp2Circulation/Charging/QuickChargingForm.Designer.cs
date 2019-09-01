@@ -87,9 +87,11 @@
             this.toolStripButton_selectItem = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_openEasForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_selectTargetLocation = new System.Windows.Forms.ToolStripButton();
-            this.ToolStripMenuItem_openEasForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip_rfid = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.ToolStripMenuItem_rfid_restartRfidCenter = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -101,6 +103,7 @@
             this.contextMenuStrip_testFunction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).BeginInit();
             this.toolStrip_main.SuspendLayout();
+            this.contextMenuStrip_rfid.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList_barcodeType
@@ -339,6 +342,7 @@
             // label_rfidMessage
             // 
             this.label_rfidMessage.AutoSize = true;
+            this.label_rfidMessage.ContextMenuStrip = this.contextMenuStrip_rfid;
             this.label_rfidMessage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label_rfidMessage.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label_rfidMessage.Location = new System.Drawing.Point(3, 464);
@@ -596,9 +600,16 @@
             // toolStripMenuItem_inventoryFromFile
             // 
             this.toolStripMenuItem_inventoryFromFile.Name = "toolStripMenuItem_inventoryFromFile";
-            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(252, 30);
+            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(235, 30);
             this.toolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
             this.toolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
+            // 
+            // ToolStripMenuItem_openEasForm
+            // 
+            this.ToolStripMenuItem_openEasForm.Name = "ToolStripMenuItem_openEasForm";
+            this.ToolStripMenuItem_openEasForm.Size = new System.Drawing.Size(235, 30);
+            this.ToolStripMenuItem_openEasForm.Text = "打开 EAS 窗";
+            this.ToolStripMenuItem_openEasForm.Click += new System.EventHandler(this.ToolStripMenuItem_openEasForm_Click);
             // 
             // toolStripDropDownButton_selectLibraryCode
             // 
@@ -617,16 +628,24 @@
             this.toolStripButton_selectTargetLocation.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectTargetLocation.Image")));
             this.toolStripButton_selectTargetLocation.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_selectTargetLocation.Name = "toolStripButton_selectTargetLocation";
-            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 28);
+            this.toolStripButton_selectTargetLocation.Size = new System.Drawing.Size(122, 27);
             this.toolStripButton_selectTargetLocation.Text = "选择调拨去向";
             this.toolStripButton_selectTargetLocation.Click += new System.EventHandler(this.toolStripButton_selectTransferTargetLocation_Click);
             // 
-            // ToolStripMenuItem_openEasForm
+            // contextMenuStrip_rfid
             // 
-            this.ToolStripMenuItem_openEasForm.Name = "ToolStripMenuItem_openEasForm";
-            this.ToolStripMenuItem_openEasForm.Size = new System.Drawing.Size(252, 30);
-            this.ToolStripMenuItem_openEasForm.Text = "打开 EAS 窗";
-            this.ToolStripMenuItem_openEasForm.Click += new System.EventHandler(this.ToolStripMenuItem_openEasForm_Click);
+            this.contextMenuStrip_rfid.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.contextMenuStrip_rfid.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_rfid_restartRfidCenter});
+            this.contextMenuStrip_rfid.Name = "contextMenuStrip_rfid";
+            this.contextMenuStrip_rfid.Size = new System.Drawing.Size(241, 65);
+            // 
+            // ToolStripMenuItem_rfid_restartRfidCenter
+            // 
+            this.ToolStripMenuItem_rfid_restartRfidCenter.Name = "ToolStripMenuItem_rfid_restartRfidCenter";
+            this.ToolStripMenuItem_rfid_restartRfidCenter.Size = new System.Drawing.Size(240, 28);
+            this.ToolStripMenuItem_rfid_restartRfidCenter.Text = "重启 RFID 中心";
+            this.ToolStripMenuItem_rfid_restartRfidCenter.Click += new System.EventHandler(this.ToolStripMenuItem_rfid_restartRfidCenter_Click);
             // 
             // QuickChargingForm
             // 
@@ -660,6 +679,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).EndInit();
             this.toolStrip_main.ResumeLayout(false);
             this.toolStrip_main.PerformLayout();
+            this.contextMenuStrip_rfid.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -716,5 +736,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_left;
         private System.Windows.Forms.Label label_rfidMessage;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_openEasForm;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_rfid;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_rfid_restartRfidCenter;
     }
 }

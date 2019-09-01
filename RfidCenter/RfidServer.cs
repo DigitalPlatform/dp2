@@ -25,9 +25,13 @@ namespace RfidCenter
 
         public NormalResult GetState(string style)
         {
-            if (style == "clearCache")
+            if (style.StartsWith("clearCache"))
             {
-                SetLastUids("");
+                string session_id = StringUtil.GetParameterByPrefix(style, "clearCache");
+                if (string.IsNullOrEmpty(session_id))
+                    ClearLastUidTable();
+                else
+                    SetLastUids(session_id, "");
                 return new NormalResult();
             }
 
@@ -81,10 +85,11 @@ namespace RfidCenter
             return new ListReadersResult { Readers = readers.ToArray() };
         }
 
-        // 前一次 ListTags() 返回的 tag 数量
-        // static int _lastListCount = 0;
-        static string _lastUids = "";
-        static object _sync_lastuids = new object();
+        // static string _lastUids = "";
+
+        // session_id --> lastUids 对照表
+        static Hashtable _lastUidTable = new Hashtable();
+        // static object _sync_lastuids = new object();
 
         static string BuildUids(List<OneTag> tags)
         {
@@ -99,22 +104,58 @@ namespace RfidCenter
             return current.ToString();
         }
 
-        static void SetLastUids(string value)
+        // 清除 Hashtable
+        static void ClearLastUidTable()
         {
+            lock (_lastUidTable.SyncRoot)
+            {
+                _lastUidTable.Clear();
+            }
+        }
+
+        static void SetLastUids(string session_id, string value)
+        {
+            /*
             lock (_sync_lastuids)
             {
                 _lastUids = value;
             }
+            */
+            if (session_id == null)
+                session_id = "";
+            lock (_lastUidTable.SyncRoot)
+            {
+                // 防止 Hashtable 太大
+                if (_lastUidTable.Count > 1000)
+                    _lastUidTable.Clear();
+                _lastUidTable[session_id] = value;
+            }
         }
 
-        static bool CompareLastUids(string value)
+        static bool CompareLastUids(string session_id, string value)
         {
+            /*
             lock (_sync_lastuids)
             {
                 if (_lastUids != value)
                     return true;
                 return false;
             }
+            */
+            if (session_id == null)
+                session_id = "";
+            string lastUids = "";
+            lock (_lastUidTable.SyncRoot)
+            {
+                if (_lastUidTable.ContainsKey(session_id))
+                {
+                    lastUids = (string)_lastUidTable[session_id];
+                }
+            }
+
+            if (lastUids != value)
+                return true;
+            return false;
         }
 
         // 增加了无标签时延迟等待功能。敏捷响应
@@ -139,6 +180,8 @@ namespace RfidCenter
                         ErrorCode = "paused"
                     };
 
+                string session_id = StringUtil.GetParameterByPrefix(style, "session");
+
                 TimeSpan length = TimeSpan.FromSeconds(2);
                 ListTagsResult result = null;
                 string current_uids = "";
@@ -153,10 +196,11 @@ namespace RfidCenter
                     else
                         current_uids = "";
 
+                    // TODO: 这里的比较应该按照 Session 来进行
                     // 只要本次和上次 tag 数不同，立刻就返回
-                    if (CompareLastUids(current_uids))
+                    if (CompareLastUids(session_id, current_uids))
                     {
-                        SetLastUids(current_uids);
+                        SetLastUids(session_id, current_uids);
                         return result;
                     }
 
@@ -174,7 +218,7 @@ namespace RfidCenter
                     Thread.Sleep(10);
                 }
 
-                SetLastUids(current_uids);
+                SetLastUids(session_id, current_uids);
                 return result;
             }
             catch (Exception ex)
@@ -325,6 +369,9 @@ namespace RfidCenter
 #endif
         }
 
+        // result.Value
+        //      -1
+        //      0
         public GetTagInfoResult GetTagInfo(string reader_name,
             string uid)
         {
@@ -352,6 +399,9 @@ namespace RfidCenter
 
 
                 InventoryInfo info = new InventoryInfo { UID = uid };
+                // result.Value
+                //      -1
+                //      0
                 GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
                 // 继续尝试往后寻找

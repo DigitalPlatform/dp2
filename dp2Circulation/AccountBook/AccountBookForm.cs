@@ -5499,7 +5499,6 @@ strTotalPrice);
             {
                 return null;    // 表示没有这个subitem下标
             }
-
         }
 
         int BuildHtmlPageBottom(PrintOption option,

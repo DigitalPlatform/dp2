@@ -78,6 +78,8 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        static bool _checkState = true;
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -87,9 +89,13 @@ namespace DigitalPlatform.RFID
             Base.LongWaitTime = TimeSpan.FromMilliseconds(2000);
             Base.Start((channel) =>
             {
-                var result = channel.Object.GetState("");
-                if (result.Value == -1)
-                    throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                // TODO: 看调用栈，如果是上层 GetState() 调用，就要免去检查 State 这一步
+                if (_checkState)
+                {
+                    var result = channel.Object.GetState("");
+                    if (result.Value == -1)
+                        throw new Exception($"RFID 中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
+                }
                 channel.Started = true;
 
                 channel.Object.EnableSendKey(false);
@@ -101,7 +107,7 @@ namespace DigitalPlatform.RFID
                     Base.TriggerSetError(null,
 new SetErrorEventArgs
 {
-Error = "RFID 功能已暂停"
+    Error = "RFID 功能已暂停"
 });
                     return true;
                 }
@@ -121,7 +127,7 @@ Error = "RFID 功能已暂停"
             (channel) =>
             {
                 var result = channel?.Object?.ListTags("*",
-null);
+$"session:{Base.GetHashCode()}");
                 if (result.Value == -1)
                     Base.TriggerSetError(result,
                         new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -278,7 +284,6 @@ null);
                     else
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
                     return result;
                 }
                 finally
@@ -380,10 +385,64 @@ null);
                 if (string.IsNullOrEmpty(Base.Url))
                     return new NormalResult();
 
-                BaseChannel<IRfid> channel = Base.GetChannel();
+                BaseChannel<IRfid> channel = null;
+                bool old_checkState = _checkState;
+                _checkState = false;
+                try
+                {
+                    channel = Base.GetChannel();
+                }
+                finally
+                {
+                    _checkState = old_checkState;
+                }
+
                 try
                 {
                     var result = channel.Object.GetState(style);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = ex.Message,
+                    ErrorCode = NotResponseException.GetErrorCode(ex)
+                };
+            }
+        }
+
+        public static NormalResult ClearCache()
+        {
+            try
+            {
+                // 因为 GetState 是可有可无的请求，如果 Url 为空就算了
+                if (string.IsNullOrEmpty(Base.Url))
+                    return new NormalResult();
+
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.GetState($"clearCache:{Base.GetHashCode()}");
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });

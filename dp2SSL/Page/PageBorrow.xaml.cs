@@ -213,7 +213,7 @@ namespace dp2SSL
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
             // App.CurrentApp.TagSetError += CurrentApp_TagSetError;
 
-            RfidManager.GetState("clearCache");
+            RfidManager.ClearCache();
             // 处理以前积累的 tags
             // RfidManager.TriggerLastListTags();
 

@@ -7,6 +7,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -30,6 +31,7 @@ namespace dp2Circulation.Charging
             this.SuppressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
         }
 
+        // https://stackoverflow.com/questions/156046/show-a-form-without-stealing-focus
         protected override bool ShowWithoutActivation
         {
             get { return true; }
@@ -48,6 +50,83 @@ namespace dp2Circulation.Charging
         }
         */
 
+        // 从 TagList.Books 中获得一个标签的 EAS 状态
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        NormalResult GetEasStateByUID(string uid)
+        {
+            foreach (var data in TagList.Books)
+            {
+                if (data.OneTag.UID != uid)
+                    continue;
+                if (data.OneTag.TagInfo == null)
+                    return new NormalResult
+                    {
+                        Value = -1,
+                        ErrorInfo = $"UID 为 '{uid}' 的标签暂时 TagInfo == null，无法获得 EAS 状态"
+                    };
+                return new NormalResult { Value = data.OneTag.TagInfo.EAS ? 1 : 0 };
+            }
+
+            // TODO: 此时可否发起一次 GetTagInfo 请求？
+            return new NormalResult { Value = -1, ErrorInfo = $"UID 为 '{uid}' 的标签不在读卡器上，无法获得其 EAS 状态" };
+        }
+
+        // 从 TagList.Books 中获得一个标签的 EAS 状态
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        NormalResult GetEasStateByPII(string pii)
+        {
+            foreach (var data in TagList.Books)
+            {
+                TagInfo tag_info = null;
+                if (data.OneTag.TagInfo == null)
+                {
+                    // result.Value
+                    //      -1
+                    //      0
+                    var result = RfidManager.GetTagInfo("*", data.OneTag.UID);
+                    if (result.Value == -1)
+                        continue;
+                    tag_info = result.TagInfo;
+                }
+                else
+                    tag_info = data.OneTag.TagInfo;
+
+                string current_pii = QuickChargingForm.GetPII(tag_info);
+                if (current_pii == pii)
+                {
+                    return new NormalResult { Value = tag_info.EAS ? 1 : 0 };
+                }
+            }
+
+            return new NormalResult { Value = -1, ErrorInfo = $"PII 为 '{pii}' 的标签不在读卡器上，无法获得其 EAS 状态" };
+        }
+
+        // result.Value:
+        //      -1  出错
+        //      0   Off
+        //      1   On
+        internal NormalResult GetEAS(string reader_name,
+            string tag_name)
+        {
+            Parse(tag_name, out string uid, out string pii);
+            if (string.IsNullOrEmpty(uid) == false)
+                return GetEasStateByUID(uid);
+            if (string.IsNullOrEmpty(pii) == false)
+                return GetEasStateByPII(pii);
+
+            return new NormalResult
+            {
+                Value = -1,
+                ErrorInfo = $"tag_name '{tag_name}' 不合法"
+            };
+        }
+
         // 设置 EAS 状态。如果失败，会在 ListView 里面自动添加一行，以备后面用户在读卡器上放标签时候自动修正
         internal NormalResult SetEAS(
             object task,
@@ -55,7 +134,6 @@ namespace dp2Circulation.Charging
             string tag_name,
             bool enable)
         {
-
             // 解析 tag_name 里面的 UID 或者 PII
             string uid = "";
             string pii = "";
@@ -125,7 +203,122 @@ namespace dp2Circulation.Charging
             ListViewUtil.ChangeItemText(item, 0, uid);
             ListViewUtil.ChangeItemText(item, 1, pii);
             this.listView1.Items.Add(item);
+            OnItemChanged();
+
+            // 自动填充书目摘要列
+            Task.Run(() =>
+            {
+                FillBiblioSummary(new List<ListViewItem>() { item });
+            });
+
             return item;
+        }
+
+        // 限制获取摘要时候可以并发使用的 LibraryChannel 通道数
+        static Semaphore _limit = new Semaphore(1, 1);
+
+        void FillBiblioSummary(List<ListViewItem> items_param)
+        {
+            List<ListViewItem> items = new List<ListViewItem>();
+            List<string> piis = new List<string>();
+
+            // 第一阶段，准备 ListViewItem 和 PII 集合
+            this.Invoke((Action)(() =>
+            {
+                foreach (ListViewItem item in items_param)
+                {
+                    string summary = ListViewUtil.GetItemText(item, 2);
+                    if (string.IsNullOrEmpty(summary) == false)
+                        continue;
+                    items.Add(item);
+                    piis.Add(ListViewUtil.GetItemText(item, 1));
+                }
+            }));
+
+            if (piis.Count == 0)
+                return;
+
+            // 第二阶段，从服务器获得摘要
+            List<string> summarys = new List<string>();
+
+            foreach (string pii in piis)
+            {
+                // 获得缓存中的bibliosummary
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = Program.MainForm.GetCachedBiblioSummary(pii,
+null,
+out string strSummary,
+out string strError);
+                if (nRet == -1)
+                    strSummary = $"GetCachedBiblioSummary() 出错: {strError}";
+                else if (nRet == 1)
+                {
+
+                }
+                else
+                {
+                    try
+                    {
+                        _limit.WaitOne(TimeSpan.FromSeconds(10));
+
+                        LibraryChannel channel = Program.MainForm.GetChannel();
+                        TimeSpan old_timeout = channel.Timeout;
+                        channel.Timeout = new TimeSpan(0, 0, 5);
+
+                        try
+                        {
+                            long lRet = channel.GetBiblioSummary(
+        null,
+        pii,
+        null,
+        null,
+        out string strBiblioRecPath,
+        out strSummary,
+        out strError);
+                            if (lRet == -1)
+                            {
+                                strSummary = $"出错: {strError}";
+                            }
+                            else
+                            {
+                                Program.MainForm.SetBiblioSummaryCache(pii,
+                                     null,
+                                     strSummary);
+                            }
+
+                        }
+                        finally
+                        {
+                            channel.Timeout = old_timeout;
+                            Program.MainForm.ReturnChannel(channel);
+
+                            _limit.Release();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        strSummary = $"异常: {ex.Message}";
+                    }
+                }
+
+                summarys.Add(strSummary);
+            }
+
+            this.Invoke((Action)(() =>
+            {
+                // 第三阶段填充
+                int i = 0;
+                foreach (string summary in summarys)
+                {
+                    ListViewItem item = items[i];
+
+                    ListViewUtil.ChangeItemText(item, 2, summary);
+                    i++;
+                }
+            }));
         }
 
         // uid 和 pii 调用时都尽量提供，匹配上一个就算数
@@ -256,6 +449,7 @@ namespace dp2Circulation.Charging
             this.Invoke((Action)(() =>
             {
                 this.listView1.Items.Remove(item);
+                OnItemChanged();
             }));
 
             return seteas_result;
@@ -389,7 +583,84 @@ namespace dp2Circulation.Charging
 
         private void EasForm_Activated(object sender, EventArgs e)
         {
-            RfidManager.Pause = false;
+            //RfidManager.Pause = false;
+        }
+
+        // 移除全部事项
+        private void toolStripButton_clearAll_Click(object sender, EventArgs e)
+        {
+            this.listView1.Items.Clear();
+            OnItemChanged();
+        }
+
+        // 切换为详细模式
+        private void ToolStripMenuItem_detailMode_Click(object sender, EventArgs e)
+        {
+            this.DisplayMode = "detail";
+        }
+
+        // 切换为数字模式
+        private void ToolStripMenuItem_numberMode_Click(object sender, EventArgs e)
+        {
+            this.DisplayMode = "number";
+        }
+
+        string _displayMode = "detail";
+
+        // detail/number 之一
+        public string DisplayMode
+        {
+            get
+            {
+                return _displayMode;
+            }
+            set
+            {
+                _displayMode = value;
+                // 兑现显示格式变化
+                if (value == "detail")
+                {
+                    this.tableLayoutPanel1.RowStyles[0].SizeType = SizeType.Percent;
+                    this.tableLayoutPanel1.RowStyles[0].Height = 100;
+
+                    this.tableLayoutPanel1.RowStyles[2].SizeType = SizeType.AutoSize;
+                    this.tableLayoutPanel1.RowStyles[2].Height = 100;
+
+
+                    this.listView1.Visible = true;
+                    this.label_message.Visible = true;
+                    this.label_number.Visible = false;
+
+                    this.ToolStripMenuItem_detailMode.Checked = true;
+                    this.ToolStripMenuItem_numberMode.Checked = false;
+                }
+                else
+                {
+                    this.tableLayoutPanel1.RowStyles[0].SizeType = SizeType.AutoSize;
+                    this.tableLayoutPanel1.RowStyles[0].Height = 100;
+
+                    this.tableLayoutPanel1.RowStyles[2].SizeType = SizeType.Percent;
+                    this.tableLayoutPanel1.RowStyles[2].Height = 100;
+
+                    this.listView1.Visible = false;
+                    this.label_message.Visible = false;
+                    this.label_number.Visible = true;
+
+                    this.ToolStripMenuItem_detailMode.Checked = false;
+                    this.ToolStripMenuItem_numberMode.Checked = true;
+
+                }
+            }
+        }
+
+        void OnItemChanged()
+        {
+            this.label_number.Text = this.listView1.Items.Count.ToString();
+        }
+
+        private void EasForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            _limit.Dispose();
         }
     }
 

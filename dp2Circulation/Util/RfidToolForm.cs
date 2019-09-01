@@ -1588,6 +1588,8 @@ this.toolStripButton_autoFixEas.Checked);
         async Task<bool> SaveTagContent(ListViewItem item)
         {
             ItemInfo item_info = (ItemInfo)item.Tag;
+            if (item_info.LogicChipItem == null)
+                return false;
             if (item_info.LogicChipItem.Changed == false)
                 return false;
 
@@ -1690,6 +1692,11 @@ this.toolStripButton_autoFixEas.Checked);
         private void toolStripButton_autoFixEas_CheckedChanged(object sender, EventArgs e)
         {
             StringUtil.SetInList(ref this._mode, "auto_fix_eas", this.toolStripButton_autoFixEas.Checked);
+        }
+
+        private void RfidToolForm_Activated(object sender, EventArgs e)
+        {
+            // RfidManager.Pause = false;
         }
 
 #if NO

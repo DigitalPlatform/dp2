@@ -236,7 +236,7 @@
             this.tabPage_record.Location = new System.Drawing.Point(4, 28);
             this.tabPage_record.Name = "tabPage_record";
             this.tabPage_record.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_record.Size = new System.Drawing.Size(416, 313);
+            this.tabPage_record.Size = new System.Drawing.Size(416, 301);
             this.tabPage_record.TabIndex = 1;
             this.tabPage_record.Text = "数据记录";
             this.tabPage_record.UseVisualStyleBackColor = true;
@@ -246,7 +246,7 @@
             this.propertyGrid_record.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid_record.Location = new System.Drawing.Point(3, 3);
             this.propertyGrid_record.Name = "propertyGrid_record";
-            this.propertyGrid_record.Size = new System.Drawing.Size(410, 307);
+            this.propertyGrid_record.Size = new System.Drawing.Size(410, 295);
             this.propertyGrid_record.TabIndex = 1;
             // 
             // panel_okCancel
@@ -327,6 +327,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "RFID 工具";
+            this.Activated += new System.EventHandler(this.RfidToolForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RfidToolForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.RfidToolForm_FormClosed);
             this.Load += new System.EventHandler(this.RfidToolForm_Load);
