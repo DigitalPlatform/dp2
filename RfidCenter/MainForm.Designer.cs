@@ -61,6 +61,9 @@
             this.MenuItem_restart = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openSendKey = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_closeSendKey = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_openLock = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_getLockState = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_testing = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,9 +93,7 @@
             this.MenuItem_manual = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_about = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MenuItem_openLock = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_getLockState = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_getComPortInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_start)).BeginInit();
@@ -413,6 +414,7 @@
             this.toolStripSeparator1,
             this.MenuItem_openLock,
             this.MenuItem_getLockState,
+            this.MenuItem_getComPortInfo,
             this.toolStripSeparator3,
             this.ToolStripMenuItem_exit});
             this.MenuItem_file.Name = "MenuItem_file";
@@ -439,6 +441,25 @@
             this.MenuItem_closeSendKey.Size = new System.Drawing.Size(252, 30);
             this.MenuItem_closeSendKey.Text = "关闭 发送";
             this.MenuItem_closeSendKey.Click += new System.EventHandler(this.MenuItem_closeSendKey_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
+            // 
+            // MenuItem_openLock
+            // 
+            this.MenuItem_openLock.Name = "MenuItem_openLock";
+            this.MenuItem_openLock.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_openLock.Text = "开锁";
+            this.MenuItem_openLock.Click += new System.EventHandler(this.MenuItem_openLock_Click);
+            // 
+            // MenuItem_getLockState
+            // 
+            this.MenuItem_getLockState.Name = "MenuItem_getLockState";
+            this.MenuItem_getLockState.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_getLockState.Text = "探测锁状态";
+            this.MenuItem_getLockState.Click += new System.EventHandler(this.MenuItem_getLockState_Click);
             // 
             // toolStripSeparator3
             // 
@@ -659,24 +680,12 @@
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
-            // MenuItem_openLock
+            // MenuItem_getComPortInfo
             // 
-            this.MenuItem_openLock.Name = "MenuItem_openLock";
-            this.MenuItem_openLock.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_openLock.Text = "开锁";
-            this.MenuItem_openLock.Click += new System.EventHandler(this.MenuItem_openLock_Click);
-            // 
-            // MenuItem_getLockState
-            // 
-            this.MenuItem_getLockState.Name = "MenuItem_getLockState";
-            this.MenuItem_getLockState.Size = new System.Drawing.Size(252, 30);
-            this.MenuItem_getLockState.Text = "探测锁状态";
-            this.MenuItem_getLockState.Click += new System.EventHandler(this.MenuItem_getLockState_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(249, 6);
+            this.MenuItem_getComPortInfo.Name = "MenuItem_getComPortInfo";
+            this.MenuItem_getComPortInfo.Size = new System.Drawing.Size(252, 30);
+            this.MenuItem_getComPortInfo.Text = "探测 COM 口信息";
+            this.MenuItem_getComPortInfo.Click += new System.EventHandler(this.MenuItem_getComPortInfo_Click);
             // 
             // MainForm
             // 
@@ -781,6 +790,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openLock;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getLockState;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_getComPortInfo;
     }
 }
 

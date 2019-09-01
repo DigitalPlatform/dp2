@@ -21,6 +21,8 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using static DigitalPlatform.CommonControl.OrderDesignControl;
 using DigitalPlatform.Core;
+using Jint;
+using Jint.Native;
 
 // 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
@@ -3285,14 +3287,15 @@ namespace dp2Circulation
                 goto END1;
 
             ListViewItem item = items[nIndex];
+            string strMARC = "";
+            string strOutMarcSyntax = "";
 
             this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
 
-            if (this.MarcFilter != null)
+            if (this.MarcFilter != null
+                || option.HasEvalue() == true)
             {
                 string strError = "";
-                string strMARC = "";
-                string strOutMarcSyntax = "";
 
                 // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
 
@@ -3312,16 +3315,19 @@ namespace dp2Circulation
                     }
 
                     // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
-                        out strError);
-                    if (nRet == -1)
+                    if (this.MarcFilter != null)
                     {
-                        strLineContent = strError;
-                        goto END1;
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strLineContent = strError;
+                            goto END1;
+                        }
                     }
                 }
             }
@@ -3330,20 +3336,28 @@ namespace dp2Circulation
             {
                 Column column = option.Columns[i];
 
-                /*
-                    int nIndex = nPage * option.LinesPerPage + nLine;
-
-                    if (nIndex >= items.Count)
-                        break;
-
-                    ListViewItem item = items[nIndex];
-                 * */
-
-                string strContent = GetMergedColumnContent(item,
+                string strContent = "";
+                if (string.IsNullOrEmpty(column.Evalue) == false)
+                {
+                    /*
+                    Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                    engine.EnableExposedClrTypes = true;
+                    engine.SetGlobalValue("syntax", strOutMarcSyntax);
+                    engine.SetGlobalValue("biblio", new DigitalPlatform.Marc.MarcRecord(strMARC));
+                    strContent = engine.Evaluate(column.Evalue).ToString();
+                    */
+                    strContent = RunScript(strOutMarcSyntax,
+                        new DigitalPlatform.Marc.MarcRecord(strMARC),
+                        column.Evalue);
+                }
+                else
+                {
+                    strContent = GetMergedColumnContent(item,
                     column.Name);
 
-                if (strContent == "!!!#")
-                    strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                    if (strContent == "!!!#")
+                        strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                }
 
                 // 截断字符串
                 if (column.MaxChars != -1)
@@ -3378,6 +3392,48 @@ namespace dp2Circulation
 
             return 0;
         }
+
+        public static string RunScript(
+            string syntax,
+            DigitalPlatform.Marc.MarcRecord biblio,
+            string script)
+        {
+            Engine engine = new Engine(cfg => cfg.AllowClr(typeof(StringUtil).Assembly));
+            SetValue(engine, "syntax", syntax);
+            SetValue(engine, "biblio", biblio);
+
+            string result = engine.Execute("var DigitalPlatform = importNamespace('DigitalPlatform');\r\n"
+    + script) // execute a statement
+    ?.GetCompletionValue() // get the latest statement completion value
+    ?.ToObject()?.ToString() // converts the value to .NET
+    ;
+            string var_result = GetString(engine, "result", null);
+            if (var_result != null)
+                result = var_result;
+            string message = GetString(engine, "message", "");
+            if (string.IsNullOrEmpty(message) == false)
+                throw new Exception(message);
+
+            return result;
+        }
+
+        static void SetValue(Engine engine, string name, object o)
+        {
+            if (o == null)
+                engine.SetValue(name, JsValue.Null);
+            else
+                engine.SetValue(name, o);
+        }
+
+        static string GetString(Engine engine, string name, string default_value)
+        {
+            var result_obj = engine.GetValue(name);
+            string value = result_obj.IsUndefined() ? default_value : result_obj.ToObject().ToString();
+            //if (value == null)
+            //    value = "";
+            return value;
+        }
+
 
         // 获得栏目内容(合并后)
         string GetMergedColumnContent(ListViewItem item,
@@ -6994,14 +7050,15 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                 goto END1;
 
             ListViewItem item = items[nIndex];
+            string strMARC = "";
+            string strOutMarcSyntax = "";
 
             this.ColumnTable.Clear();   // 清除上一记录处理时残余的内容
 
-            if (this.MarcFilter != null)
+            if (this.MarcFilter != null
+                || option.HasEvalue() == true)
             {
                 string strError = "";
-                string strMARC = "";
-                string strOutMarcSyntax = "";
 
                 // TODO: 有错误要明显报出来，否则容易在打印出来后才发现，就晚了
 
@@ -7021,16 +7078,19 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
                     }
 
                     // 触发filter中的Record相关动作
-                    nRet = this.MarcFilter.DoRecord(
-                        null,
-                        strMARC,
-                        strOutMarcSyntax,
-                        nIndex,
-                        out strError);
-                    if (nRet == -1)
+                    if (this.MarcFilter != null)
                     {
-                        strLineContent = strError;
-                        goto END1;
+                        nRet = this.MarcFilter.DoRecord(
+                            null,
+                            strMARC,
+                            strOutMarcSyntax,
+                            nIndex,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strLineContent = strError;
+                            goto END1;
+                        }
                     }
                 }
             }
@@ -7039,20 +7099,28 @@ $"通过累计 '{StringUtil.MakePathList(prices)}' 修正册价格字符串 '{st
             {
                 Column column = option.Columns[i];
 
-                /*
-                int nIndex = nPage * option.LinesPerPage + nLine;
-
-                if (nIndex >= items.Count)
-                    break;
-
-                ListViewItem item = items[nIndex];
-                 * */
-
-                string strContent = GetOriginColumnContent(item,
+                string strContent = "";
+                if (string.IsNullOrEmpty(column.Evalue) == false)
+                {
+                    /*
+                    Jurassic.ScriptEngine engine = new Jurassic.ScriptEngine();
+                    engine.EnableExposedClrTypes = true;
+                    engine.SetGlobalValue("syntax", strOutMarcSyntax);
+                    engine.SetGlobalValue("biblio", new DigitalPlatform.Marc.MarcRecord(strMARC));
+                    strContent = engine.Evaluate(column.Evalue).ToString();
+                    */
+                    strContent = RunScript(strOutMarcSyntax,
+    new DigitalPlatform.Marc.MarcRecord(strMARC),
+    column.Evalue);
+                }
+                else
+                {
+                    strContent = GetOriginColumnContent(item,
                     column.Name);
 
-                if (strContent == "!!!#")
-                    strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                    if (strContent == "!!!#")
+                        strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
+                }
 
                 // 截断字符串
                 if (column.MaxChars != -1)

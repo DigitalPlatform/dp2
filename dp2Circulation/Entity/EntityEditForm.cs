@@ -405,6 +405,9 @@ namespace dp2Circulation
             Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             Program.MainForm.MenuItem_font.Enabled = false;
             Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+
+            //if (string.IsNullOrEmpty(RfidManager.Url) == false)
+            //    RfidManager.Pause = false;
         }
 
         // 撤销标记删除状态

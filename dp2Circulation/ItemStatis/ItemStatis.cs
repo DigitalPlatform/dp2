@@ -9,6 +9,9 @@ using System.Web;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 // 2013/3/26 添加 XML 注释
 
@@ -81,7 +84,10 @@ namespace dp2Circulation
             }
         }
 
+        PromptManager _prompt = new PromptManager(2);
+
         internal string m_strBiblioXml = "";
+
         /// <summary>
         /// 当前正在处理的册记录所从属的书目 XML 记录，字符串类型
         /// </summary>
@@ -95,14 +101,34 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(this.CurrentBiblioRecPath) == true)
                     throw new Exception("CurrentBiblioRecPath为空，无法取得书目记录");
 
-                string strBiblioXml = "";
-                string strError = "";
+                REDO:
                 int nRet = this.ItemStatisForm.GetBiblioInfo(this.CurrentBiblioRecPath,
                     "xml",
-                    out strBiblioXml,
-                    out strError);
+                    out string strBiblioXml,
+                    out string strError);
                 if (nRet == -1)
-                    throw new Exception("获得书目记录时出错: " + strError);
+                {
+                    // 2019/8/31 增加重试机制
+                    MessagePromptEventArgs e = new MessagePromptEventArgs
+                    {
+                        MessageText = $"获得书目记录 '{this.CurrentBiblioRecPath}' 时出错：{strError}\r\n\r\n是否重试?\r\n\r\n(重试) 重试操作; (中断) 中断处理",
+                        IncludeOperText = true,
+                        ButtonCaptions = new string[] { "重试", "中断" },
+                        Actions = "yes,cancel"
+                    };
+                    _prompt.Prompt(this.ItemStatisForm, e);
+                    if (e.ResultAction == "cancel")
+                        throw new Exception("获得书目记录时出错: " + strError);
+                    else if (e.ResultAction == "yes")
+                        goto REDO;
+                    else
+                    {
+                        // 返回空字符串表示想跳过
+                        strBiblioXml = null;
+                    }
+
+                    // throw new Exception("获得书目记录时出错: " + strError);
+                }
 
                 this.m_strBiblioXml = strBiblioXml;
                 return this.m_strBiblioXml;

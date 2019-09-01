@@ -464,6 +464,9 @@ namespace RfidDrivers.First
             return new NormalResult();
         }
 
+        // result.Value:
+        //      -1
+        //      0
         NormalResult GetReaderHandle(string reader_name,
             out UIntPtr handle,
             out string protocols)
@@ -3071,6 +3074,9 @@ namespace RfidDrivers.First
 
         // parameters:
         //      tag_type    如果 uid 为空，则 tag_type 应为 RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID
+        // result.Value
+        //      -1
+        //      0
         public GetTagInfoResult GetTagInfo(// byte[] uid, UInt32 tag_type
             string reader_name,
             InventoryInfo info)

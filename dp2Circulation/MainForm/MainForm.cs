@@ -986,7 +986,19 @@ Stack:
                     this.BeginInvoke(d);
                 }
             }
+
+            // Trap WM_ACTIVATEAPP
+            if (m.Msg == 0x1c)
+                OnActivateApp(m.WParam != IntPtr.Zero);
+
             base.WndProc(ref m);
+        }
+
+        // https://stackoverflow.com/questions/1747562/application-deactivate-event
+        protected void OnActivateApp(bool activate)
+        {
+            // Console.WriteLine("Activate {0}", activate);
+            SetRfidManagerPause(!activate);
         }
 
         private void ShowMe()
@@ -8728,13 +8740,20 @@ Keys keyData)
 #endif
 
             // 激活 RfidManager
-            RfidManager.Pause = false;
+            // 注意这是对 Application Activate 的补充。怕后者有小概率不可靠
+            SetRfidManagerPause(false);
+        }
+
+        void SetRfidManagerPause(bool pause)
+        {
+            RfidManager.Pause = pause;
+            this.toolStripStatusLabel_rfid.Text = pause ? "" : "RFID";
         }
 
         private void MainForm_Deactivate(object sender, EventArgs e)
         {
             // 休眠 RfidManager
-            RfidManager.Pause = true;
+            // SetRfidManagerPause(true);
 
             // this.Speak("deactivated");
 

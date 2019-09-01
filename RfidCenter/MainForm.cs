@@ -66,11 +66,13 @@ namespace RfidCenter
 
                 BeginRefreshReaders(type, new CancellationToken());
             },
-            new CancellationToken());
+            _cancel.Token);
 
             // UsbNotification.RegisterUsbDeviceNotification(this.Handle);
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
         }
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
 
         private void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
         {
@@ -217,6 +219,7 @@ namespace RfidCenter
 
             // TODO: 每隔一段时间自动保存一次配置
             SaveSettings();
+            _cancel.Cancel();
         }
 
         void SaveSettings()
@@ -1901,6 +1904,12 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             {
                 MessageBox.Show(this, "放弃");
             }
+        }
+
+        private void MenuItem_getComPortInfo_Click(object sender, EventArgs e)
+        {
+            var results = UsbInfo.GetSerialDevices();
+            MessageDlg.Show(this, UsbInfo.ToString(results), "COM 口信息");
         }
     }
 }

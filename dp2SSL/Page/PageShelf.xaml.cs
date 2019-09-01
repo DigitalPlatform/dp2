@@ -95,7 +95,7 @@ namespace dp2SSL
 
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 
-            RfidManager.GetState("clearCache");
+            RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
             if (string.IsNullOrEmpty(RfidManager.Url))
                 this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");

@@ -363,6 +363,8 @@ namespace DigitalPlatform.LibraryClient
 
         public bool IncludeOperText = false;   // [in] MessageText 提示文字中是否包含了操作说明部分？如果没有包含，则显示对话框时候要补上通用的操作说明语句
 
+        public string[] ButtonCaptions = null;  // 按钮上希望出现的文字。如果为 null，表示由相关模块自行决定该显示什么(默认的一些文字)
+
         public string Actions = ""; // [in] 可选的动作。例如 "yes,no,cancel"
         public string ResultAction = "";  // [out] 返回希望采取的动作
     }
