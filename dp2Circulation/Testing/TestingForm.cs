@@ -4698,10 +4698,12 @@ out strError);
                 TestBorrowAndReturn("", "R0000001", "0000001");
             });
 
+            /*
             Task.Factory.StartNew(() =>
             {
                 TestBorrowAndReturn("", "R0000002", "0000002");
             });
+            */
         }
 
         // parameters:

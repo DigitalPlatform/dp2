@@ -76,7 +76,11 @@ namespace DigitalPlatform.IO
                     {
                         _items.Remove(item);
                         if (item.FileStream != null)
+                        {
+                            if ((item.FileAccess & FileAccess.Write) != 0)
+                                item.FileStream.Flush();    // 2019/9/2
                             item.FileStream.Close();
+                        }
                     }
                 }
                 finally
@@ -204,6 +208,8 @@ namespace DigitalPlatform.IO
             {
                 if (item.FileStream != null)
                 {
+                    if ((item.FileAccess & FileAccess.Write) != 0)
+                        item.FileStream.Flush();    // 2019/9/2
                     item.FileStream.Close();
                     item.FileStream = null;
                 }
@@ -212,7 +218,10 @@ namespace DigitalPlatform.IO
             }
 
             if (item.FileStream != null)
-                item.FileStream.Flush();
+            {
+                if ((item.FileAccess & FileAccess.Write) != 0)
+                    item.FileStream.Flush();
+            }
 
             item.DecUse();
         }
@@ -224,6 +233,8 @@ namespace DigitalPlatform.IO
             {
                 foreach (StreamItem item in _items)
                 {
+                    if ((item.FileAccess & FileAccess.Write) != 0)
+                        item.FileStream.Flush();    // 2019/9/2
                     item.FileStream.Close();
                     item.FileStream = null;
                 }
@@ -283,6 +294,8 @@ namespace DigitalPlatform.IO
 
             foreach (StreamItem item in delete_items)
             {
+                if ((item.FileAccess & FileAccess.Write) != 0)
+                    item.FileStream.Flush();    // 2019/9/2
                 item.FileStream.Close();
                 item.FileStream = null;
             }

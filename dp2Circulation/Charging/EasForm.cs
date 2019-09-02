@@ -86,6 +86,7 @@ namespace dp2Circulation.Charging
                 TagInfo tag_info = null;
                 if (data.OneTag.TagInfo == null)
                 {
+                    // TODO: 出错了考虑重试一下
                     // result.Value
                     //      -1
                     //      0

@@ -1111,9 +1111,20 @@ end_time);
                 if (old_state == enable)
                     return true;
 
-                result = RfidManager.SetEAS("*",
-                    tag_name,
-                    enable);
+                // 修改 EAS。带有重试功能 // 2019/9/2
+                for (int i = 0; i < 2; i++)
+                {
+                    // return result.Value:
+                    //      -1  出错
+                    //      0   没有找到指定的标签
+                    //      1   找到，并成功修改 EAS
+                    result = RfidManager.SetEAS("*",
+                        tag_name,
+                        enable);
+                    if (result.Value == 1)
+                        break;
+                }
+
                 TagList.ClearTagTable("");
 
                 // testing
@@ -1464,7 +1475,8 @@ end_time);
                 {
                     if (PreSetEAS(task, true, out bool old_eas, out strError) == false)
                     {
-                        task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
+                        // task.ErrorInfo = $"{strError}\r\n还书操作没有执行，EAS 不需要修正";
+                        task.ErrorInfo = $"{strError}\r\n还书操作失败";   // EAS 不需要额外修正
                         goto ERROR1;
                     }
 

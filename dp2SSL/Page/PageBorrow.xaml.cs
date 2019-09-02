@@ -42,19 +42,12 @@ namespace dp2SSL
         EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
 
-        // Task _checkTask = null;
-        CancellationTokenSource _cancel = new CancellationTokenSource();
+        // CancellationTokenSource _cancel = new CancellationTokenSource();
 
         public PageBorrow()
         {
             InitializeComponent();
 
-            /*
-            _globalErrorTable = new ErrorTable((e) =>
-            {
-                this.Error = e;
-            });
-            */
             _patronErrorTable = new ErrorTable((e) =>
             {
                 _patron.Error = e;
@@ -206,10 +199,6 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
-#if OLD_RFID
-            RfidManager.SetError += RfidManager_SetError;
-            RfidManager.ListTags += RfidManager_ListTags;
-#endif
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
             // App.CurrentApp.TagSetError += CurrentApp_TagSetError;
 
@@ -388,7 +377,7 @@ namespace dp2SSL
             }));
         }
 
-        ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
+        // ReaderWriterLockSlim _lock_refreshPatrons = new ReaderWriterLockSlim();
 
         async Task RefreshPatrons()
         {
@@ -440,6 +429,7 @@ namespace dp2SSL
             }
         }
 
+#if OLD_CODE
         private async void RfidManager_SetError(object sender, SetErrorEventArgs e)
         {
             SetGlobalError("rfid", e.Error);
@@ -463,6 +453,7 @@ namespace dp2SSL
                 _rfidState = "error";
             }
         }
+#endif
 
 #if OLD_RFID
         private async void RfidManager_ListTags(object sender, ListTagsEventArgs e)
@@ -624,37 +615,22 @@ namespace dp2SSL
 
         private void PageBorrow_Unloaded(object sender, RoutedEventArgs e)
         {
-            _cancel.Cancel();
-#if NO
-            if (_fingerprintChannel != null)
-            {
-                FingerPrint.EndFingerprintChannel(_fingerprintChannel);
-                _fingerprintChannel = null;
-            }
-#endif
+            // _cancel.Cancel();
 
-#if NO
-            if (_rfidChannel != null)
-            {
-                RFID.EndRfidChannel(_rfidChannel);
-                _rfidChannel = null;
-            }
-#endif
-
-            /*
-            if (_timer != null)
-                _timer.Dispose();
-                */
-
-            RfidManager.SetError -= RfidManager_SetError;
-#if OLD_RFID
-            RfidManager.ListTags -= RfidManager_ListTags;
-#endif
+            // 释放 Loaded 里面分配的资源
+            // RfidManager.SetError -= RfidManager_SetError;
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
-            // App.CurrentApp.TagSetError -= CurrentApp_TagSetError;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
+
+            // 释放构造函数里面分配的资源
+            //Loaded -= PageBorrow_Loaded;
+            //Unloaded -= PageBorrow_Unloaded;
+            this.patronControl.InputFace -= PatronControl_InputFace;
+            this._patron.PropertyChanged -= _patron_PropertyChanged;
+            App.CurrentApp.PropertyChanged -= CurrentApp_PropertyChanged;
+
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
@@ -775,6 +751,8 @@ namespace dp2SSL
                     // (普通)还书和续借操作并不需要读者卡
                     if (borrowButton.Visibility != Visibility.Visible)
                         this.patronControl.Visibility = Visibility.Collapsed;
+                    else
+                        this.patronControl.Visibility = Visibility.Visible; // 2019/9/3
                 }
             }
         }
@@ -1355,7 +1333,7 @@ out string strError);
 
 
 
-        #region 属性
+#region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1437,7 +1415,7 @@ out string strError);
         }
 
 
-        #endregion
+#endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1704,12 +1682,21 @@ out string strError);
                     // 成功
                     string backColor = "green";
                     string message = $"{action_name}操作成功 {success_count} 笔";
+                    string speak = $"{action_name}完成";
+
                     if (skip_count > 0)
                         message += $" (另有 {skip_count} 笔被忽略)";
                     if (skip_count > 0 && success_count == 0)
                     {
                         backColor = "yellow";
                         message = $"全部 {skip_count} 笔{action_name}操作被忽略";
+                        speak = $"{action_name}失败";
+                    }
+                    if (skip_count == 0 && success_count == 0)
+                    {
+                        backColor = "yellow";
+                        message = $"请先把图书放到读卡器上，再进行 {action_name}操作";
+                        speak = $"{action_name}失败";
                     }
 
                     DisplayError(ref progress, message, backColor);
@@ -1727,7 +1714,7 @@ out string strError);
                     // 重新装载读者信息和显示
                     var task = FillPatronDetail(true);
 
-                    App.CurrentApp.Speak($"{action_name}完成");
+                    App.CurrentApp.Speak(speak);
                 }
 
                 return; // new NormalResult { Value = success_count };
@@ -1905,7 +1892,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1946,9 +1933,9 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
-        #region global 分类报错机制
+#region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1997,7 +1984,7 @@ out string strError);
         }
 #endif
 
-        #endregion
+#endregion
 
         private async void RegisterFace_Click(object sender, RoutedEventArgs e)
         {
@@ -2294,7 +2281,7 @@ out string strError);
             });
         }
 
-        #region 下级函数
+#region 下级函数
 
         // return:
         //      "retry" "skip" 或 "cancel"
@@ -2593,7 +2580,7 @@ out strError);
         }
 
 
-        #endregion
+#endregion
 
         // 删除头像 object 的 dprms:file 元素
         // return:
@@ -2711,5 +2698,6 @@ string usage)
                     this.patronControl.BorrowedEntities.Clear();
             }
         }
+
     }
 }

@@ -10013,16 +10013,33 @@ Stack:
                     try
                     {
                         // this.Timeout = new TimeSpan(0,0,4); // 2015/11/28
-                        if (this.m_ws.State != CommunicationState.Faulted)
-                            WsClose();  // this.m_ws.Close();  // 如果长时间不返回怎么办？
+
+                        // 2019/9/3
+                        if (this.Scheme == "rest.http")
+                            WsClose();
+                        else
+                        {
+                            if (this.m_ws.State != CommunicationState.Faulted)
+                                WsClose();  // this.m_ws.Close();  // 如果长时间不返回怎么办？
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         if (this.m_ws != null)
                             WsAbort();  // this.m_ws.Abort();
                     }
                     this.m_ws = null;
                 }
+            }
+        }
+
+        string Scheme
+        {
+            get
+            {
+                string strUrl = this.Url;
+                Uri uri = new Uri(strUrl);
+                return uri.Scheme.ToLower();
             }
         }
 
@@ -10059,6 +10076,19 @@ Stack:
 
         void WsClose()
         {
+            // 2019/9/3
+            if (this.Scheme == "rest.http")
+            {
+                try
+                {
+                    IAsyncResult soapresult = this.ws.BeginLogout(null, null);
+                    Thread.Sleep(100);
+                }
+                catch
+                {
+                }
+            }
+            else
             // 2016/11/19
             // rest 和 basic 协议，都要明确 Logout()，才不会在 dp2library 一侧残留通道
             if (this.m_ws != null && this.m_ws is localhost.dp2libraryRESTClient)
