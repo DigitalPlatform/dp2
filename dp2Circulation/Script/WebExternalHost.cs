@@ -1,6 +1,7 @@
 ﻿#define SINGLE_CHANNEL
 // #define USE_LOCK
 
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -111,7 +112,7 @@ namespace dp2Circulation
         /// <summary>
         /// 通讯通道
         /// </summary>
-        public LibraryChannel Channel = new LibraryChannel();
+        // public LibraryChannel Channel = new LibraryChannel();
 #else
         public LibraryChannelCollection Channels = null;
 #endif
@@ -128,8 +129,10 @@ namespace dp2Circulation
         {
             this.Destroy();
 
+#if OLD_CHANNEL
             if (this.Channel != null)
                 this.Channel.Dispose();
+#endif
 
             base.Dispose();
         }
@@ -146,6 +149,8 @@ namespace dp2Circulation
             // this.MainForm = mainform;
             this.WebBrowser = webBrowser;
 #if SINGLE_CHANNEL
+
+#if OLD_CHANNEL
             this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -153,6 +158,8 @@ namespace dp2Circulation
 
             this.Channel.Idle -= new IdleEventHandler(Channel_Idle);
             this.Channel.Idle += new IdleEventHandler(Channel_Idle);
+#endif
+
 #else
 
             this.Channels = new LibraryChannelCollection();
@@ -188,6 +195,7 @@ namespace dp2Circulation
 
 #if SINGLE_CHANNEL
 
+#if OLD_CHANNEL
             // 2008/5/11 
             if (this.Channel != null)
             {
@@ -197,6 +205,8 @@ namespace dp2Circulation
                 this.Channel.Close();   // 2012/3/28
                 this.Channel = null;
             }
+#endif
+
 #else
             CloseAllChannels();
             this.Channels = null;
@@ -225,6 +235,7 @@ namespace dp2Circulation
 
 #if SINGLE_CHANNEL
 
+#if OLD_CHANNEL
             // 2008/5/11 
             if (this.Channel != null)
             {
@@ -242,6 +253,8 @@ namespace dp2Circulation
                     // this.Channel.AbortIt(); // 能立即切断通讯。但会留下很多丢弃的通道，很快会突破服务器端对每个 IP 50 个通道的限制
                 }
             }
+#endif
+
 #else
             CloseAllChannels();
             this.Channels = null;
@@ -291,8 +304,13 @@ namespace dp2Circulation
         void DoStop(object sender, StopEventArgs e)
         {
 #if SINGLE_CHANNEL
+
+
+#if OLD_CHANNEL
             if (this.Channel != null)
                 this.Channel.Abort();
+#endif
+
 #else
             CloseAllChannels();
 #endif
@@ -381,6 +399,16 @@ namespace dp2Circulation
 
         int m_nInHoverProperty = 0;
 
+        LibraryChannel GetChannel()
+        {
+            return Program.MainForm.GetChannel(".", ".", GetChannelStyle.None);
+        }
+
+        void ReturnChannel(LibraryChannel channel)
+        {
+            Program.MainForm.ReturnChannel(channel);
+        }
+
         /// <summary>
         /// 显示册属性
         /// </summary>
@@ -444,6 +472,9 @@ namespace dp2Circulation
                 LibraryChannel channel = GetChannelByID(strIdString);
 #endif
 
+                    LibraryChannel channel = this.GetChannel();
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = new TimeSpan(0, 0, 5);
                     try
                     {
                         string strItemText = "";
@@ -454,8 +485,8 @@ namespace dp2Circulation
 
                         byte[] item_timestamp = null;
 
-                        this.Channel.Timeout = new TimeSpan(0, 0, 5);
-                        long lRet = this.Channel.GetItemInfo(
+                        // this.Channel.Timeout = new TimeSpan(0, 0, 5);
+                        long lRet = channel.GetItemInfo(
                             stop,
                             strItemBarcode,
                             "html",
@@ -474,13 +505,12 @@ namespace dp2Circulation
                         if (lRet == -1)
                             goto ERROR1;
 
-                        string strXml = "";
-                        this.Channel.Timeout = new TimeSpan(0, 0, 5);
-                        lRet = this.Channel.GetItemInfo(
+                        // this.Channel.Timeout = new TimeSpan(0, 0, 5);
+                        lRet = channel.GetItemInfo(
         stop,
         strItemBarcode,
         "xml",
-        out strXml,
+        out string strXml,
         out strItemRecPath,
         out item_timestamp,
         "",
@@ -501,6 +531,9 @@ namespace dp2Circulation
                     }
                     finally
                     {
+                        channel.Timeout = old_timeout;
+                        this.ReturnChannel(channel);
+
                         this.m_inSearch--;
                     }
 
@@ -836,7 +869,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 #else
                 LibraryChannel channel = GetChannelByID(strIdString);
 #endif
-
+                LibraryChannel channel = this.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
                 this.m_inSearch++;
                 try
                 {
@@ -892,8 +926,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                             string[] results = null;
                             byte[] baTimestamp = null;
 
-                            this.Channel.Timeout = new TimeSpan(0, 0, 5);
-                            lRet = Channel.GetReaderInfo(stop,
+                            channel.Timeout = new TimeSpan(0, 0, 5);
+                            lRet = channel.GetReaderInfo(stop,
                                 strPatronBarcode,
                                 "xml",
                                 out results,
@@ -969,8 +1003,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     string strMetaData = "";
                     string strTempOutputPath = "";
 
-                    this.Channel.Timeout = new TimeSpan(0, 0, 60);
-                    lRet = this.Channel.GetRes(
+                    channel.Timeout = new TimeSpan(0, 0, 60);
+                    lRet = channel.GetRes(
                         stop,
                         strResPath,
                         strTempFilePath,
@@ -982,7 +1016,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     if (lRet == -1)
                     {
                         strError = "下载资源文件失败，原因: " + strError;
-                        throw new ChannelException(this.Channel.ErrorCode, strError);
+                        throw new ChannelException(channel.ErrorCode, strError);
                         // return strError;
                     }
 
@@ -996,6 +1030,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 finally
                 {
                     this.m_inSearch--;
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
                 }
             }
             finally
@@ -1113,14 +1149,16 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 #else
                 LibraryChannel channel = GetChannelByID(strIdString);
 #endif
+                LibraryChannel channel = this.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
 
                 this.m_inSearch++;
                 try
                 {
                     string strXml = "";
                     string[] results = null;
-                    this.Channel.Timeout = new TimeSpan(0, 0, 5);
-                    long lRet = Channel.GetReaderInfo(stop,
+                    channel.Timeout = new TimeSpan(0, 0, 5);
+                    long lRet = channel.GetReaderInfo(stop,
                         strPatronBarcode,
                         "xml",
                         out results,
@@ -1165,6 +1203,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 finally
                 {
                     this.m_inSearch--;
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
                 }
 
                 // 如果cache中没有，则加入cache
@@ -1313,7 +1353,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 #else
                 LibraryChannel channel = GetChannelByID(strIdString);
 #endif
-
+                LibraryChannel channel = this.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromSeconds(5);
                 this.m_inSearch++;
                 try
                 {
@@ -1340,7 +1382,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
                         // 注: Channel.Timeout 在 GetBiblioSummary() 函数中会自动设置
 
-                        lRet = this.Channel.GetBiblioSummary(
+                        lRet = channel.GetBiblioSummary(
                             stop,
                             strItemBarcode,
                             strConfirmItemRecPath,
@@ -1361,6 +1403,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 finally
                 {
                     this.m_inSearch--;
+                    channel.Timeout = old_timeout;
+                    this.ReturnChannel(channel);
                 }
 
                 // 如果cache中没有，则加入cache

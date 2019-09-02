@@ -3432,6 +3432,15 @@ false);
             menuItem.Click += new EventHandler(menuItem_deleteTask_Click);
             contextMenu.Items.Add(menuItem);
 
+            // ---
+            menuSepItem = new ToolStripSeparator();
+            contextMenu.Items.Add(menuSepItem);
+
+            // 
+            menuItem = new ToolStripMenuItem("任务数 (&C)");
+            menuItem.Click += new EventHandler(menuItem_countTask_Click);
+            contextMenu.Items.Add(menuItem);
+
             // 
             if (StringUtil.IsDevelopMode() == true)
             {
@@ -3558,6 +3567,30 @@ false);
 
             // MessageBox.Show(this, strResult);
         }
+
+        // 统计当前所有成功的任务数。也就是绿色和黄色的任务数
+        void menuItem_countTask_Click(object sender, EventArgs e)
+        {
+            int count = 0;
+            int nErrorCount = 0;
+
+            // List<DpRow> rows = new List<DpRow>();
+            foreach (DpRow row in this.dpTable_tasks.Rows)
+            {
+                ChargingTask task = (ChargingTask)row.Tag;
+                if (task == null)
+                    continue;
+                if (task.State == "error")
+                    nErrorCount++;
+                if (task.Color == "green" || task.Color == "yellow")
+                    count++;
+            }
+
+            string text = $"{count} 个成功任务";
+            Program.MainForm.Speak(text);
+            this.ShowMessageAutoClear(text, "green", 5000, true);
+        }
+
 
         // 删除选定的任务
         // 如果有没有完成的任务，则需要统一中断(等待完成)，然后再删除任务

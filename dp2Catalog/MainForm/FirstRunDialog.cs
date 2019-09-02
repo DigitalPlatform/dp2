@@ -318,7 +318,7 @@ namespace dp2Catalog
             }
             else if (this.comboBox_server_serverType.Text == "红泥巴 · 数字平台服务器")
             {
-                this.textBox_server_dp2LibraryServerUrl.Text = "net.tcp://58.87.101.80:101/hnb/";
+                this.textBox_server_dp2LibraryServerUrl.Text = "rest.http://58.87.101.80/hnb/rest";
                 this.textBox_server_dp2LibraryServerUrl.ReadOnly = true;
 
                 this.textBox_server_userName.Text = "";

@@ -10698,7 +10698,6 @@ handle.CancelTokenSource.Token).Result;
                         }
 
                         // 创建 metadata
-                        string strResultMetadata = "";
                         // return:
                         //		-1	出错
                         //		0	成功
@@ -10706,7 +10705,7 @@ handle.CancelTokenSource.Token).Result;
                             info.record.Metadata,
                             info.baContent.Length,
                             "",
-                            out strResultMetadata,
+                            out string strResultMetadata,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -11519,6 +11518,71 @@ handle.CancelTokenSource.Token).Result;
 
             int nRedoCount = 0;
             REDO:
+            StreamItem item = _streamCache.GetWriteStream(strFileName, true);
+            try
+            {
+                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                if (item.FileStream.Length > baContent.Length)
+                    item.FileStream.SetLength(0);
+
+                item.FileStream.Seek(0, SeekOrigin.Begin);
+                item.FileStream.Write(baContent,
+                        0,
+                        baContent.Length);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                if (nRedoCount == 0)
+                {
+                    // 创建中间子目录
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
+                    nRedoCount++;
+                    goto REDO;
+                }
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 '" + strFileName + "' 时发生错误: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                _streamCache.ReturnStream(item);
+            }
+            return 0;
+        }
+
+#if OLD
+        // 将缓冲区内容一次性写入对象文件
+        int WriteToObjectFile(
+            string strID,
+            byte[] baContent,
+            out string strShortFileName,
+            // ref RecordRowInfo row_info,
+            out string strError)
+        {
+            strError = "";
+            strShortFileName = "";
+
+            if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
+            {
+                strError = "数据库尚未配置对象文件目录，但写入对象时出现了需要引用对象文件的情况";
+                return -1;
+            }
+
+            string strFileName = "";
+
+            strFileName = BuildObjectFileName(strID, false);
+            strShortFileName = GetShortFileName(strFileName); // 记忆
+            if (strShortFileName == null)
+            {
+                strError = "构造短文件名时出错。记录ID '" + strID + "', 对象文件目录 '" + this.m_strObjectDir + "', 物理文件名 '" + strFileName + "'";
+                return -1;
+            }
+
+            int nRedoCount = 0;
+            REDO:
             try
             {
                 _streamCache.ClearItems(strFileName);
@@ -11556,6 +11620,8 @@ handle.CancelTokenSource.Token).Result;
             }
             return 0;
         }
+
+#endif
 
         const int MYSQL_MAX_GETINFO_COUNT = 1000;
 
@@ -15070,6 +15136,42 @@ handle.CancelTokenSource.Token).Result;
 
             int nRedoCount = 0;
             REDO:
+            StreamItem item = _streamCache.GetWriteStream(strFileName, true);
+            try
+            {
+                item.FileStream.SetLength(0);
+                return 0;
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                if (nRedoCount == 0)
+                {
+                    // 创建中间子目录
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
+                    nRedoCount++;
+                    goto REDO;
+                }
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                _streamCache.ReturnStream(item);
+            }
+        }
+#if OLD
+        // 创建一个0bytes的文件
+        int CreateZeroLengthFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            int nRedoCount = 0;
+            REDO:
             try
             {
                 _streamCache.ClearItems(strFileName);
@@ -15100,6 +15202,8 @@ handle.CancelTokenSource.Token).Result;
                 return -1;
             }
         }
+
+#endif
 
         // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
         // parameters:

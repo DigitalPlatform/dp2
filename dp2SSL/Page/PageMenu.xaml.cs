@@ -41,7 +41,7 @@ namespace dp2SSL
             this.Unloaded += PageMenu_Unloaded;
             this.DataContext = App.CurrentApp;
 
-            InitWallpaper();
+            // InitWallpaper();
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
@@ -92,7 +92,7 @@ namespace dp2SSL
 */
 
             // var task = SetWallPaper();
-
+            this.shelf.Visibility = Visibility.Collapsed;
         }
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
@@ -160,16 +160,28 @@ namespace dp2SSL
             }));
         }
 #endif
+        static PageBorrow _pageBorrow = null;
+
+        void Navigate(string buttons)
+        {
+            if (_pageBorrow == null)
+                _pageBorrow = new PageBorrow();
+
+            _pageBorrow.ActionButtons = buttons;
+            this.NavigationService.Navigate(_pageBorrow);
+        }
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
+            Navigate("borrow");
+
 #if NO
             Window mainWindow = Application.Current.MainWindow;
             var page = new PageBorrow();
             // page.Background = Brushes.Red;
             mainWindow.Content = page;
 #endif
-            this.NavigationService.Navigate(new PageBorrow("borrow"));
+            // this.NavigationService.Navigate(new PageBorrow("borrow"));
         }
 
         private void Config_Click(object sender, RoutedEventArgs e)
@@ -188,12 +200,16 @@ namespace dp2SSL
 
         private void ReturnButton_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageBorrow("return"));
+            Navigate("return");
+
+            // this.NavigationService.Navigate(new PageBorrow("return"));
         }
 
         private void RenewBotton_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageBorrow("renew"));
+            Navigate("renew");
+
+            // this.NavigationService.Navigate(new PageBorrow("renew"));
         }
 
         private void Error_Click(object sender, RoutedEventArgs e)
@@ -208,7 +224,9 @@ namespace dp2SSL
 
         private void RegisterFace_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageBorrow("registerFace,deleteFace"));
+            Navigate("registerFace,deleteFace");
+
+            // this.NavigationService.Navigate(new PageBorrow("registerFace,deleteFace"));
         }
 
         private void Shelf_Click(object sender, RoutedEventArgs e)
