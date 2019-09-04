@@ -497,6 +497,8 @@ bool bClickClose = false)
             {
                 this.pictureBox_fingerprint.Image = e.Image;
             }));
+
+            OutputHistory($"quality={e.Quality}");
         }
 
         private void FingerPrint_Speak(object sender, SpeakEventArgs e)
@@ -532,11 +534,14 @@ bool bClickClose = false)
                 {
                     Beep();
                     Speak("无法识别");
-                    DisplayText(e.ErrorInfo, "white", "darkred");
+                    DisplayText($"{e.ErrorInfo}\r\n图象质量: {e.Quality}", "white", "darkred");
                 }
                 else
                 {
                     Speak("很好");
+
+                    DisplayText($"很好\r\n图像质量: {e.Quality}");
+
                     // TODO: 显示文字中包含 e.Text?
 
                     if (this.SendKeyEnabled)

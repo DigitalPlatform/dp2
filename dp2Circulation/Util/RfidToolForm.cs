@@ -191,6 +191,9 @@ this.toolStripButton_autoFixEas.Checked);
         // 新 Tag 到来、变化、消失
         private void MainForm_TagChanged(object sender, TagChangedEventArgs e)
         {
+            if (this.PauseRfid)
+                return;
+
             bool auto_refresh = (bool)this.Invoke((Func<bool>)(() =>
             {
                 return this.toolStripButton_autoRefresh.Checked;
@@ -1233,6 +1236,8 @@ this.toolStripButton_autoFixEas.Checked);
 
         void timerCallback(object o)
         {
+            if (this.PauseRfid)
+                return;
             UpdateChipList(false);
         }
 
@@ -1694,9 +1699,17 @@ this.toolStripButton_autoFixEas.Checked);
             StringUtil.SetInList(ref this._mode, "auto_fix_eas", this.toolStripButton_autoFixEas.Checked);
         }
 
+        public bool PauseRfid = true;
+
         private void RfidToolForm_Activated(object sender, EventArgs e)
         {
             // RfidManager.Pause = false;
+            this.PauseRfid = false;
+        }
+
+        private void RfidToolForm_Deactivate(object sender, EventArgs e)
+        {
+            this.PauseRfid = true;
         }
 
 #if NO

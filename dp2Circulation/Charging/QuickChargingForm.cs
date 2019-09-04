@@ -263,7 +263,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 WriteErrorLog($"MainForm_TagChanged exception: {ExceptionUtil.GetDebugText(ex)}");
-                throw ex;
+                throw new Exception(ex.Message, ex);
             }
         }
 
@@ -501,7 +501,7 @@ namespace dp2Circulation
                         TaskList.Sound(-1);
 
                         // 延时 ShowMessage
-                        this.ShowMessageAutoClear($"任务 {pii} 被忽略(和当前任务列表重复)",
+                        this.ShowMessageAutoClear($"任务 {pii} 被忽略(和当前任务列表(count={_taskList.Count})重复)",
                             "yellow",
                             5000,
                             true);
