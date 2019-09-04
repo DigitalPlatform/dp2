@@ -41,7 +41,7 @@ namespace dp2SSL
             this.Unloaded += PageMenu_Unloaded;
             this.DataContext = App.CurrentApp;
 
-            // InitWallpaper();
+            InitWallpaper();
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)

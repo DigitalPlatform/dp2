@@ -353,6 +353,11 @@ namespace dp2SSL
                     CheckEAS(update_entities);
                 }
             }
+            else
+            {
+                _entities.Clear();  // 2019/9/3
+                booksControl.SetBorrowable();
+            }
 
             var task = RefreshPatrons();
             return new NormalResult();
@@ -419,7 +424,7 @@ namespace dp2SSL
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 SetGlobalError("rfid", $"RefreshPatrons() 出现异常: {ex.Message}");
             }
@@ -624,16 +629,19 @@ namespace dp2SSL
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
 
+            /*
             // 释放构造函数里面分配的资源
             //Loaded -= PageBorrow_Loaded;
             //Unloaded -= PageBorrow_Unloaded;
             this.patronControl.InputFace -= PatronControl_InputFace;
             this._patron.PropertyChanged -= _patron_PropertyChanged;
             App.CurrentApp.PropertyChanged -= CurrentApp_PropertyChanged;
-
+            */
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
+
+            PatronClear();  // 2019/9/3
         }
 
         bool _visiblityChanged = false;
@@ -648,7 +656,7 @@ namespace dp2SSL
                     {
                         this.patronControl.LoadPhoto(_patron.PhotoPath);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         SetGlobalError("patron", ex.Message);
                     }
@@ -748,6 +756,8 @@ namespace dp2SSL
                 }
                 else
                 {
+                    this.booksControl.Visibility = Visibility.Visible;
+
                     // (普通)还书和续借操作并不需要读者卡
                     if (borrowButton.Visibility != Visibility.Visible)
                         this.patronControl.Visibility = Visibility.Collapsed;
@@ -1333,7 +1343,7 @@ out string strError);
 
 
 
-#region 属性
+        #region 属性
 
 #if NO
         private void Entities_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -1415,7 +1425,7 @@ out string strError);
         }
 
 
-#endregion
+        #endregion
 
         // 借书
         private void BorrowButton_Click(object sender, RoutedEventArgs e)
@@ -1564,6 +1574,7 @@ out string strError);
                             continue;
                         }
 
+                        // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
                         // return 操作，提前修改 EAS
                         // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
                         {
@@ -1637,7 +1648,11 @@ out string strError);
                         if (entity.Error != null)
                             continue;
 
-                        entity.SetError($"{action_name}成功", lRet == 1 ? "yellow" : "green");
+                        string message = $"{action_name}成功";
+                        if (lRet == 1 && string.IsNullOrEmpty(strError) == false)
+                            message = strError;
+                        entity.SetError(message,
+                            lRet == 1 ? "yellow" : "green");
                         success_count++;
                         // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
                     }
@@ -1892,7 +1907,7 @@ out string strError);
             this.NavigationService.Navigate(new PageMenu());
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1933,9 +1948,9 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
-#region global 分类报错机制
+        #region global 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint
@@ -1984,7 +1999,7 @@ out string strError);
         }
 #endif
 
-#endregion
+        #endregion
 
         private async void RegisterFace_Click(object sender, RoutedEventArgs e)
         {
@@ -2281,7 +2296,7 @@ out string strError);
             });
         }
 
-#region 下级函数
+        #region 下级函数
 
         // return:
         //      "retry" "skip" 或 "cancel"
@@ -2580,7 +2595,7 @@ out strError);
         }
 
 
-#endregion
+        #endregion
 
         // 删除头像 object 的 dprms:file 元素
         // return:

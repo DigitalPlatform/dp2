@@ -100,6 +100,8 @@ namespace DigitalPlatform.CirculationClient
         public string Text { get; set; }
         public int Score { get; set; }
         public string ErrorInfo { get; set; }
+
+        public int Quality { get; set; }    // 指纹图象质量
     }
 
     public delegate void ImageReadyEventHandler(object sender,
@@ -111,6 +113,8 @@ namespace DigitalPlatform.CirculationClient
     public class ImageReadyEventArgs : EventArgs
     {
         public Image Image { get; set; }    // 注意，使用者要负责 Dispose() 这个 Image 对象
+
+        public int Quality { get; set; }    // 指纹图象质量
     }
 
     public delegate void SpeakEventHandler(object sender,

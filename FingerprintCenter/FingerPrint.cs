@@ -581,10 +581,13 @@ namespace FingerprintCenter
                         ref template_buffer_length);
                     if (ret == zkfp.ZKFP_ERR_OK)
                     {
+                        var quality = GetIntParameter(10002);
+
                         // SendMessage(FormHandle, MESSAGE_CAPTURED_OK, IntPtr.Zero, IntPtr.Zero);
                         ProcessCaptureData(image_buffer,
                             template_buffer,
-                            template_buffer_length);
+                            template_buffer_length,
+                            quality);
                     }
                     Task.Delay(200, token).Wait(token);
                     // Thread.Sleep(200);
@@ -606,7 +609,8 @@ namespace FingerprintCenter
         void ProcessCaptureData(
             byte[] image_buffer,
             byte[] template_buffer,
-            int length)
+            int length,
+            int quality)
         {
             if (this.HasImageReady())
             {
@@ -618,7 +622,7 @@ namespace FingerprintCenter
                         _captureData.mfpWidth,
                         _captureData.mfpHeight,
                         ref ms);
-                    TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms) });
+                    TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms), Quality = quality });
                 });
             }
 
@@ -690,7 +694,8 @@ namespace FingerprintCenter
                     CapturedEventArgs e1 = new CapturedEventArgs
                     {
                         Text = strBarcode,
-                        Score = score
+                        Score = score,
+                        Quality = quality,
                     };
                     Light("green");
                     TriggerCaptured(null, e1);

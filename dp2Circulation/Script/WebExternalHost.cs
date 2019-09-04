@@ -288,7 +288,7 @@ namespace dp2Circulation
                 return false;   // 还不能启动
             }
 
-            Debug.Assert(this.ChannelInUse == false, "启动前发现通道还未释放");
+            // Debug.Assert(this.ChannelInUse == false, "启动前发现通道还未释放");
             return true;    // 可以启动
         }
 

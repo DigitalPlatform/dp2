@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
@@ -12,7 +13,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -568,14 +568,13 @@ namespace dp2Circulation
 
             if (lRet > 1)
             {
-                string strBarcode = "";
                 // return:
                 //      -1  error
                 //      0   放弃
                 //      1   成功
                 int nRet = this.Container.SelectOnePatron(lRet,
                     strRecPath,
-                    out strBarcode,
+                    out string strBarcode,
                     out strResult,
                     out strError);
                 if (nRet == -1)
@@ -676,6 +675,9 @@ namespace dp2Circulation
                 }
                 else
                     this.Container.ClearTaskList(tasks);
+
+                // 真正从 _tasks 里面删除
+                ClearTasks(tasks);  // 2019/9/3
             }
 
             this.CurrentReaderBarcode = task.ReaderBarcode; // 会自动显示出来
@@ -1789,6 +1791,22 @@ end_time);
             }
         }
 
+        public int Count
+        {
+            get
+            {
+                if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
+                    throw new LockException("锁定尝试中超时");
+                try
+                {
+                    return _tasks.Count;
+                }
+                finally
+                {
+                    this.m_lock.ExitReadLock();
+                }
+            }
+        }
 
         public ChargingTask FindTaskByItemBarcode(string itemBarcode)
         {
@@ -1796,9 +1814,12 @@ end_time);
                 throw new LockException("锁定尝试中超时");
             try
             {
-                foreach (ChargingTask task in _tasks)
+                for (int i = _tasks.Count - 1; i >= 0; i--)
                 {
-                    // if (task.Action) ?
+                    var task = _tasks[i];
+
+                    if (task.Action == "load_reader_info")
+                        continue;
 
                     if (itemBarcode == task.ItemBarcode)
                         return task;

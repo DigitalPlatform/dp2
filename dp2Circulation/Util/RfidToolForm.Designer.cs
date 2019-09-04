@@ -328,6 +328,7 @@
             this.ShowInTaskbar = false;
             this.Text = "RFID 工具";
             this.Activated += new System.EventHandler(this.RfidToolForm_Activated);
+            this.Deactivate += new System.EventHandler(this.RfidToolForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RfidToolForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.RfidToolForm_FormClosed);
             this.Load += new System.EventHandler(this.RfidToolForm_Load);
