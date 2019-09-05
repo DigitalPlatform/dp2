@@ -504,6 +504,8 @@ bool bClickClose = false)
         private void FingerPrint_Speak(object sender, SpeakEventArgs e)
         {
             Speak(e.Text);
+            if (string.IsNullOrEmpty(e.DisplayText) == false)
+                this.DisplayText(e.DisplayText, "white", "gray");
         }
 
         static void Beep()
@@ -1729,8 +1731,8 @@ Keys keyData)
             _eventReplicationFinish.Reset();
 
             this.OutputHistory($"增量同步指纹信息 {strStartDate}");
-            this.ShowMessage($"正在同步最新指纹信息 {strStartDate} ...");
-            EnableControls(false);
+            //this.ShowMessage($"正在同步最新指纹信息 {strStartDate} ...");
+            //EnableControls(false);
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromSeconds(30);
@@ -1749,7 +1751,7 @@ token);
                 {
                     strError = $"增量同步指纹信息 {strStartDate} 失败: {result.ErrorInfo}";
                     this.OutputHistory(strError, 2);
-                    this.ShowMessage(strError, "red", true);
+                    //this.ShowMessage(strError, "red", true);
                     this.Speak(strError);
                     return;
                 }
@@ -1767,9 +1769,9 @@ token);
             {
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
-                EnableControls(true);
-                if (done == true)
-                    this.ClearMessage();
+                //EnableControls(true);
+                //if (done == true)
+                //    this.ClearMessage();
 
                 _eventReplicationFinish.Set();
                 _cancelReplication = null;

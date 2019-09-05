@@ -94,7 +94,11 @@ namespace FingerprintCenter
             {
                 // Program.MainForm.OutputHistory("captured");
 
-                _messages.Add(e.Text);
+                _messages.Add(new TouchMessage
+                {
+                    Message = e.Text,
+                    Quality = e.Quality
+                });
                 while (_messages.Count > 1000)
                     _messages.RemoveAt(0);
             }
@@ -182,7 +186,13 @@ namespace FingerprintCenter
         }
 
         private static readonly Object _syncRoot_messages = new Object(); // 2017/5/18
-        static List<string> _messages = new List<string>();
+        static List<TouchMessage> _messages = new List<TouchMessage>();
+
+        class TouchMessage
+        {
+            public string Message { get; set; }
+            public int Quality { get; set; }
+        }
 
         // 取走一条消息
         public GetMessageResult GetMessage(string style)
@@ -206,10 +216,14 @@ namespace FingerprintCenter
                     _messages.Clear();
                     return new GetMessageResult { Message = "" };
                 }
-                string message = _messages[0];
+                var message = _messages[0];
                 _messages.RemoveAt(0);
                 // Program.MainForm?.Speak($"拿走 {message}");
-                return new GetMessageResult { Message = message };
+                return new GetMessageResult
+                {
+                    Message = message.Message,
+                    Quality = message.Quality
+                };
             }
         }
 

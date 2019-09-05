@@ -33,11 +33,15 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public void Speaking(string text)
+        public void Speaking(string text, string displayText = null)
         {
             if (Speak != null)
             {
-                Speak(null, new SpeakEventArgs { Text = text });
+                Speak(null, new SpeakEventArgs
+                {
+                    Text = text,
+                    DisplayText = displayText
+                });
             }
         }
 
@@ -122,6 +126,9 @@ namespace DigitalPlatform.CirculationClient
 
     public class SpeakEventArgs : EventArgs
     {
+        // 语音文字
         public string Text { get; set; }
+        // 用于显示的文字。如果为空，则表示使用 Text 成员
+        public string DisplayText { get; set; }
     }
 }

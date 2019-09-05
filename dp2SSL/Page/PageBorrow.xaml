@@ -34,15 +34,20 @@
         <!-- left bar -->
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
             <Grid Height="20" />
-            <Button Name="goHome" Background="Transparent" BorderThickness="0" Click="GoHome_Click">
+            <Button Name="goHome" ToolTip="返回主菜单"
+                    Background="Transparent" BorderThickness="0" Click="GoHome_Click">
                 <fa:ImageAwesome Icon="Home"
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>
             <Grid Height="20" />
-            <Button Name="goHelp" Background="Transparent" BorderThickness="0">
+            <Button Name="goHelp" ToolTip="帮助"
+                    Background="Transparent" BorderThickness="0">
                 <fa:ImageAwesome Icon="LightbulbOutline"
                              Height="40" Foreground="DarkGray" Margin="4"/>
             </Button>
+            <Grid Height="40" />
+            <TextBlock Name="Quality" ToolTip="指纹质量"
+                       Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
         </StackPanel>
         <Button Grid.Row="1" Grid.Column="2">Right</Button>
         <!--

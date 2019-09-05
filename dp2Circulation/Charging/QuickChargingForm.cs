@@ -546,6 +546,7 @@ namespace dp2Circulation
                             task.Color = save_color;
                             this.DisplayTask("refresh", task);
                         }
+                        SetColorList(); // 2019/9/4 最后刷新一次 colorlist
                     }
                     finally
                     {

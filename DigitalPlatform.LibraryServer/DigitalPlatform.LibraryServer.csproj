@@ -294,6 +294,8 @@
   <ItemGroup>
     <Content Include="comment.txt" />
     <Content Include="deleted\deleted.txt" />
+    <Content Include="imdict.dll" />
+    <Content Include="Lucene.Net.dll" />
     <Content Include="unhandled.txt" />
   </ItemGroup>
   <ItemGroup>
