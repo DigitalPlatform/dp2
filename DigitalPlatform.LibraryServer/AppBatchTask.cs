@@ -451,7 +451,7 @@ namespace DigitalPlatform.LibraryServer
                 table["Count"] = this.Count;
 
             if (this.WaitForBegin == true)
-                table["WaitForBegin"] = "true";
+                table["WaitForBegin"] = "true"; // 注：参数缺省表示 false
             if (string.IsNullOrEmpty(this.OutputParam) == false)
                 table["OutputParam"] = this.OutputParam;
 
@@ -467,7 +467,7 @@ namespace DigitalPlatform.LibraryServer
             info.Start = (string)table["Start"];
             info.Count = (string)table["Count"];
 
-            info.WaitForBegin = DomUtil.IsBooleanTrue((string)table["WaitForBegin"]);
+            info.WaitForBegin = DomUtil.IsBooleanTrue((string)table["WaitForBegin"], false);
             info.OutputParam = (string)table["OutputParam"];
             return info;
         }

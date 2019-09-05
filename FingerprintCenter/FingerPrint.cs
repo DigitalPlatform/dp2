@@ -638,7 +638,9 @@ namespace FingerprintCenter
                         string strBarcode = (string)_id_barcode_table[id.ToString()];
                         if (_exclude.IndexOf(strBarcode) == -1)
                         {
-                            Speaking($"您的指纹以前已经被 {strBarcode} 注册过了(id={id})，无法重复注册");
+                            string text = $"您的指纹以前已经被 {strBarcode} 注册过了(id={id})，无法重复注册";
+                            Speaking(text,
+                                $"{text}\r\n质量: {quality}");
                             return;
                         }
                     }
@@ -652,7 +654,9 @@ namespace FingerprintCenter
                     {
                         _register_template_list.Clear();    // 从头来
                         Light("red");
-                        Speaking("刚扫入的指纹质量不佳，请继续重新扫入");
+                        string text = "刚扫入的指纹质量不佳，请继续重新扫入";
+                        Speaking(text,
+                            $"{text}\r\n质量: {quality}");
                         return;
                     }
                 }
@@ -672,7 +676,11 @@ namespace FingerprintCenter
                     return;
                 }
                 Light("green");
-                Speaking("很好。还需要扫入 " + (3 - _register_template_list.Count) + " 个指纹");
+                {
+                    string text = "很好。还需要扫入 " + (3 - _register_template_list.Count) + " 个指纹";
+                    Speaking(text,
+                        $"{text}\r\n质量: {quality}");
+                }
                 return;
             }
 

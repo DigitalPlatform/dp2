@@ -89,9 +89,12 @@ namespace DigitalPlatform.Interfaces
     {
         public string Message { get; set; }
 
+        // 本次扫入的指纹图象的质量。100 分为满分
+        public int Quality { get; set; }
+
         public override string ToString()
         {
-            return $"{base.ToString()},Message={Message}";
+            return $"{base.ToString()},Message={Message},Qualite={Quality}";
         }
     }
 

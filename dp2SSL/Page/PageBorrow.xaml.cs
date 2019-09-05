@@ -32,7 +32,7 @@ namespace dp2SSL
     /// 借书功能页面
     /// PageBorrow.xaml 的交互逻辑
     /// </summary>
-    public partial class PageBorrow : Page, INotifyPropertyChanged
+    public partial class PageBorrow : Page, INotifyPropertyChanged, IDisposable
     {
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
@@ -69,6 +69,8 @@ namespace dp2SSL
             // _patron.IsFingerprintSource = true;
 
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
+
+
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -130,6 +132,7 @@ namespace dp2SSL
                 Message = result.Patron,
             };
             SetPatronInfo(message);
+            SetQuality("");
             await FillPatronDetail();
         }
 
@@ -199,9 +202,6 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
-            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
-            // App.CurrentApp.TagSetError += CurrentApp_TagSetError;
-
             RfidManager.ClearCache();
             // 处理以前积累的 tags
             // RfidManager.TriggerLastListTags();
@@ -225,9 +225,19 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
-            await InitialEntities();
 
             // SetGlobalError("test", "test error");
+
+            ////
+            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+            while (true)
+            {
+                _tagChangedCount = 0;
+                await InitialEntities();
+                if (_tagChangedCount == 0)
+                    break;  // 只有当初始化过程中没有被 TagChanged 事件打扰过，才算初始化成功了。否则就要重新初始化
+            }
+
         }
 
         /*
@@ -237,8 +247,17 @@ namespace dp2SSL
         }
         */
 
+        class TagChangedMessage
+        {
+            public object sender { get; set; }
+            public TagChangedEventArgs e { get; set; }
+        }
+
+        int _tagChangedCount = 0;
+
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
         {
+            _tagChangedCount++;
             await ChangeEntities((BaseChannel<IRfid>)sender, e);
         }
 
@@ -315,6 +334,8 @@ namespace dp2SSL
         // 首次初始化 Entity 列表
         async Task<NormalResult> InitialEntities()
         {
+            _entities.Clear();  // 2019/9/4
+
             var books = TagList.Books;
             if (books.Count > 0)
             {
@@ -355,11 +376,11 @@ namespace dp2SSL
             }
             else
             {
-                _entities.Clear();  // 2019/9/3
                 booksControl.SetBorrowable();
             }
 
             var task = RefreshPatrons();
+
             return new NormalResult();
         }
 
@@ -399,6 +420,7 @@ namespace dp2SSL
                 }
                 else
                 {
+                    SetQuality("");
                     // RFID 来源
                     if (patrons.Count == 1)
                     {
@@ -474,10 +496,24 @@ namespace dp2SSL
             SetGlobalError("fingerprint", e.Error);
         }
 
+        void SetQuality(string text)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.Quality.Text = text;
+            }));
+        }
+
         // 从指纹阅读器获取消息(第一阶段)
         private async void FingerprintManager_Touched(object sender, TouchedEventArgs e)
         {
+            // 注如果 FingerprintManager 已经挂接 SetError 事件，Touched 事件这里就可以忽略 result.Value == -1 情况
+            if (e.Result.Value == -1)
+                return;
+
             SetPatronInfo(e.Result);
+
+            SetQuality(e.Quality == 0 ? "" : e.Quality.ToString());
 
             await FillPatronDetail();
 
@@ -2714,5 +2750,8 @@ string usage)
             }
         }
 
+        void IDisposable.Dispose()
+        {
+        }
     }
 }

@@ -1145,7 +1145,9 @@ end_time);
             }
             catch (Exception ex)
             {
-                strError = $"前置修改 RFID 标签 EAS 标志位时出现异常: {ex.Message}";
+                var text = $"前置修改 RFID 标签 EAS 标志位时出现异常: {ExceptionUtil.GetDebugText(ex)}";
+                this.Container.WriteErrorLog(text);
+                strError = $"前置修改 RFID 标签 EAS 标志位时出现异常: {ex.Message} (已写入错误日志)";
                 return false;
             }
         }
