@@ -4698,12 +4698,64 @@ out strError);
                 TestBorrowAndReturn("", "R0000001", "0000001");
             });
 
-            /*
             Task.Factory.StartNew(() =>
             {
                 TestBorrowAndReturn("", "R0000002", "0000002");
             });
-            */
+        }
+
+        int TestChangeReaderRecord(LibraryChannel channel,
+            string strReaderBarcode,
+            out string strError)
+        {
+            strError = "";
+
+            long lRet = channel.GetReaderInfo(stop,
+                strReaderBarcode,
+                "xml",
+                out string[] results,
+                out string strRecPath,
+                out byte[] timestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return -1;
+
+            string strXml = results[0];
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            string comment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+            if (comment == null)
+                comment = "";
+            if (comment.Length > 200 * 1024)
+            {
+                comment = "";
+                DisplayError($"comment 已经清除");
+            }
+
+            DomUtil.SetElementText(dom.DocumentElement, "comment", comment + new string('c', 1000));
+
+            string strNewXml = dom.DocumentElement.OuterXml;
+
+            lRet = channel.SetReaderInfo(stop,
+    "change",
+    strRecPath,
+    strNewXml,
+    strXml,
+    timestamp,
+    out string strExistingXml,
+    out string strSavedXml,
+    out string strSavedRecPath,
+    out byte[] new_timestamp,
+    out ErrorCodeValue kernel_errorcode,
+    out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
         }
 
         // parameters:
@@ -4771,6 +4823,16 @@ out strError);
                     else
                         DisplayOK($"读者 {strReaderBarcode} 借书 {strItemBarcode} 成功");
 
+                    {
+                        nRet = TestChangeReaderRecord(channel,
+                            strReaderBarcode,
+                            out strError);
+                        if (nRet == -1)
+                            DisplayError($"读者 {strReaderBarcode} 记录修改失败: {strError}");
+                        else
+                            DisplayOK($"读者 {strReaderBarcode} 记录修改成功");
+
+                    }
 
                     Progress.SetMessage("正在还 ...");
                     {

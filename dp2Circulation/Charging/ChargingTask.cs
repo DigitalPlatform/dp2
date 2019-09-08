@@ -1083,6 +1083,13 @@ end_time);
             });
         }
 
+        static string ToLower(string text)
+        {
+            if (text == null)
+                return "";
+            return text.ToLower();
+        }
+
         bool PreSetEAS(ChargingTask task,
     bool enable,
     out bool old_state,
@@ -1092,17 +1099,22 @@ end_time);
             old_state = false;
             try
             {
-                NormalResult result = null;
-                string tag_name = task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode;
+                string tag_name = ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode;
                 // 前置情况下，要小心检查原来标签的 EAS，如果没有必要修改就不要修改
 
                 {
                     var get_result = this.Container.GetEAS("*", tag_name);
+
+                    if (get_result == null)
+                        this.Container.WriteErrorLog("get_result == null");
+                    else
+                        this.Container.WriteErrorLog($"get_result == {get_result.ToString()}");
+
                     if (get_result.Value == -1)
                     {
                         Sound(-1);
 
-                        strError = $"获得 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
+                        strError = $"获得 RFID 标签 EAS 标志位时出错: {get_result.ErrorInfo}";
                         return false;
                     }
 
@@ -1113,31 +1125,34 @@ end_time);
                 if (old_state == enable)
                     return true;
 
-                // 修改 EAS。带有重试功能 // 2019/9/2
-                for (int i = 0; i < 2; i++)
                 {
-                    // return result.Value:
-                    //      -1  出错
-                    //      0   没有找到指定的标签
-                    //      1   找到，并成功修改 EAS
-                    result = RfidManager.SetEAS("*",
-                        tag_name,
-                        enable);
-                    if (result.Value == 1)
-                        break;
-                }
+                    NormalResult result = null;
+                    // 修改 EAS。带有重试功能 // 2019/9/2
+                    for (int i = 0; i < 2; i++)
+                    {
+                        // return result.Value:
+                        //      -1  出错
+                        //      0   没有找到指定的标签
+                        //      1   找到，并成功修改 EAS
+                        result = RfidManager.SetEAS("*",
+                            tag_name,
+                            enable);
+                        if (result.Value == 1)
+                            break;
+                    }
 
-                TagList.ClearTagTable("");
+                    TagList.ClearTagTable("");
 
-                // testing
-                // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
+                    // testing
+                    // NormalResult result = new NormalResult { Value = -1, ErrorInfo = "testing" };
 
-                if (result.Value != 1)
-                {
-                    Sound(-1);
+                    if (result.Value != 1)
+                    {
+                        Sound(-1);
 
-                    strError = $"前置修改 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
-                    return false;
+                        strError = $"前置修改 RFID 标签 EAS 标志位时出错: {result.ErrorInfo}";
+                        return false;
+                    }
                 }
 
                 Sound(2);
@@ -1181,7 +1196,7 @@ end_time);
                     result = this.Container.SetEAS(
                         task,
                         "*",
-                        task.ItemBarcodeEasType.ToLower() + ":" + task.ItemBarcode,
+                        ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode,
                         enable);
                 }
 

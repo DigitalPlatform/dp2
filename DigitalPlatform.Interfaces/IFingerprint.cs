@@ -94,7 +94,7 @@ namespace DigitalPlatform.Interfaces
 
         public override string ToString()
         {
-            return $"{base.ToString()},Message={Message},Qualite={Quality}";
+            return $"{base.ToString()},Message={Message},Quality={Quality}";
         }
     }
 

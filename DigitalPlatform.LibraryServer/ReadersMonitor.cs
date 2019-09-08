@@ -547,13 +547,17 @@ namespace DigitalPlatform.LibraryServer
                     if (strBodyType == "mq" && this._queue != null)
                     {
                         // 向 MSMQ 消息队列发送消息
+                        // return:
+                        //      -2  MSMQ 错误
+                        //      -1  出错
+                        //      0   成功
                         nRet = SendToQueue(this._queue,
                             (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
                             + "@LUID:" + this.App.UID,
                             strMime,
                             strBody,
                             out strError);
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                         {
                             strError = "发送 MQ 出错: " + strError;
                             if (this.App.Statis != null)
@@ -888,6 +892,10 @@ namespace DigitalPlatform.LibraryServer
         //      strRecipient    消息最终接收者。常见的格式为 R0000001@LUID:xxxxxx 或者 !refID:xxxxxx@LUID:xxxxxx
         //                      应优先用读者记录的 refID 字段(格式为 @refID:xxxxxx)，如果没有则用 barcode 字段
         //                      如果是和微信绑定的读者，则只能从 strBody 中解析出读者记录的 email 元素内容了
+        // return:
+        //      -2  MSMQ 错误
+        //      -1  出错
+        //      0   成功
         public static int SendToQueue(MessageQueue myQueue,
             string strRecipient,
             string strMime,
@@ -916,6 +924,11 @@ namespace DigitalPlatform.LibraryServer
                 myMessage.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
                 myQueue.Send(myMessage);
                 return 0;
+            }
+            catch(System.Messaging.MessageQueueException ex)
+            {
+                strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -2;
             }
             catch (Exception ex)
             {

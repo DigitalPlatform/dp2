@@ -1103,8 +1103,11 @@ out strError);
                     {
                         if (record.Cols == null || record.Cols.Length < 3)
                         {
+                            continue;
+                            /*
                             strError = $"record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_{this.BrowseStyle}";
                             return -1;
+                            */
                         }
                         if (string.IsNullOrEmpty(record.Cols[0]) == true)
                             continue;   // 读者记录中没有指纹信息
@@ -1117,13 +1120,19 @@ out strError);
                     {
                         if (record.Cols == null || record.Cols.Length < 1)
                         {
+                            continue;
+                            /*
                             strError = $"record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_{this.BrowseStyle}timestamp";
                             return -1;
+                            */
                         }
                         if (record.Cols.Length < 2)
                         {
+                            continue;
+                            /*
                             strError = $"record.Cols error ... 需要刷新配置文件 cfgs/browse_{this.BrowseStyle}timestamp 到最新版本";
                             return -1;
+                            */
                         }
                         if (string.IsNullOrEmpty(record.Cols[0]) == true)
                             continue;   // 读者记录中没有指纹信息
@@ -1325,9 +1334,12 @@ out strError);
 
                 if (record.Cols == null || record.Cols.Length < 3)
                 {
+                    continue;
+                    /*
                     string strError = $"record.Cols error ... 有可能是因为读者库缺乏配置文件 cfgs/browse_{this.BrowseStyle}";
                     // TODO: 并发操作的情况下，会在中途出现读者记录被别的前端修改的情况，这里似乎可以continue
                     throw new Exception(strError);
+                    */
                 }
 
                 // 如果证条码号为空，无法建立对照关系，要跳过

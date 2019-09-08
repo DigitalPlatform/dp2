@@ -82,8 +82,6 @@ namespace DigitalPlatform.rms
                     command.Parameters.Add(param_id);
                     command.Parameters.Add(param_num);
 
-
-
                     while (reader.Read())
                     {
                         param_key.Value = (string)reader["keystring"];

@@ -211,6 +211,17 @@ namespace dp2Circulation
             ShowEasForm(false);
 
             // Task.Run(() => { InitialRfidChannel(); });
+
+            // 2019/9/4 增加
+            // 首次设置输入焦点
+            Task.Run(() =>
+            {
+                Task.Delay(500).Wait();
+                this.Invoke((Action)(() =>
+                {
+                    this.textBox_input.Focus();
+                }));
+            });
         }
 
         // 新 Tag 到来
@@ -2402,6 +2413,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             return GetValue(table, "uid");
         }
 
+        // 注意本函数可能会返回 null
         static string GetValue(Hashtable table, string name)
         {
             string value = (string)table[name];

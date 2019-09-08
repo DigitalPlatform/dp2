@@ -199,7 +199,7 @@ namespace dp2SSL
                 }
 
                 {
-                    var result = FaceManager.GetState("");
+                    var result = FaceManager.GetState("camera");
                     if (result.Value == -1)
                         errors.Add(result.ErrorInfo);
                 }

@@ -11,6 +11,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Web;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -28,12 +29,12 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Core;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.rms
 {
     // 数据库集合
     // TODO: 全局 static 使用
+    // TODO: 增加 IDisposable 接口
     public class DatabaseCollection : List<Database>
     {
         public TailNumberManager TailNumberManager = new TailNumberManager();
@@ -385,12 +386,12 @@ namespace DigitalPlatform.rms
         {
             return GetTempFileName("rslt");
         }
-            public string GetTempFileName(string prefix)
+        public string GetTempFileName(string prefix)
         {
             Debug.Assert(string.IsNullOrEmpty(this.TempDir) == false, "");
             while (true)
             {
-                string strFilename = Path.Combine(this.TempDir, 
+                string strFilename = Path.Combine(this.TempDir,
                     prefix + "_" + Guid.NewGuid().ToString());    // dbc_ 前缀是为了便于识别这里创建的临时文件
                 if (File.Exists(strFilename) == false)
                 {
@@ -6773,10 +6774,24 @@ ChannelIdleEventArgs e);
         public bool Continue = true;
     }
 
-
-    public class ChannelHandle
+    // 2019/9/8 增加 IDisposeable 接口，以解决 CencalTokenSource 最后没有 Dispose() 的问题
+    public class ChannelHandle : IDisposable
     {
-        public CancellationTokenSource CancelTokenSource { get; set; }
+        CancellationTokenSource _cancelTokenSource = null;
+
+        /*
+        public CancellationTokenSource CancelTokenSource
+        {
+            get
+            {
+                return _cancelTokenSource;
+            }
+            set
+            {
+                _cancelTokenSource = value;
+            }
+        }
+        */
 
         public KernelApplication App = null;
 
@@ -6788,13 +6803,24 @@ ChannelIdleEventArgs e);
         public ChannelHandle(KernelApplication app)
         {
             this.App = app;
-            this.CancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(app._app_down.Token);
+            this._cancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(app._app_down.Token);
+        }
+
+        public CancellationToken CancelToken
+        {
+            get
+            {
+                if (_cancelTokenSource == null)
+                    return new CancellationToken();
+                return _cancelTokenSource.Token;
+            }
         }
 
         public void Clear()
         {
             this.m_bStop = false;
-            this.CancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.App._app_down.Token);
+            TryDisposeCancelTokenSource();
+            this._cancelTokenSource = CancellationTokenSource.CreateLinkedTokenSource(this.App._app_down.Token);
         }
 
         // return:
@@ -6808,7 +6834,7 @@ ChannelIdleEventArgs e);
             if (is_cancel != null && is_cancel == true)
                 return false;
 #endif
-            if (this.CancelTokenSource != null && this.CancelTokenSource.IsCancellationRequested)
+            if (this._cancelTokenSource != null && this._cancelTokenSource.IsCancellationRequested)
                 return false;
 
             if (this.m_bStop == true)
@@ -6824,9 +6850,9 @@ ChannelIdleEventArgs e);
             {
                 this.App.MyWriteDebugInfo("abort");
 
-                if (this.CancelTokenSource != null
-                    && this.CancelTokenSource.IsCancellationRequested == false)
-                    this.CancelTokenSource.Cancel();
+                if (this._cancelTokenSource != null
+                    && this._cancelTokenSource.IsCancellationRequested == false)
+                    this._cancelTokenSource.Cancel();
 
                 this.m_bStop = true;    // 2011/1/19 
                 return false;
@@ -6836,9 +6862,9 @@ ChannelIdleEventArgs e);
 
         public void DoStop()
         {
-            if (this.CancelTokenSource != null
-                && this.CancelTokenSource.IsCancellationRequested == false)
-                this.CancelTokenSource.Cancel();
+            if (this._cancelTokenSource != null
+                && this._cancelTokenSource.IsCancellationRequested == false)
+                this._cancelTokenSource.Cancel();
 
             this.m_bStop = true;
 
@@ -6848,12 +6874,26 @@ ChannelIdleEventArgs e);
             }
         }
 
+        public void Dispose()
+        {
+            TryDisposeCancelTokenSource();
+        }
+
+        void TryDisposeCancelTokenSource()
+        {
+            if (this._cancelTokenSource != null)
+            {
+                _cancelTokenSource.Dispose();
+                _cancelTokenSource = null;
+            }
+        }
+
         public bool Stopped
         {
             get
             {
-                if (this.CancelTokenSource != null
-                    && this.CancelTokenSource.IsCancellationRequested == true)
+                if (this._cancelTokenSource != null
+                    && this._cancelTokenSource.IsCancellationRequested == true)
                     return true;
 
                 return this.m_bStop;

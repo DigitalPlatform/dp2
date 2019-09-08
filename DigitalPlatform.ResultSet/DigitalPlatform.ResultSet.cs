@@ -1756,7 +1756,7 @@ namespace DigitalPlatform.ResultSet
 
             if (lBigOffset >= m_streamBig.Length)
             {
-                throw (new Exception("内部错误，位置大于总长度"));
+                throw (new Exception("DigitalPlatform.ResultSet 内部错误，位置大于总长度"));
                 //return null;
             }
 
@@ -2242,7 +2242,7 @@ namespace DigitalPlatform.ResultSet
 
             if (lOffset >= m_streamBig.Length)
             {
-                throw (new Exception("内部错误，位置大于总长度"));
+                throw (new Exception("DigitalPlatform.ResultSet 内部错误，位置大于总长度"));
                 //return null;
             }
 
@@ -2908,7 +2908,7 @@ namespace DigitalPlatform.ResultSet
 
             if (lBigOffset >= m_streamBig.Length)
             {
-                throw (new Exception("内部错误，位置大于总长度"));
+                throw (new Exception("DigitalPlatform.ResultSet 内部错误，位置大于总长度"));
                 //return null;
             }
 

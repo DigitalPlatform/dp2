@@ -36,6 +36,7 @@ using DigitalPlatform.Core;
 namespace DigitalPlatform.rms
 {
     // SQL库派生类
+    // TODO: 增加 IDisposable 接口
     public class SqlDatabase : Database
     {
         // 对物理文件开始缓存和加速的开始尺寸
@@ -1361,8 +1362,7 @@ ex);
                     {
                         using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                         {
-                            if (dr != null
-                && dr.HasRows == true)
+                            if (dr != null && dr.HasRows == true)
                             {
                                 while (dr.Read())
                                 {
@@ -1391,8 +1391,7 @@ ex);
                     {
                         using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                         {
-                            if (dr != null
-                && dr.HasRows == true)
+                            if (dr != null && dr.HasRows == true)
                             {
                                 while (dr.Read())
                                 {
@@ -1453,8 +1452,7 @@ ex);
             {
                 using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                 {
-                    if (dr != null
-        && dr.HasRows == true)
+                    if (dr != null && dr.HasRows == true)
                     {
                         while (dr.Read())
                         {
@@ -3036,10 +3034,11 @@ ex);
                             + " if exists (select * from dbo.sysdatabases where name = N'" + this.m_strSqlDbName + "')" + "\n"
                             + " drop database " + this.m_strSqlDbName + "\n";
                         strCommand += " use master " + "\n";
-                        SqlCommand command = new SqlCommand(strCommand,
-                            connection.SqlConnection);
-
-                        command.ExecuteNonQuery();
+                        using (SqlCommand command = new SqlCommand(strCommand,
+                            connection.SqlConnection))
+                        {
+                            command.ExecuteNonQuery();
+                        }
                     }
                     else if (connection.SqlServerType == SqlServerType.SQLite)
                     {
@@ -3049,10 +3048,11 @@ ex);
                     {
                         // 1.删库的sql数据库
                         strCommand = " DROP DATABASE IF EXISTS `" + this.m_strSqlDbName + "` \n";
-                        MySqlCommand command = new MySqlCommand(strCommand,
-                            connection.MySqlConnection);
-
-                        command.ExecuteNonQuery();
+                        using (MySqlCommand command = new MySqlCommand(strCommand,
+                            connection.MySqlConnection))
+                        {
+                            command.ExecuteNonQuery();
+                        }
                     }
                     else if (connection.SqlServerType == SqlServerType.Oracle)
                     {
@@ -3693,24 +3693,26 @@ handle.CancelTokenSource.Token).Result;
 #endif
 
                     // 尝试一下不用 CancellationToken。因为怀疑这样用会导致触发 Cancel 的时候让 MySQL Driver 代码死锁
-                    DbDataReader reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection
-).Result;
+                    // 2019/9/8 加上的 using
+                    using (DbDataReader reader = command.ExecuteReaderAsync(CommandBehavior.CloseConnection).Result)
+                    {
 
-                    // 从 DbDataReader 中获取和填入记录到一个结果集对象中
-                    // return:
-                    //      -1  出错
-                    //      0   没有填入任何记录
-                    //      >0  实际填入的记录条数
-                    int nRet = FillResultSet(
-                            handle,
-                            reader,
-                            resultSet,
-                            nMaxCount,
-                            style,  // GetOutputStyle(strOutputStyle),
-                            bRecordTable,
-                            out strError);
-                    if (nRet == -1 || nRet == 0)
-                        return nRet;
+                        // 从 DbDataReader 中获取和填入记录到一个结果集对象中
+                        // return:
+                        //      -1  出错
+                        //      0   没有填入任何记录
+                        //      >0  实际填入的记录条数
+                        int nRet = FillResultSet(
+                                handle,
+                                reader,
+                                resultSet,
+                                nMaxCount,
+                                style,  // GetOutputStyle(strOutputStyle),
+                                bRecordTable,
+                                out strError);
+                        if (nRet == -1 || nRet == 0)
+                            return nRet;
+                    }
                 } // end of using command
 
                 return 0;
@@ -3760,8 +3762,12 @@ handle.CancelTokenSource.Token).Result;
                     return 0;
 
                 CancellationToken token;
-                if (handle != null & handle.CancelTokenSource != null)
+                /*
+                if (handle != null && handle.CancelTokenSource != null)
                     token = handle.CancelTokenSource.Token;
+                    */
+                if (handle != null)
+                    token = handle.CancelToken;
 
                 int nGetedCount = 0;
                 while (reader.Read())
@@ -6295,19 +6301,21 @@ handle.CancelTokenSource.Token).Result;
             + "end\n"
             + "use master\n";
 
-                        SqlCommand command = new SqlCommand(strCommand,
-                            connection);
-                        try
+                        using (SqlCommand command = new SqlCommand(strCommand,
+                            connection))
                         {
-                            command.ExecuteNonQuery();
-                        }
-                        catch (Exception ex)
-                        {
-                            strError = "增加 newdptimestamp 列时出错。\r\n"
-                                + ex.Message + "\r\n"
-                                + "SQL命令:\r\n"
-                                + strCommand;
-                            return -1;
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "增加 newdptimestamp 列时出错。\r\n"
+                                    + ex.Message + "\r\n"
+                                    + "SQL命令:\r\n"
+                                    + strCommand;
+                                return -1;
+                            }
                         }
                     }
                 }
@@ -6424,9 +6432,7 @@ handle.CancelTokenSource.Token).Result;
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
                 {
-                    SqlDataReader dr =
-                        command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (dr == null || dr.HasRows == false)
                         {
@@ -6442,10 +6448,6 @@ handle.CancelTokenSource.Token).Result;
 
                             return 1;
                         }
-                    }
-                    finally
-                    {
-                        dr.Close();
                     }
                 } // end of using command
             }
@@ -6503,8 +6505,7 @@ handle.CancelTokenSource.Token).Result;
                 {
                     try
                     {
-                        SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                        try
+                        using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                         {
                             if (dr == null || dr.HasRows == false)
                             {
@@ -6520,10 +6521,6 @@ handle.CancelTokenSource.Token).Result;
 
                                 return 1;
                             }
-                        }
-                        finally
-                        {
-                            dr.Close();
                         }
                     }
                     catch (SQLiteException ex)
@@ -6587,9 +6584,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.MySqlConnection))
                 {
 
-                    MySqlDataReader dr =
-                        command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (dr == null || dr.HasRows == false)
                         {
@@ -6605,10 +6600,6 @@ handle.CancelTokenSource.Token).Result;
 
                             return 1;
                         }
-                    }
-                    finally
-                    {
-                        dr.Close();
                     }
                 } // end of using command
             }
@@ -6668,9 +6659,7 @@ handle.CancelTokenSource.Token).Result;
                         connection.OracleConnection))
                     {
 
-                        OracleDataReader dr =
-                            command.ExecuteReader(CommandBehavior.SingleResult);
-                        try
+                        using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                         {
                             if (dr == null || dr.HasRows == false)
                             {
@@ -6686,11 +6675,6 @@ handle.CancelTokenSource.Token).Result;
 
                                 return 1;
                             }
-                        }
-                        finally
-                        {
-                            if (dr != null)
-                                dr.Close();
                         }
                     } // end of using command
                 }
@@ -7501,9 +7485,6 @@ handle.CancelTokenSource.Token).Result;
             if (nRet == -1)
                 return -1;
 
-            byte[] newXmlBuffer;
-            byte[] outputTimestamp;
-            string strMetadata;
             // return:
             //		-1  出错
             //		-4  记录不存在
@@ -7519,9 +7500,9 @@ handle.CancelTokenSource.Token).Result;
                 -1,
                 -1,
                 "data", // style
-                out newXmlBuffer,
-                out strMetadata,
-                out outputTimestamp,
+                out byte[] newXmlBuffer,
+                out string strMetadata,
+                out byte[] outputTimestamp,
                 out strError);
             if (lRet <= -1)
                 return (int)lRet;
@@ -8686,25 +8667,23 @@ handle.CancelTokenSource.Token).Result;
 
                         destBuffer = new Byte[lOutputLength];
 
-                        SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                        try
+                        using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                         {
-                            dr.Read();
-                            dr.GetBytes(0,
-                                0,
-                                destBuffer,
-                                0,
-                                System.Convert.ToInt32(sizeParam.Value));
-                        }
-                        catch (Exception ex)
-                        {
-                            string strConnectionName = command.Connection.GetHashCode().ToString();
-                            this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
-                            throw ex;
-                        }
-                        finally
-                        {
-                            dr.Close();
+                            try
+                            {
+                                dr.Read();
+                                dr.GetBytes(0,
+                                    0,
+                                    destBuffer,
+                                    0,
+                                    System.Convert.ToInt32(sizeParam.Value));
+                            }
+                            catch (Exception ex)
+                            {
+                                string strConnectionName = command.Connection.GetHashCode().ToString();
+                                this.container.KernelApplication.WriteErrorLog("GetImage() ExecuteReader exception: " + ex.Message + "; connection hashcode='" + strConnectionName + "'");
+                                throw ex;
+                            }
                         }
                     } // end of using command
                 }
@@ -8817,8 +8796,7 @@ handle.CancelTokenSource.Token).Result;
                         try
                         {
                             // 执行命令
-                            SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                            try
+                            using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
@@ -8894,10 +8872,6 @@ handle.CancelTokenSource.Token).Result;
                                         strMetadata = (string)dr[nMetadataColIndex];
                                     }
                                 }
-                            }
-                            finally
-                            {
-                                dr.Close();
                             }
                         }
                         catch (Exception ex)
@@ -9171,8 +9145,7 @@ handle.CancelTokenSource.Token).Result;
                         try
                         {
                             // 执行命令
-                            MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                            try
+                            using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
@@ -9247,10 +9220,7 @@ handle.CancelTokenSource.Token).Result;
                                     }
                                 }
                             }
-                            finally
-                            {
-                                dr.Close();
-                            }
+
                         }
                         catch (Exception ex)
                         {
@@ -9521,8 +9491,7 @@ handle.CancelTokenSource.Token).Result;
                         try
                         {
                             // 执行命令
-                            OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                            try
+                            using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
@@ -9596,10 +9565,6 @@ handle.CancelTokenSource.Token).Result;
                                         strMetadata = (string)dr[nMetadataColIndex];
                                     }
                                 }
-                            }
-                            finally
-                            {
-                                dr.Close();
                             }
                         }
                         catch (Exception ex)
@@ -11742,8 +11707,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.SqlConnection))
                 {
 
-                    SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 一个记录也不存在
                         if (dr == null
@@ -11818,10 +11782,6 @@ handle.CancelTokenSource.Token).Result;
                             row_infos.Add(row_info);
                         }
                     }
-                    finally
-                    {
-                        dr.Close();
-                    }
                 } // end of using command
 
                 return 0;
@@ -11846,8 +11806,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.SQLiteConnection))
                 {
 
-                    SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在
                         if (dr == null
@@ -11891,10 +11850,6 @@ handle.CancelTokenSource.Token).Result;
                             row_infos.Add(row_info);
                         }
                     }
-                    finally
-                    {
-                        dr.Close();
-                    }
                 } // end of using command
 
                 return 0;
@@ -11920,8 +11875,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.MySqlConnection))
                 {
 
-                    MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在，需要创建
                         if (dr == null
@@ -11964,10 +11918,7 @@ handle.CancelTokenSource.Token).Result;
                             row_infos.Add(row_info);
                         }
                     }
-                    finally
-                    {
-                        dr.Close();
-                    }
+
                 } // end of using command
 
                 return 0;
@@ -11992,8 +11943,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.OracleConnection))
                 {
 
-                    OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在
                         if (dr == null
@@ -12036,11 +11986,6 @@ handle.CancelTokenSource.Token).Result;
 
                             row_infos.Add(row_info);
                         }
-                    }
-                    finally
-                    {
-                        if (dr != null)
-                            dr.Close();
                     }
                 } // end of using command
 
@@ -14402,7 +14347,10 @@ handle.CancelTokenSource.Token).Result;
                         }
 #endif
                         {
-                            StreamItem item = _streamCache.GetWriteStream(strFileName, lStartOfTarget > CACHE_SIZE);
+                            // 注：要纳入 StreamCache 管理
+                            StreamItem item = _streamCache.GetWriteStream(strFileName,
+                                true   // lStartOfTarget > CACHE_SIZE
+                                );
                             try
                             {
                                 // 第一次写文件,并且文件长度大于对象总长度，则截断文件
@@ -15101,11 +15049,13 @@ handle.CancelTokenSource.Token).Result;
 
             try
             {
+                // 注：纳入 StreamCache 管理
                 StreamItem s = this._streamCache.GetStream(
         strObjectFilename,
         FileMode.Open,
         FileAccess.Read,
-        lStart > CACHE_SIZE);
+        true    // lStart > CACHE_SIZE
+        );
                 try
                 {
                     s.FileStream.FastSeek(lStart);
@@ -15900,49 +15850,51 @@ handle.CancelTokenSource.Token).Result;
 
                 strCommand += " use master " + "\n";
 
-                SqlCommand command = new SqlCommand(strCommand,
-                    connection.SqlConnection);
-                try
+                using (SqlCommand command = new SqlCommand(strCommand,
+                    connection.SqlConnection))
                 {
-                    using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.Default))  // SingleResult
+                    try
                     {
-                        // 1.记录不存在报错
-                        if (dr == null
-                            || dr.HasRows == false)
+                        using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.Default))  // SingleResult
                         {
+                            // 1.记录不存在报错
+                            if (dr == null
+                                || dr.HasRows == false)
+                            {
+                                dr.Read();
+                                dr.NextResult();    // 这一句可以触发下一个结果集的异常 2015/9/4
+                                strError = "记录 '" + strID + "' 在库中不存在";
+                                return -1;
+                            }
+
                             dr.Read();
-                            dr.NextResult();    // 这一句可以触发下一个结果集的异常 2015/9/4
-                            strError = "记录 '" + strID + "' 在库中不存在";
-                            return -1;
+
+                            textPtr = (byte[])dr[0];
+
+                            bool bRet = dr.Read();
+
+                            if (bRet == true)
+                            {
+                                // 还有一行
+                                strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
+                                return -1;
+                            }
+
+                            lCurrentLength = 1; // 表示写成功了一个 0 字符
                         }
-
-                        dr.Read();
-
-                        textPtr = (byte[])dr[0];
-
-                        bool bRet = dr.Read();
-
-                        if (bRet == true)
-                        {
-                            // 还有一行
-                            strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
-                            return -1;
-                        }
-
-                        lCurrentLength = 1; // 表示写成功了一个 0 字符
                     }
-                }
-                catch (SqlException ex)
-                {
-                    strError = "更新数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
-
-                    // 检查 SQL 错误码
-                    if (ContainsErrorCode(ex, 1105))
+                    catch (SqlException ex)
                     {
-                        // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
-                        this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        strError = "更新数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+
+                        // 检查 SQL 错误码
+                        if (ContainsErrorCode(ex, 1105))
+                        {
+                            // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        }
+                        return -1;
                     }
-                    return -1;
                 }
             }
 
@@ -15982,74 +15934,75 @@ handle.CancelTokenSource.Token).Result;
 
                 strCommand += " use master " + "\n";
 
-                SqlCommand command = new SqlCommand(strCommand,
-                    connection.SqlConnection);
-
-                // 给参数赋值
-                SqlParameter dest_text_ptrParam =
-                    command.Parameters.Add("@dest_text_ptr",
-                    SqlDbType.Binary,
-                    16);
-
-                SqlParameter insert_offsetParam =
-                    command.Parameters.Add("@insert_offset",
-                    SqlDbType.Int);  // old Int
-
-                SqlParameter delete_lengthParam =
-                    command.Parameters.Add("@delete_length",
-                    SqlDbType.Int);  // old Int
-
-                SqlParameter inserted_dataParam =
-                    command.Parameters.Add("@inserted_data",
-                    SqlDbType.Binary,
-                    0);
-
-                long insert_offset = lStartOfTarget; // 插入image字段的位置
-                int nReadStartOfBuffer = nStartOfSource;         // 从源缓冲区中的读的起始位置
-                Byte[] chuckBuffer = null; // 块缓冲区
-                int nCount = 0;             // 影响的记录条数
-
-                dest_text_ptrParam.Value = textPtr;
-
-                while (true)
+                using (SqlCommand command = new SqlCommand(strCommand,
+                    connection.SqlConnection))
                 {
-                    // 已从缓冲区读出的长度
-                    int nReadedLength = nReadStartOfBuffer - nStartOfSource;
-                    if (nReadedLength >= nNeedReadLength)
-                        break;
 
-                    // 还需要读的长度
-                    int nContinueLength = nNeedReadLength - nReadedLength;
-                    if (nContinueLength > chucksize)  // 从源流中读的长度
-                        nContinueLength = chucksize;
+                    // 给参数赋值
+                    SqlParameter dest_text_ptrParam =
+                        command.Parameters.Add("@dest_text_ptr",
+                        SqlDbType.Binary,
+                        16);
 
-                    inserted_dataParam.Size = nContinueLength;
-                    chuckBuffer = new byte[nContinueLength];
+                    SqlParameter insert_offsetParam =
+                        command.Parameters.Add("@insert_offset",
+                        SqlDbType.Int);  // old Int
 
-                    /*
-                    if (baSource != null)
-                     * */
+                    SqlParameter delete_lengthParam =
+                        command.Parameters.Add("@delete_length",
+                        SqlDbType.Int);  // old Int
+
+                    SqlParameter inserted_dataParam =
+                        command.Parameters.Add("@inserted_data",
+                        SqlDbType.Binary,
+                        0);
+
+                    long insert_offset = lStartOfTarget; // 插入image字段的位置
+                    int nReadStartOfBuffer = nStartOfSource;         // 从源缓冲区中的读的起始位置
+                    Byte[] chuckBuffer = null; // 块缓冲区
+                    int nCount = 0;             // 影响的记录条数
+
+                    dest_text_ptrParam.Value = textPtr;
+
+                    while (true)
                     {
-                        // 拷到源数组的一段到每次用于写的chuckbuffer
-                        Array.Copy(baSource,
-                            nReadStartOfBuffer,
-                            chuckBuffer,
-                            0,
-                            nContinueLength);
-                    }
-                    /*
-                    else
-                    {
-                        streamSource.Read(chuckBuffer,
-                            0,
-                            nContinueLength);
-                    }
-                     * */
+                        // 已从缓冲区读出的长度
+                        int nReadedLength = nReadStartOfBuffer - nStartOfSource;
+                        if (nReadedLength >= nNeedReadLength)
+                            break;
 
-                    if (chuckBuffer.Length <= 0)
-                        break;
+                        // 还需要读的长度
+                        int nContinueLength = nNeedReadLength - nReadedLength;
+                        if (nContinueLength > chucksize)  // 从源流中读的长度
+                            nContinueLength = chucksize;
 
-                    insert_offsetParam.Value = insert_offset;
+                        inserted_dataParam.Size = nContinueLength;
+                        chuckBuffer = new byte[nContinueLength];
+
+                        /*
+                        if (baSource != null)
+                         * */
+                        {
+                            // 拷到源数组的一段到每次用于写的chuckbuffer
+                            Array.Copy(baSource,
+                                nReadStartOfBuffer,
+                                chuckBuffer,
+                                0,
+                                nContinueLength);
+                        }
+                        /*
+                        else
+                        {
+                            streamSource.Read(chuckBuffer,
+                                0,
+                                nContinueLength);
+                        }
+                         * */
+
+                        if (chuckBuffer.Length <= 0)
+                            break;
+
+                        insert_offsetParam.Value = insert_offset;
 
 #if NO
                     // 删除字段的长度
@@ -16076,29 +16029,30 @@ handle.CancelTokenSource.Token).Result;
                     }
 #endif
 
-                    // null表示从插入点到末尾的原来的内容全部删除 2013/2/15
-                    delete_lengthParam.Value = DBNull.Value;   // lDeleteLength;
-                    inserted_dataParam.Value = chuckBuffer;
+                        // null表示从插入点到末尾的原来的内容全部删除 2013/2/15
+                        delete_lengthParam.Value = DBNull.Value;   // lDeleteLength;
+                        inserted_dataParam.Value = chuckBuffer;
 
-                    nCount = command.ExecuteNonQuery();
-                    if (nCount == 0)
-                    {
-                        strError = "没有更新到记录块";
-                        return -1;
+                        nCount = command.ExecuteNonQuery();
+                        if (nCount == 0)
+                        {
+                            strError = "没有更新到记录块";
+                            return -1;
+                        }
+
+                        // 写入后,当前长度发生的变化
+                        // lCurrentLength = lCurrentLength + chuckBuffer.Length - lDeleteLength;
+                        lCurrentLength = insert_offset + chuckBuffer.Length;    // 2012/2/15
+
+                        // 缓冲区的位置变化
+                        nReadStartOfBuffer += chuckBuffer.Length;
+
+                        // 目标的位置变化
+                        insert_offset += chuckBuffer.Length;   //恢复时要恢复到原来的位置
+
+                        if (chuckBuffer.Length < chucksize)
+                            break;
                     }
-
-                    // 写入后,当前长度发生的变化
-                    // lCurrentLength = lCurrentLength + chuckBuffer.Length - lDeleteLength;
-                    lCurrentLength = insert_offset + chuckBuffer.Length;    // 2012/2/15
-
-                    // 缓冲区的位置变化
-                    nReadStartOfBuffer += chuckBuffer.Length;
-
-                    // 目标的位置变化
-                    insert_offset += chuckBuffer.Length;   //恢复时要恢复到原来的位置
-
-                    if (chuckBuffer.Length < chucksize)
-                        break;
                 }
             }
 
@@ -17279,8 +17233,7 @@ handle.CancelTokenSource.Token).Result;
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id = " + strParamIDName + " \n";
                             command.CommandText = strCommand;
 
-                            OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                            try
+                            using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                             {
                                 if (dr != null
                                     && dr.HasRows == true)
@@ -17295,11 +17248,6 @@ handle.CancelTokenSource.Token).Result;
                                 }
                                 else
                                     goto CONTINUE_1;    // 这个id的records行不存在
-                            }
-                            finally
-                            {
-                                if (dr != null)
-                                    dr.Close();
                             }
 
                             strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id = " + strParamIDName + " \n";
@@ -17506,22 +17454,19 @@ handle.CancelTokenSource.Token).Result;
 
             strCommand += " use master " + "\n";
 
-            SqlCommand command = new SqlCommand(strCommand,
-                connection);
-            SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-            try
+            using (SqlCommand command = new SqlCommand(strCommand,
+                connection))
             {
-                if (dr != null && dr.HasRows == true)
+                using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                 {
-                    dr.Read();
-                    strRange = dr.GetString(0);
-                    if (strRange == null)
-                        strRange = "";
+                    if (dr != null && dr.HasRows == true)
+                    {
+                        dr.Read();
+                        strRange = dr.GetString(0);
+                        if (strRange == null)
+                            strRange = "";
+                    }
                 }
-            }
-            finally
-            {
-                dr.Close();
             }
 
             return strRange;
@@ -18389,9 +18334,7 @@ handle.CancelTokenSource.Token).Result;
                 using (SQLiteCommand command = new SQLiteCommand(strCommand,
                     connection.SQLiteConnection))
                 {
-
-                    SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在，需要创建
                         if (dr == null
@@ -18453,10 +18396,6 @@ handle.CancelTokenSource.Token).Result;
                             strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
                             return -1;
                         }
-                    }
-                    finally
-                    {
-                        dr.Close();
                     }
                 } // end of using command
 
@@ -18543,8 +18482,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.MySqlConnection))
                 {
 
-                    MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在，需要创建
                         if (dr == null
@@ -18592,10 +18530,6 @@ handle.CancelTokenSource.Token).Result;
                             strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
                             return -1;
                         }
-                    }
-                    finally
-                    {
-                        dr.Close();
                     }
                 } // end of using command
 
@@ -18617,9 +18551,7 @@ handle.CancelTokenSource.Token).Result;
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
                 {
-
-                    OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 如果记录不存在，需要创建
                         if (dr == null
@@ -18667,11 +18599,6 @@ handle.CancelTokenSource.Token).Result;
                             strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
                             return -1;
                         }
-                    }
-                    finally
-                    {
-                        if (dr != null)
-                            dr.Close();
                     }
                 } // end of using command
 
@@ -18725,8 +18652,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.SqlConnection))
                 {
 
-                    SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 1.记录不存在报错
                         if (dr == null
@@ -18786,10 +18712,6 @@ handle.CancelTokenSource.Token).Result;
                             return -1;
                         }
                     }
-                    finally
-                    {
-                        dr.Close();
-                    }
                 } // end of using command
 
                 return 1;
@@ -18810,8 +18732,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.SQLiteConnection))
                 {
 
-                    SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 1.记录不存在报错
                         if (dr == null
@@ -18864,10 +18785,6 @@ handle.CancelTokenSource.Token).Result;
                             return -1;
                         }
                     }
-                    finally
-                    {
-                        dr.Close();
-                    }
                 } // end of using command
 
                 return 1;
@@ -18888,8 +18805,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.MySqlConnection))
                 {
 
-                    MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 1.记录不存在报错
                         if (dr == null
@@ -18929,10 +18845,6 @@ handle.CancelTokenSource.Token).Result;
                             strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
                             return -1;
                         }
-                    }
-                    finally
-                    {
-                        dr.Close();
                     }
                 } // end of using command
 
@@ -18953,8 +18865,7 @@ handle.CancelTokenSource.Token).Result;
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
                 {
-                    OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                    try
+                    using (OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         // 1.记录不存在报错
                         if (dr == null
@@ -18995,12 +18906,6 @@ handle.CancelTokenSource.Token).Result;
                             return -1;
                         }
                     }
-                    finally
-                    {
-                        if (dr != null)
-                            dr.Close();
-                    }
-
                 }
                 return 1;
             }
@@ -20390,20 +20295,19 @@ handle.CancelTokenSource.Token).Result;
 
                         if (string.IsNullOrEmpty(strCommand) == false)
                         {
-                            SqlDataReader dr =
-            command.ExecuteReader();
-                            if (dr != null
-        && dr.HasRows == true)
+                            using (SqlDataReader dr = command.ExecuteReader())
                             {
-                                while (dr.Read())
+                                if (dr != null && dr.HasRows == true)
                                 {
-                                    if (dr.IsDBNull(0) == false)
-                                        filenames.Add(dr.GetString(0));
-                                    if (dr.IsDBNull(1) == false)
-                                        filenames.Add(dr.GetString(1));
+                                    while (dr.Read())
+                                    {
+                                        if (dr.IsDBNull(0) == false)
+                                            filenames.Add(dr.GetString(0));
+                                        if (dr.IsDBNull(1) == false)
+                                            filenames.Add(dr.GetString(1));
+                                    }
                                 }
                             }
-                            dr.Close();
                         }
 
                         // 第二步：删除SQL行
@@ -20510,19 +20414,19 @@ handle.CancelTokenSource.Token).Result;
 
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
-                        SQLiteDataReader dr = command.ExecuteReader();
-                        if (dr != null
-                            && dr.HasRows == true)
+                        using (SQLiteDataReader dr = command.ExecuteReader())
                         {
-                            while (dr.Read())
+                            if (dr != null && dr.HasRows == true)
                             {
-                                if (dr.IsDBNull(0) == false)
-                                    filenames.Add(dr.GetString(0));
-                                if (dr.IsDBNull(1) == false)
-                                    filenames.Add(dr.GetString(1));
+                                while (dr.Read())
+                                {
+                                    if (dr.IsDBNull(0) == false)
+                                        filenames.Add(dr.GetString(0));
+                                    if (dr.IsDBNull(1) == false)
+                                        filenames.Add(dr.GetString(1));
+                                }
                             }
                         }
-                        dr.Close();
                     }
 
                     // 第二步：删除SQL行
@@ -20617,19 +20521,19 @@ handle.CancelTokenSource.Token).Result;
 
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
-                        MySqlDataReader dr = command.ExecuteReader();
-                        if (dr != null
-                            && dr.HasRows == true)
+                        using (MySqlDataReader dr = command.ExecuteReader())
                         {
-                            while (dr.Read())
+                            if (dr != null && dr.HasRows == true)
                             {
-                                if (dr.IsDBNull(0) == false)
-                                    filenames.Add(dr.GetString(0));
-                                if (dr.IsDBNull(1) == false)
-                                    filenames.Add(dr.GetString(1));
+                                while (dr.Read())
+                                {
+                                    if (dr.IsDBNull(0) == false)
+                                        filenames.Add(dr.GetString(0));
+                                    if (dr.IsDBNull(1) == false)
+                                        filenames.Add(dr.GetString(1));
+                                }
                             }
                         }
-                        dr.Close();
                     }
 
                     // 第二步：删除SQL行
@@ -20728,20 +20632,20 @@ handle.CancelTokenSource.Token).Result;
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
                         nExecuteCount++;
-                        OracleDataReader dr = command.ExecuteReader();
-                        if (dr != null
-                            && dr.HasRows == true)
+                        using (OracleDataReader dr = command.ExecuteReader())
                         {
-                            while (dr.Read())
+                            if (dr != null
+                                && dr.HasRows == true)
                             {
-                                if (dr.IsDBNull(0) == false)
-                                    filenames.Add(dr.GetString(0));
-                                if (dr.IsDBNull(1) == false)
-                                    filenames.Add(dr.GetString(1));
+                                while (dr.Read())
+                                {
+                                    if (dr.IsDBNull(0) == false)
+                                        filenames.Add(dr.GetString(0));
+                                    if (dr.IsDBNull(1) == false)
+                                        filenames.Add(dr.GetString(1));
+                                }
                             }
                         }
-                        if (dr != null)
-                            dr.Close();
                         command.Parameters.Clear();
                     }
 
@@ -20899,485 +20803,6 @@ handle.CancelTokenSource.Token).Result;
         }
     }
 
-    // 包装多种类型的Connection
-    public class Connection
-    {
-        public SqlDatabase SqlDatabase = null;
-        public SqlServerType SqlServerType = SqlServerType.None;
-        object m_connection = null;
-        bool m_bGlobal = false;
-        internal IDbTransaction m_trans = null;
-
-        ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
-        int m_nLockTimeout = 5 * 1000;
-
-        internal int m_nOpenCount = 0;
-        internal int m_nThreshold = 1000;
-
-        public void Clone(Connection connection)
-        {
-            this.SqlDatabase = connection.SqlDatabase;
-            this.SqlServerType = connection.SqlServerType;
-            this.m_connection = connection.m_connection;
-            this.m_bGlobal = connection.m_bGlobal;
-            this.m_lock = connection.m_lock;
-            this.m_nLockTimeout = connection.m_nLockTimeout;
-            this.m_nOpenCount = connection.m_nOpenCount;
-        }
-
-        /*
-        public Connection(SqlServerType server_type,
-            string strConnectionString)
-        {
-            this.SqlServerType = server_type;
-            if (server_type == rms.SqlServerType.MsSqlServer)
-                this.m_connection = new SqlConnection(strConnectionString);
-            else if (server_type == rms.SqlServerType.SQLite)
-                this.m_connection = new SQLiteConnection(strConnectionString);
-            else
-            {
-                throw new Exception("不支持的类型 " + server_type.ToString());
-            }
-        }
-         * */
-
-        public Connection(SqlDatabase database,
-            string strConnectionString,
-            ConnectionStyle style = ConnectionStyle.None)
-        {
-            this.SqlDatabase = database;
-            this.SqlServerType = database.container.SqlServerType;
-
-            if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
-                this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
-
-            if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                this.m_connection = new SqlConnection(strConnectionString);
-            else if (this.SqlServerType == rms.SqlServerType.SQLite)
-            {
-#if NO
-                // SQLite 专用, 快速的， 全局共用的
-                if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
-                {
-                    Debug.Assert(this.SqlDatabase.SQLiteInfo != null, "");
-
-                    lock (this.SqlDatabase.SQLiteInfo)
-                    {
-                        if (this.SqlDatabase.SQLiteInfo.FastMode == false)
-                        {
-                            this.m_connection = new SQLiteConnection(strConnectionString);
-                            return;
-                        }
-
-                        if (this.SqlDatabase.SQLiteInfo.m_connection == null)
-                        {
-                            this.m_connection = new SQLiteConnection(strConnectionString);
-                            this.m_bGlobal = true;
-                            this.SqlDatabase.SQLiteInfo.m_connection = this;
-                        }
-                        else
-                        {
-                            // 复制成员
-                            this.Clone(this.SqlDatabase.SQLiteInfo.m_connection);
-                            if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
-                                this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
-                        }
-                    }
-                    return;
-                }
-#endif
-                if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
-                {
-                    this.m_bGlobal = true;
-                }
-                this.m_connection = new SQLiteConnection(strConnectionString);
-            }
-            else if (this.SqlServerType == rms.SqlServerType.MySql)
-                this.m_connection = new MySqlConnection(strConnectionString);
-            else if (this.SqlServerType == rms.SqlServerType.Oracle)
-                this.m_connection = new OracleConnection(strConnectionString);
-            else
-            {
-                throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
-            }
-        }
-
-        void SQLiteConnectionOpen()
-        {
-#if REDO_OPEN
-            int nRedoCount = 0;
-            REDO:
-            try
-            {
-                this.SQLiteConnection.Open();
-            }
-            catch (SQLiteException ex)
-            {
-                if (ex.ErrorCode == SQLiteErrorCode.Busy
-                    && nRedoCount < 2)
-                {
-                    nRedoCount++;
-                    goto REDO;
-                }
-                throw ex;
-            }
-#else
-            this.SQLiteConnection.Open();
-#endif
-
-        }
-
-        public static void TryOpen(MySqlConnection connection,
-            SqlDatabase database)
-        {
-            Exception exception = null;
-            int nMax = 2;
-            for (int i = 0; i < nMax; i++)
-            {
-                try
-                {
-                    connection.Open();
-                }
-                catch (MySqlException ex)
-                {
-                    // 异常记入日志
-                    if (database != null
-                        && database.container != null
-                        && database.container.KernelApplication != null)
-                        database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
-
-                    exception = ex;
-                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
-                        && ex.InnerException is ArgumentException)
-                    {
-                        // 重试过程记入日志
-                        if (database != null
-                            && database.container != null
-                            && database.container.KernelApplication != null)
-                            database.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
-
-                        {
-                            Thread.Sleep(500);
-                            continue;
-                        }
-                    }
-                    throw ex;
-                }
-                return;
-            }
-            if (exception != null)
-                throw exception;
-        }
-
-        public void TryOpen()
-        {
-            Exception exception = null;
-            int nMax = 2;
-            for (int i = 0; i < nMax; i++)
-            {
-                try
-                {
-                    this._open();
-                }
-                catch (MySqlException ex)
-                {
-                    // 异常记入日志
-                    if (this.SqlDatabase != null
-                        && this.SqlDatabase.container != null
-                        && this.SqlDatabase.container.KernelApplication != null)
-                        this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
-
-                    exception = ex;
-                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
-                        && ex.InnerException is ArgumentException)
-                    {
-                        // 重试过程记入日志
-                        if (this.SqlDatabase != null
-                            && this.SqlDatabase.container != null
-                            && this.SqlDatabase.container.KernelApplication != null)
-                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
-
-                        {
-                            Thread.Sleep(500);
-                            continue;
-                        }
-                    }
-                    throw ex;
-                }
-                return;
-            }
-            if (exception != null)
-                throw exception;
-        }
-
-        /*public*/
-        void _open()
-        {
-            if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                this.SqlConnection.Open();
-            else if (this.SqlServerType == rms.SqlServerType.SQLite)
-            {
-                if (this.m_bGlobal == false)
-                {
-                    this.SQLiteConnectionOpen();
-                    return;
-                }
-
-                if (this.m_bGlobal == true)
-                {
-                    if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
-                        this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
-
-                    if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                        throw new ApplicationException("为Database全局Connection (Open) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
-
-                    this.m_nOpenCount++;
-                    if (this.m_nOpenCount > this.m_nThreshold)
-                    {
-                        this.m_nOpenCount = 0;
-                        this.SqlDatabase.container.ActivateCommit();
-                    }
-
-                    if (this.SQLiteConnection.State == ConnectionState.Closed)
-                    {
-                        this.SQLiteConnectionOpen();
-
-                        Debug.Assert(this.m_trans == null, ""); // 不要忘记了提交以前的Transaction ?
-
-                        this.m_trans = this.SQLiteConnection.BeginTransaction();
-                    }
-                    else
-                    {
-                        if (this.m_trans == null)
-                            this.m_trans = this.SQLiteConnection.BeginTransaction();
-                    }
-                }
-            }
-            else if (this.SqlServerType == rms.SqlServerType.MySql)
-                this.MySqlConnection.Open();
-            else if (this.SqlServerType == rms.SqlServerType.Oracle)
-            {
-                this.OracleConnection.Open();
-
-#if NO
-                int nRedoCount = 0;
-            REDO_OPEN:
-                try
-                {
-                    this.OracleConnection.Open();
-                    if (this.OracleConnection.State != ConnectionState.Open)
-                    {
-                        if (nRedoCount <= 5)
-                        {
-                            nRedoCount++;
-                            goto REDO_OPEN;
-                        }
-                        else
-                        {
-                            Debug.Assert(false, "");
-                        }
-                    }
-
-                }
-                catch (OracleException ex)
-                {
-                    if (ex.Errors.Count > 0 && ex.Errors[0].Number == 12520
-                        && nRedoCount <= 0)
-                    {
-                        nRedoCount++;
-                        this.OracleConnection.Close();
-                        goto REDO_OPEN;
-                    }
-
-                    throw ex;
-                }
-#endif
-            }
-            else
-            {
-                throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
-            }
-        }
-
-
-        // parameters:
-        //      bAuto   是否自动关闭。 false表示强制关闭
-        public void Close(bool bAuto = true)
-        {
-            if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-            {
-                this.SqlConnection.Close();
-                this.SqlConnection.Dispose();
-            }
-            else if (this.SqlServerType == rms.SqlServerType.SQLite)
-            {
-                // 需要加锁
-                // 只有强制关闭，全局的Connection才能真正关闭
-                if (bAuto == false && this.m_bGlobal == true)
-                {
-
-
-                    // 强制提交
-                    if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                        throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
-                    try
-                    {
-                        if (this.m_trans != null)
-                        {
-                            this.m_trans.Commit();
-                            this.m_trans = null;
-
-                            // this.m_nOpenCount = 0;
-                        }
-
-                        this.SQLiteConnection.Close();
-                        this.SQLiteConnection.Dispose();
-                    }
-                    finally
-                    {
-                        if (this.m_lock != null)
-                            this.m_lock.ExitWriteLock();
-                    }
-                    return;
-                }
-
-                if (m_bGlobal == true)
-                {
-                    if (this.m_lock != null)
-                        this.m_lock.ExitWriteLock();
-                }
-
-                // 不加锁的版本
-                // 不是全局的每次都要关闭
-                if (this.m_bGlobal == false)
-                {
-                    if (this.m_trans != null)
-                    {
-                        this.m_trans.Commit();
-                        this.m_trans = null;
-                    }
-                    this.SQLiteConnection.Close();
-                    this.SQLiteConnection.Dispose();
-                }
-            }
-            else if (this.SqlServerType == rms.SqlServerType.MySql)
-            {
-                this.MySqlConnection.Close();
-                this.MySqlConnection.Dispose();
-            }
-            else if (this.SqlServerType == rms.SqlServerType.Oracle)
-            {
-                /*
-                using (OracleCommand command = new OracleCommand("select count(*) from v$session", this.OracleConnection))
-                {
-                    object result = command.ExecuteScalar();
-                    Debug.WriteLine("session=" + result.ToString());
-                }
-                 * */
-
-                this.OracleConnection.Close();
-                this.OracleConnection.Dispose();
-            }
-            else
-            {
-                throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
-            }
-        }
-
-        // parameters:
-        //      bLock   是否需要加锁。2013/3/2
-        public void Commit(bool bLock = true)
-        {
-            if (this.SqlServerType == rms.SqlServerType.SQLite)
-            {
-                // 需要加锁
-                // 只有强制关闭，全局的Connection才能真正关闭
-                if (this.m_bGlobal == true)
-                {
-
-                    // 强制提交
-                    if (bLock == true)
-                    {
-                        if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                            throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
-                    }
-
-                    try
-                    {
-                        if (this.m_trans != null)
-                        {
-
-                            this.m_trans.Commit();
-                            this.m_trans = null;
-
-                            /*
-                            Debug.Assert(this.m_trans == null, "");
-                            this.m_trans = this.SQLiteConnection.BeginTransaction();
-
-                            this.m_nOpenCount = 0;
-                             * */
-                        }
-                    }
-                    finally
-                    {
-                        if (bLock == true)
-                        {
-                            if (this.m_lock != null)
-                                this.m_lock.ExitWriteLock();
-                        }
-                    }
-                    return;
-                }
-
-                // 不加锁的版本
-                // 不是全局的
-                if (this.m_bGlobal == false)
-                {
-                    if (this.m_trans != null)
-                    {
-                        this.m_trans.Commit();
-                        this.m_trans = null;
-
-                        Debug.Assert(this.m_trans == null, "");
-                        this.m_trans = this.SQLiteConnection.BeginTransaction();
-                    }
-                }
-            }
-        }
-
-
-        public SqlConnection SqlConnection
-        {
-            get
-            {
-                return (SqlConnection)m_connection;
-            }
-        }
-
-        public SQLiteConnection SQLiteConnection
-        {
-            get
-            {
-                return (SQLiteConnection)m_connection;
-            }
-        }
-
-        public MySqlConnection MySqlConnection
-        {
-            get
-            {
-                return (MySqlConnection)m_connection;
-            }
-        }
-
-        public OracleConnection OracleConnection
-        {
-            get
-            {
-                return (OracleConnection)m_connection;
-            }
-        }
-    }
 
     public class SQLiteInfo
     {

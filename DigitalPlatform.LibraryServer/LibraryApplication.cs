@@ -502,6 +502,7 @@ namespace DigitalPlatform.LibraryServer
 
                 this.Close();   // 2007/6/8 移动到这里的
 
+                _physicalFileCache?.Dispose();
 
                 /*
                 // Call the appropriate methods to clean up 
@@ -15238,12 +15239,16 @@ strLibraryCode);    // 读者所在的馆代码
                 DomUtil.SetElementText(dom.DocumentElement, "text", strText);
 
                 // 向 MSMQ 消息队列发送消息
+                // return:
+                //      -2  MSMQ 错误
+                //      -1  出错
+                //      0   成功
                 int nRet = ReadersMonitor.SendToQueue(queue,
                     strUserName + "@LUID:" + this.UID,
                     "xml",
                     dom.DocumentElement.OuterXml,
                     out strError);
-                if (nRet == -1)
+                if (nRet == -1 || nRet == -2)
                 {
                     strError = "发送 MQ 消息时出错: " + strError;
                     return -1;

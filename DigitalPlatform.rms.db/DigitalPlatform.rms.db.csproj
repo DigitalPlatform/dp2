@@ -213,6 +213,7 @@
     </Compile>
     <Compile Include="BatchTask\BatchTask.cs" />
     <Compile Include="BatchTask\RebuildKeysTask.cs" />
+    <Compile Include="Connection.cs" />
     <Compile Include="database.cs">
       <SubType>Code</SubType>
     </Compile>

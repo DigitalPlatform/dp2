@@ -1829,13 +1829,17 @@ namespace DigitalPlatform.LibraryServer
                     MessageQueue queue = new MessageQueue(this.OutgoingQueue);
 
                     // 向 MSMQ 消息队列发送消息
+                    // return:
+                    //      -2  MSMQ 错误
+                    //      -1  出错
+                    //      0   成功
                     nRet = ReadersMonitor.SendToQueue(queue,
                         (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
                         + "@LUID:" + this.UID,
                         "xml",
                         dom.DocumentElement.OuterXml,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                     {
                         strTotalError += "发送 MQ 消息时出错: " + strError + "\r\n";
                     }
@@ -2438,13 +2442,17 @@ namespace DigitalPlatform.LibraryServer
                     MessageQueue queue = new MessageQueue(this.OutgoingQueue);
 
                     // 向 MSMQ 消息队列发送消息
+                    // return:
+                    //      -2  MSMQ 错误
+                    //      -1  出错
+                    //      0   成功
                     nRet = ReadersMonitor.SendToQueue(queue,
                         (string.IsNullOrEmpty(strReaderRefID) ? strReaderBarcode : "!refID:" + strReaderRefID)
                         + "@LUID:" + this.UID,
                         "xml",
                         dom.DocumentElement.OuterXml,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                     {
                         strTotalError += "发送 MQ 消息时出错: " + strError + "\r\n";
                     }

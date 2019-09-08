@@ -60,7 +60,7 @@ namespace dp2SSL
             // App.CurrentApp.Speak("启动后台线程");
             Base.Start((channel) =>
             {
-                var result = channel.Object.GetState("");
+                var result = channel.Object.GetState("camera");
                 if (result.Value == -1)
                     throw new Exception($"人脸中心当前处于 {result.ErrorCode} 状态({result.ErrorInfo})");
 
