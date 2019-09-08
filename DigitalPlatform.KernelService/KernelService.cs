@@ -518,8 +518,8 @@ namespace dp2Kernel
 
             if (sessioninfo.InSearching > 0)
             {
-                if (sessioninfo.ChannelHandle != null)
-                    sessioninfo.ChannelHandle.DoStop();
+                // if (sessioninfo.ChannelHandle != null)
+                    sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个stop的到来，前一个search不得不中断 ");
             }
@@ -556,8 +556,8 @@ namespace dp2Kernel
 
             if (sessioninfo.InSearching > 0)
             {
-                if (sessioninfo.ChannelHandle != null)
-                    sessioninfo.ChannelHandle.DoStop();
+                // if (sessioninfo.ChannelHandle != null)
+                    sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个search(ex)的到来，前一个search(ex)不得不中断 ");
             }
@@ -576,105 +576,116 @@ namespace dp2Kernel
                 if (PrepareUser(ref result) == -1)
                     return result;
 
-                ChannelHandle handle = new ChannelHandle(app);
-                handle.Idle += new ChannelIdleEventHandler(handle_Idle);
-                handle.Stop += new EventHandler(handle_Stop);
-
-                sessioninfo.ChannelHandle = handle;
-
-                DpResultSet resultSet = null;
-
-                // Debug.WriteLine(strQuery);
-
-                // resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
-                if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
-                    resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
-                else
-                    resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
-
-                lock (result)
+                using (ChannelHandle handle = new ChannelHandle(app))
                 {
-                    if (resultSet != null)
-                        resultSet.Clear();
+                    handle.Idle += new ChannelIdleEventHandler(handle_Idle);
+                    handle.Stop += new EventHandler(handle_Stop);
 
-                    int nRet = 0;
-                    string strError = "";
-
-                    app.MyWriteDebugInfo("begin searchex1 " + strQuery);
-
-                    DpResultSet old_resultset = resultSet;
-                    // return:
-                    //		-1	出错
-                    //      -6  权限不够
-                    //		0	成功
-                    nRet = app.Dbs.API_Search(
-                        sessioninfo,
-                        strQuery,
-                        ref resultSet,
-                        user,           //注意测一下没有权限的帐户
-                        handle,
-                        strSearchStyle,
-                        out strError);
-
-                    app.MyWriteDebugInfo("end searchex1 lRet=" + nRet.ToString() + " " + strQuery);
-
-                    if (nRet <= -1)
+                    sessioninfo.ChannelHandle = handle;
+                    try
                     {
-                        result.Value = -1;
-                        if (handle.Stopped == true)
-                            result.ErrorCode = ErrorCodeValue.Canceled;
+                        DpResultSet resultSet = null;
+
+                        // Debug.WriteLine(strQuery);
+
+                        // resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
+                        if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                            resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
                         else
-                            result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
-                        result.ErrorString = strError;
-                        return result;
-                    }
+                            resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
 
-                    // throw new Exception("test exception"); 测试用
+                        lock (result)
+                        {
+                            if (resultSet != null)
+                                resultSet.Clear();
 
-                    result.Value = resultSet.Count;  //执行成功时，result.Value等于提取记录的数量
+                            int nRet = 0;
+
+                            app.MyWriteDebugInfo("begin searchex1 " + strQuery);
+
+                            DpResultSet old_resultset = resultSet;
+                            // return:
+                            //		-1	出错
+                            //      -6  权限不够
+                            //		0	成功
+                            nRet = app.Dbs.API_Search(
+                                sessioninfo,
+                                strQuery,
+                                ref resultSet,
+                                user,           //注意测一下没有权限的帐户
+                                handle,
+                                strSearchStyle,
+                                out string strError);
+
+                            app.MyWriteDebugInfo("end searchex1 lRet=" + nRet.ToString() + " " + strQuery);
+
+                            if (nRet <= -1)
+                            {
+                                result.Value = -1;
+                                if (handle.Stopped == true)
+                                    result.ErrorCode = ErrorCodeValue.Canceled;
+                                else
+                                    result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                                result.ErrorString = strError;
+                                return result;
+                            }
+
+                            // throw new Exception("test exception"); 测试用
+
+                            result.Value = resultSet.Count;  //执行成功时，result.Value等于提取记录的数量
 
 #if NO
                     if (old_resultset != resultSet)
                         sessioninfo.SetResultSet(strResultSetName, resultSet);
 #endif
-                    if (old_resultset != resultSet)
-                    {
-                        if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
-                            app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
-                        else
-                            sessioninfo.SetResultSet1(strResultSetName, resultSet);
-                    }
+                            if (old_resultset != resultSet)
+                            {
+                                if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                                    app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
+                                else
+                                    sessioninfo.SetResultSet1(strResultSetName, resultSet);
+                            }
 
-                    // GC.Collect();    // 可以确认结果集临时文件立即删除了
+                            // GC.Collect();    // 可以确认结果集临时文件立即删除了
 
-                    if (lRecordCount != 0 && resultSet.Count > 0)
-                    {
-                        // 获得若干记录
-                        // result:
-                        //		-1	出错
-                        //		>=0	结果集的总数
-                        long lRet = this.sessioninfo.API_GetRecords(
-                            resultSet,
-                            0,
-                            lRecordCount,
-                            strLang,
-                            strRecordStyle,
-                            out records,
-                            out strError);
-                        if (lRet <= -1)
-                        {
-                            result.Value = -1;
-                            result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
-                            result.ErrorString = "虽然检索已经成功，但是获取记录时发生错误: " + strError;
-                            return result;
-                        }
-                    }
-                    else
-                    {
-                        records = new Record[0];    // 2017/8/23
-                    }
+                            if (lRecordCount != 0 && resultSet.Count > 0)
+                            {
+                                // 获得若干记录
+                                // result:
+                                //		-1	出错
+                                //		>=0	结果集的总数
+                                long lRet = this.sessioninfo.API_GetRecords(
+                                    resultSet,
+                                    0,
+                                    lRecordCount,
+                                    strLang,
+                                    strRecordStyle,
+                                    out records,
+                                    out strError);
+                                if (lRet <= -1)
+                                {
+                                    result.Value = -1;
+                                    result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
+                                    result.ErrorString = "虽然检索已经成功，但是获取记录时发生错误: " + strError;
+                                    return result;
+                                }
+                            }
+                            else
+                            {
+                                records = new Record[0];    // 2017/8/23
+                            }
 
-                } // end of lock
+                        } // end of lock
+
+                    }
+                    finally
+                    {
+                        handle.Idle -= new ChannelIdleEventHandler(handle_Idle);
+                        handle.Stop -= new EventHandler(handle_Stop);
+
+                        sessioninfo.ChannelHandle = null;
+                    }
+                }
             }
             catch (Exception ex)    // TODO: 将来把异常处理在中层函数内
             {
@@ -717,8 +728,8 @@ namespace dp2Kernel
 
             if (sessioninfo.InSearching > 0)
             {
-                if (sessioninfo.ChannelHandle != null)
-                    sessioninfo.ChannelHandle.DoStop();
+                // if (sessioninfo.ChannelHandle != null)
+                    sessioninfo?.ChannelHandle?.DoStop();
 
                 app.MyWriteDebugInfo("因后一个search的到来，前一个search不得不中断 ");
             }
@@ -744,90 +755,101 @@ namespace dp2Kernel
                     new Delegate_isConnected(this.myIsConnected);
 #endif
 
-                ChannelHandle handle = new ChannelHandle(app);
-                handle.Idle += new ChannelIdleEventHandler(handle_Idle);
-                handle.Stop += new EventHandler(handle_Stop);
-
-                sessioninfo.ChannelHandle = handle;
-
-                DpResultSet resultSet = null;
-
-                if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
-                    resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
-                else
-                    resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
-
-                lock (result)
+                using (ChannelHandle handle = new ChannelHandle(app))
                 {
-                    if (resultSet != null)
-                        resultSet.Clear();
+                    handle.Idle += new ChannelIdleEventHandler(handle_Idle);
+                    handle.Stop += new EventHandler(handle_Stop);
 
-                    int nRet = 0;
-                    string strError = "";
-
-                    app.MyWriteDebugInfo("begin search1 " + strQuery);
-
-                    DpResultSet old_resultset = resultSet;
-                    // return:
-                    //		-1	出错
-                    //      -6  权限不够
-                    //		0	成功
-                    nRet = app.Dbs.API_Search(
-                        sessioninfo,
-                        strQuery,
-                        ref resultSet,
-                        user,           //注意测一下没有权限的帐户
-                        handle,
-                        // procIsConnected,
-                        strOutputStyle,
-                        out strError);
-
-                    /*
-                    int v = 0;
-                    for (int i = 0; i < 10000; i++)
+                    sessioninfo.ChannelHandle = handle;
+                    try
                     {
-                        Thread.Sleep(1);
-                        if (OperationContext.Current.Channel.State == CommunicationState.Closed
-                            || OperationContext.Current.Channel.State == CommunicationState.Closing)
-                        {
-                            app.Dbs.MyWriteDebugInfo("abort Test ");
-                            break;   //中断
-                        }
-                        v++;
-                    }
-                    result.Value = v;
-                    return result;
-                     * */
+                        DpResultSet resultSet = null;
 
-
-                    app.MyWriteDebugInfo("end search1 lRet=" + nRet.ToString() + " " + strQuery);
-
-
-                    if (nRet <= -1)
-                    {
-                        result.Value = -1;
-                        if (handle.Stopped == true)
-                            result.ErrorCode = ErrorCodeValue.Canceled;
-                        else
-                            result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
-                        result.ErrorString = strError;
-                        return result;
-                    }
-
-                    // throw new Exception("test exception"); 测试用
-
-                    result.Value = resultSet.Count;  //执行成功时，result.Value等于提取记录的数量
-
-                    if (old_resultset != resultSet)
-                    {
                         if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
-                            app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
+                            resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
                         else
-                            sessioninfo.SetResultSet1(strResultSetName, resultSet);
+                            resultSet = this.sessioninfo.GetResultSet(strResultSetName, false);
 
+                        lock (result)
+                        {
+                            if (resultSet != null)
+                                resultSet.Clear();
+
+                            int nRet = 0;
+                            string strError = "";
+
+                            app.MyWriteDebugInfo("begin search1 " + strQuery);
+
+                            DpResultSet old_resultset = resultSet;
+                            // return:
+                            //		-1	出错
+                            //      -6  权限不够
+                            //		0	成功
+                            nRet = app.Dbs.API_Search(
+                                sessioninfo,
+                                strQuery,
+                                ref resultSet,
+                                user,           //注意测一下没有权限的帐户
+                                handle,
+                                // procIsConnected,
+                                strOutputStyle,
+                                out strError);
+
+                            /*
+                            int v = 0;
+                            for (int i = 0; i < 10000; i++)
+                            {
+                                Thread.Sleep(1);
+                                if (OperationContext.Current.Channel.State == CommunicationState.Closed
+                                    || OperationContext.Current.Channel.State == CommunicationState.Closing)
+                                {
+                                    app.Dbs.MyWriteDebugInfo("abort Test ");
+                                    break;   //中断
+                                }
+                                v++;
+                            }
+                            result.Value = v;
+                            return result;
+                             * */
+
+
+                            app.MyWriteDebugInfo("end search1 lRet=" + nRet.ToString() + " " + strQuery);
+
+
+                            if (nRet <= -1)
+                            {
+                                result.Value = -1;
+                                if (handle.Stopped == true)
+                                    result.ErrorCode = ErrorCodeValue.Canceled;
+                                else
+                                    result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                                result.ErrorString = strError;
+                                return result;
+                            }
+
+                            // throw new Exception("test exception"); 测试用
+
+                            result.Value = resultSet.Count;  //执行成功时，result.Value等于提取记录的数量
+
+                            if (old_resultset != resultSet)
+                            {
+                                if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                                    app.ResultSets.SetResultset(strResultSetName.Substring(1), resultSet);
+                                else
+                                    sessioninfo.SetResultSet1(strResultSetName, resultSet);
+
+                            }
+
+                        } // end of lock
                     }
+                    finally
+                    {
+                        handle.Idle -= new ChannelIdleEventHandler(handle_Idle);
+                        handle.Stop -= new EventHandler(handle_Stop);
 
-                } // end of lock
+                        sessioninfo.ChannelHandle = null;
+                    }
+                }
             }
             catch (Exception ex)    // TODO: 将来把异常处理在中层函数内
             {

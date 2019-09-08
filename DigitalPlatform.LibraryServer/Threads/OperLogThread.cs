@@ -168,11 +168,10 @@ namespace DigitalPlatform.LibraryServer
                 if (this.ChargingOperEnabled == true
                     && (strOperation == "borrow" || strOperation == "return"))
                 {
-                    string strError = "";
                     int nRet = BuildMongoOperDatabase.AppendOperationBorrowReturn(this.App,
                         dom,
                         strOperation,
-                        out strError);
+                        out string strError);
                     if (nRet == -1)
                         this.App.WriteErrorLog("OperLogThread 写入 mongodb 日志库时出错: " + strError);
                 }
@@ -190,19 +189,30 @@ namespace DigitalPlatform.LibraryServer
                     )
                 {
                     // 写入 MSMQ 队列
-                    string strError = "";
+                    // return:
+                    //      -2  MSMQ 错误
+                    //      -1  出错
+                    //      0   成功
                     int nRet = SendToQueue(
                         dom,
                         strOperation,
-                        out strError);
-                    if (nRet == -1)
+                        out string strError);
+                    if (nRet == -1 || nRet == -2)
                         this.App.WriteErrorLog("OperLogThread 写入 MSMQ 队列时出错: " + strError);
+
+                    // 2019/9/8
+                    if (nRet == -2)
+                        this.App.AddHangup("MessageQueueWriteFail");
                 }
             }
         }
 
         MessageQueue _queue = null;
 
+        // return:
+        //      -2  MSMQ 错误
+        //      -1  出错
+        //      0   成功
         int SendToQueue(XmlDocument domOperLog,
             string strOperation,
             out string strError)
@@ -246,6 +256,10 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             // 向 MSMQ 消息队列发送消息
+            // return:
+            //      -2  MSMQ 错误
+            //      -1  出错
+            //      0   成功
             return ReadersMonitor.SendToQueue(this._queue,
                 (string.IsNullOrEmpty(strReaderRefID) ? strReaderBarcode : "!refID:" + strReaderRefID)
                 + "@LUID:" + this.App.UID,

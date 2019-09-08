@@ -32,7 +32,7 @@ namespace dp2SSL
     /// 借书功能页面
     /// PageBorrow.xaml 的交互逻辑
     /// </summary>
-    public partial class PageBorrow : Page, INotifyPropertyChanged, IDisposable
+    public partial class PageBorrow : Page, INotifyPropertyChanged
     {
         LayoutAdorner _adorner = null;
         AdornerLayer _layer = null;
@@ -188,6 +188,15 @@ namespace dp2SSL
             {
                 return await Task.Run<RecognitionFaceResult>(() =>
                 {
+                    // 2019/9/6 增加
+                    var result = FaceManager.GetState("camera");
+                    if (result.Value == -1)
+                        return new RecognitionFaceResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
                     return FaceManager.RecognitionFace("");
                 });
             }
@@ -2085,6 +2094,16 @@ out string strError);
                             DisplayVideo(videoRegister);
                         });
 
+                        // 2019/9/6 增加
+                        {
+                            var state_result = FaceManager.GetState("camera");
+                            if (state_result.Value == -1)
+                            {
+                                DisplayError(ref videoRegister, state_result.ErrorInfo);
+                                return;
+                            }
+                        }
+
                         // 启动一个单独的显示倒计时数字的任务
                         var task1 = Task.Run(() =>
                         {
@@ -2092,11 +2111,16 @@ out string strError);
                             {
                                 if (_stopVideo == true)
                                     break;
+
+                                if (videoRegister == null)
+                                    break;
+
                                 if (videoRegister != null)
                                 {
                                     Application.Current.Dispatcher.Invoke(new Action(() =>
                                     {
-                                        videoRegister.TitleText = $"倒计时 {i}";
+                                        if (videoRegister != null)
+                                            videoRegister.TitleText = $"倒计时 {i}";
                                     }));
                                 }
                                 Thread.Sleep(1000);
@@ -2109,6 +2133,8 @@ out string strError);
                                 }));
                             }
                         });
+
+
 
                         result = await GetFeatureString("returnImage,countDown,format:jpeg");
                         if (result.Value == -1)
@@ -2720,6 +2746,15 @@ string usage)
             {
                 return await Task.Run<GetFeatureStringResult>(() =>
                 {
+                    // 2019/9/6 增加
+                    var result = FaceManager.GetState("camera");
+                    if (result.Value == -1)
+                        return new GetFeatureStringResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
                     return FaceManager.GetFeatureString(null, "", style);
                 });
             }
@@ -2750,8 +2785,5 @@ string usage)
             }
         }
 
-        void IDisposable.Dispose()
-        {
-        }
     }
 }

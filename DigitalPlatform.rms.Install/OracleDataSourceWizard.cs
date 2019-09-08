@@ -270,7 +270,7 @@ namespace DigitalPlatform.rms
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
             return;
-        ERROR1:
+            ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -359,7 +359,7 @@ namespace DigitalPlatform.rms
                 StringBuilder text = new StringBuilder();
                 foreach (DbaUser user in this.DbaUsers)
                 {
-                    text.Append("username=" + user.Name + ";default_tablespace=" + user.TableSpace+"\r\n");
+                    text.Append("username=" + user.Name + ";default_tablespace=" + user.TableSpace + "\r\n");
                 }
                 return "数据库服务器名: " + this.ServerName + "\r\n"
                     + "用户名: " + this.SqlUserName + "\r\n"
@@ -368,7 +368,7 @@ namespace DigitalPlatform.rms
 
             public DbaUser FindUser(string strUserName)
             {
-                foreach(DbaUser user in this.DbaUsers)
+                foreach (DbaUser user in this.DbaUsers)
                 {
                     if (user.Name.ToUpper() == strUserName.ToUpper())
                         return user;
@@ -398,7 +398,7 @@ namespace DigitalPlatform.rms
             dlg.SqlServerName = strSqlServerName;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-        REDO_INPUT:
+            REDO_INPUT:
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -449,26 +449,29 @@ namespace DigitalPlatform.rms
             try
             {
                 string strCommand = "";
-                OracleCommand command = null;
-
                 strCommand = "select username,default_tablespace from dba_users";
-                command = new OracleCommand(strCommand,
-                    connection);
-                try
+
+                using (OracleCommand command = new OracleCommand(strCommand,
+                    connection))
                 {
-                    OracleDataReader reader = command.ExecuteReader();
-                    while (reader.Read() == true)
+                    try
                     {
-                        DbaUser user = new DbaUser();
-                        user.Name = reader.GetString(0);
-                        user.TableSpace = reader.GetString(1);
-                        info.DbaUsers.Add(user);
+                        using (OracleDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read() == true)
+                            {
+                                DbaUser user = new DbaUser();
+                                user.Name = reader.GetString(0);
+                                user.TableSpace = reader.GetString(1);
+                                info.DbaUsers.Add(user);
+                            }
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    strError = "执行命令 " + strCommand + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
-                    return -1;
+                    catch (Exception ex)
+                    {
+                        strError = "执行命令 " + strCommand + " 出错：" + ex.Message + " 类型：" + ex.GetType().ToString();
+                        return -1;
+                    }
                 }
             }
             finally
@@ -576,7 +579,7 @@ namespace DigitalPlatform.rms
                             if (user.TableSpace.ToUpper() == "SYSTEM"
                                 || user.TableSpace.ToUpper() == "SYSAUX")
                             {
-                                strError = "用户 '"+user.Name+"' 的表空间为 "+user.TableSpace+"，不适合用作 dp2kernel 用户。请重新指定或创建一个用户";
+                                strError = "用户 '" + user.Name + "' 的表空间为 " + user.TableSpace + "，不适合用作 dp2kernel 用户。请重新指定或创建一个用户";
                                 return -1;
                             }
                             return 1;
@@ -683,10 +686,12 @@ namespace DigitalPlatform.rms
                     {
                         using (OracleCommand command = new OracleCommand(strCommand, connection))
                         {
-                            OracleDataReader reader = command.ExecuteReader();
-                            while (reader.Read() == true)
+                            using (OracleDataReader reader = command.ExecuteReader())
                             {
-                                strTableSpaceFileName = reader.GetString(0);
+                                while (reader.Read() == true)
+                                {
+                                    strTableSpaceFileName = reader.GetString(0);
+                                }
                             }
                         }
                     }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define TESTING  // 增加了一些专门的线程来不断密集收缩 _items。增加测试强度
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.IO
 {
@@ -20,9 +23,25 @@ namespace DigitalPlatform.IO
 
         List<StreamItem> _items = new List<StreamItem>();
 
+#if TESTING
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+#endif
+
         public StreamCache(int nMaxItems)
         {
             MAX_ITEMS = nMaxItems;
+
+#if TESTING
+            CancellationToken token = _cancel.Token;
+            Task.Run(() =>
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    Thread.Sleep(1);
+                    this.ClearIdle(TimeSpan.FromSeconds(5));
+                }
+            });
+#endif
         }
 
         public void FileDelete(string filename)
@@ -48,6 +67,47 @@ namespace DigitalPlatform.IO
             File.Move(strSourceFileName, strFileName);
         }
 
+        // 改保守一点的版本
+        // 注：本函数要慎用
+        public void ClearItems(string strFilePath)
+        {
+            List<StreamItem> items = new List<StreamItem>();
+            m_lock.EnterWriteLock();
+            try
+            {
+                foreach (StreamItem item in _items)
+                {
+                    if (item.FilePath == strFilePath)
+                    {
+                        items.Add(item);
+                    }
+                }
+
+                foreach (StreamItem item in items)
+                {
+                    _items.Remove(item);
+                    item.Close();
+                    item.Dispose();
+                    /*
+                    if (item.FileStream != null)
+                    {
+                        if ((item.FileAccess & FileAccess.Write) != 0)
+                            item.FileStream.Flush();    // 2019/9/2
+                        item.FileStream.Close();
+                    }
+                    */
+                }
+            }
+            finally
+            {
+                m_lock.ExitWriteLock();
+            }
+        }
+
+
+#if OLD_CODE
+        // 原来版本
+        // 注：本函数要慎用
         public void ClearItems(string strFilePath)
         {
             List<StreamItem> items = new List<StreamItem>();
@@ -69,7 +129,7 @@ namespace DigitalPlatform.IO
 
             if (items.Count > 0)
             {
-                m_lock.EnterWriteLock();
+                m_lock.EnterWriteLock();    // TODO: 这样锁定可能会有问题。最好简化锁定，整个函数放在一个写锁定中
                 try
                 {
                     foreach (StreamItem item in items)
@@ -89,6 +149,8 @@ namespace DigitalPlatform.IO
                 }
             }
         }
+
+#endif
 
         public StreamItem FindItem(string strFilePath, FileAccess access)
         {
@@ -124,7 +186,7 @@ namespace DigitalPlatform.IO
         {
             // 防备尺寸过大
             if (bAddToCollection && _items.Count > MAX_ITEMS)
-                ClearAll();
+                ClearAll(true);
 
             StreamItem item = new StreamItem
             {
@@ -186,6 +248,8 @@ namespace DigitalPlatform.IO
         public StreamItem GetWriteStream(string strFilePath, bool bAddToCollection = true)
         {
             return GetStream(strFilePath, FileMode.OpenOrCreate, FileAccess.Write, bAddToCollection);
+            // testing
+            // return GetStream(strFilePath, FileMode.OpenOrCreate, FileAccess.Write, false);
         }
 #if NO
         public StreamItem GetWriteStream(string strFilePath)
@@ -206,6 +270,7 @@ namespace DigitalPlatform.IO
         {
             if (item.Fly)
             {
+                /*
                 if (item.FileStream != null)
                 {
                     if ((item.FileAccess & FileAccess.Write) != 0)
@@ -213,7 +278,10 @@ namespace DigitalPlatform.IO
                     item.FileStream.Close();
                     item.FileStream = null;
                 }
+                */
+                item.Close();
                 item.DecUse();
+                item.Dispose();
                 return;
             }
 
@@ -226,20 +294,48 @@ namespace DigitalPlatform.IO
             item.DecUse();
         }
 
-        public void ClearAll()
+        // parameters:
+        //      check_inUse   是否避免删除 InUse 状态的对象？
+        public void ClearAll(bool check_inUse = false)
         {
             m_lock.EnterWriteLock();
             try
             {
+                // 要保留的对象列表
+                List<StreamItem> reserve_items = new List<StreamItem>();
+
                 foreach (StreamItem item in _items)
                 {
+                    if (check_inUse)
+                    {
+                        int v = item.IncUse();
+                        if (v == 1)
+                        {
+                            // 说明 inc 以前是 0。适合删除
+                        }
+                        else
+                        {
+                            item.DecUse();
+                            reserve_items.Add(item);
+                            continue;
+                        }
+                    }
+
+                    /*
                     if ((item.FileAccess & FileAccess.Write) != 0)
                         item.FileStream.Flush();    // 2019/9/2
                     item.FileStream.Close();
                     item.FileStream = null;
+                    */
+                    item.Close();
+
+                    if (check_inUse)
+                        item.DecUse();
+
+                    item.Dispose();
                 }
 
-                _items.Clear();
+                _items = reserve_items;
             }
             finally
             {
@@ -247,6 +343,58 @@ namespace DigitalPlatform.IO
             }
         }
 
+        // 改保守以后的版本
+        // 清除闲置时间过长的事项
+        public void ClearIdle(TimeSpan delta)
+        {
+            DateTime now = DateTime.Now;
+
+            List<StreamItem> delete_items = new List<StreamItem>();
+            List<StreamItem> all_items = new List<StreamItem>();
+
+            // 加锁
+            m_lock.EnterWriteLock();
+            try
+            {
+                all_items.AddRange(_items);
+
+                foreach (StreamItem item in all_items)
+                {
+                    if (now - item.LastTime > delta)
+                    {
+                        int v = item.IncUse();
+                        if (v == 1)
+                            delete_items.Add(item); // item 此时处于 InUse 状态，以后也不会有人用到它
+                        else
+                            item.DecUse();
+                    }
+                }
+
+                foreach (StreamItem item in delete_items)
+                {
+                    _items.Remove(item);
+                }
+            }
+            finally
+            {
+                m_lock.ExitWriteLock();
+            }
+
+            foreach (StreamItem item in delete_items)
+            {
+                /*
+                if ((item.FileAccess & FileAccess.Write) != 0)
+                    item.FileStream.Flush();    // 2019/9/2
+                item.FileStream.Close();
+                item.FileStream = null;
+                */
+                item.Close();
+                item.Dispose();
+            }
+        }
+
+#if OLD_CODE
+        // 原来版本
         // 清除闲置时间过长的事项
         public void ClearIdle(TimeSpan delta)
         {
@@ -301,13 +449,18 @@ namespace DigitalPlatform.IO
             }
         }
 
+#endif
+
         public void Dispose()
         {
-            ClearAll();
+            ClearAll(false);
+#if TESTING
+            _cancel.Cancel();
+#endif
         }
     }
 
-    public class StreamItem
+    public class StreamItem : IDisposable
     {
         public string FilePath { get; set; }
         public FileAccess FileAccess { get; set; }
@@ -335,6 +488,23 @@ namespace DigitalPlatform.IO
         public void Touch()
         {
             this.LastTime = DateTime.Now;
+        }
+
+        public void Close()
+        {
+            if (this.FileStream != null)
+            {
+                if ((this.FileAccess & FileAccess.Write) != 0)
+                    this.FileStream.Flush();    // 2019/9/2
+                this.FileStream.Close();
+                this.FileStream.Dispose();
+                this.FileStream = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Close();
         }
     }
 }

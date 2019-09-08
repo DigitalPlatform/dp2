@@ -23,7 +23,7 @@ namespace DigitalPlatform.rms
         public SqlImageStream(Connection connection,
             string strSqlDbName,
             string strDataFieldName,
-            byte [] textPtr,
+            byte[] textPtr,
             long lTotalLength)
         {
             if (connection.SqlServerType != SqlServerType.MsSqlServer)
@@ -150,8 +150,7 @@ namespace DigitalPlatform.rms
                     SqlDbType.Int);  // old Int
                 sizeParam.Value = count;
 
-                SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
-                try
+                using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult))
                 {
                     dr.Read();
                     m_lCurrent += count;
@@ -160,10 +159,6 @@ namespace DigitalPlatform.rms
                         buffer,
                         offset, // 0,
                         System.Convert.ToInt32(sizeParam.Value));
-                }
-                finally
-                {
-                    dr.Close();
                 }
             } // end of using command
         }

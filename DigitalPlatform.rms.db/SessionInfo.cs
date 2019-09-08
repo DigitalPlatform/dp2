@@ -27,6 +27,7 @@ namespace DigitalPlatform.rms
 
         public Hashtable ResultSets = new Hashtable();
 
+        // 注意这是引用别处的对象
         public ChannelHandle ChannelHandle = null;
 
         int /*object*/ m_nInSearching = 0;
