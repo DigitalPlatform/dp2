@@ -1,16 +1,19 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.Interfaces;
 
 namespace CallFaceCenterSample
 {
@@ -104,6 +107,48 @@ namespace CallFaceCenterSample
             catch (Exception ex)
             {
                 strError = $"针对 {url} 的 CancelRecognitionFace() 操作失败: { ex.Message}";
+                return new RecognitionFaceResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+            }
+            finally
+            {
+                EndFaceChannel(channel);
+            }
+        }
+
+        NormalResult DisplayVideo(string url, CancellationToken token)
+        {
+            FaceChannel channel = StartFaceChannel(
+    url,
+    out string strError);
+            if (channel == null)
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = strError
+                };
+
+            try
+            {
+                while (token.IsCancellationRequested == false)
+                {
+                    var result = channel.Object.GetImage("");
+                    if (result.Value == -1)
+                        return result;
+                    using (MemoryStream stream = new MemoryStream(result.ImageData))
+                    {
+                        this.pictureBox1.Image = Image.FromStream(stream);
+                    }
+                }
+
+                return new NormalResult();
+            }
+            catch (Exception ex)
+            {
+                strError = $"针对 {url} 的 GetImage() 请求失败: { ex.Message}";
                 return new RecognitionFaceResult
                 {
                     Value = -1,
@@ -270,6 +315,39 @@ namespace CallFaceCenterSample
             {
                 CancelRecognition(facecenter_url);
             }
+
+            CancelDislayVideo();
+        }
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
+        Task _taskDisplayVideo = null;
+
+        void CancelDislayVideo()
+        {
+            if (_cancel != null)
+            {
+                _cancel.Cancel();
+                _cancel.Dispose();
+                _cancel = null;
+            }
+        }
+
+        private void button_startVideo_Click(object sender, EventArgs e)
+        {
+            CancelDislayVideo();
+
+            _cancel = new CancellationTokenSource();
+            _taskDisplayVideo = Task.Run(()=> {
+                var result = DisplayVideo(facecenter_url, _cancel.Token);
+                if (_cancel != null && _cancel.IsCancellationRequested == false)
+                    ShowMessageBox(result.ToString());
+            });
+        }
+
+        private void button_stopVideo_Click(object sender, EventArgs e)
+        {
+            CancelDislayVideo();
         }
     }
 }
