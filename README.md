@@ -46,7 +46,7 @@ QQ群:
 下载地址：
 https://dotnet.microsoft.com/download/visual-studio-sdks
 
-3) dp2 Solution 中引用了一个名为 dp-library 的submodule。需要用 Git 命令行执行：
+3) dp2 Solution 中引用了一个名为 dp-library 的submodule。需要用 Git 命令行执行（先安装一个Git桌面工具，例如GitHub Desktop，然后启动Git Shell）：
 
 ```
 git submodule init
