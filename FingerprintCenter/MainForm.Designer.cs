@@ -49,6 +49,7 @@
             this.MenuItem_testInitCache = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_throwException = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_showUsbInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_startWatchUsbChange = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupDriver = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +64,8 @@
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel_message = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel_replication = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
             this.splitContainer_start = new System.Windows.Forms.SplitContainer();
@@ -96,7 +98,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_cfg_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.ToolStripMenuItem_startWatchUsbChange = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -265,6 +266,13 @@
             this.ToolStripMenuItem_showUsbInfo.Text = "显示当前 USB 设备信息 ...";
             this.ToolStripMenuItem_showUsbInfo.Click += new System.EventHandler(this.ToolStripMenuItem_showUsbInfo_Click);
             // 
+            // ToolStripMenuItem_startWatchUsbChange
+            // 
+            this.ToolStripMenuItem_startWatchUsbChange.Name = "ToolStripMenuItem_startWatchUsbChange";
+            this.ToolStripMenuItem_startWatchUsbChange.Size = new System.Drawing.Size(297, 30);
+            this.ToolStripMenuItem_startWatchUsbChange.Text = "监控 USB 变化";
+            this.ToolStripMenuItem_startWatchUsbChange.Click += new System.EventHandler(this.ToolStripMenuItem_startWatchUsbChange_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -369,7 +377,8 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
-            this.toolStripStatusLabel1});
+            this.toolStripStatusLabel_message,
+            this.toolStripStatusLabel_replication});
             this.statusStrip1.Location = new System.Drawing.Point(0, 508);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 17, 0);
@@ -382,10 +391,17 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(122, 31);
             // 
-            // toolStripStatusLabel1
+            // toolStripStatusLabel_message
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 32);
+            this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
+            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(670, 32);
+            this.toolStripStatusLabel_message.Spring = true;
+            // 
+            // toolStripStatusLabel_replication
+            // 
+            this.toolStripStatusLabel_replication.Name = "toolStripStatusLabel_replication";
+            this.toolStripStatusLabel_replication.Size = new System.Drawing.Size(102, 32);
+            this.toolStripStatusLabel_replication.Text = "replication";
             // 
             // tabControl_main
             // 
@@ -685,7 +701,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(609, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(557, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -714,7 +730,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(612, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(560, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -754,13 +770,6 @@
             this.notifyIcon1.Text = "dp2-指纹中心";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-            // 
-            // ToolStripMenuItem_startWatchUsbChange
-            // 
-            this.ToolStripMenuItem_startWatchUsbChange.Name = "ToolStripMenuItem_startWatchUsbChange";
-            this.ToolStripMenuItem_startWatchUsbChange.Size = new System.Drawing.Size(297, 30);
-            this.ToolStripMenuItem_startWatchUsbChange.Text = "监控 USB 变化";
-            this.ToolStripMenuItem_startWatchUsbChange.Click += new System.EventHandler(this.ToolStripMenuItem_startWatchUsbChange_Click);
             // 
             // MainForm
             // 
@@ -831,7 +840,6 @@
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_stopAll;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_stopAll;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.CheckBox checkBox_speak;
         private System.Windows.Forms.CheckBox checkBox_beep;
         private System.Windows.Forms.Button button_cancel;
@@ -873,6 +881,8 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_deleteShortcut;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_showUsbInfo;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_startWatchUsbChange;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_replication;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_message;
     }
 }
 

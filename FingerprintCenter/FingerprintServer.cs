@@ -456,16 +456,32 @@ Exception rethrown at [0]:
             Program.MainForm?.DisplayCancelButton(true);
             try
             {
-                TextResult result = Program.FingerPrint.GetRegisterString(null, strExcludeBarcodes);
-                if (result.Value == -1)
+                if (strExcludeBarcodes == "!practice")
                 {
-                    strError = result.ErrorInfo;
-                    return -1;
+                    TextResult result = Program.FingerPrint.Practice();
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+
+                    strFingerprintString = result.Text;
+                    strVersion = "zk-10";
+                    return 1;
                 }
 
-                strFingerprintString = result.Text;
-                strVersion = "zk-10";
-                return 1;
+                {
+                    TextResult result = Program.FingerPrint.GetRegisterString(null, strExcludeBarcodes);
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+
+                    strFingerprintString = result.Text;
+                    strVersion = "zk-10";
+                    return 1;
+                }
             }
             catch (Exception ex)
             {

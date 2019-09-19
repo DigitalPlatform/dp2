@@ -285,7 +285,7 @@ bool bClickClose = false)
             this.ClearMessage();
             this.Invoke((Action)(() =>
             {
-                toolStripStatusLabel1.Text = "";
+                toolStripStatusLabel_message.Text = "";
             }));
 
             if (_initialized == true)
@@ -334,6 +334,7 @@ bool bClickClose = false)
 
                 _cancel.Cancel();
 
+                _cancel.Dispose();
                 _cancel = new CancellationTokenSource();
 
                 DisplayText("正在初始化指纹环境 ...");
@@ -531,7 +532,7 @@ bool bClickClose = false)
         {
             this.Invoke((Action)(() =>
             {
-                this.toolStripStatusLabel1.Text = e.Score.ToString();
+                this.toolStripStatusLabel_message.Text = e.Score.ToString();
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                 {
                     Beep();
@@ -566,7 +567,7 @@ bool bClickClose = false)
                     toolStripProgressBar1.Value = (int)e.BytesReceived;
                 if (string.IsNullOrEmpty(e.Text) == false)
                 {
-                    toolStripStatusLabel1.Text = e.Text;
+                    toolStripStatusLabel_message.Text = e.Text;
                 }
             }));
         }
@@ -638,8 +639,10 @@ bool bClickClose = false)
             EndTimer();
 
             _cancel?.Cancel();
+            _cancel?.Dispose();
 
             AbortReplication(false);
+            TryDisposeReplicationCancel();
 
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             // UsbNotification.UnregisterUsbDeviceNotification();
@@ -913,6 +916,8 @@ out strError);
 
                 this.ServerVersion = strVersion;
                 this.ServerUID = strUID;
+
+                this.OutputHistory($"所连接的 dp2library 服务器:{channel.Url}, 版本:{this.ServerVersion}, UID:{this.ServerUID}", 0);
 
                 /*
                 if (StringUtil.CompareVersion(strVersion, "3.13") < 0)
@@ -1701,9 +1706,18 @@ Keys keyData)
                 AbortReplication(true);
 
                 // 无论是 _cancel 还是 _cancelReplication 触发 Cancel，都能停止复制过程
+                TryDisposeReplicationCancel();
                 _cancelReplication = CancellationTokenSource.CreateLinkedTokenSource(_cancel.Token);
                 DpReplication(_cancelReplication.Token);
             });
+        }
+
+        void ShowReplicationMessage(string text)
+        {
+            this.Invoke((Action)(() =>
+            {
+                this.toolStripStatusLabel_replication.Text = text;
+            }));
         }
 
         AutoResetEvent _eventReplicationFinish = new AutoResetEvent(false);
@@ -1731,11 +1745,12 @@ Keys keyData)
             _eventReplicationFinish.Reset();
 
             this.OutputHistory($"增量同步指纹信息 {strStartDate}");
+            ShowReplicationMessage($"正在同步最新指纹信息 {strStartDate} ...");
             //this.ShowMessage($"正在同步最新指纹信息 {strStartDate} ...");
             //EnableControls(false);
             LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromSeconds(30);
+            //TimeSpan old_timeout = channel.Timeout;
+            //channel.Timeout = TimeSpan.FromSeconds(120);
             try
             {
                 string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
@@ -1767,13 +1782,24 @@ token);
             }
             finally
             {
-                channel.Timeout = old_timeout;
+                //channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
                 //EnableControls(true);
                 //if (done == true)
                 //    this.ClearMessage();
+                ShowReplicationMessage("");
 
                 _eventReplicationFinish.Set();
+                // _cancelReplication = null;
+                TryDisposeReplicationCancel();
+            }
+        }
+
+        void TryDisposeReplicationCancel()
+        {
+            if (_cancelReplication != null)
+            {
+                _cancelReplication.Dispose();
                 _cancelReplication = null;
             }
         }

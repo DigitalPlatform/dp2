@@ -66,7 +66,8 @@ namespace FingerprintCenter
                     // 删除以前接口程序的 shortcut
                     ClientInfo.RemoveShortcutFromStartupGroup("dp2-中控指纹阅读器接口");
 
-                    ClientInfo.AddShortcutToStartupGroup("dp2-指纹中心");
+                    // ClientInfo.AddShortcutToStartupGroup("dp2-指纹中心");
+                    ClientInfo.RemoveShortcutFromStartupGroup("dp2-指纹中心");
 
                     ProgramUtil.SetDpiAwareness();
 

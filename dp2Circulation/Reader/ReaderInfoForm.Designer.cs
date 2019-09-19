@@ -60,6 +60,8 @@
             this.toolStripSplitButton_registerFace = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_pasteCardPhoto = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_pasteCardPhoto = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_registerFingerprint = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_fingerprintPracticeMode = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_registerFingerprint = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_createMoneyRecord = new System.Windows.Forms.ToolStripDropDownButton();
@@ -78,7 +80,6 @@
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_addFriends = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_clearOutofReservationCount = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDropDownButton_otherFunc = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripButton_saveTemplate = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
@@ -94,6 +95,7 @@
             this.toolStripMenuItem_clearFingerprint = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_option = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStrip_load = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
@@ -328,6 +330,7 @@
             this.toolStripButton_webCamera,
             this.toolStripSplitButton_registerFace,
             this.toolStripButton_pasteCardPhoto,
+            this.toolStripSplitButton_registerFingerprint,
             this.toolStripButton_registerFingerprint,
             this.toolStripSeparator1,
             this.toolStripButton_createMoneyRecord,
@@ -451,6 +454,25 @@
             this.toolStripButton_pasteCardPhoto.Visible = false;
             this.toolStripButton_pasteCardPhoto.Click += new System.EventHandler(this.toolStripButton_pasteCardPhoto_Click);
             // 
+            // toolStripSplitButton_registerFingerprint
+            // 
+            this.toolStripSplitButton_registerFingerprint.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_registerFingerprint.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_fingerprintPracticeMode});
+            this.toolStripSplitButton_registerFingerprint.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_registerFingerprint.Image")));
+            this.toolStripSplitButton_registerFingerprint.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_registerFingerprint.Name = "toolStripSplitButton_registerFingerprint";
+            this.toolStripSplitButton_registerFingerprint.Size = new System.Drawing.Size(45, 28);
+            this.toolStripSplitButton_registerFingerprint.Text = "登记指纹";
+            this.toolStripSplitButton_registerFingerprint.ButtonClick += new System.EventHandler(this.toolStripSplitButton_registerFingerprint_ButtonClick);
+            // 
+            // ToolStripMenuItem_fingerprintPracticeMode
+            // 
+            this.ToolStripMenuItem_fingerprintPracticeMode.Name = "ToolStripMenuItem_fingerprintPracticeMode";
+            this.ToolStripMenuItem_fingerprintPracticeMode.Size = new System.Drawing.Size(217, 30);
+            this.ToolStripMenuItem_fingerprintPracticeMode.Text = "指纹练习模式 ...";
+            this.ToolStripMenuItem_fingerprintPracticeMode.Click += new System.EventHandler(this.ToolStripMenuItem_fingerprintPracticeMode_Click);
+            // 
             // toolStripButton_registerFingerprint
             // 
             this.toolStripButton_registerFingerprint.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -459,6 +481,7 @@
             this.toolStripButton_registerFingerprint.Name = "toolStripButton_registerFingerprint";
             this.toolStripButton_registerFingerprint.Size = new System.Drawing.Size(28, 28);
             this.toolStripButton_registerFingerprint.Text = "登记指纹";
+            this.toolStripButton_registerFingerprint.Visible = false;
             this.toolStripButton_registerFingerprint.Click += new System.EventHandler(this.toolStripButton_registerFingerprint_Click);
             // 
             // toolStripSeparator1
@@ -604,11 +627,6 @@
             this.toolStripButton_clearOutofReservationCount.Text = "清除预约到书后未取次数";
             this.toolStripButton_clearOutofReservationCount.Click += new System.EventHandler(this.toolStripButton_clearOutofReservationCount_Click);
             // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
-            // 
             // toolStripDropDownButton_otherFunc
             // 
             this.toolStripDropDownButton_otherFunc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -732,6 +750,11 @@
             this.toolStripButton_option.Size = new System.Drawing.Size(74, 28);
             this.toolStripButton_option.Text = "选项";
             this.toolStripButton_option.Click += new System.EventHandler(this.toolStripButton_option_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
             // 
             // toolStrip_load
             // 
@@ -901,5 +924,7 @@
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_save;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveChangeBarcode;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_saveForce;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_registerFingerprint;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_fingerprintPracticeMode;
     }
 }

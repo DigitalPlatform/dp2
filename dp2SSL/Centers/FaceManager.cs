@@ -57,6 +57,9 @@ namespace dp2SSL
         public static void Start(
             CancellationToken token)
         {
+            Base.ShortWaitTime = TimeSpan.FromSeconds(5);
+            Base.LongWaitTime = TimeSpan.FromSeconds(5);
+
             // App.CurrentApp.Speak("启动后台线程");
             Base.Start((channel) =>
             {
@@ -69,7 +72,16 @@ namespace dp2SSL
                 channel.Object.EnableSendKey(false);
             },
             null,
-            null,
+            (channel) =>
+            {
+                var result = channel.Object.GetState("camera");
+                if (result.Value == -1)
+                    Base.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = result.ErrorInfo });
+                else
+                    Base.TriggerSetError(result,
+                        new SetErrorEventArgs { Error = null }); // 清除以前的报错
+            },
             token);
         }
 

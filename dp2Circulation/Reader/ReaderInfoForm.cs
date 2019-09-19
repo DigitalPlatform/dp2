@@ -335,7 +335,7 @@ namespace dp2Circulation
             e.values = values;
         }
 
-        async private void ReaderInfoForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void ReaderInfoForm_FormClosing(object sender, FormClosingEventArgs e)
         {
 #if NO
             if (stop != null)
@@ -350,6 +350,9 @@ namespace dp2Circulation
 #endif
             if (_inFingerprintCall > 0)
             {
+                // TODO: 增加一个参数，表示不需要显示“已取消操作”提示对话框
+                var task = CancelReadFingerprintString();
+                /*
                 try
                 {
                     GetFingerprintStringResult result = await CancelReadFingerprintString();
@@ -362,20 +365,22 @@ namespace dp2Circulation
                 {
                     ShowMessageBox(ex.Message);
                 }
+                */
             }
+
 
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
             {
                 this.Invoke((Action)(() =>
                 {
-                    // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
-        "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
-        "ReaderInfoForm",
-        MessageBoxButtons.YesNo,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button2);
+                        // 警告尚未保存
+                        DialogResult result = MessageBox.Show(this,
+                "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
+                "ReaderInfoForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
                     if (result != DialogResult.Yes)
                     {
                         e.Cancel = true;
@@ -383,6 +388,7 @@ namespace dp2Circulation
                     }
                 }));
             }
+
         }
 
         private void ReaderInfoForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -5263,6 +5269,8 @@ MessageBoxDefaultButton.Button2);
         {
             string strError = "";
 
+            bool bPractice = (Control.ModifierKeys == Keys.Control);
+
             this.ShowMessage("等待扫描指纹 ...");
             this.EnableControls(false);
             // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
@@ -5289,7 +5297,8 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 REDO:
-                GetFingerprintStringResult result = await ReadFingerprintString(this.readerEditControl1.Barcode);
+                GetFingerprintStringResult result = await ReadFingerprintString(
+                    bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
                 if (result.Value == -1)
                 {
                     DialogResult temp_result = MessageBox.Show(this,
@@ -5313,9 +5322,12 @@ MessageBoxDefaultButton.Button1);
                 strVersion = "test-version";
 #endif
 
-                this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
-                this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
-                this.readerEditControl1.Changed = true;
+                if (bPractice == false)
+                {
+                    this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
+                    this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
+                    this.readerEditControl1.Changed = true;
+                }
             }
             finally
             {
@@ -6537,5 +6549,95 @@ MessageBoxDefaultButton.Button1);
 
             this.commander.AddMessage(WM_SAVE_RECORD_FORCE);
         }
+
+        private async void toolStripSplitButton_registerFingerprint_ButtonClick(object sender, EventArgs e)
+        {
+            await registerFingerprint(false);
+        }
+
+        private async void ToolStripMenuItem_fingerprintPracticeMode_Click(object sender, EventArgs e)
+        {
+            await registerFingerprint(true);
+        }
+
+        async Task registerFingerprint(bool bPractice)
+        {
+            string strError = "";
+
+            this.ShowMessage("等待扫描指纹 ...");
+            this.EnableControls(false);
+            // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
+            try
+            {
+                NormalResult getstate_result = await FingerprintGetState("");
+                if (getstate_result.Value == -1)
+                {
+                    strError = $"指纹中心当前状态不正确：{getstate_result.ErrorInfo}";
+                    goto ERROR1;
+                }
+
+                getstate_result = await FingerprintGetState("getLibraryServerUID");
+                if (getstate_result.Value == -1)
+                {
+                    strError = getstate_result.ErrorInfo;
+                    goto ERROR1;
+                }
+                else if (getstate_result.ErrorCode != null &&
+                    getstate_result.ErrorCode != Program.MainForm.ServerUID)
+                {
+                    strError = $"指纹中心所连接的 dp2library 服务器 UID {getstate_result.ErrorCode} 和内务当前所连接的 UID {Program.MainForm.ServerUID} 不同。无法进行指纹登记";
+                    goto ERROR1;
+                }
+
+                // TODO: 练习模式需要判断版本 2.2 以上
+
+                REDO:
+                GetFingerprintStringResult result = await ReadFingerprintString(
+                    bPractice == true ? "!practice" : this.readerEditControl1.Barcode);
+                if (result.Value == -1)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+result.ErrorInfo + "\r\n\r\n是否重试?",
+"ReaderInfoForm",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO;
+                }
+
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
+
+#if NO
+                strFingerprint = "12345";   // test
+                strVersion = "test-version";
+#endif
+
+                if (bPractice == false)
+                {
+                    this.readerEditControl1.FingerprintFeature = result.Fingerprint;   // strFingerprint;
+                    this.readerEditControl1.FingerprintFeatureVersion = result.Version;    // strVersion;
+                    this.readerEditControl1.Changed = true;
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+                this.ClearMessage();
+            }
+
+            // MessageBox.Show(this, strFingerprint);
+            Program.MainForm.StatusBarMessage = "指纹信息获取成功";
+            return;
+            ERROR1:
+            Program.MainForm.StatusBarMessage = strError;
+            this.ShowMessage(strError, "red", true);
+            // ShowMessageBox(strError);
+        }
+
     }
 }

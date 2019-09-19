@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define SENDKEY
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +22,10 @@ namespace RfidCenter
 
         public void Dispose()
         {
+#if SENDKEY
             _cancelInventory?.Cancel();
+            _cancelInventory?.Dispose();
+#endif
         }
 
         public NormalResult GetState(string style)
@@ -546,6 +551,8 @@ old_password,
 new_password);
         }
 
+#if SENDKEY
+
         #region Tag List
 
         // 当前在读卡器探测范围内的标签
@@ -661,6 +668,8 @@ new_password);
 
         #endregion
 
+#endif
+
         static private AtomicBoolean _sendKeyEnabled = new AtomicBoolean(false);
 
         public NormalResult EnableSendKey(bool enable)
@@ -681,7 +690,6 @@ new_password);
             else
                 message = "RFID 发送关闭";
 
-
             Task.Run(() =>
             {
                 Program.MainForm?.OutputHistory(message, 0);
@@ -694,10 +702,13 @@ new_password);
         // 开始或者结束捕获标签
         public NormalResult BeginCapture(bool begin)
         {
+#if SENDKEY
             StartInventory(begin);
+#endif
             return new NormalResult();
         }
 
+#if SENDKEY
         // 启动或者停止自动盘点
         void StartInventory(bool start)
         {
@@ -729,6 +740,7 @@ new_password);
         {
             Program.MainForm.OutputHistory("开始捕获", 0);
 
+            /*
             if (Program.Rfid.Readers.Count == 0)
                 Program.MainForm.OutputHistory("当前没有可用的读卡器", 2);
             else
@@ -737,6 +749,7 @@ new_password);
                 Program.Rfid.Readers.ForEach((o) => names.Add(o.Name));
                 Program.MainForm.OutputHistory($"当前读卡器数量 {Program.Rfid.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names, "\r\n")}", 0);
             }
+            */
 
             if (Program.Rfid.ShelfLocks.Count > 0)
             {
@@ -821,6 +834,7 @@ new_password);
             }
         }
 
+
         static DateTime _lastFlushTime = DateTime.Now;
         static int _lastErrorCount = 0;
 
@@ -900,5 +914,8 @@ new_password);
 
             return true;
         }
+
+#endif
+
     }
 }

@@ -433,6 +433,8 @@ namespace dp2SSL
             set
             {
                 string s = this.ShelfState;
+                if (s == null)
+                    s = "";
                 StringUtil.SetInList(ref s, "currentshelf", value);
                 this.ShelfState = s;
             }

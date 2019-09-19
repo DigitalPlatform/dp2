@@ -620,7 +620,9 @@ namespace DigitalPlatform.LibraryClient
             // 准备查找表
             Hashtable length_table = new Hashtable();
             {
-                List<FileSize> size_pairs = GetFilesLength(filenames);
+                List<FileSize> size_pairs = GetFilesLength(
+                    // filenames
+                    );
                 foreach (FileSize size_pair in size_pairs)
                 {
                     length_table[size_pair.Date] = size_pair;
@@ -716,22 +718,24 @@ namespace DigitalPlatform.LibraryClient
 #endif
 
                 {
-                    OperLogItemLoader loader = new OperLogItemLoader();
-                    loader.Stop = this.Stop;
-                    loader.Channel = this.Channel;
-                    // loader.owner = this.owner;
-                    loader.Estimate = this.Estimate;
-                    loader.Date = strLogFilename;
-                    loader.Level = this.Level;
-                    loader.ReplicationLevel = this.ReplicationLevel;
-                    loader.lServerFileSize = sizes[i];
-                    loader.Range = strRange;
-                    loader.AutoCache = this.AutoCache;
-                    loader.lProgressValue = lDoneSize;
-                    loader.lSize = lTotalSize;
-                    loader.Filter = this.Filter;
-                    loader.LogType = this.LogType;
-                    loader.ServerVersion = this.ServerVersion;
+                    OperLogItemLoader loader = new OperLogItemLoader
+                    {
+                        Stop = this.Stop,
+                        Channel = this.Channel,
+                        // loader.owner = this.owner;
+                        Estimate = this.Estimate,
+                        Date = strLogFilename,
+                        Level = this.Level,
+                        ReplicationLevel = this.ReplicationLevel,
+                        lServerFileSize = sizes[i],
+                        Range = strRange,
+                        AutoCache = this.AutoCache,
+                        lProgressValue = lDoneSize,
+                        lSize = lTotalSize,
+                        Filter = this.Filter,
+                        LogType = this.LogType,
+                        ServerVersion = this.ServerVersion
+                    };
 
                     if (this.Prompt != null)
                         loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -1070,7 +1074,10 @@ namespace DigitalPlatform.LibraryClient
             public long CacheFileSize { get; set; }
         }
 
-        List<FileSize> GetFilesLength(List<string> filenames)
+        // this.Dates 里面有需要获得文件长度的文件名
+        List<FileSize> GetFilesLength(
+            // List<string> filenames
+            )
         {
             List<FileSize> results = new List<FileSize>();
 

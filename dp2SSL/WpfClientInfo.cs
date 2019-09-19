@@ -486,6 +486,7 @@ namespace dp2SSL
             }
         }
 
+#if REMOVED
         public static bool HasModuleStarted(string mutex_name)
         {
             bool createdNew = true;
@@ -518,6 +519,7 @@ namespace dp2SSL
             return true;
         }
 
+#endif
     }
 
 }

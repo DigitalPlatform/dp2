@@ -417,6 +417,16 @@ namespace RfidCenter
                         }
                     }
 
+                    {
+                        if (result.Readers.Count == 0)
+                            OutputHistory("当前没有可用的读卡器", 2);
+                        else
+                        {
+                            List<string> names = new List<string>();
+                            result.Readers.ForEach((o) => names.Add(o.Name));
+                            OutputHistory($"当前读卡器数量 {result.Readers.Count}。包括: \r\n{StringUtil.MakePathList(names, "\r\n")}", 0);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

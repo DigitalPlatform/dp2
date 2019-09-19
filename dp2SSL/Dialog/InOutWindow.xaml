@@ -1,0 +1,54 @@
+﻿<Window x:Class="dp2SSL.InOutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:dp2SSL"
+        mc:Ignorable="d"
+        Title="InOutWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <!-- 图书信息 -->
+        <Grid  Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
+                    Text="{Binding ElementName=outBooks, Path=ItemCount, StringFormat={}借阅图书 ({0})}"/>
+            <local:EntityListControl x:Name="outBooks" Grid.Row="1"/>
+        </Grid>
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="Blue">
+            <!-- 
+                https://stackoverflow.com/questions/1665781/styling-gridsplitter-wpf-c-sharp 
+                -->
+            <GridSplitter.Template>
+                <ControlTemplate TargetType="{x:Type GridSplitter}">
+                    <Grid>
+                        <Button Content="⁞" BorderThickness="0" Background="Transparent" Foreground="DarkGray"/>
+                        <Rectangle Fill="#00FFFFFF" />
+                    </Grid>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+        <!-- 图书信息 -->
+        <Grid  Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
+                    Text="{Binding ElementName=InBooks, Path=ItemCount, StringFormat={}还回图书 ({0})}"/>
+            <local:EntityListControl x:Name="InBooks" Grid.Row="1"/>
+        </Grid>
+
+    </Grid>
+</Window>

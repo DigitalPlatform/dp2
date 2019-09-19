@@ -1643,6 +1643,9 @@ MessageBoxDefaultButton.Button1);
             this.PropertyTaskList.BeginThread();
 
             StartOrStopRfidManager();
+
+            // 2019/9/13
+            StartProcessManager();
         }
 
         #region RFID
@@ -1720,6 +1723,61 @@ MessageBoxDefaultButton.Button1);
                 // this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
             }
         }
+
+        #endregion
+
+
+        #region ProcessManager
+
+        CancellationTokenSource _cancelProcessMonitor = new CancellationTokenSource();
+
+        public void StartProcessManager()
+        {
+            // 停止前一次的 monitor
+            if (_cancelProcessMonitor != null)
+            {
+                _cancelProcessMonitor.Cancel();
+                _cancelProcessMonitor.Dispose();
+
+                _cancelProcessMonitor = new CancellationTokenSource();
+            }
+
+            // if (ProcessMonitor == true)
+            {
+                List<DigitalPlatform.IO.ProcessInfo> infos = new List<DigitalPlatform.IO.ProcessInfo>();
+                if (string.IsNullOrEmpty(this.FaceReaderUrl) == false
+                    && ProcessManager.IsIpcUrl(this.FaceReaderUrl))
+                    infos.Add(new DigitalPlatform.IO.ProcessInfo
+                    {
+                        Name = "人脸中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-人脸中心",
+                        MutexName = "{E343F372-13A0-482F-9784-9865B112C042}"
+                    });
+                if (string.IsNullOrEmpty(this.RfidCenterUrl) == false
+                    && ProcessManager.IsIpcUrl(this.RfidCenterUrl))
+                    infos.Add(new DigitalPlatform.IO.ProcessInfo
+                    {
+                        Name = "RFID中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-RFID中心",
+                        MutexName = "{CF1B7B4A-C7ED-4DB8-B5CC-59A067880F92}"
+                    });
+                if (string.IsNullOrEmpty(this.FingerprintReaderUrl) == false
+                    && ProcessManager.IsIpcUrl(this.FingerprintReaderUrl))
+                    infos.Add(new DigitalPlatform.IO.ProcessInfo
+                    {
+                        Name = "指纹中心",
+                        ShortcutPath = "DigitalPlatform/dp2 V3/dp2-指纹中心",
+                        MutexName = "{75FB942B-5E25-4228-9093-D220FFEDB33C}"
+                    });
+                ProcessManager.Start(infos,
+                    (info, text) =>
+                    {
+                        WriteErrorLog($"{info.Name} {text}");
+                    },
+                    _cancelProcessMonitor.Token);
+            }
+        }
+
 
         #endregion
 
@@ -2668,8 +2726,9 @@ Culture=neutral, PublicKeyToken=null
                 RestoreLastOpenedMdiWindow(strOpenedMdiWindow);
 #endif
 
+                // 这是 zkfingerprint 要求的动作
                 // 初始化指纹高速缓存
-                FirstInitialFingerprintCache();
+                // FirstInitialFingerprintCache();
             }
             return true;
         }

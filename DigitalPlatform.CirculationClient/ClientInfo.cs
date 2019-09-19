@@ -17,6 +17,8 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Core;
 using System.Drawing;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -1018,6 +1020,86 @@ delegate_action action)
             {
                 return false;
             }
+        }
+
+        /*
+         * <config amerce_interface="<无>" im_server_url="http://dp2003.com:8083/dp2MServer" green_package_server_url="" pinyin_server_url="http://dp2003.com/dp2library" gcat_server_url="http://dp2003.com/dp2library" circulation_server_url="net.pipe://localhost/dp2library/XE"/>
+         * <default_account tempCode="" phoneNumber="" occur_per_start="true" location="" isreader="false" savepassword_long="true" savepassword_short="true" username="supervisor" password="Z7RAQEBWFmBcKM8mFvOjwg=="/>
+         * */
+        public static int GetDp2circulationUserName(
+            out string url,
+            out string userName,
+            out string password,
+            out bool savePassword,
+            out string strError)
+        {
+            strError = "";
+            url = "";
+            userName = "";
+            password = "";
+            savePassword = false;
+
+            string strXmlFilename = Path.Combine(
+    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+    "dp2circulation_v2\\dp2circulation.xml");
+            if (File.Exists(strXmlFilename) == false)
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            dom.PreserveWhitespace = true;
+            try
+            {
+                dom.Load(strXmlFilename);
+            }
+            catch(Exception ex)
+            {
+                strError = $"打开 XML 文件失败: {ex.Message}";
+                return -1;
+            }
+
+            {
+                XmlElement default_account = dom.DocumentElement.SelectSingleNode("default_account") as XmlElement;
+                if (default_account != null)
+                {
+                    userName = default_account.GetAttribute("username");
+                    savePassword = DomUtil.GetBooleanParam(default_account, "savepassword_long", false);
+                    if (savePassword == true)
+                    {
+                        string password_text = default_account.GetAttribute("password");
+                        password = DecryptDp2circulationPasssword(password_text);
+                    }
+                }
+            }
+
+            {
+                XmlElement config = dom.DocumentElement.SelectSingleNode("config") as XmlElement;
+                if (config != null)
+                {
+                    url = config.GetAttribute("circulation_server_url");
+                }
+            }
+
+            return 1;
+        }
+
+        internal static string DecryptDp2circulationPasssword(string strEncryptedText)
+        {
+            if (String.IsNullOrEmpty(strEncryptedText) == false)
+            {
+                try
+                {
+                    string strPassword = Cryptography.Decrypt(
+        strEncryptedText,
+        "dp2circulation_client_password_key");
+                    return strPassword;
+                }
+                catch
+                {
+                    return "errorpassword";
+                }
+            }
+
+            return "";
         }
     }
 }

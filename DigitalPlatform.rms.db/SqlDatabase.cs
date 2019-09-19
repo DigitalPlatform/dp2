@@ -353,7 +353,7 @@ namespace DigitalPlatform.rms
                 if (nTicks > 5000 && this.SQLiteInfo != null
                     && this.SQLiteInfo.m_connection != null)
                 {
-                    this.SQLiteInfo.m_connection.m_nThreshold = 100;
+                    this.SQLiteInfo.m_connection._nThreshold = 100;
                 }
             }
             catch (Exception ex)
@@ -11483,17 +11483,24 @@ handle.CancelTokenSource.Token).Result;
 
             int nRedoCount = 0;
             REDO:
-            StreamItem item = _streamCache.GetWriteStream(strFileName, true);
             try
             {
-                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
-                if (item.FileStream.Length > baContent.Length)
-                    item.FileStream.SetLength(0);
+                StreamItem item = _streamCache.GetWriteStream(strFileName, true);
+                try
+                {
+                    // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                    if (item.FileStream.Length > baContent.Length)
+                        item.FileStream.SetLength(0);
 
-                item.FileStream.Seek(0, SeekOrigin.Begin);
-                item.FileStream.Write(baContent,
-                        0,
-                        baContent.Length);
+                    item.FileStream.Seek(0, SeekOrigin.Begin);
+                    item.FileStream.Write(baContent,
+                            0,
+                            baContent.Length);
+                }
+                finally
+                {
+                    _streamCache.ReturnStream(item);
+                }
             }
             catch (DirectoryNotFoundException ex)
             {
@@ -11510,10 +11517,6 @@ handle.CancelTokenSource.Token).Result;
             {
                 strError = "写入文件 '" + strFileName + "' 时发生错误: " + ex.Message;
                 return -1;
-            }
-            finally
-            {
-                _streamCache.ReturnStream(item);
             }
             return 0;
         }
@@ -12450,12 +12453,11 @@ handle.CancelTokenSource.Token).Result;
                     try
                     {
                         // select 已经存在的行信息
-                        List<RecordRowInfo> row_infos = null;
                         // 获得多个已存在的行信息
                         int nRet = GetRowInfos(connection,
                             bRebuildKeys ? true : !bFastMode,
                             WriteInfo.get_ids(records),    // 采用 get_existing_ids 纯追加 40 万条书目数据才加快速度1分钟而已
-                            out row_infos,
+                            out List<RecordRowInfo> row_infos,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -15086,11 +15088,18 @@ handle.CancelTokenSource.Token).Result;
 
             int nRedoCount = 0;
             REDO:
-            StreamItem item = _streamCache.GetWriteStream(strFileName, true);
             try
             {
-                item.FileStream.SetLength(0);
-                return 0;
+                StreamItem item = _streamCache.GetWriteStream(strFileName, true);
+                try
+                {
+                    item.FileStream.SetLength(0);
+                    return 0;
+                }
+                finally
+                {
+                    _streamCache.ReturnStream(item);
+                }
             }
             catch (DirectoryNotFoundException ex)
             {
@@ -15107,10 +15116,6 @@ handle.CancelTokenSource.Token).Result;
             {
                 strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
                 return -1;
-            }
-            finally
-            {
-                _streamCache.ReturnStream(item);
             }
         }
 #if OLD
@@ -19186,7 +19191,7 @@ handle.CancelTokenSource.Token).Result;
                     connection.TryOpen();
                     try
                     {
-                        connection.m_nOpenCount += 10;
+                        connection._nOpenCount += 10;
 
                         RecordRowInfo row_info = null;
                         // return:

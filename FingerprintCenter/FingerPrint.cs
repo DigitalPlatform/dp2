@@ -69,6 +69,9 @@ namespace FingerprintCenter
             }
         }
 
+        // 默认的指纹质量最低分
+        public const int DefaultQuality = 60;
+
         public override string BioTypeName
         {
             get
@@ -603,6 +606,66 @@ namespace FingerprintCenter
             }
         }
 
+        #region 练习模式
+
+        List<int> m_gameScores = new List<int>();
+
+
+        int CountContinue(int v)
+        {
+            int nCount = 0;
+            for (int i = this.m_gameScores.Count - 1; i >= 0; i--)
+            {
+                if (this.m_gameScores[i] != v)
+                {
+                    return nCount;
+                }
+                nCount++;
+            }
+
+            return nCount;
+        }
+
+        string GetScoreString(int v)
+        {
+            string strResult = "";
+            if (v >= 100)
+            {
+                int nContine = CountContinue(100);
+                if (nContine >= 1)
+                {
+                    strResult = "连续 " + (nContine + 1).ToString() + " 次 100 分！";
+                    goto END1;
+                }
+                else
+                    strResult = "极端完美！";
+            }
+            else if (v >= 90)
+                strResult = "帅呆了！";
+            else if (v >= 80)
+                strResult = "非常好！";
+            else if (v >= 70)
+                strResult = "很好！";
+            else if (v >= 60)
+                strResult = "还行！";
+            else if (v >= 50)
+                strResult = "加油啊！";
+            else
+                strResult = "不好意思！";
+
+            strResult += v.ToString() + " 分";
+
+            END1:
+            m_gameScores.Add(v);
+            while (this.m_gameScores.Count > 100)
+            {
+                this.m_gameScores.RemoveAt(0);
+            }
+            return strResult;
+        }
+
+        #endregion
+
         // parameters:
         //      template_buffer 指纹模板数据
         //      length  template_buffer 数组内有效数据长度
@@ -624,6 +687,32 @@ namespace FingerprintCenter
                         ref ms);
                     TriggerImageReady(null, new ImageReadyEventArgs { Image = new Bitmap(ms), Quality = quality });
                 });
+            }
+
+            // 练习模式
+            if (_mode == "practice")
+            {
+                if (quality >= 60)
+                    Light("green");
+                else
+                    Light("red");
+
+                {
+                    string text = GetScoreString(quality);
+                    Speaking(text,
+                        $"{text}\r\n质量: {quality}");
+                }
+                return;
+            }
+
+            // 检查指纹质量
+            if (quality < DefaultQuality)
+            {
+                Light("red");
+                string text = $"指纹图像质量不佳({quality})，请重新扫入";
+                Speaking(text,
+                    $"{text}\r\n质量: {quality}");
+                return;
             }
 
             if (_mode == "register")
@@ -654,7 +743,7 @@ namespace FingerprintCenter
                     {
                         _register_template_list.Clear();    // 从头来
                         Light("red");
-                        string text = "刚扫入的指纹质量不佳，请继续重新扫入";
+                        string text = "刚扫入的指纹和先前的指纹不一致，请继续重新扫入";
                         Speaking(text,
                             $"{text}\r\n质量: {quality}");
                         return;
@@ -684,6 +773,8 @@ namespace FingerprintCenter
                 return;
             }
 
+
+            // 指纹识别
             {
                 int ret = zkfp.ZKFP_ERR_OK;
                 int fid = 0, score = 0;
@@ -721,7 +812,8 @@ namespace FingerprintCenter
                     CapturedEventArgs e1 = new CapturedEventArgs
                     {
                         Score = score,
-                        ErrorInfo = $"无法识别, 错误码={ret}"
+                        ErrorInfo = $"无法识别, 错误码={ret}",
+                        Quality = quality,
                     };
                     Light("red");
                     TriggerCaptured(null, e1);
@@ -777,6 +869,60 @@ namespace FingerprintCenter
 
                 Speaking("获取指纹信息成功");
                 return new TextResult { Value = 0, Text = zkfp2.BlobToBase64(buffer, length) };
+            }
+            finally
+            {
+                _mode = save_mode;
+            }
+        }
+
+
+        // exception:
+        //      可能会抛出异常。在 token 中断时
+        public TextResult Practice()
+        {
+            string save_mode = _mode;
+            try
+            {
+                _mode = "practice";
+                _cancelOfRegister = new CancellationTokenSource();
+                _eventRegisterFinished.Reset();
+                Speaking("进入练习模式");
+
+                while (_eventRegisterFinished.WaitOne(TimeSpan.FromMilliseconds(500)) == false)
+                {
+                    _cancelOfRegister.Token.ThrowIfCancellationRequested();
+                }
+
+                /*
+                byte[] buffer = new byte[2048];
+                int length = 0; // buffer.Length;
+                int nRet = zkfp2.DBMerge(_dBHandle, _register_template_list[0], _register_template_list[1], _register_template_list[2], buffer, ref length);
+                if (nRet != zkfp.ZKFP_ERR_OK)
+                {
+                    Speaking("非常抱歉，合成指纹时发生错误");
+                    return new TextResult { Value = -1, ErrorInfo = "合成模板时发生错误，错误码=" + nRet };
+                }
+
+                // 尝试加入高速缓存
+                {
+                    string temp_id = Guid.NewGuid().ToString();
+                    nRet = AddItems(new List<FingerprintItem> {
+                        new FingerprintItem {
+                            ReaderBarcode = temp_id,
+                            FingerprintString = zkfp2.BlobToBase64(buffer, length)
+                        }},
+                        null,
+                        out string strError);
+                    if (nRet == -1)
+                        return new TextResult { Value = -1, ErrorInfo = "尝试加入高速缓存时失败" };
+
+                    RemoveItem(temp_id, out strError);
+                }
+
+                */
+                Speaking("退出练习模式");
+                return new TextResult();
             }
             finally
             {

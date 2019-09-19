@@ -113,8 +113,6 @@ namespace RfidDrivers.First
             Lock();
             try
             {
-
-
                 GetDriversInfo();
 
                 NormalResult result = OpenAllReaders(hint_table, out List<HintInfo> output_hint_table);

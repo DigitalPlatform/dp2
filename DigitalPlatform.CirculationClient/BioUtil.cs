@@ -227,7 +227,6 @@ namespace DigitalPlatform.CirculationClient
                     dates[0] = dates[0] + ":" + strRight;
                 }
 
-                channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
                 // using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
                 {
@@ -248,6 +247,9 @@ namespace DigitalPlatform.CirculationClient
                         ServerVersion = serverVersion
                     };
 
+                    TimeSpan old_timeout = channel.Timeout;
+                    channel.Timeout = new TimeSpan(0, 2, 0);   // 二分钟
+
                     loader.Prompt += Loader_Prompt;
                     try
                     {
@@ -255,6 +257,7 @@ namespace DigitalPlatform.CirculationClient
 
                         string strLastItemDate = "";
                         long lLastItemIndex = -1;
+                        // TODO: 计算遍历耗费的时间。如果太短了，要想办法让调主知道这一点，放缓重新调用的节奏，以避免 CPU 和网络资源太高
                         foreach (OperLogItem item in loader)
                         {
                             token.ThrowIfCancellationRequested();
@@ -353,6 +356,7 @@ namespace DigitalPlatform.CirculationClient
                     finally
                     {
                         loader.Prompt -= Loader_Prompt;
+                        channel.Timeout = old_timeout;
                     }
                 }
 

@@ -208,6 +208,8 @@ namespace dp2SSL
 
         private async void PageBorrow_Loaded(object sender, RoutedEventArgs e)
         {
+            SetGlobalError("current", null); // 清除以前残留的报错信息
+
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
@@ -502,7 +504,10 @@ namespace dp2SSL
 
         private void FingerprintManager_SetError(object sender, SetErrorEventArgs e)
         {
-            SetGlobalError("fingerprint", e.Error);
+            if (e.Error == null)
+                SetGlobalError("fingerprint", null);
+            else
+                SetGlobalError("fingerprint", $"fingerprint error: {e.Error}");  // 2019/9/11 增加 fingerprinterror:
         }
 
         void SetQuality(string text)
@@ -703,7 +708,7 @@ namespace dp2SSL
                     }
                     catch (Exception ex)
                     {
-                        SetGlobalError("patron", ex.Message);
+                        SetGlobalError("patron", $"patron exception: {ex.Message}");    // 2019/9/11 增加 patron exception:
                     }
                 });
             }
@@ -1374,7 +1379,8 @@ out string strError);
             }
             catch (Exception ex)
             {
-                SetGlobalError("current", ex.Message);
+                LibraryChannelManager.Log?.Error($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
+                SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
         }
 
@@ -2266,7 +2272,7 @@ out string strError);
                 // 上传完对象后通知 facecenter DoReplication 一次
                 var notify_result = FaceManager.Notify("faceChanged");
                 if (notify_result.Value == -1)
-                    SetGlobalError("face", notify_result.ErrorInfo);
+                    SetGlobalError("face", $"FaceManager.Notify() error: {notify_result.ErrorInfo}");   // 2019/9/11 增加 error:
 
                 string message = $"{action_name}成功";
                 if (action == "deleteFace")
