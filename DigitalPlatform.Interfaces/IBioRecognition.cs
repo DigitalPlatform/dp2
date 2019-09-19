@@ -105,6 +105,15 @@ namespace DigitalPlatform.Interfaces
         public int Score { get; set; }
 
         public string DebugInfo { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder(base.ToString()+"\r\n");
+            text.Append($"Patron={Patron}\r\n");
+            text.Append($"Score={Score}\r\n");
+            text.Append($"DebugInfo={DebugInfo}\r\n");
+            return text.ToString();
+        }
     }
 
     [Serializable()]

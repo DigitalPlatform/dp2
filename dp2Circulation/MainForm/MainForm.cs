@@ -1506,6 +1506,8 @@ Stack:
             string strOldMessagePassword = this.MessagePassword;
             bool bOldPrintLabelMode = this.PrintLabelMode;
 
+            string oldUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|" + this.FingerprintReaderUrl;
+
             CfgDlg dlg = new CfgDlg();
 
             dlg.ParamChanged += new ParamChangedEventHandler(CfgDlg_ParamChanged);
@@ -1590,6 +1592,10 @@ Stack:
                     EnsureChildForm<LabelPrintForm>();
                 }
             }
+
+            string strUrl = this.FaceReaderUrl + "|" + this.RfidCenterUrl + "|" + this.FingerprintReaderUrl;
+            if (strOldDp2MserverUrl != strUrl)
+                StartProcessManager();
         }
 
         void CfgDlg_ParamChanged(object sender, ParamChangedEventArgs e)
@@ -7559,10 +7565,11 @@ out strError);
             form.Close();
         }
 
+#if REMOVED
+        // 这是 zkfingerprint 要求的动作
         // 首次初始化指纹缓存。如果接口程序尚未启动，则不报错。这是因为缺省就有remoting server的URL配置，很可能用户根本不是要配置接口程序的意思
         void FirstInitialFingerprintCache()
         {
-            string strError = "";
 
             // 没有配置 指纹阅读器接口URL 参数，就没有必要进行初始化
             if (string.IsNullOrEmpty(this.FingerprintReaderUrl) == true)
@@ -7580,7 +7587,7 @@ out strError);
             //      -2  remoting服务器连接失败。指纹接口程序尚未启动
             //      -1  出错
             //      >=0   成功
-            int nRet = form.InitFingerprintCache(true, out strError);
+            int nRet = form.InitFingerprintCache(true, out string strError);
             if (nRet < 0)
             {
                 strError = "初始化指纹缓存失败: " + strError;
@@ -7592,6 +7599,8 @@ out strError);
             MessageBox.Show(this, strError);
             form.Close();
         }
+
+#endif
 
         // 
         /// <summary>

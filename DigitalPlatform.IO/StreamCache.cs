@@ -195,11 +195,30 @@ namespace DigitalPlatform.IO
             };
             item.Touch();
             item.FilePath = strFilePath;
-            item.FileStream = File.Open(
-    strFilePath,
-    mode,   // FileMode.OpenOrCreate,
-    access, // FileAccess.Write,
-    FileShare.ReadWrite);
+
+            int nRedoCount = 0;
+            REDO:
+            try
+            {
+                item.FileStream = File.Open(
+        strFilePath,
+        mode,   // FileMode.OpenOrCreate,
+        access, // FileAccess.Write,
+        FileShare.ReadWrite);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                if ((item.FileAccess & FileAccess.Write) != 0
+                    && nRedoCount == 0)
+                {
+                    // 创建中间子目录
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFilePath));
+                    nRedoCount++;
+                    goto REDO;
+                }
+                throw new Exception(ex.Message, ex);
+            }
+
             item.IncUse();
 
             if (bAddToCollection)

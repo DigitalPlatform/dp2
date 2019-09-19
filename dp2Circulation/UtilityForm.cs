@@ -664,7 +664,7 @@ out strError);
                 double m_secs = delta.TotalMilliseconds;    // 221
 
                 int score = (int)(((double)50 * 10 / m_secs) * (double)100);
-                this.label_health_message.Text = score.ToString() + "\r\n\r\n以每次通讯 50 毫秒为基准，满分 100";
+                this.label_health_message.Text = $"{score.ToString()}\r\n\r\n以每次通讯 50 毫秒为基准，满分 100\r\n服务器: {Program.MainForm.LibraryServerUrl}\r\n检测时间: {DateTime.Now.ToString()}";
             }
             finally
             {

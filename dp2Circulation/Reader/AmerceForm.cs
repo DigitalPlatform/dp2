@@ -15,6 +15,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Core;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -1721,7 +1722,6 @@ this.splitContainer_lists,
                         dup_ids.Add(strID);
                     }
 
-
                     // TODO: 摘要建议异步作，或者在全部数据装载完成后单独扫描一遍做
                     string strSummary = "";
 
@@ -1773,6 +1773,7 @@ this.splitContainer_lists,
                     AddListItem(this.listView_overdues, item);
                 }
 
+                /*
                 if (dup_ids.Count > 0)
                 {
                     StringUtil.RemoveDupNoSort(ref dup_ids);
@@ -1780,6 +1781,7 @@ this.splitContainer_lists,
                     strError = "未交费用列表中发现下列ID出现了重复，这是一个严重错误，请系统管理员尽快排除。\r\n---\r\n" + StringUtil.MakePathList(dup_ids, "; ");
                     goto ERROR1;
                 }
+                */
 
                 // 第二阶段，填充摘要
                 if (this.FillAmercingParam.FillSummary == true)
@@ -1793,13 +1795,10 @@ this.splitContainer_lists,
 
                         ListViewItem item = items[i];
 
-                        string strSummary = "";
-                        string strItemBarcode = "";
-
                         Safe_getBarcodeAndSummary(listView_overdues,
         item,
-        out strItemBarcode,
-        out strSummary);
+        out string strItemBarcode,
+        out string strSummary);
 
                         // 已经有内容了，就不刷新了
                         if (String.IsNullOrEmpty(strSummary) == false)
@@ -1811,13 +1810,12 @@ this.splitContainer_lists,
 
                         try
                         {
-                            string strBiblioRecPath = "";
                             long lRet = channel.GetBiblioSummary(
                                 null,
                                 strItemBarcode,
                                 "", // strItemRecPath,
                                 null,
-                                out strBiblioRecPath,
+                                out string strBiblioRecPath,
                                 out strSummary,
                                 out strError);
                             if (lRet == -1)
@@ -1835,6 +1833,13 @@ this.splitContainer_lists,
                     }
                 }
 
+                if (dup_ids.Count > 0)
+                {
+                    StringUtil.RemoveDupNoSort(ref dup_ids);
+                    Debug.Assert(dup_ids.Count >= 1, "");
+                    string warning = "未交费用列表中发现下列ID出现了重复，这是一个严重错误，请系统管理员尽快排除。\r\n---\r\n" + StringUtil.MakePathList(dup_ids, "; ");
+                    this.ShowMessage(warning, "red", true);    // 2019/9/19
+                }
 
                 return;
             }
@@ -1847,6 +1852,7 @@ this.splitContainer_lists,
 
             ERROR1:
             SetError(this.listView_overdues, strError);
+            this.ShowMessage(strError, "red", true);    // 2019/9/19
             // Safe_errorBox(strError);
         }
 
@@ -2759,6 +2765,7 @@ this.splitContainer_lists,
             return strResult;
         }
 
+        // TODO: 对 ID 进行查重
         // parameters:
         //      strFunction 为"amerce" "modifyprice" "modifycomment" 之一
         int GetCheckedIdList(ListView listview,
@@ -2770,10 +2777,17 @@ this.splitContainer_lists,
             amerce_items = new List<AmerceItem>();
             // 目前两个listview的id列都还是8
 
+            // ID --> ListViewItem
+            Hashtable id_table = new Hashtable();
+
             for (int i = 0; i < listview.Items.Count; i++)
             {
                 ListViewItem item = listview.Items[i];
                 if (item.Checked == false)
+                    continue;
+
+                // 2019/9/19
+                if (item.Tag == null)
                     continue;
 
                 AmercingItemInfo info = null;
@@ -2806,6 +2820,15 @@ this.splitContainer_lists,
                     return -1;
                 }
 
+                // 如果出现了 ID 重复的行
+                if (id_table.ContainsKey(strID))
+                {
+                    // TODO: 如何警告?
+                    continue;
+                }
+
+                id_table[strID] = item;
+
                 // 有星号的才是变更金额
                 string strNewPrice = "";
                 if (strPrice.Length > 0 && strPrice[0] == '*')
@@ -2818,11 +2841,9 @@ this.splitContainer_lists,
                         continue;
                 }
 
-                string strExistComment = "";
-                string strAppendComment = "";
                 ParseCommentString(strComment,
-                    out strExistComment,
-                    out strAppendComment);
+                    out string strExistComment,
+                    out string strAppendComment);
 
                 bool bAppendComment = false;
                 bool bCommentChanged = false;   // 注释是否发生过修改?
@@ -2922,10 +2943,9 @@ this.splitContainer_lists,
                 goto ERROR1;
             }
 
-            List<AmerceItem> amerce_items = null;
             nRet = GetCheckedIdList(this.listView_overdues,
                 "amerce",
-                out amerce_items,
+                out List<AmerceItem> amerce_items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -2940,9 +2960,8 @@ this.splitContainer_lists,
             amerce_items.CopyTo(amerce_items_param);
 
             // 显示用
-            List<OverdueItemInfo> overdue_infos = null;
             nRet = GetCheckedOverdueInfos(this.listView_overdues,
-                out overdue_infos,
+                out List<OverdueItemInfo> overdue_infos,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3040,17 +3059,13 @@ this.splitContainer_lists,
 
             try
             {
-                string strReaderXml = "";
-
-                AmerceItem[] failed_items = null;
-
                 long lRet = Channel.Amerce(
                     stop,
                     "amerce",
                     this.textBox_readerBarcode.Text,
                     amerce_items,
-                    out failed_items,
-                    out strReaderXml,
+                    out AmerceItem[] failed_items,
+                    out string strReaderXml,
                     out strError);
                 if (lRet == -1)
                 {

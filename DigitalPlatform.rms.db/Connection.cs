@@ -19,25 +19,26 @@ namespace DigitalPlatform.rms
     {
         public SqlDatabase SqlDatabase = null;
         public SqlServerType SqlServerType = SqlServerType.None;
-        object m_connection = null;
-        bool m_bGlobal = false;
-        internal IDbTransaction m_trans = null;
 
-        ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
-        int m_nLockTimeout = 5 * 1000;
+        object _connection = null;
+        bool _bGlobal = false;
+        internal IDbTransaction _globalTrans = null;
 
-        internal int m_nOpenCount = 0;
-        internal int m_nThreshold = 1000;
+        ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        int _nLockTimeout = 5 * 1000;
+
+        internal int _nOpenCount = 0;
+        internal int _nThreshold = 1000;
 
         public void Clone(Connection connection)
         {
             this.SqlDatabase = connection.SqlDatabase;
             this.SqlServerType = connection.SqlServerType;
-            this.m_connection = connection.m_connection;
-            this.m_bGlobal = connection.m_bGlobal;
-            this.m_lock = connection.m_lock;
-            this.m_nLockTimeout = connection.m_nLockTimeout;
-            this.m_nOpenCount = connection.m_nOpenCount;
+            this._connection = connection._connection;
+            this._bGlobal = connection._bGlobal;
+            this._lock = connection._lock;
+            this._nLockTimeout = connection._nLockTimeout;
+            this._nOpenCount = connection._nOpenCount;
         }
 
         /*
@@ -63,11 +64,11 @@ namespace DigitalPlatform.rms
             this.SqlDatabase = database;
             this.SqlServerType = database.container.SqlServerType;
 
-            if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
-                this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
+            if (this._nLockTimeout < this.SqlDatabase.m_nTimeOut)
+                this._nLockTimeout = this.SqlDatabase.m_nTimeOut;
 
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
-                this.m_connection = new SqlConnection(strConnectionString);
+                this._connection = new SqlConnection(strConnectionString);
             else if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
 #if NO
@@ -103,14 +104,14 @@ namespace DigitalPlatform.rms
 #endif
                 if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 {
-                    this.m_bGlobal = true;
+                    this._bGlobal = true;
                 }
-                this.m_connection = new SQLiteConnection(strConnectionString);
+                this._connection = new SQLiteConnection(strConnectionString);
             }
             else if (this.SqlServerType == rms.SqlServerType.MySql)
-                this.m_connection = new MySqlConnection(strConnectionString);
+                this._connection = new MySqlConnection(strConnectionString);
             else if (this.SqlServerType == rms.SqlServerType.Oracle)
-                this.m_connection = new OracleConnection(strConnectionString);
+                this._connection = new OracleConnection(strConnectionString);
             else
             {
                 throw new Exception("不支持的类型 " + this.SqlServerType.ToString());
@@ -232,24 +233,27 @@ namespace DigitalPlatform.rms
                 this.SqlConnection.Open();
             else if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
-                if (this.m_bGlobal == false)
+                if (this._bGlobal == false)
                 {
                     this.SQLiteConnectionOpen();
                     return;
                 }
 
-                if (this.m_bGlobal == true)
+                if (this._bGlobal == true)
                 {
-                    if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
-                        this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
+                    if (this._nLockTimeout < this.SqlDatabase.m_nTimeOut)
+                        this._nLockTimeout = this.SqlDatabase.m_nTimeOut;
 
-                    if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                        throw new ApplicationException("为Database全局Connection (Open) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
+                    if (this._lock == null)
+                        _lock = new ReaderWriterLockSlim();
 
-                    this.m_nOpenCount++;
-                    if (this.m_nOpenCount > this.m_nThreshold)
+                    if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
+                        throw new ApplicationException("为Database全局Connection (Open) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
+
+                    this._nOpenCount++;
+                    if (this._nOpenCount > this._nThreshold)
                     {
-                        this.m_nOpenCount = 0;
+                        this._nOpenCount = 0;
                         this.SqlDatabase.container.ActivateCommit();
                     }
 
@@ -258,14 +262,14 @@ namespace DigitalPlatform.rms
                         this.SQLiteConnectionOpen();
 
                         this.DisposeTransaction();
-                        Debug.Assert(this.m_trans == null, ""); // 不要忘记了提交以前的Transaction ?
+                        Debug.Assert(this._globalTrans == null, ""); // 不要忘记了提交以前的Transaction ?
 
-                        this.m_trans = this.SQLiteConnection.BeginTransaction();
+                        this._globalTrans = this.SQLiteConnection.BeginTransaction();
                     }
                     else
                     {
-                        if (this.m_trans == null)
-                            this.m_trans = this.SQLiteConnection.BeginTransaction();
+                        if (this._globalTrans == null)
+                            this._globalTrans = this.SQLiteConnection.BeginTransaction();
                     }
                 }
             }
@@ -317,11 +321,11 @@ namespace DigitalPlatform.rms
 
         void TryCommitTransaction()
         {
-            if (this.m_trans != null)
+            if (this._globalTrans != null)
             {
-                this.m_trans.Commit();
-                this.m_trans.Dispose();
-                this.m_trans = null;
+                this._globalTrans.Commit();
+                this._globalTrans.Dispose();
+                this._globalTrans = null;
 
                 // this.m_nOpenCount = 0;
             }
@@ -329,10 +333,19 @@ namespace DigitalPlatform.rms
 
         void DisposeTransaction()
         {
-            if (this.m_trans != null)
+            if (this._globalTrans != null)
             {
-                this.m_trans.Dispose();
-                this.m_trans = null;
+                this._globalTrans.Dispose();
+                this._globalTrans = null;
+            }
+        }
+
+        void DisposeLock()
+        {
+            if (_lock != null)
+            {
+                _lock.Dispose();
+                _lock = null;
             }
         }
 
@@ -351,11 +364,11 @@ namespace DigitalPlatform.rms
                 {
                     // 需要加锁
                     // 只有强制关闭，全局的Connection才能真正关闭
-                    if (bAuto == false && this.m_bGlobal == true)
+                    if (bAuto == false && this._bGlobal == true)
                     {
                         // 强制提交
-                        if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                            throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
+                        if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
+                            throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
                         try
                         {
                             TryCommitTransaction();
@@ -365,21 +378,21 @@ namespace DigitalPlatform.rms
                         }
                         finally
                         {
-                            if (this.m_lock != null)
-                                this.m_lock.ExitWriteLock();
+                            if (this._lock != null)
+                                this._lock.ExitWriteLock();
                         }
                         return;
                     }
 
-                    if (m_bGlobal == true)
+                    if (_bGlobal == true)
                     {
-                        if (this.m_lock != null)
-                            this.m_lock.ExitWriteLock();
+                        if (this._lock != null)
+                            this._lock.ExitWriteLock();
                     }
 
                     // 不加锁的版本
                     // 不是全局的每次都要关闭
-                    if (this.m_bGlobal == false)
+                    if (this._bGlobal == false)
                     {
                         this.TryCommitTransaction();
 
@@ -412,8 +425,7 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                m_lock?.Dispose();
-                this.DisposeTransaction();
+                this.DisposeLock();
             }
         }
 
@@ -425,14 +437,13 @@ namespace DigitalPlatform.rms
             {
                 // 需要加锁
                 // 只有强制关闭，全局的Connection才能真正关闭
-                if (this.m_bGlobal == true)
+                if (this._bGlobal == true)
                 {
-
                     // 强制提交
                     if (bLock == true)
                     {
-                        if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                            throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
+                        if (this._lock != null && this._lock.TryEnterWriteLock(this._nLockTimeout) == false)
+                            throw new ApplicationException("为Database全局Connection (Commit) 加写锁时失败。Timeout=" + this._nLockTimeout.ToString());
                     }
 
                     try
@@ -458,8 +469,8 @@ namespace DigitalPlatform.rms
                     {
                         if (bLock == true)
                         {
-                            if (this.m_lock != null)
-                                this.m_lock.ExitWriteLock();
+                            if (this._lock != null)
+                                this._lock.ExitWriteLock();
                         }
                     }
                     return;
@@ -467,14 +478,14 @@ namespace DigitalPlatform.rms
 
                 // 不加锁的版本
                 // 不是全局的
-                if (this.m_bGlobal == false)
+                if (this._bGlobal == false)
                 {
-                    if (this.m_trans != null)
+                    if (this._globalTrans != null)
                     {
                         this.TryCommitTransaction();
 
-                        Debug.Assert(this.m_trans == null, "");
-                        this.m_trans = this.SQLiteConnection.BeginTransaction();
+                        Debug.Assert(this._globalTrans == null, "");
+                        this._globalTrans = this.SQLiteConnection.BeginTransaction();
                     }
                 }
             }
@@ -483,13 +494,14 @@ namespace DigitalPlatform.rms
         public void Dispose()
         {
             this.Close();
+            this.DisposeTransaction();
         }
 
         public SqlConnection SqlConnection
         {
             get
             {
-                return (SqlConnection)m_connection;
+                return (SqlConnection)_connection;
             }
         }
 
@@ -497,7 +509,7 @@ namespace DigitalPlatform.rms
         {
             get
             {
-                return (SQLiteConnection)m_connection;
+                return (SQLiteConnection)_connection;
             }
         }
 
@@ -505,7 +517,7 @@ namespace DigitalPlatform.rms
         {
             get
             {
-                return (MySqlConnection)m_connection;
+                return (MySqlConnection)_connection;
             }
         }
 
@@ -513,7 +525,7 @@ namespace DigitalPlatform.rms
         {
             get
             {
-                return (OracleConnection)m_connection;
+                return (OracleConnection)_connection;
             }
         }
     }

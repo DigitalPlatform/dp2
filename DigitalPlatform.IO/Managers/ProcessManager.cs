@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace dp2SSL
+namespace DigitalPlatform.IO
 {
-#if REMOVED
     // 负责监控和重启进程
     public static class ProcessManager
     {
@@ -41,14 +42,14 @@ namespace dp2SSL
                         if (token.IsCancellationRequested)
                             return;
 
-                        if (WpfClientInfo.HasModuleStarted(info.MutexName) == true)
+                        if (HasModuleStarted(info.MutexName) == true)
                             continue;
 
                         // TODO: 写入日志
                         writeLog?.Invoke(info, "进程被重新启动");
 
                         // 启动
-                        WpfClientInfo.StartModule(info.ShortcutPath, "minimize");
+                        StartModule(info.ShortcutPath, "minimize");
                     }
                 }
             });
@@ -70,6 +71,39 @@ namespace dp2SSL
                 return false;
             }
         }
+
+        public static bool HasModuleStarted(string mutex_name)
+        {
+            bool createdNew = true;
+            // mutex name need contains windows account name. or us programes file path, hashed
+            using (Mutex mutex = new Mutex(true,
+                mutex_name, // "dp2libraryXE V3", 
+                out createdNew))
+            {
+                if (createdNew)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        public static bool StartModule(
+            string shortcut_path,
+            string arguments)
+        {
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath(
+                    shortcut_path
+                    // "DigitalPlatform/dp2 V3/dp2Library XE V3"
+                    );
+
+            if (File.Exists(strShortcutFilePath) == false)
+                return false;
+
+            // https://stackoverflow.com/questions/558344/clickonce-appref-ms-argument
+            Process.Start(strShortcutFilePath, arguments);
+            return true;
+        }
+
     }
 
     public class ProcessInfo
@@ -83,6 +117,4 @@ namespace dp2SSL
         // Mutex 名
         public string MutexName { get; set; }
     }
-
-#endif
 }

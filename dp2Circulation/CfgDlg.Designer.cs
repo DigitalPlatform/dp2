@@ -2288,7 +2288,7 @@
             this.groupBox10.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox10.Size = new System.Drawing.Size(302, 126);
+            this.groupBox10.Size = new System.Drawing.Size(705, 126);
             this.groupBox10.TabIndex = 3;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "人脸识别接口 URL ";
@@ -2296,7 +2296,7 @@
             // button_face_setDefaultValue
             // 
             this.button_face_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_face_setDefaultValue.Location = new System.Drawing.Point(136, 70);
+            this.button_face_setDefaultValue.Location = new System.Drawing.Point(539, 70);
             this.button_face_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_face_setDefaultValue.Name = "button_face_setDefaultValue";
             this.button_face_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2312,7 +2312,7 @@
             this.textBox_face_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_face_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_face_readerUrl.Name = "textBox_face_readerUrl";
-            this.textBox_face_readerUrl.Size = new System.Drawing.Size(282, 28);
+            this.textBox_face_readerUrl.Size = new System.Drawing.Size(685, 28);
             this.textBox_face_readerUrl.TabIndex = 0;
             // 
             // groupBox9
@@ -2378,7 +2378,7 @@
             this.groupBox7.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox7.Size = new System.Drawing.Size(302, 126);
+            this.groupBox7.Size = new System.Drawing.Size(705, 126);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2386,7 +2386,7 @@
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(136, 70);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(539, 70);
             this.button_fingerprint_setDefaultValue.Margin = new System.Windows.Forms.Padding(4);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(158, 34);
@@ -2402,7 +2402,7 @@
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(9, 30);
             this.textBox_fingerprint_readerUrl.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(282, 28);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(685, 28);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
