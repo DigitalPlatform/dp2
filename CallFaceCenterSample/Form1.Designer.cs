@@ -32,12 +32,13 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button_startVideo = new System.Windows.Forms.Button();
             this.button_stopVideo = new System.Windows.Forms.Button();
+            this.button_faceRecognition2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // button_faceRecognition1
             // 
-            this.button_faceRecognition1.Location = new System.Drawing.Point(13, 81);
+            this.button_faceRecognition1.Location = new System.Drawing.Point(12, 24);
             this.button_faceRecognition1.Name = "button_faceRecognition1";
             this.button_faceRecognition1.Size = new System.Drawing.Size(545, 45);
             this.button_faceRecognition1.TabIndex = 0;
@@ -74,11 +75,22 @@
             this.button_stopVideo.UseVisualStyleBackColor = true;
             this.button_stopVideo.Click += new System.EventHandler(this.button_stopVideo_Click);
             // 
+            // button_faceRecognition2
+            // 
+            this.button_faceRecognition2.Location = new System.Drawing.Point(13, 75);
+            this.button_faceRecognition2.Name = "button_faceRecognition2";
+            this.button_faceRecognition2.Size = new System.Drawing.Size(545, 45);
+            this.button_faceRecognition2.TabIndex = 4;
+            this.button_faceRecognition2.Text = "人脸识别2(利用本程序窗口)";
+            this.button_faceRecognition2.UseVisualStyleBackColor = true;
+            this.button_faceRecognition2.Click += new System.EventHandler(this.button_faceRecognition2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button_faceRecognition2);
             this.Controls.Add(this.button_stopVideo);
             this.Controls.Add(this.button_startVideo);
             this.Controls.Add(this.pictureBox1);
@@ -98,6 +110,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button button_startVideo;
         private System.Windows.Forms.Button button_stopVideo;
+        private System.Windows.Forms.Button button_faceRecognition2;
     }
 }
 

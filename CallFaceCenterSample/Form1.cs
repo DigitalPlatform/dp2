@@ -36,6 +36,7 @@ namespace CallFaceCenterSample
         Task _recognitionTask = null;
 
         // 第一种方法：利用 facecenter 窗口自动翻起来显示视频
+        // 测试要点：注意在视频显示中途退出本程序，检查视频显示过程是否能被终止
         private void button_faceRecognition1_Click(object sender, EventArgs e)
         {
             // 用单独任务进行人脸识别，这样可以不阻塞界面线程
@@ -316,14 +317,14 @@ namespace CallFaceCenterSample
                 CancelRecognition(facecenter_url);
             }
 
-            CancelDislayVideo();
+            CancelDisplayVideo();
         }
 
         CancellationTokenSource _cancel = new CancellationTokenSource();
 
         Task _taskDisplayVideo = null;
 
-        void CancelDislayVideo()
+        void CancelDisplayVideo()
         {
             if (_cancel != null)
             {
@@ -333,21 +334,47 @@ namespace CallFaceCenterSample
             }
         }
 
-        private void button_startVideo_Click(object sender, EventArgs e)
+        void BeginDisplayVideo()
         {
-            CancelDislayVideo();
+            CancelDisplayVideo();
 
             _cancel = new CancellationTokenSource();
-            _taskDisplayVideo = Task.Run(()=> {
+            _taskDisplayVideo = Task.Run(() => {
                 var result = DisplayVideo(facecenter_url, _cancel.Token);
                 if (_cancel != null && _cancel.IsCancellationRequested == false)
                     ShowMessageBox(result.ToString());
             });
         }
 
+        private void button_startVideo_Click(object sender, EventArgs e)
+        {
+            BeginDisplayVideo();
+        }
+
         private void button_stopVideo_Click(object sender, EventArgs e)
         {
-            CancelDislayVideo();
+            CancelDisplayVideo();
+        }
+
+        // 第二种方法：利用本程序自己的窗口显示视频
+        // 测试要点：注意在视频显示中途退出本程序，检查视频显示过程是否能被终止
+        private void button_faceRecognition2_Click(object sender, EventArgs e)
+        {
+            // 用单独任务进行人脸识别，这样可以不阻塞界面线程
+            _recognitionTask = Task.Run(() =>
+            {
+                BeginDisplayVideo();
+                try
+                {
+                    var result = Recognition(facecenter_url, "");
+                    ShowMessageBox(result.ToString());
+                    _recognitionTask = null;
+                }
+                finally
+                {
+                    CancelDisplayVideo();
+                }
+            });
         }
     }
 }
