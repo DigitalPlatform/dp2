@@ -444,7 +444,7 @@
             // splitContainer_rfidArea
             // 
             this.splitContainer_rfidArea.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_rfidArea.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_rfidArea.Location = new System.Drawing.Point(47, 0);
             this.splitContainer_rfidArea.Name = "splitContainer_rfidArea";
             // 
             // splitContainer_rfidArea.Panel1
@@ -480,12 +480,12 @@
             // 
             // toolStrip_rfid
             // 
-            this.toolStrip_rfid.Dock = System.Windows.Forms.DockStyle.Right;
+            this.toolStrip_rfid.Dock = System.Windows.Forms.DockStyle.Left;
             this.toolStrip_rfid.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.toolStrip_rfid.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_saveRfid,
             this.toolStripButton_loadRfid});
-            this.toolStrip_rfid.Location = new System.Drawing.Point(460, 0);
+            this.toolStrip_rfid.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_rfid.Name = "toolStrip_rfid";
             this.toolStrip_rfid.Size = new System.Drawing.Size(47, 342);
             this.toolStrip_rfid.TabIndex = 0;

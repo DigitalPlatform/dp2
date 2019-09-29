@@ -20,18 +20,36 @@ namespace DigitalPlatform.RFID
 
         ListTagsResult ListTags(string reader_name, string style);
 
-        GetTagInfoResult GetTagInfo(string reader_name, string uid);
+        GetTagInfoResult GetTagInfo(string reader_name, string uid,
+            uint antenna_id);
+
+        /*
+        GetTagInfoResult GetTagInfo(string reader_name,
+    InventoryInfo info);
+    */
 
         NormalResult WriteTagInfo(
     string reader_name,
     TagInfo old_tag_info,
     TagInfo new_tag_info);
 
+        /*
+        // 旧的 API
         // parameters:
         //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态
         NormalResult SetEAS(
 string reader_name,
 string tag_name,
+bool enable);
+*/
+
+        // 新的 API
+        // parameters:
+        //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态
+        NormalResult SetEAS(
+string reader_name,
+string tag_name,
+uint antenna_id,
 bool enable);
 
         NormalResult ChangePassword(string reader_name,
@@ -44,6 +62,9 @@ uint new_password);
         NormalResult BeginCapture(bool begin);
 
         NormalResult EnableSendKey(bool enable);
+
+        GetLockStateResult GetShelfLockState(string lockName,
+    string indices);
     }
 
     [Serializable()]
@@ -78,6 +99,10 @@ uint new_password);
         public DateTime LastActive { get; set; }
 
         public byte DSFID { get; set; }
+
+        public uint AntennaID { get; set; }
+
+        // TODO
         // public InventoryInfo InventoryInfo { get; set; }
 
         public TagInfo TagInfo { get; set; }
@@ -96,13 +121,14 @@ uint new_password);
             result.UID = this.UID;
             result.LastActive = this.LastActive;
             result.DSFID = this.DSFID;
+            result.AntennaID = this.AntennaID;
             result.TagInfo = this.TagInfo;
             return result;
         }
 
         public override string ToString()
         {
-            return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)},Protocol={Protocol}";
+            return $"ReaderName={ReaderName},UID={UID},DSFID={Element.GetHexString(DSFID)},Protocol={Protocol},AntennaID={AntennaID}";
         }
 
         public string GetDescription()

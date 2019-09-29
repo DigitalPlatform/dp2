@@ -48,6 +48,9 @@ namespace DigitalPlatform.RFID.UI
             }
         }
 
+        // TODO: 是否需要显示出来
+        uint _antenna = 0;
+
         byte _afi = 0;
 
         [DisplayName("AFI"), Description("AFI")]
@@ -719,7 +722,8 @@ namespace DigitalPlatform.RFID.UI
                 tag_info.UID,
                 tag_info.DSFID,
                 tag_info.AFI,
-                tag_info.EAS);
+                tag_info.EAS,
+                tag_info.AntennaID);
 #if NO
             chip.DSFID = tag_info.DSFID;
             chip.AFI = tag_info.AFI;
@@ -759,7 +763,8 @@ namespace DigitalPlatform.RFID.UI
             string uid,
             byte dsfid,
             byte afi,
-            bool eas)
+            bool eas,
+            uint antenna_id)
         {
             this.OriginBytes = bytes;
             this.OriginLockStatus = lock_status;
@@ -769,6 +774,7 @@ namespace DigitalPlatform.RFID.UI
             this._dsfid = dsfid;
             this._afi = afi;
             this._eas = eas;
+            this._antenna = antenna_id;
         }
 
         // 得到用16进制字符串表示的 bytes 内容

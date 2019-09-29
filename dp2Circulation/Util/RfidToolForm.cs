@@ -87,6 +87,7 @@ namespace dp2Circulation
         const int COLUMN_UID = 1;
         const int COLUMN_READERNAME = 2;
         const int COLUMN_PROTOCOL = 3;
+        const int COLUMN_ANTENNA = 4;
 
         public RfidToolForm()
         {
@@ -249,7 +250,7 @@ this.toolStripButton_autoFixEas.Checked);
                     }
 #else
                     List<TagAndData> tags = new List<TagAndData>();
-                    foreach(var book in TagList.Books)
+                    foreach (var book in TagList.Books)
                     {
                         if (book.OneTag.TagInfo == null)
                             continue;
@@ -290,6 +291,7 @@ this.toolStripButton_autoFixEas.Checked);
                                 ListViewUtil.ChangeItemText(item, COLUMN_UID, tag.UID);
                                 ListViewUtil.ChangeItemText(item, COLUMN_READERNAME, tag.ReaderName);
                                 ListViewUtil.ChangeItemText(item, COLUMN_PROTOCOL, tag.Protocol);
+                                ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
                                 item.Tag = new ItemInfo { OneTag = tag };
                                 this.listView_tags.Items.Add(item);
 
@@ -322,6 +324,15 @@ this.toolStripButton_autoFixEas.Checked);
                                         if (TagInfoFilled(item) == false)
                                             tasks.Add(Task.Run(() => { FillTagInfo(item); }));
                                     }
+                                }
+
+                                string old_antenna = ListViewUtil.GetItemText(item, COLUMN_ANTENNA);
+                                if (old_antenna != tag.AntennaID.ToString())
+                                {
+                                    ItemInfo info = (ItemInfo)item.Tag;
+                                    if (info != null && info.OneTag != null)
+                                        info.OneTag.AntennaID = tag.AntennaID;
+                                    ListViewUtil.ChangeItemText(item, COLUMN_ANTENNA, tag.AntennaID.ToString());
                                 }
                             }
 
@@ -716,7 +727,7 @@ this.toolStripButton_autoFixEas.Checked);
 #if OLD_CODE
                 GetTagInfoResult result = channel.Object.GetTagInfo("*", tag.UID);
 #else
-                GetTagInfoResult result = RfidManager.GetTagInfo("*", tag.UID);
+                GetTagInfoResult result = RfidManager.GetTagInfo("*", tag.UID, tag.AntennaID);
 #endif
                 if (result.Value == -1)
                 {
@@ -872,6 +883,12 @@ this.toolStripButton_autoFixEas.Checked);
                     // var tag_info = tag.TagInfo;
 
                     this.SelectedTag = tag.Clone(); // 最好是深度拷贝
+
+                    // 2019/9/30
+                    // 修正 AntennaID
+                    if (this.SelectedTag.TagInfo != null)
+                        this.SelectedTag.TagInfo.AntennaID = this.SelectedTag.AntennaID;
+
                     this.button_OK.Enabled = true;
 
                     this.chipEditor1.LogicChipItem = item_info.LogicChipItem;
@@ -1023,7 +1040,7 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, false, out strError);
 #else
                         {
-                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, false);
+                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, false);
                             TagList.SetEasData(tag_info.UID, false);
                         }
 #endif
@@ -1032,7 +1049,7 @@ this.toolStripButton_autoFixEas.Checked);
                             result = SetEAS(channel, "*", "uid:" + tag_info.UID, true, out strError);
 #else
                         {
-                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, true);
+                            result = RfidManager.SetEAS("*", "uid:" + tag_info.UID, tag_info.AntennaID, true);
                             TagList.SetEasData(tag_info.UID, true);
                         }
 #endif

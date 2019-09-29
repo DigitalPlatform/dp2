@@ -14,6 +14,7 @@ using log4net;
 using DigitalPlatform;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using RFIDLIB;
 
 namespace RfidDrivers.First
 {
@@ -462,6 +463,7 @@ namespace RfidDrivers.First
             return new NormalResult();
         }
 
+#if NOT_USE
         // result.Value:
         //      -1
         //      0
@@ -488,6 +490,7 @@ namespace RfidDrivers.First
                 // Unlock();
             }
         }
+#endif
 
         List<Reader> GetReadersByName(string reader_name)
         {
@@ -526,7 +529,6 @@ namespace RfidDrivers.First
 
             return results;
         }
-
 
         // 根据 reader 名字找到 reader_handle
         UIntPtr GetReaderHandle(string reader_name, out string protocols)
@@ -1759,11 +1761,13 @@ namespace RfidDrivers.First
         static bool GetDriverName(string product_id,
             out string driver_name,
             out string product_name,
-            out string protocols)
+            out string protocols,
+            out int antenna_count)
         {
             driver_name = "";
             product_name = "";
             protocols = "";
+            antenna_count = 0;
 
             if (_product_dom == null)
             {
@@ -1797,6 +1801,13 @@ namespace RfidDrivers.First
 
                     protocols = StringUtil.MakePathList(list);
                 }
+            }
+
+            // 2019/9/27
+            {
+                XmlElement count = _product_dom.DocumentElement.SelectSingleNode($"device/basic/id[text()='{product_id}']/../antena_count") as XmlElement;
+                if (count != null)
+                    Int32.TryParse(count.InnerText.Trim(), out antenna_count);
             }
 
             return true;
@@ -1849,13 +1860,15 @@ namespace RfidDrivers.First
                 bool bRet = GetDriverName(product_id,
                     out string driver_name,
                     out string product_name,
-                    out string protocols);
+                    out string protocols,
+                    out int antenna_count);
                 if (bRet == false)
                     return new NormalResult { Value = -1, ErrorInfo = $"product_id {product_id} 没有找到 driver name" };
 
                 reader.DriverName = driver_name;
                 reader.ProductName = product_name;
                 reader.Protocols = protocols;
+                reader.AntannaCount = antenna_count;
                 return new NormalResult();
             }
             catch (Exception ex)
@@ -2029,9 +2042,38 @@ namespace RfidDrivers.First
             }
         }
 #endif
+        byte[] GetAntennaList(string list)
+        {
+            if (string.IsNullOrEmpty(list) == true)
+                return new byte[] { 1 };    // 默认是一号天线
+            string[] numbers = list.Split(new char[] { '|', ',' });
+            List<byte> bytes = new List<byte>();
+            foreach (string number in numbers)
+            {
+                bytes.Add(Convert.ToByte(number));
+            }
+
+            return bytes.ToArray();
+        }
+
+        NormalResult GetReader(string reader_name, out Reader reader)
+        {
+            reader = null;
+            //2019/9/29
+            if (reader_name == "*")
+                return new NormalResult { Value = -1, ErrorInfo = "GetReader() 不应该用通配符的读卡器名" };
+            var readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
+                return new NormalResult { Value = -1,
+                    ErrorInfo = $"没有找到名为 '{reader_name}' 的读卡器" };
+            reader = readers[0];
+            return new NormalResult();
+        }
+
         // parameters:
         //      style   可由下列值组成
         //              only_new    每次只列出最新发现的那些标签(否则全部列出)
+        //              antenna:1|2|3|4 天线列表。缺省相当于 antenna:1 效果
         // exception:
         //      可能会抛出 System.AccessViolationException 异常
         public InventoryResult Inventory(string reader_name, string style)
@@ -2039,9 +2081,15 @@ namespace RfidDrivers.First
             Lock();
             try
             {
+                /*
                 NormalResult result = GetReaderHandle(reader_name,
                     out UIntPtr hreader,
                     out string protocols);
+                if (result.Value == -1)
+                    return new InventoryResult(result);
+                    */
+                NormalResult result = GetReader(reader_name,
+out Reader reader);
                 if (result.Value == -1)
                     return new InventoryResult(result);
 
@@ -2049,13 +2097,19 @@ namespace RfidDrivers.First
                 if (StringUtil.IsInList("only_new", style))
                     ai_type = RFIDLIB.rfidlib_def.AI_TYPE_CONTINUE;
 
+                // 2019/9/24
+                // 天线列表
+                // 1|2|3|4 这样的形态
+                string antenna_list = StringUtil.GetParameterByPrefix(style, "antenna", ":");
+                byte[] antennas = GetAntennaList(antenna_list);
+
                 UInt32 nTagCount = 0;
                 int ret = tag_inventory(
-                    hreader,
-                    protocols,
+                    reader.ReaderHandle,
+                    reader.Protocols,
                     ai_type,
-                    1,
-                    new Byte[] { 1 },
+                    (byte)antennas.Length,    // 1,
+                    antennas,   // new Byte[] { 1 },
                     ref nTagCount,
                     out List<InventoryInfo> results);
                 if (ret != 0)
@@ -2063,7 +2117,7 @@ namespace RfidDrivers.First
                     {
                         Value = -1,
                         ErrorInfo = "Inventory() error",
-                        ErrorCode = GetErrorCode(ret, hreader)
+                        ErrorCode = GetErrorCode(ret, reader.ReaderHandle)
                     };
 
                 Debug.Assert(nTagCount == results.Count);
@@ -2265,7 +2319,9 @@ namespace RfidDrivers.First
         // TODO: 中间某个读卡器出错，还要继续往后用其他读卡器探索读取？
         // TODO: 根据 PII 寻找标签。如果找到两个或者以上，并且它们 UID 不同，会报错
         // 注：PII 相同，UID 也相同，属于正常情况，这是因为多个读卡器都读到了同一个标签的缘故
-        // return:
+        // parameters:
+        //      reader_name 可以用通配符
+            // return:
         //      result.Value    -1 出错
         //      result.Value    0   没有找到指定的标签
         //      result.Value    1   找到了。result.UID 和 result.ReaderName 里面有返回值
@@ -2274,6 +2330,7 @@ namespace RfidDrivers.First
         public FindTagResult FindTagByPII(
             string reader_name,
             string protocols,   // 2019/8/28
+            string antenna_list,    // 2019/9/24
             string pii)
         {
 #if NO
@@ -2284,6 +2341,8 @@ namespace RfidDrivers.First
             List<Reader> readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
                 return new FindTagResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+
+            byte[] antennas = GetAntennaList(antenna_list);
 
             Lock();
             try
@@ -2304,8 +2363,8 @@ namespace RfidDrivers.First
                         reader.ReaderHandle,
                         protocols,  // reader.Protocols,
                         ai_type,
-                        1,
-                        new Byte[] { 1 },
+                        (byte)antennas.Length,    // 1,
+                        antennas,   // new Byte[] { 1 },
                         ref nTagCount,
                         out List<InventoryInfo> results);
                     if (ret != 0)
@@ -2323,6 +2382,22 @@ namespace RfidDrivers.First
 
                     foreach (InventoryInfo info in results)
                     {
+                        // 选择天线
+                        if (reader.AntannaCount > 1)
+                        {
+                            var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
+                                (byte)info.AntennaID);
+                            if (hr != 0)
+                            {
+                                return new FindTagResult
+                                {
+                                    Value = -1,
+                                    ErrorInfo = $"1 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{info.AntennaID}",
+                                    ErrorCode = GetErrorCode(hr, reader.ReaderHandle)
+                                };
+                            }
+                        }
+
                         UIntPtr hTag = _connectTag(
     reader.ReaderHandle,
     info?.UID,
@@ -2676,10 +2751,16 @@ namespace RfidDrivers.First
         public NormalResult SetEAS(
     string reader_name,
     string uid,
+    uint antenna_id,
     bool enable)
         {
+            /*
             List<object> handles = GetAllReaderHandle(reader_name);
             if (handles.Count == 0)
+                return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
+                */
+            var readers = GetReadersByName(reader_name);
+            if (readers.Count == 0)
                 return new NormalResult { Value = -1, ErrorInfo = $"没有找到名为 {reader_name} 的读卡器" };
 
             Lock();
@@ -2687,17 +2768,35 @@ namespace RfidDrivers.First
             {
                 List<NormalResult> error_results = new List<NormalResult>();
 
-                foreach (UIntPtr hreader in handles)
+                // foreach (UIntPtr hreader in handles)
+                foreach(var reader in readers)
                 {
+                    // 选择天线
+                    if (reader.AntannaCount > 1)
+                    {
+                        Debug.WriteLine($"antenna_id={antenna_id}");
+                        var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
+                            (byte)antenna_id);
+                        if (hr != 0)
+                        {
+                            return new NormalResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"2 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{antenna_id}",
+                                ErrorCode = GetErrorCode(hr, reader.ReaderHandle)
+                            };
+                        }
+                    }
+
                     UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
-                    UIntPtr hTag = _connectTag(hreader, uid, tag_type);
+                    UIntPtr hTag = _connectTag(reader.ReaderHandle, uid, tag_type);
                     if (hTag == UIntPtr.Zero)
                         continue;
                     try
                     {
                         // 写入 AFI
                         {
-                            NormalResult result0 = WriteAFI(hreader,
+                            NormalResult result0 = WriteAFI(reader.ReaderHandle,
                                 hTag,
                                 enable ? (byte)0x07 : (byte)0xc2);
                             if (result0.Value == -1)
@@ -2709,7 +2808,7 @@ namespace RfidDrivers.First
 
                         // 设置 EAS 状态
                         {
-                            NormalResult result0 = EnableEAS(hreader, hTag, enable);
+                            NormalResult result0 = EnableEAS(reader.ReaderHandle, hTag, enable);
                             if (result0.Value == -1)
                             {
                                 error_results.Add(result0);
@@ -2721,7 +2820,7 @@ namespace RfidDrivers.First
                     }
                     finally
                     {
-                        _disconnectTag(hreader, ref hTag);
+                        _disconnectTag(reader.ReaderHandle, ref hTag);
                     }
                 }
 
@@ -2760,9 +2859,10 @@ namespace RfidDrivers.First
         }
 
         // parameters:
+        //      one_reader_name 不能用通配符
         //      style   randomizeEasAfiPassword
         public NormalResult WriteTagInfo(// byte[] uid, UInt32 tag_type
-            string reader_name,
+            string one_reader_name,
             TagInfo old_tag_info,
             TagInfo new_tag_info //,
                                  // string style
@@ -2775,12 +2875,36 @@ namespace RfidDrivers.First
             Lock();
             try
             {
+                /*
                 NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader, out string protocols);
                 if (result.Value == -1)
                     return result;
+                    */
+                NormalResult result = GetReader(one_reader_name,
+                    out Reader reader);
+                if (result.Value == -1)
+                    return result;
+
+                // TODO: 选择天线
+                // 2019/9/27
+                // 选择天线
+                if (reader.AntannaCount > 1)
+                {
+                    var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
+                        (byte)old_tag_info.AntennaID);
+                    if (hr != 0)
+                    {
+                        return new GetTagInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"3 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{old_tag_info.AntennaID}",
+                            ErrorCode = GetErrorCode(hr, reader.ReaderHandle)
+                        };
+                    }
+                }
 
                 UInt32 tag_type = RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID;
-                UIntPtr hTag = _connectTag(hreader, old_tag_info.UID, tag_type);
+                UIntPtr hTag = _connectTag(reader.ReaderHandle, old_tag_info.UID, tag_type);
                 if (hTag == UIntPtr.Zero)
                     return new NormalResult { Value = -1, ErrorInfo = "connectTag Error" };
                 try
@@ -2818,7 +2942,7 @@ namespace RfidDrivers.First
                             if (range.Locked == false)
                             {
                                 NormalResult result0 = WriteBlocks(
-                                    hreader,
+                                    reader.ReaderHandle,
                             hTag,
                             (uint)current_block_count,
                             (uint)range.BlockCount,
@@ -2852,7 +2976,7 @@ namespace RfidDrivers.First
                             if (range.Locked == true)
                             {
                                 string error_code = LockBlocks(
-                                    hreader,
+                                    reader.ReaderHandle,
                                     hTag,
                                     (uint)current_block_count,
                                     (uint)range.BlockCount);
@@ -2867,7 +2991,7 @@ namespace RfidDrivers.First
                     // 写入 DSFID
                     if (old_tag_info.DSFID != new_tag_info.DSFID)
                     {
-                        NormalResult result0 = WriteDSFID(hreader, hTag, new_tag_info.DSFID);
+                        NormalResult result0 = WriteDSFID(reader.ReaderHandle, hTag, new_tag_info.DSFID);
                         if (result0.Value == -1)
                             return result0;
                     }
@@ -2875,7 +2999,7 @@ namespace RfidDrivers.First
                     // 写入 AFI
                     if (old_tag_info.AFI != new_tag_info.AFI)
                     {
-                        NormalResult result0 = WriteAFI(hreader, hTag, new_tag_info.AFI);
+                        NormalResult result0 = WriteAFI(reader.ReaderHandle, hTag, new_tag_info.AFI);
                         if (result0.Value == -1)
                             return result0;
                     }
@@ -2883,7 +3007,7 @@ namespace RfidDrivers.First
                     // 设置 EAS 状态
                     if (old_tag_info.EAS != new_tag_info.EAS)
                     {
-                        NormalResult result0 = EnableEAS(hreader, hTag, new_tag_info.EAS);
+                        NormalResult result0 = EnableEAS(reader.ReaderHandle, hTag, new_tag_info.EAS);
                         if (result0.Value == -1)
                             return result0;
                     }
@@ -2892,7 +3016,7 @@ namespace RfidDrivers.First
                 }
                 finally
                 {
-                    _disconnectTag(hreader, ref hTag);
+                    _disconnectTag(reader.ReaderHandle, ref hTag);
                 }
             }
             finally
@@ -3071,30 +3195,54 @@ namespace RfidDrivers.First
         }
 
         // parameters:
+        //      one_reader_name 不能用通配符
         //      tag_type    如果 uid 为空，则 tag_type 应为 RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID
         // result.Value
         //      -1
         //      0
         public GetTagInfoResult GetTagInfo(// byte[] uid, UInt32 tag_type
-            string reader_name,
+            string one_reader_name,
             InventoryInfo info)
         {
 
             Lock();
             try
             {
+                /*
                 NormalResult result = GetReaderHandle(reader_name, out UIntPtr hreader, out string protocols);
                 if (result.Value == -1)
                     return new GetTagInfoResult(result);
+                    */
+                NormalResult result = GetReader(one_reader_name,
+                    out Reader reader);
+                if (result.Value == -1)
+                    return new GetTagInfoResult(result);
+
 #if DEBUG
                 if (info != null)
                 {
                     Debug.Assert(info.UID.Length >= 8);
                 }
 #endif
+                // 2019/9/27
+                // 选择天线
+                if (info != null && reader.AntannaCount > 1)
+                {
+                    var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
+                        (byte)info.AntennaID);
+                    if (hr != 0)
+                    {
+                        return new GetTagInfoResult
+                        {
+                            Value = -1,
+                            ErrorInfo = $"4 RDR_SetAcessAntenna() error. hr:{hr},reader_name:{reader.Name},antenna_id:{info.AntennaID}",
+                            ErrorCode = GetErrorCode(hr, reader.ReaderHandle)
+                        };
+                    }
+                }
 
                 UIntPtr hTag = _connectTag(
-                    hreader,
+                    reader.ReaderHandle,
                     info?.UID,
                     info == null ? RFIDLIB.rfidlib_def.RFID_ISO15693_PICC_ICODE_SLI_ID : info.TagType);
                 if (hTag == UIntPtr.Zero)
@@ -3115,7 +3263,7 @@ namespace RfidDrivers.First
                     dsfid = afi = icref = 0;
                     blkSize = blkNum = 0;
                     iret = RFIDLIB.rfidlib_aip_iso15693.ISO15693_GetSystemInfo(
-                        hreader,
+                        reader.ReaderHandle,
                         hTag,
                         uid,
                         ref dsfid,
@@ -3127,8 +3275,8 @@ namespace RfidDrivers.First
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. reader_name:{reader_name},uid:{Element.GetHexString(uid)}",
-                            ErrorCode = GetErrorCode(iret, hreader)
+                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)}",
+                            ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                         };
 
 #if NO
@@ -3142,7 +3290,7 @@ namespace RfidDrivers.First
 #endif
 
                     ReadBlocksResult result0 = ReadBlocks(
-                        hreader,
+                        reader.ReaderHandle,
                         hTag,
                         0,
                         blkNum,
@@ -3156,7 +3304,7 @@ namespace RfidDrivers.First
                             ErrorCode = result0.ErrorCode
                         };
 
-                    NormalResult eas_result = CheckEAS(hreader, hTag);
+                    NormalResult eas_result = CheckEAS(reader.ReaderHandle, hTag);
                     if (eas_result.Value == -1)
                         return new GetTagInfoResult { Value = -1, ErrorInfo = eas_result.ErrorInfo, ErrorCode = eas_result.ErrorCode };
 
@@ -3165,7 +3313,7 @@ namespace RfidDrivers.First
                         TagInfo = new TagInfo
                         {
                             // 这里返回真正 GetTagInfo 成功的那个 ReaderName。而 Inventory 可能返回类似 reader1,reader2 这样的字符串
-                            ReaderName = reader_name,   // 2019/2/27
+                            ReaderName = one_reader_name,   // 2019/2/27
 
                             UID = Element.GetHexString(uid),
                             AFI = afi,
@@ -3176,13 +3324,14 @@ namespace RfidDrivers.First
                             LockStatus = result0.LockStatus,    // TagInfo.GetLockString(block_status),
                             Bytes = result0.Bytes,
                             EAS = eas_result.Value == 1,
+                            AntennaID = info == null ? 0 : info.AntennaID
                         }
                     };
                     return result1;
                 }
                 finally
                 {
-                    _disconnectTag(hreader, ref hTag);
+                    _disconnectTag(reader.ReaderHandle, ref hTag);
                 }
             }
             finally
@@ -3756,6 +3905,7 @@ namespace RfidDrivers.First
                 states.Add(new LockState
                 {
                     Name = current_lock.Name,
+                    Index = index,
                     State = (sta == 0x00 ? "open" : "close")
                 });
             }

@@ -144,6 +144,7 @@ namespace dp2SSL
 
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.Url = App.RfidUrl;
+            RfidManager.AntennaList = "1|2|3|4";    // testing
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
             RfidManager.Start(_cancelRefresh.Token);

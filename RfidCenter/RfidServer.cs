@@ -28,6 +28,27 @@ namespace RfidCenter
 #endif
         }
 
+        public GetLockStateResult GetShelfLockState(string lockName,
+            string indices)
+        {
+            List<LockState> states = new List<LockState>();
+            string[] list = indices.Split(new char[] { ',' });
+            foreach (var one in list)
+            {
+                // 探测锁状态
+                // parameters:
+                //      lockName    锁名字。如果为 * 表示所有的锁
+                //      index       锁编号。从 0 开始计数
+                var result = Program.Rfid.GetShelfLockState(lockName, Convert.ToInt32(one));
+                if (result.Value == -1)
+                    return result;
+                states.AddRange(result.States);
+            }
+
+            return new GetLockStateResult { Value = 0, States = states };
+        }
+
+
         public NormalResult GetState(string style)
         {
             if (style.StartsWith("clearCache"))
@@ -39,6 +60,7 @@ namespace RfidCenter
                     SetLastUids(session_id, "");
                 return new NormalResult();
             }
+
 
             if (style == "restart")
             {
@@ -96,6 +118,7 @@ namespace RfidCenter
         static Hashtable _lastUidTable = new Hashtable();
         // static object _sync_lastuids = new object();
 
+        // 构造用于比较的 uid 字符串
         static string BuildUids(List<OneTag> tags)
         {
             if (tags == null || tags.Count == 0)
@@ -104,7 +127,7 @@ namespace RfidCenter
             StringBuilder current = new StringBuilder();
             foreach (OneTag tag in tags)
             {
-                current.Append(tag.UID + ",");
+                current.Append($"{tag.UID}|{tag.AntennaID},");
             }
             return current.ToString();
         }
@@ -239,6 +262,10 @@ namespace RfidCenter
                 Program.Rfid.DecApiCount();
             }
         }
+
+        static uint _currenAntenna = 1;
+        DateTime _lastTime;
+
         // parameters:
         //      style   如果为 "getTagInfo"，表示要在结果中返回 TagInfo
         ListTagsResult _listTags(string reader_name, string style)
@@ -272,7 +299,9 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name, reader.Name) == false)
                     continue;
 
-                InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name, "");
+                InventoryResult inventory_result = Program.Rfid.Inventory(reader.Name,
+                    style   // ""
+                    );
                 if (inventory_result.Value == -1)
                 {
                     return new ListTagsResult { Value = -1, ErrorInfo = inventory_result.ErrorInfo, ErrorCode = inventory_result.ErrorCode };
@@ -295,8 +324,22 @@ namespace RfidCenter
                             Protocol = info.Protocol,
                             ReaderName = reader.Name,
                             UID = info.UID,
-                            DSFID = info.DsfID
+                            DSFID = info.DsfID,
+                            AntennaID = info.AntennaID, // 2019/9/25
+                            // InventoryInfo = info    // 有些冗余的字段
                         };
+
+                        /*
+                        // testing
+                        tag.AntennaID = _currenAntenna;
+                        if (DateTime.Now - _lastTime > TimeSpan.FromSeconds(5))
+                        {
+                            _currenAntenna++;
+                            if (_currenAntenna > 50)
+                                _currenAntenna = 1;
+                            _lastTime = DateTime.Now;
+                        }
+                        */
 
                         uid_table[info.UID] = tag;
                         tags.Add(tag);
@@ -374,11 +417,62 @@ namespace RfidCenter
 #endif
         }
 
+        // 2019/9/25
+        // 新版本。根据 InventoryInfo 获得标签详细信息
         // result.Value
         //      -1
         //      0
         public GetTagInfoResult GetTagInfo(string reader_name,
-            string uid)
+            InventoryInfo info)
+        {
+            if (Program.MainForm.ErrorState != "normal")
+                return new GetTagInfoResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"{Program.MainForm.ErrorStateInfo}",
+                    ErrorCode = $"state:{Program.MainForm.ErrorState}"
+                };
+
+            List<GetTagInfoResult> errors = new List<GetTagInfoResult>();
+            foreach (Reader reader in Program.Rfid.Readers)
+            {
+                if (Reader.MatchReaderName(reader_name, reader.Name) == false)
+                    continue;
+
+                // result.Value
+                //      -1
+                //      0
+                GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
+
+                // 继续尝试往后寻找
+                if (result0.Value == -1
+                    // && result0.ErrorCode == "errorFromReader=4"
+                    )
+                {
+                    errors.Add(result0);
+                    continue;
+                }
+
+                if (result0.Value == -1)
+                    return result0;
+
+                // found
+                return result0;
+            }
+
+            if (errors.Count > 0)
+                return errors[0];
+
+            return new GetTagInfoResult { ErrorCode = "notFoundReader" };
+        }
+
+        // 2019/9/27 增加的 antenna_id
+        // result.Value
+        //      -1
+        //      0
+        public GetTagInfoResult GetTagInfo(string reader_name,
+            string uid,
+            uint antenna_id)
         {
             if (Program.MainForm.ErrorState != "normal")
                 return new GetTagInfoResult
@@ -402,8 +496,12 @@ namespace RfidCenter
                 if (Reader.MatchReaderName(reader_name, reader.Name) == false)
                     continue;
 
+                InventoryInfo info = new InventoryInfo
+                {
+                    UID = uid,
+                    AntennaID = antenna_id
+                };
 
-                InventoryInfo info = new InventoryInfo { UID = uid };
                 // result.Value
                 //      -1
                 //      0
@@ -456,7 +554,8 @@ namespace RfidCenter
 
                 InventoryInfo info = new InventoryInfo
                 {
-                    UID = old_tag_info.UID
+                    UID = old_tag_info.UID,
+                    AntennaID = old_tag_info.AntennaID  // 2019/9/27
                 };
                 GetTagInfoResult result0 = Program.Rfid.GetTagInfo(reader.Name, info);
 
@@ -481,9 +580,21 @@ namespace RfidCenter
             };
         }
 
+        /*
+        // 兼容以前的 API
+        public NormalResult SetEAS(
+string reader_name,
+string tag_name,
+bool enable)
+        {
+            return SetEAS(reader_name, tag_name, 0, enable);
+        }
+        */
+
         // parameters:
         //      reader_name 读卡器名字。也可以为 "*"，表示所有读卡器
         //      tag_name    标签名字。为 pii:xxxx 或者 uid:xxxx 形态。若没有冒号，则默认为是 UID
+        //      style   如果标签所在的天线不是 1 号天线，要用 antenna:1|2|3|4 来进行调用(列出一个或者多个可能的天线号)
         // return result.Value:
         //      -1  出错
         //      0   没有找到指定的标签
@@ -491,15 +602,21 @@ namespace RfidCenter
         public NormalResult SetEAS(
 string reader_name,
 string tag_name,
+uint antenna_id,
 bool enable)
         {
             string uid = "";
             List<string> parts = StringUtil.ParseTwoPart(tag_name, ":");
             if (parts[0] == "pii")
             {
+                // 2019/9/24
+                // 天线列表
+                // 1|2|3|4 这样的形态
+
                 FindTagResult result = Program.Rfid.FindTagByPII(
                     reader_name,
                     InventoryInfo.ISO15693, // 只有 ISO15693 才有 EAS (2019/8/28)
+                    antenna_id.ToString(),
                     parts[1]);
                 if (result.Value != 1)
                     return new NormalResult
@@ -530,6 +647,7 @@ bool enable)
                 NormalResult result = Program.Rfid.SetEAS(
 reader_name,
 uid,
+antenna_id,
 enable);
                 if (result.Value == -1)
                     return result;

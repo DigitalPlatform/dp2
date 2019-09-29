@@ -1101,7 +1101,8 @@ end_time);
             {
                 string tag_name = ToLower(task.ItemBarcodeEasType) + ":" + task.ItemBarcode;
                 // 前置情况下，要小心检查原来标签的 EAS，如果没有必要修改就不要修改
-
+                uint antenna_id = 0;
+                string reader_name = "";
                 {
                     var get_result = this.Container.GetEAS("*", tag_name);
 
@@ -1119,6 +1120,9 @@ end_time);
                     }
 
                     old_state = (get_result.Value == 1);
+
+                    antenna_id = get_result.AntennaID;
+                    reader_name = get_result.ReaderName;
                 }
 
                 // 如果修改前已经是这个值就不修改了
@@ -1134,8 +1138,9 @@ end_time);
                         //      -1  出错
                         //      0   没有找到指定的标签
                         //      1   找到，并成功修改 EAS
-                        result = RfidManager.SetEAS("*",
+                        result = RfidManager.SetEAS(string.IsNullOrEmpty(reader_name) ? "*" : reader_name,
                             tag_name,
+                            antenna_id,
                             enable);
                         if (result.Value == 1)
                             break;

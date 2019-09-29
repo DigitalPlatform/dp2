@@ -53,6 +53,7 @@
             this.button_OK = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label_message = new System.Windows.Forms.Label();
+            this.columnHeader_antenna = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -147,7 +148,8 @@
             this.columnHeader_pii,
             this.columnHeader_uid,
             this.columnHeader_readerName,
-            this.columnHeader_protocol});
+            this.columnHeader_protocol,
+            this.columnHeader_antenna});
             this.listView_tags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_tags.FullRowSelect = true;
             this.listView_tags.HideSelection = false;
@@ -314,6 +316,10 @@
             this.label_message.TabIndex = 4;
             this.label_message.Visible = false;
             // 
+            // columnHeader_antenna
+            // 
+            this.columnHeader_antenna.Text = "天线";
+            // 
             // RfidToolForm
             // 
             this.AcceptButton = this.button_OK;
@@ -375,5 +381,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton toolStripButton_autoFixEas;
         private System.Windows.Forms.Label label_message;
+        private System.Windows.Forms.ColumnHeader columnHeader_antenna;
     }
 }

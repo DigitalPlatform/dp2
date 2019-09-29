@@ -146,6 +146,7 @@ uint new_password);
         }
     }
 
+    // [Serializable]
     public class InventoryInfo
     {
         // 协议类型
@@ -183,6 +184,8 @@ uint new_password);
 
         public bool EAS { get; set; }
 
+        public uint AntennaID { get; set; }
+
         // 锁定状态字符串。表达每个块的锁定状态
         // 例如 "ll....lll"。'l' 表示锁定，'.' 表示没有锁定。缺省为 '.'。空字符串表示全部块都没有被锁定
         public string LockStatus { get; set; }
@@ -192,7 +195,7 @@ uint new_password);
 
         public override string ToString()
         {
-            return $"uid={UID},dsfid={Element.GetHexString(DSFID)},afi={Element.GetHexString(AFI)},icref={Element.GetHexString(IcRef)},blkSize={BlockSize},blkNum={MaxBlockCount},lock={LockStatus},Bytes={Element.GetHexString(Bytes)}";
+            return $"uid={UID},dsfid={Element.GetHexString(DSFID)},afi={Element.GetHexString(AFI)},icref={Element.GetHexString(IcRef)},blkSize={BlockSize},blkNum={MaxBlockCount},lock={LockStatus},AntennaID={AntennaID},Bytes={Element.GetHexString(Bytes)}";
         }
 
         // 获得锁定状态字符串
@@ -221,6 +224,7 @@ uint new_password);
                 BlockSize = this.BlockSize,
                 MaxBlockCount = this.MaxBlockCount,
                 LockStatus = this.LockStatus,
+                AntennaID = this.AntennaID,
                 Bytes = Clone(this.Bytes)
             };
 
@@ -327,6 +331,8 @@ uint new_password);
         public string Protocols { get; set; }   // 支持的协议。ISO15693,ISO14443A 等
         public string SerialNumber { get; set; }    // 序列号(USB)，或者 COM 端口号
         public string DriverPath { get; set; }
+        public int AntannaCount { get; set; }   // 天线数量
+
         public UIntPtr ReaderHandle { get; set; }
         [NonSerialized]
         public OpenReaderResult Result = null;
@@ -366,14 +372,16 @@ uint new_password);
     public class LockState
     {
         public string Name { get; set; }
+        public int Index { get; set; }
         public string State { get; set; }
 
         public override string ToString()
         {
-            return $"Name={Name},State={State}";
+            return $"Name={Name},Index={Index},State={State}";
         }
     }
 
+    [Serializable()]
     public class GetLockStateResult : NormalResult
     {
         public List<LockState> States { get; set; }

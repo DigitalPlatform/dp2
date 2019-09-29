@@ -116,6 +116,10 @@ namespace DigitalPlatform.RFID
             // 从当前列表中发现已有的读者。用于交叉运算
             List<TagAndData> found_patrons = new List<TagAndData>();
 
+            // 即便是发现已经存在 UID 的标签，也要再判断一下 Antenna 是否不同。如果有不同，要进行变化通知
+            // 从当前列表中发现(除了 UID) 内容有变化的图书。这些图书也会进入 found_books 集合
+            List<TagAndData> changed_books = new List<TagAndData>();
+
             foreach (OneTag tag in list)
             {
                 // 检查以前的列表中是否已经有了
@@ -123,6 +127,12 @@ namespace DigitalPlatform.RFID
                 if (book != null)
                 {
                     found_books.Add(book);
+                    if (book.OneTag.AntennaID != tag.AntennaID)
+                    {
+                        // 修改 AntennaID
+                        book.OneTag.AntennaID = tag.AntennaID;
+                        changed_books.Add(book);
+                    }
 
                     if (string.IsNullOrEmpty(book.Error) == false)
                         error_books.Add(book);
@@ -218,9 +228,10 @@ namespace DigitalPlatform.RFID
 
             // 通知一次变化
             if (array_changed
+                || changed_books.Count > 0
                 || new_books.Count > 0 || remove_books.Count > 0
                 || new_patrons.Count > 0 || remove_patrons.Count > 0)    // 2019/8/15 优化
-                notifyChanged(new_books, null, remove_books,
+                notifyChanged(new_books, changed_books, remove_books,
                     new_patrons, null, remove_patrons);
 
             // 需要获得 Tag 详细信息的。注意还应当包含以前出错的 Tag
@@ -253,7 +264,23 @@ namespace DigitalPlatform.RFID
                     if (tag.Protocol == InventoryInfo.ISO14443A)
                         continue;
                     {
-                        var gettaginfo_result = GetTagInfo(channel, tag.UID);
+                        /*
+                        // TODO
+                        GetTagInfoResult gettaginfo_result = null;
+                        if (tag.InventoryInfo == null)
+                            gettaginfo_result = GetTagInfo(channel, tag.UID);
+                        else
+                            gettaginfo_result = GetTagInfo(channel, tag.InventoryInfo);
+                            */
+                        // 自动重试一次
+                        GetTagInfoResult gettaginfo_result = null;
+                        for (int i = 0; i < 2; i++)
+                        {
+                            gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
+                            if (gettaginfo_result.Value != -1)
+                                break;
+                        }
+
                         if (gettaginfo_result.Value == -1)
                         {
                             setError?.Invoke("rfid", gettaginfo_result.ErrorInfo);
@@ -434,7 +461,9 @@ namespace DigitalPlatform.RFID
 
         // 从缓存中获取标签信息
         static GetTagInfoResult GetTagInfo(BaseChannel<IRfid> channel,
-            string uid)
+            string reader_name,
+            string uid,
+            uint antenna)
         {
             // 2019/5/21
             if (channel.Started == false)
@@ -443,7 +472,7 @@ namespace DigitalPlatform.RFID
             TagInfo info = (TagInfo)_tagTable[uid];
             if (info == null)
             {
-                var result = channel.Object.GetTagInfo("*", uid);
+                var result = channel.Object.GetTagInfo(reader_name, uid, antenna);
                 if (result.Value == -1)
                     return result;
                 info = result.TagInfo;
@@ -457,6 +486,36 @@ namespace DigitalPlatform.RFID
 
             return new GetTagInfoResult { TagInfo = info };
         }
+
+#if NOT_USE
+        // 2019/9/25
+        // 从缓存中获取标签信息
+        static GetTagInfoResult GetTagInfo(BaseChannel<IRfid> channel,
+            InventoryInfo inventory_info)
+        {
+            // 2019/5/21
+            if (channel.Started == false)
+                return new GetTagInfoResult { Value = -1, ErrorInfo = "RFID 通道尚未启动" };
+
+            TagInfo info = (TagInfo)_tagTable[inventory_info.UID];
+            if (info == null)
+            {
+                var result = channel.Object.GetTagInfo("*", inventory_info);
+                if (result.Value == -1)
+                    return result;
+                info = result.TagInfo;
+                if (info != null)
+                {
+                    if (_tagTable.Count > 1000)
+                        _tagTable.Clear();
+                    _tagTable[inventory_info.UID] = info;
+                }
+            }
+
+            return new GetTagInfoResult { TagInfo = info };
+        }
+
+#endif
     }
 
     public class TagAndData

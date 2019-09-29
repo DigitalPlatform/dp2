@@ -428,7 +428,8 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(pii))
             {
                 // TODO: 改进显示方式
-                SetError("sendKey", $"此标签(UID={data.OneTag.UID})无法解析出 PII 元素");
+                SetError("sendKey", $"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。已写入错误日志");
+                MainForm.WriteErrorLog($"此标签(UID={data.OneTag.UID})无法解析出 PII 元素。bytes='{Element.GetHexString(data.OneTag.TagInfo.Bytes)}'");
                 return;
             }
 
@@ -472,7 +473,9 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   ListsView 中没有找到事项
                 //      1   发生了修改
-                var eas_result = _easForm.TryCorrectEas(data.OneTag.UID, pii);
+                var eas_result = _easForm.TryCorrectEas(data.OneTag.UID, 
+                    data.OneTag.AntennaID,
+                    pii);
                 if (eas_result.Value == -1)
                 {
                     // TODO SetError()
@@ -580,7 +583,7 @@ namespace dp2Circulation
         //      -1  出错
         //      0   Off
         //      1   On
-        internal NormalResult GetEAS(string reader_name,
+        internal GetEasStateResult GetEAS(string reader_name,
             string tag_name)
         {
             return _easForm.GetEAS(reader_name, tag_name);

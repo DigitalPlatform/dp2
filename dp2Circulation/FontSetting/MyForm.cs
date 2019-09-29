@@ -2300,6 +2300,11 @@ out string strError)
                 bDone = true;
                 return result;
             }
+            catch(Exception ex)
+            {
+                strError = $"连接指纹中心 '{strUrl}' 时出现异常: {ex.Message}";
+                return null;
+            }
             finally
             {
                 if (bDone == false)

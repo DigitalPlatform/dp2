@@ -158,6 +158,7 @@ namespace dp2SSL
             {
                 Container = this,
                 UID = data.OneTag.UID,
+                Antenna = data.OneTag.AntennaID.ToString(),
                 TagInfo = data.OneTag.TagInfo
             };
             this.Add(entity);
@@ -183,7 +184,7 @@ namespace dp2SSL
             }
             if (data.OneTag != null
                 && data.OneTag.TagInfo != null
-                    && entity.TagInfo == null)
+                && entity.TagInfo == null)
             {
                 entity.TagInfo = data.OneTag.TagInfo;
             }
@@ -193,6 +194,14 @@ namespace dp2SSL
                 entity.TagInfo = null;
                 entity.PII = null;
                 entity.FillFinished = false;
+            }
+
+            // 2019/9/29
+            if (data.OneTag != null)
+            {
+                var id = data.OneTag.AntennaID.ToString();
+                if (entity.Antenna != id)
+                    entity.Antenna = id;
             }
 
             SetPII(entity);

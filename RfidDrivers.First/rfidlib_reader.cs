@@ -13,7 +13,7 @@ namespace RFIDLIB
 #if UNICODE
         /**********************************************Use Unicode Character Set********************************************/
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern  UInt32  RDR_GetLibVersion(StringBuilder buf ,UInt32 nSize )  ;
+        public static extern UInt32 RDR_GetLibVersion(StringBuilder buf, UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_LoadReaderDrivers(string drvpath);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
@@ -26,13 +26,13 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int HID_GetEnumItem(UInt32 indx, byte infType, StringBuilder infBuffer, ref UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern UInt32  COMPort_Enum() ;
+        public static extern UInt32 COMPort_Enum();
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int  COMPort_GetEnumItem(UInt32 idx,StringBuilder nameBuf,UInt32 nSize ) ;
+        public static extern int COMPort_GetEnumItem(UInt32 idx, StringBuilder nameBuf, UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int  RDR_Open(string connStr ,ref UIntPtr hrOut) ;
+        public static extern int RDR_Open(string connStr, ref UIntPtr hrOut);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern  int RDR_Close(UIntPtr hr)  ;
+        public static extern int RDR_Close(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern UIntPtr RDR_CreateInvenParamSpecList();
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
@@ -46,11 +46,11 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_DisableAsyncTagReportOutput(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_TagDisconnect(UIntPtr hr,UIntPtr hTag);
+        public static extern int RDR_TagDisconnect(UIntPtr hr, UIntPtr hTag);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_SetAcessAntenna(UIntPtr hr ,Byte AntennaID) ;
+        public static extern int RDR_SetAcessAntenna(UIntPtr hr, Byte AntennaID);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_OpenRFTransmitter(UIntPtr hr) ;
+        public static extern int RDR_OpenRFTransmitter(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_CloseRFTransmitter(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
@@ -61,14 +61,14 @@ namespace RFIDLIB
         public static extern UInt32 RDR_GetAntennaInterfaceCount(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_GetReaderInfor(UIntPtr hr,
-									 Byte Type ,
-									 StringBuilder buffer,
-									ref UInt32 nSize) ;
+                                     Byte Type,
+                                     StringBuilder buffer,
+                                    ref UInt32 nSize);
 
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int  RDR_ExeSpecialControlCmd(UIntPtr hr,string cmd ,string parameters,StringBuilder result,ref UInt32 nSize) ;
+        public static extern int RDR_ExeSpecialControlCmd(UIntPtr hr, string cmd, string parameters, StringBuilder result, ref UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_ConfigBlockWrite(UIntPtr hr,UInt32 cfgno ,byte[] cfgdata,UInt32 nSize,UInt32 mask) ;
+        public static extern int RDR_ConfigBlockWrite(UIntPtr hr, UInt32 cfgno, byte[] cfgdata, UInt32 nSize, UInt32 mask);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_ConfigBlockRead(UIntPtr hr, UInt32 cfgno, byte[] cfgbuff, UInt32 nSize);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
@@ -98,34 +98,34 @@ namespace RFIDLIB
 
 
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_SetStopCommBeforeClose(UIntPtr hr) ;
+        public static extern int RDR_SetStopCommBeforeClose(UIntPtr hr);
 
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-         public static extern int RDR_GetSystemTime(UIntPtr hr ,ref UInt32 year,ref Byte month,ref Byte day ,ref Byte hour,ref Byte minute,ref Byte second)  ;
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-         public static extern int RDR_SetSystemTime(UIntPtr hr ,UInt32 year,Byte month,Byte day ,Byte hour,Byte minute,Byte second)  ;
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-         public static extern int RDR_BuffMode_FetchRecords(UIntPtr hr ,UInt32 flags)  ;
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-         public static extern int RDR_BuffMode_ClearRecords(UIntPtr hr ) ;
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_GetSystemTime(UIntPtr hr, ref UInt32 year, ref Byte month, ref Byte day, ref Byte hour, ref Byte minute, ref Byte second);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_SetSystemTime(UIntPtr hr, UInt32 year, Byte month, Byte day, Byte hour, Byte minute, Byte second);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_BuffMode_FetchRecords(UIntPtr hr, UInt32 flags);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_BuffMode_ClearRecords(UIntPtr hr);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_BuffMode_FlashEmpty(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_ParseTagDataReportRaw(UIntPtr hTagReport,Byte[] rawBuffer, ref UInt32 nSize);
+        public static extern int RDR_ParseTagDataReportRaw(UIntPtr hTagReport, Byte[] rawBuffer, ref UInt32 nSize);
 
 
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-         public static extern  UIntPtr  RDR_CreateSetOutputOperations();
+        public static extern UIntPtr RDR_CreateSetOutputOperations();
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-       public static extern int RDR_AddOneOutputOperation(UIntPtr hOperas,Byte outNo,Byte outMode,UInt32 outFrequency,UInt32 outActiveDuration ,UInt32 outInactiveDuration) ;
+        public static extern int RDR_AddOneOutputOperation(UIntPtr hOperas, Byte outNo, Byte outMode, UInt32 outFrequency, UInt32 outActiveDuration, UInt32 outInactiveDuration);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_SetOutput(UIntPtr hr, UIntPtr outputOpers /* output operations */);
 
 
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-       public static extern int RDR_BuffMode_StartReportCollection(UIntPtr hr)  ;
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-      public static extern int RDR_BuffMode_StopReportCollection(UIntPtr hr)  ;
+        public static extern int RDR_BuffMode_StartReportCollection(UIntPtr hr);
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public static extern int RDR_BuffMode_StopReportCollection(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_BuffMode_StopReportCollectionNoWait(UIntPtr hr);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
@@ -134,15 +134,15 @@ namespace RFIDLIB
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_ResetPassingCounter(UIntPtr hr, UInt32 flag);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int RDR_GetPassingCounter(UIntPtr hr, ref UInt32 inFlow,  ref UInt32 outFlow);
+        public static extern int RDR_GetPassingCounter(UIntPtr hr, ref UInt32 inFlow, ref UInt32 outFlow);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_ReverseInOutDirection(UIntPtr hr);
-         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_Login(UIntPtr hr, Byte[] pwd);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int  RDR_EnablePasswordLogin(UIntPtr hr, Byte[] pwd, Byte enable);
+        public static extern int RDR_EnablePasswordLogin(UIntPtr hr, Byte[] pwd, Byte enable);
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
-        public static extern int  RDR_UpdateLoginPassword(UIntPtr hr, Byte[] pwd, Byte[] newPwd);
+        public static extern int RDR_UpdateLoginPassword(UIntPtr hr, Byte[] pwd, Byte[] newPwd);
 
         [DllImport("rfidlib_reader.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern int RDR_GetAIPTypeName(UIntPtr hr, UInt32 AIP_ID, StringBuilder nameBuf, ref UInt32 nSize);
