@@ -5493,14 +5493,13 @@ account == null ? null : new AccountRecord(account));
                     // 检查评估模式下书目记录路径
                     if (this.TestMode == true || sessioninfo.TestMode == true)
                     {
-                        string strBiblioDbName = "";
                         // 根据实体库名, 找到对应的书目库名
                         // return:
                         //      -1  出错
                         //      0   没有找到
                         //      1   找到
                         nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
-                            out strBiblioDbName,
+                            out string strBiblioDbName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -15160,13 +15159,11 @@ out string strError)
             strError = "";
             int nRet = 0;
 
-            string strPeriodUnit = "";
-            long lPeriodValue = 0;
 
             nRet = LibraryApplication.ParsePeriodUnit(strDenyPeriod,
                 strDefaultUnit,
-                out lPeriodValue,
-                out strPeriodUnit,
+                out long lPeriodValue,
+                out string strPeriodUnit,
                 out strError);
             if (nRet == -1)
             {
@@ -15210,12 +15207,11 @@ out string strError)
 
             TimeSpan delta = now_rounded - timeEnd;
 
-            long lDelta = 0;
 
             nRet = ParseTimeSpan(
                 delta,
                 strPeriodUnit,
-                out lDelta,
+                out long lDelta,
                 out strError);
             if (nRet == -1)
                 return -1;

@@ -2225,6 +2225,17 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             else
                 menuItem.Enabled = false;
 
+            // 从 XML 粘贴整个记录
+            menuItem = new MenuItem("从 MARCXML 粘贴整个记录");// + strName);
+            menuItem.Click += new System.EventHandler(this.menuItem_PasteFromMarcXml);
+            contextMenu.MenuItems.Add(menuItem);
+            if (ido.GetDataPresent(DataFormats.Text)
+                && this.ReadOnly == false)    // 原来是==1
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
+
+
             //粘贴覆盖
             menuItem = new MenuItem("粘贴覆盖字段");// + strName);
             menuItem.Click += new System.EventHandler(this.menuItem_PasteOverwrite);
@@ -4216,6 +4227,22 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             MarcEditor.TextToClipboardFormat(strText);
         }
 
+        static string ConvertMarcXmlString(string strXml)
+        {
+            int nRet = MarcUtil.Xml2Marc(strXml, false,
+                null,
+                out string marcSyntax,
+                out string strMARC,
+                out string strError);
+            if (nRet == -1)
+            {
+                throw new Exception(strError);
+            }
+
+            return strMARC;
+        }
+
+
         /* http://z39.tcmarc.net/Index.asp?one=1
 001    012012004066
 005    20121222232554.0
@@ -4262,6 +4289,47 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             strResult = strTotal.Replace("■", new string((char)31, 1)).Replace("|", new string((char)31, 1));
             return strResult;
+        }
+
+        // 从 XML 粘贴整个记录
+        void menuItem_PasteFromMarcXml(object sender,
+            System.EventArgs e)
+        {
+            try
+            {
+                bool bHasFocus = this.Focused;
+
+                // 先删除所有字段
+                this.record.Fields.Clear();
+                this.SelectedFieldIndices.Clear();
+
+                int nFirstIndex = 0;
+
+                int nNewFieldsCount = 0;
+                string strFieldsMarc = MarcEditor.ClipboardToText();
+                strFieldsMarc = ConvertMarcXmlString(strFieldsMarc);
+
+                // TODO: 这个函数可以改造为两步实现：
+                // 1) 一个函数切分MARC多字段字符串为一个一个字段单独字符串
+                // 2) 根据上一步切分出来的字符串数组，进行插入或者替换等操作
+                this.record.Fields.InsertInternal(nFirstIndex,
+                    strFieldsMarc,
+                    out nNewFieldsCount);
+
+                this.SetScrollBars(ScrollBarMember.Both);
+                this.Invalidate();
+
+                // 设第一个节点为当前活动焦点
+                if (bHasFocus == true)
+                {
+                    if (this.record.Fields.Count > 0)
+                        this.SetActiveField(0, 3, true);
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, $"异常: {ex.Message}");
+            }
         }
 
         // 从 tcmarc 粘贴整个记录

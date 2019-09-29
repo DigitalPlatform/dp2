@@ -6488,7 +6488,7 @@ dlg.UiState);
                                 out string strError0);
                             if (nRet0 == -1)
                                 MessageBox.Show(this, strError0);
-                            else if (nRet == 1)
+                            else if (nRet0 == 1)
                                 strCardPhotoPath = Path.GetFileName(strLocalFilePath);
 
 

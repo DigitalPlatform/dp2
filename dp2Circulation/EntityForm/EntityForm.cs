@@ -5335,7 +5335,15 @@ dp2Circulation 版本: dp2Circulation, Version=3.2.7016.36344, Culture=neutral, 
 
                 if (lHitCount == 1)
                 {
-                    this.browseWindow.LoadFirstDetail(true);    // 不会触发 closed 事件
+                    try
+                    {
+                        this.browseWindow.LoadFirstDetail(true);    // 不会触发 closed 事件
+                    }
+                    catch(Exception ex)
+                    {
+                        this.ShowMessage(ex.Message);
+                    }
+
                     this.CloseBrowseWindow();
                 }
                 else

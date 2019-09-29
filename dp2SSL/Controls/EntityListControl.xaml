@@ -50,6 +50,8 @@
                             -->
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
                                        TextAlignment="Right" FontSize="8" Foreground="Gray"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Antenna}" 
+                                       TextAlignment="Left" FontSize="8" Foreground="Gray"/>
 
                     <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Height="20" Foreground="DarkGray"
                             Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 

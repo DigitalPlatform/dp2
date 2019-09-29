@@ -111,6 +111,23 @@ namespace dp2SSL
             }
         }
 
+        private string _antenna;
+
+        // RFID 天线编号
+        public string Antenna
+        {
+            get => _antenna;
+            set
+            {
+                if (_antenna != value)
+                {
+                    // Debug.WriteLine($"PII='{value}'");
+
+                    _antenna = value;
+                    OnPropertyChanged("Antenna");
+                }
+            }
+        }
 
         internal void OnPropertyChanged(string name)
         {

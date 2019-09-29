@@ -26,6 +26,22 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        static string _antennaList = null;
+
+        public static string AntennaList
+        {
+            get
+            {
+                return _antennaList;
+            }
+            set
+            {
+                _antennaList = value;
+            }
+        }
+
+        public static event ListLocksEventHandler ListLocks = null;
+
         public static event ListTagsEventHandler ListTags = null;
 
         public static ManagerBase<IRfid> Base = new ManagerBase<IRfid>();
@@ -80,6 +96,9 @@ namespace DigitalPlatform.RFID
 
         static bool _checkState = true;
 
+        public static string LockName = null;   // "*";
+        public static string LockIndices = null; // "0,1,2,3";
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -126,8 +145,11 @@ new SetErrorEventArgs
             },
             (channel) =>
             {
-                var result = channel?.Object?.ListTags("*",
-$"session:{Base.GetHashCode()}");
+                string style = $"session:{Base.GetHashCode()}";
+                if (string.IsNullOrEmpty(_antennaList) == false)
+                    style += ",antenna:" + _antennaList;
+
+                var result = channel?.Object?.ListTags("*", style);
                 if (result.Value == -1)
                     Base.TriggerSetError(result,
                         new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -148,6 +170,24 @@ $"session:{Base.GetHashCode()}");
                 }
                 else
                     _lastTags = null;
+
+                // 检查门状态
+                if (string.IsNullOrEmpty(LockName) == false && string.IsNullOrEmpty(LockIndices) == false)
+                {
+                    var lock_result = channel?.Object?.GetShelfLockState(LockName, LockIndices);
+                    if (lock_result.Value == -1)
+                        Base.TriggerSetError(lock_result,
+                            new SetErrorEventArgs { Error = lock_result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(lock_result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    // 注意 lock_result.Value == -1 时也会触发这个事件
+                    ListLocks?.Invoke(channel, new ListLocksEventArgs
+                    {
+                        Result = lock_result
+                    });
+                }
             },
             token);
         }
@@ -197,14 +237,15 @@ $"session:{Base.GetHashCode()}");
         }
 
         public static GetTagInfoResult GetTagInfo(string reader_name,
-            string uid)
+            string uid,
+            uint antenna_id)
         {
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.GetTagInfo(reader_name, uid);
+                    var result = channel.Object.GetTagInfo(reader_name, uid, antenna_id);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -267,9 +308,9 @@ $"session:{Base.GetHashCode()}");
             }
         }
 
-
         public static NormalResult SetEAS(string reader_name,
             string tag_name,
+            uint antenna_id,
             bool enable)
         {
             try
@@ -277,7 +318,7 @@ $"session:{Base.GetHashCode()}");
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS(reader_name, tag_name, enable);
+                    var result = channel.Object.SetEAS(reader_name, tag_name, antenna_id, enable);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -303,15 +344,14 @@ $"session:{Base.GetHashCode()}");
             }
         }
 
-
-        public static NormalResult SetEAS(string uid, bool enable)
+        public static NormalResult SetEAS(string uid, uint antenna_id, bool enable)
         {
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.SetEAS("*", $"uid:{uid}", enable);
+                    var result = channel.Object.SetEAS("*", $"uid:{uid}", antenna_id, enable);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -486,4 +526,14 @@ $"session:{Base.GetHashCode()}");
         public ListTagsResult Result { get; set; }
     }
 
+    public delegate void ListLocksEventHandler(object sender,
+ListLocksEventArgs e);
+
+    /// <summary>
+    ///列出门锁状态事件的参数
+    /// </summary>
+    public class ListLocksEventArgs : EventArgs
+    {
+        public GetLockStateResult Result { get; set; }
+    }
 }

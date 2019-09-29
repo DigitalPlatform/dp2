@@ -1056,9 +1056,9 @@ namespace dp2SSL
                 // 检测 EAS 是否正确
                 NormalResult result = null;
                 if (entity.State == "borrowed" && entity.TagInfo.EAS == true)
-                    result = SetEAS(entity.UID, false);
+                    result = SetEAS(entity.UID, entity.Antenna, false);
                 else if (entity.State == "onshelf" && entity.TagInfo.EAS == false)
-                    result = SetEAS(entity.UID, true);
+                    result = SetEAS(entity.UID, entity.Antenna, true);
                 else
                     continue;
 
@@ -1307,7 +1307,6 @@ out string strError);
                         || _cancel.IsCancellationRequested)
                         return;
                         */
-
                     if (entity.FillFinished == true)
                         continue;
 
@@ -1629,7 +1628,7 @@ out string strError);
                         // return 操作，提前修改 EAS
                         // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
                         {
-                            var result = SetEAS(entity.UID, action == "return");
+                            var result = SetEAS(entity.UID, entity.Antenna, action == "return");
                             if (result.Value == -1)
                             {
                                 entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
@@ -1668,7 +1667,7 @@ out string strError);
                         // return 操作如果 API 失败，则要改回原来的 EAS 状态
                         if (action == "return")
                         {
-                            var result = SetEAS(entity.UID, false);
+                            var result = SetEAS(entity.UID, entity.Antenna, false);
                             if (result.Value == -1)
                                 strError += $"\r\n并且复原 EAS 状态的动作也失败了: {result.ErrorInfo}";
                         }
@@ -1683,7 +1682,7 @@ out string strError);
                     // 注: 如果 API 成功但修改 EAS 动作失败(可能由于读者从读卡器上过早拿走图书导致)，读者会无法把本册图书拿出门禁。遇到此种情况，读者回来补充修改 EAS 一次即可
                     if (action == "borrow")
                     {
-                        var result = SetEAS(entity.UID, action == "return");
+                        var result = SetEAS(entity.UID, entity.Antenna, action == "return");
                         if (result.Value == -1)
                         {
                             entity.SetError($"虽然{action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}", "yellow");
@@ -1801,15 +1800,17 @@ out string strError);
             RemoveLayer();
         }
 
-        NormalResult SetEAS(string uid, bool enable)
+        NormalResult SetEAS(string uid, string antenna, bool enable)
         {
             try
             {
+                if (uint.TryParse(antenna, out uint antenna_id) == false)
+                    antenna_id = 0;
 #if OLD_RFID
                 this.ClearTagTable(uid);
 #endif
                 // TagList.ClearTagTable(uid);
-                var result = RfidManager.SetEAS($"{uid}", enable);
+                var result = RfidManager.SetEAS($"{uid}", antenna_id, enable);
                 if (result.Value != -1)
                 {
                     TagList.SetEasData(uid, enable);

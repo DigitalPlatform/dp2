@@ -941,6 +941,7 @@ namespace dp2Circulation
                 int nRet = LoadChipByUID(
                     _tagExisting.ReaderName,
                     _tagExisting.TagInfo.UID,
+                    _tagExisting.AntennaID,
     out TagInfo tag_info,
     out strError);
                 if (nRet == -1)
@@ -1258,6 +1259,7 @@ out strError);
         int LoadChipByUID(
             string reader_name,
             string uid, 
+            uint antenna_id,
             out TagInfo tag_info,
             out string strError)
         {
@@ -1283,7 +1285,8 @@ out strError);
 #else
                 var result = RfidManager.GetTagInfo(
                     reader_name,
-                    uid);
+                    uid,
+                    antenna_id);
 #endif
                 if (result.Value == -1)
                 {

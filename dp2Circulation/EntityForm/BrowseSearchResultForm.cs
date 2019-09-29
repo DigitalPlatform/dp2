@@ -224,6 +224,7 @@ namespace dp2Circulation
             return null;
         }
 
+        // 可能会抛出异常
         /// <summary>
         /// 装入第一条记录到详细窗
         /// </summary>
@@ -288,7 +289,14 @@ namespace dp2Circulation
             }
             return;
             ERROR1:
-            MessageBox.Show(this, strError);
+            try
+            {
+                MessageBox.Show(this, strError);
+            }
+            catch
+            {
+                throw new Exception(strError);
+            }
         }
 
         void DoOpenDetail(OpenDetailEventArgs args)

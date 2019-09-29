@@ -1,4 +1,4 @@
-﻿// #define ENABLE_DETECT
+﻿#define ENABLE_DETECT
 
 using System;
 using System.Collections.Generic;
