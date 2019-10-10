@@ -498,7 +498,7 @@ namespace DigitalPlatform.LibraryServer
                     //File.Delete(strFilePath);
                     //File.Move(strNewFilePath, strFilePath);
                     this._physicalFileCache.FileDelete(strFilePath);
-                    this._physicalFileCache.FileMove(strNewFilePath, strFilePath);
+                    this._physicalFileCache.FileMove(strNewFilePath, strFilePath, true);
 
                     //if (File.Exists(strRangeFileName) == true)
                     //    File.Delete(strRangeFileName);

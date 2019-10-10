@@ -65,6 +65,8 @@ uint new_password);
 
         GetLockStateResult GetShelfLockState(string lockName,
     string indices);
+
+        NormalResult OpenShelfLock(string lockName, int index);
     }
 
     [Serializable()]

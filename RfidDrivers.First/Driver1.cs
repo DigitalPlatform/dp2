@@ -3226,8 +3226,10 @@ out Reader reader);
 #endif
                 // 2019/9/27
                 // 选择天线
+                int antenna_id = -1;    // -1 表示尚未使用
                 if (info != null && reader.AntannaCount > 1)
                 {
+                    antenna_id = (int)info.AntennaID;
                     var hr = rfidlib_reader.RDR_SetAcessAntenna(reader.ReaderHandle,
                         (byte)info.AntennaID);
                     if (hr != 0)
@@ -3275,7 +3277,7 @@ out Reader reader);
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)}",
+                            ErrorInfo = $"ISO15693_GetSystemInfo() error 2. iret:{iret},reader_name:{one_reader_name},uid:{Element.GetHexString(uid)},antenna_id:{antenna_id}",
                             ErrorCode = GetErrorCode(iret, reader.ReaderHandle)
                         };
 
@@ -3300,7 +3302,7 @@ out Reader reader);
                         return new GetTagInfoResult
                         {
                             Value = -1,
-                            ErrorInfo = result0.ErrorInfo,
+                            ErrorInfo = $"{result0.ErrorInfo},antenna_id:{antenna_id}",
                             ErrorCode = result0.ErrorCode
                         };
 

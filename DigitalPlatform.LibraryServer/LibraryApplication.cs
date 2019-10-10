@@ -6101,14 +6101,13 @@ out strError);
             }
 #endif
 
-            Record[] records = null;
             long lRet = channel.DoSearchEx(strQueryXml,
                 "default",
                 "", // strOuputStyle
                 1,
                 "zh",
                 "id,xml,timestamp",
-                out records,
+                out Record[] records,
                 out strError);
             if (lRet == -1)
                 goto ERROR1;
@@ -6127,16 +6126,24 @@ out strError);
                 strError = "records error";
                 return -1;
             }
+            Record record = records[0];
 
-            Debug.Assert(records[0].RecordBody != null, "");
+            Debug.Assert(record.RecordBody != null, "");
+
+            // 2019/10/10
+            if (record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+            {
+                strError = record.RecordBody.Result.ErrorString;
+                return -1;
+            }
 
             // strOutputPath = records[0].Path;
             if (nMax >= 1)
-                recpaths.Add(records[0].Path);
-            strXml = records[0].RecordBody.Xml;
-            timestamp = records[0].RecordBody.Timestamp;
+                recpaths.Add(record.Path);
+            strXml = record.RecordBody.Xml;
+            timestamp = record.RecordBody.Timestamp;
 
-            // 如果命中结果多余一条，则继续获得第一条以后的各条的path
+            // 如果命中结果多于一条，则继续获得第一条以后的各条的path
             if (lHitCount > 1 && nMax > 1)
             {
                 // List<string> temp = null;

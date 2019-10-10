@@ -1744,7 +1744,7 @@ namespace DigitalPlatform.rms
             else if (strAction == "endfastappend"
                 || strAction == "start_endfastappend")
             {
-                int nRet = 0;
+                // int nRet = 0;
 
                 if (db.FastAppendTaskCount == 0)
                 {

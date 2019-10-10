@@ -2784,13 +2784,12 @@ start_time_1,
             }
 
             // 读入读者记录
-            string strReaderXml = "";
             nRet = this.TryGetReaderRecXml(
                 // sessioninfo.Channels,
                 channel,
                 strReaderBarcode,
                 sessioninfo.LibraryCodeList,    // TODO: 对个人书斋情况要测试一下
-                out strReaderXml,
+                out string strReaderXml,
                 out strOutputReaderRecPath,
                 out reader_timestamp,
                 out strError);

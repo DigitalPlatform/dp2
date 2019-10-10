@@ -28,6 +28,7 @@ namespace RfidCenter
 #endif
         }
 
+        // 获得门锁状态
         public GetLockStateResult GetShelfLockState(string lockName,
             string indices)
         {
@@ -48,6 +49,11 @@ namespace RfidCenter
             return new GetLockStateResult { Value = 0, States = states };
         }
 
+        // 开锁
+        public NormalResult OpenShelfLock(string lockName, int index)
+        {
+            return Program.Rfid.OpenShelfLock(lockName, index);
+        }
 
         public NormalResult GetState(string style)
         {
@@ -233,7 +239,9 @@ namespace RfidCenter
                     }
 
                     if (result.Value == -1)
+                    {
                         return result;
+                    }
                     /*
                     // TODO: 如果本次和上次都是 2，是否立即返回？可否先对比一下 uid，有差别再返回?
                     if (result.Results != null
@@ -243,7 +251,7 @@ namespace RfidCenter
                         return result;
                     }
                     */
-                    Thread.Sleep(10);
+                    Thread.Sleep(200);  // 10?
                 }
 
                 SetLastUids(session_id, current_uids);

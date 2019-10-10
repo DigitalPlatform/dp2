@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 
@@ -30,7 +31,6 @@ using DigitalPlatform.ResultSet;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using System.Data.Common;
 using DigitalPlatform.Core;
 
 namespace DigitalPlatform.rms
@@ -8925,12 +8925,25 @@ handle.CancelTokenSource.Token).Result;
                         strObjectFilename = GetObjectFileName(row_info.NewFileName);
                     }
 
+                    int nRedoCount = 0;
+                    REDO:
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
-                        // TODO: 不要直接汇报物理文件名
-                        strError = "对象文件 '" + strObjectFilename + "' 不存在";
-                        return -100;
+                        // 尝试补救一下
+                        string strTempFileName = strObjectFilename + ".bak";
+                        if (nRedoCount > 2 || File.Exists(strTempFileName) == false)
+                        {
+                            // TODO: 不要直接汇报物理文件名
+                            strError = "对象文件 '" + strObjectFilename + "' 不存在";
+                            return -100;
+                        }
+                        else
+                        {
+                            File.Copy(strTempFileName, strObjectFilename);
+                            nRedoCount++;
+                            goto REDO;
+                        }
                     }
                     lTotalLength = fi.Length;
                 }
@@ -14442,9 +14455,14 @@ handle.CancelTokenSource.Token).Result;
                 }
             }
 
-            // TODO: 注意这里不要有多余的操作，注意速度问题
-            if (bFull == true)
+            string temp_filename = "";
+            bool succeed = false;
+            try
             {
+
+                // TODO: 注意这里不要有多余的操作，注意速度问题
+                if (bFull == true)
+                {
 #if NO
                 if (bDeleted == false)
                 {
@@ -14461,29 +14479,39 @@ handle.CancelTokenSource.Token).Result;
                         return -1;
                 }
 #endif
-                strCurrentRange = "";
-                lCurrentLength = lTotalLength;
+                    strCurrentRange = "";
+                    lCurrentLength = lTotalLength;
 
-                if (bObjectFile == true)
-                {
-                    string strDeletedFilename = "";
-                    // 对象文件改名
-                    if (string.IsNullOrEmpty(row_info.FileName) == false)
+                    if (bObjectFile == true)
                     {
-                        strDeletedFilename = GetObjectFileName(row_info.FileName);
-                        this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
-                    }
+                        string strDeletedFilename = "";
+                        // 对象文件改名
+                        if (string.IsNullOrEmpty(row_info.FileName) == false)
+                        {
+                            strDeletedFilename = GetObjectFileName(row_info.FileName);
 
-                    // 正式文件名重新命名
-                    string strFileName = BuildObjectFileName(strID, false); // 长文件名
-                    row_info.FileName = GetShortFileName(strFileName); // 短文件名
+                            // this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
 
-                    if (lTotalLength == 0)
-                    {
-                        nRet = CreateZeroLengthFile(strFileName,
-            out strError);
-                        if (nRet == -1)
-                            return -1;
+                            string strBackFileName = strDeletedFilename + ".bak";
+
+                            this._streamCache.FileMove(strDeletedFilename,
+                                strBackFileName,
+                                true);   // 对原有的正式文件改名
+                            temp_filename = strBackFileName;    // 记忆，在最后会删除这个文件
+                        }
+
+                        // 正式文件名重新命名
+                        string strFileName = BuildObjectFileName(strID, false); // 长文件名
+                        row_info.FileName = GetShortFileName(strFileName); // 短文件名
+
+                        if (lTotalLength == 0)
+                        {
+                            nRet = CreateZeroLengthFile(strFileName,
+                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            succeed = true;
 #if NO
                         // 创建一个0bytes的文件
                         int nRedoCount = 0;
@@ -14516,38 +14544,49 @@ handle.CancelTokenSource.Token).Result;
                             return -1;
                         }
 #endif
+                        }
+                        else
+                        {
+                            Debug.Assert(string.IsNullOrEmpty(row_info.NewFileName) == false, "");
+                            string strSourceFilename = GetObjectFileName(row_info.NewFileName);
+
+                            if (strDeletedFilename != strFileName)
+                            {
+                                this._streamCache.FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                            }
+
+                            try
+                            {
+                                // TODO: 这里可否进行一些保护？意思是一旦这部分代码出错返回，不至于出现后面访问记录“对象文件不存在”的报错
+                                // File.Move(strSourceFilename, strFileName);    // 改名
+                                _streamCache.FileMove(strSourceFilename, strFileName, false);
+                                succeed = true;
+                            }
+                            catch (FileNotFoundException /* ex */)
+                            {
+                                // 如果源文件不存在
+                                strError = "对象文件(临时文件) '" + strSourceFilename + "' 不存在...";
+                                return -1;
+                            }
+
+
+                        }
+
+                        row_info.NewFileName = "";
                     }
-                    else
-                    {
-                        Debug.Assert(string.IsNullOrEmpty(row_info.NewFileName) == false, "");
-                        string strSourceFilename = GetObjectFileName(row_info.NewFileName);
-
-                        if (strDeletedFilename != strFileName)
-                        {
-                            this._streamCache.FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
-                        }
-
-                        try
-                        {
-                            // File.Move(strSourceFilename, strFileName);    // 改名
-                            _streamCache.FileMove(strSourceFilename, strFileName);
-                        }
-                        catch (FileNotFoundException /* ex */)
-                        {
-                            // 如果源文件不存在
-                            strError = "对象文件(临时文件) '" + strSourceFilename + "' 不存在...";
-                            return -1;
-                        }
-                    }
-
-                    row_info.NewFileName = "";
+                }
+                else
+                {
+                    lCurrentLength = -1;
                 }
             }
-            else
+            finally
             {
-                lCurrentLength = -1;
+                if (succeed && string.IsNullOrEmpty(temp_filename) == false)
+                {
+                    this._streamCache.FileDelete(temp_filename);   // 这里才删除 .bak 文件
+                }
             }
-
 
             {
                 // 最后,更新range,metadata,dptimestamp;

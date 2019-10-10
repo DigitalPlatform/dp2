@@ -59,9 +59,21 @@ namespace dp2SSL
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
+            this.doorControl.OpenDoor += DoorControl_OpenDoor;
+
             App.CurrentApp.PropertyChanged += CurrentApp_PropertyChanged;
 
+
+
             // this.error.Text = "test";
+        }
+
+        private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
+        {
+            // MessageBox.Show(e.Name);
+            var result = RfidManager.OpenShelfLock(e.Door.LockName, e.Door.LockIndex);
+            if (result.Value == -1)
+                MessageBox.Show(result.ErrorInfo);
         }
 
         private void CurrentApp_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -95,6 +107,8 @@ namespace dp2SSL
 
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 
+            RfidManager.ListLocks += RfidManager_ListLocks;
+
             RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
             if (string.IsNullOrEmpty(RfidManager.Url))
@@ -114,8 +128,25 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
+            RfidManager.LockCommands = DoorControl.GetLockCommands();
 
             await Fill(new CancellationToken());
+        }
+
+        private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
+        {
+            if (e.Result.Value == -1)
+                return;
+
+            foreach(var state in e.Result.States)
+            {
+                SetLockState(state);
+            }
+        }
+
+        void SetLockState(LockState state)
+        {
+            this.doorControl.SetLockState(state);
         }
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
@@ -127,6 +158,7 @@ namespace dp2SSL
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
 
+            RfidManager.ListLocks -= RfidManager_ListLocks;
         }
 
         // 从指纹阅读器获取消息(第一阶段)
@@ -683,12 +715,12 @@ namespace dp2SSL
         NormalResult OpenDoor()
         {
             // 打开对话框，询问门号
-            ProgressWindow progress = null;
+            OpenDoorWindow progress = null;
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                progress = new ProgressWindow();
-                progress.MessageText = "正在处理，请稍候 ...";
+                progress = new OpenDoorWindow();
+                // progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Closed;
@@ -734,7 +766,7 @@ namespace dp2SSL
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
-
+            OpenDoor();
         }
     }
 }

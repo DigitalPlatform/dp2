@@ -60,11 +60,26 @@ namespace DigitalPlatform.IO
         }
 
         // 改名
-        public void FileMove(string strSourceFileName, string strFileName)
+        public void FileMove(string strSourceFileName,
+            string strFileName,
+            bool auto_retry)
         {
             this.ClearItems(strSourceFileName);
             this.ClearItems(strFileName);
-            File.Move(strSourceFileName, strFileName);
+            if (auto_retry == false)
+                File.Move(strSourceFileName, strFileName);
+            else
+            {
+                try
+                {
+                    File.Move(strSourceFileName, strFileName);
+                }
+                catch (System.IO.IOException)
+                {
+                    File.Delete(strFileName);
+                    File.Move(strSourceFileName, strFileName);
+                }
+            }
         }
 
         // 改保守一点的版本
