@@ -369,6 +369,7 @@ uint new_password);
 
     }
 
+    [Serializable()]
     public class LockState
     {
         public string Name { get; set; }

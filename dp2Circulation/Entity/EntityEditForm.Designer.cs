@@ -48,6 +48,7 @@
             this.toolStripButton_option = new System.Windows.Forms.ToolStripButton();
             this.entityEditControl_editing = new dp2Circulation.EntityEditControl();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.panel_okCancel = new System.Windows.Forms.Panel();
             this.textBox_message = new System.Windows.Forms.TextBox();
             this.panel_back = new System.Windows.Forms.Panel();
             this.splitContainer_back = new System.Windows.Forms.SplitContainer();
@@ -67,6 +68,7 @@
             this.panel_editing.SuspendLayout();
             this.toolStrip_item.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
+            this.panel_okCancel.SuspendLayout();
             this.panel_back.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_back)).BeginInit();
             this.splitContainer_back.Panel1.SuspendLayout();
@@ -84,7 +86,7 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
-            this.button_OK.Location = new System.Drawing.Point(851, 487);
+            this.button_OK.Location = new System.Drawing.Point(683, 1);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(84, 33);
             this.button_OK.TabIndex = 2;
@@ -96,7 +98,7 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(942, 487);
+            this.button_Cancel.Location = new System.Drawing.Point(773, 1);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(84, 33);
             this.button_Cancel.TabIndex = 3;
@@ -110,7 +112,7 @@
             this.checkBox_autoSearchDup.AutoSize = true;
             this.checkBox_autoSearchDup.Checked = true;
             this.checkBox_autoSearchDup.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(15, 452);
+            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(0, 7);
             this.checkBox_autoSearchDup.Name = "checkBox_autoSearchDup";
             this.checkBox_autoSearchDup.Size = new System.Drawing.Size(259, 22);
             this.checkBox_autoSearchDup.TabIndex = 1;
@@ -130,8 +132,8 @@
             // splitContainer_itemArea.Panel2
             // 
             this.splitContainer_itemArea.Panel2.Controls.Add(this.tableLayoutPanel_editing);
-            this.splitContainer_itemArea.Size = new System.Drawing.Size(492, 342);
-            this.splitContainer_itemArea.SplitterDistance = 237;
+            this.splitContainer_itemArea.Size = new System.Drawing.Size(418, 407);
+            this.splitContainer_itemArea.SplitterDistance = 201;
             this.splitContainer_itemArea.TabIndex = 5;
             // 
             // tableLayoutPanel_existing
@@ -148,7 +150,7 @@
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(237, 342);
+            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(201, 407);
             this.tableLayoutPanel_existing.TabIndex = 0;
             // 
             // label1
@@ -198,7 +200,7 @@
             this.entityEditControl_existing.RegisterNo = "";
             this.entityEditControl_existing.Seller = "";
             this.entityEditControl_existing.ShelfNo = "";
-            this.entityEditControl_existing.Size = new System.Drawing.Size(231, 279);
+            this.entityEditControl_existing.Size = new System.Drawing.Size(195, 344);
             this.entityEditControl_existing.Source = "";
             this.entityEditControl_existing.State = "";
             this.entityEditControl_existing.TabIndex = 1;
@@ -208,7 +210,7 @@
             // 
             // button_existing_undoMaskDelete
             // 
-            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(3, 306);
+            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(3, 371);
             this.button_existing_undoMaskDelete.Name = "button_existing_undoMaskDelete";
             this.button_existing_undoMaskDelete.Size = new System.Drawing.Size(183, 33);
             this.button_existing_undoMaskDelete.TabIndex = 2;
@@ -230,12 +232,12 @@
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(251, 342);
+            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(213, 407);
             this.tableLayoutPanel_editing.TabIndex = 0;
             // 
             // button_editing_undoMaskDelete
             // 
-            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(3, 306);
+            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(3, 371);
             this.button_editing_undoMaskDelete.Name = "button_editing_undoMaskDelete";
             this.button_editing_undoMaskDelete.Size = new System.Drawing.Size(183, 33);
             this.button_editing_undoMaskDelete.TabIndex = 1;
@@ -259,7 +261,7 @@
             this.panel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_editing.Location = new System.Drawing.Point(3, 21);
             this.panel_editing.Name = "panel_editing";
-            this.panel_editing.Size = new System.Drawing.Size(245, 279);
+            this.panel_editing.Size = new System.Drawing.Size(207, 344);
             this.panel_editing.TabIndex = 8;
             // 
             // toolStrip_item
@@ -272,11 +274,11 @@
             this.toolStripButton_prev,
             this.toolStripButton_new,
             this.toolStripButton_option});
-            this.toolStrip_item.Location = new System.Drawing.Point(215, 0);
+            this.toolStrip_item.Location = new System.Drawing.Point(177, 0);
             this.toolStrip_item.Name = "toolStrip_item";
             this.toolStrip_item.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
             this.toolStrip_item.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_item.Size = new System.Drawing.Size(30, 279);
+            this.toolStrip_item.Size = new System.Drawing.Size(30, 344);
             this.toolStrip_item.TabIndex = 3;
             this.toolStrip_item.Text = "toolStrip1";
             // 
@@ -362,7 +364,7 @@
             this.entityEditControl_editing.RegisterNo = "";
             this.entityEditControl_editing.Seller = "";
             this.entityEditControl_editing.ShelfNo = "";
-            this.entityEditControl_editing.Size = new System.Drawing.Size(204, 279);
+            this.entityEditControl_editing.Size = new System.Drawing.Size(166, 344);
             this.entityEditControl_editing.Source = "";
             this.entityEditControl_editing.State = "";
             this.entityEditControl_editing.TabIndex = 0;
@@ -374,20 +376,33 @@
             // 
             // tableLayoutPanel_main
             // 
-            this.tableLayoutPanel_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel_main.ColumnCount = 1;
             this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_main.Controls.Add(this.panel_okCancel, 0, 3);
             this.tableLayoutPanel_main.Controls.Add(this.textBox_message, 0, 0);
             this.tableLayoutPanel_main.Controls.Add(this.panel_back, 0, 1);
-            this.tableLayoutPanel_main.Location = new System.Drawing.Point(14, 15);
+            this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
-            this.tableLayoutPanel_main.RowCount = 2;
+            this.tableLayoutPanel_main.RowCount = 4;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(1013, 432);
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(863, 537);
             this.tableLayoutPanel_main.TabIndex = 0;
+            // 
+            // panel_okCancel
+            // 
+            this.panel_okCancel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel_okCancel.Controls.Add(this.button_OK);
+            this.panel_okCancel.Controls.Add(this.button_Cancel);
+            this.panel_okCancel.Controls.Add(this.checkBox_autoSearchDup);
+            this.panel_okCancel.Location = new System.Drawing.Point(3, 500);
+            this.panel_okCancel.Name = "panel_okCancel";
+            this.panel_okCancel.Size = new System.Drawing.Size(857, 34);
+            this.panel_okCancel.TabIndex = 4;
             // 
             // textBox_message
             // 
@@ -401,7 +416,7 @@
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
             this.textBox_message.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_message.Size = new System.Drawing.Size(1007, 78);
+            this.textBox_message.Size = new System.Drawing.Size(857, 78);
             this.textBox_message.TabIndex = 0;
             // 
             // panel_back
@@ -410,7 +425,7 @@
             this.panel_back.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_back.Location = new System.Drawing.Point(3, 87);
             this.panel_back.Name = "panel_back";
-            this.panel_back.Size = new System.Drawing.Size(1007, 342);
+            this.panel_back.Size = new System.Drawing.Size(857, 407);
             this.panel_back.TabIndex = 1;
             // 
             // splitContainer_back
@@ -426,8 +441,8 @@
             // splitContainer_back.Panel2
             // 
             this.splitContainer_back.Panel2.Controls.Add(this.panel_rfid);
-            this.splitContainer_back.Size = new System.Drawing.Size(1007, 342);
-            this.splitContainer_back.SplitterDistance = 492;
+            this.splitContainer_back.Size = new System.Drawing.Size(857, 407);
+            this.splitContainer_back.SplitterDistance = 418;
             this.splitContainer_back.SplitterWidth = 8;
             this.splitContainer_back.TabIndex = 0;
             // 
@@ -438,13 +453,13 @@
             this.panel_rfid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_rfid.Location = new System.Drawing.Point(0, 0);
             this.panel_rfid.Name = "panel_rfid";
-            this.panel_rfid.Size = new System.Drawing.Size(507, 342);
+            this.panel_rfid.Size = new System.Drawing.Size(431, 407);
             this.panel_rfid.TabIndex = 0;
             // 
             // splitContainer_rfidArea
             // 
             this.splitContainer_rfidArea.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_rfidArea.Location = new System.Drawing.Point(47, 0);
+            this.splitContainer_rfidArea.Location = new System.Drawing.Point(29, 0);
             this.splitContainer_rfidArea.Name = "splitContainer_rfidArea";
             // 
             // splitContainer_rfidArea.Panel1
@@ -454,8 +469,8 @@
             // splitContainer_rfidArea.Panel2
             // 
             this.splitContainer_rfidArea.Panel2.Controls.Add(this.chipEditor_editing);
-            this.splitContainer_rfidArea.Size = new System.Drawing.Size(460, 342);
-            this.splitContainer_rfidArea.SplitterDistance = 220;
+            this.splitContainer_rfidArea.Size = new System.Drawing.Size(402, 407);
+            this.splitContainer_rfidArea.SplitterDistance = 192;
             this.splitContainer_rfidArea.TabIndex = 0;
             // 
             // chipEditor_existing
@@ -464,7 +479,7 @@
             this.chipEditor_existing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_existing.LogicChipItem = null;
             this.chipEditor_existing.Name = "chipEditor_existing";
-            this.chipEditor_existing.Size = new System.Drawing.Size(220, 342);
+            this.chipEditor_existing.Size = new System.Drawing.Size(192, 407);
             this.chipEditor_existing.TabIndex = 0;
             this.chipEditor_existing.TitleVisible = true;
             // 
@@ -474,7 +489,7 @@
             this.chipEditor_editing.Location = new System.Drawing.Point(0, 0);
             this.chipEditor_editing.LogicChipItem = null;
             this.chipEditor_editing.Name = "chipEditor_editing";
-            this.chipEditor_editing.Size = new System.Drawing.Size(236, 342);
+            this.chipEditor_editing.Size = new System.Drawing.Size(206, 407);
             this.chipEditor_editing.TabIndex = 1;
             this.chipEditor_editing.TitleVisible = true;
             // 
@@ -487,7 +502,7 @@
             this.toolStripButton_loadRfid});
             this.toolStrip_rfid.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_rfid.Name = "toolStrip_rfid";
-            this.toolStrip_rfid.Size = new System.Drawing.Size(47, 342);
+            this.toolStrip_rfid.Size = new System.Drawing.Size(29, 407);
             this.toolStrip_rfid.TabIndex = 0;
             this.toolStrip_rfid.Text = "toolStrip2";
             // 
@@ -497,7 +512,7 @@
             this.toolStripButton_saveRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_saveRfid.Image")));
             this.toolStripButton_saveRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_saveRfid.Name = "toolStripButton_saveRfid";
-            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(44, 28);
+            this.toolStripButton_saveRfid.Size = new System.Drawing.Size(26, 28);
             this.toolStripButton_saveRfid.Text = "写入标签";
             this.toolStripButton_saveRfid.Click += new System.EventHandler(this.toolStripButton_saveRfid_Click);
             // 
@@ -507,7 +522,7 @@
             this.toolStripButton_loadRfid.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadRfid.Image")));
             this.toolStripButton_loadRfid.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadRfid.Name = "toolStripButton_loadRfid";
-            this.toolStripButton_loadRfid.Size = new System.Drawing.Size(44, 28);
+            this.toolStripButton_loadRfid.Size = new System.Drawing.Size(26, 28);
             this.toolStripButton_loadRfid.Text = "装载标签";
             this.toolStripButton_loadRfid.Click += new System.EventHandler(this.toolStripButton_loadRfid_Click);
             // 
@@ -517,11 +532,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(1039, 535);
+            this.ClientSize = new System.Drawing.Size(863, 537);
             this.Controls.Add(this.tableLayoutPanel_main);
-            this.Controls.Add(this.checkBox_autoSearchDup);
-            this.Controls.Add(this.button_Cancel);
-            this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "EntityEditForm";
             this.ShowInTaskbar = false;
@@ -543,6 +555,8 @@
             this.toolStrip_item.PerformLayout();
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
+            this.panel_okCancel.ResumeLayout(false);
+            this.panel_okCancel.PerformLayout();
             this.panel_back.ResumeLayout(false);
             this.splitContainer_back.Panel1.ResumeLayout(false);
             this.splitContainer_back.Panel2.ResumeLayout(false);
@@ -557,7 +571,6 @@
             this.toolStrip_rfid.ResumeLayout(false);
             this.toolStrip_rfid.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -592,5 +605,6 @@
         private System.Windows.Forms.ToolStrip toolStrip_rfid;
         private System.Windows.Forms.ToolStripButton toolStripButton_saveRfid;
         private System.Windows.Forms.ToolStripButton toolStripButton_loadRfid;
+        private System.Windows.Forms.Panel panel_okCancel;
     }
 }

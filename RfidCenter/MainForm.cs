@@ -1888,13 +1888,24 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             ClientInfo.RemoveShortcutFromStartupGroup("dp2-RFID中心", true);
         }
 
+        bool _inSimuLock = false;   // 是否处于模拟门锁状态
+        SimuLock _simuLock = new SimuLock(4);
+
         private void MenuItem_openLock_Click(object sender, EventArgs e)
         {
             string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
             if (string.IsNullOrEmpty(strIndex) == false)
             {
-                var result = _driver.OpenShelfLock("*", Convert.ToInt32(strIndex));
-                MessageDlg.Show(this, result.ToString(), "开锁");
+                if (_inSimuLock == false)
+                {
+                    var result = _driver.OpenShelfLock("*", Convert.ToInt32(strIndex));
+                    MessageDlg.Show(this, result.ToString(), "开锁");
+                }
+                else
+                {
+                    var result = _simuLock.OpenShelfLock("*", Convert.ToInt32(strIndex));
+                    MessageDlg.Show(this, result.ToString(), "开锁");
+                }
             }
             else
             {
@@ -1907,8 +1918,16 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
             string strIndex = InputDlg.GetInput(this, "请指定锁编号", "锁编号(从0开始)", "0");
             if (string.IsNullOrEmpty(strIndex) == false)
             {
-                var result = _driver.GetShelfLockState("*", Convert.ToInt32(strIndex));
-                MessageDlg.Show(this, result.ToString(), "锁状态");
+                if (_inSimuLock == false)
+                {
+                    var result = _driver.GetShelfLockState("*", Convert.ToInt32(strIndex));
+                    MessageDlg.Show(this, result.ToString(), "锁状态");
+                }
+                else
+                {
+                    var result = _simuLock.GetShelfLockState("*", Convert.ToInt32(strIndex));
+                    MessageDlg.Show(this, result.ToString(), "锁状态");
+                }
             }
             else
             {
@@ -1920,6 +1939,20 @@ rfidcenter 版本: RfidCenter, Version=1.1.7013.32233, Culture=neutral, PublicKe
         {
             var results = UsbInfo.GetSerialDevices();
             MessageDlg.Show(this, UsbInfo.ToString(results), "COM 口信息");
+        }
+
+        private void MenuItem_simuLock_Click(object sender, EventArgs e)
+        {
+            if (_inSimuLock == false)
+            {
+                _inSimuLock = true;
+                MenuItem_simuLock.Checked = true;
+            }
+            else
+            {
+                _inSimuLock = false;
+                MenuItem_simuLock.Checked = false;
+            }
         }
     }
 }

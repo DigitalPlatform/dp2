@@ -936,6 +936,8 @@ namespace dp2Circulation
                 Debug.WriteLine("222 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
 
                 Debug.Assert(_tagExisting.TagInfo != null, "");
+                // 2019/9/30
+                Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"1 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
 
                 // 用保存后的确定了的 UID 重新装载
                 int nRet = LoadChipByUID(
@@ -954,6 +956,8 @@ namespace dp2Circulation
                 Debug.Assert(tag_info != null, "");
 
                 _tagExisting.TagInfo = tag_info;
+                _tagExisting.AntennaID = tag_info.AntennaID;    // 2019/9/30
+
                 Debug.WriteLine("set taginfo");
                 var chip = LogicChipItem.FromTagInfo(tag_info);
                 this.chipEditor_existing.LogicChipItem = chip;
@@ -1228,6 +1232,8 @@ out strError);
                 Debug.WriteLine("111 " + (_tagExisting.TagInfo != null ? "!=null" : "==null"));
 
                 Debug.Assert(_tagExisting.TagInfo != null, "");
+                // 2019/9/30
+                Debug.Assert(_tagExisting.AntennaID == _tagExisting.TagInfo.AntennaID, $"2 _tagExisting.AntennaID({_tagExisting.AntennaID}) 应该 == _tagExisting.TagInfo.AntennaID({_tagExisting.TagInfo.AntennaID})");
 
                 NormalResult result = RfidManager.WriteTagInfo(
     _tagExisting.ReaderName,

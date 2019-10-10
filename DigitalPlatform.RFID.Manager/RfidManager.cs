@@ -96,8 +96,11 @@ namespace DigitalPlatform.RFID
 
         static bool _checkState = true;
 
+        /*
         public static string LockName = null;   // "*";
         public static string LockIndices = null; // "0,1,2,3";
+        */
+        public static List<LockCommand> LockCommands = null;
 
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
@@ -172,21 +175,25 @@ new SetErrorEventArgs
                     _lastTags = null;
 
                 // 检查门状态
-                if (string.IsNullOrEmpty(LockName) == false && string.IsNullOrEmpty(LockIndices) == false)
+                if (LockCommands != null)
                 {
-                    var lock_result = channel?.Object?.GetShelfLockState(LockName, LockIndices);
-                    if (lock_result.Value == -1)
-                        Base.TriggerSetError(lock_result,
-                            new SetErrorEventArgs { Error = lock_result.ErrorInfo });
-                    else
-                        Base.TriggerSetError(lock_result,
-                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
-
-                    // 注意 lock_result.Value == -1 时也会触发这个事件
-                    ListLocks?.Invoke(channel, new ListLocksEventArgs
+                    foreach (var command in LockCommands)
                     {
-                        Result = lock_result
-                    });
+                        var lock_result = channel?.Object?.GetShelfLockState(command.LockName, 
+                            command.Indices);
+                        if (lock_result.Value == -1)
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = lock_result.ErrorInfo });
+                        else
+                            Base.TriggerSetError(lock_result,
+                                new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                        // 注意 lock_result.Value == -1 时也会触发这个事件
+                        ListLocks?.Invoke(channel, new ListLocksEventArgs
+                        {
+                            Result = lock_result
+                        });
+                    }
                 }
             },
             token);
@@ -513,6 +520,41 @@ new SetErrorEventArgs
                 };
             }
         }
+
+        public static NormalResult OpenShelfLock(string lockName, int index)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.OpenShelfLock(lockName, index);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
     }
 
     public delegate void ListTagsEventHandler(object sender,
@@ -535,5 +577,12 @@ ListLocksEventArgs e);
     public class ListLocksEventArgs : EventArgs
     {
         public GetLockStateResult Result { get; set; }
+    }
+
+
+    public class LockCommand
+    {
+        public string LockName { get; set; }
+        public string Indices { get; set; } // 0,1,2,3
     }
 }

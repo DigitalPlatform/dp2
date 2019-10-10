@@ -93,7 +93,7 @@ namespace dp2SSL
 
             // var task = SetWallPaper();
 
-            this.shelf.Visibility = Visibility.Collapsed;
+            // this.shelf.Visibility = Visibility.Collapsed;
         }
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)

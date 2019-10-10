@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <shelf readerName="RD242" antannaRange="0-3">
+    <door name="第一排" lock="*:0" antenna="*:0"/>
+    <door name="第二排" lock="*:1" antenna="*:1"/>
+    <door name="第三排" lock="*:2" antenna="*:2"/>
+    <door name="第四排" lock="*:3" antenna="*:3"/>
+  </shelf>
+  <shelf readerName="RD242" antannaRange="0-3">
+    <door name="第一排" lock="*:0" antenna="*:0"/>
+    <door name="第二排" lock="*:1" antenna="*:1"/>
+    <door name="第三排" lock="*:2" antenna="*:2"/>
+    <door name="第四排" lock="*:3" antenna="*:3"/>
+  </shelf>
+</root>
