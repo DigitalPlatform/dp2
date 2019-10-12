@@ -159,6 +159,7 @@ namespace dp2SSL
                 Container = this,
                 UID = data.OneTag.UID,
                 Antenna = data.OneTag.AntennaID.ToString(),
+                ReaderName = data.OneTag.ReaderName,
                 TagInfo = data.OneTag.TagInfo
             };
             this.Add(entity);
@@ -202,6 +203,9 @@ namespace dp2SSL
                 var id = data.OneTag.AntennaID.ToString();
                 if (entity.Antenna != id)
                     entity.Antenna = id;
+                var readerName = data.OneTag.ReaderName;
+                if (entity.ReaderName != readerName)
+                    entity.ReaderName = readerName;
             }
 
             SetPII(entity);
@@ -221,7 +225,7 @@ namespace dp2SSL
         }
 
         // 根据 entity 中的 RFID 信息设置 PII
-        static void SetPII(Entity entity)
+        public static void SetPII(Entity entity)
         {
             // 刷新 PII
             if (string.IsNullOrEmpty(entity.PII)

@@ -111,6 +111,22 @@ namespace dp2SSL
             }
         }
 
+        private string _readerName;
+
+        // RFID 读卡器名字
+        public string ReaderName
+        {
+            get => _readerName;
+            set
+            {
+                if (_readerName != value)
+                {
+                    _readerName = value;
+                    OnPropertyChanged("ReaderName");
+                }
+            }
+        }
+
         private string _antenna;
 
         // RFID 天线编号
