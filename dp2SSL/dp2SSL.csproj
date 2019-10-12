@@ -185,6 +185,9 @@
     </Compile>
     <Compile Include="Converter\StateToBorderConverter.cs" />
     <Compile Include="Converter\StringToVisibilityConverter.cs" />
+    <Compile Include="Page\PageShelfSave.xaml.cs">
+      <DependentUpon>PageShelfSave.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Page\PageShelf.xaml.cs">
       <DependentUpon>PageShelf.xaml</DependentUpon>
     </Compile>
@@ -264,6 +267,10 @@
     <Page Include="Dialog\ProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Page\PageShelfSave.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Page\PageShelf.xaml">
       <SubType>Designer</SubType>

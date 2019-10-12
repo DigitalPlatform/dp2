@@ -162,14 +162,17 @@ namespace dp2SSL
             int borrowable_count = 0;
             int returnable_count = 0;
             int renewable_count = 0;
-            foreach (Entity entity in _entities)
+            if (_entities != null)
             {
-                if (entity.State == "onshelf")
-                    borrowable_count++;
-                if (entity.State == "borrowed")
-                    returnable_count++;
-                if (entity.State == "borrowed")
-                    renewable_count++;
+                foreach (Entity entity in _entities)
+                {
+                    if (entity.State == "onshelf")
+                        borrowable_count++;
+                    if (entity.State == "borrowed")
+                        returnable_count++;
+                    if (entity.State == "borrowed")
+                        renewable_count++;
+                }
             }
 
             this.Borrowable = borrowable_count.ToString();

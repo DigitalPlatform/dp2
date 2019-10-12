@@ -2094,6 +2094,7 @@ namespace DigitalPlatform.LibraryServer
     "Borrow() 中返回册记录(" + strItemFormatList + ") 耗时 ");
             }
 
+#if REMOVED
             // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
@@ -2101,7 +2102,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (String.IsNullOrEmpty(strBiblioRecID) == true)
                 {
-                    strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
+                    strError = "册记录 XML 中 <parent> 元素缺乏或者值为空, 因此无法定位种记录ID";
                     // text-level: 用户提示
                     if (result.ErrorCode == ErrorCode.NoError)
                         strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
@@ -2111,14 +2112,13 @@ namespace DigitalPlatform.LibraryServer
 
                 string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
 
-                string strBiblioDbName = "";
                 // 根据实体库名, 找到对应的书目库名
                 // return:
                 //      -1  出错
                 //      0   没有找到
                 //      1   找到
                 nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
-                    out strBiblioDbName,
+                    out string strBiblioDbName,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2154,14 +2154,11 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    string strMetaData = "";
-                    byte[] timestamp = null;
-                    string strTempOutputPath = "";
                     lRet = channel.GetRes(strBiblioRecPath,
                         out strBiblioXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strTempOutputPath,
+                        out string strMetaData,
+                        out byte[] timestamp,
+                        out string strTempOutputPath,
                         out strError);
                     if (lRet == -1)
                     {
@@ -2300,6 +2297,73 @@ start_time_1,
 
             }
 
+#endif
+            // 2008/5/9
+            if (StringUtil.IsInList("biblio", strStyle) == true)
+            {
+                DateTime start_time_1 = DateTime.Now;
+
+                // TODO: 这一段是构造 strBiblioRecPath，可以考虑加入一个函数
+                if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                {
+                    strError = "册记录 XML 中 <parent> 元素缺乏或者值为空, 因此无法定位种记录ID";
+                    // text-level: 用户提示
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                    goto ERROR1;
+                }
+
+                string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
+
+                // 根据实体库名, 找到对应的书目库名
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                    out string strBiblioDbName,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                    // text-level: 用户提示
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                    goto ERROR1;
+                }
+
+                string strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+
+                nRet = BuildBiblio(
+    sessioninfo,
+    strBiblioRecPath,
+    /*
+    strBiblioRecID,
+    strOutputItemRecPath,
+    */
+    strStyle,
+    strBiblioFormatList,
+    result,
+    out biblio_records,
+    out strError);
+                if (nRet == -1)
+                {
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                    goto ERROR1;
+                }
+
+                WriteTimeUsed(
+    time_lines,
+    start_time_1,
+    "Borrow() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
+            }
+
             WriteTimeUsed(
     time_lines,
     start_time,
@@ -2334,6 +2398,261 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        string BuildError(
+            string type,
+            LibraryServerResult result,
+            string strError)
+        {
+            if (type == "borrow")
+            {
+                // text-level: 用户提示
+                if (result.ErrorCode == ErrorCode.NoError)
+                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                    strError);
+            }
+            else
+            {
+                if (result.ErrorCode == ErrorCode.NoError)
+                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+            }
+            return strError;
+        }
+
+        // parameters:
+        //      strStyle    其中要包括 biblio，才会返回书目相关信息
+        int BuildBiblio(
+            SessionInfo sessioninfo,
+            string strBiblioRecPath,
+            /*
+            string strBiblioRecID,
+            string strOutputItemRecPath,
+            */
+            string strStyle,
+            string strBiblioFormatList,
+            LibraryServerResult result,
+            out string[] biblio_records,
+            out string strError)
+        {
+            biblio_records = null;
+            strError = "";
+            int nRet = 0;
+#if NO
+            if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+            {
+                if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                {
+                    strError = "册记录 XML 中 <parent> 元素缺乏或者值为空, 因此无法定位种记录ID";
+
+                    this.WriteErrorLog("*** " + strError);
+
+                    // text-level: 用户提示
+                    /*
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                        */
+                    strError = BuildError(
+        type,
+        result,
+        strError);
+
+                    // goto ERROR1;
+                    return -1;
+                }
+
+                string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
+
+                // 根据实体库名, 找到对应的书目库名
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                int nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                    out string strBiblioDbName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // goto ERROR1;
+                    return -1;
+                }
+                if (nRet == 0)
+                {
+                    strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                    /*
+                    // text-level: 用户提示
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        strError);
+                        */
+                    strError = BuildError(
+    type,
+    result,
+    strError);
+                    // goto ERROR1;
+                    return -1;
+                }
+
+                strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+            }
+#endif
+            string strBiblioDbName = StringUtil.GetDbName(strBiblioRecPath);
+
+            string[] biblio_formats = strBiblioFormatList.Split(new char[] { ',' });
+            biblio_records = new string[biblio_formats.Length];
+
+            string strBiblioXml = "";
+            // 至少有html xml text之一，才获取strBiblioXml
+            if (StringUtil.IsInList("html", strBiblioFormatList) == true
+                || StringUtil.IsInList("xml", strBiblioFormatList) == true
+                || StringUtil.IsInList("text", strBiblioFormatList) == true
+                || StringUtil.IsInList("summary", strBiblioFormatList) == true)
+            {
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    // goto ERROR1;
+                    return -1;
+                }
+
+                long lRet = channel.GetRes(strBiblioRecPath,
+                    out strBiblioXml,
+                    out string strMetaData,
+                    out byte[] timestamp,
+                    out string strTempOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    // goto ERROR1;
+                    return -1;
+                }
+            }
+
+            for (int i = 0; i < biblio_formats.Length; i++)
+            {
+                string strBiblioFormat = biblio_formats[i];
+
+                // 需要从内核映射过来文件
+                string strLocalPath = "";
+                string strBiblio = "";
+
+                // 将书目记录数据从XML格式转换为HTML格式
+                if (String.Compare(strBiblioFormat, "html", true) == 0)
+                {
+                    // TODO: 可以cache
+                    nRet = this.MapKernelScriptFile(
+                        sessioninfo,
+                        strBiblioDbName,
+                        "./cfgs/loan_biblio.fltx",
+                        out strLocalPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // goto ERROR1;
+                        return -1;
+                    }
+
+                    // 将种记录数据从XML格式转换为HTML格式
+                    string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
+                    if (string.IsNullOrEmpty(strBiblioXml) == false)
+                    {
+                        nRet = this.ConvertBiblioXmlToHtml(
+                            strFilterFileName,
+                            strBiblioXml,
+                                null,
+                            strBiblioRecPath,
+                            out strBiblio,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // goto ERROR1;
+                            return -1;
+                        }
+                    }
+                    else
+                        strBiblio = "";
+
+                    biblio_records[i] = strBiblio;
+                }
+                // 将书目记录数据从XML格式转换为书目摘要格式。2019/10/12
+                else if (String.Compare(strBiblioFormat, "summary", true) == 0)
+                {
+                    nRet = BuildFormats(
+    sessioninfo,
+    strBiblioRecPath,
+    strBiblioXml,
+    null,   // strOutputPath,   // 记录的路径
+    null,   // strMetadata,     // 记录的metadata
+    null,
+    new string[] { "summary" },
+    out List<String> result_strings,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    biblio_records[i] = result_strings[0];
+                }
+                // 将书目记录数据从XML格式转换为text格式
+                else if (String.Compare(strBiblioFormat, "text", true) == 0)
+                {
+                    // TODO: 可以cache
+                    nRet = this.MapKernelScriptFile(
+                        sessioninfo,
+                        strBiblioDbName,
+                        "./cfgs/loan_biblio_text.fltx",
+                        out strLocalPath,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // goto ERROR1;
+                        return -1;
+                    }
+                    // 将种记录数据从XML格式转换为TEXT格式
+                    string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
+                    if (string.IsNullOrEmpty(strBiblioXml) == false)
+                    {
+                        nRet = this.ConvertBiblioXmlToHtml(
+                            strFilterFileName,
+                            strBiblioXml,
+                            null,
+                            strBiblioRecPath,
+                            out strBiblio,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // goto ERROR1;
+                            return -1;
+                        }
+
+                    }
+                    else
+                        strBiblio = "";
+
+                    biblio_records[i] = strBiblio;
+                }
+                else if (String.Compare(strBiblioFormat, "xml", true) == 0)
+                {
+                    biblio_records[i] = strBiblioXml;
+                }
+                else if (String.Compare(strBiblioFormat, "recpath", true) == 0)
+                {
+                    biblio_records[i] = strBiblioRecPath;
+                }
+                else if (string.IsNullOrEmpty(strBiblioFormat) == true)
+                {
+                    biblio_records[i] = "";
+                }
+                else
+                {
+                    strError = "strBiblioFormatList参数出现了不支持的数据格式类型 '" + strBiblioFormat + "'";
+                    // goto ERROR1;
+                    return -1;
+                }
+            } // end of for
+
+            return 0;
         }
 
         // 2017/1/12
@@ -3102,7 +3421,6 @@ start_time_1,
             out string strError)
         {
             strError = "";
-            int nRet = 0;
 
             if (String.IsNullOrEmpty(strAccessString) == true)
                 return 2;
@@ -3657,8 +3975,8 @@ start_time_1,
                     // .SetValue("account", account);
 
                     SetValue(engine,
-"account",
-account == null ? null : new AccountRecord(account));
+    "account",
+    account == null ? null : new AccountRecord(account));
 
                     SetValue(engine,
                         "patron",
@@ -3819,7 +4137,7 @@ account == null ? null : new AccountRecord(account));
                 strOperName = this.GetString("续借");
 
             string strRefID = DomUtil.GetElementText(itemdom.DocumentElement,
-"refID");
+    "refID");
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
             string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
@@ -6766,11 +7084,11 @@ account == null ? null : new AccountRecord(account));
                 DateTime start_time_1 = DateTime.Now;
 
                 List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
-                // 通知预约到书的操作
-                // 出于对读者库加锁方面的便利考虑, 单独做了此函数
-                // return:
-                //      -1  error
-                //      0   没有找到<request>元素
+                                                            // 通知预约到书的操作
+                                                            // 出于对读者库加锁方面的便利考虑, 单独做了此函数
+                                                            // return:
+                                                            //      -1  error
+                                                            //      0   没有找到<request>元素
                 nRet = DoReservationNotify(
                     null,
                     channel,
@@ -6789,9 +7107,9 @@ account == null ? null : new AccountRecord(account));
                 }
 
                 WriteTimeUsed(
-time_lines,
-start_time_1,
-"Return() 中预约到书通知 耗时 ");
+    time_lines,
+    start_time_1,
+    "Return() 中预约到书通知 耗时 ");
 
                 /* 前面已经通知过了
                 result.Value = 1;
@@ -6816,19 +7134,19 @@ start_time_1,
                 DateTime start_time_1 = DateTime.Now;
 
                 nRet = BuildReaderResults(
-sessioninfo,
-null,
-strOutputReaderXml,
-strReaderFormatList,
-strLibraryCode,  // calendar/advancexml/html 时需要
-null,    // recpaths 时需要
-strOutputReaderRecPath,   // recpaths 时需要
-null,    // timestamp 时需要
-OperType.Return,
+    sessioninfo,
+    null,
+    strOutputReaderXml,
+    strReaderFormatList,
+    strLibraryCode,  // calendar/advancexml/html 时需要
+    null,    // recpaths 时需要
+    strOutputReaderRecPath,   // recpaths 时需要
+    null,    // timestamp 时需要
+    OperType.Return,
                             null,
                             strItemBarcodeParam,
-ref reader_records,
-out strError);
+    ref reader_records,
+    out strError);
                 if (nRet == -1)
                 {
                     strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
@@ -6836,9 +7154,9 @@ out strError);
                 }
 
                 WriteTimeUsed(
-time_lines,
-start_time_1,
-"Return() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
+    time_lines,
+    start_time_1,
+    "Return() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
             }
 
 #if NO
@@ -7031,12 +7349,86 @@ start_time_1,
                 } // end of for
 
                 WriteTimeUsed(
-time_lines,
-start_time_1,
-"Return() 中返回册记录(" + strItemFormatList + ") 耗时 ");
+    time_lines,
+    start_time_1,
+    "Return() 中返回册记录(" + strItemFormatList + ") 耗时 ");
 
             }
 
+            // 2008/5/9
+            if (StringUtil.IsInList("biblio", strStyle) == true)
+            {
+                DateTime start_time_1 = DateTime.Now;
+
+                string strBiblioRecPath = "";
+                // TODO: 这一段是构造 strBiblioRecPath。可以考虑写成一个函数
+                {
+                    if (IsBiblioRecPath(strItemBarcodeParam) == true)
+                        strBiblioRecPath = strItemBarcodeParam.Substring("@biblioRecPath:".Length);
+
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                    {
+                        if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                        {
+                            strError = "册记录 '" + strOutputItemRecPath + "' XML 中 parent 元素缺乏或者值为空, 因此无法定位种记录 ID";
+
+                            this.WriteErrorLog("*** " + strError);
+
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
+
+                        string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
+
+                        // 根据实体库名, 找到对应的书目库名
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                            out string strBiblioDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
+
+                        strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+                    }
+                }
+
+                nRet = BuildBiblio(
+sessioninfo,
+strBiblioRecPath,
+/*
+strBiblioRecID,
+strOutputItemRecPath,
+*/
+strStyle,
+strBiblioFormatList,
+result,
+out biblio_records,
+out strError);
+                if (nRet == -1)
+                {
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                    goto ERROR1;
+                }
+
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Return() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
+            }
+
+#if REMOVED
             // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
@@ -7060,14 +7452,13 @@ start_time_1,
 
                     string strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
 
-                    string strBiblioDbName = "";
                     // 根据实体库名, 找到对应的书目库名
                     // return:
                     //      -1  出错
                     //      0   没有找到
                     //      1   找到
                     nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
-                        out strBiblioDbName,
+                        out string strBiblioDbName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -7091,16 +7482,6 @@ start_time_1,
                     || StringUtil.IsInList("xml", strBiblioFormatList) == true
                     || StringUtil.IsInList("text", strBiblioFormatList) == true)
                 {
-#if NO
-                    RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
-                    if (channel == null)
-                    {
-                        strError = "get channel error";
-                        if (result.ErrorCode == ErrorCode.NoError)
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                        goto ERROR1;
-                    }
-#endif
 
                     string strMetaData = "";
                     byte[] timestamp = null;
@@ -7233,10 +7614,12 @@ start_time_1,
                 } // end of for
 
                 WriteTimeUsed(
-time_lines,
-start_time_1,
-"Return() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
+    time_lines,
+    start_time_1,
+    "Return() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
             }
+
+#endif
 
             this.WriteTimeUsed(
                 time_lines,
@@ -7367,7 +7750,7 @@ start_time_1,
             if (strBatchNo != null)
             {
                 string old_batchno = DomUtil.GetElementText(new_itemdom.DocumentElement,
-"batchNo");
+    "batchNo");
                 if (old_batchno != strBatchNo)
                 {
                     DomUtil.SetElementText(new_itemdom.DocumentElement,
@@ -8434,9 +8817,9 @@ start_time_1,
          * */
 
         public int SetValueTablesXml(
-string strLibraryCodeList,
-string strFragment,
-out string strError)
+    string strLibraryCodeList,
+    string strFragment,
+    out string strError)
         {
             return SetLibraryFragmentXml(
                 "valueTables",
@@ -8447,9 +8830,9 @@ out string strError)
 
         // 将前端发来的权限XML代码更新到library.xml中
         public int SetRightsTableXml(
-string strLibraryCodeList,
-string strFragment,
-out string strError)
+    string strLibraryCodeList,
+    string strFragment,
+    out string strError)
         {
             return SetLibraryFragmentXml(
                 "rightsTable",
@@ -8461,9 +8844,9 @@ out string strError)
         // 将前端发来的片断XML代码更新到library.xml中
         public int SetLibraryFragmentXml(
             string strRootElementName,
-string strLibraryCodeList,
-string strFragment,
-out string strError)
+    string strLibraryCodeList,
+    string strFragment,
+    out string strError)
         {
             strError = "";
 
@@ -8560,9 +8943,9 @@ out string strError)
         }
 
         public int GetValueTablesXml(
-string strLibraryCodeList,
-out string strValue,
-out string strError)
+    string strLibraryCodeList,
+    out string strValue,
+    out string strError)
         {
             return GetiLibraryFragmentXml(
                 "valueTables",
@@ -8572,9 +8955,9 @@ out string strError)
         }
 
         public int GetRightsTableXml(
-string strLibraryCodeList,
-out string strValue,
-out string strError)
+    string strLibraryCodeList,
+    out string strValue,
+    out string strError)
         {
             return GetiLibraryFragmentXml(
                 "rightsTable",
@@ -8951,9 +9334,9 @@ out string strError)
 
         // 修改 <callNumber> 元素定义。本函数专用于分馆用户。全局用户可以直接修改这个元素的 InnerXml 即可
         public int SetCallNumberXml(
-string strLibraryCodeList,
-string strFragment,
-out string strError)
+    string strLibraryCodeList,
+    string strFragment,
+    out string strError)
         {
             strError = "";
 
@@ -10397,7 +10780,7 @@ out string strError)
                 return time.ToString("d");  // 精确到日
 
             return time.ToString("g");  // 精确到分钟。G精确到秒
-            // http://www.java2s.com/Tutorial/CSharp/0260__Date-Time/UsetheToStringmethodtoconvertaDateTimetoastringdDfFgGmrstTuUy.htm
+                                        // http://www.java2s.com/Tutorial/CSharp/0260__Date-Time/UsetheToStringmethodtoconvertaDateTimetoastringdDfFgGmrstTuUy.htm
         }
 
         // 分析价格参数
@@ -12220,9 +12603,9 @@ out string strError)
         }
 
         /*
-  <reservations>
+    <reservations>
         <request reader="R0000001" requestDate="Fri, 02 Dec 2016 18:50:22 +0800" operator="R0000001" state="arrived" arrivedDate="Fri, 02 Dec 2016 18:50:23 +0800" /> 
-  </reservations>
+    </reservations>
          * * */
         // 在册记录中获得预约者证条码号
         // return:
@@ -13298,7 +13681,7 @@ out string strError)
                     pause_start.ToString("d"),  // "yyyy-MM-dd"
                     lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit),
                     timeEnd.ToString("d")); // "yyyy-MM-dd"
-                // "共有 " + nTotalCount.ToString() + " 项以停代金事项，从 " + pause_start.ToString("yyyy-MM-dd") + " 开始，总计应暂停借阅 " + lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit) + ", 于 " + timeEnd.ToString("yyyy-MM-dd") + " 结束。";
+                                            // "共有 " + nTotalCount.ToString() + " 项以停代金事项，从 " + pause_start.ToString("yyyy-MM-dd") + " 开始，总计应暂停借阅 " + lTotalOverduePeriod.ToString() + GetDisplayTimeUnitLang(strTotalUnit) + ", 于 " + timeEnd.ToString("yyyy-MM-dd") + " 结束。";
             }
 
             if (lDelta > 0)
@@ -13632,17 +14015,17 @@ out string strError)
         }
 
         /*
-读者记录里面的：
-<reservations>
-  <request items="0000001" requestDate="Fri, 02 Dec 2016 18:50:22 +0800" operator="R0000001" state="arrived" arrivedDate="Fri, 02 Dec 2016 18:50:23 +0800" arrivedItemBarcode="0000001" /> 
-  </reservations>
+    读者记录里面的：
+    <reservations>
+    <request items="0000001" requestDate="Fri, 02 Dec 2016 18:50:22 +0800" operator="R0000001" state="arrived" arrivedDate="Fri, 02 Dec 2016 18:50:23 +0800" arrivedItemBarcode="0000001" /> 
+    </reservations>
 
 
-册记录里面的：
-- <reservations>
-  <request reader="R0000001" requestDate="Fri, 02 Dec 2016 18:50:22 +0800" operator="R0000001" state="arrived" arrivedDate="Fri, 02 Dec 2016 18:50:23 +0800" /> 
-  </reservations>
-*/
+    册记录里面的：
+    - <reservations>
+    <request reader="R0000001" requestDate="Fri, 02 Dec 2016 18:50:22 +0800" operator="R0000001" state="arrived" arrivedDate="Fri, 02 Dec 2016 18:50:23 +0800" /> 
+    </reservations>
+    */
         // 按照 boxing 操作要求，对读者记录和册记录进行修改，还有对预约到书记录进行修改
         // parameters:
         //      strReaderBarcode    读者证条码号或者 "@refID:xxxxx"
@@ -14920,7 +15303,7 @@ out string strError)
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerRecPath", "");
             DomUtil.DeleteElements(itemdom.DocumentElement,
-"borrowerRecPath");
+    "borrowerRecPath");
 
             if (nodeOldBorrower != null)
                 DomUtil.SetAttr(nodeOldBorrower,
@@ -14929,7 +15312,7 @@ out string strError)
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowDate", "");
             DomUtil.DeleteElements(itemdom.DocumentElement,
-"borrowDate");
+    "borrowDate");
 
             if (nodeOldBorrower != null)
                 DomUtil.SetAttr(nodeOldBorrower,
@@ -14938,7 +15321,7 @@ out string strError)
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowPeriod", "");
             DomUtil.DeleteElements(itemdom.DocumentElement,
-"borrowPeriod");
+    "borrowPeriod");
 
             // 2016/6/8
             if (nodeOldBorrower != null)
@@ -14946,7 +15329,7 @@ out string strError)
                "denyPeriod",
                DomUtil.GetElementText(itemdom.DocumentElement, "denyPeriod"));
             DomUtil.DeleteElements(itemdom.DocumentElement,
-"denyPeriod");
+    "denyPeriod");
 
             // 2014/11/14
             if (nodeOldBorrower != null)
@@ -14968,7 +15351,7 @@ out string strError)
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "operator", "");    // 清除
             DomUtil.DeleteElements(itemdom.DocumentElement,
-"operator");
+    "operator");
 
             // item中原operator元素值表示借阅操作者，此时应转入历史中的borrowOperator元素中
             if (nodeOldBorrower != null)
@@ -15651,7 +16034,7 @@ out string strError)
 
             // 获得例行参数
             string strRefID = DomUtil.GetElementText(itemdom.DocumentElement,
-"refID");
+    "refID");
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
 
@@ -16168,7 +16551,7 @@ out string strError)
                 // 加入借阅册信息
                 nodeBorrow = readerdom.CreateElement("borrow");
                 nodeBorrow = DomUtil.InsertFirstChild(root, nodeBorrow); // 2006/12/24 changed，2015/1/12 增加等号左边的部分 
-                // nodeBorrow = root.AppendChild(nodeBorrow);
+                                                                         // nodeBorrow = root.AppendChild(nodeBorrow);
             }
 
             //
@@ -16605,7 +16988,7 @@ out string strError)
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowPeriod",
                 strThisBorrowPeriod);   // strBorrowPeriod现在已经是个别参数，不是逗号分隔的列举值了
-            // 2016/6/7
+                                        // 2016/6/7
             if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "denyPeriod",
@@ -16651,7 +17034,7 @@ out string strError)
                 strBorrowDate);     // 借阅日期
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod",
                 strThisBorrowPeriod);   // 借阅期限
-            // 2016/6/7
+                                        // 2016/6/7
             if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
                 DomUtil.SetElementText(domOperLog.DocumentElement, "denyPeriod",
                     strThisDenyPeriod);
@@ -16662,13 +17045,13 @@ out string strError)
             // 2015/1/12
             DomUtil.SetElementText(domOperLog.DocumentElement, "type",
     strBookType);    // 图书类型
-            // 2017/5/22
+                     // 2017/5/22
             if (string.IsNullOrEmpty(strVolume) == false)
                 DomUtil.SetElementText(domOperLog.DocumentElement, "volume",
                     strVolume);
 
             DomUtil.SetElementText(domOperLog.DocumentElement, "price",
-strBookPrice);    // 图书价格
+    strBookPrice);    // 图书价格
 
             // TODO: 0 需要忽略写入
             DomUtil.SetElementText(domOperLog.DocumentElement, "no",
@@ -18809,15 +19192,15 @@ strBookPrice);    // 图书价格
                     reader_timestamp = output_timestamp;
 
                     /*
-<root>
-  <operation>repairBorrowInfo</operation> 
-  <action>...</action> 具体动作 有 repairreaderside repairitemside
-  <readerBarcode>...</readerBarcode>
-  <itemBarcode>...</itemBarcode>
-  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
-  <operator>test</operator> 
-  <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
-</root>
+    <root>
+    <operation>repairBorrowInfo</operation> 
+    <action>...</action> 具体动作 有 repairreaderside repairitemside
+    <readerBarcode>...</readerBarcode>
+    <itemBarcode>...</itemBarcode>
+    <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
+    <operator>test</operator> 
+    <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
+    </root>
                      * * */
 
                     XmlDocument domOperLog = new XmlDocument();
@@ -19337,7 +19720,7 @@ strBookPrice);    // 图书价格
                 strRefID = strItemBarcode.Substring(strHead.Length);
 
                 string strTempRefID = DomUtil.GetElementText(itemdom.DocumentElement,
-"refID");
+    "refID");
                 if (strRefID != strTempRefID)
                 {
                     strError = "参考ID参数 '" + strRefID + "' 和" + strRecordTypeCaption + "记录中<refID>元素(参考ID)值 '" + strTempRefID + "' 不一致";
@@ -19350,7 +19733,7 @@ strBookPrice);    // 图书价格
 
                 if (strFrom == "登录号")   // 2018/5/12
                     strTempItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
-"registerNo");
+    "registerNo");
                 else
                     strTempItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
     "barcode");
@@ -20596,8 +20979,8 @@ strBookPrice);    // 图书价格
             DomUtil.SetAttr(nodeOverdue, "borrowPeriod", strHirePeriod);    // borrowperiod中放租金周期参数
             DomUtil.SetAttr(nodeOverdue, "returnDate", strHireExpireDate);  // returnDate中放失效期参数
             DomUtil.SetAttr(nodeOverdue, "borrowOperator", strOperator);  // 创建交费请求的人
-            // DomUtil.SetAttr(nodeOverdue, "operator", strOperator);
-            // id属性是唯一的, 为交违约金C/S界面创造了有利条件
+                                                                          // DomUtil.SetAttr(nodeOverdue, "operator", strOperator);
+                                                                          // id属性是唯一的, 为交违约金C/S界面创造了有利条件
             DomUtil.SetAttr(nodeOverdue, "id", strID);
 
             strOverdueString = nodeOverdue.OuterXml;
@@ -21146,10 +21529,10 @@ strBookPrice);    // 图书价格
             // 获得媒体类型
             long lRet = channel.GetRes(
                 strPath,
-                null,	// Response.OutputStream,
+                null,   // Response.OutputStream,
                 stop,
                 "metadata",
-                null,	// byte [] input_timestamp,
+                null,   // byte [] input_timestamp,
                 out strMetaData,
                 out baOutputTimeStamp,
                 out strOutputPath,
@@ -21226,12 +21609,12 @@ strBookPrice);    // 图书价格
             // http://support.microsoft.com/kb/329661
             // http://support.microsoft.com/kb/239750/EN-US/
             /*
-To use this fix, you must add the following registry value to the key listed below: 
-Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings
+    To use this fix, you must add the following registry value to the key listed below: 
+    Key: HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings
 
-Value name: IsTextPlainHonored
-Value type: DWORD
-Value data: HEX 0x1 
+    Value name: IsTextPlainHonored
+    Value type: DWORD
+    Value data: HEX 0x1 
              * */
 
             /*
@@ -21239,7 +21622,7 @@ Value data: HEX 0x1
             Page.Response.CacheControl = "no-cache";    // 如果不用此句，text/plain会被当作xml文件打开
             Page.Response.AddHeader("Pragma", "no-cache");
             Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
-//            Page.Response.AddHeader("Cache-Control", "public");
+    //            Page.Response.AddHeader("Cache-Control", "public");
             Page.Response.AddHeader("Expires", "0");
             Page.Response.AddHeader("Content-Transfer-Encoding", "binary");
              * */
@@ -21266,7 +21649,7 @@ Value data: HEX 0x1
                 flushOutputMethod,
                 stop,
                 "content,data",
-                null,	// byte [] input_timestamp,
+                null,   // byte [] input_timestamp,
                 out strMetaData,
                 out baOutputTimeStamp,
                 out strOutputPath,
