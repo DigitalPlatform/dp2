@@ -210,7 +210,7 @@ namespace dp2SSL
 
                     var tag = new Door
                     {
-                        Name = button.Name,
+                        Name = door_name,
                         LockName = lockName,
                         LockIndex = lockIndex,
                         ReaderName = readerName,
@@ -371,8 +371,10 @@ namespace dp2SSL
             OpenDoor?.Invoke(sender, new OpenDoorEventArgs { Door = button.Tag as Door });
         }
 
+
+
         // 刷新门锁(开/关)状态
-        public void SetLockState(LockState state)
+        public LockChanged SetLockState(LockState state)
         {
             /*
             List<Button> buttons = new List<Button>();
@@ -390,12 +392,21 @@ namespace dp2SSL
             }));
             */
 
+            List<LockChanged> results = new List<LockChanged>();
+
             int i = 0;
             foreach (Door door in _doors)
             {
                 if (IsEqual(state.Name, door.LockName)
                     && state.Index == door.LockIndex)
                 {
+                    results.Add(new LockChanged
+                    {
+                        LockName = door.Name,
+                        OldState = door.State,
+                        NewState = state.State
+                    });
+
                     door.State = state.State;
 
                     Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -409,6 +420,10 @@ namespace dp2SSL
 
                 i++;
             }
+
+            if (results.Count == 0)
+                return new LockChanged();
+            return results[0];
         }
 
         static bool IsEqual(string name1, string name2)
@@ -460,5 +475,12 @@ OpenDoorEventArgs e);
         public string Count { get; set; }   // 现有册数
 
         public Button Button { get; set; }
+    }
+
+    public class LockChanged
+    {
+        public string LockName { get; set; }
+        public string OldState { get; set; }
+        public string NewState { get; set; }
     }
 }
