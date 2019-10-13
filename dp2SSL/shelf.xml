@@ -2,7 +2,7 @@
 <root>
   <shelf readerName="RD242" antannaRange="0-3">
     <door name="第一排" lock="*:0" antenna="*:1"/>
-    <door name="第二排" lock="*:1" antenna="*:2"/>
+    <door name="第二排" lock="*:1" antenna="RL1700:0"/>
     <door name="第三排" lock="*:2" antenna="*:3"/>
     <door name="第四排" lock="*:3" antenna="*:4"/>
   </shelf>

@@ -254,7 +254,17 @@ namespace dp2SSL
                 {
                     if (state.State == "open")
                         count++;
-                    SetLockState(state);
+                    var result = SetLockState(state);
+                    if (result.LockName != null && result.OldState != null && result.NewState != null)
+                    {
+                        if (result.NewState != result.OldState)
+                        {
+                            if (result.NewState == "open")
+                                App.CurrentApp.Speak($"{result.LockName} 打开");
+                            else
+                                App.CurrentApp.Speak($"{result.LockName} 关闭");
+                        }
+                    }
                 }
 
                 if (_openCount > 0 && count == 0)
@@ -265,12 +275,15 @@ namespace dp2SSL
 
             // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
             if (triggerAllClosed)
+            {
                 SubmitCheckInOut();
+                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+            }
         }
 
-        void SetLockState(LockState state)
+        LockChanged SetLockState(LockState state)
         {
-            this.doorControl.SetLockState(state);
+            return this.doorControl.SetLockState(state);
         }
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
@@ -286,7 +299,7 @@ namespace dp2SSL
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
-            PatronClear();
+            PatronClear(true);
         }
 
         // 从指纹阅读器获取消息(第一阶段)
@@ -312,7 +325,7 @@ namespace dp2SSL
             {
                 SetPatronError("fingerprint", $"指纹中心出错: {result.ErrorInfo}, 错误码: {result.ErrorCode}");
                 if (_patron.IsFingerprintSource)
-                    PatronClear();    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
+                    PatronClear(true);    // 只有当面板上的读者信息来源是指纹仪时，才清除面板上的读者信息
                 return;
             }
             else
@@ -324,7 +337,7 @@ namespace dp2SSL
             if (result.Message == null)
                 return;
 
-            PatronClear();
+            PatronClear(true);
             _patron.IsFingerprintSource = true;
             _patron.PII = result.Message;
         }
@@ -529,7 +542,7 @@ namespace dp2SSL
             return result;
         }
 
-        List<Entity> Find(List<Entity> entities, TagAndData tag)
+        static List<Entity> Find(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
@@ -540,7 +553,7 @@ namespace dp2SSL
             return results;
         }
 
-        bool Add(List<Entity> entities, Entity entity)
+        static bool Add(List<Entity> entities, Entity entity)
         {
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
@@ -554,7 +567,7 @@ namespace dp2SSL
             return true;
         }
 
-        bool Remove(List<Entity> entities, Entity entity)
+        static bool Remove(List<Entity> entities, Entity entity)
         {
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
@@ -564,7 +577,7 @@ namespace dp2SSL
             });
             if (results.Count > 0)
             {
-                foreach(var o in results)
+                foreach (var o in results)
                 {
                     entities.Remove(o);
                 }
@@ -573,7 +586,7 @@ namespace dp2SSL
             return false;
         }
 
-        bool Add(List<Entity> entities, TagAndData tag)
+        static bool Add(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
@@ -589,7 +602,7 @@ namespace dp2SSL
             return false;
         }
 
-        bool Remove(List<Entity> entities, TagAndData tag)
+        static bool Remove(List<Entity> entities, TagAndData tag)
         {
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
@@ -606,6 +619,19 @@ namespace dp2SSL
                 return true;
             }
             return false;
+        }
+
+        // 更新 Entity 信息
+        static void Update(List<Entity> entities, TagAndData tag)
+        {
+            foreach(var entity in entities)
+            {
+                if (entity.UID == tag.OneTag.UID)
+                {
+                    entity.ReaderName = tag.OneTag.ReaderName;
+                    entity.Antenna = tag.OneTag.AntennaID.ToString();
+                }
+            }
         }
 
         // 跟随事件动态更新列表
@@ -630,6 +656,7 @@ namespace dp2SSL
             if (e.UpdateBooks != null)
                 tags.AddRange(e.UpdateBooks);
 
+            List<string> add_uids = new List<string>();
             // 新添加标签(或者更新标签信息)
             foreach (var tag in tags)
             {
@@ -637,17 +664,24 @@ namespace dp2SSL
                 if (tag.OneTag.TagInfo == null)
                     continue;
 
+                add_uids.Add(tag.OneTag.UID);
+
                 // 看看 _all 里面有没有
                 var results = Find(_all, tag);
                 if (results.Count == 0)
                 {
                     if (Add(_adds, tag) == true)
+                    {
                         changed = true;
+                    }
                     if (Remove(_removes, tag) == true)
                         changed = true;
                 }
                 else
                 {
+                    // 更新 _all 里面的信息
+                    Update(_all, tag);
+
                     // 要把 _adds 和 _removes 里面都去掉
                     if (Remove(_adds, tag) == true)
                         changed = true;
@@ -669,7 +703,9 @@ namespace dp2SSL
                     if (Remove(_adds, tag) == true)
                         changed = true;
                     if (Add(_removes, tag) == true)
+                    {
                         changed = true;
+                    }
                 }
                 else
                 {
@@ -681,6 +717,17 @@ namespace dp2SSL
                         changed = true;
                 }
             }
+
+            StringUtil.RemoveDup(ref add_uids, false);
+            int add_count = add_uids.Count;
+            int remove_count = 0;
+            if (e.RemoveBooks != null)
+                remove_count = e.RemoveBooks.Count;
+
+            if (remove_count > 0)
+                App.CurrentApp.Speak($"取出 {remove_count} 本");
+            if (add_count > 0)
+                App.CurrentApp.Speak($"放入 {add_count} 本");
 
             if (changed == true)
             {
@@ -700,6 +747,8 @@ namespace dp2SSL
             this.doorControl.DisplayCount(_all, _adds, _removes);
         }
 
+        // 刷新读者信息
+        // TODO: 当读者信息更替时，要检查前一个读者是否有 _adds 和 _removes 队列需要提交，先提交，再刷成后一个读者信息
         async Task RefreshPatrons()
         {
             //_lock_refreshPatrons.EnterWriteLock();
@@ -728,7 +777,7 @@ namespace dp2SSL
                     }
                     else
                     {
-                        PatronClear();
+                        PatronClear(false); // 不需要 submit
                         SetPatronError("getreaderinfo", "");
                         if (patrons.Count > 1)
                         {
@@ -833,8 +882,17 @@ namespace dp2SSL
             return new NormalResult();
         }
 
-        void PatronClear()
+        // parameters:
+        //      submitBefore    是否自动提交前面残留的 _adds 和 _removes ?
+        void PatronClear(bool submitBefore)
         {
+            // 预先提交一次
+            if (submitBefore)
+            {
+                if (_adds.Count > 0 || _removes.Count > 0)
+                    SubmitCheckInOut(false);
+            }
+
             _patron.Clear();
 
             if (this.patronControl.BorrowedEntities.Count == 0)
@@ -904,6 +962,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         // 开门
         NormalResult OpenDoor()
         {
@@ -936,6 +995,7 @@ namespace dp2SSL
                 }));
             }
         }
+        */
 
         private void Progress_Closed(object sender, EventArgs e)
         {
@@ -969,7 +1029,9 @@ namespace dp2SSL
         }
 
         // 关门，或者更换读者的时候，向服务器提交出纳请求
-        void SubmitCheckInOut()
+        // parameters:
+        //      clearPatron 操作完成后是否自动清除右侧的读者信息
+        void SubmitCheckInOut(bool clearPatron = true)
         {
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
@@ -988,14 +1050,19 @@ namespace dp2SSL
                 return;
 
             ProgressWindow progress = null;
+            string patron_name = "";
+            patron_name = _patron.PatronName;
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
+
                 progress = new ProgressWindow();
                 progress.MessageText = "正在处理，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Closed;
+                progress.Width = 700;
+                progress.Height = 500;
                 progress.Show();
                 AddLayer();
             }));
@@ -1028,6 +1095,8 @@ namespace dp2SSL
                 int skip_count = 0;
                 int success_count = 0;
                 List<string> errors = new List<string>();
+                List<string> borrows = new List<string>();
+                List<string> returns = new List<string>();
                 foreach (ActionInfo info in actions)
                 {
                     string action = info.Action;
@@ -1171,6 +1240,11 @@ namespace dp2SSL
                         continue;
                     }
 
+                    if (action == "borrow")
+                        borrows.Add(title);
+                    if (action == "return")
+                        returns.Add(title);
+
                     // TODO: 把 _adds 和 _removes 归入 _all
                     // 是否一边处理一边动态修改 _all?
                     if (action == "return")
@@ -1240,7 +1314,7 @@ namespace dp2SSL
                 {
                     // 成功
                     string backColor = "green";
-                    string message = $"操作成功 {success_count} 笔";
+                    string message = $"{patron_name} 操作成功 {success_count} 笔";
                     string speak = $"出纳完成";
 
                     if (skip_count > 0)
@@ -1257,6 +1331,12 @@ namespace dp2SSL
                         message = $"请先把图书放到读卡器上，再进行 出纳 操作";
                         speak = $"出纳失败";
                     }
+
+                    if (returns.Count > 0)
+                        message += $"\r\n还书:\r\n" + MakeList(returns);
+
+                    if (borrows.Count > 0)
+                        message += $"\r\n借书:\r\n" + MakeList(borrows);
 
                     DisplayError(ref progress, message, backColor);
 
@@ -1277,8 +1357,29 @@ namespace dp2SSL
                     if (progress != null)
                         progress.Close();
                 }));
+                if (clearPatron)
+                    PatronClear(false);
             }
         }
 
+        static string MakeList(List<string> list)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 1;
+            foreach (string s in list)
+            {
+                text.Append($"{i++}) {s}\r\n");
+            }
+
+            return text.ToString();
+        }
+
+        // 延时自动清除读者信息
+        // 当在规定的时间内没有打开柜门，则自动清除读者信息。若打开了则不会清除
+        async Task DelayClearPatron(CancellationToken token)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(10), token);
+            PatronClear(true);
+        }
     }
 }
