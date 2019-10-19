@@ -82,6 +82,10 @@
       <Project>{9d26d2ad-eabb-4c32-8706-fb9e323faf01}</Project>
       <Name>DigitalPlatform.RFID</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107de16-dda1-4606-b3a3-840b24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
       <Name>DigitalPlatform.Text</Name>
