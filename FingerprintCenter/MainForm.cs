@@ -113,7 +113,9 @@ namespace FingerprintCenter
                     new ControlWrapper(this.checkBox_beep, true),
                     new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
                     this.comboBox_deviceList,
-                    this.textBox_cfg_shreshold
+                    this.textBox_cfg_shreshold,
+                    this.textBox_cfg_registerQualityThreshold,
+                    this.textBox_cfg_recognitionQualityThreshold
                 };
                 return GuiState.GetUiState(controls);
             }
@@ -130,7 +132,9 @@ namespace FingerprintCenter
                     new ControlWrapper(this.checkBox_beep, true),
                     new ControlWrapper(this.checkBox_cfg_savePasswordLong, true),
                     this.comboBox_deviceList,
-                    this.textBox_cfg_shreshold
+                    this.textBox_cfg_shreshold,
+                    this.textBox_cfg_registerQualityThreshold,
+                    this.textBox_cfg_recognitionQualityThreshold
                 };
                 GuiState.SetUiState(controls, value);
             }
@@ -184,7 +188,7 @@ bool bClickClose = false)
                 return;
             }
 
-            // ClientInfo.SerialNumberMode = "must";
+            ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
             ClientInfo.Initial("fingerprintcenter");
             this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
@@ -1027,7 +1031,7 @@ MessageBoxDefaultButton.Button2);
 
             this.ShowMessage("本地缓存文件删除成功", "green", true);
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
         }
 
@@ -1243,7 +1247,7 @@ string strHtml)
         internal static void Navigate(WebBrowser webBrowser, string urlString)
         {
             int nRedoCount = 0;
-            REDO:
+        REDO:
             try
             {
                 webBrowser.Navigate(urlString);
@@ -2074,7 +2078,7 @@ token);
             if (nRet == -1)
                 goto ERROR1;
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
 
 #if NO
@@ -2192,6 +2196,109 @@ token);
                     this.OutputHistory($"add_count:{add_count}, remove_count:{remove_count}", 1);
                 },
                 new CancellationToken());
+        }
+
+        private void button_setDefaultRegisterQuality_Click(object sender, EventArgs e)
+        {
+            this.textBox_cfg_registerQualityThreshold.Text = FingerPrint.DefaultRecognitionQuality.ToString();
+        }
+
+        private void button_setDefaultRecognitionQuality_Click(object sender, EventArgs e)
+        {
+            this.textBox_cfg_recognitionQualityThreshold.Text = FingerPrint.DefaultRecognitionQuality.ToString();
+        }
+
+        private void textBox_cfg_registerQualityThreshold_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                FingerPrint.RegisterShreshold = Convert.ToInt32(this.textBox_cfg_registerQualityThreshold.Text);
+            }
+            catch
+            {
+                FingerPrint.RegisterShreshold = FingerPrint.DefaultRegisterQuality;
+            }
+        }
+
+        private void textBox_cfg_recognitionQualityThreshold_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                FingerPrint.RecognitionShreshold = Convert.ToInt32(this.textBox_cfg_recognitionQualityThreshold.Text);
+            }
+            catch
+            {
+                FingerPrint.RecognitionShreshold = FingerPrint.DefaultRecognitionQuality;
+            }
+        }
+
+        private void checkBox_allow_changeThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_allow_changeThreshold.Checked == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要修改指纹比对阈值？\r\n\r\n(修改指纹比对阈值会影响到指纹比对算法效果，请谨慎操作)",
+"FingerprintCenter",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    this.checkBox_allow_changeThreshold.Checked = false;
+                    return;
+                }
+                this.textBox_cfg_shreshold.ReadOnly = false;
+            }
+            else
+            {
+                this.textBox_cfg_shreshold.ReadOnly = true;
+            }
+        }
+
+        private void checkBox_allow_changeRegisterQuality_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_allow_changeRegisterQuality.Checked == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+"确实要修改指纹注册质量阈值？\r\n\r\n(修改指纹注册质量阈值会影响到指纹注册效果，请谨慎操作)",
+"FingerprintCenter",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    this.checkBox_allow_changeRegisterQuality.Checked = false;
+                    return;
+                }
+                this.textBox_cfg_registerQualityThreshold.ReadOnly = false;
+            }
+            else
+            {
+                this.textBox_cfg_registerQualityThreshold.ReadOnly = true;
+            }
+        }
+
+        private void checkBox_allow_changeRecognitionQuality_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_allow_changeRecognitionQuality.Checked == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+"确实要修改指纹识别质量阈值？\r\n\r\n(修改指纹识别质量阈值会影响到指纹识别效果，请谨慎操作)",
+"FingerprintCenter",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (result == DialogResult.No)
+                {
+                    this.checkBox_allow_changeRecognitionQuality.Checked = false;
+                    return;
+                }
+                this.textBox_cfg_recognitionQualityThreshold.ReadOnly = false;
+            }
+            else
+            {
+                this.textBox_cfg_recognitionQualityThreshold.ReadOnly = true;
+            }
         }
     }
 
