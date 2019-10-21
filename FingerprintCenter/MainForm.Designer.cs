@@ -75,6 +75,15 @@
             this.tabPage_operHistory = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.tabPage_cfg = new System.Windows.Forms.TabPage();
+            this.checkBox_allow_changeRecognitionQuality = new System.Windows.Forms.CheckBox();
+            this.checkBox_allow_changeRegisterQuality = new System.Windows.Forms.CheckBox();
+            this.checkBox_allow_changeThreshold = new System.Windows.Forms.CheckBox();
+            this.button_setDefaultRecognitionQuality = new System.Windows.Forms.Button();
+            this.textBox_cfg_recognitionQualityThreshold = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.button_setDefaultRegisterQuality = new System.Windows.Forms.Button();
+            this.textBox_cfg_registerQualityThreshold = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.button_setDefaultThreshold = new System.Windows.Forms.Button();
             this.textBox_cfg_shreshold = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -394,7 +403,7 @@
             // toolStripStatusLabel_message
             // 
             this.toolStripStatusLabel_message.Name = "toolStripStatusLabel_message";
-            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(670, 32);
+            this.toolStripStatusLabel_message.Size = new System.Drawing.Size(716, 32);
             this.toolStripStatusLabel_message.Spring = true;
             // 
             // toolStripStatusLabel_replication
@@ -511,6 +520,15 @@
             // tabPage_cfg
             // 
             this.tabPage_cfg.AutoScroll = true;
+            this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeRecognitionQuality);
+            this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeRegisterQuality);
+            this.tabPage_cfg.Controls.Add(this.checkBox_allow_changeThreshold);
+            this.tabPage_cfg.Controls.Add(this.button_setDefaultRecognitionQuality);
+            this.tabPage_cfg.Controls.Add(this.textBox_cfg_recognitionQualityThreshold);
+            this.tabPage_cfg.Controls.Add(this.label9);
+            this.tabPage_cfg.Controls.Add(this.button_setDefaultRegisterQuality);
+            this.tabPage_cfg.Controls.Add(this.textBox_cfg_registerQualityThreshold);
+            this.tabPage_cfg.Controls.Add(this.label8);
             this.tabPage_cfg.Controls.Add(this.button_setDefaultThreshold);
             this.tabPage_cfg.Controls.Add(this.textBox_cfg_shreshold);
             this.tabPage_cfg.Controls.Add(this.label7);
@@ -539,6 +557,95 @@
             this.tabPage_cfg.Text = "配置参数";
             this.tabPage_cfg.UseVisualStyleBackColor = true;
             // 
+            // checkBox_allow_changeRecognitionQuality
+            // 
+            this.checkBox_allow_changeRecognitionQuality.AutoSize = true;
+            this.checkBox_allow_changeRecognitionQuality.Location = new System.Drawing.Point(480, 550);
+            this.checkBox_allow_changeRecognitionQuality.Name = "checkBox_allow_changeRecognitionQuality";
+            this.checkBox_allow_changeRecognitionQuality.Size = new System.Drawing.Size(108, 28);
+            this.checkBox_allow_changeRecognitionQuality.TabIndex = 27;
+            this.checkBox_allow_changeRecognitionQuality.Text = "允许修改";
+            this.checkBox_allow_changeRecognitionQuality.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeRecognitionQuality.CheckedChanged += new System.EventHandler(this.checkBox_allow_changeRecognitionQuality_CheckedChanged);
+            // 
+            // checkBox_allow_changeRegisterQuality
+            // 
+            this.checkBox_allow_changeRegisterQuality.AutoSize = true;
+            this.checkBox_allow_changeRegisterQuality.Location = new System.Drawing.Point(480, 500);
+            this.checkBox_allow_changeRegisterQuality.Name = "checkBox_allow_changeRegisterQuality";
+            this.checkBox_allow_changeRegisterQuality.Size = new System.Drawing.Size(108, 28);
+            this.checkBox_allow_changeRegisterQuality.TabIndex = 26;
+            this.checkBox_allow_changeRegisterQuality.Text = "允许修改";
+            this.checkBox_allow_changeRegisterQuality.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeRegisterQuality.CheckedChanged += new System.EventHandler(this.checkBox_allow_changeRegisterQuality_CheckedChanged);
+            // 
+            // checkBox_allow_changeThreshold
+            // 
+            this.checkBox_allow_changeThreshold.AutoSize = true;
+            this.checkBox_allow_changeThreshold.Location = new System.Drawing.Point(480, 444);
+            this.checkBox_allow_changeThreshold.Name = "checkBox_allow_changeThreshold";
+            this.checkBox_allow_changeThreshold.Size = new System.Drawing.Size(108, 28);
+            this.checkBox_allow_changeThreshold.TabIndex = 25;
+            this.checkBox_allow_changeThreshold.Text = "允许修改";
+            this.checkBox_allow_changeThreshold.UseVisualStyleBackColor = true;
+            this.checkBox_allow_changeThreshold.CheckedChanged += new System.EventHandler(this.checkBox_allow_changeThreshold_CheckedChanged);
+            // 
+            // button_setDefaultRecognitionQuality
+            // 
+            this.button_setDefaultRecognitionQuality.Location = new System.Drawing.Point(297, 542);
+            this.button_setDefaultRecognitionQuality.Name = "button_setDefaultRecognitionQuality";
+            this.button_setDefaultRecognitionQuality.Size = new System.Drawing.Size(177, 47);
+            this.button_setDefaultRecognitionQuality.TabIndex = 24;
+            this.button_setDefaultRecognitionQuality.Text = "恢复默认值";
+            this.button_setDefaultRecognitionQuality.UseVisualStyleBackColor = true;
+            this.button_setDefaultRecognitionQuality.Click += new System.EventHandler(this.button_setDefaultRecognitionQuality_Click);
+            // 
+            // textBox_cfg_recognitionQualityThreshold
+            // 
+            this.textBox_cfg_recognitionQualityThreshold.Location = new System.Drawing.Point(191, 550);
+            this.textBox_cfg_recognitionQualityThreshold.Name = "textBox_cfg_recognitionQualityThreshold";
+            this.textBox_cfg_recognitionQualityThreshold.ReadOnly = true;
+            this.textBox_cfg_recognitionQualityThreshold.Size = new System.Drawing.Size(100, 31);
+            this.textBox_cfg_recognitionQualityThreshold.TabIndex = 23;
+            this.textBox_cfg_recognitionQualityThreshold.TextChanged += new System.EventHandler(this.textBox_cfg_recognitionQualityThreshold_TextChanged);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(12, 553);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(146, 24);
+            this.label9.TabIndex = 22;
+            this.label9.Text = "识别质量阈值(&R):";
+            // 
+            // button_setDefaultRegisterQuality
+            // 
+            this.button_setDefaultRegisterQuality.Location = new System.Drawing.Point(298, 489);
+            this.button_setDefaultRegisterQuality.Name = "button_setDefaultRegisterQuality";
+            this.button_setDefaultRegisterQuality.Size = new System.Drawing.Size(177, 47);
+            this.button_setDefaultRegisterQuality.TabIndex = 21;
+            this.button_setDefaultRegisterQuality.Text = "恢复默认值";
+            this.button_setDefaultRegisterQuality.UseVisualStyleBackColor = true;
+            this.button_setDefaultRegisterQuality.Click += new System.EventHandler(this.button_setDefaultRegisterQuality_Click);
+            // 
+            // textBox_cfg_registerQualityThreshold
+            // 
+            this.textBox_cfg_registerQualityThreshold.Location = new System.Drawing.Point(192, 497);
+            this.textBox_cfg_registerQualityThreshold.Name = "textBox_cfg_registerQualityThreshold";
+            this.textBox_cfg_registerQualityThreshold.ReadOnly = true;
+            this.textBox_cfg_registerQualityThreshold.Size = new System.Drawing.Size(100, 31);
+            this.textBox_cfg_registerQualityThreshold.TabIndex = 20;
+            this.textBox_cfg_registerQualityThreshold.TextChanged += new System.EventHandler(this.textBox_cfg_registerQualityThreshold_TextChanged);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(13, 500);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(146, 24);
+            this.label8.TabIndex = 19;
+            this.label8.Text = "登记质量阈值(&R):";
+            // 
             // button_setDefaultThreshold
             // 
             this.button_setDefaultThreshold.Location = new System.Drawing.Point(297, 433);
@@ -553,6 +660,7 @@
             // 
             this.textBox_cfg_shreshold.Location = new System.Drawing.Point(191, 441);
             this.textBox_cfg_shreshold.Name = "textBox_cfg_shreshold";
+            this.textBox_cfg_shreshold.ReadOnly = true;
             this.textBox_cfg_shreshold.Size = new System.Drawing.Size(100, 31);
             this.textBox_cfg_shreshold.TabIndex = 13;
             this.textBox_cfg_shreshold.TextChanged += new System.EventHandler(this.textBox_cfg_shreshold_TextChanged);
@@ -564,7 +672,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(144, 24);
             this.label7.TabIndex = 12;
-            this.label7.Text = "指纹识别阈值(&T):";
+            this.label7.Text = "指纹比对阈值(&T):";
             // 
             // comboBox_deviceList
             // 
@@ -586,7 +694,7 @@
             // textBox_replicationStart
             // 
             this.textBox_replicationStart.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_replicationStart.Location = new System.Drawing.Point(191, 544);
+            this.textBox_replicationStart.Location = new System.Drawing.Point(192, 658);
             this.textBox_replicationStart.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_replicationStart.Name = "textBox_replicationStart";
             this.textBox_replicationStart.Size = new System.Drawing.Size(283, 31);
@@ -595,7 +703,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(11, 547);
+            this.label5.Location = new System.Drawing.Point(12, 661);
             this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(146, 24);
@@ -605,7 +713,7 @@
             // checkBox_speak
             // 
             this.checkBox_speak.AutoSize = true;
-            this.checkBox_speak.Location = new System.Drawing.Point(135, 491);
+            this.checkBox_speak.Location = new System.Drawing.Point(136, 605);
             this.checkBox_speak.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_speak.Name = "checkBox_speak";
             this.checkBox_speak.Size = new System.Drawing.Size(130, 28);
@@ -616,7 +724,7 @@
             // checkBox_beep
             // 
             this.checkBox_beep.AutoSize = true;
-            this.checkBox_beep.Location = new System.Drawing.Point(15, 491);
+            this.checkBox_beep.Location = new System.Drawing.Point(16, 605);
             this.checkBox_beep.Margin = new System.Windows.Forms.Padding(2, 4, 2, 4);
             this.checkBox_beep.Name = "checkBox_beep";
             this.checkBox_beep.Size = new System.Drawing.Size(95, 28);
@@ -701,7 +809,7 @@
             this.textBox_cfg_dp2LibraryServerUrl.Location = new System.Drawing.Point(16, 56);
             this.textBox_cfg_dp2LibraryServerUrl.Margin = new System.Windows.Forms.Padding(5);
             this.textBox_cfg_dp2LibraryServerUrl.Name = "textBox_cfg_dp2LibraryServerUrl";
-            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(557, 31);
+            this.textBox_cfg_dp2LibraryServerUrl.Size = new System.Drawing.Size(375, 31);
             this.textBox_cfg_dp2LibraryServerUrl.TabIndex = 1;
             this.textBox_cfg_dp2LibraryServerUrl.TextChanged += new System.EventHandler(this.textBox_cfg_userName_TextChanged);
             // 
@@ -730,7 +838,7 @@
             this.toolStrip_server.Location = new System.Drawing.Point(16, 96);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.toolStrip_server.Size = new System.Drawing.Size(560, 51);
+            this.toolStrip_server.Size = new System.Drawing.Size(378, 51);
             this.toolStrip_server.TabIndex = 2;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -883,6 +991,15 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_startWatchUsbChange;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_replication;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel_message;
+        private System.Windows.Forms.Button button_setDefaultRecognitionQuality;
+        private System.Windows.Forms.TextBox textBox_cfg_recognitionQualityThreshold;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button button_setDefaultRegisterQuality;
+        private System.Windows.Forms.TextBox textBox_cfg_registerQualityThreshold;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox checkBox_allow_changeRecognitionQuality;
+        private System.Windows.Forms.CheckBox checkBox_allow_changeRegisterQuality;
+        private System.Windows.Forms.CheckBox checkBox_allow_changeThreshold;
     }
 }
 

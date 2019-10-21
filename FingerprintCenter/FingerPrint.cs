@@ -69,8 +69,39 @@ namespace FingerprintCenter
             }
         }
 
+        // 默认的指纹登记质量最低分
+        public const int DefaultRegisterQuality = 60;
+        // 默认的指纹识别质量最低分
+        public const int DefaultRecognitionQuality = 60;
+
+        int _registerShreshold = DefaultRegisterQuality;
+        public int RegisterShreshold
+        {
+            get
+            {
+                return _registerShreshold;
+            }
+            set
+            {
+                _registerShreshold = value;
+            }
+        }
+
+        int _recognitionShreshold = DefaultRecognitionQuality;
+        public int RecognitionShreshold
+        {
+            get
+            {
+                return _recognitionShreshold;
+            }
+            set
+            {
+                _recognitionShreshold = value;
+            }
+        }
+
         // 默认的指纹质量最低分
-        public const int DefaultQuality = 60;
+        // public const int DefaultQuality = 60;
 
         public override string BioTypeName
         {
@@ -706,13 +737,27 @@ namespace FingerprintCenter
             }
 
             // 检查指纹质量
-            if (quality < DefaultQuality)
+            if (_mode == "register")
             {
-                Light("red");
-                string text = $"指纹图像质量不佳({quality})，请重新扫入";
-                Speaking(text,
-                    $"{text}\r\n质量: {quality}");
-                return;
+                if (quality < RegisterShreshold)
+                {
+                    Light("red");
+                    string text = $"指纹图像质量不佳({quality})，请重新扫入";
+                    Speaking(text,
+                        $"{text}\r\n质量: {quality}");
+                    return;
+                }
+            }
+            else
+            {
+                if (quality < RecognitionShreshold)
+                {
+                    Light("red");
+                    string text = $"指纹图像质量不佳({quality})，请重新扫入";
+                    Speaking(text,
+                        $"{text}\r\n质量: {quality}");
+                    return;
+                }
             }
 
             if (_mode == "register")

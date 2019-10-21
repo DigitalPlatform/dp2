@@ -3066,6 +3066,7 @@ namespace DigitalPlatform.LibraryServer
                     errors.Add("根元素下 " + element_name + " 元素定义超过一个。请删除多余的，只保留一个即可");
             }
 
+            /*
             // 对 maps_856u 的特殊检查
             // 序列号允许的功能如果不含有 maps856u，则 maps_856u/item@type 属性值不允许重复
             if (StringUtil.IsInList("maps856u", this.Function) == false)
@@ -3081,6 +3082,7 @@ namespace DigitalPlatform.LibraryServer
                     types.Add(type);
                 }
             }
+            */
 
             // 2019/7/24
             // 检查两个保留 account 元素的 type 属性
