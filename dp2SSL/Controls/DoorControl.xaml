@@ -6,7 +6,49 @@
              xmlns:local="clr-namespace:dp2SSL"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Name="grid">
-            
-    </Grid>
+    <UserControl.Resources>
+        <local:IntToAddConverter x:Key="IntToAdd" Direction="+"/>
+        <local:IntToAddConverter x:Key="IntToRemove" Direction="-"/>
+
+        <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
+            <Border Background="{TemplateBinding Background}" BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="6">
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <!--
+                <Ellipse x:Name = "ButtonEllipse" Height = "100" Width = "150" >
+                    <Ellipse.Fill>
+                        <LinearGradientBrush StartPoint = "0,0.2" EndPoint = "0.2,1.4">
+                            <GradientStop Offset = "0" Color = "Red" />
+                            <GradientStop Offset = "1" Color = "Orange" />
+                        </LinearGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+                -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Name}" Foreground="White" HorizontalAlignment="Right" />
+                    <TextBlock FontSize="40" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Count}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    
+                    <TextBlock FontSize="16" Grid.Row="2" Grid.Column="0" Text="{Binding Add,Converter={StaticResource IntToAdd}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock FontSize="16" Grid.Row="2" Grid.Column="1" Text="{Binding Remove,Converter={StaticResource IntToRemove}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <!--
+                <ContentPresenter Content = "{TemplateBinding Content}" 
+               HorizontalAlignment = "Center" VerticalAlignment = "Center" />
+                -->
+                </Grid>
+            </Border>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <Border BorderBrush="Gray" BorderThickness="0,0,0,0">
+        <Grid Name="grid">
+
+        </Grid>
+    </Border>
 </UserControl>

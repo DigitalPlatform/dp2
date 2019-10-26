@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +39,9 @@ namespace dp2SSL
             try
             {
                 InitializeButtons();
-                SetSize(new Size(this.ActualWidth, this.ActualHeight));
+
+                SetSize(new Size(this.ActualWidth - (this.Padding.Left + this.Padding.Right), 
+                    this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             }
             catch (Exception ex)
             {
@@ -51,7 +55,9 @@ namespace dp2SSL
 
         private void DoorControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            SetSize(e.NewSize);
+            Size size = new Size(e.NewSize.Width - (this.Padding.Left + this.Padding.Right),
+                e.NewSize.Height - (this.Padding.Top + this.Padding.Bottom));
+            SetSize(size);
         }
 
         private void DoorControl_Loaded(object sender, RoutedEventArgs e)
@@ -78,8 +84,6 @@ namespace dp2SSL
             public List<Entity> All { get; set; }
             public List<Entity> Removes { get; set; }
             public List<Entity> Adds { get; set; }
-
-
         }
 
         public Hashtable Build(List<Entity> entities)
@@ -131,11 +135,16 @@ namespace dp2SSL
 
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
+                    door.Count = count.Count;
+                    door.Add = add.Count;
+                    door.Remove = remove.Count;
+                    /*
                     TextBlock block = (TextBlock)door.Button.GetValue(Button.ContentProperty);
                     SetBlockText(block, null,
                         count.Count.ToString(),
                         add.Count.ToString(),
                         remove.Count.ToString());
+                        */
                 }));
             }
         }
@@ -154,7 +163,7 @@ namespace dp2SSL
 
         void InitializeButtons()
         {
-            string cfg_filename = System.IO.Path.Combine(WpfClientInfo.DataDir, "shelf.xml");
+            string cfg_filename = App.ShelfFilePath;
             XmlDocument cfg_dom = new XmlDocument();
             cfg_dom.Load(cfg_filename);
 
@@ -197,10 +206,16 @@ namespace dp2SSL
                         // Content = door_name,
                     };
 
+                    /*
                     var block = BuildTextBlock();
                     SetBlockText(block, door_name, "0", null, null);
+                    */
 
-                    button.SetValue(Button.ContentProperty, block);
+                    var template = this.Resources["ButtonTemplate"];
+
+                    // button.Children.Add(block);
+                    button.SetValue(Button.TemplateProperty, template);
+                    // button.SetValue(Grid.prop.ContentProperty, block);
                     button.SetValue(Grid.RowProperty, row);
                     button.SetValue(Grid.ColumnProperty, column);
                     button.Click += Button_Click;
@@ -217,6 +232,8 @@ namespace dp2SSL
                         Antenna = antenna,
                         Button = button
                     };
+
+                    button.DataContext = tag;
 
                     _doors.Add(tag);
 
@@ -246,6 +263,7 @@ namespace dp2SSL
             */
         }
 
+        /*
         class TextPart
         {
             public Run Name { get; set; }
@@ -290,6 +308,8 @@ namespace dp2SSL
             string add,
             string remove)
         {
+            Debug.Assert(block != null, "");
+
             TextPart part = block.Tag as TextPart;
             if (name != null)
                 part.Name.Text = name;
@@ -310,10 +330,11 @@ namespace dp2SSL
                     part.Remove.Text = "-" + remove;
             }
         }
+        */
 
         public static List<LockCommand> GetLockCommands()
         {
-            string cfg_filename = System.IO.Path.Combine(WpfClientInfo.DataDir, "shelf.xml");
+            string cfg_filename = App.ShelfFilePath;
             XmlDocument cfg_dom = new XmlDocument();
             cfg_dom.Load(cfg_filename);
             return GetLockCommands(cfg_dom);
@@ -463,16 +484,89 @@ OpenDoorEventArgs e);
         public Door Door { get; set; }
     }
 
-    public class Door
+    public class Door : INotifyPropertyChanged
     {
-        public string Name { get; set; }
+        internal void OnPropertyChanged(string name)
+        {
+            if (this.PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private string _name;
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    // Debug.WriteLine($"PII='{value}'");
+
+                    _name = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        private int _count;
+
+        // 现有册数
+        public int Count
+        {
+            get => _count;
+            set
+            {
+                if (_count != value)
+                {
+                    // Debug.WriteLine($"PII='{value}'");
+
+                    _count = value;
+                    OnPropertyChanged("Count");
+                }
+            }
+        }
+
+        private int _add;
+
+        // 增加的册数
+        public int Add
+        {
+            get => _add;
+            set
+            {
+                if (_add != value)
+                {
+                    _add = value;
+                    OnPropertyChanged("Add");
+                }
+            }
+        }
+
+        private int _remove;
+
+        // 减少的册数
+        public int Remove
+        {
+            get => _remove;
+            set
+            {
+                if (_remove != value)
+                {
+                    _remove = value;
+                    OnPropertyChanged("Remove");
+                }
+            }
+        }
+
         public string LockName { get; set; }
         public int LockIndex { get; set; }
         public string ReaderName { get; set; }
         public int Antenna { get; set; }
 
         public string State { get; set; }
-        public string Count { get; set; }   // 现有册数
 
         public Button Button { get; set; }
     }

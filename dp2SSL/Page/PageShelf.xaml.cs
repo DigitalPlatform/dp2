@@ -207,8 +207,10 @@ namespace dp2SSL
             }
         }
 
-        private void PageShelf_Loaded(object sender, RoutedEventArgs e)
+        private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
         {
+            _firstInitial = false;
+
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
 
@@ -235,9 +237,16 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
-            RfidManager.LockCommands = DoorControl.GetLockCommands();
+            try
+            {
+                RfidManager.LockCommands = DoorControl.GetLockCommands();
+            }
+            catch (Exception ex)
+            {
+                this.SetGlobalError("cfg", $"获得门锁命令时出错:{ex.Message}");
+            }
 
-            InitialEntities();
+            await InitialEntities();
         }
 
         int _openCount = 0; // 当前处于打开状态的门的个数
@@ -624,7 +633,7 @@ namespace dp2SSL
         // 更新 Entity 信息
         static void Update(List<Entity> entities, TagAndData tag)
         {
-            foreach(var entity in entities)
+            foreach (var entity in entities)
             {
                 if (entity.UID == tag.OneTag.UID)
                 {
@@ -644,6 +653,9 @@ namespace dp2SSL
         async Task ChangeEntities(BaseChannel<IRfid> channel,
             TagChangedEventArgs e)
         {
+            if (_firstInitial == false)
+                return;
+
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
 
@@ -735,16 +747,63 @@ namespace dp2SSL
             }
         }
 
-        void InitialEntities()
-        {
-            _all.Clear();
-            var books = TagList.Books;
-            foreach (var tag in books)
-            {
-                _all.Add(NewEntity(tag));
-            }
+        bool _firstInitial = false;
 
-            this.doorControl.DisplayCount(_all, _adds, _removes);
+        // TODO: 对所有现存的图书执行一次尝试还书的操作
+        async Task InitialEntities()
+        {
+            ProgressWindow progress = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "正在初始化图书信息，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += Progress_Closed;
+                //progress.Width = 700;
+                //progress.Height = 500;
+                progress.Show();
+                AddLayer();
+            }));
+            this.doorControl.Visibility = Visibility.Hidden;
+
+            try
+            {
+                // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
+                await Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        if (TagList.DataReady == true)
+                            return true;
+                        Thread.Sleep(100);
+                    }
+                });
+
+                _all.Clear();
+                var books = TagList.Books;
+                foreach (var tag in books)
+                {
+                    _all.Add(NewEntity(tag));
+                }
+
+                this.doorControl.DisplayCount(_all, _adds, _removes);
+
+
+                TryReturn(progress, _all);
+            }
+            finally
+            {
+                _firstInitial = true;   // 第一次初始化已经完成
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    if (progress != null)
+                        progress.Close();
+                }));
+
+                this.doorControl.Visibility = Visibility.Visible;
+            }
         }
 
         // 刷新读者信息
@@ -777,7 +836,11 @@ namespace dp2SSL
                     }
                     else
                     {
-                        PatronClear(false); // 不需要 submit
+                        // 拿走 RFID 读者卡时，不要清除读者信息。也就是说和指纹做法一样
+
+                        // PatronClear(false); // 不需要 submit
+
+
                         SetPatronError("getreaderinfo", "");
                         if (patrons.Count > 1)
                         {
@@ -1022,6 +1085,231 @@ namespace dp2SSL
             // OpenDoor();
         }
 
+        // 尝试进行一次还书操作
+        void TryReturn(ProgressWindow progress,
+            List<Entity> entities)
+        {
+            List<ActionInfo> actions = new List<ActionInfo>();
+            foreach (var entity in entities)
+            {
+                actions.Add(new ActionInfo { Entity = entity, Action = "return" });
+            }
+
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            try
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.ProgressBar.Value = 0;
+                    progress.ProgressBar.Minimum = 0;
+                    progress.ProgressBar.Maximum = actions.Count;
+                }));
+
+                // TODO: 准备工作：把涉及到的 Entity 对象的字段填充完整
+                // 检查 PII 是否都具备了
+
+                int skip_count = 0;
+                int success_count = 0;
+                List<string> errors = new List<string>();
+                List<string> borrows = new List<string>();
+                List<string> returns = new List<string>();
+                foreach (ActionInfo info in actions)
+                {
+                    string action = info.Action;
+                    Entity entity = info.Entity;
+
+                    string action_name = "借书";
+                    if (action == "return")
+                        action_name = "还书";
+                    else if (action == "renew")
+                        action_name = "续借";
+
+                    long lRet = 0;
+                    string strError = "";
+                    string[] item_records = null;
+                    string[] biblio_records = null;
+
+                    if (action == "return")
+                    {
+                        // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
+
+                        entity.Waiting = true;
+                        lRet = channel.Return(null,
+                            "return",
+                            _patron.Barcode,
+                            entity.PII,
+                            entity.ItemRecPath,
+                            false,
+                            "item,reader,biblio", // style,
+                            "xml", // item_format_list
+                            out item_records,
+                            "xml",
+                            out string[] reader_records,
+                            "summary",
+                            out biblio_records,
+                            out string[] dup_path,
+                            out string output_reader_barcode,
+                            out ReturnInfo return_info,
+                            out strError);
+                    }
+
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.ProgressBar.Value++;
+                    }));
+
+                    if (biblio_records != null && biblio_records.Length > 0)
+                        entity.Title = biblio_records[0];
+
+                    string title = entity.PII;
+                    if (string.IsNullOrEmpty(entity.Title) == false)
+                        title += " (" + entity.Title + ")";
+
+                    // TODO: 各种情况的返回值和错误码
+                    if (lRet == -1)
+                    {
+                        /*
+                        // return 操作如果 API 失败，则要改回原来的 EAS 状态
+                        if (action == "return")
+                        {
+                            var result = SetEAS(entity.UID, entity.Antenna, false);
+                            if (result.Value == -1)
+                                strError += $"\r\n并且复原 EAS 状态的动作也失败了: {result.ErrorInfo}";
+                        }
+                        */
+
+                        if (channel.ErrorCode == ErrorCode.NotBorrowed)
+                        {
+
+                        }
+                        else
+                        {
+                            entity.SetError($"{action_name}操作失败: {strError}", "red");
+                            // TODO: 这里最好用 title
+                            errors.Add($"册 '{title}': {strError}");
+                        }
+                        continue;
+                    }
+
+                    if (action == "borrow")
+                        borrows.Add(title);
+                    if (action == "return")
+                        returns.Add(title);
+
+                    // TODO: 把 _adds 和 _removes 归入 _all
+                    // 是否一边处理一边动态修改 _all?
+                    if (action == "return")
+                        Add(_all, entity);
+                    else
+                        Remove(_all, entity);
+
+                    Remove(_adds, entity);
+                    Remove(_removes, entity);
+
+                    /*
+                    // borrow 操作，API 之后才修改 EAS
+                    // 注: 如果 API 成功但修改 EAS 动作失败(可能由于读者从读卡器上过早拿走图书导致)，读者会无法把本册图书拿出门禁。遇到此种情况，读者回来补充修改 EAS 一次即可
+                    if (action == "borrow")
+                    {
+                        var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                        if (result.Value == -1)
+                        {
+                            entity.SetError($"虽然{action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}", "yellow");
+                            errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
+                        }
+                    }
+                    */
+
+                    // 刷新显示
+                    {
+                        if (item_records?.Length > 0)
+                            entity.SetData(entity.ItemRecPath, item_records[0]);
+
+                        if (entity.Error != null)
+                            continue;
+
+                        string message = $"{action_name}成功";
+                        if (lRet == 1 && string.IsNullOrEmpty(strError) == false)
+                            message = strError;
+                        entity.SetError(message,
+                            lRet == 1 ? "yellow" : "green");
+                        success_count++;
+                        // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
+                    }
+                }
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress.ProgressBar.Visibility = Visibility.Collapsed;
+                    // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
+                }));
+
+                // 修改 borrowable
+                // booksControl.SetBorrowable();
+
+                if (errors.Count > 0)
+                {
+                    string error = StringUtil.MakePathList(errors, "\r\n");
+                    string message = $"操作出错 {errors.Count} 个";
+                    if (success_count > 0)
+                        message += $"，成功 {success_count} 个";
+                    if (skip_count > 0)
+                        message += $" (另有 {skip_count} 个被忽略)";
+
+                    if (errors.Count > 0)
+                        message += $"\r\n出错:\r\n" + error;
+
+                    DisplayError(ref progress, message);
+                    App.CurrentApp.Speak(message);
+                    return; // new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, "; ") };
+                }
+                else
+                {
+                    /*
+                    // 成功
+                    string backColor = "green";
+                    string message = $"{patron_name} 操作成功 {success_count} 笔";
+                    string speak = $"出纳完成";
+
+                    if (skip_count > 0)
+                        message += $" (另有 {skip_count} 笔被忽略)";
+                    if (skip_count > 0 && success_count == 0)
+                    {
+                        backColor = "yellow";
+                        message = $"全部 {skip_count} 笔出纳操作被忽略";
+                        speak = $"出纳失败";
+                    }
+                    if (skip_count == 0 && success_count == 0)
+                    {
+                        backColor = "yellow";
+                        message = $"请先把图书放到读卡器上，再进行 出纳 操作";
+                        speak = $"出纳失败";
+                    }
+
+                    if (returns.Count > 0)
+                        message += $"\r\n还书:\r\n" + MakeList(returns);
+
+                    if (borrows.Count > 0)
+                        message += $"\r\n借书:\r\n" + MakeList(borrows);
+
+                    DisplayError(ref progress, message, backColor);
+
+                    // 重新装载读者信息和显示
+                    // var task = FillPatronDetail(true);
+                    this.doorControl.DisplayCount(_all, _adds, _removes);
+
+                    App.CurrentApp.Speak(speak);
+                    */
+                }
+
+                return; // new NormalResult { Value = success_count };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+            }
+        }
+
         class ActionInfo
         {
             public Entity Entity { get; set; }
@@ -1067,15 +1355,23 @@ namespace dp2SSL
                 AddLayer();
             }));
 
+            // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
+
+            bool patron_filled = false;
+
             // 检查读者卡状态是否 OK
             if (IsPatronOK("open", out string check_message) == false)
             {
+                /*
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"读卡器上的当前读者卡状态不正确。无法进行 checkin/out 操作";
 
                 DisplayError(ref progress, check_message);
                 return;
+                */
             }
+            else
+                patron_filled = true;
 
             LibraryChannel channel = App.CurrentApp.GetChannel();
             try
@@ -1097,6 +1393,7 @@ namespace dp2SSL
                 List<string> errors = new List<string>();
                 List<string> borrows = new List<string>();
                 List<string> returns = new List<string>();
+                List<string> warnings = new List<string>();
                 foreach (ActionInfo info in actions)
                 {
                     string action = info.Action;
@@ -1108,17 +1405,24 @@ namespace dp2SSL
                     else if (action == "renew")
                         action_name = "续借";
 
-                    /*
                     // 借书操作必须要有读者卡。(还书和续借，可要可不要)
                     if (action == "borrow")
                     {
+                        if (patron_filled == false)
+                        {
+                            // 界面警告
+                            errors.Add($"册 '{entity.PII}' 无法进行借书请求");
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 无法进行借书请求");
+                            continue;
+                        }
+
                         if (string.IsNullOrEmpty(_patron.Barcode))
                         {
                             DisplayError(ref progress, $"请先在读卡器上放好读者卡，再进行{action_name}");
                             return;
                         }
                     }
-                    */
 
                     long lRet = 0;
                     string strError = "";
@@ -1222,6 +1526,18 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title) == false)
                         title += " (" + entity.Title + ")";
 
+                    {
+                        // 把 _adds 和 _removes 归入 _all
+                        // 一边处理一边动态修改 _all?
+                        if (action == "return")
+                            Add(_all, entity);
+                        else
+                            Remove(_all, entity);
+
+                        Remove(_adds, entity);
+                        Remove(_removes, entity);
+                    }
+
                     if (lRet == -1)
                     {
                         /*
@@ -1234,6 +1550,18 @@ namespace dp2SSL
                         }
                         */
 
+                        if (action == "return")
+                        {
+                            if (channel.ErrorCode == ErrorCode.NotBorrowed)
+                            {
+                                // 界面警告
+                                warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
+                                // 写入错误日志
+                                WpfClientInfo.WriteInfoLog($"读者 {_patron.NameSummary} 尝试还回册 '{title}' 时: {strError}");
+                                continue;
+                            }
+                        }
+
                         entity.SetError($"{action_name}操作失败: {strError}", "red");
                         // TODO: 这里最好用 title
                         errors.Add($"册 '{title}': {strError}");
@@ -1245,15 +1573,7 @@ namespace dp2SSL
                     if (action == "return")
                         returns.Add(title);
 
-                    // TODO: 把 _adds 和 _removes 归入 _all
-                    // 是否一边处理一边动态修改 _all?
-                    if (action == "return")
-                        Add(_all, entity);
-                    else
-                        Remove(_all, entity);
 
-                    Remove(_adds, entity);
-                    Remove(_removes, entity);
 
                     /*
                     // borrow 操作，API 之后才修改 EAS
@@ -1296,8 +1616,11 @@ namespace dp2SSL
                 // 修改 borrowable
                 // booksControl.SetBorrowable();
 
+#if NO
                 if (errors.Count > 0)
                 {
+                    // TODO: 成功和出错可能会同时存在
+
                     string error = StringUtil.MakePathList(errors, "\r\n");
                     string message = $"操作出错 {errors.Count} 个";
                     if (success_count > 0)
@@ -1305,20 +1628,46 @@ namespace dp2SSL
                     if (skip_count > 0)
                         message += $" (另有 {skip_count} 个被忽略)";
 
+                    if (errors.Count > 0)
+                        message += $"\r\n出错:\r\n" + error;
+
                     DisplayError(ref progress, message);
                     App.CurrentApp.Speak(message);
-
                     return; // new NormalResult { Value = -1, ErrorInfo = StringUtil.MakePathList(errors, "; ") };
                 }
                 else
+#endif
                 {
                     // 成功
                     string backColor = "green";
-                    string message = $"{patron_name} 操作成功 {success_count} 笔";
+                    string message = "";
+
+                    if (success_count > 0)
+                        message = $"{patron_name} 操作成功 {success_count} 笔";
+                    if (errors.Count > 0)
+                    {
+                        message += "\r\n";
+                        message += $"操作出错 {errors.Count} 个";
+
+                        backColor = "red";
+                    }
+                    if (warnings.Count > 0)
+                    {
+                        message += "\r\n";
+                        message += $"操作警告 {warnings.Count} 个";
+
+                        backColor = "yellow";
+                    }
+
                     string speak = $"出纳完成";
 
+                    /*
                     if (skip_count > 0)
+                    {
+                        message += "\r\n";
                         message += $" (另有 {skip_count} 笔被忽略)";
+                    }
+
                     if (skip_count > 0 && success_count == 0)
                     {
                         backColor = "yellow";
@@ -1331,6 +1680,13 @@ namespace dp2SSL
                         message = $"请先把图书放到读卡器上，再进行 出纳 操作";
                         speak = $"出纳失败";
                     }
+                    */
+
+                    if (errors.Count > 0)
+                        message += $"\r\n出错:\r\n" + MakeList(errors);
+
+                    if (warnings.Count > 0)
+                        message += $"\r\n警告:\r\n" + MakeList(warnings);
 
                     if (returns.Count > 0)
                         message += $"\r\n还书:\r\n" + MakeList(returns);

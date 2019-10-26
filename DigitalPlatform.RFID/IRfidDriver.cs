@@ -8,7 +8,9 @@ namespace DigitalPlatform.RFID
 {
     public interface IRfidDriver
     {
-        InitializeDriverResult InitializeDriver(string style, List<HintInfo> hint_table);
+        InitializeDriverResult InitializeDriver(string cfgFileName,
+            string style,
+            List<HintInfo> hint_table);
 
         NormalResult ReleaseDriver();
 

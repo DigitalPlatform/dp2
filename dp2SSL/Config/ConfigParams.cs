@@ -211,5 +211,25 @@ Description = "智能书架内的图书的专属馆藏地"
             }
         }
 
+
+        // https://github.com/xceedsoftware/wpftoolkit/issues/1269
+        // 默认值 空
+        [Display(
+Order = 10,
+Name = "功能类型",
+Description = "dp2SSL 的功能类型"
+)]
+        [Category("全局")]
+        public string Function
+        {
+            get
+            {
+                return _config.Get("global", "function", "自助借还");
+            }
+            set
+            {
+                _config.Set("global", "function", value);
+            }
+        }
     }
 }

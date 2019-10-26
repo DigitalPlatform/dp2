@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>106</ApplicationRevision>
+    <ApplicationRevision>108</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -150,6 +150,7 @@
     <Compile Include="Controls\selector.cs" />
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="Converter\CountToVisibilityConverter.cs" />
+    <Compile Include="Converter\IntToAdd.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="Converter\StringToOpacityConverter.cs" />
     <Compile Include="Dialog\InOutWindow.xaml.cs">

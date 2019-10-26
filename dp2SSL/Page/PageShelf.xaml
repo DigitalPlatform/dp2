@@ -68,7 +68,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="0"/><!-- 60 -->
             </Grid.RowDefinitions>
             <!-- 图书信息 -->
             <Grid  Grid.Column="0">
@@ -96,7 +96,7 @@
                 </GridSplitter.Template>
             </GridSplitter>
             <!-- 读者信息 -->
-            <Grid Grid.Column="2" MaxWidth="700">
+            <Grid Grid.Column="2" MaxWidth="700" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20"/>
                     <RowDefinition Height="*"/>
@@ -105,8 +105,10 @@
                     Text="读者"/>
                 <local:PatronControl x:Name="patronControl" Grid.Row="1"/>
             </Grid>
-            <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Name="openButton"
+            <StackPanel Grid.Column="0" Grid.Row="1" 
+                        Visibility="Collapsed"
+                        Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Name="openButton" 
                     Style="{DynamicResource RoundedButtonStyle}" 
                     Width="160" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
