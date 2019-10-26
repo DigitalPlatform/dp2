@@ -385,7 +385,9 @@ namespace RfidCenter
                         lock_param = $"lock:{lock_param}";
                     }
 
-                    InitializeDriverResult result = _driver.InitializeDriver(lock_param, set_hint_table ? null : existing_hint_table);
+                    string cfgFileName = Path.Combine(ClientInfo.UserDir, "readers.xml");
+
+                    InitializeDriverResult result = _driver.InitializeDriver(cfgFileName, lock_param, set_hint_table ? null : existing_hint_table);
                     // 列出所有可用设备名称
                     UpdateDeviceList(result.Readers);
 
@@ -431,7 +433,7 @@ namespace RfidCenter
                 catch (Exception ex)
                 {
                     SetErrorState("error", ex.Message);
-                    OutputHistory($"初始化驱动出现异常: {ex.Message}", 2);
+                    OutputHistory($"初始化驱动出现异常: {ExceptionUtil.GetDebugText(ex)}", 2);
                     ShowMessage(ex.Message, "red", true);
                 }
                 finally

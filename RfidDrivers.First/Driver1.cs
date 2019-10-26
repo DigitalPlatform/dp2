@@ -104,7 +104,9 @@ namespace RfidDrivers.First
         // parameters:
         //      style   风格列表。xxx,xxx,xxx 形态
         //              其中，lock:COM1|COM2 指定锁控 COM 口
-        public InitializeDriverResult InitializeDriver(string style,
+        public InitializeDriverResult InitializeDriver(
+            string cfgFileName,
+            string style,
             List<HintInfo> hint_table)
         {
             this.State = "initializing";
@@ -116,7 +118,9 @@ namespace RfidDrivers.First
             {
                 GetDriversInfo();
 
-                NormalResult result = OpenAllReaders(hint_table, out List<HintInfo> output_hint_table);
+                NormalResult result = OpenAllReaders(cfgFileName,
+                    hint_table,
+                    out List<HintInfo> output_hint_table);
                 if (result.Value == -1)
                     return new InitializeDriverResult(result);
 
@@ -166,7 +170,9 @@ namespace RfidDrivers.First
         }
 
         // 打开所有读卡器
-        NormalResult OpenAllReaders(List<HintInfo> hint_table,
+        NormalResult OpenAllReaders(
+            string cfgFileName,
+            List<HintInfo> hint_table,
             out List<HintInfo> output_hint_table)
         {
             output_hint_table = null;
@@ -185,6 +191,10 @@ namespace RfidDrivers.First
             {
                 _readers = OpenComReaders(name_table, null, out output_hint_table);
             }
+
+            // 2019/10/23
+            if (string.IsNullOrEmpty(cfgFileName) == false)
+                _readers.AddRange(OpenTcpReaders(name_table, cfgFileName, out error));
 
             return new NormalResult();
         }
@@ -383,6 +393,110 @@ namespace RfidDrivers.First
             return readers;
         }
 
+        static List<Reader> EnumTcpReader(string cfgFileName)
+        {
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(cfgFileName);
+            }
+            catch (FileNotFoundException)
+            {
+                return new List<Reader>();
+            }
+
+            List<Reader> results = new List<Reader>();
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("reader");
+            foreach (XmlElement reader in nodes)
+            {
+
+                string type = reader.GetAttribute("type");
+                if (type != "NET")
+                    continue;
+                Reader new_reader = new Reader();
+                new_reader.DriverName = reader.GetAttribute("driverName");
+                new_reader.Type = "NET";
+                new_reader.SerialNumber = reader.GetAttribute("ip") + ":" + reader.GetAttribute("port");
+                results.Add(new_reader);
+            }
+
+            return results;
+        }
+
+        // 打开所有 TCP 读卡器
+        // parameters:
+        //      cfgFileName  XML 配置文件名
+        static List<Reader> OpenTcpReaders(
+            Hashtable name_table,
+            string cfgFileName,
+            out NormalResult error)
+        {
+            error = null;
+
+            // 枚举所有的 TCP reader
+            List<Reader> readers = EnumTcpReader(cfgFileName);
+
+            List<Reader> removed = new List<Reader>();
+
+            // name --> count
+            // Hashtable table = new Hashtable();
+
+            // 打开所有的 reader
+            foreach (Reader reader in readers)
+            {
+                var fill_result = FillReaderInfo(reader, "");
+                if (fill_result.Value == -1)
+                {
+#if NO
+                    if (reader.Type == "COM")
+                    {
+                        removed.Add(reader);
+                        continue;
+                    }
+                    return fill_result;
+#endif
+                    // TODO: 是否报错?
+                    error = fill_result;
+                    return new List<Reader>();
+                }
+
+                OpenReaderResult result = OpenReader(reader.DriverName,
+                    reader.Type,
+                    reader.SerialNumber,
+                    "",
+                    null);
+                reader.Result = result;
+                reader.ReaderHandle = result.ReaderHandle;
+
+                // 构造 Name
+                // 重复的 ProductName 后面要加上序号
+                {
+                    int count = 0;
+                    if (name_table.ContainsKey(reader.ProductName) == true)
+                        count = (int)name_table[reader.ProductName];
+
+                    if (count == 0)
+                        reader.Name = reader.ProductName;
+                    else
+                        reader.Name = $"{reader.ProductName}({count + 1})";
+
+                    name_table[reader.ProductName] = ++count;
+                }
+            }
+
+            // 去掉填充信息阶段报错的那些 reader
+            foreach (Reader reader in removed)
+            {
+                readers.Remove(reader);
+            }
+
+            //_readers = readers;
+            //return new NormalResult();
+            return readers;
+        }
+
+#if NO
         // 刷新读卡器打开状态
         public NormalResult RefreshAllReaders()
         {
@@ -436,6 +550,8 @@ namespace RfidDrivers.First
                 Unlock();
             }
         }
+#endif
+
 
 #if NO
         static Reader _findReader(List<Reader> _readers, string serialNumber)
@@ -1912,6 +2028,13 @@ namespace RfidDrivers.First
                 // TODO: BaudRate=38400;Frame=8E1;BusAddr=255 应该可以配置
                 return $"RDType={readerDriverName};CommType={comm_type};COMName={serial_number};BaudRate={baudRate};Frame=8E1;BusAddr=255";// Frame=8E1 或者 8N1 8O1
             }
+            else if (comm_type == "NET")
+            {
+                var parts = StringUtil.ParseTwoPart(serial_number, ":");
+                string ip = parts[0];
+                string port = parts[1];
+                return $"RDType={readerDriverName};CommType={comm_type};RemoteIP={ip};RemotePort={port};LocalIP=";
+            }
             else
                 throw new ArgumentException($"未知的 comm_type [{comm_type}]");
 
@@ -2064,8 +2187,11 @@ namespace RfidDrivers.First
                 return new NormalResult { Value = -1, ErrorInfo = "GetReader() 不应该用通配符的读卡器名" };
             var readers = GetReadersByName(reader_name);
             if (readers.Count == 0)
-                return new NormalResult { Value = -1,
-                    ErrorInfo = $"没有找到名为 '{reader_name}' 的读卡器" };
+                return new NormalResult
+                {
+                    Value = -1,
+                    ErrorInfo = $"没有找到名为 '{reader_name}' 的读卡器"
+                };
             reader = readers[0];
             return new NormalResult();
         }
@@ -2321,7 +2447,7 @@ out Reader reader);
         // 注：PII 相同，UID 也相同，属于正常情况，这是因为多个读卡器都读到了同一个标签的缘故
         // parameters:
         //      reader_name 可以用通配符
-            // return:
+        // return:
         //      result.Value    -1 出错
         //      result.Value    0   没有找到指定的标签
         //      result.Value    1   找到了。result.UID 和 result.ReaderName 里面有返回值
@@ -2769,7 +2895,7 @@ out Reader reader);
                 List<NormalResult> error_results = new List<NormalResult>();
 
                 // foreach (UIntPtr hreader in handles)
-                foreach(var reader in readers)
+                foreach (var reader in readers)
                 {
                     // 选择天线
                     if (reader.AntannaCount > 1)
@@ -3436,7 +3562,7 @@ out Reader reader);
                     RFIDLIB.rfidlib_aip_iso14443A.ISO14443A_CreateInvenParam(InvenParamSpecList, 0);
             }
             nTagCount = 0;
-            LABEL_TAG_INVENTORY:
+        LABEL_TAG_INVENTORY:
             // 可能会抛出 System.AccessViolationException 异常
             iret = RFIDLIB.rfidlib_reader.RDR_TagInventory(hreader, AIType, AntennaSelCount, AntennaSel, InvenParamSpecList);
             RFIDLIB.rfidlib_reader.RDR_CloseRFTransmitter(hreader);

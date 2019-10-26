@@ -93,7 +93,17 @@ namespace dp2SSL
 
             // var task = SetWallPaper();
 
-            // this.shelf.Visibility = Visibility.Collapsed;
+            if (App.Function == "自助借还")
+            {
+                this.shelf.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.shelf.Visibility = Visibility.Visible;
+                this.borrowButton.Visibility = Visibility.Collapsed;
+                this.returnButton.Visibility = Visibility.Collapsed;
+                this.renewBotton.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)

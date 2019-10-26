@@ -169,6 +169,9 @@ namespace dp2SSL
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)
         {
+            // 刚开始 5 分钟内频繁检查
+            DateTime start = DateTime.Now;
+
             var task1 = Task.Run(() =>
             {
                 try
@@ -181,10 +184,13 @@ namespace dp2SSL
                         else
                             SetError("uid", null);
 
-                        Task.Delay(TimeSpan.FromMinutes(5)).Wait(token);
+                        if (DateTime.Now - start < TimeSpan.FromMinutes(5))
+                            Task.Delay(TimeSpan.FromSeconds(5)).Wait(token);
+                        else
+                            Task.Delay(TimeSpan.FromMinutes(5)).Wait(token);
                     }
                 }
-                catch(OperationCanceledException)
+                catch (OperationCanceledException)
                 {
                     return;
                 }
@@ -389,6 +395,16 @@ namespace dp2SSL
                 return WpfClientInfo.Config?.Get("shelf",
                     "location",
                     "");
+            }
+        }
+
+        public static string Function
+        {
+            get
+            {
+                return WpfClientInfo.Config?.Get("global",
+    "function",
+    "自助借还");
             }
         }
 
@@ -638,6 +654,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // 标签总数显示 图书+读者卡
                 this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            }
+        }
+
+        public static string ShelfFilePath
+        {
+            get
+            {
+                string cfg_filename = System.IO.Path.Combine(WpfClientInfo.UserDir, "shelf.xml");
+                return cfg_filename;
             }
         }
     }

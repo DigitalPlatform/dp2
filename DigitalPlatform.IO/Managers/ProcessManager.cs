@@ -12,6 +12,8 @@ namespace DigitalPlatform.IO
     // 负责监控和重启进程
     public static class ProcessManager
     {
+        // public static TimeSpan FirstWaitLength = TimeSpan.FromSeconds(30);
+
         public delegate void delegate_writeLog(ProcessInfo info, string text);
 
         public static void Start(
@@ -19,23 +21,13 @@ namespace DigitalPlatform.IO
             delegate_writeLog writeLog,
             CancellationToken token)
         {
+            // 首次等待
             TimeSpan wait_time = TimeSpan.FromSeconds(30);
 
             Task.Run(() =>
             {
                 while (token.IsCancellationRequested == false)
                 {
-                    // 延时
-                    try
-                    {
-                        Task.Delay(// TimeSpan.FromMilliseconds(1000), 
-                            wait_time,
-                            token).Wait();
-                    }
-                    catch
-                    {
-                        return;
-                    }
 
                     foreach (ProcessInfo info in process_infos)
                     {
@@ -50,6 +42,18 @@ namespace DigitalPlatform.IO
 
                         // 启动
                         StartModule(info.ShortcutPath, "minimize");
+                    }
+
+                    // 延时
+                    try
+                    {
+                        Task.Delay(// TimeSpan.FromMilliseconds(1000), 
+                            wait_time,
+                            token).Wait();
+                    }
+                    catch
+                    {
+                        return;
                     }
                 }
             });

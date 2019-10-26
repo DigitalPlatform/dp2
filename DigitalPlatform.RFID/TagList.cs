@@ -44,6 +44,16 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        static bool _dataReady = false;
+
+        public static bool DataReady
+        {
+            get
+            {
+                return _dataReady;
+            }
+        }
+
         static void ClearTagInfo(string uid)
         {
             lock (_sync_books)
@@ -103,276 +113,105 @@ namespace DigitalPlatform.RFID
             delegate_notifyChanged notifyChanged,
             delegate_setError setError)
         {
-            setError?.Invoke("rfid", null);
-
-            List<TagAndData> new_books = new List<TagAndData>();
-            List<TagAndData> new_patrons = new List<TagAndData>();
-
-            List<TagAndData> error_books = new List<TagAndData>();
-            List<TagAndData> error_patrons = new List<TagAndData>();
-
-            // 从当前列表中发现已有的图书。用于交叉运算
-            List<TagAndData> found_books = new List<TagAndData>();
-            // 从当前列表中发现已有的读者。用于交叉运算
-            List<TagAndData> found_patrons = new List<TagAndData>();
-
-            // 即便是发现已经存在 UID 的标签，也要再判断一下 Antenna 是否不同。如果有不同，要进行变化通知
-            // 从当前列表中发现(除了 UID) 内容有变化的图书。这些图书也会进入 found_books 集合
-            List<TagAndData> changed_books = new List<TagAndData>();
-
-            foreach (OneTag tag in list)
+            try
             {
-                // 检查以前的列表中是否已经有了
-                var book = FindBookTag(tag.UID);
-                if (book != null)
+                setError?.Invoke("rfid", null);
+
+                List<TagAndData> new_books = new List<TagAndData>();
+                List<TagAndData> new_patrons = new List<TagAndData>();
+
+                List<TagAndData> error_books = new List<TagAndData>();
+                List<TagAndData> error_patrons = new List<TagAndData>();
+
+                // 从当前列表中发现已有的图书。用于交叉运算
+                List<TagAndData> found_books = new List<TagAndData>();
+                // 从当前列表中发现已有的读者。用于交叉运算
+                List<TagAndData> found_patrons = new List<TagAndData>();
+
+                // 即便是发现已经存在 UID 的标签，也要再判断一下 Antenna 是否不同。如果有不同，要进行变化通知
+                // 从当前列表中发现(除了 UID) 内容有变化的图书。这些图书也会进入 found_books 集合
+                List<TagAndData> changed_books = new List<TagAndData>();
+
+                foreach (OneTag tag in list)
                 {
-                    found_books.Add(book);
-                    if (book.OneTag.AntennaID != tag.AntennaID)
+                    // 检查以前的列表中是否已经有了
+                    var book = FindBookTag(tag.UID);
+                    if (book != null)
                     {
-                        // 修改 AntennaID
-                        book.OneTag.AntennaID = tag.AntennaID;
-                        changed_books.Add(book);
+                        found_books.Add(book);
+                        if (book.OneTag.AntennaID != tag.AntennaID)
+                        {
+                            // 修改 AntennaID
+                            book.OneTag.AntennaID = tag.AntennaID;
+                            changed_books.Add(book);
+                        }
+
+                        if (string.IsNullOrEmpty(book.Error) == false)
+                            error_books.Add(book);
+                        continue;
+                    }
+                    var patron = FindPatronTag(tag.UID);
+                    if (patron != null)
+                    {
+                        found_patrons.Add(patron);
+                        if (string.IsNullOrEmpty(patron.Error) == false)
+                            error_patrons.Add(patron);
+                        continue;
                     }
 
-                    if (string.IsNullOrEmpty(book.Error) == false)
-                        error_books.Add(book);
-                    continue;
-                }
-                var patron = FindPatronTag(tag.UID);
-                if (patron != null)
-                {
-                    found_patrons.Add(patron);
-                    if (string.IsNullOrEmpty(patron.Error) == false)
-                        error_patrons.Add(patron);
-                    continue;
-                }
-
-                // ISO14443A 的一律当作读者证卡
-                if (tag.Protocol == InventoryInfo.ISO14443A)
-                {
-                    patron = new TagAndData { OneTag = tag, Type = "patron" };
-                    new_patrons.Add(patron);
-                }
-                else
-                {
-                    // 根据缓存的 typeOfUsage 来判断
-                    string typeOfUsage = (string)_typeTable[tag.UID];
-                    if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                    // ISO14443A 的一律当作读者证卡
+                    if (tag.Protocol == InventoryInfo.ISO14443A)
                     {
                         patron = new TagAndData { OneTag = tag, Type = "patron" };
                         new_patrons.Add(patron);
-                        found_books.Remove(patron);
                     }
                     else
                     {
-                        // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
-                        book = new TagAndData { OneTag = tag };
-                        new_books.Add(book);
-                    }
-                }
-            }
-
-            List<TagAndData> remove_books = new List<TagAndData>();
-            List<TagAndData> remove_patrons = new List<TagAndData>();
-
-            // 交叉运算
-            foreach (TagAndData book in _books)
-            {
-                if (found_books.IndexOf(book) == -1)
-                    remove_books.Add(book);
-            }
-
-            foreach (TagAndData patron in _patrons)
-            {
-                if (found_patrons.IndexOf(patron) == -1)
-                    remove_patrons.Add(patron);
-            }
-
-            bool array_changed = false;
-
-            // 兑现添加
-            lock (_sync_books)
-            {
-                foreach (TagAndData book in new_books)
-                {
-                    if (_books.IndexOf(book) == -1)
-                    {
-                        _books.Add(book);
-                        array_changed = true;
-                    }
-                }
-                // 兑现删除
-                foreach (TagAndData book in remove_books)
-                {
-                    _books.Remove(book);
-                    array_changed = true;
-                }
-            }
-
-            lock (_sync_patrons)
-            {
-                foreach (TagAndData patron in new_patrons)
-                {
-                    if (_patrons.IndexOf(patron) == -1)
-                    {
-                        _patrons.Add(patron);
-                        array_changed = true;
-                    }
-                }
-                foreach (TagAndData patron in remove_patrons)
-                {
-                    _patrons.Remove(patron);
-                    array_changed = true;
-                }
-            }
-
-            // 通知一次变化
-            if (array_changed
-                || changed_books.Count > 0
-                || new_books.Count > 0 || remove_books.Count > 0
-                || new_patrons.Count > 0 || remove_patrons.Count > 0)    // 2019/8/15 优化
-                notifyChanged(new_books, changed_books, remove_books,
-                    new_patrons, null, remove_patrons);
-
-            // 需要获得 Tag 详细信息的。注意还应当包含以前出错的 Tag
-            //List<TagAndData> news = new_books;
-            // news.AddRange(error_books);
-
-            List<TagAndData> news = new List<TagAndData>();
-            news.AddRange(_books);
-            news.AddRange(new_patrons);
-
-            new_books = new List<TagAndData>();
-            remove_books = new List<TagAndData>();
-            new_patrons = new List<TagAndData>();
-            remove_patrons = new List<TagAndData>();
-
-            // .TagInfo 是否发生过填充
-            bool taginfo_changed = false;
-            {
-                List<TagAndData> update_books = new List<TagAndData>();
-                List<TagAndData> update_patrons = new List<TagAndData>();
-
-                // 逐个获得新发现的 ISO15693 标签的详细数据，用于判断图书/读者类型
-                foreach (TagAndData data in news)
-                {
-                    OneTag tag = data.OneTag;
-                    if (tag == null)
-                        continue;
-                    if (tag.TagInfo != null && data.Error == null)
-                        continue;
-                    if (tag.Protocol == InventoryInfo.ISO14443A)
-                        continue;
-                    {
-                        /*
-                        // TODO
-                        GetTagInfoResult gettaginfo_result = null;
-                        if (tag.InventoryInfo == null)
-                            gettaginfo_result = GetTagInfo(channel, tag.UID);
-                        else
-                            gettaginfo_result = GetTagInfo(channel, tag.InventoryInfo);
-                            */
-                        // 自动重试一次
-                        GetTagInfoResult gettaginfo_result = null;
-                        for (int i = 0; i < 2; i++)
+                        // 根据缓存的 typeOfUsage 来判断
+                        string typeOfUsage = (string)_typeTable[tag.UID];
+                        if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
                         {
-                            gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
-                            if (gettaginfo_result.Value != -1)
-                                break;
-                        }
-
-                        if (gettaginfo_result.Value == -1)
-                        {
-                            setError?.Invoke("rfid", gettaginfo_result.ErrorInfo);
-                            // TODO: 是否直接在标签上显示错误文字?
-                            data.Error = gettaginfo_result.ErrorInfo;
-                            if (data.Type == "patron")
-                                update_patrons.Add(data);
-                            else
-                                update_books.Add(data);
-                            continue;
+                            patron = new TagAndData { OneTag = tag, Type = "patron" };
+                            new_patrons.Add(patron);
+                            found_books.Remove(patron);
                         }
                         else
                         {
-                            if (string.IsNullOrEmpty(data.Error) == false)
-                            {
-                                data.Error = null;
-                                if (data.Type == "patron")
-                                    update_patrons.Add(data);
-                                else
-                                    update_books.Add(data);
-                            }
-                        }
-
-                        TagInfo info = gettaginfo_result.TagInfo;
-
-                        // 记下来。避免以后重复再次去获取了
-                        if (tag.TagInfo == null)
-                        {
-                            tag.TagInfo = info;
-                            taginfo_changed = true;
-
-                            // 2019/8/25
-                            if (data.Type == "patron")
-                            {
-                                if (update_patrons.IndexOf(data) == -1)
-                                    update_patrons.Add(data);
-                            }
-                            else
-                            {
-                                /*
-                                if (update_books.IndexOf(data) == -1)
-                                    update_books.Add(data);
-                                    */
-                            }
-                        }
-
-                        // 观察 typeOfUsage 元素
-                        var chip = LogicChip.From(info.Bytes,
-    (int)info.BlockSize,
-    "");
-
-                        string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
-
-                        // 分离 ISO15693 图书标签和读者卡标签
-                        if (string.IsNullOrEmpty(data.Type))
-                        {
-                            if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
-                            {
-                                // 需要调整到 _patrons 中
-                                data.Type = "patron";
-                                // 删除列表? 同时添加列表
-                                remove_books.Add(data);
-                                update_books.Remove(data);  // 容错
-                                new_patrons.Add(data);
-                            }
-                            else
-                            {
-                                data.Type = "book";
-                                update_books.Add(data);
-                                update_patrons.Remove(data);
-                            }
-
-                            // 保存到缓存
-                            if (typeOfUsage != null)
-                            {
-                                if (_typeTable.Count > 1000)
-                                    _typeTable.Clear();
-                                _typeTable[data.OneTag.UID] = typeOfUsage;
-                            }
+                            // ISO15693 的则先添加到 _books 中。等类型判断完成，有可能还要调整到 _patrons 中
+                            book = new TagAndData { OneTag = tag };
+                            new_books.Add(book);
                         }
                     }
-                } // end of foreach
+                }
 
-                array_changed = false;
-                // 再次兑现添加和删除
+                List<TagAndData> remove_books = new List<TagAndData>();
+                List<TagAndData> remove_patrons = new List<TagAndData>();
+
+                // 交叉运算
+                foreach (TagAndData book in _books)
+                {
+                    if (found_books.IndexOf(book) == -1)
+                        remove_books.Add(book);
+                }
+
+                foreach (TagAndData patron in _patrons)
+                {
+                    if (found_patrons.IndexOf(patron) == -1)
+                        remove_patrons.Add(patron);
+                }
+
+                bool array_changed = false;
+
                 // 兑现添加
                 lock (_sync_books)
                 {
                     foreach (TagAndData book in new_books)
                     {
-                        _books.Add(book);
-                        array_changed = true;
+                        if (_books.IndexOf(book) == -1)
+                        {
+                            _books.Add(book);
+                            array_changed = true;
+                        }
                     }
                     // 兑现删除
                     foreach (TagAndData book in remove_books)
@@ -386,8 +225,11 @@ namespace DigitalPlatform.RFID
                 {
                     foreach (TagAndData patron in new_patrons)
                     {
-                        _patrons.Add(patron);
-                        array_changed = true;
+                        if (_patrons.IndexOf(patron) == -1)
+                        {
+                            _patrons.Add(patron);
+                            array_changed = true;
+                        }
                     }
                     foreach (TagAndData patron in remove_patrons)
                     {
@@ -396,17 +238,192 @@ namespace DigitalPlatform.RFID
                     }
                 }
 
-                // 再次通知变化
-                if (array_changed == true
-                    || taginfo_changed == true
-                    || new_books.Count > 0
-                    || update_books.Count > 0
-                    || remove_books.Count > 0
-                    || new_patrons.Count > 0
-                    || update_patrons.Count > 0
-                    || remove_patrons.Count > 0)    // 2019/8/15 优化
-                    notifyChanged(new_books, update_books, remove_books,
-                        new_patrons, update_patrons, remove_patrons);
+                // 通知一次变化
+                if (array_changed
+                    || changed_books.Count > 0
+                    || new_books.Count > 0 || remove_books.Count > 0
+                    || new_patrons.Count > 0 || remove_patrons.Count > 0)    // 2019/8/15 优化
+                    notifyChanged(new_books, changed_books, remove_books,
+                        new_patrons, null, remove_patrons);
+
+                // 需要获得 Tag 详细信息的。注意还应当包含以前出错的 Tag
+                //List<TagAndData> news = new_books;
+                // news.AddRange(error_books);
+
+                List<TagAndData> news = new List<TagAndData>();
+                news.AddRange(_books);
+                news.AddRange(new_patrons);
+
+                new_books = new List<TagAndData>();
+                remove_books = new List<TagAndData>();
+                new_patrons = new List<TagAndData>();
+                remove_patrons = new List<TagAndData>();
+
+                // .TagInfo 是否发生过填充
+                bool taginfo_changed = false;
+                {
+                    List<TagAndData> update_books = new List<TagAndData>();
+                    List<TagAndData> update_patrons = new List<TagAndData>();
+
+                    // 逐个获得新发现的 ISO15693 标签的详细数据，用于判断图书/读者类型
+                    foreach (TagAndData data in news)
+                    {
+                        OneTag tag = data.OneTag;
+                        if (tag == null)
+                            continue;
+                        if (tag.TagInfo != null && data.Error == null)
+                            continue;
+                        if (tag.Protocol == InventoryInfo.ISO14443A)
+                            continue;
+                        {
+                            /*
+                            // TODO
+                            GetTagInfoResult gettaginfo_result = null;
+                            if (tag.InventoryInfo == null)
+                                gettaginfo_result = GetTagInfo(channel, tag.UID);
+                            else
+                                gettaginfo_result = GetTagInfo(channel, tag.InventoryInfo);
+                                */
+                            // 自动重试一次
+                            GetTagInfoResult gettaginfo_result = null;
+                            for (int i = 0; i < 2; i++)
+                            {
+                                gettaginfo_result = GetTagInfo(channel, tag.ReaderName, tag.UID, tag.AntennaID);
+                                if (gettaginfo_result.Value != -1)
+                                    break;
+                            }
+
+                            if (gettaginfo_result.Value == -1)
+                            {
+                                setError?.Invoke("rfid", gettaginfo_result.ErrorInfo);
+                                // TODO: 是否直接在标签上显示错误文字?
+                                data.Error = gettaginfo_result.ErrorInfo;
+                                if (data.Type == "patron")
+                                    update_patrons.Add(data);
+                                else
+                                    update_books.Add(data);
+                                continue;
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(data.Error) == false)
+                                {
+                                    data.Error = null;
+                                    if (data.Type == "patron")
+                                        update_patrons.Add(data);
+                                    else
+                                        update_books.Add(data);
+                                }
+                            }
+
+                            TagInfo info = gettaginfo_result.TagInfo;
+
+                            // 记下来。避免以后重复再次去获取了
+                            if (tag.TagInfo == null)
+                            {
+                                tag.TagInfo = info;
+                                taginfo_changed = true;
+
+                                // 2019/8/25
+                                if (data.Type == "patron")
+                                {
+                                    if (update_patrons.IndexOf(data) == -1)
+                                        update_patrons.Add(data);
+                                }
+                                else
+                                {
+                                    /*
+                                    if (update_books.IndexOf(data) == -1)
+                                        update_books.Add(data);
+                                        */
+                                }
+                            }
+
+                            // 观察 typeOfUsage 元素
+                            var chip = LogicChip.From(info.Bytes,
+        (int)info.BlockSize,
+        "");
+
+                            string typeOfUsage = chip.FindElement(ElementOID.TypeOfUsage)?.Text;
+
+                            // 分离 ISO15693 图书标签和读者卡标签
+                            if (string.IsNullOrEmpty(data.Type))
+                            {
+                                if (typeOfUsage != null && typeOfUsage.StartsWith("8"))
+                                {
+                                    // 需要调整到 _patrons 中
+                                    data.Type = "patron";
+                                    // 删除列表? 同时添加列表
+                                    remove_books.Add(data);
+                                    update_books.Remove(data);  // 容错
+                                    new_patrons.Add(data);
+                                }
+                                else
+                                {
+                                    data.Type = "book";
+                                    update_books.Add(data);
+                                    update_patrons.Remove(data);
+                                }
+
+                                // 保存到缓存
+                                if (typeOfUsage != null)
+                                {
+                                    if (_typeTable.Count > 1000)
+                                        _typeTable.Clear();
+                                    _typeTable[data.OneTag.UID] = typeOfUsage;
+                                }
+                            }
+                        }
+                    } // end of foreach
+
+                    array_changed = false;
+                    // 再次兑现添加和删除
+                    // 兑现添加
+                    lock (_sync_books)
+                    {
+                        foreach (TagAndData book in new_books)
+                        {
+                            _books.Add(book);
+                            array_changed = true;
+                        }
+                        // 兑现删除
+                        foreach (TagAndData book in remove_books)
+                        {
+                            _books.Remove(book);
+                            array_changed = true;
+                        }
+                    }
+
+                    lock (_sync_patrons)
+                    {
+                        foreach (TagAndData patron in new_patrons)
+                        {
+                            _patrons.Add(patron);
+                            array_changed = true;
+                        }
+                        foreach (TagAndData patron in remove_patrons)
+                        {
+                            _patrons.Remove(patron);
+                            array_changed = true;
+                        }
+                    }
+
+                    // 再次通知变化
+                    if (array_changed == true
+                        || taginfo_changed == true
+                        || new_books.Count > 0
+                        || update_books.Count > 0
+                        || remove_books.Count > 0
+                        || new_patrons.Count > 0
+                        || update_patrons.Count > 0
+                        || remove_patrons.Count > 0)    // 2019/8/15 优化
+                        notifyChanged(new_books, update_books, remove_books,
+                            new_patrons, update_patrons, remove_patrons);
+                }
+            }
+            finally
+            {
+                _dataReady = true;
             }
         }
 

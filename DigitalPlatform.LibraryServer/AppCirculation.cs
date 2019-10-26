@@ -1464,7 +1464,6 @@ namespace DigitalPlatform.LibraryServer
                         // 如果有必要保存回读者记录(因前面刷新了以停代金数据)
                         if (bReaderDomChanged == true)
                         {
-                            string strError_1 = "";
                             /*
                             byte[] output_timestamp = null;
                             string strOutputPath = "";
@@ -1478,7 +1477,7 @@ namespace DigitalPlatform.LibraryServer
                                 reader_timestamp,
                                 out output_timestamp,
                                 out strOutputPath,
-                                out strError_1);
+                                out string strError_1);
                             if (lRet == -1)
                             {
                                 // text-level: 内部错误

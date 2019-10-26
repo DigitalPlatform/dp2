@@ -455,5 +455,14 @@ namespace dp2SSL
                 this.NotEmpty = false;
         }
 
+        // 用于精确定位的名字
+        public string NameSummary
+        {
+            get
+            {
+                return $"{PatronName} 证条码号:{Barcode}";
+            }
+        }
+
     }
 }
