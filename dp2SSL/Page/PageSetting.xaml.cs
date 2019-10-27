@@ -31,6 +31,8 @@ namespace dp2SSL
 
             this.Loaded += PageSetting_Loaded;
             this.Unloaded += PageSetting_Unloaded;
+
+            this.keyborad.KeyPressed += Keyborad_KeyPressed;
         }
 
         private void PageSetting_Unloaded(object sender, RoutedEventArgs e)
@@ -51,6 +53,24 @@ namespace dp2SSL
             InitialPage();
             if (this.password.Visibility == Visibility.Visible)
                 this.password.Focus();
+        }
+
+        private void Keyborad_KeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            if (e.Key == '\r')
+            {
+                if (this.setPassword.Visibility == Visibility.Visible)
+                {
+                    SetPassword_Click(this.setPassword, new RoutedEventArgs());
+                }
+                else if (this.login.Visibility == Visibility.Visible)
+                {
+                    Login_Click(this.login, new RoutedEventArgs());
+                }
+                return;
+            }
+
+            this.password.Password = this.keyborad.Text;
         }
 
         void InitialPage()

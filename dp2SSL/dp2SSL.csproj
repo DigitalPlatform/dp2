@@ -146,6 +146,9 @@
       <DependentUpon>DoorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Entity.cs" />
+    <Compile Include="Controls\NumberKeyboardControl.xaml.cs">
+      <DependentUpon>NumberKeyboardControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Patron.cs" />
     <Compile Include="Controls\selector.cs" />
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
@@ -200,6 +203,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\DoorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\NumberKeyboardControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
