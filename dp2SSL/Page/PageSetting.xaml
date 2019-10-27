@@ -60,16 +60,32 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <!-- 密码区域 -->
-            <StackPanel Name="passwordArea" Orientation="Horizontal" Height="36">
-                <TextBlock Foreground="White" 
+            <Grid Name="passwordArea" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Foreground="White" Grid.Column="0"
                            FontSize="20" Margin="4">锁屏密码</TextBlock>
-                <PasswordBox Name="password" 
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36"/>
+                        <RowDefinition Height="160"/>
+                    </Grid.RowDefinitions>
+                    <PasswordBox Name="password" Grid.Row="0"
                              Width="300" FontSize="20" Margin="4"/>
-                <Button Name="setPassword" Click="SetPassword_Click"
-                        FontSize="16"  Margin="4" Padding="4">设置密码</Button>
-                <Button Name="login" Click="Login_Click"
-                        FontSize="16"  Margin="4" Padding="4">登录</Button>
-            </StackPanel>
+                    <local:NumberKeyboardControl x:Name="keyborad" Grid.Row="1"
+                                                 Width="160" Height="160"/>
+                </Grid>
+
+                <Button Name="setPassword" Grid.Column="2" VerticalAlignment="Top"
+                        Click="SetPassword_Click"
+                        FontSize="14" Width="100" Height="36" Margin="4" Padding="4">设置密码</Button>
+                <Button Name="login" Grid.Column="2" VerticalAlignment="Top"
+                        Click="Login_Click"
+                        FontSize="14" Width="100" Height="36" Margin="4" Padding="4">登录</Button>
+            </Grid>
             <!-- 按钮区域 -->
             <WrapPanel Name="buttonArea" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" 
                         Orientation="Horizontal" HorizontalAlignment="Center"
