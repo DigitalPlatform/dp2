@@ -44,9 +44,7 @@ namespace dp2SSL
         // EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
 
-        List<Entity> _all = new List<Entity>();
-        List<Entity> _adds = new List<Entity>();
-        List<Entity> _removes = new List<Entity>();
+
 
 
         public PageShelf()
@@ -214,7 +212,7 @@ namespace dp2SSL
 
         private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
         {
-            _firstInitial = false;
+            // _firstInitial = false;
 
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Touched += FingerprintManager_Touched;
@@ -259,12 +257,12 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
 
-            await InitialEntities();
+            await InitialShelfEntities();
 
             // 迫使图书盘点暂停(如果门是全部关闭的话)
             // SetOpenCount(_openCount);
 
-            this.doorControl.InitializeButtons(App.CurrentApp.ShelfCfgDom, App.CurrentApp.Doors);
+            this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
         }
 
         private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
@@ -603,249 +601,21 @@ namespace dp2SSL
 
         private async void CurrentApp_TagChanged(object sender, TagChangedEventArgs e)
         {
-            await ChangeEntities((BaseChannel<IRfid>)sender, e);
-        }
-
-        static Entity NewEntity(TagAndData tag)
-        {
-            var result = new Entity
-            {
-                UID = tag.OneTag.UID,
-                ReaderName = tag.OneTag.ReaderName,
-                Antenna = tag.OneTag.AntennaID.ToString(),
-                TagInfo = tag.OneTag.TagInfo,
-            };
-
-            EntityCollection.SetPII(result);
-            return result;
-        }
-
-        static List<Entity> Find(List<Entity> entities, TagAndData tag)
-        {
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == tag.OneTag.UID)
-                    results.Add(o);
-            });
-            return results;
-        }
-
-        static bool Add(List<Entity> entities, Entity entity)
-        {
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == entity.UID)
-                    results.Add(o);
-            });
-            if (results.Count > 0)
-                return false;
-            entities.Add(entity);
-            return true;
-        }
-
-        static bool Remove(List<Entity> entities, Entity entity)
-        {
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == entity.UID)
-                    results.Add(o);
-            });
-            if (results.Count > 0)
-            {
-                foreach (var o in results)
-                {
-                    entities.Remove(o);
-                }
-                return true;
-            }
-            return false;
-        }
-
-        static bool Add(List<Entity> entities, TagAndData tag)
-        {
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == tag.OneTag.UID)
-                    results.Add(o);
-            });
-            if (results.Count == 0)
-            {
-                entities.Add(NewEntity(tag));
-                return true;
-            }
-            return false;
-        }
-
-        static bool Remove(List<Entity> entities, TagAndData tag)
-        {
-            List<Entity> results = new List<Entity>();
-            entities.ForEach((o) =>
-            {
-                if (o.UID == tag.OneTag.UID)
-                    results.Add(o);
-            });
-            if (results.Count > 0)
-            {
-                foreach (var o in results)
-                {
-                    entities.Remove(o);
-                }
-                return true;
-            }
-            return false;
-        }
-
-        // 更新 Entity 信息
-        static void Update(List<Entity> entities, TagAndData tag)
-        {
-            foreach (var entity in entities)
-            {
-                if (entity.UID == tag.OneTag.UID)
-                {
-                    entity.ReaderName = tag.OneTag.ReaderName;
-                    entity.Antenna = tag.OneTag.AntennaID.ToString();
-                }
-            }
-        }
-
-        static SpeakList _speakList = new SpeakList();
-
-        // 跟随事件动态更新列表
-        // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
-        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
-        // Remove: 检查列表中是否存在这个 PII，如果存在，则修改状态为 不在架
-        //      如果不存在这个 PII，则不做任何动作
-        // Update: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
-        //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
-        async Task ChangeEntities(BaseChannel<IRfid> channel,
-            TagChangedEventArgs e)
-        {
-            if (_firstInitial == false)
-                return;
-
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
             // TODO: 这里要精确返回读者卡数量变动情况，以便“取出”语音提示更准确
 
-            // 开门状态下，动态信息暂时不要合并
-            bool changed = false;
-
-            List<TagAndData> tags = new List<TagAndData>();
-            if (e.AddBooks != null)
-                tags.AddRange(e.AddBooks);
-            if (e.UpdateBooks != null)
-                tags.AddRange(e.UpdateBooks);
-
-            List<string> add_uids = new List<string>();
-            // 新添加标签(或者更新标签信息)
-            foreach (var tag in tags)
-            {
-                // 没有 TagInfo 信息的先跳过
-                if (tag.OneTag.TagInfo == null)
-                    continue;
-
-                add_uids.Add(tag.OneTag.UID);
-
-                // 看看 _all 里面有没有
-                var results = Find(_all, tag);
-                if (results.Count == 0)
-                {
-                    if (Add(_adds, tag) == true)
-                    {
-                        changed = true;
-                    }
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                }
-                else
-                {
-                    // 更新 _all 里面的信息
-                    Update(_all, tag);
-
-                    // 要把 _adds 和 _removes 里面都去掉
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                }
-            }
-
-            // 拿走标签
-            int removeBooksCount = 0;
-            foreach (var tag in e.RemoveBooks)
-            {
-                if (tag.OneTag.TagInfo == null)
-                    continue;
-
-                if (tag.Type == "patron")
-                    continue;
-
-                // 看看 _all 里面有没有
-                var results = Find(_all, tag);
-                if (results.Count > 0)
-                {
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Add(_removes, tag) == true)
-                    {
-                        changed = true;
-                    }
-                }
-                else
-                {
-                    // _all 里面没有，很奇怪。但，
-                    // 要把 _adds 和 _removes 里面都去掉
-                    if (Remove(_adds, tag) == true)
-                        changed = true;
-                    if (Remove(_removes, tag) == true)
-                        changed = true;
-                }
-
-                removeBooksCount++;
-            }
-
-            StringUtil.RemoveDup(ref add_uids, false);
-            int add_count = add_uids.Count;
-            int remove_count = 0;
-            if (e.RemoveBooks != null)
-                remove_count = removeBooksCount; // 注： e.RemoveBooks.Count 是不准确的，有时候会把 ISO15693 的读者卡判断时作为 remove 信号
-
-            if (remove_count > 0)
-            {
-                // App.CurrentApp.SpeakSequence($"取出 {remove_count} 本");
-                _speakList.Speak("取出 {0} 本",
-                    remove_count,
-                    (s) =>
-                    {
-                        App.CurrentApp.SpeakSequence(s);
-                    });
-            }
-            if (add_count > 0)
-            {
-                // App.CurrentApp.SpeakSequence($"放入 {add_count} 本");
-                _speakList.Speak("放入 {0} 本",
-    add_count,
-    (s) =>
-    {
-        App.CurrentApp.SpeakSequence(s);
-    });
-            }
-
-            if (changed == true)
-            {
-                DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
-            }
+            await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
         }
 
-        bool _firstInitial = false;
 
-        // TODO: 对所有现存的图书执行一次尝试还书的操作
-        async Task InitialEntities()
+        // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
+        // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
+        async Task InitialShelfEntities()
         {
+            if (ShelfData.FirstInitialized)
+                return;
+
             ProgressWindow progress = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -863,9 +633,14 @@ namespace dp2SSL
 
             try
             {
+                await ShelfData.InitialShelfEntities();
+
+#if NO
                 // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
                 await Task.Run(() =>
                 {
+                    TagList.DataReady = false;
+                    // TODO: 是否一开始主动把 RfidManager ReaderNameList 设置为 "*"?
                     while (true)
                     {
                         if (TagList.DataReady == true)
@@ -881,13 +656,15 @@ namespace dp2SSL
                     _all.Add(NewEntity(tag));
                 }
 
-                DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+                // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+                ShelfData.RefreshCount();
+#endif
 
-                TryReturn(progress, _all);
+                TryReturn(progress, ShelfData.All);
             }
             finally
             {
-                _firstInitial = true;   // 第一次初始化已经完成
+                // _firstInitial = true;   // 第一次初始化已经完成
 
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
@@ -1045,7 +822,7 @@ namespace dp2SSL
             // 预先提交一次
             if (submitBefore)
             {
-                if (_adds.Count > 0 || _removes.Count > 0)
+                if (ShelfData.Adds.Count > 0 || ShelfData.Removes.Count > 0)
                     SubmitCheckInOut(false);
             }
 
@@ -1063,7 +840,7 @@ namespace dp2SSL
             }
         }
 
-        #region patron 分类报错机制
+#region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -1075,7 +852,7 @@ namespace dp2SSL
             _patronErrorTable.SetError(type, error);
         }
 
-        #endregion
+#endregion
 
         bool _visiblityChanged = false;
 
@@ -1292,12 +1069,12 @@ namespace dp2SSL
                     // TODO: 把 _adds 和 _removes 归入 _all
                     // 是否一边处理一边动态修改 _all?
                     if (action == "return")
-                        Add(_all, entity);
+                        ShelfData.Add(ShelfData.All, entity);
                     else
-                        Remove(_all, entity);
+                        ShelfData.Remove(ShelfData.All, entity);
 
-                    Remove(_adds, entity);
-                    Remove(_removes, entity);
+                    ShelfData.Remove(ShelfData.Adds, entity);
+                    ShelfData.Remove(ShelfData.Removes, entity);
 
                     /*
                     // borrow 操作，API 之后才修改 EAS
@@ -1418,11 +1195,11 @@ namespace dp2SSL
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
 
             List<ActionInfo> actions = new List<ActionInfo>();
-            foreach (var entity in _adds)
+            foreach (var entity in ShelfData.Adds)
             {
                 actions.Add(new ActionInfo { Entity = entity, Action = "return" });
             }
-            foreach (var entity in _removes)
+            foreach (var entity in ShelfData.Removes)
             {
                 actions.Add(new ActionInfo { Entity = entity, Action = "borrow" });
             }
@@ -1623,12 +1400,12 @@ namespace dp2SSL
                         // 把 _adds 和 _removes 归入 _all
                         // 一边处理一边动态修改 _all?
                         if (action == "return")
-                            Add(_all, entity);
+                            ShelfData.Add(ShelfData.All, entity);
                         else
-                            Remove(_all, entity);
+                            ShelfData.Remove(ShelfData.All, entity);
 
-                        Remove(_adds, entity);
-                        Remove(_removes, entity);
+                        ShelfData.Remove(ShelfData.Adds, entity);
+                        ShelfData.Remove(ShelfData.Removes, entity);
                     }
 
                     if (lRet == -1)
@@ -1790,7 +1567,8 @@ namespace dp2SSL
                     DisplayError(ref progress, message, backColor);
 
                     // 重新装载读者信息和显示
-                    DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+                    // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+                    ShelfData.RefreshCount();
 
                     App.CurrentApp.Speak(speak);
                 }
@@ -1830,7 +1608,7 @@ namespace dp2SSL
             PatronClear(true);
         }
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1982,6 +1760,6 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
     }
 }

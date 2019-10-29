@@ -36,7 +36,7 @@ namespace dp2SSL
             int total_width,
             int total_height)
         {
-            string cfg_filename = App.ShelfFilePath;
+            string cfg_filename = ShelfData.ShelfFilePath;
             XmlDocument cfg_dom = new XmlDocument();
             cfg_dom.Load(cfg_filename);
 
