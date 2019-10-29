@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
+using System.IO;
 
 using dp2SSL.Models;
 using static dp2SSL.LibraryChannelUtil;
@@ -27,6 +29,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using dp2SSL.Dialog;
 
 namespace dp2SSL
 {
@@ -45,6 +48,7 @@ namespace dp2SSL
         List<Entity> _adds = new List<Entity>();
         List<Entity> _removes = new List<Entity>();
 
+
         public PageShelf()
         {
             InitializeComponent();
@@ -61,6 +65,7 @@ namespace dp2SSL
 
             // this.booksControl.SetSource(_entities);
             this.patronControl.DataContext = _patron;
+            this.patronControl.InputFace += PatronControl_InputFace;
 
             this._patron.PropertyChanged += _patron_PropertyChanged;
 
@@ -237,6 +242,7 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
+            /*
             try
             {
                 RfidManager.LockCommands = DoorControl.GetLockCommands();
@@ -245,9 +251,19 @@ namespace dp2SSL
             {
                 this.SetGlobalError("cfg", $"获得门锁命令时出错:{ex.Message}");
             }
+            */
+
+            // 要在初始化以前设定好
+            // RfidManager.AntennaList = GetAntennaList();
+
+            // _patronReaderName = GetPatronReaderName();
 
             await InitialEntities();
+
+            // 迫使图书盘点暂停(如果门是全部关闭的话)
+            SetOpenCount(_openCount);
         }
+
 
         int _openCount = 0; // 当前处于打开状态的门的个数
 
@@ -256,7 +272,7 @@ namespace dp2SSL
             if (e.Result.Value == -1)
                 return;
 
-            bool triggerAllClosed = false;
+            // bool triggerAllClosed = false;
             {
                 int count = 0;
                 foreach (var state in e.Result.States)
@@ -276,19 +292,56 @@ namespace dp2SSL
                     }
                 }
 
-                if (_openCount > 0 && count == 0)
-                    triggerAllClosed = true;
+                //if (_openCount > 0 && count == 0)
+                //    triggerAllClosed = true;
 
-                _openCount = count;
-            }
-
-            // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
-            if (triggerAllClosed)
-            {
-                SubmitCheckInOut();
-                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+                SetOpenCount(count);
             }
         }
+
+        // 设置打开门数量
+        void SetOpenCount(int count)
+        {
+            int oldCount = _openCount;
+
+            _openCount = count;
+
+            // 打开门的数量发生变化
+            if (oldCount != _openCount)
+            {
+                /*
+                if (_openCount == 0)
+                {
+                    // 关闭图书读卡器(只使用读者证读卡器)
+                    if (string.IsNullOrEmpty(_patronReaderName) == false
+                        && RfidManager.ReaderNameList != _patronReaderName)
+                    {
+                        RfidManager.ReaderNameList = _patronReaderName;
+                        RfidManager.ClearCache();
+                    }
+                }
+                else
+                {
+                    // 打开图书读卡器(同时也使用读者证读卡器)
+                    if (RfidManager.ReaderNameList != "*")
+                    {
+                        RfidManager.ReaderNameList = "*";
+                        RfidManager.ClearCache();
+                    }
+                }*/
+                if (oldCount > 0 && count == 0)
+                {
+                    // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
+                    // if (triggerAllClosed)
+                    {
+                        SubmitCheckInOut();
+                        PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+                    }
+                }
+
+            }
+        }
+
 
         LockChanged SetLockState(LockState state)
         {
@@ -643,6 +696,8 @@ namespace dp2SSL
             }
         }
 
+        static SpeakList _speakList = new SpeakList();
+
         // 跟随事件动态更新列表
         // Add: 检查列表中是否存在这个 PII，如果存在，则修改状态为 在架，并设置 UID 成员
         //      如果不存在，则为列表添加一个新元素，修改状态为在架，并设置 UID 和 PII 成员
@@ -658,6 +713,7 @@ namespace dp2SSL
 
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
+            // TODO: 这里要精确返回读者卡数量变动情况，以便“取出”语音提示更准确
 
             // 开门状态下，动态信息暂时不要合并
             bool changed = false;
@@ -703,9 +759,13 @@ namespace dp2SSL
             }
 
             // 拿走标签
+            int removeBooksCount = 0;
             foreach (var tag in e.RemoveBooks)
             {
                 if (tag.OneTag.TagInfo == null)
+                    continue;
+
+                if (tag.Type == "patron")
                     continue;
 
                 // 看看 _all 里面有没有
@@ -728,18 +788,34 @@ namespace dp2SSL
                     if (Remove(_removes, tag) == true)
                         changed = true;
                 }
+
+                removeBooksCount++;
             }
 
             StringUtil.RemoveDup(ref add_uids, false);
             int add_count = add_uids.Count;
             int remove_count = 0;
             if (e.RemoveBooks != null)
-                remove_count = e.RemoveBooks.Count;
+                remove_count = removeBooksCount; // 注： e.RemoveBooks.Count 是不准确的，有时候会把 ISO15693 的读者卡判断时作为 remove 信号
 
             if (remove_count > 0)
-                App.CurrentApp.Speak($"取出 {remove_count} 本");
+            {
+                // App.CurrentApp.SpeakSequence($"取出 {remove_count} 本");
+                _speakList.Speak("取出 {0} 本", 
+                    remove_count,
+                    (s)=> {
+                        App.CurrentApp.SpeakSequence(s);
+                    });
+            }
             if (add_count > 0)
-                App.CurrentApp.Speak($"放入 {add_count} 本");
+            {
+                // App.CurrentApp.SpeakSequence($"放入 {add_count} 本");
+                _speakList.Speak("放入 {0} 本",
+    add_count,
+    (s) => {
+        App.CurrentApp.SpeakSequence(s);
+    });
+            }
 
             if (changed == true)
             {
@@ -1349,8 +1425,8 @@ namespace dp2SSL
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Closed;
-                progress.Width = 700;
-                progress.Height = 500;
+                progress.Width = Math.Min(700, this.ActualWidth);
+                progress.Height = Math.Min(500, this.ActualHeight);
                 progress.Show();
                 AddLayer();
             }));
@@ -1737,5 +1813,159 @@ namespace dp2SSL
             await Task.Delay(TimeSpan.FromSeconds(10), token);
             PatronClear(true);
         }
+
+        #region 人脸识别功能
+
+        bool _stopVideo = false;
+
+        private async void PatronControl_InputFace(object sender, EventArgs e)
+        {
+            RecognitionFaceResult result = null;
+
+            VideoWindow videoRecognition = null;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                videoRecognition = new VideoWindow
+                {
+                    TitleText = "识别人脸 ...",
+                    Owner = Application.Current.MainWindow,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+                videoRecognition.Closed += VideoRecognition_Closed;
+                videoRecognition.Show();
+            }));
+            _stopVideo = false;
+            var task = Task.Run(() =>
+            {
+                DisplayVideo(videoRecognition);
+            });
+            try
+            {
+                result = await RecognitionFace("");
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode != "cancelled")
+                        SetGlobalError("face", result.ErrorInfo);
+                    DisplayError(ref videoRecognition, result.ErrorInfo);
+                    return;
+                }
+
+                SetGlobalError("face", null);
+            }
+            finally
+            {
+                if (videoRecognition != null)
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        videoRecognition.Close();
+                    }));
+            }
+
+            GetMessageResult message = new GetMessageResult
+            {
+                Value = 1,
+                Message = result.Patron,
+            };
+            SetPatronInfo(message);
+            SetQuality("");
+            await FillPatronDetail();
+        }
+
+        void DisplayError(ref VideoWindow videoRegister,
+    string message,
+    string color = "red")
+        {
+            MemoryDialog(videoRegister);
+            var temp = videoRegister;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                temp.MessageText = message;
+                temp.BackColor = color;
+                temp.okButton.Content = "返回";
+                temp = null;
+            }));
+            videoRegister = null;
+        }
+
+
+        void SetQuality(string text)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                this.Quality.Text = text;
+            }));
+        }
+
+        void DisplayVideo(VideoWindow window)
+        {
+            while (_stopVideo == false)
+            {
+                var result = FaceManager.GetImage("");
+                if (result.ImageData == null)
+                {
+                    Thread.Sleep(500);
+                    continue;
+                }
+                MemoryStream stream = new MemoryStream(result.ImageData);
+                try
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        window.SetPhoto(stream);
+                    }));
+                    stream = null;
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.Close();
+                }
+            }
+        }
+
+        private void VideoRecognition_Closed(object sender, EventArgs e)
+        {
+            FaceManager.CancelRecognitionFace();
+            _stopVideo = true;
+            RemoveLayer();
+        }
+
+        void EnableControls(bool enable)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                //this.borrowButton.IsEnabled = enable;
+                //this.returnButton.IsEnabled = enable;
+                this.goHome.IsEnabled = enable;
+                this.patronControl.inputFace.IsEnabled = enable;
+            }));
+        }
+
+        async Task<RecognitionFaceResult> RecognitionFace(string style)
+        {
+            EnableControls(false);
+            try
+            {
+                return await Task.Run<RecognitionFaceResult>(() =>
+                {
+                    // 2019/9/6 增加
+                    var result = FaceManager.GetState("camera");
+                    if (result.Value == -1)
+                        return new RecognitionFaceResult
+                        {
+                            Value = -1,
+                            ErrorInfo = result.ErrorInfo,
+                            ErrorCode = result.ErrorCode
+                        };
+                    return FaceManager.RecognitionFace("");
+                });
+            }
+            finally
+            {
+                EnableControls(true);
+            }
+        }
+
+        #endregion
     }
 }

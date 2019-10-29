@@ -108,7 +108,16 @@ namespace DigitalPlatform.RFID
         // UID --> typeOfUsage string
         static Hashtable _typeTable = new Hashtable();
 
+        static bool InRange(TagAndData data, string readerNameList)
+        {
+            // 匹配读卡器名字
+            return Reader.MatchReaderName(readerNameList, data.OneTag.ReaderName);
+        }
+
+        // parameters:
+        //      readerNameList  list中包含的内容的读卡器名(列表)。注意 list 中包含的标签，可能并不是全部读卡器的标签。对没有包含在其中的标签，本函数需要注意跳过(维持现状)，不要当作被删除处理
         public static void Refresh(BaseChannel<IRfid> channel,
+            string readerNameList,
             List<OneTag> list,
             delegate_notifyChanged notifyChanged,
             delegate_setError setError)
@@ -188,14 +197,20 @@ namespace DigitalPlatform.RFID
                 List<TagAndData> remove_patrons = new List<TagAndData>();
 
                 // 交叉运算
+                // 注意对那些在 readerNameList 以外的标签不要当作 removed 处理
                 foreach (TagAndData book in _books)
                 {
+                    if (InRange(book, readerNameList) == false)
+                        continue;
                     if (found_books.IndexOf(book) == -1)
                         remove_books.Add(book);
                 }
 
                 foreach (TagAndData patron in _patrons)
                 {
+                    if (InRange(patron, readerNameList) == false)
+                        continue;
+
                     if (found_patrons.IndexOf(patron) == -1)
                         remove_patrons.Add(patron);
                 }

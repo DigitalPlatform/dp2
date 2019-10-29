@@ -60,10 +60,10 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <!-- 密码区域 -->
-            <Grid Name="passwordArea" >
+            <Grid Name="passwordArea" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="300"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Foreground="White" Grid.Column="0"

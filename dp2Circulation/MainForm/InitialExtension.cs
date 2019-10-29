@@ -1701,7 +1701,9 @@ MessageBoxDefaultButton.Button1);
             // 标签总数显示
             if (e.Result.Results != null)
             {
-                TagList.Refresh(sender as BaseChannel<IRfid>, e.Result.Results,
+                TagList.Refresh(sender as BaseChannel<IRfid>, 
+                    e.ReaderNameList,
+                    e.Result.Results,
                         (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                         {
                             TagChanged?.Invoke(sender, new TagChangedEventArgs

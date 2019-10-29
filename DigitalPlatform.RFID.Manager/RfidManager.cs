@@ -26,6 +26,21 @@ namespace DigitalPlatform.RFID
             }
         }
 
+        // 每次 ListTags() 请求所用到的 reader_name 参数值
+
+        static string _readerNameList = "*";
+        public static string ReaderNameList
+        {
+            get
+            {
+                return _readerNameList;
+            }
+            set
+            {
+                _readerNameList = value;
+            }
+        }
+
         static string _antennaList = null;
 
         public static string AntennaList
@@ -152,7 +167,8 @@ new SetErrorEventArgs
                 if (string.IsNullOrEmpty(_antennaList) == false)
                     style += ",antenna:" + _antennaList;
 
-                var result = channel?.Object?.ListTags("*", style);
+                var readerNameList = _readerNameList;
+                var result = channel?.Object?.ListTags(readerNameList, style);
                 if (result.Value == -1)
                     Base.TriggerSetError(result,
                         new SetErrorEventArgs { Error = result.ErrorInfo });
@@ -168,6 +184,7 @@ new SetErrorEventArgs
                     // 注意 result.Value == -1 时也会触发这个事件
                     ListTags(channel, new ListTagsEventArgs
                     {
+                        ReaderNameList = readerNameList,
                         Result = result
                     });
                 }
@@ -565,6 +582,9 @@ new SetErrorEventArgs
     /// </summary>
     public class ListTagsEventArgs : EventArgs
     {
+        // 本次 ListTags 请求所用的 reader_name 参数值
+        public string ReaderNameList { get; set; }
+
         public ListTagsResult Result { get; set; }
     }
 

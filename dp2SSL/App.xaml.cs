@@ -19,6 +19,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using System.Xml;
+using System.IO;
 
 namespace dp2SSL
 {
@@ -27,6 +29,9 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        // 读者证读卡器名字。在 shelf.xml 中配置
+        string _patronReaderName = "";
+
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
 
@@ -144,9 +149,12 @@ namespace dp2SSL
 
             RfidManager.Base.Name = "RFID 中心";
             RfidManager.Url = App.RfidUrl;
-            RfidManager.AntennaList = "1|2|3|4";    // testing
+            // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
+
+            RfidManager.ListLocks += RfidManager_ListLocks;
+
             RfidManager.Start(_cancelRefresh.Token);
 
             FaceManager.Base.Name = "人脸中心";
@@ -164,7 +172,166 @@ namespace dp2SSL
             StartProcessManager();
 
             BeginCheckServerUID(_cancelRefresh.Token);
+
+            // 要在初始化以前设定好
+            RfidManager.AntennaList = GetAntennaList();
+            try
+            {
+                RfidManager.LockCommands = DoorControl.GetLockCommands();
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
+            }
+            _patronReaderName = GetPatronReaderName();
         }
+
+        // 从 shelf.xml 配置文件中获得读者证读卡器名
+        public string GetPatronReaderName()
+        {
+            string cfg_filename = App.ShelfFilePath;
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.Load(cfg_filename);
+
+                XmlElement patron = cfg_dom.DocumentElement.SelectSingleNode("patron") as XmlElement;
+                if (patron == null)
+                    return "";
+
+                return patron.GetAttribute("readerName");
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
+                return "";
+            }
+        }
+
+        // 从 shelf.xml 配置文件中归纳出所有的天线编号
+        public string GetAntennaList()
+        {
+            List<string> antenna_list = new List<string>();
+            string cfg_filename = App.ShelfFilePath;
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.Load(cfg_filename);
+
+                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
+                foreach (XmlElement door in doors)
+                {
+                    DoorControl.ParseLockString(door.GetAttribute("antenna"),
+                        out string readerName,
+                        out int antenna);
+                    antenna_list.Add(antenna.ToString());
+                }
+
+                StringUtil.RemoveDup(ref antenna_list, false);
+                return StringUtil.MakePathList(antenna_list, "|");
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
+                return "";
+            }
+        }
+
+
+        // 当前处于打开状态的门的个数
+        public int OpenCount
+        {
+            get
+            {
+                return _openCount;
+            }
+        }
+
+        int _openCount = 0; // 当前处于打开状态的门的个数
+
+        private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
+        {
+            if (e.Result.Value == -1)
+                return;
+
+            bool triggerAllClosed = false;
+            {
+                int count = 0;
+                foreach (var state in e.Result.States)
+                {
+                    if (state.State == "open")
+                        count++;
+                    /*
+                    var result = SetLockState(state);
+                    if (result.LockName != null && result.OldState != null && result.NewState != null)
+                    {
+                        if (result.NewState != result.OldState)
+                        {
+                            if (result.NewState == "open")
+                                App.CurrentApp.Speak($"{result.LockName} 打开");
+                            else
+                                App.CurrentApp.Speak($"{result.LockName} 关闭");
+                        }
+                    }
+                    */
+                }
+
+                if (_openCount > 0 && count == 0)
+                    triggerAllClosed = true;
+
+                SetOpenCount(count);
+            }
+
+            /*
+            // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
+            if (triggerAllClosed)
+            {
+                SubmitCheckInOut();
+                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+            }
+            */
+        }
+
+        // 设置打开门数量
+        void SetOpenCount(int count)
+        {
+            int oldCount = _openCount;
+
+            _openCount = count;
+
+            // 打开门的数量发生变化
+            if (oldCount != _openCount)
+            {
+                if (_openCount == 0)
+                {
+                    // 关闭图书读卡器(只使用读者证读卡器)
+                    if (string.IsNullOrEmpty(_patronReaderName) == false
+                        && RfidManager.ReaderNameList != _patronReaderName)
+                    {
+                        RfidManager.ReaderNameList = _patronReaderName;
+                        RfidManager.ClearCache();
+                    }
+                }
+                else
+                {
+                    // 打开图书读卡器(同时也使用读者证读卡器)
+                    if (RfidManager.ReaderNameList != "*")
+                    {
+                        RfidManager.ReaderNameList = "*";
+                        RfidManager.ClearCache();
+                    }
+                }
+            }
+        }
+
 
         // 单独的线程，监控 server UID 关系
         public void BeginCheckServerUID(CancellationToken token)
@@ -575,6 +742,23 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             }
         }
 
+        public void SpeakSequence(string strText, bool bError = false)
+        {
+            if (this.m_speech == null)
+                return;
+
+            this.m_strSpeakContent = strText;
+            try
+            {
+                // this.m_speech.SpeakAsyncCancelAll();
+                this.m_speech.SpeakAsync(strText);
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                // TODO: 如何报错?
+            }
+        }
+
         protected override void OnActivated(EventArgs e)
         {
             // 单独线程执行，避免阻塞 OnActivated() 返回
@@ -633,7 +817,9 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             // this.Number = e.Result?.Results?.Count.ToString();
             if (e.Result.Results != null)
             {
-                TagList.Refresh(sender as BaseChannel<IRfid>, e.Result.Results,
+                TagList.Refresh(sender as BaseChannel<IRfid>,
+                    e.ReaderNameList,
+                    e.Result.Results,
                         (add_books, update_books, remove_books, add_patrons, update_patrons, remove_patrons) =>
                         {
                             TagChanged?.Invoke(sender, new TagChangedEventArgs
