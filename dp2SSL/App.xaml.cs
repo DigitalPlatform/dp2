@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Diagnostics;
+using System.Xml;
+using System.IO;
 
 using dp2SSL.Models;
 
@@ -19,8 +21,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
-using System.Xml;
-using System.IO;
 
 namespace dp2SSL
 {
@@ -29,6 +29,17 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
+        public event OpenCountChangedEventHandler OpenCountChanged;
+
+        List<DoorItem> _doors = new List<DoorItem>();
+        public List<DoorItem> Doors
+        {
+            get
+            {
+                return _doors;
+            }
+        }
+
         // 读者证读卡器名字。在 shelf.xml 中配置
         string _patronReaderName = "";
 
@@ -173,17 +184,28 @@ namespace dp2SSL
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
+            {
+                string cfg_filename = App.ShelfFilePath;
+                XmlDocument cfg_dom = new XmlDocument();
+                cfg_dom.Load(cfg_filename);
+
+                _shelfCfgDom = cfg_dom;
+            }
+
+            this._doors = DoorItem.BuildItems(_shelfCfgDom);
+
             // 要在初始化以前设定好
             RfidManager.AntennaList = GetAntennaList();
             try
             {
-                RfidManager.LockCommands = DoorControl.GetLockCommands();
+                RfidManager.LockCommands = DoorItem.GetLockCommands();
             }
             catch (Exception ex)
             {
                 this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
             }
             _patronReaderName = GetPatronReaderName();
+
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
@@ -225,7 +247,7 @@ namespace dp2SSL
                 XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
                 foreach (XmlElement door in doors)
                 {
-                    DoorControl.ParseLockString(door.GetAttribute("antenna"),
+                    DoorItem.ParseLockString(door.GetAttribute("antenna"),
                         out string readerName,
                         out int antenna);
                     antenna_list.Add(antenna.ToString());
@@ -269,8 +291,8 @@ namespace dp2SSL
                 {
                     if (state.State == "open")
                         count++;
-                    /*
-                    var result = SetLockState(state);
+
+                    var result = DoorItem.SetLockState(_doors, state);
                     if (result.LockName != null && result.OldState != null && result.NewState != null)
                     {
                         if (result.NewState != result.OldState)
@@ -281,7 +303,6 @@ namespace dp2SSL
                                 App.CurrentApp.Speak($"{result.LockName} 关闭");
                         }
                     }
-                    */
                 }
 
                 if (_openCount > 0 && count == 0)
@@ -310,8 +331,15 @@ namespace dp2SSL
             // 打开门的数量发生变化
             if (oldCount != _openCount)
             {
+                OpenCountChanged?.Invoke(this, new OpenCountChangedEventArgs
+                {
+                    OldCount = oldCount,
+                    NewCount = count
+                });
+
                 if (_openCount == 0)
                 {
+
                     // 关闭图书读卡器(只使用读者证读卡器)
                     if (string.IsNullOrEmpty(_patronReaderName) == false
                         && RfidManager.ReaderNameList != _patronReaderName)
@@ -840,6 +868,16 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // 标签总数显示 图书+读者卡
                 this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
+            }
+        }
+
+        XmlDocument _shelfCfgDom = null;
+
+        public XmlDocument ShelfCfgDom
+        {
+            get
+            {
+                return _shelfCfgDom;
             }
         }
 
