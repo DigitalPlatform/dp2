@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>108</ApplicationRevision>
+    <ApplicationRevision>113</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -176,6 +176,7 @@
     </Compile>
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
+    <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\TagList.cs" />
     <Compile Include="Page\PageError.xaml.cs">
       <DependentUpon>PageError.xaml</DependentUpon>
@@ -378,7 +379,7 @@
     <Resource Include="face_recognition_219.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="shelf.xml">
+    <Content Include="sample_shelf.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>

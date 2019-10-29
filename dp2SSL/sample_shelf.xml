@@ -12,4 +12,5 @@
     <door name="第三排" lock="*:2" antenna="*:3"/>
     <door name="第四排" lock="*:3" antenna="*:4"/>
   </shelf>
+  <patron readerName="RL1700"/>
 </root>
