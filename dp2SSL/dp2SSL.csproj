@@ -178,6 +178,7 @@
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
     <Compile Include="Models\Door.cs" />
+    <Compile Include="Models\ShelfData.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\TagList.cs" />
     <Compile Include="Page\PageError.xaml.cs">

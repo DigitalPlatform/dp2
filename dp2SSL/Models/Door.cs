@@ -184,13 +184,7 @@ namespace dp2SSL
             return name1 == name2;
         }
 
-        public static List<LockCommand> GetLockCommands()
-        {
-            string cfg_filename = App.ShelfFilePath;
-            XmlDocument cfg_dom = new XmlDocument();
-            cfg_dom.Load(cfg_filename);
-            return GetLockCommands(cfg_dom);
-        }
+
 
         // 注：不用刷新。可以把背景色绑定到状态文字上
         // 刷新门锁(开/关)状态
@@ -234,49 +228,6 @@ namespace dp2SSL
             return results[0];
         }
 
-        // 构造锁命令字符串数组
-        public static List<LockCommand> GetLockCommands(XmlDocument cfg_dom)
-        {
-            // lockName --> List<int>
-            Hashtable table = new Hashtable();
-            XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("//door");
-            foreach (XmlElement door in doors)
-            {
-                string lockDef = door.GetAttribute("lock");
-                ParseLockString(lockDef, out string lockName, out int lockIndex);
-                List<int> array = null;
-                if (table.ContainsKey(lockName) == false)
-                {
-                    array = new List<int>();
-                    table[lockName] = array;
-                }
-                else
-                    array = (List<int>)table[lockName];
-
-                array.Add(lockIndex);
-            }
-
-            List<LockCommand> results = new List<LockCommand>();
-            foreach (string key in table.Keys)
-            {
-                StringBuilder text = new StringBuilder();
-                int i = 0;
-                foreach (var v in table[key] as List<int>)
-                {
-                    if (i > 0)
-                        text.Append(",");
-                    text.Append(v);
-                    i++;
-                }
-                results.Add(new LockCommand
-                {
-                    LockName = key,
-                    Indices = text.ToString()
-                });
-            }
-
-            return results;
-        }
 
         class Three
         {

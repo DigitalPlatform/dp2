@@ -31,15 +31,6 @@ namespace dp2SSL
     {
         public event OpenCountChangedEventHandler OpenCountChanged;
 
-        List<DoorItem> _doors = new List<DoorItem>();
-        public List<DoorItem> Doors
-        {
-            get
-            {
-                return _doors;
-            }
-        }
-
         // 读者证读卡器名字。在 shelf.xml 中配置
         string _patronReaderName = "";
 
@@ -184,34 +175,25 @@ namespace dp2SSL
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
-            {
-                string cfg_filename = App.ShelfFilePath;
-                XmlDocument cfg_dom = new XmlDocument();
-                cfg_dom.Load(cfg_filename);
-
-                _shelfCfgDom = cfg_dom;
-            }
-
-            this._doors = DoorItem.BuildItems(_shelfCfgDom);
+            ShelfData.InitialDoors();
 
             // 要在初始化以前设定好
             RfidManager.AntennaList = GetAntennaList();
             try
             {
-                RfidManager.LockCommands = DoorItem.GetLockCommands();
+                RfidManager.LockCommands = ShelfData.GetLockCommands();
             }
             catch (Exception ex)
             {
                 this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
             }
             _patronReaderName = GetPatronReaderName();
-
         }
 
         // 从 shelf.xml 配置文件中获得读者证读卡器名
         public string GetPatronReaderName()
         {
-            string cfg_filename = App.ShelfFilePath;
+            string cfg_filename = ShelfData.ShelfFilePath;
             XmlDocument cfg_dom = new XmlDocument();
             try
             {
@@ -238,7 +220,7 @@ namespace dp2SSL
         public string GetAntennaList()
         {
             List<string> antenna_list = new List<string>();
-            string cfg_filename = App.ShelfFilePath;
+            string cfg_filename = ShelfData.ShelfFilePath;
             XmlDocument cfg_dom = new XmlDocument();
             try
             {
@@ -292,7 +274,7 @@ namespace dp2SSL
                     if (state.State == "open")
                         count++;
 
-                    var result = DoorItem.SetLockState(_doors, state);
+                    var result = DoorItem.SetLockState(ShelfData.Doors, state);
                     if (result.LockName != null && result.OldState != null && result.NewState != null)
                     {
                         if (result.NewState != result.OldState)
@@ -339,7 +321,6 @@ namespace dp2SSL
 
                 if (_openCount == 0)
                 {
-
                     // 关闭图书读卡器(只使用读者证读卡器)
                     if (string.IsNullOrEmpty(_patronReaderName) == false
                         && RfidManager.ReaderNameList != _patronReaderName)
@@ -868,25 +849,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 // 标签总数显示 图书+读者卡
                 this.Number = $"{TagList.Books.Count}:{TagList.Patrons.Count}";
-            }
-        }
-
-        XmlDocument _shelfCfgDom = null;
-
-        public XmlDocument ShelfCfgDom
-        {
-            get
-            {
-                return _shelfCfgDom;
-            }
-        }
-
-        public static string ShelfFilePath
-        {
-            get
-            {
-                string cfg_filename = System.IO.Path.Combine(WpfClientInfo.UserDir, "shelf.xml");
-                return cfg_filename;
             }
         }
     }
