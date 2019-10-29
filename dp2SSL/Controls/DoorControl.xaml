@@ -9,9 +9,11 @@
     <UserControl.Resources>
         <local:IntToAddConverter x:Key="IntToAdd" Direction="+"/>
         <local:IntToAddConverter x:Key="IntToRemove" Direction="-"/>
+        <local:StateToBackConverter x:Key="StateToBack"/>
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
-            <Border Background="{TemplateBinding Background}" BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="6">
+            <Border Background="{Binding State,Converter={StaticResource StateToBack}}" 
+                    BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="6">
                 <Grid >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
@@ -35,7 +37,7 @@
                 -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Name}" Foreground="White" HorizontalAlignment="Right" />
                     <TextBlock FontSize="40" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Count}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    
+
                     <TextBlock FontSize="16" Grid.Row="2" Grid.Column="0" Text="{Binding Add,Converter={StaticResource IntToAdd}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
                     <TextBlock FontSize="16" Grid.Row="2" Grid.Column="1" Text="{Binding Remove,Converter={StaticResource IntToRemove}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
                     <!--

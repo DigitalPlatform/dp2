@@ -221,7 +221,8 @@ namespace dp2SSL
 
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 
-            RfidManager.ListLocks += RfidManager_ListLocks;
+            // RfidManager.ListLocks += RfidManager_ListLocks;
+            App.CurrentApp.OpenCountChanged += CurrentApp_OpenCountChanged;
 
             RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
@@ -261,10 +262,22 @@ namespace dp2SSL
             await InitialEntities();
 
             // 迫使图书盘点暂停(如果门是全部关闭的话)
-            SetOpenCount(_openCount);
+            // SetOpenCount(_openCount);
+
+            this.doorControl.InitializeButtons(App.CurrentApp.ShelfCfgDom, App.CurrentApp.Doors);
         }
 
+        private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
+        {
+            // 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
+            if (e.OldCount > 0 && e.NewCount == 0)
+            {
+                SubmitCheckInOut();
+                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+            }
+        }
 
+#if NO
         int _openCount = 0; // 当前处于打开状态的门的个数
 
         private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
@@ -279,7 +292,7 @@ namespace dp2SSL
                 {
                     if (state.State == "open")
                         count++;
-                    var result = SetLockState(state);
+                    var result = DoorItem.SetLockState(_doors, state);
                     if (result.LockName != null && result.OldState != null && result.NewState != null)
                     {
                         if (result.NewState != result.OldState)
@@ -341,12 +354,14 @@ namespace dp2SSL
 
             }
         }
+#endif
 
-
+        /*
         LockChanged SetLockState(LockState state)
         {
             return this.doorControl.SetLockState(state);
         }
+        */
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
@@ -357,7 +372,8 @@ namespace dp2SSL
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
 
-            RfidManager.ListLocks -= RfidManager_ListLocks;
+            // RfidManager.ListLocks -= RfidManager_ListLocks;
+            App.CurrentApp.OpenCountChanged -= CurrentApp_OpenCountChanged;
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
@@ -801,9 +817,10 @@ namespace dp2SSL
             if (remove_count > 0)
             {
                 // App.CurrentApp.SpeakSequence($"取出 {remove_count} 本");
-                _speakList.Speak("取出 {0} 本", 
+                _speakList.Speak("取出 {0} 本",
                     remove_count,
-                    (s)=> {
+                    (s) =>
+                    {
                         App.CurrentApp.SpeakSequence(s);
                     });
             }
@@ -812,14 +829,15 @@ namespace dp2SSL
                 // App.CurrentApp.SpeakSequence($"放入 {add_count} 本");
                 _speakList.Speak("放入 {0} 本",
     add_count,
-    (s) => {
+    (s) =>
+    {
         App.CurrentApp.SpeakSequence(s);
     });
             }
 
             if (changed == true)
             {
-                this.doorControl.DisplayCount(_all, _adds, _removes);
+                DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
             }
         }
 
@@ -863,8 +881,7 @@ namespace dp2SSL
                     _all.Add(NewEntity(tag));
                 }
 
-                this.doorControl.DisplayCount(_all, _adds, _removes);
-
+                DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
 
                 TryReturn(progress, _all);
             }
@@ -1773,8 +1790,7 @@ namespace dp2SSL
                     DisplayError(ref progress, message, backColor);
 
                     // 重新装载读者信息和显示
-                    // var task = FillPatronDetail(true);
-                    this.doorControl.DisplayCount(_all, _adds, _removes);
+                    DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
 
                     App.CurrentApp.Speak(speak);
                 }

@@ -154,6 +154,7 @@
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="Converter\CountToVisibilityConverter.cs" />
     <Compile Include="Converter\IntToAdd.cs" />
+    <Compile Include="Converter\StateToBackConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="Converter\StringToOpacityConverter.cs" />
     <Compile Include="Dialog\InOutWindow.xaml.cs">
@@ -176,6 +177,7 @@
     </Compile>
     <Compile Include="LibraryChannelUtil.cs" />
     <Compile Include="ManagerBase.cs" />
+    <Compile Include="Models\Door.cs" />
     <Compile Include="Models\SpeakList.cs" />
     <Compile Include="Models\TagList.cs" />
     <Compile Include="Page\PageError.xaml.cs">

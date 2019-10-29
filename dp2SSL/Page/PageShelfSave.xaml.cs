@@ -131,7 +131,7 @@ namespace dp2SSL
                 this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
             }
 
-            RfidManager.LockCommands = DoorControl.GetLockCommands();
+            // RfidManager.LockCommands = DoorControl.GetLockCommands();
 
             await Fill(new CancellationToken());
         }
@@ -143,14 +143,16 @@ namespace dp2SSL
 
             foreach(var state in e.Result.States)
             {
-                SetLockState(state);
+                // SetLockState(state);
             }
         }
 
+        /*
         void SetLockState(LockState state)
         {
             this.doorControl.SetLockState(state);
         }
+        */
 
         private void PageShelf_Unloaded(object sender, RoutedEventArgs e)
         {
