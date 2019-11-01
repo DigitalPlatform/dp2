@@ -28,8 +28,9 @@ namespace dp2SSL
     /// <summary>
     /// PageMenu.xaml 的交互逻辑
     /// </summary>
-    public partial class PageMenu : Page
+    public partial class PageMenu : Page, IDisposable
     {
+        public static PageMenu MenuPage = null;
 
         public PageMenu()
         {
@@ -42,6 +43,13 @@ namespace dp2SSL
             this.DataContext = App.CurrentApp;
 
             InitWallpaper();
+
+            MenuPage = this;
+        }
+
+        public void Dispose()
+        {
+            DeleteTempFiles();
         }
 
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
@@ -108,7 +116,6 @@ namespace dp2SSL
 
         private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
         {
-            DeleteTempFiles();
         }
 
         #region Wallpaper & tempo files
@@ -173,7 +180,7 @@ namespace dp2SSL
 #endif
         static PageBorrow _pageBorrow = null;
 
-        void Navigate(string buttons)
+        void NavigatePageBorrow(string buttons)
         {
             if (_pageBorrow == null)
                 _pageBorrow = new PageBorrow();
@@ -184,7 +191,7 @@ namespace dp2SSL
 
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
-            Navigate("borrow");
+            NavigatePageBorrow("borrow");
 
 #if NO
             Window mainWindow = Application.Current.MainWindow;
@@ -211,14 +218,14 @@ namespace dp2SSL
 
         private void ReturnButton_Click(object sender, RoutedEventArgs e)
         {
-            Navigate("return");
+            NavigatePageBorrow("return");
 
             // this.NavigationService.Navigate(new PageBorrow("return"));
         }
 
         private void RenewBotton_Click(object sender, RoutedEventArgs e)
         {
-            Navigate("renew");
+            NavigatePageBorrow("renew");
 
             // this.NavigationService.Navigate(new PageBorrow("renew"));
         }
@@ -235,7 +242,7 @@ namespace dp2SSL
 
         private void RegisterFace_Click(object sender, RoutedEventArgs e)
         {
-            Navigate("registerFace,deleteFace");
+            NavigatePageBorrow("registerFace,deleteFace");
 
             // this.NavigationService.Navigate(new PageBorrow("registerFace,deleteFace"));
         }
@@ -244,6 +251,8 @@ namespace dp2SSL
         {
             this.NavigationService.Navigate(new PageShelf());
         }
+
+
 
 #if NO
         // https://blog.csdn.net/m0_37682004/article/details/82314055

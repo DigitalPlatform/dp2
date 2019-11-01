@@ -257,6 +257,7 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
 
+            // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
             await InitialShelfEntities();
 
             // 迫使图书盘点暂停(如果门是全部关闭的话)
@@ -947,7 +948,7 @@ namespace dp2SSL
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageMenu());
+            this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)

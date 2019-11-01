@@ -1447,6 +1447,11 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2019/10/31
+            // 拼音中“女”为 nu^，而复分表用了 v 表示 u^。需要预处理一下
+            strFirstPinyin = strFirstPinyin.Replace("u^", "v");
+
+
             if (strFirstPinyin.Length == 0)
             {
                 strError = "strFirstPinyin内容不能为空";

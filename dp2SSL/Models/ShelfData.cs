@@ -345,7 +345,6 @@ namespace dp2SSL
             if (ShelfData.FirstInitialized == false)
                 return;
 
-
             // 开门状态下，动态信息暂时不要合并
             bool changed = false;
 
