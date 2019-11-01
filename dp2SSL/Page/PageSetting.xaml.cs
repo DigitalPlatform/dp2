@@ -347,7 +347,7 @@ namespace dp2SSL
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageMenu());
+            this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
         // 首次设置密码

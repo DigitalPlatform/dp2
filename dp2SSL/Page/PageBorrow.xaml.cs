@@ -1956,7 +1956,7 @@ out string strError);
 
         private void GoHome_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageMenu());
+            this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
         #region patron 分类报错机制
