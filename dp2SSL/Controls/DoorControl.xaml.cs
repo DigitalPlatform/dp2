@@ -106,6 +106,10 @@ namespace dp2SSL
             */
 
             XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
+
+            this.grid.ColumnDefinitions.Clear();
+            this.grid.RowDefinitions.Clear();
+
             // int shelf_width = total_width / Math.Max(1, shelfs.Count);
             // int level_height = 100;
             bool rowDefinitionCreated = false;
@@ -205,8 +209,20 @@ namespace dp2SSL
             this.grid.Children.Add(button);
             */
 
+            InitialSize();
+        }
+
+        public void InitialSize()
+        {
+            if (this.Visibility != Visibility.Visible)
+                return;
+
+            Debug.Assert(this.Visibility == Visibility.Visible, "");
+
+            double w1 = this.ActualWidth;
+            double w2 = this.Width;
             SetSize(new Size(this.ActualWidth - (this.Padding.Left + this.Padding.Right),
-    this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
+this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
         }
 
         /*
