@@ -28,7 +28,7 @@ namespace dp2SSL
     /// <summary>
     /// PageMenu.xaml 的交互逻辑
     /// </summary>
-    public partial class PageMenu : Page, IDisposable
+    public partial class PageMenu : Page
     {
         public static PageMenu MenuPage = null;
 
@@ -47,12 +47,33 @@ namespace dp2SSL
             MenuPage = this;
         }
 
-        public void Dispose()
+        ~PageMenu()
         {
             DeleteTempFiles();
         }
 
+        bool _initialized = false;
+
         private void PageMenu_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 只初始化一次。
+            // 但初始化必须放在 _loaded 事件里面，因为只有这里才能得到 Application.Current.MainWindow。构造函数那里时机偏早了，MainWindow 还没有来得及创建
+            if (_initialized == false)
+            {
+                Initial();
+                _initialized = true;
+
+                // 初始化智能书柜
+                // 过程中需要检查门锁是否关上，如果没有关上要警告，只有关上了才能进入正常的菜单画面
+                NavigatePageShelf("initial");
+            }
+        }
+
+        private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
+        {
+        }
+
+        void Initial()
         {
             Window window = Application.Current.MainWindow;
 
@@ -112,10 +133,7 @@ namespace dp2SSL
                 this.returnButton.Visibility = Visibility.Collapsed;
                 this.renewBotton.Visibility = Visibility.Collapsed;
             }
-        }
 
-        private void PageMenu_Unloaded(object sender, RoutedEventArgs e)
-        {
         }
 
         #region Wallpaper & tempo files
@@ -189,6 +207,18 @@ namespace dp2SSL
             this.NavigationService.Navigate(_pageBorrow);
         }
 
+        static PageShelf _pageShelf = null;
+
+        void NavigatePageShelf(string mode)
+        {
+            if (_pageShelf == null)
+                _pageShelf = new PageShelf(mode);
+            else
+                _pageShelf.Mode = mode;
+
+            this.NavigationService.Navigate(_pageShelf);
+        }
+
         private void Button_Borrow_Click(object sender, RoutedEventArgs e)
         {
             NavigatePageBorrow("borrow");
@@ -249,7 +279,8 @@ namespace dp2SSL
 
         private void Shelf_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new PageShelf());
+            // this.NavigationService.Navigate(new PageShelf());
+            NavigatePageShelf("");  // 普通使用
         }
 
 

@@ -1,7 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.RFID;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.RFID;
+using DigitalPlatform.Text;
 
 namespace dp2SSL
 {
@@ -98,10 +99,16 @@ namespace dp2SSL
             }
         }
 
+        public delegate void Delegate_displayText(string text);
+        public delegate bool Delegate_cancelled();
+
+
         // 首次初始化智能书柜所需的标签相关数据结构
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
-        public static async Task InitialShelfEntities()
+        public static async Task InitialShelfEntities(
+            Delegate_displayText func_display,
+            Delegate_cancelled func_cancelled)
         {
             /*
             ProgressWindow progress = null;
@@ -123,16 +130,60 @@ namespace dp2SSL
             try
             {
                 // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
-                await Task.Run(() =>
+                func_display("等待读卡器就绪 ...");
+                bool ret = await Task.Run(() =>
                 {
                     // TODO: 是否一开始主动把 RfidManager ReaderNameList 设置为 "*"?
                     while (true)
                     {
                         if (TagList.DataReady == true)
                             return true;
+                        if (func_cancelled() == true)
+                            return false;
                         Thread.Sleep(100);
                     }
                 });
+
+                if (ret == false)
+                    return;
+
+                // 使用全部读卡器、全部天线进行初始化。即便门是全部关闭的(注：一般情况下，当门关闭的时候图书读卡器是暂停盘点的)
+                func_display("启用全部读卡器 ...");
+                ret = await Task.Run(() =>
+                {
+                    // 使用全部读卡器，全部天线
+                    RfidManager.ReaderNameList = "*";
+                    TagList.DataReady = false;
+                    RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
+                    while (true)
+                    {
+                        if (TagList.DataReady == true)
+                            return true;
+                        if (func_cancelled() == true)
+                            return false;
+                        Thread.Sleep(100);
+                    }
+                });
+
+                if (ret == false)
+                    return;
+
+                // TODO: 显示“等待锁控就绪 ...”
+                func_display("等待锁控就绪 ...");
+                ret = await Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        if (App.CurrentApp.OpeningDoorCount != -1)
+                            return true;
+                        if (func_cancelled() == true)
+                            return false;
+                        Thread.Sleep(100);
+                    }
+                });
+
+                if (ret == false)
+                    return;
 
                 _all.Clear();
                 var books = TagList.Books;
@@ -160,8 +211,6 @@ namespace dp2SSL
                 this.doorControl.Visibility = Visibility.Visible;
                 */
             }
-
-
         }
 
         static Entity NewEntity(TagAndData tag)
