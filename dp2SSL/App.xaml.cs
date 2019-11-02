@@ -251,15 +251,15 @@ namespace dp2SSL
 
 
         // 当前处于打开状态的门的个数
-        public int OpenCount
+        public int OpeningDoorCount
         {
             get
             {
-                return _openCount;
+                return _openingDoorCount;
             }
         }
 
-        int _openCount = 0; // 当前处于打开状态的门的个数
+        int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
 
         private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
         {
@@ -287,7 +287,7 @@ namespace dp2SSL
                     }
                 }
 
-                if (_openCount > 0 && count == 0)
+                if (_openingDoorCount > 0 && count == 0)
                     triggerAllClosed = true;
 
                 SetOpenCount(count);
@@ -306,12 +306,12 @@ namespace dp2SSL
         // 设置打开门数量
         void SetOpenCount(int count)
         {
-            int oldCount = _openCount;
+            int oldCount = _openingDoorCount;
 
-            _openCount = count;
+            _openingDoorCount = count;
 
             // 打开门的数量发生变化
-            if (oldCount != _openCount)
+            if (oldCount != _openingDoorCount)
             {
                 OpenCountChanged?.Invoke(this, new OpenCountChangedEventArgs
                 {
@@ -319,7 +319,7 @@ namespace dp2SSL
                     NewCount = count
                 });
 
-                if (_openCount == 0)
+                if (_openingDoorCount == 0)
                 {
                     // 关闭图书读卡器(只使用读者证读卡器)
                     if (string.IsNullOrEmpty(_patronReaderName) == false

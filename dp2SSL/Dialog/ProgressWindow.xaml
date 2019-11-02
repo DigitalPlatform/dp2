@@ -33,7 +33,7 @@
                     Width="120" Height="60" 
                     FontSize="30" FontWeight="ExtraBold" 
                     Foreground="White" 
-                     Click="OkButton_Click">关闭</Button>
+                    Click="OkButton_Click">关闭</Button>
         </Grid>
     </Border>
 </Window>

@@ -20,6 +20,7 @@ using System.IO;
 
 using dp2SSL.Models;
 using static dp2SSL.LibraryChannelUtil;
+using dp2SSL.Dialog;
 
 using DigitalPlatform;
 using DigitalPlatform.Core;
@@ -29,7 +30,6 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
-using dp2SSL.Dialog;
 
 namespace dp2SSL
 {
@@ -44,8 +44,7 @@ namespace dp2SSL
         // EntityCollection _entities = new EntityCollection();
         Patron _patron = new Patron();
 
-
-
+        public string Mode { get; set; }    // 运行模式。空/initial
 
         public PageShelf()
         {
@@ -75,6 +74,73 @@ namespace dp2SSL
 
             // this.error.Text = "test";
         }
+
+        // parameters:
+        //      mode    空字符串或者“initial”
+        public PageShelf(string mode) : this()
+        {
+            this.Mode = mode;
+        }
+
+        private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
+        {
+            // _firstInitial = false;
+
+            FingerprintManager.SetError += FingerprintManager_SetError;
+            FingerprintManager.Touched += FingerprintManager_Touched;
+
+            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
+
+            // RfidManager.ListLocks += RfidManager_ListLocks;
+            App.CurrentApp.OpenCountChanged += CurrentApp_OpenCountChanged;
+
+            RfidManager.ClearCache();
+            // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
+            if (string.IsNullOrEmpty(RfidManager.Url))
+                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
+
+            _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
+            _adorner = new LayoutAdorner(this);
+
+            {
+                List<string> style = new List<string>();
+                if (string.IsNullOrEmpty(App.RfidUrl) == false)
+                    style.Add("rfid");
+                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
+                    style.Add("fingerprint");
+                if (string.IsNullOrEmpty(App.FaceUrl) == false)
+                    style.Add("face");
+                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
+            }
+
+            /*
+            try
+            {
+                RfidManager.LockCommands = DoorControl.GetLockCommands();
+            }
+            catch (Exception ex)
+            {
+                this.SetGlobalError("cfg", $"获得门锁命令时出错:{ex.Message}");
+            }
+            */
+
+            // 要在初始化以前设定好
+            // RfidManager.AntennaList = GetAntennaList();
+
+            // _patronReaderName = GetPatronReaderName();
+
+            if (Mode == "initial")
+            {
+                // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
+                await InitialShelfEntities();
+
+                // 迫使图书盘点暂停(如果门是全部关闭的话)
+                // SetOpenCount(_openCount);
+
+                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+            }
+        }
+
 
         // 当前读者卡状态是否 OK?
         bool IsPatronOK(string action, out string message)
@@ -121,6 +187,18 @@ namespace dp2SSL
                 temp = null;
             }));
             progress = null;
+        }
+
+        void DisplayMessage(ProgressWindow progress,
+            string message,
+            string color = "")
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress.MessageText = message;
+                if (string.IsNullOrEmpty(color) == false)
+                    progress.BackColor = color;
+            }));
         }
 
         List<Window> _dialogs = new List<Window>();
@@ -210,61 +288,6 @@ namespace dp2SSL
             }
         }
 
-        private async void PageShelf_Loaded(object sender, RoutedEventArgs e)
-        {
-            // _firstInitial = false;
-
-            FingerprintManager.SetError += FingerprintManager_SetError;
-            FingerprintManager.Touched += FingerprintManager_Touched;
-
-            App.CurrentApp.TagChanged += CurrentApp_TagChanged;
-
-            // RfidManager.ListLocks += RfidManager_ListLocks;
-            App.CurrentApp.OpenCountChanged += CurrentApp_OpenCountChanged;
-
-            RfidManager.ClearCache();
-            // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
-            if (string.IsNullOrEmpty(RfidManager.Url))
-                this.SetGlobalError("rfid", "尚未配置 RFID 中心 URL");
-
-            _layer = AdornerLayer.GetAdornerLayer(this.mainGrid);
-            _adorner = new LayoutAdorner(this);
-
-            {
-                List<string> style = new List<string>();
-                if (string.IsNullOrEmpty(App.RfidUrl) == false)
-                    style.Add("rfid");
-                if (string.IsNullOrEmpty(App.FingerprintUrl) == false)
-                    style.Add("fingerprint");
-                if (string.IsNullOrEmpty(App.FaceUrl) == false)
-                    style.Add("face");
-                this.patronControl.SetStartMessage(StringUtil.MakePathList(style));
-            }
-
-            /*
-            try
-            {
-                RfidManager.LockCommands = DoorControl.GetLockCommands();
-            }
-            catch (Exception ex)
-            {
-                this.SetGlobalError("cfg", $"获得门锁命令时出错:{ex.Message}");
-            }
-            */
-
-            // 要在初始化以前设定好
-            // RfidManager.AntennaList = GetAntennaList();
-
-            // _patronReaderName = GetPatronReaderName();
-
-            // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
-            await InitialShelfEntities();
-
-            // 迫使图书盘点暂停(如果门是全部关闭的话)
-            // SetOpenCount(_openCount);
-
-            this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
-        }
 
         private void CurrentApp_OpenCountChanged(object sender, OpenCountChangedEventArgs e)
         {
@@ -609,6 +632,7 @@ namespace dp2SSL
             await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
         }
 
+        bool _initialCancelled = false;
 
         // 初始化开始前，要先把 RfidManager.ReaderNameList 设置为 "*"
         // 初始化完成前，先不要允许(开关门变化导致)修改 RfidManager.ReaderNameList
@@ -617,6 +641,8 @@ namespace dp2SSL
             if (ShelfData.FirstInitialized)
                 return;
 
+            _initialCancelled = false;
+
             ProgressWindow progress = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -624,9 +650,10 @@ namespace dp2SSL
                 progress.MessageText = "正在初始化图书信息，请稍候 ...";
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                progress.Closed += Progress_Closed;
+                progress.Closed += Progress_Cancelled;
                 //progress.Width = 700;
                 //progress.Height = 500;
+                progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
             }));
@@ -634,7 +661,18 @@ namespace dp2SSL
 
             try
             {
-                await ShelfData.InitialShelfEntities();
+                await ShelfData.InitialShelfEntities(
+                    (s) =>
+                    {
+                        DisplayMessage(progress, s, "green");
+                    },
+                    () =>
+                    {
+                        return _initialCancelled;
+                    });
+
+                if (_initialCancelled)
+                    return;
 
 #if NO
                 // TODO: 出现“正在初始化”的对话框。另外需要注意如果 DataReady 信号永远来不了怎么办
@@ -660,21 +698,79 @@ namespace dp2SSL
                 // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
                 ShelfData.RefreshCount();
 #endif
+                // 检查门是否为关闭状态？
+                // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
+                await Task.Run(() =>
+                {
+                    while (App.CurrentApp.OpeningDoorCount > 0)
+                    {
+                        DisplayMessage(progress, "请关闭全部柜门", "yellow");
+                        Thread.Sleep(1000);
+                    }
+                });
+
+                if (_initialCancelled)
+                    return;
+
 
                 TryReturn(progress, ShelfData.All);
+
+                if (_initialCancelled)
+                    return;
+
+                if (_initialCancelled == false)
+                {
+                    this.doorControl.Visibility = Visibility.Visible;
+                }
             }
             finally
             {
                 // _firstInitial = true;   // 第一次初始化已经完成
+                RemoveLayer();
 
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                if (_initialCancelled == false)
                 {
-                    if (progress != null)
-                        progress.Close();
-                }));
+                    // PageMenu.MenuPage.shelf.Visibility = Visibility.Visible;
 
-                this.doorControl.Visibility = Visibility.Visible;
+                    progress.Closed -= Progress_Cancelled;
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        if (progress != null)
+                            progress.Close();
+                    }));
+                }
+                else
+                {
+                    // PageMenu.MenuPage.shelf.Visibility = Visibility.Collapsed;
+
+                    // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
+
+                    ProgressWindow error = null;
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        error = new ProgressWindow();
+                        error.Owner = Application.Current.MainWindow;
+                        error.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        error.Closed += Error_Closed;
+                        error.Show();
+                        AddLayer();
+                    }));
+                    DisplayError(ref error, "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                }
             }
+
+            // TODO: 初始化中断后，是否允许切换到菜单和设置画面？(只是不让进入书架画面)
+        }
+
+        private void Error_Closed(object sender, EventArgs e)
+        {
+            RemoveLayer();
+        }
+
+        // 初始化被中途取消
+        private void Progress_Cancelled(object sender, EventArgs e)
+        {
+            _initialCancelled = true;
         }
 
         // 刷新读者信息
@@ -841,7 +937,7 @@ namespace dp2SSL
             }
         }
 
-#region patron 分类报错机制
+        #region patron 分类报错机制
 
         // 错误类别 --> 错误字符串
         // 错误类别有：rfid fingerprint getreaderinfo
@@ -853,7 +949,7 @@ namespace dp2SSL
             _patronErrorTable.SetError(type, error);
         }
 
-#endregion
+        #endregion
 
         bool _visiblityChanged = false;
 
@@ -1609,7 +1705,7 @@ namespace dp2SSL
             PatronClear(true);
         }
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1761,6 +1857,6 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
     }
 }

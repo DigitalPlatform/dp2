@@ -52,6 +52,10 @@ namespace DigitalPlatform.RFID
             {
                 return _dataReady;
             }
+            set
+            {
+                _dataReady = value;
+            }
         }
 
         static void ClearTagInfo(string uid)

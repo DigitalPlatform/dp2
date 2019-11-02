@@ -117,6 +117,17 @@ namespace DigitalPlatform.RFID
         */
         public static List<LockCommand> LockCommands = null;
 
+        static bool _lockReady = false;
+
+        // 门锁状态就绪
+        public static bool LockReady
+        {
+            get
+            {
+                return _lockReady;
+            }
+        }
+
         // 启动后台任务。
         // 后台任务负责监视 RFID 中心的标签
         public static void Start(
@@ -211,6 +222,9 @@ new SetErrorEventArgs
                             Result = lock_result
                         });
                     }
+
+                    // 门锁状态就绪
+                    _lockReady = true;
                 }
             },
             token);
