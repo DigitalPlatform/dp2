@@ -129,7 +129,7 @@ namespace dp2SSL
 
             // _patronReaderName = GetPatronReaderName();
 
-            if (Mode == "initial")
+            if (Mode == "initial" || ShelfData.FirstInitialized == false)
             {
                 // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
                 await InitialShelfEntities();
@@ -137,7 +137,6 @@ namespace dp2SSL
                 // 迫使图书盘点暂停(如果门是全部关闭的话)
                 // SetOpenCount(_openCount);
 
-                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
             }
         }
 
@@ -630,6 +629,31 @@ namespace dp2SSL
             // TODO: 这里要精确返回读者卡数量变动情况，以便“取出”语音提示更准确
 
             await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
+
+            // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
+            if (this.Mode == "initial")
+            {
+                List<Entity> adds = new List<Entity>(ShelfData.Adds);
+                foreach (var entity in adds)
+                {
+                    ShelfData.Add(ShelfData.All, entity);
+
+                    ShelfData.Remove(ShelfData.Adds, entity);
+                    ShelfData.Remove(ShelfData.Removes, entity);
+                }
+
+                List<Entity> removes = new List<Entity>(ShelfData.Removes);
+                foreach (var entity in removes)
+                {
+                    ShelfData.Remove(ShelfData.All, entity);
+
+                    ShelfData.Remove(ShelfData.Adds, entity);
+                    ShelfData.Remove(ShelfData.Removes, entity);
+                }
+
+                ShelfData.RefreshCount();
+            }
+
         }
 
         bool _initialCancelled = false;
@@ -641,6 +665,7 @@ namespace dp2SSL
             if (ShelfData.FirstInitialized)
                 return;
 
+            this.doorControl.Visibility = Visibility.Collapsed;
             _initialCancelled = false;
 
             ProgressWindow progress = null;
@@ -698,13 +723,19 @@ namespace dp2SSL
                 // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
                 ShelfData.RefreshCount();
 #endif
+                // 把门显示出来。因为此时需要看到是否关门的状态
+                this.doorControl.Visibility = Visibility.Visible;
+                this.doorControl.InitializeButtons(ShelfData.ShelfCfgDom, ShelfData.Doors);
+
                 // 检查门是否为关闭状态？
                 // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
                 await Task.Run(() =>
                 {
                     while (App.CurrentApp.OpeningDoorCount > 0)
                     {
-                        DisplayMessage(progress, "请关闭全部柜门", "yellow");
+                        if (_initialCancelled)
+                            break;
+                        DisplayMessage(progress, "请关闭全部柜门，以完成初始化", "yellow");
                         Thread.Sleep(1000);
                     }
                 });
@@ -712,16 +743,17 @@ namespace dp2SSL
                 if (_initialCancelled)
                     return;
 
-
                 TryReturn(progress, ShelfData.All);
 
                 if (_initialCancelled)
                     return;
 
+                /*
                 if (_initialCancelled == false)
                 {
                     this.doorControl.Visibility = Visibility.Visible;
                 }
+                */
             }
             finally
             {
@@ -738,13 +770,19 @@ namespace dp2SSL
                         if (progress != null)
                             progress.Close();
                     }));
+
+                    SetGlobalError("initial", null);
+                    this.Mode = ""; // 从初始化模式转为普通模式
                 }
                 else
                 {
+                    ShelfData.FirstInitialized = false;
+
                     // PageMenu.MenuPage.shelf.Visibility = Visibility.Collapsed;
 
                     // TODO: 页面中央大字显示“书柜初始化失败”。重新进入页面时候应该自动重试初始化
-
+                    SetGlobalError("initial", "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                    /*
                     ProgressWindow error = null;
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
@@ -756,6 +794,7 @@ namespace dp2SSL
                         AddLayer();
                     }));
                     DisplayError(ref error, "智能书柜初始化失败。请检查读卡器和门锁参数配置，重新进行初始化 ...");
+                    */
                 }
             }
 

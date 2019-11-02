@@ -97,6 +97,10 @@ namespace dp2SSL
             {
                 return _firstInitial;
             }
+            set
+            {
+                _firstInitial = value;
+            }
         }
 
         public delegate void Delegate_displayText(string text);
@@ -196,10 +200,10 @@ namespace dp2SSL
                 RefreshCount();
 
                 // TryReturn(progress, _all);
+                _firstInitial = true;   // 第一次初始化已经完成
             }
             finally
             {
-                _firstInitial = true;   // 第一次初始化已经完成
 
                 /*
                 Application.Current.Dispatcher.Invoke(new Action(() =>
