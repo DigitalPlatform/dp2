@@ -626,7 +626,6 @@ namespace dp2SSL
         {
             // 读者。不再精细的进行增删改跟踪操作，而是笼统地看 TagList.Patrons 集合即可
             var task = RefreshPatrons();
-            // TODO: 这里要精确返回读者卡数量变动情况，以便“取出”语音提示更准确
 
             await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
 
@@ -653,7 +652,6 @@ namespace dp2SSL
 
                 ShelfData.RefreshCount();
             }
-
         }
 
         bool _initialCancelled = false;
@@ -742,6 +740,9 @@ namespace dp2SSL
 
                 if (_initialCancelled)
                     return;
+
+                // 此时门是关闭状态。让读卡器切换到节省盘点状态
+                App.CurrentApp.RefreshReaderNameList();
 
                 TryReturn(progress, ShelfData.All);
 

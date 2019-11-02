@@ -319,24 +319,30 @@ namespace dp2SSL
                     NewCount = count
                 });
 
-                if (_openingDoorCount == 0)
+                // 
+                RefreshReaderNameList();
+            }
+        }
+
+        public void RefreshReaderNameList()
+        {
+            if (_openingDoorCount == 0)
+            {
+                // 关闭图书读卡器(只使用读者证读卡器)
+                if (string.IsNullOrEmpty(_patronReaderName) == false
+                    && RfidManager.ReaderNameList != _patronReaderName)
                 {
-                    // 关闭图书读卡器(只使用读者证读卡器)
-                    if (string.IsNullOrEmpty(_patronReaderName) == false
-                        && RfidManager.ReaderNameList != _patronReaderName)
-                    {
-                        RfidManager.ReaderNameList = _patronReaderName;
-                        RfidManager.ClearCache();
-                    }
+                    RfidManager.ReaderNameList = _patronReaderName;
+                    RfidManager.ClearCache();
                 }
-                else
+            }
+            else
+            {
+                // 打开图书读卡器(同时也使用读者证读卡器)
+                if (RfidManager.ReaderNameList != "*")
                 {
-                    // 打开图书读卡器(同时也使用读者证读卡器)
-                    if (RfidManager.ReaderNameList != "*")
-                    {
-                        RfidManager.ReaderNameList = "*";
-                        RfidManager.ClearCache();
-                    }
+                    RfidManager.ReaderNameList = "*";
+                    RfidManager.ClearCache();
                 }
             }
         }

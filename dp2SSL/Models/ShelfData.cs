@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -9,8 +10,10 @@ using System.Windows;
 using System.Xml;
 
 using DigitalPlatform;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
+using static dp2SSL.LibraryChannelUtil;
 
 namespace dp2SSL
 {
@@ -137,7 +140,6 @@ namespace dp2SSL
                 func_display("等待读卡器就绪 ...");
                 bool ret = await Task.Run(() =>
                 {
-                    // TODO: 是否一开始主动把 RfidManager ReaderNameList 设置为 "*"?
                     while (true)
                     {
                         if (TagList.DataReady == true)
@@ -201,6 +203,13 @@ namespace dp2SSL
 
                 // TryReturn(progress, _all);
                 _firstInitial = true;   // 第一次初始化已经完成
+
+                var task = Task.Run(async () =>
+                {
+                    await FillBookFields(_all);
+                    await FillBookFields(_adds);
+                    await FillBookFields(_removes);
+                });
             }
             finally
             {
@@ -506,6 +515,80 @@ namespace dp2SSL
             {
                 // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
                 ShelfData.RefreshCount();
+            }
+
+            var task = Task.Run(async () =>
+            {
+                await FillBookFields(_all);
+                await FillBookFields(_adds);
+                await FillBookFields(_removes);
+            });
+        }
+
+        public static async Task FillBookFields(// BaseChannel<IRfid> channel,
+    List<Entity> entities)
+        {
+            try
+            {
+                foreach (Entity entity in entities)
+                {
+                    /*
+                    if (_cancel == null
+                        || _cancel.IsCancellationRequested)
+                        return;
+                        */
+                    if (entity.FillFinished == true)
+                        continue;
+
+                    //if (string.IsNullOrEmpty(entity.Error) == false)
+                    //    continue;
+
+                    // 获得 PII
+                    // 注：如果 PII 为空，文字中要填入 "(空)"
+                    if (string.IsNullOrEmpty(entity.PII))
+                    {
+                        if (entity.TagInfo == null)
+                            continue;
+
+                        Debug.Assert(entity.TagInfo != null);
+
+                        LogicChip chip = LogicChip.From(entity.TagInfo.Bytes,
+(int)entity.TagInfo.BlockSize,
+"" // tag.TagInfo.LockStatus
+);
+                        string pii = chip.FindElement(ElementOID.PII)?.Text;
+                        entity.PII = PageBorrow.GetCaption(pii);
+                    }
+
+                    // 获得 Title
+                    // 注：如果 Title 为空，文字中要填入 "(空)"
+                    if (string.IsNullOrEmpty(entity.Title)
+                        && string.IsNullOrEmpty(entity.PII) == false && entity.PII != "(空)")
+                    {
+                        GetEntityDataResult result = await
+                            Task<GetEntityDataResult>.Run(() =>
+                            {
+                                return GetEntityData(entity.PII);
+                            });
+                        if (result.Value == -1)
+                        {
+                            // TODO: 条码号没有找到的错误码要单独记下来
+                            entity.SetError(result.ErrorInfo);
+                            continue;
+                        }
+                        entity.Title = PageBorrow.GetCaption(result.Title);
+                        entity.SetData(result.ItemRecPath, result.ItemXml);
+                    }
+
+                    entity.SetError(null);
+                    entity.FillFinished = true;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //LibraryChannelManager.Log?.Error($"FillBookFields() 发生异常: {ExceptionUtil.GetExceptionText(ex)}");   // 2019/9/19
+                //SetGlobalError("current", $"FillBookFields() 发生异常(已写入错误日志): {ex.Message}"); // 2019/9/11 增加 FillBookFields() exception:
             }
         }
 
