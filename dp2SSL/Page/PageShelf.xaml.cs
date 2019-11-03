@@ -92,7 +92,7 @@ namespace dp2SSL
             App.CurrentApp.TagChanged += CurrentApp_TagChanged;
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
-            App.CurrentApp.OpenCountChanged += CurrentApp_OpenCountChanged;
+            ShelfData.OpenCountChanged += CurrentApp_OpenCountChanged;
 
             RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
@@ -394,7 +394,7 @@ namespace dp2SSL
             FingerprintManager.SetError -= FingerprintManager_SetError;
 
             // RfidManager.ListLocks -= RfidManager_ListLocks;
-            App.CurrentApp.OpenCountChanged -= CurrentApp_OpenCountChanged;
+            ShelfData.OpenCountChanged -= CurrentApp_OpenCountChanged;
 
             // 确保 page 关闭时对话框能自动关闭
             CloseDialogs();
@@ -729,7 +729,7 @@ namespace dp2SSL
                 // 注意 RfidManager 中门锁启动需要一定时间。状态可能是：尚未初始化/有门开着/门都关了
                 await Task.Run(() =>
                 {
-                    while (App.CurrentApp.OpeningDoorCount > 0)
+                    while (ShelfData.OpeningDoorCount > 0)
                     {
                         if (_initialCancelled)
                             break;
@@ -742,7 +742,7 @@ namespace dp2SSL
                     return;
 
                 // 此时门是关闭状态。让读卡器切换到节省盘点状态
-                App.CurrentApp.RefreshReaderNameList();
+                ShelfData.RefreshReaderNameList();
 
                 TryReturn(progress, ShelfData.All);
 

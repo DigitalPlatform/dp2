@@ -21,7 +21,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using DigitalPlatform.Text;
-using Newtonsoft.Json;
 
 namespace dp2SSL
 {
@@ -65,7 +64,8 @@ namespace dp2SSL
 
                 // 初始化智能书柜
                 // 过程中需要检查门锁是否关上，如果没有关上要警告，只有关上了才能进入正常的菜单画面
-                NavigatePageShelf("initial");
+                if (App.Function == "智能书柜")
+                    NavigatePageShelf("initial");
             }
         }
 
@@ -122,16 +122,16 @@ namespace dp2SSL
 
             // var task = SetWallPaper();
 
-            if (App.Function == "自助借还")
-            {
-                this.shelf.Visibility = Visibility.Collapsed;
-            }
-            else
+            if (App.Function == "智能书柜")
             {
                 this.shelf.Visibility = Visibility.Visible;
                 this.borrowButton.Visibility = Visibility.Collapsed;
                 this.returnButton.Visibility = Visibility.Collapsed;
                 this.renewBotton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.shelf.Visibility = Visibility.Collapsed;
             }
 
         }

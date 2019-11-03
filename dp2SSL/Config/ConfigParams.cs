@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 
 using DigitalPlatform.Core;
+using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
+using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace dp2SSL
 {
@@ -219,6 +221,7 @@ Order = 10,
 Name = "功能类型",
 Description = "dp2SSL 的功能类型"
 )]
+        [ItemsSource(typeof(FunctionItemsSource))]
         [Category("全局")]
         public string Function
         {
@@ -232,4 +235,6 @@ Description = "dp2SSL 的功能类型"
             }
         }
     }
+
+
 }
