@@ -29,10 +29,6 @@ namespace dp2SSL
     /// </summary>
     public partial class App : Application, INotifyPropertyChanged
     {
-        public event OpenCountChangedEventHandler OpenCountChanged;
-
-        // 读者证读卡器名字。在 shelf.xml 中配置
-        string _patronReaderName = "";
 
         // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
@@ -155,7 +151,7 @@ namespace dp2SSL
             RfidManager.SetError += RfidManager_SetError;
             RfidManager.ListTags += RfidManager_ListTags;
 
-            RfidManager.ListLocks += RfidManager_ListLocks;
+            RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
 
             RfidManager.Start(_cancelRefresh.Token);
 
@@ -175,177 +171,36 @@ namespace dp2SSL
 
             BeginCheckServerUID(_cancelRefresh.Token);
 
-            ShelfData.InitialDoors();
 
-            // 要在初始化以前设定好
-            RfidManager.AntennaList = GetAntennaList();
-            try
+            if (App.Function == "智能书柜")
             {
-                RfidManager.LockCommands = ShelfData.GetLockCommands();
-            }
-            catch (Exception ex)
-            {
-                this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
-            }
-            _patronReaderName = GetPatronReaderName();
-        }
+                /*
+                ShelfData.InitialDoors();
 
-        // 从 shelf.xml 配置文件中获得读者证读卡器名
-        public string GetPatronReaderName()
-        {
-            string cfg_filename = ShelfData.ShelfFilePath;
-            XmlDocument cfg_dom = new XmlDocument();
-            try
-            {
-                cfg_dom.Load(cfg_filename);
-
-                XmlElement patron = cfg_dom.DocumentElement.SelectSingleNode("patron") as XmlElement;
-                if (patron == null)
-                    return "";
-
-                return patron.GetAttribute("readerName");
-            }
-            catch (FileNotFoundException)
-            {
-                return "";
-            }
-            catch (Exception ex)
-            {
-                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
-                return "";
-            }
-        }
-
-        // 从 shelf.xml 配置文件中归纳出所有的天线编号
-        public string GetAntennaList()
-        {
-            List<string> antenna_list = new List<string>();
-            string cfg_filename = ShelfData.ShelfFilePath;
-            XmlDocument cfg_dom = new XmlDocument();
-            try
-            {
-                cfg_dom.Load(cfg_filename);
-
-                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
-                foreach (XmlElement door in doors)
+                // 要在初始化以前设定好
+                RfidManager.AntennaList = GetAntennaList();
+                try
                 {
-                    DoorItem.ParseLockString(door.GetAttribute("antenna"),
-                        out string readerName,
-                        out int antenna);
-                    antenna_list.Add(antenna.ToString());
+                    RfidManager.LockCommands = ShelfData.GetLockCommands();
                 }
-
-                StringUtil.RemoveDup(ref antenna_list, false);
-                return StringUtil.MakePathList(antenna_list, "|");
-            }
-            catch (FileNotFoundException)
-            {
-                return "";
-            }
-            catch (Exception ex)
-            {
-                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
-                return "";
-            }
-        }
-
-
-        // 当前处于打开状态的门的个数
-        public int OpeningDoorCount
-        {
-            get
-            {
-                return _openingDoorCount;
-            }
-        }
-
-        int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
-
-        private void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
-        {
-            if (e.Result.Value == -1)
-                return;
-
-            bool triggerAllClosed = false;
-            {
-                int count = 0;
-                foreach (var state in e.Result.States)
+                catch (Exception ex)
                 {
-                    if (state.State == "open")
-                        count++;
-
-                    var result = DoorItem.SetLockState(ShelfData.Doors, state);
-                    if (result.LockName != null && result.OldState != null && result.NewState != null)
-                    {
-                        if (result.NewState != result.OldState)
-                        {
-                            if (result.NewState == "open")
-                                App.CurrentApp.Speak($"{result.LockName} 打开");
-                            else
-                                App.CurrentApp.Speak($"{result.LockName} 关闭");
-                        }
-                    }
+                    this.SetError("cfg", $"获得门锁命令时出错:{ex.Message}");
                 }
-
-                if (_openingDoorCount > 0 && count == 0)
-                    triggerAllClosed = true;
-
-                SetOpenCount(count);
-            }
-
-            /*
-            // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
-            if (triggerAllClosed)
-            {
-                SubmitCheckInOut();
-                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
-            }
-            */
-        }
-
-        // 设置打开门数量
-        void SetOpenCount(int count)
-        {
-            int oldCount = _openingDoorCount;
-
-            _openingDoorCount = count;
-
-            // 打开门的数量发生变化
-            if (oldCount != _openingDoorCount)
-            {
-                OpenCountChanged?.Invoke(this, new OpenCountChangedEventArgs
+                _patronReaderName = GetPatronReaderName();
+                */
+                try
                 {
-                    OldCount = oldCount,
-                    NewCount = count
-                });
-
-                // 
-                RefreshReaderNameList();
-            }
-        }
-
-        public void RefreshReaderNameList()
-        {
-            if (_openingDoorCount == 0)
-            {
-                // 关闭图书读卡器(只使用读者证读卡器)
-                if (string.IsNullOrEmpty(_patronReaderName) == false
-                    && RfidManager.ReaderNameList != _patronReaderName)
-                {
-                    RfidManager.ReaderNameList = _patronReaderName;
-                    RfidManager.ClearCache();
+                    ShelfData.InitialShelf();
                 }
-            }
-            else
-            {
-                // 打开图书读卡器(同时也使用读者证读卡器)
-                if (RfidManager.ReaderNameList != "*")
+                catch(Exception ex)
                 {
-                    RfidManager.ReaderNameList = "*";
-                    RfidManager.ClearCache();
+                    this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
             }
         }
+
+
 
 
         // 单独的线程，监控 server UID 关系

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -22,6 +23,215 @@ namespace dp2SSL
     /// </summary>
     public static class ShelfData
     {
+        public static event OpenCountChangedEventHandler OpenCountChanged;
+
+        // 读者证读卡器名字。在 shelf.xml 中配置
+        static string _patronReaderName = "";
+
+        // 当前处于打开状态的门的个数
+        public static int OpeningDoorCount
+        {
+            get
+            {
+                return _openingDoorCount;
+            }
+        }
+
+        static int _openingDoorCount = -1; // 当前处于打开状态的门的个数。-1 表示个数尚未初始化
+
+
+        #region
+
+
+        public static void RfidManager_ListLocks(object sender, ListLocksEventArgs e)
+        {
+            if (e.Result.Value == -1)
+                return;
+
+            bool triggerAllClosed = false;
+            {
+                int count = 0;
+                foreach (var state in e.Result.States)
+                {
+                    if (state.State == "open")
+                        count++;
+
+                    var result = DoorItem.SetLockState(ShelfData.Doors, state);
+                    if (result.LockName != null && result.OldState != null && result.NewState != null)
+                    {
+                        if (result.NewState != result.OldState)
+                        {
+                            if (result.NewState == "open")
+                                App.CurrentApp.Speak($"{result.LockName} 打开");
+                            else
+                                App.CurrentApp.Speak($"{result.LockName} 关闭");
+                        }
+                    }
+                }
+
+                if (_openingDoorCount > 0 && count == 0)
+                    triggerAllClosed = true;
+
+                SetOpenCount(count);
+            }
+
+            /*
+            // TODO: 如果从有门打开的状态变为全部门都关闭的状态，要尝试提交一次出纳请求
+            if (triggerAllClosed)
+            {
+                SubmitCheckInOut();
+                PatronClear(false);  // 确保在没有可提交内容的情况下也自动清除读者信息
+            }
+            */
+        }
+
+        // 设置打开门数量
+        static void SetOpenCount(int count)
+        {
+            int oldCount = _openingDoorCount;
+
+            _openingDoorCount = count;
+
+            // 打开门的数量发生变化
+            if (oldCount != _openingDoorCount)
+            {
+                OpenCountChanged?.Invoke(null, new OpenCountChangedEventArgs
+                {
+                    OldCount = oldCount,
+                    NewCount = count
+                });
+
+                // 
+                RefreshReaderNameList();
+            }
+        }
+
+        public static void RefreshReaderNameList()
+        {
+            if (_openingDoorCount == 0)
+            {
+                // 关闭图书读卡器(只使用读者证读卡器)
+                if (string.IsNullOrEmpty(_patronReaderName) == false
+                    && RfidManager.ReaderNameList != _patronReaderName)
+                {
+                    RfidManager.ReaderNameList = _patronReaderName;
+                    RfidManager.ClearCache();
+                }
+            }
+            else
+            {
+                // 打开图书读卡器(同时也使用读者证读卡器)
+                if (RfidManager.ReaderNameList != "*")
+                {
+                    RfidManager.ReaderNameList = "*";
+                    RfidManager.ClearCache();
+                }
+            }
+        }
+
+        // exception:
+        //      可能会抛出异常
+        public static void InitialShelf()
+        {
+            ShelfData.InitialDoors();
+
+            // 要在初始化以前设定好
+            RfidManager.AntennaList = GetAntennaList();
+            RfidManager.LockCommands = ShelfData.GetLockCommands();
+            _patronReaderName = GetPatronReaderName();
+        }
+
+        // 从 shelf.xml 配置文件中获得读者证读卡器名
+        public static string GetPatronReaderName()
+        {
+            if (ShelfCfgDom == null)
+                return "";
+
+            XmlElement patron = ShelfCfgDom.DocumentElement.SelectSingleNode("patron") as XmlElement;
+            if (patron == null)
+                return "";
+
+            return patron.GetAttribute("readerName");
+
+
+            /*
+            string cfg_filename = ShelfData.ShelfFilePath;
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.Load(cfg_filename);
+
+                XmlElement patron = cfg_dom.DocumentElement.SelectSingleNode("patron") as XmlElement;
+                if (patron == null)
+                    return "";
+
+                return patron.GetAttribute("readerName");
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
+                return "";
+            }
+            */
+        }
+
+        // 从 shelf.xml 配置文件中归纳出所有的天线编号
+        public static string GetAntennaList()
+        {
+            if (ShelfCfgDom == null)
+                return "";
+
+            List<string> antenna_list = new List<string>();
+
+            XmlNodeList doors = ShelfCfgDom.DocumentElement.SelectNodes("shelf/door");
+            foreach (XmlElement door in doors)
+            {
+                DoorItem.ParseLockString(door.GetAttribute("antenna"),
+                    out string readerName,
+                    out int antenna);
+                antenna_list.Add(antenna.ToString());
+            }
+
+            StringUtil.RemoveDup(ref antenna_list, false);
+            return StringUtil.MakePathList(antenna_list, "|");
+
+            /*
+            List<string> antenna_list = new List<string>();
+            string cfg_filename = ShelfData.ShelfFilePath;
+            XmlDocument cfg_dom = new XmlDocument();
+            try
+            {
+                cfg_dom.Load(cfg_filename);
+
+                XmlNodeList doors = cfg_dom.DocumentElement.SelectNodes("shelf/door");
+                foreach (XmlElement door in doors)
+                {
+                    DoorItem.ParseLockString(door.GetAttribute("antenna"),
+                        out string readerName,
+                        out int antenna);
+                    antenna_list.Add(antenna.ToString());
+                }
+
+                StringUtil.RemoveDup(ref antenna_list, false);
+                return StringUtil.MakePathList(antenna_list, "|");
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                this.SetError("cfg", $"装载配置文件 shelf.xml 时出现异常: {ex.Message}");
+                return "";
+            }
+            */
+        }
+
+        #endregion
 
         static XmlDocument _shelfCfgDom = null;
 
@@ -180,7 +390,7 @@ namespace dp2SSL
                 {
                     while (true)
                     {
-                        if (App.CurrentApp.OpeningDoorCount != -1)
+                        if (OpeningDoorCount != -1)
                             return true;
                         if (func_cancelled() == true)
                             return false;
