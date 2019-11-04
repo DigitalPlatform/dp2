@@ -90,6 +90,22 @@ namespace dp2SSL
             }
         }
 
+        private int _errorCount;
+
+        // 有出错的册数
+        public int ErrorCount
+        {
+            get => _errorCount;
+            set
+            {
+                if (_errorCount != value)
+                {
+                    _errorCount = value;
+                    OnPropertyChanged("ErrorCount");
+                }
+            }
+        }
+
         private string _state;
 
         // 状态
@@ -265,11 +281,13 @@ namespace dp2SSL
         public static void DisplayCount(List<Entity> entities,
             List<Entity> adds,
             List<Entity> removes,
+            List<Entity> errors,
             List<DoorItem> _doors)
         {
             var all_table = Build(entities, _doors);
             var add_table = Build(adds, _doors);
             var remove_table = Build(removes, _doors);
+            var error_table = Build(errors, _doors);
 
             foreach (var door in _doors)
             {
@@ -285,11 +303,16 @@ namespace dp2SSL
                 if (remove == null)
                     remove = new List<Entity>();
 
+                List<Entity> error = (List<Entity>)error_table[door];
+                if (error == null)
+                    error = new List<Entity>();
+
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     door.Count = count.Count;
                     door.Add = add.Count;
                     door.Remove = remove.Count;
+                    door.ErrorCount = error.Count;
                     /*
                     TextBlock block = (TextBlock)door.Button.GetValue(Button.ContentProperty);
                     SetBlockText(block, null,

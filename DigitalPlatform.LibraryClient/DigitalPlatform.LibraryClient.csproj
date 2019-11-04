@@ -158,26 +158,6 @@
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ZhongcihaoSearchResult.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
-    <None Include="Service References\localhost\LibraryService.wsdl" />
-    <None Include="Service References\localhost\metadata.wsdl" />
-    <None Include="Service References\localhost\metadata.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata4.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\localhost\metadata5.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadataStorage Include="Service References\localhost\" />
@@ -189,6 +169,26 @@
     <None Include="Service References\localhost\configuration.svcinfo" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Service References\localhost\LibraryService1.wsdl" />
+    <None Include="Service References\localhost\metadata1.wsdl" />
+    <None Include="Service References\localhost\metadata6.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\localhost\metadata61.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\localhost\metadata62.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\localhost\metadata63.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\localhost\metadata64.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\localhost\metadata65.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\localhost\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>

@@ -452,7 +452,28 @@ namespace dp2SSL
 
         public static void RefreshCount()
         {
-            DoorItem.DisplayCount(_all, _adds, _removes, Doors);
+            List<Entity> errors = GetErrors(_all, _adds, _removes);
+            DoorItem.DisplayCount(_all, _adds, _removes, errors, Doors);
+        }
+
+        public static List<Entity> GetErrors(List<Entity> all,
+            List<Entity> adds,
+            List<Entity> removes)
+        {
+            List<Entity> errors = new List<Entity>();
+            List<Entity> list = new List<Entity>(all);
+            list.AddRange(adds);
+            list.AddRange(removes);
+            foreach (var entity in list)
+            {
+                if (entity.Error != null)
+                {
+                    if (errors.IndexOf(entity) == -1)
+                        errors.Add(entity);
+                }
+            }
+
+            return errors;
         }
 
         public static List<LockCommand> GetLockCommands()
@@ -740,6 +761,7 @@ namespace dp2SSL
         {
             try
             {
+                int error_count = 0;
                 foreach (Entity entity in entities)
                 {
                     /*
@@ -767,6 +789,16 @@ namespace dp2SSL
 "" // tag.TagInfo.LockStatus
 );
                         string pii = chip.FindElement(ElementOID.PII)?.Text;
+                        if (string.IsNullOrEmpty(pii))
+                        {
+                            // 报错
+                            App.CurrentApp.SpeakSequence($"警告：发现 PII 字段为空的标签");
+                            entity.SetError($"PII 字段为空");
+                            entity.FillFinished = true;
+                            error_count++;
+                            continue;
+                        }
+
                         entity.PII = PageBorrow.GetCaption(pii);
                     }
 
@@ -780,10 +812,18 @@ namespace dp2SSL
                             {
                                 return GetEntityData(entity.PII);
                             });
-                        if (result.Value == -1)
+                        if (result.Value == -1 || result.Value == 0)
                         {
                             // TODO: 条码号没有找到的错误码要单独记下来
+                            // 报错
+                            string error = $"警告：PII 为 {entity.PII} 的标签出错: {result.ErrorInfo}";
+                            if (result.ErrorCode == "NotFound")
+                                error = $"警告：PII 为 {entity.PII} 的图书没有找到记录";
+
+                            App.CurrentApp.SpeakSequence(error);
                             entity.SetError(result.ErrorInfo);
+                            entity.FillFinished = true;
+                            error_count++;
                             continue;
                         }
                         entity.Title = PageBorrow.GetCaption(result.Title);
@@ -794,6 +834,7 @@ namespace dp2SSL
                     entity.FillFinished = true;
                 }
 
+                ShelfData.RefreshCount();
             }
             catch (Exception ex)
             {

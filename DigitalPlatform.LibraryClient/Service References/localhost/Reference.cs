@@ -1999,6 +1999,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string LatestReturnTimeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] OverflowsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string PeriodField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
@@ -2072,6 +2075,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.LatestReturnTimeField, value) != true)) {
                     this.LatestReturnTimeField = value;
                     this.RaisePropertyChanged("LatestReturnTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] Overflows {
+            get {
+                return this.OverflowsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.OverflowsField, value) != true)) {
+                    this.OverflowsField = value;
+                    this.RaisePropertyChanged("Overflows");
                 }
             }
         }

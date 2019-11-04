@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://dp2003.com/dp2library/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:i0="http://dp2003.com/dp2library/rest" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="LibraryService" targetNamespace="http://dp2003.com/dp2library/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <wsp:Policy wsu:Id="NetTcpBinding_dp2library_policy">
-    <wsp:ExactlyOne>
-      <wsp:All>
-        <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
-        <wsaw:UsingAddressing />
-      </wsp:All>
-    </wsp:ExactlyOne>
-  </wsp:Policy>
-  <wsp:Policy wsu:Id="NetNamedPipeBinding_dp2library_policy">
-    <wsp:ExactlyOne>
-      <wsp:All>
-        <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
-        <wsaw:UsingAddressing />
-      </wsp:All>
-    </wsp:ExactlyOne>
-  </wsp:Policy>
   <wsp:Policy wsu:Id="WSHttpBinding_dp2library_policy">
     <wsp:ExactlyOne>
       <wsp:All>
@@ -4008,14 +3992,22 @@
       </wsp:All>
     </wsp:ExactlyOne>
   </wsp:Policy>
-  <wsdl:import namespace="http://dp2003.com/dp2library/rest" location="http://localhost:8001/dp2library/metadata?wsdl=wsdl0" />
+  <wsp:Policy wsu:Id="NetNamedPipeBinding_dp2library_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
+        <wsaw:UsingAddressing />
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:import namespace="http://dp2003.com/dp2library/rest" location="http://localhost:8001/dp2library/xe/metadata?wsdl=wsdl0" />
   <wsdl:types>
     <xsd:schema targetNamespace="http://dp2003.com/dp2library/Imports">
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/metadata?xsd=xsd2" namespace="http://dp2003.com/dp2kernel/" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
-      <xsd:import schemaLocation="http://localhost:8001/dp2library/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd0" namespace="http://dp2003.com/dp2library/" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd2" namespace="http://dp2003.com/dp2kernel/" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" />
+      <xsd:import schemaLocation="http://localhost:8001/dp2library/xe/metadata?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="dp2library_SetComments_InputMessage">
@@ -5046,1862 +5038,6 @@
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/dp2library/GetCommentsResponse" message="tns:dp2library_GetComments_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
-  <wsdl:binding name="NetTcpBinding_dp2library" type="tns:dp2library">
-    <wsp:PolicyReference URI="#NetTcpBinding_dp2library_policy" />
-    <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="SetComments">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetComments" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCommentInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCommentInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchCommentDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCommentDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchComment">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchComment" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetStatisInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetStatisInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ExistStatisInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ExistStatisInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetFile">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetFile" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListFile">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListFile" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="HitCounter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/HitCounter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchCharging">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCharging" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="BindPatron">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BindPatron" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Dir">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Dir" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetAuthorNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetAuthorNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetPinyin">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetPinyin" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetPinyin">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetPinyin" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetVersion">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetVersion" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Login">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Login" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Logout">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Logout" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetLang">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetLang" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Stop">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Stop" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-    </wsdl:operation>
-    <wsdl:operation name="VerifyReaderPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyReaderPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ChangeReaderPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeReaderPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="MoveReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="DevolveReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/DevolveReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchReader">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchReader" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetFriends">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetFriends" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOneDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Search">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Search" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRecord">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRecord" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBrowseRecords">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBrowseRecords" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListBiblioDbFroms">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListBiblioDbFroms" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchBiblio">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchBiblio" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CopyBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/CopyBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioInfos">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfos" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchItem">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItem" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetItemInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetItemInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchItemDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItemDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioSummary">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioSummary" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Borrow">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Borrow" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Return">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Return" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Reservation">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Reservation" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Amerce">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Amerce" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetIssues">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssues" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetIssues">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetIssues" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetIssueInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssueInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchIssueDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssueDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchIssue">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssue" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetEntities">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetEntities" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetEntities">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetEntities" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOrders">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrders" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetOrders">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOrders" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOrderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOrderDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrderDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOrder">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrder" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetClock">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetClock" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetClock">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetClock" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ResetPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ResetPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetValueTable">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetValueTable" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOperLogs">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLogs" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOperLog">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLog" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCalendar">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCalendar" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetCalendar">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetCalendar" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="BatchTask">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BatchTask" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ClearAllDbs">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ClearAllDbs" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ManageDatabase">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageDatabase" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetUser">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUser" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetUser">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUser" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetChannelInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetChannelInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ManageChannel">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageChannel" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ChangeUserPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeUserPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="VerifyBarcode">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyBarcode" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetSystemParameter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSystemParameter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetSystemParameter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetSystemParameter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="UrgentRecover">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/UrgentRecover" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="RepairBorrowInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="PassGate">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/PassGate" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Foregift">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Foregift" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Hire">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Hire" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Settlement">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Settlement" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOneClassCallNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCallNumberSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOneClassTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetOneClassTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchUsedZhongcihao">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetZhongcihaoTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetDupSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListDupProjectInfos">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetUtilInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUtilInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetUtilInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUtilInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/WriteRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetComments">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetComments" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
-  <wsdl:binding name="NetNamedPipeBinding_dp2library" type="tns:dp2library">
-    <wsp:PolicyReference URI="#NetNamedPipeBinding_dp2library_policy" />
-    <soap12:binding transport="http://schemas.microsoft.com/soap/named-pipe" />
-    <wsdl:operation name="SetComments">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetComments" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCommentInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCommentInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchCommentDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCommentDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchComment">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchComment" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetMessage">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetMessage" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetStatisInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetStatisInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ExistStatisInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ExistStatisInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetFile">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetFile" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListFile">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListFile" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="HitCounter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/HitCounter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchCharging">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCharging" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="BindPatron">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BindPatron" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Dir">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Dir" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetAuthorNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetAuthorNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetPinyin">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetPinyin" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetPinyin">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetPinyin" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetVersion">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetVersion" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Login">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Login" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Logout">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Logout" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetLang">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetLang" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Stop">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Stop" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-    </wsdl:operation>
-    <wsdl:operation name="VerifyReaderPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyReaderPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ChangeReaderPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeReaderPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="MoveReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="DevolveReaderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/DevolveReaderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchReader">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchReader" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetFriends">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetFriends" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOneDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Search">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Search" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRecord">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRecord" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBrowseRecords">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBrowseRecords" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListBiblioDbFroms">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListBiblioDbFroms" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchBiblio">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchBiblio" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CopyBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/CopyBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioInfos">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfos" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchItem">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItem" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetItemInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetItemInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchItemDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItemDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBiblioSummary">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioSummary" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Borrow">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Borrow" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Return">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Return" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Reservation">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Reservation" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Amerce">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Amerce" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetIssues">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssues" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetIssues">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetIssues" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetIssueInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssueInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchIssueDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssueDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchIssue">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssue" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetEntities">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetEntities" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetEntities">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetEntities" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOrders">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrders" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetOrders">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOrders" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOrderInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrderInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOrderDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrderDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOrder">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrder" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetClock">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetClock" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetClock">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetClock" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ResetPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ResetPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetValueTable">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetValueTable" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOperLogs">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLogs" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOperLog">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLog" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCalendar">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCalendar" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetCalendar">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetCalendar" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="BatchTask">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BatchTask" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ClearAllDbs">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ClearAllDbs" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ManageDatabase">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageDatabase" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetUser">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUser" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetUser">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUser" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetChannelInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetChannelInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ManageChannel">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageChannel" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ChangeUserPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeUserPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="VerifyBarcode">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyBarcode" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetSystemParameter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSystemParameter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetSystemParameter">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetSystemParameter" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="UrgentRecover">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/UrgentRecover" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="RepairBorrowInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="PassGate">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/PassGate" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Foregift">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Foregift" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Hire">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Hire" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Settlement">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Settlement" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchOneClassCallNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetCallNumberSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetOneClassTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetOneClassTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchUsedZhongcihao">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetZhongcihaoTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetZhongcihaoTailNumber">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchDup">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchDup" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetDupSearchResult">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResult" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ListDupProjectInfos">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetUtilInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUtilInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetUtilInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUtilInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/WriteRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetComments">
-      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetComments" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
   <wsdl:binding name="WSHttpBinding_dp2library" type="tns:dp2library">
     <wsp:PolicyReference URI="#WSHttpBinding_dp2library_policy" />
     <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
@@ -8035,950 +6171,939 @@
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
-  <wsdl:binding name="BasicHttpBinding_dp2libraryREST" type="i0:dp2libraryREST">
-    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+  <wsdl:binding name="NetNamedPipeBinding_dp2library" type="tns:dp2library">
+    <wsp:PolicyReference URI="#NetNamedPipeBinding_dp2library_policy" />
+    <soap12:binding transport="http://schemas.microsoft.com/soap/named-pipe" />
     <wsdl:operation name="SetComments">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetComments" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetComments" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetCommentInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCommentInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCommentInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchCommentDup">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCommentDup" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCommentDup" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchComment">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchComment" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchComment" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetMessage">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetMessage" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetMessage" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ListMessage">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListMessage" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListMessage" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetMessage">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetMessage" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetMessage" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetStatisInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetStatisInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetStatisInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ExistStatisInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ExistStatisInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ExistStatisInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetFile">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetFile" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ListFile">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFile" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListFile" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="HitCounter">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/HitCounter" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/HitCounter" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchCharging">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchCharging" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchCharging" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="BindPatron">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BindPatron" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BindPatron" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Dir">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Dir" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Dir" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetAuthorNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetAuthorNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetPinyin">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetPinyin" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetPinyin">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyin" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetPinyin" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetVersion" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Login">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Login" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Login" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Logout">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Logout" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Logout" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetLang">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetLang" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetLang" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Stop">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Stop" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Stop" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
     </wsdl:operation>
     <wsdl:operation name="VerifyReaderPassword">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyReaderPassword" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyReaderPassword" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ChangeReaderPassword">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeReaderPassword" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeReaderPassword" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetReaderInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetReaderInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetReaderInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetReaderInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetReaderInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetReaderInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="MoveReaderInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/MoveReaderInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/MoveReaderInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="DevolveReaderInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/DevolveReaderInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/DevolveReaderInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchReader">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchReader" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchReader" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetFriends">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetFriends" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetFriends" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchOneDb">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneDb" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneDb" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Search">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Search" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Search" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetSearchResult">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSearchResult" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSearchResult" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetRecord">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRecord" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRecord" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetBrowseRecords">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBrowseRecords" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBrowseRecords" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ListBiblioDbFroms">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListBiblioDbFroms" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListBiblioDbFroms" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchBiblio">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchBiblio" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetBiblioInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="CopyBiblioInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/CopyBiblioInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/CopyBiblioInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetBiblioInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetBiblioInfos">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioInfos" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioInfos" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchItem">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItem" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItem" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetItemInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetItemInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetItemInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchItemDup">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchItemDup" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchItemDup" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetBiblioSummary">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetBiblioSummary" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetBiblioSummary" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Borrow">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Borrow" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Borrow" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Return">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Return" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Return" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Reservation">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Reservation" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Reservation" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Amerce">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Amerce" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Amerce" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetIssues">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssues" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssues" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetIssues">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetIssues" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetIssues" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetIssueInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetIssueInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetIssueInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchIssueDup">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssueDup" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssueDup" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchIssue">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchIssue" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchIssue" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetEntities">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetEntities" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetEntities" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetEntities">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetEntities" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetEntities" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetOrders">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrders" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrders" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetOrders">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOrders" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOrders" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetOrderInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOrderInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOrderInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchOrderDup">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrderDup" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrderDup" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchOrder">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOrder" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOrder" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetClock">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetClock" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetClock" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetClock">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetClock" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetClock" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ResetPassword">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPassword" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ResetPassword" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetValueTable">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTable" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetValueTable" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetOperLogs">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLogs" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLogs" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetOperLog">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOperLog" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOperLog" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetCalendar">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCalendar" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCalendar" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetCalendar">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetCalendar" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetCalendar" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="BatchTask">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/BatchTask" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/BatchTask" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ClearAllDbs">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ClearAllDbs" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ClearAllDbs" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ManageDatabase">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageDatabase" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageDatabase" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetUser">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUser" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUser" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetUser">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUser" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUser" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetChannelInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetChannelInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetChannelInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ManageChannel">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ManageChannel" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ManageChannel" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ChangeUserPassword">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ChangeUserPassword" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ChangeUserPassword" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="VerifyBarcode">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcode" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/VerifyBarcode" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetSystemParameter">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameter" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetSystemParameter" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetSystemParameter">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetSystemParameter" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetSystemParameter" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="UrgentRecover">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/UrgentRecover" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/UrgentRecover" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="RepairBorrowInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/RepairBorrowInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/RepairBorrowInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="PassGate">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/PassGate" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/PassGate" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Foregift">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Foregift" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Foregift" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Hire">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Hire" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Hire" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="Settlement">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/Settlement" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/Settlement" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchOneClassCallNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchOneClassCallNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchOneClassCallNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetCallNumberSearchResult">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetCallNumberSearchResult" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetCallNumberSearchResult" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetOneClassTailNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetOneClassTailNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetOneClassTailNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetOneClassTailNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetOneClassTailNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetOneClassTailNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchUsedZhongcihao">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchUsedZhongcihao" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchUsedZhongcihao" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetZhongcihaoSearchResult">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoSearchResult" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoSearchResult" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetZhongcihaoTailNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetZhongcihaoTailNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetZhongcihaoTailNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetZhongcihaoTailNumber">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetZhongcihaoTailNumber" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetZhongcihaoTailNumber" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SearchDup">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchDup" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SearchDup" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetDupSearchResult">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetDupSearchResult" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetDupSearchResult" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="ListDupProjectInfos">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ListDupProjectInfos" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/ListDupProjectInfos" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetUtilInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetUtilInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetUtilInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="SetUtilInfo">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetUtilInfo" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/SetUtilInfo" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetRes">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetRes" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetRes" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="WriteRes">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/WriteRes" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/WriteRes" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="GetComments">
-      <soap:operation soapAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetComments" style="document" />
+      <soap12:operation soapAction="http://dp2003.com/dp2library/dp2library/GetComments" style="document" />
       <wsdl:input>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:input>
       <wsdl:output>
-        <soap:body use="literal" />
+        <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="LibraryService">
-    <wsdl:port name="NetTcpBinding_dp2library" binding="tns:NetTcpBinding_dp2library">
-      <soap12:address location="net.tcp://localhost:8002/dp2library/" />
-      <wsa10:EndpointReference>
-        <wsa10:Address>net.tcp://localhost:8002/dp2library/</wsa10:Address>
-      </wsa10:EndpointReference>
-    </wsdl:port>
-    <wsdl:port name="NetNamedPipeBinding_dp2library" binding="tns:NetNamedPipeBinding_dp2library">
-      <soap12:address location="net.pipe://localhost/dp2library/" />
-      <wsa10:EndpointReference>
-        <wsa10:Address>net.pipe://localhost/dp2library/</wsa10:Address>
-      </wsa10:EndpointReference>
-    </wsdl:port>
     <wsdl:port name="WSHttpBinding_dp2library" binding="tns:WSHttpBinding_dp2library">
-      <soap12:address location="http://localhost:8001/dp2library/" />
+      <soap12:address location="http://localhost:8001/dp2library/xe" />
       <wsa10:EndpointReference>
-        <wsa10:Address>http://localhost:8001/dp2library/</wsa10:Address>
+        <wsa10:Address>http://localhost:8001/dp2library/xe</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
           <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
             <X509Data>
@@ -8988,8 +7113,11 @@
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>
-    <wsdl:port name="BasicHttpBinding_dp2libraryREST" binding="tns:BasicHttpBinding_dp2libraryREST">
-      <soap:address location="http://localhost:8001/dp2library/basic/" />
+    <wsdl:port name="NetNamedPipeBinding_dp2library" binding="tns:NetNamedPipeBinding_dp2library">
+      <soap12:address location="net.pipe://localhost/dp2library/xe" />
+      <wsa10:EndpointReference>
+        <wsa10:Address>net.pipe://localhost/dp2library/xe</wsa10:Address>
+      </wsa10:EndpointReference>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

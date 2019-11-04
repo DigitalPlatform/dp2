@@ -627,6 +627,7 @@ namespace DigitalPlatform.LibraryServer
         //      strStyle    操作风格。
         //                  "item"表示将返回册记录；"reader"表示将返回读者记录
         //                  "auto_renew"  表示如果当前处在已经借出状态，并且发起借书的又是同一人，自动当作续借请求进行操作
+        //                  "overflowable" 表示允许超过借书限额进行借书。但超出限额的册的借期只有一天(必须在当天之内还回)
         //      strItemFormat   规定strItemRecord参数所返回的数据格式
         //      strItemRecord   返回册记录
         //      strReaderFormat 规定strReaderRecord参数所返回的数据格式
@@ -658,7 +659,7 @@ namespace DigitalPlatform.LibraryServer
             out BorrowInfo borrow_info   // 2007/12/6
             )
         {
-            REDO_WHOLE:
+        REDO_WHOLE:
             item_records = null;
             reader_records = null;
             biblio_records = null;
@@ -813,7 +814,7 @@ namespace DigitalPlatform.LibraryServer
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
             string strLockReaderBarcode = strReaderBarcode; // 加锁专用字符串，不怕后面被修改了
 
-            REDO_BORROW:
+        REDO_BORROW:
 
             bool bReaderLocked = false;
 
@@ -915,6 +916,8 @@ namespace DigitalPlatform.LibraryServer
                         return result;
                     }
                 }
+
+                List<string> overflowReasons = new List<string>();
 
                 byte[] item_timestamp = null;
                 List<string> aPath = null;
@@ -1461,40 +1464,47 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1 || nRet == 0)
                     {
-                        // 如果有必要保存回读者记录(因前面刷新了以停代金数据)
-                        if (bReaderDomChanged == true)
+                        if (StringUtil.IsInList("overflowable", strStyle))
                         {
-                            /*
-                            byte[] output_timestamp = null;
-                            string strOutputPath = "";
-                             * */
-
-                            // 写回读者记录
-                            lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                                readerdom.OuterXml,
-                                false,
-                                "content",  // ,ignorechecktimestamp
-                                reader_timestamp,
-                                out output_timestamp,
-                                out strOutputPath,
-                                out string strError_1);
-                            if (lRet == -1)
+                            overflowReasons.Add(strError);
+                        }
+                        else
+                        {
+                            // 如果有必要保存回读者记录(因前面刷新了以停代金数据)
+                            if (bReaderDomChanged == true)
                             {
-                                // text-level: 内部错误
-                                strError = strError + "。然而在写入读者记录过程中，发生错误: " + strError_1;
-                                goto ERROR1;
+                                /*
+                                byte[] output_timestamp = null;
+                                string strOutputPath = "";
+                                 * */
+
+                                // 写回读者记录
+                                lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
+                                    readerdom.OuterXml,
+                                    false,
+                                    "content",  // ,ignorechecktimestamp
+                                    reader_timestamp,
+                                    out output_timestamp,
+                                    out strOutputPath,
+                                    out string strError_1);
+                                if (lRet == -1)
+                                {
+                                    // text-level: 内部错误
+                                    strError = strError + "。然而在写入读者记录过程中，发生错误: " + strError_1;
+                                    goto ERROR1;
+                                }
                             }
-                        }
 
-                        if (nRet == 0)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.AccessDenied;  // 权限不够
-                            return result;
-                        }
+                            if (nRet == 0)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.AccessDenied;  // 权限不够
+                                return result;
+                            }
 
-                        goto ERROR1;
+                            goto ERROR1;
+                        }
                     }
 
                     XmlDocument domOperLog = new XmlDocument();
@@ -1510,12 +1520,13 @@ namespace DigitalPlatform.LibraryServer
                         bRenew == true ? "renew" : "borrow");
                     // 原来在这里
 
+                    // TODO: overflowable 状态下，发现册已经被保留，如何处理？是否允许短暂借出?
                     // 借阅API的从属函数
                     // 检查预约相关信息
                     // return:
                     //      -1  error
                     //      0   正常
-                    //      1   发现该册被保留)， 不能借阅
+                    //      1   发现该册被保留， 不能借阅
                     //      2   发现该册预约， 不能续借
                     //      3   发现该册被保留， 不能借阅。而且本函数修改了册记录(<location>元素发生了变化)，需要本函数返回后，把册记录保存。
                     nRet = DoBorrowReservationCheck(
@@ -1529,46 +1540,60 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     if (nRet == 1 || nRet == 2)
                     {
-                        // 被预约保留, 不能借阅
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        if (nRet == 1)
-                            result.ErrorCode = ErrorCode.BorrowReservationDenied;
-                        if (nRet == 2)
-                            result.ErrorCode = ErrorCode.RenewReservationDenied;
-                        return result;
+                        if (StringUtil.IsInList("overflowable", strStyle))
+                        {
+                            overflowReasons.Add(strError);
+                        }
+                        else
+                        {
+                            // 被预约保留, 不能借阅
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            if (nRet == 1)
+                                result.ErrorCode = ErrorCode.BorrowReservationDenied;
+                            if (nRet == 2)
+                                result.ErrorCode = ErrorCode.RenewReservationDenied;
+                            return result;
+                        }
                     }
 
                     if (nRet == 3)
                     {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.BorrowReservationDenied;
-
-                        /*
-                        byte[] output_timestamp = null;
-                        string strOutputPath = "";
-                         * */
-
-                        // 写回册记录
-                        lRet = channel.DoSaveTextRes(strOutputItemRecPath,
-                            itemdom.OuterXml,
-                            false,
-                            "content",  // ,ignorechecktimestamp
-                            item_timestamp,
-                            out output_timestamp,
-                            out strOutputPath,
-                            out strError);
-                        if (lRet == -1)
+                        if (StringUtil.IsInList("overflowable", strStyle))
                         {
-                            // text-level: 内部错误
-                            strError = "借阅操作中遇在架预约图书需要写回册记录 " + strOutputItemRecPath + " 时出错: " + strError;
-                            this.WriteErrorLog(strError);
-                            strError += "。借阅操作被拒绝。";
-                            goto ERROR1;
+                            overflowReasons.Add(strError);
                         }
+                        else
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.BorrowReservationDenied;
 
-                        return result;
+                            /*
+                            byte[] output_timestamp = null;
+                            string strOutputPath = "";
+                             * */
+
+                            // 写回册记录
+                            lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+                                itemdom.OuterXml,
+                                false,
+                                "content",  // ,ignorechecktimestamp
+                                item_timestamp,
+                                out output_timestamp,
+                                out strOutputPath,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                // text-level: 内部错误
+                                strError = "借阅操作中遇在架预约图书需要写回册记录 " + strOutputItemRecPath + " 时出错: " + strError;
+                                this.WriteErrorLog(strError);
+                                strError += "。借阅操作被拒绝。";
+                                goto ERROR1;
+                            }
+
+                            return result;
+                        }
                     }
 
                     // 移动到这里
@@ -1577,6 +1602,7 @@ namespace DigitalPlatform.LibraryServer
                     // string strNewReaderXml = "";
                     nRet = DoBorrowReaderAndItemXml(
                         bRenew,
+                        overflowReasons,
                         strLibraryCode,
                         ref readerdom,
                         ref itemdom,
@@ -1759,6 +1785,15 @@ namespace DigitalPlatform.LibraryServer
                         // itemdom.OuterXml
                         );
                     DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
+
+                    // 2019/11/3
+                    // 记载溢出情况
+                    if (overflowReasons.Count > 0)
+                    {
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
+                            "overflow",
+                            StringUtil.MakePathList(overflowReasons, "; "));
+                    }
 
                     nRet = this.OperLog.WriteOperLog(domOperLog,
                         sessioninfo.ClientAddress,
@@ -2392,7 +2427,7 @@ start_time_1,
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -2915,7 +2950,7 @@ start_time_1,
                     goto ERROR1;
                 }
 
-                SKIP0:
+            SKIP0:
 
                 if (aPath.Count > 1)
                 {
@@ -3062,7 +3097,7 @@ start_time_1,
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3227,7 +3262,7 @@ start_time_1,
                 goto ERROR1;
             }
 
-            SKIP0:
+        SKIP0:
 
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
@@ -3300,7 +3335,7 @@ start_time_1,
                 start_time_read_reader,
                 strActionName + " 中读取读者记录 耗时 ");
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -4059,8 +4094,8 @@ start_time_1,
             return 1;
         }
 
-        // 借阅API的从属函数
         // 检查借阅权限
+        // 借阅API的从属函数
         // text-level: 用户提示 OPAC的续借要调用Borrow()函数，进而调用本函数
         // parameters:
         //      strLibraryCode  读者记录所在读者库的馆代码
@@ -4076,6 +4111,7 @@ start_time_1,
             string strLibraryCode,
             string strAccessParameters,
             string reader_recpath,
+
             ref XmlDocument readerdom,
             string item_recpath,
             ref XmlDocument itemdom,
@@ -4805,7 +4841,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-            REDO:
+        REDO:
 
             lRet = channel.GetRes(strReaderRecPath,
     out strReaderXml,
@@ -4960,7 +4996,7 @@ start_time_1,
             }
 
             return (aFoundPath.Count);
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -5270,7 +5306,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-            REDO_RETURN:
+        REDO_RETURN:
 
             bool bReaderLocked = false;
             bool bEntityLocked = false;
@@ -6201,7 +6237,7 @@ start_time_1,
                         }
                     }
 #endif
-                    SKIP0:
+                SKIP0:
 
                     if (strAction == "inventory")
                     {
@@ -6833,7 +6869,7 @@ start_time_1,
                         start_time_write_item,
                         "Return() 中写回册记录 耗时 ");
 
-                    WRITE_OPERLOG:
+                WRITE_OPERLOG:
                     DateTime start_time_write_operlog = DateTime.Now;
 
                     // 写入日志
@@ -7122,7 +7158,7 @@ start_time_1,
                 // 最好超期和保留两种状态码可以并存?
             }
 
-            END3:
+        END3:
             // 输出数据
             // 把输出数据部分放在读者锁以外范围，是为了尽量减少锁定的时间，提高并发运行效率
             DateTime output_start_time = DateTime.Now;
@@ -7657,7 +7693,7 @@ start_time_1,
 
             // result.Value值在前面可能被设置成1
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             if (string.IsNullOrEmpty(result.ErrorInfo) == false)
                 result.ErrorInfo += "; ";
@@ -8215,7 +8251,7 @@ start_time_1,
 
             int nRedoCount = 0;
 
-            REDO:
+        REDO:
 
             lRet = channel.GetRes(strReaderRecPath,
     out strReaderXml,
@@ -11532,7 +11568,7 @@ start_time_1,
                         goto ERROR1;
 
                     int nRedoDeleteCount = 0;
-                    REDO_DELETE:
+                REDO_DELETE:
                     // 删除已付违约金记录
                     lRet = channel.DoDeleteRes(strAmercedRecPath,
                         amerced_timestamp,
@@ -11648,7 +11684,7 @@ start_time_1,
             }
 
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -12217,7 +12253,7 @@ start_time_1,
                     goto ERROR1;
                 }
 
-                SAVERECORD:
+            SAVERECORD:
 
                 // 为写回读者、册记录做准备
                 // byte[] timestamp = null;
@@ -12365,7 +12401,7 @@ start_time_1,
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -12689,7 +12725,7 @@ start_time_1,
                 byte[] timestamp = null;
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
-                REDO:
+            REDO:
 
                 long lRet = channel.DoDeleteRes(strPath,
                     timestamp,
@@ -13833,7 +13869,7 @@ start_time_1,
                         continue;   // 重新执行刷新操作似乎没有必要，因为没有刚开始就立即结束的？
                     }
                     break;
-                    FOUND:
+                FOUND:
                     string strUnit = "";
                     long lOverduePeriod = 0;
 
@@ -13941,7 +13977,7 @@ start_time_1,
                     }
 
                     break;// 没有找到下一个可启动的事项了
-                    FOUND_1:
+                FOUND_1:
 
                     TimeSpan delta;
 
@@ -15207,7 +15243,7 @@ start_time_1,
                     Debug.Assert(false, "");
                 }
 
-                CONTINUE_LOSTING:
+            CONTINUE_LOSTING:
 
                 strOverdueMessage += "有丢失违约金 " + strLostPrice + "。请履行付违约金手续。";
 
@@ -15233,7 +15269,7 @@ start_time_1,
             }
 
 
-            DOCHANGE:
+        DOCHANGE:
 
             XmlNode nodeOldBorrower = null;
 
@@ -15741,7 +15777,7 @@ start_time_1,
             if (bChanged == false)
                 return 0;   // not changed
             return 1;   // 虽然没有找到，但是册记录发生了修改
-            FOUND:
+        FOUND:
             Debug.Assert(found_node != null, "");
             strReservationReaderBarcode = found_node.GetAttribute("reader");
 
@@ -16144,7 +16180,7 @@ start_time_1,
 
             int nRedoLoadCount = 0;
 
-            REDO_LOAD_QUEUE_REC:
+        REDO_LOAD_QUEUE_REC:
 
             // 进一步检索预约到书库, 看看是否属于已经通知来取书的册, 或者是等待上普通架的预约超期未取册
             string strNotifyXml = "";
@@ -16288,7 +16324,7 @@ start_time_1,
             {
                 byte[] output_timestamp = null;
                 int nRedoCount = 0;
-                REDO_DELETE:
+            REDO_DELETE:
                 lRet = channel.DoDeleteRes(strOutputPath,
                     timestamp,
                     out output_timestamp,
@@ -16307,7 +16343,7 @@ start_time_1,
                 }
             }
 
-            CHANGEITEMLOCATION:
+        CHANGEITEMLOCATION:
 
             // StringUtil.RemoveFromInList("#reservation", true, ref strLocation);
             strLocation = StringUtil.GetPureLocationString(strLocation);
@@ -16428,6 +16464,7 @@ start_time_1,
         //      // 1   发现先前借阅的图书目前有超期情况
         int DoBorrowReaderAndItemXml(
             bool bRenew,
+            List<string> overflowReasons,
             string strLibraryCode,
             ref XmlDocument readerdom,
             ref XmlDocument itemdom,
@@ -16444,6 +16481,10 @@ start_time_1,
             int nRet = 0;
             borrow_info = new BorrowInfo();
 
+            // 2019/11/3
+            if (overflowReasons.Count > 0)
+                borrow_info.Overflows = overflowReasons.ToArray();
+
             DateTime this_return_time = new DateTime(0);
 
             LibraryApplication app = this;
@@ -16451,7 +16492,6 @@ start_time_1,
             // 获得例行参数
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
-
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
     "location");
@@ -16493,10 +16533,10 @@ start_time_1,
             // 从读者信息中, 找到读者类型
             string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
 
-
             // 修改读者记录
             int nNo = 0;
 
+            // 读者记录中的 borrow 元素
             XmlNode nodeBorrow = null;
 
             if (bRenew == true)
@@ -16588,41 +16628,56 @@ start_time_1,
 
             DomUtil.SetAttr(nodeBorrow, "location", strLocation); // 2016/9/5
 
-            // 加入借期字段
-            // 读者记录中的借期字段，目的是为了查询方便，但注意没有法律效力。
-            // 真正对超期判断起作用的，是册记录中的借期字段。
+            // 2019/11/3
+            // 记载溢出原因
+            if (overflowReasons.Count > 0)
+            {
+                DomUtil.SetAttr(nodeBorrow, "overflow", StringUtil.MakePathList(overflowReasons, "; "));
+            }
+
             string strBorrowPeriodList = "";
-            MatchResult matchresult;
-            // return:
-            //      reader和book类型均匹配 算4分
-            //      只有reader类型匹配，算3分
-            //      只有book类型匹配，算2分
-            //      reader和book类型都不匹配，算1分
-            nRet = app.GetLoanParam(
+
+            if (overflowReasons.Count > 0)
+            {
+                // 溢出情况处理。给一个一天的借期
+                strBorrowPeriodList = "1day";
+            }
+            else
+            {
+                // 加入借期字段
+                // 读者记录中的借期字段，目的是为了查询方便，但注意没有法律效力。
+                // 真正对超期判断起作用的，是册记录中的借期字段。
+                // return:
+                //      reader和book类型均匹配 算4分
+                //      只有reader类型匹配，算3分
+                //      只有book类型匹配，算2分
+                //      reader和book类型都不匹配，算1分
+                nRet = app.GetLoanParam(
                 //null,
                 strLibraryCode,
                 strReaderType,
                 strBookType,
                 "借期",
                 out strBorrowPeriodList,
-                out matchresult,
+                out MatchResult matchresult,
                 out strError);
-            if (nRet == -1)
-            {
-                if (bForce == true)
-                    goto DOCHANGE;
-                // text-level: 内部错误
-                strError = "借阅失败。获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数时发生错误: " + strError;
-                return -1;
-            }
-            if (nRet < 4)  // nRet == 0
-            {
-                if (bForce == true)
-                    goto DOCHANGE;
+                if (nRet == -1)
+                {
+                    if (bForce == true)
+                        goto DOCHANGE;
+                    // text-level: 内部错误
+                    strError = "借阅失败。获得 馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数时发生错误: " + strError;
+                    return -1;
+                }
+                if (nRet < 4)  // nRet == 0
+                {
+                    if (bForce == true)
+                        goto DOCHANGE;
 
-                // text-level: 内部错误
-                strError = "借阅失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数无法获得: " + strError;
-                return -1;
+                    // text-level: 内部错误
+                    strError = "借阅失败。馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 针对图书类型 '" + strBookType + "' 的 借期 参数无法获得: " + strError;
+                    return -1;
+                }
             }
 
             // 按照逗号分列值，需要根据序号取出某个参数
@@ -16727,23 +16782,20 @@ start_time_1,
                 }
             }
 
-            DOCHANGE:
+        DOCHANGE:
 
             // 测算本次 借阅/续借 的应还书时间
             DateTime now = app.Clock.UtcNow;  //  今天，当下。GMT时间
 
             {
-                long lPeriodValue = 0;
-                string strPeriodUnit = "";
                 nRet = LibraryApplication.ParsePeriodUnit(
                     strThisBorrowPeriod,
-                    out lPeriodValue,
-                    out strPeriodUnit,
+                    out long lPeriodValue,
+                    out string strPeriodUnit,
                     out strError);
                 if (nRet == -1)
                     goto SKIP_CHECK_RENEW_PERIOD;
 
-                DateTime nextWorkingDay;
 
                 // parameters:
                 //      calendar    工作日历。如果为null，表示函数不进行非工作日判断。
@@ -16757,7 +16809,7 @@ start_time_1,
                     lPeriodValue,
                     strPeriodUnit,
                     out this_return_time,
-                    out nextWorkingDay,
+                    out DateTime nextWorkingDay,
                     out strError);
                 if (nRet == -1)
                 {
@@ -16797,11 +16849,9 @@ start_time_1,
                     goto SKIP_CHECK_RENEW_PERIOD;
                 }
 
-                long lLastPeriodValue = 0;
-                string strLastPeriodUnit = "";
                 nRet = ParsePeriodUnit(strLastBorrowPeriod,
-                    out lLastPeriodValue,
-                    out strLastPeriodUnit,
+                    out long lLastPeriodValue,
+                    out string strLastPeriodUnit,
                     out strError);
                 if (nRet == -1)
                 {
@@ -16810,17 +16860,15 @@ start_time_1,
                     goto SKIP_CHECK_RENEW_PERIOD;
                 }
 
-                DateTime nextWorkingDay;
 
-                DateTime last_return_time;
                 // 测算上次借书的还书日期
                 nRet = GetReturnDay(
                     null,
                     last_borrowdate,
                     lLastPeriodValue,
                     strLastPeriodUnit,
-                    out last_return_time,
-                    out nextWorkingDay,
+                    out DateTime last_return_time,
+                    out DateTime nextWorkingDay,
                     out strError);
                 if (nRet == -1)
                 {
@@ -16865,7 +16913,7 @@ start_time_1,
                 }
             }
 
-            SKIP_CHECK_RENEW_PERIOD:
+        SKIP_CHECK_RENEW_PERIOD:
 
             string strRenewComment = "";
 
@@ -17406,7 +17454,7 @@ start_time_1,
                     }
                 }
 
-                DOITEM:
+            DOITEM:
                 // 顺便获得下一个预约读者证条码号
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
@@ -17826,7 +17874,7 @@ start_time_1,
                                 goto ERROR1;
                             }
 
-                            REDO_WRITE_SOURCE:
+                        REDO_WRITE_SOURCE:
                             nRedoCount = 0;
                             lRet = channel.DoSaveTextRes(strSourceOutputReaderRecPath,
                                 source_readerdom.OuterXml,
@@ -17920,7 +17968,7 @@ start_time_1,
 
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -18158,7 +18206,7 @@ start_time_1,
                 string strOutputItemRecPath = "";
 
                 int nRedoCount = 0;
-                REDO:
+            REDO:
 
                 // 获得册记录
                 // return:
@@ -18378,7 +18426,7 @@ start_time_1,
                 this.EntityLocks.UnlockForWrite(strEntityBarcode);
             }
             return 1;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -18602,7 +18650,7 @@ start_time_1,
                 result.Value = 0;
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -18862,7 +18910,7 @@ start_time_1,
                 }
             }
 
-            END1:
+        END1:
             if (String.IsNullOrEmpty(strCheckError) == false)
             {
                 result.Value = 1;
@@ -18871,7 +18919,7 @@ start_time_1,
             else
                 result.Value = 0;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -18908,7 +18956,7 @@ start_time_1,
                 goto ERROR1;
             }
 
-            REDO_REPAIR:
+        REDO_REPAIR:
 
             /*
                     string strOutputReaderXml = "";
@@ -19155,7 +19203,7 @@ start_time_1,
                         goto CORRECT;
                     }
 
-                    DELETE_CHAIN:
+                DELETE_CHAIN:
 
                     // 移除读者记录侧的链
                     nodeBorrow.ParentNode.RemoveChild(nodeBorrow);
@@ -19252,12 +19300,12 @@ start_time_1,
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
-            CORRECT:
+        CORRECT:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
@@ -19300,7 +19348,7 @@ start_time_1,
                 strError = "get channel error";
                 goto ERROR1;
             }
-            REDO_REPAIR:
+        REDO_REPAIR:
 
             // 加读者记录锁
 #if DEBUG_LOCK_READER
@@ -19684,12 +19732,12 @@ start_time_1,
             }
 
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
-            CORRECT:
+        CORRECT:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
@@ -20121,10 +20169,10 @@ start_time_1,
                 }
             }
 
-            END1:
+        END1:
             result.Value = nResultValue;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -20192,7 +20240,7 @@ start_time_1,
 
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
-            REDO_FOREGIFT:
+        REDO_FOREGIFT:
 
 
             // 加读者记录锁
@@ -20388,7 +20436,7 @@ start_time_1,
             // END1:
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -20521,7 +20569,7 @@ start_time_1,
 
             strOverdueString = nodeOverdue.OuterXml;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -20580,7 +20628,7 @@ start_time_1,
             }
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
-            REDO_HIRE:
+        REDO_HIRE:
 
 
             // 加读者记录锁
@@ -20776,7 +20824,7 @@ start_time_1,
             // END1:
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -20882,7 +20930,7 @@ start_time_1,
                     strStartDate = strExistStartDate;
             }
 
-            SKIP_HIRE_LATE:
+        SKIP_HIRE_LATE:
 
             int nResultValue = 0;
             string strHireExpireDate = "";
@@ -20984,7 +21032,7 @@ start_time_1,
 
             strOverdueString = nodeOverdue.OuterXml;
             return 0;
-            ERROR1:
+        ERROR1:
             return -1;
         }
 
@@ -21165,7 +21213,7 @@ start_time_1,
 
             result.Value = 1;
             return result;
-            ERROR1:
+        ERROR1:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             result.ErrorInfo = strError;
@@ -21210,7 +21258,7 @@ start_time_1,
             }
 
             int nRedoCount = 0;
-            REDO:
+        REDO:
 
             long lRet = channel.GetRes(strAmercedRecPath,
                 out strAmercedXml,
@@ -21418,7 +21466,7 @@ start_time_1,
             }
 
 
-            END1:
+        END1:
             if (bCreateOperLog == true)
             {
                 if (this.Statis != null)
@@ -21731,6 +21779,12 @@ start_time_1,
         // 可能是 @refID:xxxx 形态
         [DataMember]
         public string ItemBarcode = "";
+
+
+        // 2019/11/3
+        // 溢出原因
+        [DataMember]
+        public string[] Overflows = null;
 
         /*
         // 2008/5/9

@@ -12,8 +12,8 @@ namespace dp2SSL
         public ItemCollection GetValues()
         {
             ItemCollection sizes = new ItemCollection();
-            sizes.Add("自助借还", "自助借还");
-            sizes.Add("智能书柜", "智能书柜");
+            sizes.Add("自助借还");
+            sizes.Add("智能书柜");
             return sizes;
         }
     }
