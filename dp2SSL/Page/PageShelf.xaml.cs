@@ -468,7 +468,7 @@ namespace dp2SSL
             */
         }
 
-
+#if NO
         async Task<NormalResult> Update(
             BaseChannel<IRfid> channel_param,
             List<Entity> update_entities,
@@ -503,6 +503,8 @@ namespace dp2SSL
             }
             return new NormalResult();
         }
+
+#endif
 
         // 设置全局区域错误字符串
         void SetGlobalError(string type, string error)
@@ -1435,6 +1437,7 @@ namespace dp2SSL
                     string strError = "";
                     string[] item_records = null;
                     string[] biblio_records = null;
+                    BorrowInfo borrow_info = null;
 
                     if (action == "borrow" || action == "renew")
                     {
@@ -1462,7 +1465,7 @@ namespace dp2SSL
                             entity.ItemRecPath,
                             false,
                             null,
-                            "item,reader,biblio", // style,
+                            "item,reader,biblio,overflowable", // style,
                             "xml", // item_format_list
                             out item_records,
                             "xml",
@@ -1471,8 +1474,9 @@ namespace dp2SSL
                             out biblio_records,
                             out string[] dup_path,
                             out string output_reader_barcode,
-                            out BorrowInfo borrow_info,
+                            out borrow_info,
                             out strError);
+
                     }
                     else if (action == "return")
                     {
@@ -1576,11 +1580,21 @@ namespace dp2SSL
                     }
 
                     if (action == "borrow")
+                    {
+                        if (borrow_info.Overflows != null && borrow_info.Overflows.Length > 0)
+                        {
+                            // 界面警告
+                            // TODO: 可以考虑归入 overflows 单独语音警告处理。语音要简洁。详细原因可出现在文字警告中
+                            warnings.Add($"册 '{title}' (借书操作发生溢出，请于当日内还书): {string.Join("; ", borrow_info.Overflows)}");
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"读者 {_patron.NameSummary} 借阅 '{title}' 时发生溢出: {strError}");
+                        }
+                    }
+
+                    if (action == "borrow")
                         borrows.Add(title);
                     if (action == "return")
                         returns.Add(title);
-
-
 
                     /*
                     // borrow 操作，API 之后才修改 EAS

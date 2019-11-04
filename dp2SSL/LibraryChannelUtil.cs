@@ -20,6 +20,9 @@ namespace dp2SSL
         }
 
         // 获得一个册的题名字符串
+        // .Value
+        //      0   没有找到
+        //      1   找到
         public static GetEntityDataResult GetEntityData(string pii)
         {
             /*
@@ -69,10 +72,12 @@ namespace dp2SSL
 
                 return new GetEntityDataResult
                 {
-                    Value = 0,
+                    Value = (int)lRet,
                     ItemXml = item_xml,
                     ItemRecPath = item_recpath,
-                    Title = strSummary
+                    Title = strSummary,
+                    ErrorInfo = strError,
+                    ErrorCode = channel.ErrorCode.ToString()
                 };
             }
             finally

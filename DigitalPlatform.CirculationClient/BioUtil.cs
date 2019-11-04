@@ -428,15 +428,25 @@ namespace DigitalPlatform.CirculationClient
                 || strAction == "change"
                 || strAction == "move")
             {
+                string strNewRecPath = "";
                 string strRecord = DomUtil.GetElementText(domLog.DocumentElement,
                     "record",
                     out XmlNode node);
                 if (node == null)
                 {
-                    strError = "日志记录中缺<record>元素";
-                    return -1;
+                    // 2019/11/5
+                    // 注: move 操作，分馆账户获得日志记录时候可能会被 dp2library 滤除 record 元素。
+                    // 此种情况可以理解为 delete 操作
+                    if (strAction != "move")
+                    {
+                        strError = $"日志记录中缺<record>元素。日志记录内容如下：{domLog.OuterXml}";
+                        return -1;
+                    }
                 }
-                string strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                else
+                {
+                    strNewRecPath = DomUtil.GetAttr(node, "recPath");
+                }
 
                 string strOldRecord = "";
                 string strOldRecPath = "";
@@ -463,7 +473,9 @@ namespace DigitalPlatform.CirculationClient
                     }
 
                     // 如果移动过程中没有修改，则要用旧的记录内容写入目标
-                    if (string.IsNullOrEmpty(strRecord) == true)
+                    // 注意：如果 record 元素都不存在，则应该理解为 delete。如果 record 元素存在，即 recPath 属性存在但 InnerText 不存在，则当作移动过程记录没有变化，即采用 oldRecord 的 InnerText 作为新记录内容
+                    if (string.IsNullOrEmpty(strRecord) == true
+                        && string.IsNullOrEmpty(strNewRecPath) == false)
                         strRecord = strOldRecord;
                 }
 
