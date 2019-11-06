@@ -145,15 +145,6 @@ namespace dp2SSL
             FingerprintManager.SetError += FingerprintManager_SetError;
             FingerprintManager.Start(_cancelRefresh.Token);
 
-            RfidManager.Base.Name = "RFID 中心";
-            RfidManager.Url = App.RfidUrl;
-            // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
-            RfidManager.SetError += RfidManager_SetError;
-            RfidManager.ListTags += RfidManager_ListTags;
-
-            RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
-
-            RfidManager.Start(_cancelRefresh.Token);
 
             FaceManager.Base.Name = "人脸中心";
             FaceManager.Url = App.FaceUrl;
@@ -198,6 +189,17 @@ namespace dp2SSL
                     this.SetError("cfg", $"InitialShelf() 出现异常:{ex.Message}");
                 }
             }
+
+            RfidManager.Base.Name = "RFID 中心";
+            RfidManager.Url = App.RfidUrl;
+            // RfidManager.AntennaList = "1|2|3|4";    // TODO: 从 shelf.xml 中归纳出天线号范围
+            RfidManager.SetError += RfidManager_SetError;
+            RfidManager.ListTags += RfidManager_ListTags;
+
+            RfidManager.ListLocks += ShelfData.RfidManager_ListLocks;
+
+            RfidManager.Start(_cancelRefresh.Token);
+
         }
 
 

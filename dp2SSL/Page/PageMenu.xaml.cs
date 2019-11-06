@@ -267,7 +267,34 @@ namespace dp2SSL
 
         private void Message_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Clipboard.SetDataObject(this.message.Text, true);
+            if (e.ChangedButton == MouseButton.Right)
+                Clipboard.SetDataObject(this.message.Text, true);
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                // 测试功能
+                MessageDocument doc = new MessageDocument();
+                doc.Add("borrow", "succeed", "", "", new Entity { Title = "书名1" });
+                doc.Add("borrow", "succeed", "", "", new Entity { Title = "书名2" });
+                doc.Add("return", "warning", "这是警告信息", "", new Entity { Title = "书名3" });
+                doc.Add("return", "error", "还书出错", "errorCode", new Entity { Title = "书名4" });
+
+                ProgressWindow progress = null;
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+
+                    progress = new ProgressWindow();
+                    // progress.MessageText = "正在处理，请稍候 ...";
+                    progress.MessageDocument = doc.BuildDocument("王利文", out string speak);
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    //progress.Closed += Progress_Closed;
+                    progress.Width = Math.Min(700, this.ActualWidth);
+                    progress.Height = Math.Min(500, this.ActualHeight);
+                    progress.Show();
+                    //AddLayer();
+                }));
+            }
         }
 
         private void RegisterFace_Click(object sender, RoutedEventArgs e)

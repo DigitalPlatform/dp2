@@ -1365,6 +1365,7 @@ namespace dp2SSL
             }));
 
             // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
+            MessageDocument doc = new MessageDocument();
 
             bool patron_filled = false;
 
@@ -1549,6 +1550,20 @@ namespace dp2SSL
                         ShelfData.Remove(ShelfData.Removes, entity);
                     }
 
+                    string resultType = "succeed";
+                    if (lRet == -1)
+                        resultType = "error";
+                    else if (lRet == 1)
+                        resultType = "information";
+                    MessageItem messageItem = new MessageItem
+                    {
+                        Operation = action,
+                        ResultType = resultType,
+                        ErrorCode = channel.ErrorCode.ToString(),
+                        Entity = entity,
+                    };
+                    doc.Add(messageItem);
+
                     if (lRet == -1)
                     {
                         /*
@@ -1585,9 +1600,14 @@ namespace dp2SSL
                         {
                             // 界面警告
                             // TODO: 可以考虑归入 overflows 单独语音警告处理。语音要简洁。详细原因可出现在文字警告中
-                            warnings.Add($"册 '{title}' (借书操作发生溢出，请于当日内还书): {string.Join("; ", borrow_info.Overflows)}");
+                            // warnings.Add($"册 '{title}' (借书操作发生溢出，请于当日内还书): {string.Join("; ", borrow_info.Overflows)}");
+
+                            // TODO: 详细原因文字可否用稍弱的字体效果来显示？
+                            messageItem.ErrorInfo = $"借书操作超越许可，请将本册放回书柜。详细原因： {string.Join("; ", borrow_info.Overflows)}";
+                            messageItem.ResultType = "warning";
+                            messageItem.ErrorCode = "overflow";
                             // 写入错误日志
-                            WpfClientInfo.WriteInfoLog($"读者 {_patron.NameSummary} 借阅 '{title}' 时发生溢出: {strError}");
+                            WpfClientInfo.WriteInfoLog($"读者 {_patron.NameSummary} 借阅 '{title}' 时发生超越许可: {strError}");
                         }
                     }
 
@@ -1715,7 +1735,12 @@ namespace dp2SSL
                     if (borrows.Count > 0)
                         message += $"\r\n借书:\r\n" + MakeList(borrows);
 
-                    DisplayError(ref progress, message, backColor);
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        // DisplayError(ref progress, message, backColor);
+                        progress.MessageDocument = doc.BuildDocument(patron_name, out speak);
+                        progress = null;
+                    }));
 
                     // 重新装载读者信息和显示
                     // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
@@ -1817,8 +1842,8 @@ namespace dp2SSL
         }
 
         void DisplayError(ref VideoWindow videoRegister,
-    string message,
-    string color = "red")
+        string message,
+        string color = "red")
         {
             MemoryDialog(videoRegister);
             var temp = videoRegister;

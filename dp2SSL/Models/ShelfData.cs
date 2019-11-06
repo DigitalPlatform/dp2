@@ -368,8 +368,11 @@ namespace dp2SSL
                 ret = await Task.Run(() =>
                 {
                     // 使用全部读卡器，全部天线
+                    RfidManager.Pause = true;
                     RfidManager.ReaderNameList = "*";
+                    RfidManager.AntennaList = GetAntennaList();
                     TagList.DataReady = false;
+                    RfidManager.Pause = false;
                     RfidManager.ClearCache();   // 迫使立即重新请求 Inventory
                     while (true)
                     {
@@ -466,7 +469,7 @@ namespace dp2SSL
             list.AddRange(removes);
             foreach (var entity in list)
             {
-                if (entity.Error != null)
+                if (entity.Error != null && entity.ErrorColor == "red")
                 {
                     if (errors.IndexOf(entity) == -1)
                         errors.Add(entity);
