@@ -246,13 +246,14 @@ namespace dp2SSL
                 return new NormalResult();
 
             string dp2library_uid = "";
+            string version = "";
 
             // 获得 dp2library 服务器的 UID
             var channel = App.CurrentApp.GetChannel();
             try
             {
                 long lRet = channel.GetVersion(null,
-                    out string version,
+                    out version,
                     out dp2library_uid,
                     out string strError);
                 if (lRet == -1)
@@ -275,6 +276,13 @@ namespace dp2SSL
             }
 
             List<string> errors = new List<string>();
+
+            // 检查 dp2library 版本号
+            if (App.Function == "智能书柜"
+                && StringUtil.CompareVersion(version, "3.18") < 0)
+            {
+                errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 3.18 以上(但当前是 {version})");
+            }
 
             // 如果没有配置 指纹中心 URL 则不检查
             if (string.IsNullOrEmpty(App.FingerprintUrl) == false)

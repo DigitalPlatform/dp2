@@ -41,6 +41,23 @@ namespace dp2SSL
             }
         }
 
+        public FlowDocument MessageDocument
+        {
+            get
+            {
+                return richText.Document;
+            }
+            set
+            {
+                richText.Document = value;
+                if (value != null)
+                {
+                    text.Visibility = Visibility.Collapsed;
+                    richText.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
         public ProgressBar ProgressBar
         {
             get

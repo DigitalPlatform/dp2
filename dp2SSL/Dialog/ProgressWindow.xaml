@@ -20,11 +20,14 @@
             </Grid.RowDefinitions>
             <TextBox Name="title" Grid.Row="0"
                      Background="Transparent" BorderThickness="0"/>
-            <TextBox Name="text" Grid.Row="1" 
+            <Grid Grid.Row="1">
+                <FlowDocumentScrollViewer Name="richText" Visibility="Collapsed"/>
+                <TextBox Name="text"  
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="20" TextWrapping="Wrap"
                  Background="Transparent" Foreground="White" 
                  VerticalScrollBarVisibility="Auto" BorderThickness="0">Text</TextBox>
+            </Grid>
             <ProgressBar Name="progressBar" Grid.Row="2"
                      Height="5" Background="Transparent" BorderThickness="0"/>
 
