@@ -472,7 +472,7 @@ namespace dp2SSL
                 if (entity.Error != null && entity.ErrorColor == "red")
                 {
                     if (errors.IndexOf(entity) == -1)
-                        errors.Add(entity);
+                        Add(errors, entity);
                 }
             }
 

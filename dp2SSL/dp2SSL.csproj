@@ -33,7 +33,7 @@
     <SuiteName>dp2 V3</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>117</ApplicationRevision>
+    <ApplicationRevision>119</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -147,6 +147,8 @@
       <DependentUpon>DoorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\Entity.cs" />
+    <Compile Include="Controls\MyFlowDocumentScrollViewer.cs" />
+    <Compile Include="Controls\MyScrollViewer.cs" />
     <Compile Include="Controls\NumberKeyboardControl.xaml.cs">
       <DependentUpon>NumberKeyboardControl.xaml</DependentUpon>
     </Compile>
@@ -155,6 +157,7 @@
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="Converter\CountToVisibilityConverter.cs" />
     <Compile Include="Converter\IntToAdd.cs" />
+    <Compile Include="Converter\PercentageConverter.cs" />
     <Compile Include="Converter\StateToBackConverter.cs" />
     <Compile Include="Converter\StringToBrushConverter.cs" />
     <Compile Include="Converter\StringToOpacityConverter.cs" />
@@ -339,6 +342,10 @@
     <ProjectReference Include="..\DigitalPlatform.LibraryClient\DigitalPlatform.LibraryClient.csproj">
       <Project>{3541EC0B-82F5-4829-AFC3-5EF48254175D}</Project>
       <Name>DigitalPlatform.LibraryClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
+      <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>
+      <Name>DigitalPlatform.LibraryServer.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.RFID.Manager\DigitalPlatform.RFID.Manager.csproj">
       <Project>{e45f79df-041f-4da8-9365-909f53baee72}</Project>

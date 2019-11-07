@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Collections.Generic;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
-using System.Collections.Generic;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -15,6 +15,189 @@ namespace DigitalPlatform.LibraryServer
 
         // 本地文件目录的虚拟前缀字符串
         public static string LOCAL_PREFIX = "!";
+
+        // return:
+        //      -1  检查过程出错
+        //      0   状态不正常
+        //      1   状态正常
+        public static int CheckPatronState(XmlDocument readerdom,
+            out string strError)
+        {
+            // 检查借阅证是否超期，是否有挂失等状态
+            // return:
+            //      -1  检测过程发生了错误。应当作不能借阅来处理
+            //      0   可以借阅
+            //      1   证已经过了失效期，不能借阅
+            //      2   证有不让借阅的状态
+            int nRet = CheckReaderExpireAndState(readerdom,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet != 0)
+                return 0;
+
+            // 检查是否已经有记载了的<overdue>字段
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
+            if (nodes.Count > 0)
+            {
+                // text-level: 用户提示
+                strError = $"该读者当前有 {nodes.Count} 个违约记录尚未处理";
+                return 0;
+            }
+
+            {
+                // 检查当前是否有潜在的超期册
+                // return:
+                //      -1  error
+                //      0   没有超期册
+                //      1   有超期册
+                nRet = CheckOverdue(
+                    readerdom,
+                    out List<string> overdue_infos,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return 0;
+            }
+
+            return 1;
+        }
+
+        static string ToLocalTime(string strRfc1123, string strFormat)
+        {
+            try
+            {
+                return DateTimeUtil.Rfc1123DateTimeStringToLocal(strRfc1123, strFormat);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("时间字符串 '" + strRfc1123 + "' 格式不正确: " + ex.Message);
+            }
+        }
+
+        // 检查当前是否有潜在的超期册
+        // return:
+        //      -1  error
+        //      0   没有超期册
+        //      1   有超期册
+        public static int CheckOverdue(XmlDocument readerdom,
+            out List<string> overdue_infos,
+            out string strError)
+        {
+            overdue_infos = new List<string>();
+            strError = "";
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+            if (nodes.Count == 0)
+                return 0;
+
+            List<string> errors = new List<string>();
+
+            foreach (XmlElement borrow in nodes)
+            {
+                string strItemBarcode = borrow.GetAttribute("barcode");
+                try
+                {
+                    string strBorrowDate = ToLocalTime(borrow.GetAttribute("borrowDate"), "yyyy-MM-dd HH:mm");
+                    // string strBorrowPeriod = GetDisplayTimePeriodString(borrow.GetAttribute("borrowPeriod"));
+                    string strReturningDate = ToLocalTime(borrow.GetAttribute("returningDate"), "yyyy-MM-dd");
+                    string strRecPath = borrow.GetAttribute("recPath");
+                    //string strIsOverdue = borrow.GetAttribute("isOverdue");
+                    //string strOverdueInfo = borrow.GetAttribute("overdueInfo1");
+
+                    string strPeriod = borrow.GetAttribute("borrowPeriod");
+                    string strRfc1123String = borrow.GetAttribute("returningDate");
+
+                    if (string.IsNullOrEmpty(strRfc1123String) == false)
+                    {
+                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
+                        TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                        if (strPeriod.IndexOf("hour") != -1)
+                        {
+                            // TODO: 如果没有册条码号则用 refID 代替
+                            if (delta.Hours > 0)
+                                overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
+                        }
+                        else
+                        {
+                            if (delta.Days > 0)
+                                overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"册 {strItemBarcode} 出现异常: {ex.Message}");
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
+
+            if (overdue_infos.Count > 0)
+            {
+                strError = $"有 {overdue_infos.Count} 个在借册已经超期";
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // 检查借阅证是否超期，是否有挂失等状态
+        // text-level: 用户提示 OPAC预约功能要调用此函数
+        // return:
+        //      -1  检测过程发生了错误。应当作不能借阅来处理
+        //      0   可以借阅
+        //      1   证已经过了失效期，不能借阅
+        //      2   证有不让借阅的状态
+        public static int CheckReaderExpireAndState(XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+
+            string strExpireDate = DomUtil.GetElementText(readerdom.DocumentElement, "expireDate");
+            if (String.IsNullOrEmpty(strExpireDate) == false)
+            {
+                DateTime expireDate;
+                try
+                {
+                    expireDate = DateTimeUtil.FromRfc1123DateTimeString(strExpireDate);
+                }
+                catch
+                {
+                    // text-level: 内部错误
+                    strError = $"借阅证失效期 (expireDate 元素) 值 '{strExpireDate}' 格式错误";
+                    // "借阅证失效期<expireDate>值 '" + strExpireDate + "' 格式错误";
+                    return -1;
+                }
+
+                DateTime now = DateTime.UtcNow;
+
+                if (expireDate <= now)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format("今天({0})已经超过借阅证失效期({1})。",
+                        now.ToLocalTime().ToLongDateString(),
+                        expireDate.ToLocalTime().ToLongDateString());
+                    return 1;
+                }
+            }
+
+            string strState = DomUtil.GetElementText(readerdom.DocumentElement, "state");
+            if (String.IsNullOrEmpty(strState) == false)
+            {
+                // text-level: 用户提示
+                strError = string.Format("借阅证的状态为 '{0}'。",
+                    strState);
+                return 2;
+            }
+
+            return 0;
+        }
 
         // 从读者记录 email 元素值中获得 email 地址部分
         public static string GetEmailAddress(string strValue)

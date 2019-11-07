@@ -21,8 +21,9 @@
             <TextBox Name="title" Grid.Row="0"
                      Background="Transparent" BorderThickness="0"/>
             <Grid Grid.Row="1">
-                <FlowDocumentScrollViewer Name="richText" Visibility="Collapsed"
-                                          ScrollViewer.PanningMode="Both"/>
+                <local:MyFlowDocumentScrollViewer x:Name="richText" Visibility="Collapsed"
+                                          ScrollViewer.PanningMode="Both"
+                                          IsSelectionEnabled="False" ScrollViewer.CanContentScroll="False"/>
                 <TextBox Name="text"  
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    FontSize="20" TextWrapping="Wrap"

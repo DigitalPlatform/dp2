@@ -17255,6 +17255,7 @@ start_time_1,
             return 0;
         }
 
+        // TODO: 如果此函数要改写为通用函数，GetString() 要用一个 Interface 解决，UtcNow 也要用一个 Interface 解决
         // 检查借阅证是否超期，是否有挂失等状态
         // 2006/8/23 但是 尚未测试
         // text-level: 用户提示 OPAC预约功能要调用此函数

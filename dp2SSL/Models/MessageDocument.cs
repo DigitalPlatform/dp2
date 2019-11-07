@@ -42,17 +42,21 @@ namespace dp2SSL
             });
         }
 
-        public FlowDocument BuildDocument(string patron_name, out string speak)
+        public FlowDocument BuildDocument(string patron_name,
+            double baseFontSize,
+            out string speak)
         {
             speak = "";
             List<MessageItem> items = new List<MessageItem>();
             items.AddRange(this._items);
 
+            /*
             // 按照 Operation 排序
             items.Sort((a, b) =>
             {
-                return string.CompareOrdinal(a.Operation, b.Operation);
+                return -1*string.CompareOrdinal(a.Operation, b.Operation);
             });
+            */
 
             FlowDocument doc = new FlowDocument();
 
@@ -68,7 +72,7 @@ namespace dp2SSL
             {
                 var p = new Paragraph();
                 p.FontFamily = new FontFamily("微软雅黑");
-                p.FontSize = 14;
+                p.FontSize = baseFontSize;
                 p.TextAlignment = TextAlignment.Left;
                 p.Foreground = Brushes.Gray;
                 // p.TextIndent = -20;
@@ -89,7 +93,7 @@ namespace dp2SSL
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
                         FontFamily = new FontFamily("楷体"),
-                        FontSize = 36,
+                        FontSize = baseFontSize * 2.5,
                         // FontWeight = FontWeights.Bold,
                         Foreground = Brushes.White,
                     });
@@ -99,7 +103,7 @@ namespace dp2SSL
                         Text = $"{StringUtil.MakePathList(lines, ", ")}\r\n",
                         //Background = Brushes.DarkRed,
                         //Foreground = Brushes.White
-                        FontSize = 18,
+                        FontSize = baseFontSize * 1.2,
                         Foreground = Brushes.White,
                     });
                 }
@@ -147,7 +151,7 @@ namespace dp2SSL
             int index = 0;
             foreach (var item in items)
             {
-                var p = item.BuildParagraph(index++);
+                var p = item.BuildParagraph(index++, baseFontSize);
                 doc.Blocks.Add(p);
             }
 
@@ -195,11 +199,20 @@ namespace dp2SSL
         // 消息所涉及到的实体
         public Entity Entity { get; set; }
 
-        public Paragraph BuildParagraph(int index)
+        static string GetOperationCaption(string operation)
+        {
+            if (operation == "borrow")
+                return "借";
+            if (operation == "return")
+                return "还";
+            return operation;
+        }
+
+        public Paragraph BuildParagraph(int index, double baseFontSize)
         {
             var p = new Paragraph();
             p.FontFamily = new FontFamily("微软雅黑");
-            p.FontSize = 14;
+            p.FontSize = baseFontSize;
             // p.FontStyle = FontStyles.Italic;
             p.TextAlignment = TextAlignment.Left;
             p.Foreground = Brushes.Gray;
@@ -254,7 +267,11 @@ namespace dp2SSL
             }
 
             // 操作名称
-            p.Inlines.Add(new Run(Operation + " "));
+            p.Inlines.Add(new Run
+            {
+                Text = GetOperationCaption(Operation) + " ",
+                Foreground = Brushes.White
+            });
 
             // 书目摘要
             if (Entity != null && string.IsNullOrEmpty(Entity.Title) == false)

@@ -188,10 +188,42 @@ bool bClickClose = false)
                 return;
             }
 
+            // ClearHtml();
+
+            // 后台自动检查更新
+            // 这要放在检查序列号之前启动
+            Task.Run(() =>
+            {
+                Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+                NormalResult result = ClientInfo.InstallUpdateSync();
+                if (result.Value == -1)
+                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
+                else if (result.Value == 1)
+                    OutputHistory(result.ErrorInfo, 1);
+                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                    OutputHistory(result.ErrorInfo, 0);
+            });
+
             ClientInfo.SerialNumberMode = "must";
             ClientInfo.CopyrightKey = "fingerprintcenter_sn_key";
-            ClientInfo.Initial("fingerprintcenter");
-            this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+            ClientInfo.Initial("fingerprintcenter",
+                () =>
+                {
+                    this.UiState = ClientInfo.Config.Get("global", "ui_state", ""); // Properties.Settings.Default.ui_state;
+
+                    try
+                    {
+                        string url = this.textBox_cfg_dp2LibraryServerUrl.Text;
+                        Uri uri = new Uri(url);
+                        if (uri.Host == "123.207.138.139")
+                            return true;
+                        return false;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
 
             if (StringUtil.IsDevelopMode() == false)
                 MenuItem_testing.Visible = false;
@@ -256,17 +288,7 @@ bool bClickClose = false)
 
             // DisplayText("1");
 
-            // 后台自动检查更新
-            Task.Run(() =>
-            {
-                NormalResult result = ClientInfo.InstallUpdateSync();
-                if (result.Value == -1)
-                    OutputHistory("自动更新出错: " + result.ErrorInfo, 2);
-                else if (result.Value == 1)
-                    OutputHistory(result.ErrorInfo, 1);
-                else if (string.IsNullOrEmpty(result.ErrorInfo) == false)
-                    OutputHistory(result.ErrorInfo, 0);
-            });
+
 
             if (ClientInfo.IsMinimizeMode())
             {

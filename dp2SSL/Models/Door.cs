@@ -200,8 +200,6 @@ namespace dp2SSL
             return name1 == name2;
         }
 
-
-
         // 注：不用刷新。可以把背景色绑定到状态文字上
         // 刷新门锁(开/关)状态
         public static LockChanged SetLockState(
