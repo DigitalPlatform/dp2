@@ -11,12 +11,15 @@ namespace dp2SSL
 {
     public class StateToBackConverter : IValueConverter
     {
+        public Color OpenColor { get; set; }
+        public Color CloseColor { get; set; }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((string)value == "open")
-                return new SolidColorBrush(Colors.DarkRed);
+                return new SolidColorBrush(OpenColor);
 
-            return new SolidColorBrush(Colors.DarkGreen);
+            return new SolidColorBrush(CloseColor);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

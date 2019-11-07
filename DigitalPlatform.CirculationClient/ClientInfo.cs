@@ -120,9 +120,13 @@ namespace DigitalPlatform.CirculationClient
 
         public static string ProductName = "";
 
+        // return:
+        //      true    不检查序列号
+        public delegate bool Delegate_skipSerialNumberCheck();
+
         // parameters:
         //      product_name    例如 "fingerprintcenter"
-        public static void Initial(string product_name)
+        public static void Initial(string product_name, Delegate_skipSerialNumberCheck skipCheck = null)
         {
             ProductName = product_name;
             ClientVersion = Assembly.GetAssembly(TypeOfProgram).GetName().Version.ToString();
@@ -167,7 +171,8 @@ namespace DigitalPlatform.CirculationClient
             {
                 // 检查序列号
                 // if (DateTime.Now >= start_day || this.MainForm.IsExistsSerialNumberStatusFile() == true)
-                if (SerialNumberMode == "must")
+                if (SerialNumberMode == "must"
+                    && (skipCheck == null || skipCheck() == false))
                 {
                     // 在用户目录中写入一个隐藏文件，表示序列号功能已经启用
                     // this.WriteSerialNumberStatusFile();

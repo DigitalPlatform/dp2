@@ -35,7 +35,8 @@
                 <GradientStop Color="#FF363636" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <local:MyScrollViewer 
+            HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid Visibility="{Binding Path=NotEmpty, Converter={StaticResource VisibleIfTrueConverter}}"
                   >
@@ -119,6 +120,6 @@
                     </Button>
                 </StackPanel>
             </Grid>
-        </ScrollViewer>
+        </local:MyScrollViewer>
     </Border>
 </UserControl>

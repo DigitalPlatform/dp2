@@ -10,7 +10,8 @@
         <local:IntToAddConverter x:Key="IntToAdd" Direction="+"/>
         <local:IntToAddConverter x:Key="IntToRemove" Direction="-"/>
         <local:IntToAddConverter x:Key="IntToError" Direction=" e:"/>
-        <local:StateToBackConverter x:Key="StateToBack"/>
+        <local:StateToBackConverter x:Key="StateToBack" OpenColor="DarkCyan" CloseColor="DarkGreen"/>
+        <local:PercentageConverter x:Key="PercentageConverter" />
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
             <Border Background="{Binding State,Converter={StaticResource StateToBack}}" 
@@ -37,12 +38,42 @@
                     </Ellipse.Fill>
                 </Ellipse>
                 -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Text="{Binding Name}" Foreground="White" HorizontalAlignment="Right" />
-                    <TextBlock FontSize="40" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Text="{Binding Count}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}"
+                        Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding Count}"
+                        FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.5}"
+                               Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                    <TextBlock FontSize="16" Grid.Row="2" Grid.Column="0" Text="{Binding Add,Converter={StaticResource IntToAdd}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <TextBlock FontSize="16" Grid.Row="2" Grid.Column="1" Text="{Binding Remove,Converter={StaticResource IntToRemove}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <TextBlock FontSize="16" Grid.Row="2" Grid.Column="2" Text="{Binding ErrorCount,Converter={StaticResource IntToError}}" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Add,Converter={StaticResource IntToAdd}}"
+                        FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}"
+                               Grid.Row="2" Grid.Column="0"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Remove,Converter={StaticResource IntToRemove}}"
+                        FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}" 
+                               Grid.Row="2" Grid.Column="1"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding ErrorCount,Converter={StaticResource IntToError}}"
+                        FontSize="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}"
+                               Grid.Row="2" Grid.Column="2"  Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center" />
                     <!--
                 <ContentPresenter Content = "{TemplateBinding Content}" 
                HorizontalAlignment = "Center" VerticalAlignment = "Center" />

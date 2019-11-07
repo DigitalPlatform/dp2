@@ -30,6 +30,7 @@ using DigitalPlatform.Interfaces;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2SSL
 {
@@ -223,7 +224,6 @@ namespace dp2SSL
         {
             // TODO: 以前积累的 _adds 和 _removes 要先处理，处理完再开门
 
-
             // 先检查当前是否具备读者身份？
             // 检查读者卡状态是否 OK
             if (IsPatronOK("open", out string check_message) == false)
@@ -256,6 +256,32 @@ namespace dp2SSL
                 return;
             }
 
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(_patron.Xml);
+            // return:
+            //      -1  检查过程出错
+            //      0   状态不正常
+            //      1   状态正常
+            int nRet = LibraryServerUtil.CheckPatronState(readerdom,
+                out string strError);
+            if (nRet != 1)
+            {
+                ProgressWindow progress = null;
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    progress = new ProgressWindow();
+                    progress.MessageText = "正在处理，请稍候 ...";
+                    progress.Owner = Application.Current.MainWindow;
+                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    progress.Closed += Progress_Closed;
+                    progress.Show();
+                    AddLayer();
+                }));
+
+                DisplayError(ref progress, check_message);
+                return;
+            }
 
             // MessageBox.Show(e.Name);
             var result = RfidManager.OpenShelfLock(e.Door.LockName, e.Door.LockIndex);
@@ -1560,9 +1586,14 @@ namespace dp2SSL
                         Operation = action,
                         ResultType = resultType,
                         ErrorCode = channel.ErrorCode.ToString(),
+                        ErrorInfo = strError,
                         Entity = entity,
                     };
                     doc.Add(messageItem);
+
+                    // 微调
+                    if (lRet == 0 && action == "return")
+                        messageItem.ErrorInfo = "";
 
                     if (lRet == -1)
                     {
@@ -1580,6 +1611,9 @@ namespace dp2SSL
                         {
                             if (channel.ErrorCode == ErrorCode.NotBorrowed)
                             {
+                                // TODO: 这里不知是普通状态还是 warning 合适。warning 是否比较强烈了
+                                messageItem.ResultType = "warning";
+                                messageItem.ErrorCode = ErrorCode.NotBorrowed.ToString();
                                 // 界面警告
                                 warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
                                 // 写入错误日志
@@ -1740,7 +1774,7 @@ namespace dp2SSL
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         // DisplayError(ref progress, message, backColor);
-                        progress.MessageDocument = doc.BuildDocument(patron_name, out speak);
+                        progress.MessageDocument = doc.BuildDocument(patron_name, 18, out speak);
                         progress = null;
                     }));
 
@@ -1786,7 +1820,7 @@ namespace dp2SSL
             PatronClear(true);
         }
 
-#region 人脸识别功能
+        #region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1938,6 +1972,6 @@ namespace dp2SSL
             }
         }
 
-#endregion
+        #endregion
     }
 }

@@ -107,7 +107,8 @@
                 </Grid.RowDefinitions>
                 <TextBlock Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="读者"/>
-                <local:PatronControl x:Name="patronControl" Grid.Row="1"/>
+                <local:PatronControl x:Name="patronControl" Grid.Row="1"
+                                     />
             </Grid>
             <StackPanel Grid.Column="0" Grid.Row="1" 
                         Visibility="Collapsed"
