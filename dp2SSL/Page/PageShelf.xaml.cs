@@ -1679,6 +1679,7 @@ namespace dp2SSL
                 else
 #endif
                 {
+#if NO
                     // 成功
                     string backColor = "green";
                     string message = "";
@@ -1734,7 +1735,8 @@ namespace dp2SSL
 
                     if (borrows.Count > 0)
                         message += $"\r\n借书:\r\n" + MakeList(borrows);
-
+#endif
+                    string speak = "";
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         // DisplayError(ref progress, message, backColor);
@@ -1784,7 +1786,7 @@ namespace dp2SSL
             PatronClear(true);
         }
 
-        #region 人脸识别功能
+#region 人脸识别功能
 
         bool _stopVideo = false;
 
@@ -1936,6 +1938,6 @@ namespace dp2SSL
             }
         }
 
-        #endregion
+#endregion
     }
 }
