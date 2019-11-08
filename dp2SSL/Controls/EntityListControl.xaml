@@ -122,7 +122,8 @@
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>
                     <!-- 借阅信息 TODO: 背景颜色应该和是否超期相关。已经超期的要显示为黄色 -->
                     <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding BorrowInfo}" 
-                                       Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
+                                   FontSize="11"    
+                               Visibility="{Binding Path=BorrowInfo, Converter={StaticResource StringToVis}}"
                                        Foreground="LightGray"
                                        TextWrapping="Wrap"/>
 

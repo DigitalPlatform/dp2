@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
+using System.Diagnostics;
 
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
@@ -36,6 +37,22 @@ namespace dp2SSL
 
                     _name = value;
                     OnPropertyChanged("Name");
+                }
+            }
+        }
+
+        private string _type;
+
+        // 门的类型。值可能为 空/free。free 表示这是一个安装在书柜外面的读卡器，它实际上没有门 
+        public string Type
+        {
+            get => _type;
+            set
+            {
+                if (_type != value)
+                {
+                    _type = value;
+                    OnPropertyChanged("Type");
                 }
             }
         }
@@ -122,6 +139,46 @@ namespace dp2SSL
             }
         }
 
+        // 全部图书对象
+        EntityCollection _allEntities = new EntityCollection();
+        public EntityCollection AllEntities
+        {
+            get
+            {
+                return _allEntities;
+            }
+        }
+
+        // 新添加的图书对象
+        EntityCollection _addEntities = new EntityCollection();
+        public EntityCollection AddEntities
+        {
+            get
+            {
+                return _addEntities;
+            }
+        }
+
+        // 新添加的图书对象
+        EntityCollection _removeEntities = new EntityCollection();
+        public EntityCollection RemoveEntities
+        {
+            get
+            {
+                return _removeEntities;
+            }
+        }
+
+        // 错误状态的图书对象
+        EntityCollection _errorEntities = new EntityCollection();
+        public EntityCollection ErrorEntities
+        {
+            get
+            {
+                return _errorEntities;
+            }
+        }
+
         public string LockName { get; set; }
         public int LockIndex { get; set; }
         public string ReaderName { get; set; }
@@ -129,7 +186,7 @@ namespace dp2SSL
 
         // public string State { get; set; }
 
-
+        // 根据 shelf.xml 配置文件定义，构建 DoorItem 集合
         public static List<DoorItem> BuildItems(XmlDocument cfg_dom)
         {
             List<DoorItem> results = new List<DoorItem>();
@@ -144,6 +201,7 @@ namespace dp2SSL
                 foreach (XmlElement door in doors)
                 {
                     string door_name = door.GetAttribute("name");
+                    string door_type = door.GetAttribute("type");
 
                     ParseLockString(door.GetAttribute("lock"), out string lockName, out int lockIndex);
                     ParseLockString(door.GetAttribute("antenna"), out string readerName, out int antenna);
@@ -155,6 +213,7 @@ namespace dp2SSL
                         LockIndex = lockIndex,
                         ReaderName = readerName,
                         Antenna = antenna,
+                        Type = door_type,
                     };
 
                     results.Add(item);
@@ -242,7 +301,6 @@ namespace dp2SSL
             return results[0];
         }
 
-
         class Three
         {
             public List<Entity> All { get; set; }
@@ -305,8 +363,37 @@ namespace dp2SSL
                 if (error == null)
                     error = new List<Entity>();
 
+                /*
+                // TODO: 触发 BookChanged 事件?
+                ShelfData.TriggerBookChanged(new BookChangedEventArgs
+                {
+                    Door = door,
+                    All = count,
+                    Adds = add,
+                    Removes = remove,
+                    Errors = error
+                });
+                */
+
+
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
+                    // 更新 entities
+                    // TODO: 异步填充
+                    if (Refresh(door._allEntities, count) == true
+                    || Refresh(door._removeEntities, remove) == true
+                    || Refresh(door._addEntities, add) == true
+                    || Refresh(door._errorEntities, error) == true)
+                    {
+                        var task = Task.Run(async () =>
+                        {
+                            await ShelfData.FillBookFields(door._allEntities);
+                            await ShelfData.FillBookFields(door._removeEntities);
+                            await ShelfData.FillBookFields(door._addEntities);
+                            await ShelfData.FillBookFields(door._errorEntities);
+                        });
+                    }
+
                     door.Count = count.Count;
                     door.Add = add.Count;
                     door.Remove = remove.Count;
@@ -322,6 +409,43 @@ namespace dp2SSL
             }
         }
 
+        // 根据 items 集合更新 collection 集合内容
+        static bool Refresh(EntityCollection collection, List<Entity> items)
+        {
+            bool changed = false;
+            int oldCount = items.Count;
+            // 添加 items 中多出来的对象
+            foreach (var item in items)
+            {
+                // TODO: 用 UID 来搜索
+                var found = collection.FindEntityByUID(item.UID);
+                if (found == null)
+                {
+                    Entity dup = item.Clone();
+                    dup.Container = collection;
+                    collection.Add(dup);
+                    changed = true;
+                }
+            }
+
+            List<Entity> removes = new List<Entity>();
+            // 删除 collection 中多出来的对象
+            foreach (var item in collection)
+            {
+                var found = items.Find((o) => { return (o.UID == item.UID); });
+                if (found == null)
+                    removes.Add(item);
+            }
+
+            foreach (var item in removes)
+            {
+                collection.Remove(item);
+                changed = true;
+            }
+
+            Debug.Assert(oldCount == items.Count, "");
+            return changed;
+        }
     }
 
 
@@ -337,4 +461,19 @@ OpenCountChangedEventArgs e);
         public int NewCount { get; set; }
     }
 
+    public delegate void BookChangedEventHandler(object sender,
+BookChangedEventArgs e);
+
+    /// <summary>
+    /// 图书拿放变化事件的参数
+    /// </summary>
+    public class BookChangedEventArgs : EventArgs
+    {
+        public DoorItem Door { get; set; }
+
+        public List<Entity> All { get; set; }
+        public List<Entity> Adds { get; set; }
+        public List<Entity> Removes { get; set; }
+        public List<Entity> Errors { get; set; }
+    }
 }

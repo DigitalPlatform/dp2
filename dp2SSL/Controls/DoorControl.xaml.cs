@@ -110,6 +110,15 @@ namespace dp2SSL
             this.grid.ColumnDefinitions.Clear();
             this.grid.RowDefinitions.Clear();
 
+            // 获得一个 shelf 元素下 door 数量的最多那个
+            int max_doors = 0;
+            foreach (XmlElement shelf in shelfs)
+            {
+                int current = shelf.SelectNodes("door").Count;
+                if (current > max_doors)
+                    max_doors = current;
+            }
+
             // int shelf_width = total_width / Math.Max(1, shelfs.Count);
             // int level_height = 100;
             bool rowDefinitionCreated = false;
@@ -118,11 +127,18 @@ namespace dp2SSL
             {
                 this.grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
 
+                // TODO: 这里要用具有最多 door 元素的 shelf 元素来获得数字
                 if (rowDefinitionCreated == false)
                 {
+                    /*
                     XmlNodeList doors = shelf.SelectNodes("door");
                     // level_height = total_height / Math.Max(1, doors.Count);
                     foreach (XmlElement door in doors)
+                    {
+                        this.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
+                    }
+                    */
+                    for (int i = 0; i < max_doors; i++)
                     {
                         this.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
                     }
@@ -305,7 +321,23 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             OpenDoor?.Invoke(sender, new OpenDoorEventArgs { Door = button.DataContext as DoorItem });
         }
 
+        private void TextBlock_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBlock textblock = (TextBlock)sender;
+            DoorItem door = textblock.DataContext as DoorItem;
 
+            OpenDoor?.Invoke(sender, new OpenDoorEventArgs
+            {
+                ButtonName = textblock.Name,
+                Door = textblock.DataContext as DoorItem
+            });
+
+            e.Handled = true;
+            /*
+            Button button = textblock.TemplatedParent as Button;
+            DoorItem door = button.DataContext as DoorItem;
+            */
+        }
     }
 
     public delegate void OpenDoorEventHandler(object sender,
@@ -324,6 +356,9 @@ OpenDoorEventArgs e);
         public string State { get; set; }
         */
         public DoorItem Door { get; set; }
+
+        // 触发位置。空/count/add/remove/error
+        public string ButtonName { get; set; }
     }
 
 #if NO

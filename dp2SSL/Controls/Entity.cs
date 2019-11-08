@@ -33,7 +33,7 @@ namespace dp2SSL
             }
         }
 
-        Entity FindEntityByUID(string uid)
+        public Entity FindEntityByUID(string uid)
         {
             foreach (Entity entity in this)
             {
@@ -321,6 +321,32 @@ namespace dp2SSL
 
     public class Entity : RfidItem
     {
+        public Entity Clone()
+        {
+            Entity dup = new Entity();
+            dup.Container = this.Container;
+            dup.TagInfo = this.TagInfo.Clone();
+            dup.ItemRecPath = this.ItemRecPath;
+            dup.Title = this.Title;
+            dup.Location = this.Location;
+            dup.BorrowInfo = this.BorrowInfo;
+            dup.ShelfState = this.ShelfState;
+            dup.OnShelf = this.OnShelf;
+            dup.BelongToCurrentShelf = this.BelongToCurrentShelf;
+            dup.FillFinished = this.FillFinished;
+            dup.State = this.State;
+
+            dup.PII = this.PII;
+            dup.UID = this.UID;
+            dup.Error = this.Error;
+            dup.ErrorColor = this.ErrorColor;
+            dup.Waiting = this.Waiting;
+            dup.ReaderName = this.ReaderName;
+            dup.Antenna = this.Antenna;
+
+            return dup;
+        }
+
         public EntityCollection Container { get; set; }
 
         public TagInfo TagInfo { get; set; }
@@ -431,7 +457,8 @@ namespace dp2SSL
             set
             {
                 string s = this.ShelfState;
-                StringUtil.SetInList(ref s, "offshelf", !value);
+                if (s != null)
+                    StringUtil.SetInList(ref s, "offshelf", !value);
                 this.ShelfState = s;
             }
         }

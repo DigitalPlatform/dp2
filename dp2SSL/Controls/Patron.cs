@@ -160,7 +160,6 @@ namespace dp2SSL
             this.ErrorColor = color;
             this.Waiting = false;
         }
-
     }
 
     // 读者信息

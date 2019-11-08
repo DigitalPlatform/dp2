@@ -25,6 +25,15 @@ namespace dp2SSL
     {
         public static event OpenCountChangedEventHandler OpenCountChanged;
 
+        /*
+        public static event BookChangedEventHandler BookChanged;
+
+        public static void TriggerBookChanged(BookChangedEventArgs e)
+        {
+            BookChanged?.Invoke(null, e);
+        }
+        */
+
         // 读者证读卡器名字。在 shelf.xml 中配置
         static string _patronReaderName = "";
 
@@ -453,6 +462,21 @@ namespace dp2SSL
             return result;
         }
 
+        // 检查一本图书是否处在普通(非 free) 类型的门内
+        public static bool BelongToNormal(Entity entity)
+        {
+            var doors = DoorItem.FindDoors(_doors, entity.ReaderName, entity.Antenna);
+            int count = 0;
+            foreach (DoorItem door in doors)
+            {
+                if (door.Type == "free")
+                    return false;
+                count++;
+            }
+            return count > 0;
+        }
+
+        // 刷新门内图书数字显示
         public static void RefreshCount()
         {
             List<Entity> errors = GetErrors(_all, _adds, _removes);
@@ -546,6 +570,9 @@ namespace dp2SSL
 
         internal static bool Add(List<Entity> entities, Entity entity)
         {
+            Debug.Assert(entity != null, "");
+            Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
             {
@@ -560,6 +587,9 @@ namespace dp2SSL
 
         internal static bool Remove(List<Entity> entities, Entity entity)
         {
+            Debug.Assert(entity != null, "");
+            Debug.Assert(string.IsNullOrEmpty(entity.UID) == false, "");
+
             List<Entity> results = new List<Entity>();
             entities.ForEach((o) =>
             {
@@ -745,6 +775,8 @@ namespace dp2SSL
     });
             }
 
+            // TODO: 把 add remove error 动作分散到每个门，然后再触发 ShelfData.BookChanged 事件
+
             if (changed == true)
             {
                 // DoorItem.DisplayCount(_all, _adds, _removes, ShelfData.Doors);
@@ -760,7 +792,7 @@ namespace dp2SSL
         }
 
         public static async Task FillBookFields(// BaseChannel<IRfid> channel,
-    List<Entity> entities)
+    IList<Entity> entities)
         {
             try
             {

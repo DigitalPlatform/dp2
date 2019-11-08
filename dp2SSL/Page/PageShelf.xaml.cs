@@ -94,6 +94,7 @@ namespace dp2SSL
 
             // RfidManager.ListLocks += RfidManager_ListLocks;
             ShelfData.OpenCountChanged += CurrentApp_OpenCountChanged;
+            //ShelfData.BookChanged += ShelfData_BookChanged;
 
             RfidManager.ClearCache();
             // 注：将来也许可以通过(RFID 以外的)其他方式输入图书号码
@@ -141,6 +142,41 @@ namespace dp2SSL
             }
         }
 
+        private void ShowBookInfo(object sender, OpenDoorEventArgs e)
+        {
+            // 书柜外的读卡器触发观察图书信息对话框
+            // if (e.Door.Type == "free" && e.Adds != null && e.Adds.Count > 0)
+            {
+                BookInfoWindow bookInfoWindow = null;
+
+                EntityCollection collection = null;
+                if (e.ButtonName == "count")
+                    collection = e.Door.AllEntities;
+                else if (e.ButtonName == "add")
+                    collection = e.Door.AddEntities;
+                else if (e.ButtonName == "remove")
+                    collection = e.Door.RemoveEntities;
+                else if (e.ButtonName == "errorCount")
+                    collection = e.Door.ErrorEntities;
+
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    bookInfoWindow = new BookInfoWindow();
+                    bookInfoWindow.TitleText = e.ButtonName;
+                    bookInfoWindow.Owner = Application.Current.MainWindow;
+                    bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    bookInfoWindow.Closed += BookInfoWindow_Closed;
+                    bookInfoWindow.SetBooks(collection);
+                    bookInfoWindow.Show();
+                    AddLayer();
+                }));
+            }
+        }
+
+        private void BookInfoWindow_Closed(object sender, EventArgs e)
+        {
+            RemoveLayer();
+        }
 
         // 当前读者卡状态是否 OK?
         bool IsPatronOK(string action, out string message)
@@ -222,6 +258,12 @@ namespace dp2SSL
 
         private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
+            if (string.IsNullOrEmpty(e.ButtonName) == false)
+            {
+                ShowBookInfo(sender, e);
+                return;
+            }
+
             // TODO: 以前积累的 _adds 和 _removes 要先处理，处理完再开门
 
             // 先检查当前是否具备读者身份？
@@ -415,6 +457,7 @@ namespace dp2SSL
             RfidManager.SetError -= RfidManager_SetError;
 
             App.CurrentApp.TagChanged -= CurrentApp_TagChanged;
+            //ShelfData.BookChanged -= ShelfData_BookChanged;
 
             FingerprintManager.Touched -= FingerprintManager_Touched;
             FingerprintManager.SetError -= FingerprintManager_SetError;
@@ -658,6 +701,7 @@ namespace dp2SSL
             await ShelfData.ChangeEntities((BaseChannel<IRfid>)sender, e);
 
             // "initial" 模式下，立即合并到 _all。等关门时候一并提交请求
+            // TODO: 不过似乎此时有语音提示放入、取出，似乎更显得实用一些？
             if (this.Mode == "initial")
             {
                 List<Entity> adds = new List<Entity>(ShelfData.Adds);
@@ -1359,13 +1403,19 @@ namespace dp2SSL
             // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
             // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
 
+            // TODO: 属于 free 类型的门里面的图书不要参与处理
+
             List<ActionInfo> actions = new List<ActionInfo>();
             foreach (var entity in ShelfData.Adds)
             {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
                 actions.Add(new ActionInfo { Entity = entity, Action = "return" });
             }
             foreach (var entity in ShelfData.Removes)
             {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
                 actions.Add(new ActionInfo { Entity = entity, Action = "borrow" });
             }
 
