@@ -522,7 +522,12 @@ namespace dp2SSL
             foreach (XmlElement door in doors)
             {
                 string lockDef = door.GetAttribute("lock");
+                if (string.IsNullOrEmpty(lockDef))
+                    continue;
                 DoorItem.ParseLockString(lockDef, out string lockName, out int lockIndex);
+                if (string.IsNullOrEmpty(lockName))
+                    continue;
+
                 List<int> array = null;
                 if (table.ContainsKey(lockName) == false)
                 {

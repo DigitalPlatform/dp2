@@ -15340,6 +15340,10 @@ start_time_1,
             DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrowerRecPath");
 
+            // 2019/11/9
+            DomUtil.DeleteElements(itemdom.DocumentElement,
+"overflow");
+
             if (nodeOldBorrower != null)
                 DomUtil.SetAttr(nodeOldBorrower,
                "borrowDate",
@@ -17023,6 +17027,15 @@ start_time_1,
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowDate",
                 strBorrowDate);
+
+            // 2019/11/9
+            // 记载溢出原因
+            if (overflowReasons.Count > 0)
+            {
+                DomUtil.SetElementText(itemdom.DocumentElement,
+    "overflow",
+    StringUtil.MakePathList(overflowReasons, "; "));
+            }
 
             if (nNo > 0)    // 2013/12/23
                 DomUtil.SetElementText(itemdom.DocumentElement,

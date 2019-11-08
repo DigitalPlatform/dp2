@@ -338,6 +338,20 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             DoorItem door = button.DataContext as DoorItem;
             */
         }
+
+        private void All_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            DoorItem door = button.DataContext as DoorItem;
+
+            OpenDoor?.Invoke(sender, new OpenDoorEventArgs
+            {
+                ButtonName = "count",
+                Door = button.DataContext as DoorItem
+            });
+
+            e.Handled = true;
+        }
     }
 
     public delegate void OpenDoorEventHandler(object sender,

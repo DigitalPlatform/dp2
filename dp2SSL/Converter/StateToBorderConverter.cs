@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace dp2SSL
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((string)value == "borrowed")
+            if (StringUtil.IsInList("borrowed", (string)value))
                 return FontAwesome.WPF.FontAwesomeIcon.AddressBook;
 
             // return FontAwesome.WPF.FontAwesomeIcon.HandPaperOutline;
@@ -46,4 +47,29 @@ namespace dp2SSL
             throw new NotImplementedException();
         }
     }
+
+    public class StateToTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            List<string> results = new List<string>();
+            var list = StringUtil.SplitList((string)value);
+            foreach(string s in list)
+            {
+                if (s == "overflow")
+                    results.Add("超额");
+                if (s == "overdue")
+                    results.Add("超期");
+            }
+
+            return StringUtil.MakePathList(results);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 }

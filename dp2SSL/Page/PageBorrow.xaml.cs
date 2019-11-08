@@ -1055,9 +1055,9 @@ namespace dp2SSL
 
                 // 检测 EAS 是否正确
                 NormalResult result = null;
-                if (entity.State == "borrowed" && entity.TagInfo.EAS == true)
+                if (StringUtil.IsInList("borrowed", entity.State) && entity.TagInfo.EAS == true)
                     result = SetEAS(entity.UID, entity.Antenna, false);
-                else if (entity.State == "onshelf" && entity.TagInfo.EAS == false)
+                else if (StringUtil.IsInList("onshelf", entity.State) && entity.TagInfo.EAS == false)
                     result = SetEAS(entity.UID, entity.Antenna, true);
                 else
                     continue;
@@ -1583,13 +1583,13 @@ out string strError);
 
                     if (action == "borrow" || action == "renew")
                     {
-                        if (action == "borrow" && entity.State == "borrowed")
+                        if (action == "borrow" && StringUtil.IsInList("borrowed", entity.State))
                         {
                             entity.SetError($"本册是外借状态。{action_name}操作被忽略", "yellow");
                             skip_count++;
                             continue;
                         }
-                        if (action == "renew" && entity.State == "onshelf")
+                        if (action == "renew" && StringUtil.IsInList("onshelf", entity.State))
                         {
                             entity.SetError($"本册是在馆状态。{action_name}操作被忽略 (只有处于外借状态的册才能进行续借)", "yellow");
                             skip_count++;
@@ -1617,7 +1617,7 @@ out string strError);
                     }
                     else if (action == "return")
                     {
-                        if (entity.State == "onshelf")
+                        if (StringUtil.IsInList("onshelf", entity.State))
                         {
                             entity.SetError($"本册是在馆状态。{action_name}操作被忽略", "yellow");
                             skip_count++;
@@ -2424,7 +2424,7 @@ out strError);
             long skip_offset = 0;
 
             {
-                REDO_DETECT:
+            REDO_DETECT:
                 // 先检查以前是否有已经上传的局部
                 long lRet = channel.GetRes(stop,
                     strServerFilePath,
@@ -2588,7 +2588,7 @@ out strError);
 
                         int nRedoCount = 0;
                         long save_pos = stream.Position;
-                        REDO:
+                    REDO:
                         // 2019/6/21
                         // 如果是重做，文件指针要回到合适位置
                         if (stream.Position != save_pos)
