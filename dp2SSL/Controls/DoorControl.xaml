@@ -15,7 +15,7 @@
 
         <ControlTemplate x:Key = "ButtonTemplate" TargetType = "Button">
             <Border Background="{Binding State,Converter={StaticResource StateToBack}}" 
-                    BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="6">
+                    BorderBrush="DarkGray" BorderThickness="1,1,1,1" Padding="8">
                 <Grid >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
@@ -43,37 +43,41 @@
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.2}"
+                       ConverterParameter=0.18}"
                         Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding Count}"
+                    <TextBlock Name="count" Text="{Binding Count}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
-                       ConverterParameter=0.5}"
-                               Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                       ConverterParameter=0.4}"
+                               Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                               MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
 
-                    <TextBlock Text="{Binding Add,Converter={StaticResource IntToAdd}}"
+                    <TextBlock Name="add"  Text="{Binding Add,Converter={StaticResource IntToAdd}}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
                        ConverterParameter=0.2}"
-                               Grid.Row="2" Grid.Column="0"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Remove,Converter={StaticResource IntToRemove}}"
+                               Grid.Row="2" Grid.Column="0"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               MouseLeftButtonDown="TextBlock_MouseLeftButtonDown" />
+                    <TextBlock Name="remove" Text="{Binding Remove,Converter={StaticResource IntToRemove}}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
                        ConverterParameter=0.2}" 
-                               Grid.Row="2" Grid.Column="1"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding ErrorCount,Converter={StaticResource IntToError}}"
+                               Grid.Row="2" Grid.Column="1"  Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
+                    <TextBlock Name="errorCount" Text="{Binding ErrorCount,Converter={StaticResource IntToError}}"
                         FontSize="{Binding 
                        Converter={StaticResource PercentageConverter}, 
                        RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
                        Path=ActualHeight, 
                        ConverterParameter=0.2}"
-                               Grid.Row="2" Grid.Column="2"  Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                               Grid.Row="2" Grid.Column="2"  Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center"
+                               MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
                     <!--
                 <ContentPresenter Content = "{TemplateBinding Content}" 
                HorizontalAlignment = "Center" VerticalAlignment = "Center" />
