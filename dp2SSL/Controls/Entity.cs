@@ -556,10 +556,37 @@ namespace dp2SSL
                 this.BorrowInfo = null;
             else
             {
-                borrowDate = ToDate(borrowDate);
-                returningDate = ToDate(returningDate);
-                this.BorrowInfo = $"借书日期:\t{borrowDate}\n期限:\t\t{period}\n应还日期:\t{returningDate}";
+                this.BorrowInfo = $"借书日期:\t{ToDate(borrowDate)}\n期限:\t\t{period}\n应还日期:\t{ToDate(returningDate)}";
             }
+
+            // 2019/11/9
+            // 判断是否超期
+            bool isOverdue = false;
+            if (string.IsNullOrEmpty(returningDate) == false)
+            {
+                DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate);
+                TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                if (period.IndexOf("hour") != -1)
+                {
+                    // TODO: 如果没有册条码号则用 refID 代替
+                    if (delta.Hours > 0)
+                        isOverdue = true;
+                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Hours} 小时");
+                }
+                else
+                {
+                    if (delta.Days > 0)
+                        isOverdue = true;
+                        // overdue_infos.Add($"册 {strItemBarcode} 已超期 {delta.Days} 天");
+                }
+            }
+
+            if (isOverdue)
+                this.State += ",overdue";
+
+            string overflow = DomUtil.GetElementText(dom.DocumentElement, "overflow");
+            if (string.IsNullOrEmpty(overflow) == false)
+                this.State += ",overflow";
         }
 
         static string ToDate(string strTime)

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:dp2SSL"
+             xmlns:fa="http://schemas.fontawesome.io/icons/"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -52,7 +53,7 @@
                        Path=ActualHeight, 
                        ConverterParameter=0.4}"
                                Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"  Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
+                               />
 
                     <TextBlock Name="add"  Text="{Binding Add,Converter={StaticResource IntToAdd}}"
                         FontSize="{Binding 
@@ -78,6 +79,17 @@
                        ConverterParameter=0.2}"
                                Grid.Row="2" Grid.Column="2"  Foreground="Red" HorizontalAlignment="Left" VerticalAlignment="Center"
                                MouseLeftButtonDown="TextBlock_MouseLeftButtonDown"/>
+                    <Button Name="all" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="Transparent" BorderThickness="0" Foreground="DarkGray" Margin="4"
+                            Click="All_Click">
+                        <fa:ImageAwesome Icon="InfoCircle"
+                             Height="{Binding 
+                       Converter={StaticResource PercentageConverter}, 
+                       RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type Grid}},
+                       Path=ActualHeight, 
+                       ConverterParameter=0.2}" 
+                                         Foreground="DarkGray" Margin="4"/>
+                    </Button>
                     <!--
                 <ContentPresenter Content = "{TemplateBinding Content}" 
                HorizontalAlignment = "Center" VerticalAlignment = "Center" />

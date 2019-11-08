@@ -234,7 +234,8 @@ namespace dp2SSL
             index = 0;
             var parts = StringUtil.ParseTwoPart(text, ":");
             lockName = parts[0];
-            index = Convert.ToInt32(parts[1]);
+            if (Int32.TryParse(parts[1], out index) == false)
+                index = 0;
         }
 
         public static List<DoorItem> FindDoors(

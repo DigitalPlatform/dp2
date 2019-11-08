@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -166,11 +167,11 @@ namespace dp2SSL
             {
                 foreach (Entity entity in _entities)
                 {
-                    if (entity.State == "onshelf")
+                    if (StringUtil.IsInList("onshelf", entity.State))
                         borrowable_count++;
-                    if (entity.State == "borrowed")
+                    if (StringUtil.IsInList("borrowed", entity.State))
                         returnable_count++;
-                    if (entity.State == "borrowed")
+                    if (StringUtil.IsInList("borrowed", entity.State))
                         renewable_count++;
                 }
             }

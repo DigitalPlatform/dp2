@@ -5,14 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
-        Title="BookInfoWindow" Height="450" Width="800">
+        Title="BookInfoWindow" Height="450" Width="800"
+        Background="Black" Foreground="White"
+        WindowStyle="None"
+    AllowsTransparency="True"
+    ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <TextBlock Name="title" Background="Transparent" Foreground="Gray" FontSize="14" TextAlignment="Center"
                     Text="Title"/>
         <local:EntityListControl x:Name="books" Grid.Row="1"/>
+        <Button Name="okButton" Grid.Row="2"
+                    Style="{DynamicResource RoundedButtonStyle}" 
+                    Width="120" Height="60" 
+                    FontSize="30" FontWeight="ExtraBold" 
+                    Foreground="White" 
+                    Click="OkButton_Click">关闭</Button>
     </Grid>
 </Window>

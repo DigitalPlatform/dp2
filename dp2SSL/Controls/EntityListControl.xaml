@@ -12,9 +12,11 @@
         <local:StringToVisibilityConverter x:Key="StringToVis" />
         <local:StateToBorderConverter x:Key="StateToBorder" />
         <local:StateToIconConverter x:Key="StateToIcon" />
+        <local:StateToTextConverter x:Key="StateToText" />
         <local:StringToBrushConverter x:Key="StringToBrush" />
         <local:InvertCountToVisibilityConverter x:Key="InvertCountToVis" />
         <local:StringToOpacityConverter x:Key="StringToOpacity" />
+        <local:EntityStateToBackConverter x:Key="StateToBack" OverdueColor="DarkGoldenrod" OverflowColor="DarkRed"/>
 
         <local:PersonDataTemplateSelector x:Key="personDataTemplateSelector" />
         <DataTemplate x:Key="LargeTemplate">
@@ -85,7 +87,7 @@
                         <GradientStop Color="#FF363636" Offset="1"/>
                     </LinearGradientBrush>
                 </Border.Background>
-                <Grid Width="180" MaxHeight="660" Margin="10">
+                <Grid Width="150" MaxHeight="660" Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -109,14 +111,20 @@
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding UID}" 
                                Visibility="Collapsed"
                                TextAlignment="Right" FontSize="8" Foreground="Gray"/>
-
-                    <fa:ImageAwesome Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                    <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Orientation="Horizontal"
+                                Background="{Binding Path=State, Converter={StaticResource StateToBack}}">
+                        <fa:ImageAwesome 
                                      Height="14" Foreground="DarkGray"
                                     Icon="{Binding Path=State, Converter={StaticResource StateToIcon}}" 
-                                    HorizontalAlignment="Left"/>
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="4,2,2,2"
+                                   FontSize="11" 
+                                   Text="{Binding Path=State, Converter={StaticResource StateToText}}"/>
+                    </StackPanel>
 
 
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding PII}" TextAlignment="Right" 
+                               FontSize="12" FontWeight="Bold" Foreground="DarkOrange"/>
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Title}" 
                                        FontSize="12" FontWeight="Bold" Foreground="LightGray"
                                        MaxWidth="240" TextWrapping="NoWrap"  TextTrimming="CharacterEllipsis"/>

@@ -165,6 +165,8 @@ namespace dp2SSL
                     bookInfoWindow.TitleText = e.ButtonName;
                     bookInfoWindow.Owner = Application.Current.MainWindow;
                     bookInfoWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                    bookInfoWindow.Width = Math.Min(1800, this.ActualWidth);
+                    bookInfoWindow.Height = Math.Min(700, this.ActualHeight);
                     bookInfoWindow.Closed += BookInfoWindow_Closed;
                     bookInfoWindow.SetBooks(collection);
                     bookInfoWindow.Show();
@@ -256,11 +258,36 @@ namespace dp2SSL
             _dialogs.Add(dialog);
         }
 
+        void ErrorBox(string message)
+        {
+            ProgressWindow progress = null;
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                progress = new ProgressWindow();
+                progress.MessageText = "正在处理，请稍候 ...";
+                progress.Owner = Application.Current.MainWindow;
+                progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                progress.Closed += Progress_Closed;
+                progress.Show();
+                AddLayer();
+            }));
+
+            DisplayError(ref progress, message);
+        }
+
         private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
             if (string.IsNullOrEmpty(e.ButtonName) == false)
             {
                 ShowBookInfo(sender, e);
+                return;
+            }
+
+            // 没有门锁的门
+            if (string.IsNullOrEmpty(e.Door.LockName))
+            {
+                ErrorBox("没有门锁");
                 return;
             }
 
@@ -273,6 +300,7 @@ namespace dp2SSL
                 if (string.IsNullOrEmpty(check_message))
                     check_message = $"(读卡器上的)当前读者卡状态不正确。无法进行开门操作";
 
+                /*
                 ProgressWindow progress = null;
 
                 Application.Current.Dispatcher.Invoke(new Action(() =>
@@ -287,14 +315,8 @@ namespace dp2SSL
                 }));
 
                 DisplayError(ref progress, check_message);
-                /*
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    progress.MessageText = ;
-                    progress.BackColor = "red";
-                    progress = null;
-                }));
                 */
+                ErrorBox(check_message);
                 return;
             }
 
@@ -308,20 +330,7 @@ namespace dp2SSL
                 out string strError);
             if (nRet != 1)
             {
-                ProgressWindow progress = null;
-
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    progress = new ProgressWindow();
-                    progress.MessageText = "正在处理，请稍候 ...";
-                    progress.Owner = Application.Current.MainWindow;
-                    progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                    progress.Closed += Progress_Closed;
-                    progress.Show();
-                    AddLayer();
-                }));
-
-                DisplayError(ref progress, check_message);
+                ErrorBox(check_message);
                 return;
             }
 
@@ -1154,8 +1163,29 @@ namespace dp2SSL
             _layer.Remove(_adorner);
         }
 
-        private void GoHome_Click(object sender, RoutedEventArgs e)
+        private async void GoHome_Click(object sender, RoutedEventArgs e)
         {
+            // 检查全部门是否关闭
+
+            if (ShelfData.OpeningDoorCount > 0)
+            {
+                ErrorBox("请先关闭全部柜门，才能返回菜单页面");
+                return;
+            }
+
+            /*
+            await Task.Run(() =>
+            {
+                while (ShelfData.OpeningDoorCount > 0)
+                {
+                    if (_initialCancelled)
+                        break;
+                    DisplayMessage(progress, "请先关闭全部柜门，以返回菜单页面", "yellow");
+                    Thread.Sleep(1000);
+                }
+            });
+            */
+
             this.NavigationService.Navigate(PageMenu.MenuPage);
         }
 
@@ -1164,6 +1194,7 @@ namespace dp2SSL
             // OpenDoor();
         }
 
+        // TODO: 报错信息尝试用 FlowDocument 改造
         // 尝试进行一次还书操作
         void TryReturn(ProgressWindow progress,
             List<Entity> entities)
@@ -1585,7 +1616,7 @@ namespace dp2SSL
                         entity.Waiting = true;
                         lRet = channel.Return(null,
                             "return",
-                            _patron.Barcode,
+                            "", // _patron.Barcode,
                             entity.PII,
                             entity.ItemRecPath,
                             false,
