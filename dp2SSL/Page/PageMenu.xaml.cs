@@ -207,6 +207,13 @@ namespace dp2SSL
             this.NavigationService.Navigate(_pageBorrow);
         }
 
+        public static PageShelf PageShelf
+        {
+            get
+            {
+                return _pageShelf;
+            }
+        }
         static PageShelf _pageShelf = null;
 
         void NavigatePageShelf(string mode)

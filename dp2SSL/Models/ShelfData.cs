@@ -8,10 +8,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.RFID;
 using DigitalPlatform.Text;
 using static dp2SSL.LibraryChannelUtil;
@@ -883,5 +885,365 @@ namespace dp2SSL
             }
         }
 
+        public class SubmitResult : NormalResult
+        {
+            public MessageDocument MessageDocument { get; set; }
+            public string SpeakContent { get; set; }
+        }
+
+        // public delegate void Delegate_showDialog();
+
+        // -1 -1 n only change progress value
+        // -1 -1 -1 hide progress bar
+        public delegate void Delegate_setProgress(double min, double max, double value);
+
+        // result.Value
+        //      -1  出错(要用对话框显示结果)
+        //      0   没有必要处理
+        //      1   已经完成处理(要用对话框显示结果)
+        public static SubmitResult SubmitCheckInOut(
+            // Delegate_showDialog func_showDialog,
+            Delegate_setProgress func_setProgress,
+            // ProgressWindow progress,
+            string patronBarcode,
+            string patron_name,
+            List<ActionInfo> actions,
+            bool patron_filled)
+        {
+            // TODO: 如果当前没有读者身份，则当作初始化处理，将书柜内的全部图书做还书尝试；被拿走的图书记入本地日志(所谓无主操作)
+            // TODO: 注意还书，也就是往书柜里面放入图书，是不需要具体读者身份就可以提交的
+
+            // TODO: 属于 free 类型的门里面的图书不要参与处理
+
+            // ProgressWindow progress = null;
+            //string patron_name = "";
+            //patron_name = _patron.PatronName;
+
+            // 先尽量执行还书请求，再报错说无法进行借书操作(记入错误日志)
+            MessageDocument doc = new MessageDocument();
+
+            LibraryChannel channel = App.CurrentApp.GetChannel();
+            try
+            {
+                // ClearEntitiesError();
+
+                /*
+                if (progress != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.ProgressBar.Value = 0;
+                        progress.ProgressBar.Minimum = 0;
+                        progress.ProgressBar.Maximum = actions.Count;
+                    }));
+                }
+                */
+                int index = 0;
+                func_setProgress?.Invoke(0, actions.Count, index);
+
+                // TODO: 准备工作：把涉及到的 Entity 对象的字段填充完整
+                // 检查 PII 是否都具备了
+
+                int success_count = 0;
+                List<string> errors = new List<string>();
+                List<string> borrows = new List<string>();
+                List<string> returns = new List<string>();
+                List<string> warnings = new List<string>();
+                foreach (ActionInfo info in actions)
+                {
+                    string action = info.Action;
+                    Entity entity = info.Entity;
+
+                    string action_name = "借书";
+                    if (action == "return")
+                        action_name = "还书";
+                    else if (action == "renew")
+                        action_name = "续借";
+
+                    // 借书操作必须要有读者卡。(还书和续借，可要可不要)
+                    if (action == "borrow")
+                    {
+                        if (patron_filled == false)
+                        {
+                            // 界面警告
+                            errors.Add($"册 '{entity.PII}' 无法进行借书请求");
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"册 '{entity.PII}' 无法进行借书请求");
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(patronBarcode))
+                        {
+                            return new SubmitResult
+                            {
+                                Value = -1,
+                                ErrorInfo = $"请先在读卡器上放好读者卡，再进行{action_name}"
+                            };
+                        }
+                    }
+
+                    long lRet = 0;
+                    string strError = "";
+                    string[] item_records = null;
+                    string[] biblio_records = null;
+                    BorrowInfo borrow_info = null;
+
+                    if (action == "borrow" || action == "renew")
+                    {
+                        // TODO: 智能书柜要求强制借书。如果册操作前处在被其他读者借阅状态，要自动先还书再进行借书
+
+                        entity.Waiting = true;
+                        lRet = channel.Borrow(null,
+                            action == "renew",
+                            patronBarcode,
+                            entity.PII,
+                            entity.ItemRecPath,
+                            false,
+                            null,
+                            "item,reader,biblio,overflowable", // style,
+                            "xml", // item_format_list
+                            out item_records,
+                            "xml",
+                            out string[] reader_records,
+                            "summary",
+                            out biblio_records,
+                            out string[] dup_path,
+                            out string output_reader_barcode,
+                            out borrow_info,
+                            out strError);
+                    }
+                    else if (action == "return")
+                    {
+                        /*
+                        // TODO: 增加检查 EAS 现有状态功能，如果已经是 true 则不用修改，后面 API 遇到出错后也不要回滚 EAS
+                        // return 操作，提前修改 EAS
+                        // 注: 提前修改 EAS 的好处是比较安全。相比 API 执行完以后再修改 EAS，提前修改 EAS 成功后，无论后面发生什么，读者都无法拿着这本书走出门禁
+                        {
+                            var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                            if (result.Value == -1)
+                            {
+                                entity.SetError($"{action_name}时修改 EAS 动作失败: {result.ErrorInfo}", "red");
+                                errors.Add($"册 '{entity.PII}' {action_name}时修改 EAS 动作失败: {result.ErrorInfo}");
+                                continue;
+                            }
+                        }
+                        */
+                        // 智能书柜不使用 EAS 状态。可以考虑统一修改为 EAS Off 状态？
+
+                        entity.Waiting = true;
+                        lRet = channel.Return(null,
+                            "return",
+                            "", // _patron.Barcode,
+                            entity.PII,
+                            entity.ItemRecPath,
+                            false,
+                            "item,reader,biblio", // style,
+                            "xml", // item_format_list
+                            out item_records,
+                            "xml",
+                            out string[] reader_records,
+                            "summary",
+                            out biblio_records,
+                            out string[] dup_path,
+                            out string output_reader_barcode,
+                            out ReturnInfo return_info,
+                            out strError);
+                    }
+
+                    /*
+                    if (progress != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.ProgressBar.Value++;
+                        }));
+                    }
+                    */
+                    func_setProgress?.Invoke(-1, -1, ++index);
+
+                    if (biblio_records != null && biblio_records.Length > 0)
+                        entity.Title = biblio_records[0];
+
+                    string title = entity.PII;
+                    if (string.IsNullOrEmpty(entity.Title) == false)
+                        title += " (" + entity.Title + ")";
+
+                    {
+                        // 把 _adds 和 _removes 归入 _all
+                        // 一边处理一边动态修改 _all?
+                        if (action == "return")
+                            ShelfData.Add(ShelfData.All, entity);
+                        else
+                            ShelfData.Remove(ShelfData.All, entity);
+
+                        ShelfData.Remove(ShelfData.Adds, entity);
+                        ShelfData.Remove(ShelfData.Removes, entity);
+                    }
+
+                    string resultType = "succeed";
+                    if (lRet == -1)
+                        resultType = "error";
+                    else if (lRet == 1)
+                        resultType = "information";
+                    MessageItem messageItem = new MessageItem
+                    {
+                        Operation = action,
+                        ResultType = resultType,
+                        ErrorCode = channel.ErrorCode.ToString(),
+                        ErrorInfo = strError,
+                        Entity = entity,
+                    };
+                    doc.Add(messageItem);
+
+                    // 微调
+                    if (lRet == 0 && action == "return")
+                        messageItem.ErrorInfo = "";
+
+                    if (lRet == -1)
+                    {
+                        /*
+                        // return 操作如果 API 失败，则要改回原来的 EAS 状态
+                        if (action == "return")
+                        {
+                            var result = SetEAS(entity.UID, entity.Antenna, false);
+                            if (result.Value == -1)
+                                strError += $"\r\n并且复原 EAS 状态的动作也失败了: {result.ErrorInfo}";
+                        }
+                        */
+
+                        if (action == "return")
+                        {
+                            if (channel.ErrorCode == ErrorCode.NotBorrowed)
+                            {
+                                // TODO: 这里不知是普通状态还是 warning 合适。warning 是否比较强烈了
+                                messageItem.ResultType = "warning";
+                                messageItem.ErrorCode = ErrorCode.NotBorrowed.ToString();
+                                // 界面警告
+                                warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
+                                // 写入错误日志
+                                WpfClientInfo.WriteInfoLog($"读者 {patron_name} {patronBarcode} 尝试还回册 '{title}' 时: {strError}");
+                                continue;
+                            }
+                        }
+
+                        entity.SetError($"{action_name}操作失败: {strError}", "red");
+                        // TODO: 这里最好用 title
+                        errors.Add($"册 '{title}': {strError}");
+                        continue;
+                    }
+
+                    if (action == "borrow")
+                    {
+                        if (borrow_info.Overflows != null && borrow_info.Overflows.Length > 0)
+                        {
+                            // 界面警告
+                            // TODO: 可以考虑归入 overflows 单独语音警告处理。语音要简洁。详细原因可出现在文字警告中
+                            // warnings.Add($"册 '{title}' (借书操作发生溢出，请于当日内还书): {string.Join("; ", borrow_info.Overflows)}");
+
+                            // TODO: 详细原因文字可否用稍弱的字体效果来显示？
+                            messageItem.ErrorInfo = $"借书操作超越许可，请将本册放回书柜。详细原因： {string.Join("; ", borrow_info.Overflows)}";
+                            messageItem.ResultType = "warning";
+                            messageItem.ErrorCode = "overflow";
+                            // 写入错误日志
+                            WpfClientInfo.WriteInfoLog($"读者 {patron_name} {patronBarcode} 借阅 '{title}' 时发生超越许可: {strError}");
+                        }
+                    }
+
+                    if (action == "borrow")
+                        borrows.Add(title);
+                    if (action == "return")
+                        returns.Add(title);
+
+                    /*
+                    // borrow 操作，API 之后才修改 EAS
+                    // 注: 如果 API 成功但修改 EAS 动作失败(可能由于读者从读卡器上过早拿走图书导致)，读者会无法把本册图书拿出门禁。遇到此种情况，读者回来补充修改 EAS 一次即可
+                    if (action == "borrow")
+                    {
+                        var result = SetEAS(entity.UID, entity.Antenna, action == "return");
+                        if (result.Value == -1)
+                        {
+                            entity.SetError($"虽然{action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}", "yellow");
+                            errors.Add($"册 '{entity.PII}' {action_name}操作成功，但修改 EAS 动作失败: {result.ErrorInfo}");
+                        }
+                    }
+                    */
+
+                    // 刷新显示
+                    {
+                        if (item_records?.Length > 0)
+                            entity.SetData(entity.ItemRecPath, item_records[0]);
+
+                        if (entity.Error != null)
+                            continue;
+
+                        string message = $"{action_name}成功";
+                        if (lRet == 1 && string.IsNullOrEmpty(strError) == false)
+                            message = strError;
+                        entity.SetError(message,
+                            lRet == 1 ? "yellow" : "green");
+                        success_count++;
+                        // 刷新显示。特别是一些关于借阅日期，借期，应还日期的内容
+                    }
+                }
+
+                /*
+                if (progress != null)
+                {
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.ProgressBar.Visibility = Visibility.Collapsed;
+                        // progress.ProgressBar.Value = progress.ProgressBar.Maximum;
+                    }));
+                }*/
+                func_setProgress?.Invoke(-1, -1, -1);   // hide progress bar
+
+                string speak = "";
+                {
+                    /*
+                    if (progress != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            // DisplayError(ref progress, message, backColor);
+                            progress.MessageDocument = doc.BuildDocument(patron_name, 18, out speak);
+                            progress = null;
+                        }));
+                    }
+                    */
+
+                    // 重新装载读者信息和显示
+                    // DoorItem.DisplayCount(_all, _adds, _removes, App.CurrentApp.Doors);
+                    ShelfData.RefreshCount();
+
+                    // App.CurrentApp.Speak(speak);
+                }
+
+                return new SubmitResult
+                {
+                    Value = 1,
+                    MessageDocument = doc,
+                    SpeakContent = speak
+                }; // new NormalResult { Value = success_count };
+            }
+            finally
+            {
+                App.CurrentApp.ReturnChannel(channel);
+                /*
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    if (progress != null)
+                        progress.Close();
+                }));
+                */
+            }
+        }
+
     }
+
+    public class ActionInfo
+    {
+        public Entity Entity { get; set; }
+        public string Action { get; set; }  // borrow/return
+    }
+
 }
