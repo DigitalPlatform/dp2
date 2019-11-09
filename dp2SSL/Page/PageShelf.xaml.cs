@@ -258,7 +258,9 @@ namespace dp2SSL
             _dialogs.Add(dialog);
         }
 
-        void ErrorBox(string message)
+        void ErrorBox(string message, 
+            string color = "red",
+            string style = "")
         {
             ProgressWindow progress = null;
 
@@ -269,15 +271,34 @@ namespace dp2SSL
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Closed;
+                if (StringUtil.IsInList("button_ok", style))
+                    progress.okButton.Content = "确定";
                 progress.Show();
                 AddLayer();
             }));
 
-            DisplayError(ref progress, message);
+
+            if (StringUtil.IsInList("auto_close", style))
+            {
+                DisplayMessage(progress, message, color);
+
+                Task.Run(() =>
+                {
+                    // TODO: 显示倒计时计数？
+                    Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        progress.Close();
+                    }));
+                });
+            }
+            else
+                DisplayError(ref progress, message, color);
         }
 
         private void DoorControl_OpenDoor(object sender, OpenDoorEventArgs e)
         {
+            // 观察图书详情
             if (string.IsNullOrEmpty(e.ButtonName) == false)
             {
                 ShowBookInfo(sender, e);
@@ -291,7 +312,15 @@ namespace dp2SSL
                 return;
             }
 
-            // TODO: 以前积累的 _adds 和 _removes 要先处理，处理完再开门
+            // 检查门锁是否已经是打开状态?
+            if (e.Door.State == "open")
+            {
+                App.CurrentApp.Speak("已经打开");
+                ErrorBox("已经打开", "yellow", "auto_close,button_ok");
+                return;
+            }
+
+            // 以前积累的 _adds 和 _removes 要先处理，处理完再开门
 
             // 先检查当前是否具备读者身份？
             // 检查读者卡状态是否 OK
@@ -320,6 +349,7 @@ namespace dp2SSL
                 return;
             }
 
+            // 检查读者记录状态
             XmlDocument readerdom = new XmlDocument();
             readerdom.LoadXml(_patron.Xml);
             // return:
