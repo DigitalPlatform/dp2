@@ -128,5 +128,17 @@ namespace dp2SSL
                 }
             }
         }
+
+        public string TitleText
+        {
+            get
+            {
+                return title.Text;
+            }
+            set
+            {
+                title.Text = value;
+            }
+        }
     }
 }

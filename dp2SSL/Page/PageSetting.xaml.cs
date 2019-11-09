@@ -279,9 +279,9 @@ namespace dp2SSL
 
             // 检查 dp2library 版本号
             if (App.Function == "智能书柜"
-                && StringUtil.CompareVersion(version, "3.18") < 0)
+                && StringUtil.CompareVersion(version, "3.19") < 0)
             {
-                errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 3.18 以上(但当前是 {version})");
+                errors.Add($"智能书柜功能要求连接的 dp2library 服务器版本在 3.19 以上(但当前是 {version})");
             }
 
             // 如果没有配置 指纹中心 URL 则不检查

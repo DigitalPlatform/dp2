@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:dp2SSL"
         mc:Ignorable="d"
         Title="BookInfoWindow" Height="450" Width="800"
-        Background="Black" Foreground="White"
+        Background="#FF353535" Foreground="White"
         WindowStyle="None"
     AllowsTransparency="True"
     ResizeMode="CanResizeWithGrip" ShowInTaskbar="False">

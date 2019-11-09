@@ -42,6 +42,20 @@ namespace dp2SSL
             });
         }
 
+        public int ErrorCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (var item in _items)
+                {
+                    if (item.ResultType == "error")
+                        count++;
+                }
+                return count;
+            }
+        }
+
         public FlowDocument BuildDocument(string patron_name,
             double baseFontSize,
             out string speak)
