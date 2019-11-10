@@ -806,8 +806,8 @@ namespace dp2SSL
                 progress.Owner = Application.Current.MainWindow;
                 progress.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 progress.Closed += Progress_Cancelled;
-                //progress.Width = 700;
-                //progress.Height = 500;
+                progress.Width = Math.Min(700, this.ActualWidth);
+                progress.Height = Math.Min(500, this.ActualHeight);
                 progress.okButton.Content = "取消";
                 progress.Show();
                 AddLayer();
@@ -877,7 +877,26 @@ namespace dp2SSL
                 ShelfData.RefreshReaderNameList();
 
                 // TODO: 如何显示还书操作中的报错信息? 看了报错以后点继续?
+                // result.Value
+                //      -1  出错
+                //      0   没有必要处理
+                //      1   已经处理
                 var result = TryReturn(progress, ShelfData.All);
+                if (result.MessageDocument.ErrorCount > 0)
+                {
+                    string speak = "";
+                    {
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            progress.BackColor = "yellow";
+                            progress.MessageDocument = result.MessageDocument.BuildDocument("初始化", 18, out speak);
+                            if (result.MessageDocument.ErrorCount > 0)
+                                progress = null;
+                        }));
+                    }
+                    if (string.IsNullOrEmpty(speak) == false)
+                        App.CurrentApp.Speak(speak);
+                }
 
                 if (_initialCancelled)
                     return;
@@ -898,12 +917,15 @@ namespace dp2SSL
                 {
                     // PageMenu.MenuPage.shelf.Visibility = Visibility.Visible;
 
-                    progress.Closed -= Progress_Cancelled;
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    if (progress != null)
                     {
-                        if (progress != null)
-                            progress.Close();
-                    }));
+                        progress.Closed -= Progress_Cancelled;
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            if (progress != null)
+                                progress.Close();
+                        }));
+                    }
 
                     SetGlobalError("initial", null);
                     this.Mode = ""; // 从初始化模式转为普通模式
@@ -1257,19 +1279,29 @@ namespace dp2SSL
         //      -1  出错
         //      0   没有必要处理
         //      1   已经处理
-        NormalResult TryReturn(ProgressWindow progress,
+        SubmitResult TryReturn(ProgressWindow progress,
             List<Entity> entities)
         {
             List<ActionInfo> actions = new List<ActionInfo>();
             foreach (var entity in entities)
             {
-                actions.Add(new ActionInfo { Entity = entity, Action = "return" });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "return"
+                });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "transfer",
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                });
             }
 
             if (actions.Count == 0)
-                return new NormalResult();  // 没有必要处理
+                return new SubmitResult();  // 没有必要处理
 
-            var result = ShelfData.SubmitCheckInOut(
+            return ShelfData.SubmitCheckInOut(
                 (min, max, value) =>
                 {
                     if (progress != null)
@@ -1291,29 +1323,6 @@ namespace dp2SSL
                 "", // _patron.PatronName,
                 actions,
                 false);
-            if (result.Value == -1)
-            {
-                //DisplayError(ref progress, result.ErrorInfo);
-                //return;
-                return result;
-            }
-
-            // TODO: doc 里面有错误则需要显示出来
-            string speak = "";
-            if (progress != null && result.Value == 1)
-            {
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    progress.MessageDocument = result.MessageDocument.BuildDocument("初始化", 18, out speak);
-                    if (result.MessageDocument.ErrorCount > 0)
-                        progress = null;
-                }));
-            }
-
-            if (string.IsNullOrEmpty(speak) == false)
-                App.CurrentApp.Speak(speak);
-
-            return new NormalResult { Value = result.MessageDocument.ErrorCount > 0 ? -1 : 1 };
         }
 
         // 关门，或者更换读者的时候，向服务器提交出纳请求
@@ -1326,7 +1335,17 @@ namespace dp2SSL
             {
                 if (ShelfData.BelongToNormal(entity) == false)
                     continue;
-                actions.Add(new ActionInfo { Entity = entity, Action = "return" });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "return"
+                });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "transfer",
+                    CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                });
             }
             foreach (var entity in ShelfData.Removes)
             {

@@ -26,6 +26,11 @@ namespace dp2SSL
             _items.Add(item);
         }
 
+        public void Remove(MessageItem item)
+        {
+            _items.Remove(item);
+        }
+
         public void Add(string operation,
             string resultType,
             string errorInfo,
@@ -77,6 +82,7 @@ namespace dp2SSL
             // 第一部分，总结信息
             int return_count = items.FindAll((o) => { return o.Operation == "return"; }).Count;
             int borrow_count = items.FindAll((o) => { return o.Operation == "borrow"; }).Count;
+            int transfer_count = items.FindAll((o) => { return o.Operation == "transfer"; }).Count;
 
             int succeed_count = items.FindAll((o) => { return o.ResultType == "succeed" || string.IsNullOrEmpty(o.ResultType); }).Count;
             int error_count = items.FindAll((o) => { return o.ResultType == "error"; }).Count;
@@ -100,6 +106,8 @@ namespace dp2SSL
                         lines.Add($"还书请求 {return_count}");
                     if (borrow_count > 0)
                         lines.Add($"借书请求 {borrow_count}");
+                    if (transfer_count > 0)
+                        lines.Add($"转移请求 {transfer_count}");
 
                     p.Inlines.Add(new Run
                     {
@@ -160,7 +168,6 @@ namespace dp2SSL
                 }
             }
 
-
             // 第二部分，列出每一笔操作
             int index = 0;
             foreach (var item in items)
@@ -206,7 +213,7 @@ namespace dp2SSL
 
     public class MessageItem
     {
-        public string Operation { get; set; }   // borrow 或 return
+        public string Operation { get; set; }   // borrow 或 return 或 transfer
         public string ResultType { get; set; }  // 结果类型。succeed/error/warning/information
         public string ErrorInfo { get; set; }
         public string ErrorCode { get; set; }   // 错误码
@@ -219,6 +226,9 @@ namespace dp2SSL
                 return "借";
             if (operation == "return")
                 return "还";
+            if (operation == "transfer")
+                return "转移";
+
             return operation;
         }
 
