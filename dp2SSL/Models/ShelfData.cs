@@ -478,6 +478,14 @@ namespace dp2SSL
             return count > 0;
         }
 
+        public static string GetShelfNo(Entity entity)
+        {
+            var doors = DoorItem.FindDoors(_doors, entity.ReaderName, entity.Antenna);
+            if (doors.Count == 0)
+                return "";
+            return doors[0].ShelfNo;
+        }
+
         // 刷新门内图书数字显示
         public static void RefreshCount()
         {
@@ -885,11 +893,7 @@ namespace dp2SSL
             }
         }
 
-        public class SubmitResult : NormalResult
-        {
-            public MessageDocument MessageDocument { get; set; }
-            public string SpeakContent { get; set; }
-        }
+
 
         // public delegate void Delegate_showDialog();
 
@@ -948,7 +952,7 @@ namespace dp2SSL
                 List<string> errors = new List<string>();
                 List<string> borrows = new List<string>();
                 List<string> returns = new List<string>();
-                List<string> warnings = new List<string>();
+                //List<string> warnings = new List<string>();
                 foreach (ActionInfo info in actions)
                 {
                     string action = info.Action;
@@ -959,8 +963,10 @@ namespace dp2SSL
                         action_name = "还书";
                     else if (action == "renew")
                         action_name = "续借";
+                    else if (action == "transfer")
+                        action_name = "转移";
 
-                    // 借书操作必须要有读者卡。(还书和续借，可要可不要)
+                    // 借书操作必须要有读者卡
                     if (action == "borrow")
                     {
                         if (patron_filled == false)
@@ -1049,6 +1055,37 @@ namespace dp2SSL
                             out ReturnInfo return_info,
                             out strError);
                     }
+                    else if (action == "transfer")
+                    {
+                        // currentLocation 元素内容。格式为 馆藏地:架号
+                        // 注意馆藏地和架号字符串里面不应包含逗号和冒号
+                        string currentLocation = App.ShelfLocation + ":" + info.CurrentShelfNo;
+                        entity.Waiting = true;
+                        lRet = channel.Return(null,
+                            "transfer",
+                            "", // _patron.Barcode,
+                            entity.PII,
+                            entity.ItemRecPath,
+                            false,
+                            $"item,biblio,currentLocation:{currentLocation}", // style,
+                            "xml", // item_format_list
+                            out item_records,
+                            "xml",
+                            out string[] reader_records,
+                            "",
+                            out biblio_records,
+                            out string[] dup_path,
+                            out string output_reader_barcode,
+                            out ReturnInfo return_info,
+                            out strError);
+                    }
+
+                    /*
+                    // testing
+                    lRet = -1;
+                    strError = "testing";
+                    channel.ErrorCode = ErrorCode.AccessDenied;
+                    */
 
                     /*
                     if (progress != null)
@@ -1068,6 +1105,7 @@ namespace dp2SSL
                     if (string.IsNullOrEmpty(entity.Title) == false)
                         title += " (" + entity.Title + ")";
 
+                    if (action == "borrow" || action == "return")
                     {
                         // 把 _adds 和 _removes 归入 _all
                         // 一边处理一边动态修改 _all?
@@ -1117,11 +1155,30 @@ namespace dp2SSL
                             {
                                 // TODO: 这里不知是普通状态还是 warning 合适。warning 是否比较强烈了
                                 messageItem.ResultType = "warning";
-                                messageItem.ErrorCode = ErrorCode.NotBorrowed.ToString();
+                                // messageItem.ErrorCode = channel.ErrorCode.ToString();
                                 // 界面警告
-                                warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
+                                //warnings.Add($"册 '{title}' (尝试还书时发现未曾被借出过): {strError}");
                                 // 写入错误日志
                                 WpfClientInfo.WriteInfoLog($"读者 {patron_name} {patronBarcode} 尝试还回册 '{title}' 时: {strError}");
+                                continue;
+                            }
+                        }
+
+
+                        if (action == "transfer")
+                        {
+                            if (channel.ErrorCode == ErrorCode.NotChanged)
+                            {
+                                // 不出现在结果中
+                                doc.Remove(messageItem);
+
+                                // 改为警告
+                                messageItem.ResultType = "warning";
+                                // messageItem.ErrorCode = channel.ErrorCode.ToString();
+                                // 界面警告
+                                //warnings.Add($"册 '{title}' (尝试转移时发现没有发生修改): {strError}");
+                                // 写入错误日志
+                                WpfClientInfo.WriteInfoLog($"转移册 '{title}' 时: {strError}");
                                 continue;
                             }
                         }
@@ -1222,7 +1279,7 @@ namespace dp2SSL
                 {
                     Value = 1,
                     MessageDocument = doc,
-                    SpeakContent = speak
+                    // SpeakContent = speak
                 }; // new NormalResult { Value = success_count };
             }
             finally
@@ -1243,7 +1300,13 @@ namespace dp2SSL
     public class ActionInfo
     {
         public Entity Entity { get; set; }
-        public string Action { get; set; }  // borrow/return
+        public string Action { get; set; }  // borrow/return/transfer
+        public string CurrentShelfNo { get; set; }  // 当前架号。transfer 动作会用到
     }
 
+    public class SubmitResult : NormalResult
+    {
+        public MessageDocument MessageDocument { get; set; }
+        // public string SpeakContent { get; set; }
+    }
 }

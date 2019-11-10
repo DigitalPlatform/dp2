@@ -6301,8 +6301,10 @@ start_time_1,
 
                         if (nRet == 0)
                         {
-                            strError = $"册记录 {strOutputItemRecPath} 没有发生修改";
-                            goto ERROR1;
+                            result.ErrorInfo = $"册记录 {strOutputItemRecPath} 没有发生修改";
+                            result.ErrorCode = ErrorCode.NotChanged;
+                            result.Value = -1;
+                            return result;
                         }
 
                         strOutputItemXml = itemdom.OuterXml;

@@ -482,6 +482,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         NotBorrowed = 35,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotChanged = 36,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

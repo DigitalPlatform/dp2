@@ -123,7 +123,23 @@ namespace dp2SSL
             }
         }
 
-        private string _state;
+        private string _shelfNo;
+
+        // 架号
+        public string ShelfNo
+        {
+            get => _shelfNo;
+            set
+            {
+                if (_shelfNo != value)
+                {
+                    _shelfNo = value;
+                    OnPropertyChanged("ShelfNo");
+                }
+            }
+        }
+
+        private string _state = "";
 
         // 状态
         public string State
@@ -202,6 +218,7 @@ namespace dp2SSL
                 {
                     string door_name = door.GetAttribute("name");
                     string door_type = door.GetAttribute("type");
+                    string door_shelfNo = door.GetAttribute("shelfNo");
 
                     ParseLockString(door.GetAttribute("lock"), out string lockName, out int lockIndex);
                     ParseLockString(door.GetAttribute("antenna"), out string readerName, out int antenna);
@@ -214,6 +231,7 @@ namespace dp2SSL
                         ReaderName = readerName,
                         Antenna = antenna,
                         Type = door_type,
+                        ShelfNo = door_shelfNo,
                     };
 
                     results.Add(item);
