@@ -64,23 +64,62 @@ namespace dp2SSL
 
         private void DoorControl_Loaded(object sender, RoutedEventArgs e)
         {
+            SetBackgroundImage();
+        }
 
+        // 计算背景图象 Uniform 方式显示的 x y 偏移
+        Point GetOffset(Size size, out Size picture_size)
+        {
+            double x = 0;
+            double y = 0;
+
+            picture_size = size;
+
+            if (_canvas_height == 0 || _canvas_width == 0)
+                return new Point(0, 0);
+
+            // 按照横向放下，计算图片高度
+            double ratio = size.Width / _canvas_width;
+            double test_height = _canvas_height * ratio;
+            if (test_height > size.Height)
+            {
+                // 竖向放不下。改为按照竖向放下，来计算图片宽度
+                ratio = size.Height / _canvas_height;
+                double test_width = _canvas_width * ratio;
+                x = (size.Width - test_width) / 2;
+                Debug.Assert(x >= 0, "");
+                picture_size.Width = test_width;
+            }
+            else
+            {
+                y = (size.Height - test_height) / 2;
+                Debug.Assert(y >= 0, "");
+                picture_size.Height = test_height;
+            }
+
+            return new Point(x, y);
         }
 
         void SetSize(Size size)
         {
-            double row_height = size.Height / Math.Max(1, this.grid.RowDefinitions.Count);
-            foreach (var row in this.grid.RowDefinitions)
+            // 计算居中的 x y 偏移
+            Point offset = GetOffset(size, out Size picture_size);
+
+            // 遍历 Grid 对象
+            foreach (Grid grid in this.canvas.Children)
             {
-                row.Height = new GridLength(row_height);
-            }
-            double column_width = size.Width / Math.Max(1, this.grid.ColumnDefinitions.Count);
-            foreach (var column in this.grid.ColumnDefinitions)
-            {
-                column.Width = new GridLength(column_width);
+                if (grid == null)
+                    continue;
+                GroupPosition gp = grid.Tag as GroupPosition;
+                if (gp == null)
+                    continue;
+
+                grid.SetValue(Canvas.LeftProperty, offset.X + (picture_size.Width * gp.Left));
+                grid.SetValue(Canvas.TopProperty, offset.Y + (picture_size.Height * gp.Top));
+                grid.Width = picture_size.Width * gp.Width;
+                grid.Height = picture_size.Height * gp.Height;
             }
         }
-
 
         /*
         List<Door> FindDoors(string readerName, string antenna)
@@ -96,134 +135,82 @@ namespace dp2SSL
         }
         */
 
+        class GroupPosition
+        {
+            public double Left { get; set; }    // 相对于图片宽度的百分比
+            public double Top { get; set; }     // 相对于图片高度的百分比
+            public double Width { get; set; }   // 相对于图片宽度的百分比
+            public double Height { get; set; }  // 相对于图片宽度的百分比
+        }
+
+        // 根据一个 group 元素定义，创建一个 Grid 控件
+        Grid CreateGroupControls(XmlElement group, List<DoorItem> items, ref int index)
+        {
+            Grid grid = new Grid();
+
+            //grid.SetValue(Canvas.LeftProperty, 0);
+            //grid.SetValue(Canvas.TopProperty, 0);
+
+            int row = 0;
+            XmlNodeList doors = group.SelectNodes("door");
+            foreach (XmlElement door in doors)
+            {
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength((double)1, GridUnitType.Star) });
+
+                string door_name = door.GetAttribute("name");
+
+                Button button = new Button
+                {
+                    // Name = $"button_{column}_{row}",
+                };
+
+                var template = this.Resources["ButtonTemplate"];
+
+                // button.Children.Add(block);
+                button.SetValue(Button.TemplateProperty, template);
+                // button.SetValue(Grid.prop.ContentProperty, block);
+                button.SetValue(Grid.RowProperty, row);
+                button.SetValue(Grid.ColumnProperty, 0);
+                button.Click += Button_Click;
+
+                button.DataContext = items[index++];
+
+                grid.Children.Add(button);
+                row++;
+            }
+
+            return grid;
+        }
+
+        double _canvas_width = 0;
+        double _canvas_height = 0;
+
         public void InitializeButtons(XmlDocument cfg_dom,
             List<DoorItem> items)
         {
-            /*
-            string cfg_filename = App.ShelfFilePath;
-            XmlDocument cfg_dom = new XmlDocument();
-            cfg_dom.Load(cfg_filename);
-            */
+            XmlElement root = cfg_dom.DocumentElement;
+            double canvas_width = Convert.ToDouble(root.GetAttribute("width"));
+            double canvas_height = Convert.ToDouble(root.GetAttribute("height"));
+
+            _canvas_width = canvas_width;
+            _canvas_height = canvas_height;
 
             XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
 
-            this.grid.ColumnDefinitions.Clear();
-            this.grid.RowDefinitions.Clear();
-
-            // 获得一个 shelf 元素下 door 数量的最多那个
-            int max_doors = 0;
-            foreach (XmlElement shelf in shelfs)
-            {
-                int current = shelf.SelectNodes("door").Count;
-                if (current > max_doors)
-                    max_doors = current;
-            }
-
-            // int shelf_width = total_width / Math.Max(1, shelfs.Count);
-            // int level_height = 100;
-            bool rowDefinitionCreated = false;
-            // 初始化 Definitions
-            foreach (XmlElement shelf in shelfs)
-            {
-                this.grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
-
-                // TODO: 这里要用具有最多 door 元素的 shelf 元素来获得数字
-                if (rowDefinitionCreated == false)
-                {
-                    /*
-                    XmlNodeList doors = shelf.SelectNodes("door");
-                    // level_height = total_height / Math.Max(1, doors.Count);
-                    foreach (XmlElement door in doors)
-                    {
-                        this.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
-                    }
-                    */
-                    for (int i = 0; i < max_doors; i++)
-                    {
-                        this.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100) });
-                    }
-
-                    rowDefinitionCreated = true;
-                }
-            }
-
-            // 填充 Buttons
             int index = 0;
-            int column = 0;
             foreach (XmlElement shelf in shelfs)
             {
-                XmlNodeList doors = shelf.SelectNodes("door");
-                int row = 0;
-                foreach (XmlElement door in doors)
-                {
-                    string door_name = door.GetAttribute("name");
+                GroupPosition gp = new GroupPosition();
+                gp.Left = Convert.ToDouble(shelf.GetAttribute("left")) / canvas_width;
+                gp.Top = Convert.ToDouble(shelf.GetAttribute("top")) / canvas_height;
+                gp.Width = Convert.ToDouble(shelf.GetAttribute("width")) / canvas_width;
+                gp.Height = Convert.ToDouble(shelf.GetAttribute("height")) / canvas_height;
 
-                    Button button = new Button
-                    {
-                        Name = $"button_{column}_{row}",
-                        // Height = level_height,
-                        // Content = door_name,
-                    };
+                Grid grid = CreateGroupControls(shelf, items, ref index);
+                grid.Tag = gp;
 
-                    /*
-                    var block = BuildTextBlock();
-                    SetBlockText(block, door_name, "0", null, null);
-                    */
-
-                    var template = this.Resources["ButtonTemplate"];
-
-                    // button.Children.Add(block);
-                    button.SetValue(Button.TemplateProperty, template);
-                    // button.SetValue(Grid.prop.ContentProperty, block);
-                    button.SetValue(Grid.RowProperty, row);
-                    button.SetValue(Grid.ColumnProperty, column);
-                    button.Click += Button_Click;
-
-                    /*
-                    ParseLockString(door.GetAttribute("lock"), out string lockName, out int lockIndex);
-                    ParseLockString(door.GetAttribute("antenna"), out string readerName, out int antenna);
-
-                    var tag = new Door
-                    {
-                        Name = door_name,
-                        LockName = lockName,
-                        LockIndex = lockIndex,
-                        ReaderName = readerName,
-                        Antenna = antenna,
-                        Button = button
-                    };
-                    */
-
-                    button.DataContext = items[index++];
-
-                    /*
-                    _doors.Add(tag);
-
-                    button.Tag = tag;
-                    */
-                    this.grid.Children.Add(button);
-                    row++;
-                }
-
-                column++;
+                this.canvas.Children.Add(grid);
             }
-
-            /*
-            this.grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            this.grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            this.grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            this.grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            Button button = new Button
-            {
-                Name = "button1",
-                Height = 100,
-                Content = "1",
-            };
-            button.SetValue(Grid.RowProperty, 0);
-            //button.SetValue(Grid.ColumnProperty, 0);
-            this.grid.Children.Add(button);
-            */
 
             InitialSize();
         }
@@ -351,6 +338,21 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
             });
 
             e.Handled = true;
+        }
+
+        void SetBackgroundImage()
+        {
+            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir, "bookshelf1.png");
+
+            BitmapImage bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+            bitmap.EndInit();
+
+            var brush = new ImageBrush(bitmap);
+            brush.Stretch = Stretch.Uniform;
+            this.Background = brush;
         }
     }
 

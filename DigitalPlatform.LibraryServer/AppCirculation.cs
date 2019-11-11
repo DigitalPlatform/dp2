@@ -933,7 +933,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 加册记录锁
-                this.EntityLocks.LockForWrite(strItemBarcode);
+                this.EntityLocks.LockForWrite(strItemBarcode == null ? "" : strItemBarcode);
 
                 try // 册记录锁定范围开始
                 {
@@ -1854,7 +1854,7 @@ namespace DigitalPlatform.LibraryServer
                 finally
                 {
                     // 解册记录锁
-                    this.EntityLocks.UnlockForWrite(strItemBarcode);    // strItemBarcode 在整个函数中不允许被修改
+                    this.EntityLocks.UnlockForWrite(strItemBarcode == null ? "" : strItemBarcode);    // strItemBarcode 在整个函数中不允许被修改
                 }
 
             } // 读者记录锁定范围结束
@@ -2841,6 +2841,12 @@ start_time_1,
             }
             else
             {
+                if (string.IsNullOrEmpty(strItemBarcode) == true)
+                {
+                    strError = "册条码号不应为空";
+                    goto ERROR1;
+                }
+
                 // 从册条码号获得册记录
 
                 // 获得册记录

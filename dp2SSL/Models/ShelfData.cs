@@ -70,7 +70,8 @@ namespace dp2SSL
                     var result = DoorItem.SetLockState(ShelfData.Doors, state);
                     if (result.LockName != null && result.OldState != null && result.NewState != null)
                     {
-                        if (result.NewState != result.OldState)
+                        if (result.NewState != result.OldState
+                            && string.IsNullOrEmpty(result.OldState) == false)
                         {
                             if (result.NewState == "open")
                                 App.CurrentApp.Speak($"{result.LockName} 打开");

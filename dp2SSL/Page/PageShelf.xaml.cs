@@ -133,12 +133,19 @@ namespace dp2SSL
 
             if (Mode == "initial" || ShelfData.FirstInitialized == false)
             {
-                // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
-                await InitialShelfEntities();
+                try
+                {
+                    // TODO: 可否放到 App 的初始化阶段? 这样好处是菜单画面就可以看到有关数量显示了
+                    await InitialShelfEntities();
 
-                // 迫使图书盘点暂停(如果门是全部关闭的话)
-                // SetOpenCount(_openCount);
-
+                    // 迫使图书盘点暂停(如果门是全部关闭的话)
+                    // SetOpenCount(_openCount);
+                }
+                catch (Exception ex)
+                {
+                    this.SetGlobalError("initial", $"InitialShelfEntities() 出现异常: {ex.Message}");
+                    WpfClientInfo.WriteErrorLog($"InitialShelfEntities() 出现异常: {ExceptionUtil.GetDebugText(ex)}");
+                }
             }
         }
 
@@ -882,7 +889,8 @@ namespace dp2SSL
                 //      0   没有必要处理
                 //      1   已经处理
                 var result = TryReturn(progress, ShelfData.All);
-                if (result.MessageDocument.ErrorCount > 0)
+                if (result.MessageDocument != null
+                    && result.MessageDocument.ErrorCount > 0)
                 {
                     string speak = "";
                     {
@@ -1424,7 +1432,7 @@ namespace dp2SSL
                 }
 
                 string speak = "";
-                if (progress != null && result.Value == 1)
+                if (progress != null && result.Value == 1 && result.MessageDocument != null)
                 {
                     Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
