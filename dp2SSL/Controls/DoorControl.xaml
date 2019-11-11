@@ -99,8 +99,8 @@
         </ControlTemplate>
     </UserControl.Resources>
     <Border BorderBrush="Gray" BorderThickness="0,0,0,0">
-        <Grid Name="grid">
+        <Canvas Name="canvas" >
 
-        </Grid>
+        </Canvas>
     </Border>
 </UserControl>
