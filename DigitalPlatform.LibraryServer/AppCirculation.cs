@@ -6269,8 +6269,10 @@ start_time_1,
 
                     if (strAction == "transfer")
                     {
-                        // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
                         string strNewLocation = StringUtil.GetParameterByPrefix(strStyle, "location");
+                        // 注意参数值里面的逗号和冒号在请求时候要处理为转义字符
+                        if (strNewLocation != null)
+                            strNewLocation = StringUtil.UnescapeString(strNewLocation);
 
                         if (string.IsNullOrEmpty(strNewLocation) == true && strNewLocation != null)
                         {
@@ -6282,6 +6284,8 @@ start_time_1,
     "location");
 
                         string strNewCurrentLocation = StringUtil.GetParameterByPrefix(strStyle, "currentLocation");
+                        if (strNewCurrentLocation != null)
+                            strNewCurrentLocation = StringUtil.UnescapeString(strNewCurrentLocation);
                         // 执行典藏移交
                         // return:
                         //      -1  出错

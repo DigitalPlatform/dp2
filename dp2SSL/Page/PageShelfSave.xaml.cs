@@ -241,7 +241,7 @@ namespace dp2SSL
             await Task.Run(() =>
             {
                 FillLocationBooks(_entities,
-        App.ShelfLocation,
+        "?", // App.ShelfLocation,
         token);
             });
 

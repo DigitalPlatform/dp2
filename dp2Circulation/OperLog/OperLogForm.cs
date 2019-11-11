@@ -2813,6 +2813,9 @@ out string strError)
             string strPublishTime = DomUtil.GetElementInnerText(item_dom.DocumentElement, "publishTime");
             string strLocation = DomUtil.GetElementInnerText(item_dom.DocumentElement, "location");
 
+            string strShelfNo = DomUtil.GetElementInnerText(item_dom.DocumentElement, "shelftNo");
+            string strCurrentLocation = DomUtil.GetElementInnerText(item_dom.DocumentElement, "currentLocation");
+
             string strSeller = DomUtil.GetElementInnerText(item_dom.DocumentElement, "seller");
             string strSource = DomUtil.GetElementInnerText(item_dom.DocumentElement, "source");
             string strPrice = DomUtil.GetElementInnerXml(item_dom.DocumentElement, "price");
@@ -2858,6 +2861,8 @@ out string strError)
                 BuildHtmlLine("册状态", strState)
                 + BuildHtmlLine("出版时间", strPublishTime)
                 + BuildHtmlLine("馆藏处", strLocation)
+                + BuildHtmlLine("架号", strShelfNo)
+                + BuildHtmlLine("当前位置", strCurrentLocation)
                 + BuildHtmlLine("订购渠道", strSeller)
                 + BuildHtmlLine("经费来源", strSource)
                 + BuildHtmlLine("册价格", strPrice)

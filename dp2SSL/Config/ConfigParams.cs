@@ -194,6 +194,7 @@ Description = "自动监控和重启 人脸中心 RFID中心 指纹中心等模�
             }
         }
 
+        /*
         // 默认值 空
         [Display(
 Order = 9,
@@ -212,7 +213,7 @@ Description = "智能书架内的图书的专属馆藏地"
                 _config.Set("shelf", "location", value);
             }
         }
-
+        */
 
         // https://github.com/xceedsoftware/wpftoolkit/issues/1269
         // 默认值 空

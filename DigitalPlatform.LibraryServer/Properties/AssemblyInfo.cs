@@ -31,8 +31,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.19.*")]
-[assembly: AssemblyFileVersion("3.19.0.0")]
+[assembly: AssemblyVersion("3.20.*")]
+[assembly: AssemblyFileVersion("3.20.0.0")]
 
 //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
 //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
@@ -200,3 +200,4 @@ ItemCanReturn()
 //      3.17 (2019/8/29) GetOperLogs() strStyle 参数可包含 "wait"，表示最多等待 30 秒直到有返回结果
 //      3.18 (2019/11/6) Borrow() strStyle 参数可包含 overflowable，表示允许超额临时借书，主要是用于智能书柜。此时读者记录中的 borrow 元素里要写入 overflow 属性
 //      3.19 (2019/11/9) Borrow() 用 overflowable 方式借阅图书时，册记录中要写入 overflow 元素
+//      3.20 (2019/11/11) Return() 中 transfer 功能进行了修正。为 strStyle 中的 location 和 currentLocation 子参数进行了 StringUtil.Unescape()

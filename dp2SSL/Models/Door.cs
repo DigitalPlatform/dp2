@@ -220,6 +220,11 @@ namespace dp2SSL
                     string door_type = door.GetAttribute("type");
                     string door_shelfNo = door.GetAttribute("shelfNo");
 
+                    if (door_type != "free" && string.IsNullOrEmpty(door_shelfNo))
+                    {
+                        throw new Exception($"非 free 类型的 door 元素未定义必备的 shelfNo (架号)属性({door.OuterXml})");
+                    }
+
                     ParseLockString(door.GetAttribute("lock"), out string lockName, out int lockIndex);
                     ParseLockString(door.GetAttribute("antenna"), out string readerName, out int antenna);
 
