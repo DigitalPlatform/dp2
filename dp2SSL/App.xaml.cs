@@ -429,6 +429,7 @@ namespace dp2SSL
             }
         }
 
+        /*
         public static string ShelfLocation
         {
             get
@@ -438,6 +439,7 @@ namespace dp2SSL
                     "");
             }
         }
+        */
 
         public static string Function
         {

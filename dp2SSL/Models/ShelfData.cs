@@ -1059,7 +1059,7 @@ namespace dp2SSL
                     {
                         // currentLocation 元素内容。格式为 馆藏地:架号
                         // 注意馆藏地和架号字符串里面不应包含逗号和冒号
-                        string currentLocation = App.ShelfLocation + ":" + info.CurrentShelfNo;
+                        string currentLocation = info.CurrentShelfNo;
                         entity.Waiting = true;
                         lRet = channel.Return(null,
                             "transfer",
@@ -1067,7 +1067,7 @@ namespace dp2SSL
                             entity.PII,
                             entity.ItemRecPath,
                             false,
-                            $"item,biblio,currentLocation:{currentLocation}", // style,
+                            $"item,biblio,currentLocation:{StringUtil.EscapeString(currentLocation, ":,")}", // style,
                             "xml", // item_format_list
                             out item_records,
                             "xml",
