@@ -115,7 +115,7 @@ namespace DigitalPlatform.RFID
         public static string LockName = null;   // "*";
         public static string LockIndices = null; // "0,1,2,3";
         */
-        public static List<LockCommand> LockCommands = null;
+        public static List<string> LockCommands = null;
 
         static bool _lockReady = false;
 
@@ -205,24 +205,37 @@ new SetErrorEventArgs
                 // 检查门状态
                 if (LockCommands != null)
                 {
+                    List<GetLockStateResult> errors = new List<GetLockStateResult>();
+                    List<LockState> states = new List<LockState>();
                     foreach (var command in LockCommands)
                     {
-                        var lock_result = channel?.Object?.GetShelfLockState(command.LockName, 
-                            command.Indices);
+                        var lock_result = channel?.Object?.GetShelfLockState(command);
                         if (lock_result.Value == -1)
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = lock_result.ErrorInfo });
                         else
                             Base.TriggerSetError(lock_result,
                                 new SetErrorEventArgs { Error = null }); // 清除以前的报错
+                        if (lock_result.Value == -1)
+                        {
+                            // 注意 lock_result.Value == -1 时也会触发这个事件
+                            ListLocks?.Invoke(channel, new ListLocksEventArgs
+                            {
+                                Result = lock_result
+                            });
+                        }
+                        if (lock_result.States != null)
+                            states.AddRange(lock_result.States);
+                    }
 
+                    if (states.Count > 0)
+                    {
                         // 注意 lock_result.Value == -1 时也会触发这个事件
                         ListLocks?.Invoke(channel, new ListLocksEventArgs
                         {
-                            Result = lock_result
+                            Result = new GetLockStateResult { States = states }
                         });
                     }
-
                     // 门锁状态就绪
                     _lockReady = true;
                 }
@@ -552,14 +565,14 @@ new SetErrorEventArgs
             }
         }
 
-        public static NormalResult OpenShelfLock(string lockName, int index)
+        public static NormalResult OpenShelfLock(string lockName)
         {
             try
             {
                 BaseChannel<IRfid> channel = Base.GetChannel();
                 try
                 {
-                    var result = channel.Object.OpenShelfLock(lockName, index);
+                    var result = channel.Object.OpenShelfLock(lockName);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });

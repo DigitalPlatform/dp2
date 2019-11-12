@@ -29,18 +29,17 @@ namespace RfidCenter
         }
 
         // 获得门锁状态
-        public GetLockStateResult GetShelfLockState(string lockName,
-            string indices)
+        public GetLockStateResult GetShelfLockState(string lockNameList)
         {
             List<LockState> states = new List<LockState>();
-            string[] list = indices.Split(new char[] { ',' });
+            string[] list = lockNameList.Split(new char[] { ',' });
             foreach (var one in list)
             {
                 // 探测锁状态
                 // parameters:
                 //      lockName    锁名字。如果为 * 表示所有的锁
                 //      index       锁编号。从 0 开始计数
-                var result = Program.Rfid.GetShelfLockState(lockName, Convert.ToInt32(one));
+                var result = Program.Rfid.GetShelfLockState(one);
                 if (result.Value == -1)
                     return result;
                 states.AddRange(result.States);
@@ -50,9 +49,9 @@ namespace RfidCenter
         }
 
         // 开锁
-        public NormalResult OpenShelfLock(string lockName, int index)
+        public NormalResult OpenShelfLock(string lockName)
         {
-            return Program.Rfid.OpenShelfLock(lockName, index);
+            return Program.Rfid.OpenShelfLock(lockName);
         }
 
         public NormalResult GetState(string style)

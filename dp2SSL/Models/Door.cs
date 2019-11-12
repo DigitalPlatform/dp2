@@ -195,8 +195,8 @@ namespace dp2SSL
             }
         }
 
-        public string LockName { get; set; }
-        public int LockIndex { get; set; }
+        public string LockPath { get; set; }
+        // public int LockIndex { get; set; }
         public string ReaderName { get; set; }
         public int Antenna { get; set; }
 
@@ -225,14 +225,19 @@ namespace dp2SSL
                         throw new Exception($"非 free 类型的 door 元素未定义必备的 shelfNo (架号)属性({door.OuterXml})");
                     }
 
-                    ParseLockString(door.GetAttribute("lock"), out string lockName, out int lockIndex);
-                    ParseLockString(door.GetAttribute("antenna"), out string readerName, out int antenna);
+                    string lockName = door.GetAttribute("lock");
+                    if (lockName != null && lockName.IndexOf(":") != -1)
+                        throw new Exception($"lock 属性值中不应包含冒号({door.OuterXml})");
+                    if (string.IsNullOrEmpty(lockName) == false)
+                        lockName = NormalizeLockName(lockName);
+                    // ParseReaderString(, out string lockName, out int lockIndex);
+                    ParseReaderString(door.GetAttribute("antenna"), out string readerName, out int antenna);
 
                     DoorItem item = new DoorItem
                     {
                         Name = door_name,
-                        LockName = lockName,
-                        LockIndex = lockIndex,
+                        LockPath = lockName,
+                        // LockIndex = lockIndex,
                         ReaderName = readerName,
                         Antenna = antenna,
                         Type = door_type,
@@ -249,7 +254,58 @@ namespace dp2SSL
             return results;
         }
 
-        public static void ParseLockString(string text,
+        public static void ParseLockName(string text, out string lockName,
+            out string card,
+            out string number)
+        {
+            lockName = "*";
+            card = "1";
+            number = "1";
+            string[] parts = text.Split(new char[] { '.' });
+
+            if (parts.Length > 0)
+                lockName = parts[0];
+            if (parts.Length > 1)
+                card = parts[1];
+            if (parts.Length > 2)
+                number = parts[2];
+        }
+
+
+        // 正规化锁名字
+        // 变换为三段的形态 name.card.number
+        public static string NormalizeLockName(string lockName)
+        {
+            string[] parts = lockName.Split(new char[] { '.' });
+            List<string> results = new List<string>();
+            int i = 0;
+            foreach (string part in parts)
+            {
+                string s = part;
+                if (string.IsNullOrEmpty(part))
+                {
+                    if (i == 0)
+                        s = "*";
+                    else
+                        s = "1";
+                }
+
+                results.Add(s);
+                i++;
+            }
+
+            while (results.Count < 3)
+            {
+                if (results.Count == 0)
+                    results.Add("*");
+                else
+                    results.Add("1");
+            }
+
+            return StringUtil.MakePathList(results, ".");
+        }
+
+        public static void ParseReaderString(string text,
     out string lockName,
     out int index)
         {
@@ -283,6 +339,19 @@ namespace dp2SSL
             return name1 == name2;
         }
 
+        public static bool IsLockPathEqual(string path1, string path2)
+        {
+            ParseLockName(path1, out string lockName1, out string card1, out string number1);
+            ParseLockName(path2, out string lockName2, out string card2, out string number2);
+            if (IsEqual(lockName1, lockName2) == false)
+                return false;
+            if (card1 != card2)
+                return false;
+            if (number1 != number2)
+                return false;
+            return true;
+        }
+
         // 注：不用刷新。可以把背景色绑定到状态文字上
         // 刷新门锁(开/关)状态
         public static LockChanged SetLockState(
@@ -294,8 +363,7 @@ namespace dp2SSL
             int i = 0;
             foreach (DoorItem door in _doors)
             {
-                if (DoorItem.IsEqual(state.Name, door.LockName)
-                    && state.Index == door.LockIndex)
+                if (DoorItem.IsLockPathEqual(state.Path, door.LockPath))
                 {
                     results.Add(new LockChanged
                     {

@@ -182,6 +182,33 @@ namespace dp2SSL
             return grid;
         }
 
+        static double GetDouble(XmlElement element, string attr, double default_value)
+        {
+            if (element.HasAttribute(attr) == false)
+                return default_value;
+            string s = element.GetAttribute(attr);
+            if (double.TryParse(s, out double value) == false)
+                throw new Exception($"属性值 {attr} 定义错误，应为数字({element.OuterXml})");
+            return value;
+        }
+
+        static string[] all_attrs = new string[] { "left", "top", "width", "height" };
+        static string[] two_attrs = new string[] { "width", "height" };
+
+        static void CheckAttributes(XmlElement element, string [] attrs)
+        {
+            int count = 0;
+            foreach (string attr in attrs)
+            {
+                if (element.HasAttribute(attr) == true)
+                    count++;
+            }
+            if (count == 0)
+                return;
+            if (count != attrs.Length)
+                throw new Exception($"元素 {element.OuterXml} 中属性 {string.Join(",", attrs)} 必须同时都定义，或者都不定义");
+        }
+
         double _canvas_width = 0;
         double _canvas_height = 0;
 
@@ -189,28 +216,68 @@ namespace dp2SSL
             List<DoorItem> items)
         {
             XmlElement root = cfg_dom.DocumentElement;
-            double canvas_width = Convert.ToDouble(root.GetAttribute("width"));
-            double canvas_height = Convert.ToDouble(root.GetAttribute("height"));
+            CheckAttributes(root, two_attrs);
 
-            _canvas_width = canvas_width;
-            _canvas_height = canvas_height;
+            double canvas_width = GetDouble(root, "width", 0);
+            double canvas_height = GetDouble(root, "height", 0);
 
             XmlNodeList shelfs = cfg_dom.DocumentElement.SelectNodes("shelf");
 
+            bool undefined = false;
             int index = 0;
             foreach (XmlElement shelf in shelfs)
             {
+                CheckAttributes(shelf, all_attrs);
+
                 GroupPosition gp = new GroupPosition();
-                gp.Left = Convert.ToDouble(shelf.GetAttribute("left")) / canvas_width;
-                gp.Top = Convert.ToDouble(shelf.GetAttribute("top")) / canvas_height;
-                gp.Width = Convert.ToDouble(shelf.GetAttribute("width")) / canvas_width;
-                gp.Height = Convert.ToDouble(shelf.GetAttribute("height")) / canvas_height;
+                gp.Left = GetDouble(shelf, "left", -1);
+                gp.Top = GetDouble(shelf, "top", -1);
+                gp.Width = GetDouble(shelf, "width", -1);
+                gp.Height = GetDouble(shelf, "height", -1);
+
+                if (gp.Left == -1 || gp.Top == -1 || gp.Width == -1 || gp.Height == -1)
+                    undefined = true;
 
                 Grid grid = CreateGroupControls(shelf, items, ref index);
                 grid.Tag = gp;
 
                 this.canvas.Children.Add(grid);
             }
+
+            // 对 -1 进行调整
+            if (undefined)
+            {
+                double x = 0;
+                foreach (Grid grid in this.canvas.Children)
+                {
+                    GroupPosition gp = grid.Tag as GroupPosition;
+                    if (gp.Left == -1)
+                    {
+                        gp.Left = x;
+                        gp.Top = 0;
+                        gp.Width = 10;
+                        gp.Height = 20;
+
+                        x += 10;
+                    }
+                }
+                canvas_width = x;
+                canvas_height = 20;
+            }
+
+            // 变换为比率
+            foreach (Grid grid in this.canvas.Children)
+            {
+                GroupPosition gp = grid.Tag as GroupPosition;
+                gp.Left /= canvas_width;
+                gp.Top /= canvas_height;
+                gp.Width /= canvas_width;
+                gp.Height /= canvas_height;
+            }
+
+            // 记忆
+            _canvas_width = canvas_width;
+            _canvas_height = canvas_height;
 
             InitialSize();
         }
@@ -342,17 +409,29 @@ this.ActualHeight - (this.Padding.Top + this.Padding.Bottom)));
 
         void SetBackgroundImage()
         {
-            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir, "bookshelf1.png");
+            // shelf.xml 中 root 元素的 backImageFile 属性
+            string backImageFile = ShelfData.ShelfCfgDom.DocumentElement.GetAttribute("backImageFile");
+            if (string.IsNullOrEmpty(backImageFile))
+                return;
 
-            BitmapImage bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.UriSource = new Uri(filename, UriKind.Absolute);
-            bitmap.EndInit();
+            string filename = System.IO.Path.Combine(WpfClientInfo.UserDir, backImageFile);
 
-            var brush = new ImageBrush(bitmap);
-            brush.Stretch = Stretch.Uniform;
-            this.Background = brush;
+            try
+            {
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(filename, UriKind.Absolute);
+                bitmap.EndInit();
+
+                var brush = new ImageBrush(bitmap);
+                brush.Stretch = Stretch.Uniform;
+                this.Background = brush;
+            }
+            catch(Exception ex)
+            {
+                // TODO: 用一个报错文字图片设定为背景?
+            }
         }
     }
 

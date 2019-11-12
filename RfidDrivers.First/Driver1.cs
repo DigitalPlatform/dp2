@@ -3998,13 +3998,41 @@ out Reader reader);
             return results;
         }
 
+        public static void ParseLockName(string text, out string lockName,
+    out string card,
+    out string number)
+        {
+            lockName = "*";
+            card = "1";
+            number = "1";
+            string[] parts = text.Split(new char[] { '.' });
+
+            if (parts.Length > 0)
+                lockName = parts[0];
+            if (parts.Length > 1)
+                card = parts[1];
+            if (parts.Length > 2)
+                number = parts[2];
+        }
+
         // 探测锁状态
         // parameters:
         //      lockName    锁名字。如果为 * 表示所有的锁
         //      index       锁编号。从 0 开始计数
-        public GetLockStateResult GetShelfLockState(string lockName,
-            int index)
+        public GetLockStateResult GetShelfLockState(string lockNameParam)
         {
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+
+            int addr = 1;
+            int index = 1;
+            if (string.IsNullOrEmpty(card) == false)
+                Int32.TryParse(card, out addr);
+            if (string.IsNullOrEmpty(number) == false)
+                Int32.TryParse(number, out index);
+
             List<ShelfLock> locks = GetLocksByName(lockName);
             if (locks.Count == 0)
                 return new GetLockStateResult
@@ -4020,8 +4048,8 @@ out Reader reader);
             {
                 Byte sta = 0x00;
                 int iret = RFIDLIB.miniLib_Lock.Mini_GetDoorStatus(current_lock.LockHandle,
-                    1,
-                    (Byte)(index + 1),
+                    (Byte)addr, // 1,
+                    (Byte)index,
                     ref sta);
                 if (iret != 0)
                     return new GetLockStateResult
@@ -4032,7 +4060,11 @@ out Reader reader);
 
                 states.Add(new LockState
                 {
-                    Name = current_lock.Name,
+                    // Path
+                    Path = $"{current_lock.Name}.{addr}.{index}",
+                    // 锁名字
+                    Lock = current_lock.Name,
+                    Board = addr,
                     Index = index,
                     State = (sta == 0x00 ? "open" : "close")
                 });
@@ -4045,10 +4077,31 @@ out Reader reader);
             };
         }
 
-        // 开门
-        public NormalResult OpenShelfLock(string lockName,
-            int index)
+        /*
+        // 还原锁名字
+        static string RestoreLockName(string lockName, string number)
         {
+            if (string.IsNullOrEmpty(number))
+                return lockName;
+            return lockName + "." + number;
+        }
+        */
+
+        // 开门
+        public NormalResult OpenShelfLock(string lockNameParam)
+        {
+            ParseLockName(lockNameParam,
+                out string lockName,
+out string card,
+out string number);
+
+            int addr = 1;
+            int index = 1;
+            if (string.IsNullOrEmpty(card) == false)
+                Int32.TryParse(card, out addr);
+            if (string.IsNullOrEmpty(number) == false)
+                Int32.TryParse(number, out index);
+
             List<ShelfLock> locks = GetLocksByName(lockName);
             if (locks.Count == 0)
                 return new NormalResult
@@ -4064,8 +4117,8 @@ out Reader reader);
             foreach (var current_lock in locks)
             {
                 int iret = RFIDLIB.miniLib_Lock.Mini_OpenDoor(current_lock.LockHandle,
-                    1,
-                    (Byte)(index + 1));
+                    (Byte)addr,   // 1,
+                    (Byte)index);
                 if (iret != 0)
                     return new NormalResult
                     {
@@ -4080,7 +4133,6 @@ out Reader reader);
                 Value = count
             };
         }
-
     }
 
     public class CReaderDriverInf

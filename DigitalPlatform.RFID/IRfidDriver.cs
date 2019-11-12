@@ -38,11 +38,9 @@ uint new_password);
 
         //void DisconnectTag();
 
-        GetLockStateResult GetShelfLockState(string lockName,
-    int index);
+        GetLockStateResult GetShelfLockState(string lockName);
 
-        NormalResult OpenShelfLock(string lockName,
-    int index);
+        NormalResult OpenShelfLock(string lockName);
     }
 
     // 一段连续的 block
@@ -374,13 +372,15 @@ uint new_password);
     [Serializable()]
     public class LockState
     {
-        public string Name { get; set; }
+        public string Path { get; set; }
+        public string Lock { get; set; }
+        public int Board { get; set; }
         public int Index { get; set; }
         public string State { get; set; }
 
         public override string ToString()
         {
-            return $"Name={Name},Index={Index},State={State}";
+            return $"Path={Path},Lock={Lock},Board={Board},Index={Index},State={State}";
         }
     }
 

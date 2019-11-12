@@ -217,6 +217,9 @@ namespace dp2SSL
         public string ResultType { get; set; }  // 结果类型。succeed/error/warning/information
         public string ErrorInfo { get; set; }
         public string ErrorCode { get; set; }   // 错误码
+
+        public string Direction { get; set; }   // 转移操作的方向。只有转移操作才用到这个字段
+
         // 消息所涉及到的实体
         public Entity Entity { get; set; }
 
@@ -296,6 +299,16 @@ namespace dp2SSL
                 Text = GetOperationCaption(Operation) + " ",
                 Foreground = Brushes.White
             });
+
+            // 转移方向
+            if (Operation == "transfer" && string.IsNullOrEmpty(Direction) == false)
+            {
+                p.Inlines.Add(new Run
+                {
+                    Text = GetOperationCaption(Direction) + " ",
+                    Foreground = Brushes.White
+                });
+            }
 
             // 书目摘要
             if (Entity != null && string.IsNullOrEmpty(Entity.Title) == false)

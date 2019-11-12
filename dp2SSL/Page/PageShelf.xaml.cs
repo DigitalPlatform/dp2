@@ -328,7 +328,7 @@ namespace dp2SSL
             }
 
             // 没有门锁的门
-            if (string.IsNullOrEmpty(e.Door.LockName))
+            if (string.IsNullOrEmpty(e.Door.LockPath))
             {
                 ErrorBox("没有门锁");
                 return;
@@ -387,7 +387,7 @@ namespace dp2SSL
             }
 
             // MessageBox.Show(e.Name);
-            var result = RfidManager.OpenShelfLock(e.Door.LockName, e.Door.LockIndex);
+            var result = RfidManager.OpenShelfLock(e.Door.LockPath);
             if (result.Value == -1)
                 MessageBox.Show(result.ErrorInfo);
         }
@@ -1117,7 +1117,9 @@ namespace dp2SSL
 
         public void Submit(bool silently = false)
         {
-            if (ShelfData.Adds.Count > 0 || ShelfData.Removes.Count > 0)
+            if (ShelfData.Adds.Count > 0
+                || ShelfData.Removes.Count > 0
+                || ShelfData.Changes.Count > 0)
                 SubmitCheckInOut(false, silently);
         }
         // parameters:
@@ -1127,7 +1129,9 @@ namespace dp2SSL
             // 预先提交一次
             if (submitBefore)
             {
-                if (ShelfData.Adds.Count > 0 || ShelfData.Removes.Count > 0)
+                if (ShelfData.Adds.Count > 0
+                    || ShelfData.Removes.Count > 0
+                    || ShelfData.Changes.Count > 0)
                     SubmitCheckInOut(false);
             }
 
@@ -1348,6 +1352,22 @@ namespace dp2SSL
                     Entity = entity,
                     Action = "return"
                 });
+                // 没有更新的，才进行一次 transfer
+                if (ShelfData.Find(ShelfData.Changes, entity.UID).Count == 0)
+                {
+                    actions.Add(new ActionInfo
+                    {
+                        Entity = entity,
+                        Action = "transfer",
+                        CurrentShelfNo = ShelfData.GetShelfNo(entity),
+                    });
+                }
+            }
+            foreach (var entity in ShelfData.Changes)
+            {
+                if (ShelfData.BelongToNormal(entity) == false)
+                    continue;
+                // 更新
                 actions.Add(new ActionInfo
                 {
                     Entity = entity,
@@ -1359,7 +1379,11 @@ namespace dp2SSL
             {
                 if (ShelfData.BelongToNormal(entity) == false)
                     continue;
-                actions.Add(new ActionInfo { Entity = entity, Action = "borrow" });
+                actions.Add(new ActionInfo
+                {
+                    Entity = entity,
+                    Action = "borrow"
+                });
             }
 
             if (actions.Count == 0)
