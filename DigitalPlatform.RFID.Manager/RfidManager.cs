@@ -565,6 +565,7 @@ new SetErrorEventArgs
             }
         }
 
+        // 打开门锁
         public static NormalResult OpenShelfLock(string lockName)
         {
             try
@@ -573,6 +574,41 @@ new SetErrorEventArgs
                 try
                 {
                     var result = channel.Object.OpenShelfLock(lockName);
+                    if (result.Value == -1)
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = result.ErrorInfo });
+                    else
+                        Base.TriggerSetError(result,
+                            new SetErrorEventArgs { Error = null }); // 清除以前的报错
+
+                    return result;
+                }
+                finally
+                {
+                    Base.ReturnChannel(channel);
+                }
+            }
+            catch (Exception ex)
+            {
+                Base.Clear();
+                Base.TriggerSetError(ex,
+                    new SetErrorEventArgs
+                    {
+                        Error = $"RFID 中心出现异常: {ExceptionUtil.GetAutoText(ex)}"
+                    });
+                return new NormalResult { Value = -1, ErrorInfo = ex.Message };
+            }
+        }
+
+        // 开关灯
+        public static NormalResult TurnShelfLamp(string lampName, string action)
+        {
+            try
+            {
+                BaseChannel<IRfid> channel = Base.GetChannel();
+                try
+                {
+                    var result = channel.Object.TurnShelfLamp(lampName, action);
                     if (result.Value == -1)
                         Base.TriggerSetError(result,
                             new SetErrorEventArgs { Error = result.ErrorInfo });

@@ -195,7 +195,11 @@ namespace dp2SSL
             }
         }
 
+        // 锁路径
         public string LockPath { get; set; }
+        // 灯路径。目前只能用 '*'
+        public string LampPath { get; set; }
+
         // public int LockIndex { get; set; }
         public string ReaderName { get; set; }
         public int Antenna { get; set; }
@@ -233,10 +237,13 @@ namespace dp2SSL
                     // ParseReaderString(, out string lockName, out int lockIndex);
                     ParseReaderString(door.GetAttribute("antenna"), out string readerName, out int antenna);
 
+                    string lampName = door.GetAttribute("lamp");
+
                     DoorItem item = new DoorItem
                     {
                         Name = door_name,
                         LockPath = lockName,
+                        LampPath = lampName,
                         // LockIndex = lockIndex,
                         ReaderName = readerName,
                         Antenna = antenna,
@@ -372,7 +379,14 @@ namespace dp2SSL
                         NewState = state.State
                     });
 
-                    door.State = state.State;
+                    string oldState = door.State;
+                    if (oldState != state.State)
+                    {
+                        door.State = state.State;
+                        // 开关灯
+                        if (string.IsNullOrEmpty(door.LampPath) == false)
+                            ShelfData.TurnLamp(door.Name, door.State == "open");
+                    }
 
                     /*
                     Application.Current.Dispatcher.Invoke(new Action(() =>

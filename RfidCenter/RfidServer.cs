@@ -54,6 +54,12 @@ namespace RfidCenter
             return Program.Rfid.OpenShelfLock(lockName);
         }
 
+        // 开关灯
+        public NormalResult TurnShelfLamp(string lampName, string action)
+        {
+            return Program.Rfid.TurnShelfLamp(lampName, action);
+        }
+
         public NormalResult GetState(string style)
         {
             if (style.StartsWith("clearCache"))
